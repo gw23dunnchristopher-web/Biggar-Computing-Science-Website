@@ -254,6 +254,15 @@ th {
     background-color:palevioletred;
 }
 
+#WDDBreakdown .specifications th {
+    background-color:lightgreen;
+}
+
+#DDDBreakdown .specifications th {
+    background-color:lightyellow;
+}
+
+
 .specifications th {
     text-align:center;
 }

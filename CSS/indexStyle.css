@@ -13,7 +13,7 @@ header {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100px;
+    height: 200px;
     background-color: black;
     z-index: 10;
 }
@@ -36,13 +36,13 @@ header h1 {
     top:10px;
     left:30px;
     color:white;
-    padding:20px;
-    font-size:40px;
+    padding:40px;
+    font-size:60px;
     font-family:Arial;
 }
 header img {
     float:right;
-    height:100px;
+    height:200px;
 }
 
 #mainHeading, #pageContainer, .contentHeading {
@@ -70,7 +70,7 @@ footer {
         height: 80px;
     }
     footer > div {
-        font-size: 10px;
+        font-size: 8px;
     }
     #left p {
         padding-left: 10px;
@@ -109,6 +109,17 @@ footer > div {
     margin-bottom:10px;
 }
 
+@media (max-width: 768px) {
+    #left p {
+        font-size: 8px;
+    }
+    #center {
+        font-size: 8px;
+    }
+    #right {
+        font-size: 8px;
+    }
+}
 
 body {
     display: flex;
@@ -117,9 +128,8 @@ body {
 }
 
 body main {
-    position: absolute;
-    top: 100px;
-    bottom: 100px;
+    position: relative;
+    top: 120px;
     left: 0;
     right: 0;
     display: flex;
@@ -131,24 +141,40 @@ body main {
     margin: 0;
 }
 
+@media (max-width: 768px) {
+    body main {
+        position: relative;
+        display: flex;
+        background-color:#03030c;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 0 20px;
+    }
+}
+
 body #coursePanels {
     display: flex;
     justify-content: center;
     gap: 20px;
     width: 100%;
-    max-width: 1200px;
+    max-width: 2400px;
     align-items: center;
     padding: 20px;
     flex-wrap: wrap;
 }
 
 @media (max-width: 768px) {
+    body main {
+        top: 0;
+        bottom: 80px;
+    }   
     body #coursePanels {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         padding: 10px;
         gap: 10px;
-        margin-top: 90px;
+        margin-top: 0px;
     }
     body #coursePanels div {
         width: 100%;
@@ -162,7 +188,7 @@ body #coursePanels {
     }
     body main {
         height: auto;
-        margin-top: 60px;
+        margin-top: 0px;
         margin-bottom: 80px;
         padding: 10px;
     }
@@ -196,13 +222,11 @@ body #coursePanels {
         align-items: center;
         gap: 20px;
         padding: 20px;
-        height: auto;
     }
     body #coursePanels div {
         flex: 1;
-        max-width: 300px;
-        height: 225px;
-        min-height: 225px;
+        height: auto;
+        min-height: 400px;
     }
     body #coursePanels div img {
         width: 100%;
