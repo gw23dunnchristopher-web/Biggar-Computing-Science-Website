@@ -7,6 +7,20 @@ function darken(event) {
 }
 
 let sidebarCache = '';
+let sidebarPromise = null;
+
+// Preload the sidebar
+function preloadSidebar(menuLoc) {
+    if (!sidebarPromise) {
+        sidebarPromise = fetch(menuLoc)
+            .then(response => response.text())
+            .then(data => {
+                sidebarCache = data;
+                return data;
+            });
+    }
+    return sidebarPromise;
+}
 
 function loadSidebar(menuLoc, menuID) {
     if (sidebarCache) {
@@ -15,13 +29,20 @@ function loadSidebar(menuLoc, menuID) {
         return;
     }
 
-    fetch(menuLoc)
-        .then(response => response.text())
-        .then(data => {
-            sidebarCache = data;
+    // If already preloading, use that promise
+    if (sidebarPromise) {
+        sidebarPromise.then(data => {
             document.getElementById(menuID).innerHTML = data;
             attachMenuListeners();
         });
+        return;
+    }
+
+    // Otherwise load normally
+    preloadSidebar(menuLoc).then(data => {
+        document.getElementById(menuID).innerHTML = data;
+        attachMenuListeners();
+    });
 }
 
 
