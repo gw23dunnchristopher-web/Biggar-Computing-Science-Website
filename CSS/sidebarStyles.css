@@ -81,6 +81,22 @@
 
 @media (max-width: 768px) {
     #sidebar {
-        transform: translateX(-320px); /* Move sidebar offscreen */
+        transform: translateX(-320px);
+        width: 100%;
+        max-width: 320px;
+        z-index: 1000;
+    }
+    
+    #sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .sidebar-menu li a {
+        padding: 15px 10px;
+        font-size: 16px;
+    }
+    
+    .submenu li a {
+        padding: 12px 20px;
     }
 }
