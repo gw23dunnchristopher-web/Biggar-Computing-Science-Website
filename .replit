@@ -7,7 +7,6 @@ compile = "Configure Compile Command"
 channel = "stable-22_11"
 
 [deployment]
-run = ""
 deploymentTarget = "static"
 publicDir = "/"
 
