@@ -191,6 +191,8 @@ body #coursePanels {
     body #coursePanels div {
         flex: 1;
         max-width: 300px;
+        min-height: 225px;
+        aspect-ratio: 4/3;
     }
 }
 
