@@ -6,10 +6,19 @@ function darken(event) {
     event.target.style.filter='brightness(50%) grayscale(100%)';
 }
 
+let sidebarCache = '';
+
 function loadSidebar(menuLoc, menuID) {
+    if (sidebarCache) {
+        document.getElementById(menuID).innerHTML = sidebarCache;
+        attachMenuListeners();
+        return;
+    }
+
     fetch(menuLoc)
         .then(response => response.text())
         .then(data => {
+            sidebarCache = data;
             document.getElementById(menuID).innerHTML = data;
             attachMenuListeners();
         });
