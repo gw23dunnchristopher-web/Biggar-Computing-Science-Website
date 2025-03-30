@@ -81,9 +81,9 @@ main {
 }
 
 .contentContainer{
-    max-width: 100%;
-    margin: 10px;
-    margin-right: auto;
+    max-width: 1440px;
+    width: 100%;
+    margin: 10px auto;
     text-align: left;
     padding: 10px;
     padding-bottom: 0px;
@@ -150,6 +150,35 @@ table {
     border-collapse: collapse;
     margin:5px auto;
     max-width:800px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .ImgAndText {
+        flex-direction: column;
+    }
+    
+    .ImgAndText img {
+        width: 100%;
+        margin: 10px 0;
+    }
+    
+    .topicButton {
+        width: 100%;
+        max-width: 100%;
+    }
 }
 
 th, td {

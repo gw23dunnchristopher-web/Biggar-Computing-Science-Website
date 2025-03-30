@@ -170,11 +170,34 @@ body #coursePanels div img {
     max-width: 550px;
 }
 
+body #coursePanels {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
 body #coursePanels div {
     filter: brightness(50%) grayscale(100%);
     transition-duration: 0.2s;
     transition-delay: 0.2s;
     transition-timing-function: ease-out;
+    width: 100%;
+    max-width: 100%;
+}
+
+body #coursePanels div img {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    body #coursePanels {
+        padding: 10px;
+    }
 }
 
 body #coursePanels div:hover {
