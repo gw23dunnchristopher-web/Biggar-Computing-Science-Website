@@ -133,3 +133,15 @@ footer > div {
     padding-right:30px;
     margin-bottom:10px;
 }
+
+@media (max-width: 768px) {
+    footer > div {
+        font-size: 10px;
+    }
+    #left p {
+        padding-left: 10px;
+    }
+    #right {
+        padding-right: 10px;
+    }
+}
