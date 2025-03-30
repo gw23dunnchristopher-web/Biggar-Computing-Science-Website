@@ -180,6 +180,12 @@ body #coursePanels {
 
 /* Desktop layout */
 @media (min-width: 769px) {
+    body main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 200px);
+    }
     body #coursePanels {
         display: flex;
         flex-direction: row;
@@ -187,6 +193,7 @@ body #coursePanels {
         align-items: center;
         gap: 20px;
         padding: 20px;
+        margin: auto;
     }
     body #coursePanels div {
         flex: 1;
