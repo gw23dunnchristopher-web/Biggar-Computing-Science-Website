@@ -142,29 +142,55 @@ body #coursePanels {
 
 @media (max-width: 768px) {
     body #coursePanels {
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
         padding: 10px;
-        gap: 15px;
-        justify-content: flex-start;
-        margin-top: 20px;
+        gap: 10px;
+        margin-top: 90px;
     }
     body #coursePanels div {
         width: 100%;
-        max-width: 400px;
-        margin: 0 auto;
+        max-width: none;
+        aspect-ratio: 1;
     }
     body #coursePanels div img {
         width: 100%;
-        height: auto;
+        height: 100%;
         object-fit: cover;
     }
     body main {
         height: auto;
-        margin-top: 80px;
+        margin-top: 60px;
         margin-bottom: 80px;
+        padding: 10px;
+    }
+    header {
+        height: 60px;
+    }
+    header h1 {
+        font-size: 16px;
+        left: 5px;
+        padding: 10px;
+        top: 5px;
+    }
+    header img {
+        height: 60px;
+    }
+}
+
+/* Desktop layout */
+@media (min-width: 769px) {
+    body #coursePanels {
         display: flex;
+        flex-direction: row;
         justify-content: center;
         align-items: center;
+        gap: 20px;
+        padding: 20px;
+    }
+    body #coursePanels div {
+        flex: 1;
+        max-width: 300px;
     }
 }
 
