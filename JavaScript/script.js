@@ -1,11 +1,9 @@
-function brighten() {
-    this.style.filter='brightness(100%)';
-    this.style.filter='greyscale(0%)';
+function brighten(event) {
+    event.target.style.filter='brightness(100%) grayscale(0%)';
 }
 
-function darken() {
-    this.style.filter='brightness(50%)';
-    this.style.filter='greyscale(100%)';
+function darken(event) {
+    event.target.style.filter='brightness(50%) grayscale(100%)';
 }
 
 function loadSidebar(menuLoc, menuID) {
