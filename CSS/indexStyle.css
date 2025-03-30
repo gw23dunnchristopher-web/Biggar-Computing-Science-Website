@@ -142,15 +142,25 @@ body #coursePanels {
     body #coursePanels {
         flex-direction: column;
         padding: 20px;
+        justify-content: center;
+        align-items: center;
+    }
+    body #coursePanels div {
+        display: flex;
+        justify-content: center;
+        width: 100%;
     }
     body #coursePanels div img {
-        max-width: 100%;
+        max-width: 80%;
         height: auto;
     }
     body main {
         height: auto;
         margin-top: 80px;
         margin-bottom: 80px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 }
 
