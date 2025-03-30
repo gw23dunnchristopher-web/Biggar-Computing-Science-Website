@@ -3,15 +3,15 @@
     <head>
         <meta charset="UTF-8" />
         <title>BHS Computing Science - Home</title>
-        <link rel="stylesheet" href="/CSS/styles.css" />
-        <link rel="stylesheet" href="/CSS/frameStyles.css" />
-        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
-        <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="../../CSS/styles.css" />
+        <link rel="stylesheet" href="../../CSS/frameStyles.css" />
+        <link rel="stylesheet" href="../../CSS/sidebarStyles.css" />
+        <script src="../../JavaScript/script.js"></script>
     </head>
-    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+    <body onload="loadSidebar('../../../N5/N5Sidebar.html','sidebar')">
         <header>
             <h1>BHS Computing Science</h1>
-            <img src="/Images/Header/banner.png" />
+            <img src="../../../../Images/Header/banner.png" />
         </header>
         <div id="mainHeading"><h1>National 5</h1></div>
         <div id="pageContainer">
@@ -21,7 +21,7 @@
                 
                 <div class="contentContainer">
                     <h2>Decimal and Binary Systems</h2>
-                    <img class="rImg" src="/Images/N5/DataRep/hands.jpg" alt="hands">
+                    <img class="rImg" src="../../../../Images/N5/DataRep/hands.jpg" alt="hands">
                     <p>The numbering system that we use is known as the <b>decimal</b> (denary) or <b>base 10</b> system.  This means the we have <b>10 potential digits</b> in our numbers - 0, 1, 2, 3, 4, 5, 6, 7, 8, and 9.</p>
                     <p>Computers use a binary number system instead, <b>base 2</b>, meaning that there are only <b>2 potential digits</b>, 1 and 0.</p>
                     <p>Each digit in a binary number is known as a <b>binary digit</b>.  This is shortened to <b>bit</b>, which is the smallest unit of measurement for data in a computer.</p>
@@ -122,7 +122,7 @@
                     <p>Unfortunately, computers cannot represent a decimal point, so they need to change the form of the number into something that can be represented.  Fortunately, scientific notation can be used for this!</p>
                     <p>For example, the computer would interpret the number <b>101.22</b> as <b>0.10122x10<sup>3</sup></b>.</p>
                     <p>This is called floating point, because the decimal point is moved until it is at the very font of the number.  By doing this, the computer only needs to consider three things, the <b>mantissa</b>, the <b>base</b> and the <b>exponent</b> when representing real numbers.</p>
-                    <img class="cImg" width="50%" src="/Images/N5/DataRep/floatingPoint.jpg" alt="Floating Point Representation">
+                    <img class="cImg" width="50%" src="../../../../Images/N5/DataRep/floatingPoint.jpg" alt="Floating Point Representation">
                     <ul>
                         <li><b>Base</b> - If we think about Real Numbers as numbers in our decimal system, then the base is always 10, since the decimal system is Base 10.  When you move onto higher, we will start looking at binary real numbers, which have a base of 2.</li>
                         <li><b>Mantissa</b> - The mantissa is actual digits of the real number.  In the case of our example above, the mantissa would be 10122. The mantissa always begins with a number greater than 0.</li>
