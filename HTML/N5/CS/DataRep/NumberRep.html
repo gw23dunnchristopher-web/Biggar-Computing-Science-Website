@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>BHS Computing Science - Home</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="mainHeading"><h1>National 5</h1></div>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div class="contentHeading"><h1>Data Representation - Numbers</h1></div>
+                
+                <div class="contentContainer">
+                    <h2>Decimal and Binary Systems</h2>
+                    <img class="rImg" src="/Images/N5/DataRep/hands.jpg" alt="hands">
+                    <p>The numbering system that we use is known as the <b>decimal</b> (denary) or <b>base 10</b> system.  This means the we have <b>10 potential digits</b> in our numbers - 0, 1, 2, 3, 4, 5, 6, 7, 8, and 9.</p>
+                    <p>Computers use a binary number system instead, <b>base 2</b>, meaning that there are only <b>2 potential digits</b>, 1 and 0.</p>
+                    <p>Each digit in a binary number is known as a <b>binary digit</b>.  This is shortened to <b>bit</b>, which is the smallest unit of measurement for data in a computer.</p>
+                    <p>Decimal numbers have place values - 1, 10, 100, 1000, 10000, etc.  Note that these are all multiples of 10, this is because the decimal system uses base 10.</p>
+                    <p>The binary system is base 2, so its place values are 1, 2, 4, 8, 16, etc.  Multiples of 2. In a computer system, we read these from the right to left, and the number of place values depends on the number bits that we are using.
+                    for example, in an 8-bit system there would be 8 values, starting with the largest one - 128 64 32 16 8 4 2 1.</p>
+                </div>
+                
+                <div class="contentContainer">
+                    <h2>Converting Binary Integers to Decimal</h2>
+                    <p>A 8-bit binary number consists of eight digits, with each digit being 1 or 0.  To convert this into a decimal number we must first draw a binary table.</p>
+                    <p>To represent 8-bit binary, we would draw a table with 8 columns and 2 rows.  The heading for each column would be the place values for binary numbers, read from right to left. As show below:</p>
+                    <table class="binaryTable">
+                        <tr>
+                            <th>128</th><th>64</th><th>32</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th>
+                        </tr>
+                        <tr>
+                            <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                        </tr> 
+                    </table>
+                         <p> Plug the binary number into this table.  As an example I will use the binary number 00110011.</p>
+                        <table class="binaryTable">
+                        <tr>
+                            <th>128</th><th>64</th><th>32</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th>
+                        </tr>
+                        <tr>
+                            <td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td>
+                        </tr>   
+                    </table>
+                    <p> Now add together all of the numbers that have a 1 beneath them on the table.</p>
+                    <div class="example1">
+                        <p>31 + 16 + 2 + 1 = 61</p>
+                    </div>
+                    <p>Note that the highest number that can be represented using 8 bits is 11111111.  If we add all of the numbers from the table together we get <b>255 (2<sup>8-1</sup>-1)</b>.  
+                </div>
+
+                <div class="contentContainer">
+                    <h2>Converting Decimal Integers to Binary</h2>
+                    <p>To convert a decimal number into binary, you have to place 1s in the table under numbers that add up to the decimal number you are converting.  The best way to do this is to check the largest number on the table and see if it can fit into the number you are converting.</p>
+                    <p>If it doesn't fit place a 0 under that number and move onto the next number.</p>
+                    <p>If it does, then place a 1 under that number and subtract it from the number you are converting, then move onto the next number.</p>
+                    <p>In this example, we will convert the number 28 into binary.</p>
+                    <ol>
+                        <li>You cannot subtract the numbers 128, 64, or 32 from 28 without going below zero, so put 0s under those numbers.
+                        </li>
+                        <table class="binaryTable">
+                            <tr>
+                                <th>128</th><th>64</th><th>32</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th>
+                            </tr>
+                            <tr>
+                                <td>0</td><td>0</td><td>0</td><td></td><td></td><td></td><td></td><td></td>
+                            </tr>   
+                        </table>
+                        <li>You can subtract 16 from 28, so we place a 1 under the number 16 and the subtract 16 from 28.  <b>28-16=12</b> 
+                        </li>
+                        <table class="binaryTable">
+                            <tr>
+                                <th>128</th><th>64</th><th>32</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th>
+                            </tr>
+                            <tr>
+                                <td>0</td><td>0</td><td>0</td><td>1</td><td></td><td></td><td></td><td></td>
+                            </tr>   
+                        </table>
+                        <li>You can fit 8 into 12, so place we place a 1 under the 8 and subtract 8 from 12. <b>12-8=4</b></li>
+                        <table class="binaryTable">
+                            <tr>
+                                <th>128</th><th>64</th><th>32</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th>
+                            </tr>
+                            <tr>
+                                <td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td></td><td></td><td></td>
+                            </tr>   
+                        </table>
+                        <li>You can fit 4 into 4, so we place a 1 under the number 4 and subtract 4 from the total, leaving 0.</li>
+                        <table class="binaryTable">
+                            <tr>
+                                <th>128</th><th>64</th><th>32</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th>
+                            </tr>
+                            <tr>
+                                <td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td><td></td><td></td>
+                            </tr>   
+                        </table>
+                        <li>Since we are at 0, we cannot subtract any more numbers, meaning the remaining numbers must have 0 under them.</li>
+                        <table class="binaryTable">
+                            <tr>
+                                <th>128</th><th>64</th><th>32</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th>
+                            </tr>
+                            <tr>
+                                <td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td>
+                            </tr>   
+                        </table>
+                    </ol>
+                </div>
+
+                <div class="contentContainer">
+                    <h2>Real Numbers - Floating Point Representation</h2>
+                    <p>An integer is a whole number such as 1, 2, 55, 6000; any number that does not have a decimal point.   </p>
+                    <p>Computers can also represent <b>real numbers</b>.  These are numbers that do have a decimal point, such as 1.5, 0.23 or 900.12943.</p>
+                    <p>Unfortunately, computers cannot represent a decimal point, so they need to change the form of the number into something that can be represented.  Fortunately, scientific notation can be used for this!</p>
+                    <p>For example, the computer would interpret the number <b>101.22</b> as <b>0.10122x10<sup>3</sup></b>.</p>
+                    <p>This is called floating point, because the decimal point is moved until it is at the very font of the number.  By doing this, the computer only needs to consider three things, the <b>mantissa</b>, the <b>base</b> and the <b>exponent</b> when representing real numbers.</p>
+                    <img class="cImg" width="50%" src="/Images/N5/DataRep/floatingPoint.jpg" alt="Floating Point Representation">
+                    <ul>
+                        <li><b>Base</b> - If we think about Real Numbers as numbers in our decimal system, then the base is always 10, since the decimal system is Base 10.  When you move onto higher, we will start looking at binary real numbers, which have a base of 2.</li>
+                        <li><b>Mantissa</b> - The mantissa is actual digits of the real number.  In the case of our example above, the mantissa would be 10122. The mantissa always begins with a number greater than 0.</li>
+                        <li><b>Exponent</b> - The exponent is the power to which the base is raised.  It is the number of places that the decimal point must be moved so that it sits in front of the mantissa.  If the decimal point has to move in the other direction (for example, if the number were 0.0025), then the exponent would be negative (in the case of 0.0025 it would be -2).</p>
+                <div>
+            </div>
+            
+        </div>
+
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+    </body>
+</html>

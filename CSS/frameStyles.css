@@ -1,0 +1,112 @@
+* {padding:0; margin:0; box-sizing:border-box;}
+html, body {height:100%}
+
+body {
+    font-family: Arial, sans-serif;
+    display:flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+#pageContainer {
+    display: flex;
+    flex-direction: row;
+    margin-top: 150px; 
+    box-sizing: border-box;
+    margin-bottom: 100px; 
+    min-height: calc(100vh - 100px); 
+}
+
+header {
+    position: fixed; /* Stays at top */
+    top: 0;
+    left: 0;
+    width: 100%; /* Full width */
+    height: 100px;
+    background-color: black;
+    min-width: 1024px;
+    z-index: 10; /* Ensure it’s above other elements */
+}
+
+header h1 {
+    position:absolute;
+    top:10px;
+    left:30px;
+    min-width:1024px;
+    color:white;
+    padding:20px;
+    font-size:30px;
+    font-family:Arial;
+}
+
+header img {
+    float:right;
+    height:100px;
+}
+
+#mainHeading, #pageContainer, .contentHeading {
+    position: static; 
+    z-index: auto;
+    top: auto;
+}
+
+#mainHeading {
+    position: fixed; /* Stays below header */
+    top: 100px; /* Below header’s 200px */
+    left: 0;
+    width: 100%;
+    background-color: #030346;
+    color: white;
+    min-width: 1024px;
+    font-family: arial;
+    font-size: m0px;
+    text-align: center;
+    z-index: 10;
+}
+
+#mainHeading h1 {padding:10px;}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+footer {
+    position: fixed; /* Stays at bottom */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: black;
+    height: 100px;
+    min-width: 1024px;
+    display: flex;
+    flex-wrap: nowrap;
+    z-index: 10;
+}
+
+footer > div {
+    width:33%;
+    font-size:12px;
+    font-family:arial;
+}
+
+#left, #center, #right {
+    padding-top:20px;
+    color:white;
+}
+
+#left p{
+    text-align:left;
+    padding-left:30px;
+    margin-bottom:8px;
+}
+
+#center {
+    text-align:center;
+    margin-bottom:10px;
+}
+
+#right {
+    text-align:right;
+    padding-right:30px;
+    margin-bottom:10px;
+}

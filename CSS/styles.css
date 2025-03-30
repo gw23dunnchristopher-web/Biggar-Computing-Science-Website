@@ -1,0 +1,218 @@
+
+
+main {
+    margin-top:200px;
+    margin-bottom:100px;
+}
+
+
+#content {
+    width: calc(100% - 320px); /* Fill remaining width */
+    min-width: 1024px;
+    margin-left:320px;
+    margin-bottom:100px;
+    box-sizing: border-box;
+    text-align: center;
+    padding: 10px;
+    overflow-y: auto; /* Allow vertical scrolling */
+    
+}
+
+.contentHeading {
+    font-family:arial;
+    padding-bottom:5px;
+    margin-bottom: 5px;
+    color:#17479b;
+    background-color: #c5f1ff;
+    text-align:center;
+    border-top-style:solid;
+    border-bottom-style:solid;
+    border-color:#376cfd;
+}
+
+.contentContainer{
+    margin:10px;
+    margin-right:auto;
+    text-align:left;
+    padding:20px;
+    padding-bottom:0px;
+    font-size:16px;  
+    flex:1;
+}
+
+.contentContainer p{
+    padding:10px;
+}
+
+.contentContainer h2 {
+    text-align:left;
+    color:#0c3f71;
+    border-bottom-style:solid;
+    border-color:#5252c8;
+    font-size:25px;
+    margin-top:20px;
+    margin-bottom:20px;
+}
+
+.contentContainer ul {
+    list-style-type:circle;
+    padding:10px;
+    margin-left:20px;
+}
+
+
+.contentContainer ul li{
+    margin-bottom:10px;
+}
+
+#marks th, #marks td{
+    width:200px;
+    text-align:center;
+    border:1px solid;
+}
+
+#marks th {
+    background-color:lightblue;
+}
+
+table {
+    border:1px solid;
+    border-color:black;
+    border-collapse: collapse;
+    margin:5px auto;
+    max-width:900px;
+}
+
+th, td {
+    border:1px solid black;
+    padding:10px;
+} 
+
+th {
+    text-align:center;
+    background-color:lightblue;
+}
+
+.topicButton {
+    width:800px;
+    display:block;
+    border:1px solid;
+    margin-left:auto;
+    margin-right:auto;
+    margin-top:10px;
+    font-size:20px;
+    text-align:center;
+    font-weight:bold;
+    padding-top:20px;
+    padding-bottom:20px;
+    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
+}
+
+#CSButton:hover,  #CSButton.active {
+    background-image: linear-gradient(to bottom, lightblue , rgb(73, 161, 196));
+}
+
+#SDDButton:hover,  #SDDButton.active  {
+    background-image: linear-gradient(to bottom, palevioletred , rgb(179, 47, 47));
+}
+
+#WDDButton:hover,  #WDDButton.active  {
+    background-image: linear-gradient(to bottom, darkseagreen , seagreen);
+}
+
+#DDDButton:hover, #DDDButton.active  {
+    background-image: linear-gradient(to bottom, lightgoldenrodyellow , yellow);
+}
+
+.breakdown{
+    width:800px;
+    margin-left:auto;
+    margin-right:auto;
+    display:none;
+}
+
+.specifications th, .specifications tr td {
+    border:1px solid;
+    border-color:black;
+    border-collapse: collapse;
+    margin-left:auto;
+    margin-right:auto;
+    padding:20px;
+}
+
+.specifications tr td ul {
+    list-style-type:disc;
+}
+
+.specifications tr td ul li ul{
+    list-style-type:square;
+}
+
+#CSBreakdown .specifications th {
+    background-color:lightblue;
+}
+
+#SDDBreakdown .specifications th {
+    background-color:palevioletred;
+}
+
+.specifications th {
+    text-align:center;
+}
+
+.binaryTable tr th, .binaryTable tr td {
+    border:solid 1px black;
+    border-collapse:collapse;
+    text-align:center;
+    width:50px;
+    height:50px;
+}
+
+.binaryTable tr th {
+    background-color:lightblue;
+}
+
+.example1 {
+    width:600px;
+    margin:auto;
+    text-align:center;
+    font-size:30px;
+    background-color:lightyellow;
+    padding:20px;
+    border:solid 1px black;
+}
+
+.rImg {
+    float:right;
+    padding:20px;
+}
+
+.lImg {
+    float:left;
+    padding:20px;
+}
+
+.cImg {
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+    padding: 20px;
+}
+
+.ImgAndText {
+    display:flex;
+    flex-direction:row;
+    align-content:center;
+    justify-content: center;
+}
+
+.ImgAndText img {
+    padding:20px;
+}
+
+ol li {
+    padding-bottom:10px;
+    padding-top:10px;
+    margin-left:30px;
+}
+

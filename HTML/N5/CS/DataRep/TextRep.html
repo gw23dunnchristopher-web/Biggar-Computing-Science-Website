@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>BHS Computing Science - Home</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <script src="/JavaScript/script.js"> </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+          <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Data Representation - Text</h1></div>
+                <div class="contentContainer">
+                <h2>ASCII</h2>
+                <p>Computers do not understand letters like we do, but they do understand numbers.  This is why, in order for a computer to understand letters, they have to receive a number and the check a table to see which letter that number would represent.</p>
+                <p>In the early days, there were a lot of different tables that computers could use for this, but this was very confusing.  The letter P could be the number 27, or 48! So a standard list of numbers and letters was produced in America that all computers would use from that point on.</p>
+                <p>This list was known as <b>ASCII</b> or the <b>American Standard Code for Information Interchange</b>.</p>
+                <p> Although there are now a number of different lists that computers can use for different maximum numbers of characters, the first 256 characters are always the same as the characters on the ASCII list.</p>
+                <p>The common list allows all computers to understand text files from other computers.</p>
+
+                <h2>Standard vs Extended</h2>
+                <p>There are two kinds of ASCII - Standard ASCII and Extended ASCII.</p>
+                <p><b>Standard ASCII</b> - Standard ASCII uses 7 bits to represent each letter.  The maximum number of letters that can be represented using standard ASCII is 128 (1111111 in binary is 127, but since 0000000 can also represent a character, there are 128 possible characters).</p>
+                <p><b>Extended ASCII</b> - Extended ASCII uses 8 bits to represent characters, enabling it to represent 256 characters (11111111 or 255 characters plus 1 for 00000000).</p>
+
+                <h2>Printable Characters and Control Characters</h2>
+                <div class="ImgAndText"> 
+                    <div>
+                        <img style="max-width:200px;" src="/Images/N5/DataRep/enter.jpg" alt="Enter is a Control Character">
+                    </div>
+                    <div>
+                        <p>ASCII needs to be able to represent Printable Characters and Control (Non-Printable) Characters. </p>
+                        <p><b>Printable Characters</b> - These are characters that can be display on the screen, such as letters, numbers and symbols.  A space is also a printable character, since it creates a clear block on the screen.</p>
+                        <p><b>Control (non-printable) Characters</b> - These cannot be displayed on the screen, and tend to perform special functions.  For example: Enter, Backspace, Tab, Capslock, and Ctrl are all Control Characters.</p> 
+                    </div>
+                </div>
+                <h2>The ASCII List</h2>
+                <p>You can see an image of the ASCII list below, showing how the numbers are converted into binary, which the computer will then check against the list to see what character should be displayed or represented.</p>
+                <p>You will not be required to remember every single number and character on this list for an exam, this is just to show you how the list works.</p>
+                <img style="max-width:80%" class="cImg" src="/Images/N5/DataRep/ASCII.png" alt="The ASCII list">
+            </div>
+        </div>
+
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+    </body>
+</html>

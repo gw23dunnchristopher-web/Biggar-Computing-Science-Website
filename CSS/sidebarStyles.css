@@ -1,0 +1,78 @@
+
+/* Sidebar container */
+#sidebar {
+    position: fixed;
+    top: 200x; /* Sticks below mainHeading */
+    width: 320px; /* Fixed width */
+    background-color: #333;
+    color: #fff;
+    height: calc(100vh - 100px); /* From mainHeading to footer */
+    overflow-y: auto; /* Scroll sidebar if needed */
+}
+
+/* Base menu styles */
+.sidebar-menu {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar-menu li {
+    cursor: pointer;
+}
+
+.sidebar-menu li a {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: transparent; /* Default: no background */
+}
+
+/* Submenu styling */
+.submenu {
+    list-style-type: none;
+    display: none; /* Hidden by default */
+}
+
+/* Arrow styling */
+.arrow {
+    transition: transform 0.3s;
+}
+
+.arrow.down {
+    transform: rotate(90deg);
+}
+
+/* Highlight child items in an active submenu */
+.sidebar-menu li.active .submenu li a {
+    background-color: #555; /* Gray highlight for level 2 items */
+}
+
+/* Level 1 active: Highlight level 2 children */
+.sidebar-menu li:nth-child(2).active .submenu li a { background-color: #386aa5; } /* Computer Systems */
+.sidebar-menu li:nth-child(3).active .submenu li a { background-color: #a23854; } /* Software Design */
+.sidebar-menu li:nth-child(4).active .submenu li a { background-color: #36834f; } /* Web Design */
+.sidebar-menu li:nth-child(5).active .submenu li a { background-color: #9d7521; } /* Database Design */
+
+/* Level 2 active: Highlight level 3 children */
+.sidebar-menu li:nth-child(2) .submenu li.active .submenu li a { background-color: #193755; }
+.sidebar-menu li:nth-child(3) .submenu li.active .submenu li a { background-color: #571b2b; }
+.sidebar-menu li:nth-child(4) .submenu li.active .submenu li a { background-color: #184226; }
+.sidebar-menu li:nth-child(5) .submenu li.active .submenu li a { background-color: #6c5117; }
+
+/* No hover effect */
+.sidebar-menu li a:hover {
+    background-color: transparent;
+    color: #fff;
+}
+
+/* control the arrows on the sidebar */
+.arrow {
+    transition: transform 0.3s;
+}
+
+.arrow.down {
+    transform: rotate(90deg);
+}

@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>BHS Computing Science - National 5</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="mainHeading"><h1>National 5</h1></div>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div class="contentHeading"><h1>Course Overview</h1></div>
+                <div class="contentContainer">
+                    <p>
+                        The National 5 Computing Science course in Scotland is designed to develop learners'
+                        understanding of computational processes and thinking. It explores several central themes
+                        through practical and investigative tasks across various specialized areas. The course
+                        emphasizes the role of computing professionals as problem-solvers and designers, highlighting
+                        the extensive influence of information technology on both the environment and society.
+                    </p>
+                    <p>The course aims to enable learners to:</p>
+                    <ul>
+                        <li>Utilize computational-thinking skills in diverse modern contexts.</li>
+                        <li>Apply knowledge of fundamental computing science concepts and processes.</li>
+                        <li>
+                            Engage in the analysis, design, implementation, testing, and evaluation of various digital
+                            solutions.
+                        </li>
+                        <li>
+                            Effectively communicate computing concepts and clearly explain computational behaviors using
+                            appropriate terminology.​
+                        </li>
+                        <li>
+                            Develop an understanding of how computing science contributes to and influences
+                            environmental and societal changes.
+                        </li>
+                    </ul>
+                    <h2>Assessment</h2>
+                    <p>
+                        The course is assessed through two main components: a <b>question paper</b> and an
+                        <b>assignment</b>. The question paper is worth 80 marks, and the assignment is worth 40 marks,
+                        for a total of 120 marks. Each of these is divided into three distinct sections, covering
+                        <b>Software Design and Development</b>, <b>Web Design and Development</b> and
+                        <b>Database Design and Development</b>. Completion of the Software Development section is
+                        mandatory in both papers, but candidates can choose which of the other two sections they wish to
+                        complete.
+                    </p>
+                    <p>Here is a breakdown of the marks for the average question paper and assignment.</p>
+                    <table id="marks">
+                        <tr>
+                            <th>Type of Assessment</th>
+                            <th>SDD and CS</th>
+                            <th>WDD</th>
+                            <th>DDD</th>
+                            <th>Total Marks</th>
+                            <th>Duration</th>
+                        </tr>
+                        <tr>
+                            <td>Question Paper</td>
+                            <td>55</td>
+                            <td>25</td>
+                            <td>25</td>
+                            <td>80</td>
+                            <td>1 hour and 30 minutes</td>
+                        </tr>
+                        <tr>
+                            <td>Assignment</td>
+                            <td>25</td>
+                            <td>15</td>
+                            <td>15</td>
+                            <td>40</td>
+                            <td>6 hours (approx. 7 periods)</td>
+                        </tr>
+                    </table>
+                    <p>
+                        Note that the <b>Computer Systems</b> topic is folded into the Software Design and Development
+                        topic in both cases. This topic is usually worth roughly 10% of the available marks.
+                    </p>
+                    <p>The assignment will be completed in class time, and the candidate will be give 6 periods in which to complete it.</p>
+                </div>
+                <div class="contentHeading"><h1>Course Breakdown and Specifications</h1></div>
+                <div class="contentContainer">
+                    <p>
+                        Below you can find more information on the different topics in Computing Science, click on the
+                        buttons to find out more information on each topic. The specifications for each topic from the
+                        SQA website have been included with each breakdown.
+                    </p>
+                    <div class="topicButton" tabindex="1" id="CSButton" onclick="toggleBreakdown('CSBreakdown')"><span>Computer Systems</span></div>
+                    <div class="breakdown" id="CSBreakdown">
+                        <p>
+                            Candidates develop an understanding of how data and instructions are stored in binary form
+                            and basic computer architecture. They gain an awareness of the environmental impact of the
+                            energy use of computing systems and security precautions that can be taken to protect
+                            computer systems.
+                        </p>
+                        <table class = "specifications">
+                            <tr>
+                                <th>Data Representation</th>
+                                <td>
+                                    <p>Describe and exemplify the use of binary to represent positive integers.</p>
+                                    <p>Describe floating point representation of positive real numbers using the terms mantissa and exponent.</p>
+                                    <p>Convert from binary to denary and vice-versa.</p>
+                                    <p>Describe extended ASCII code (8-bit) used to represent characters.</p>
+                                    <p>Describe the vector graphics method of graphic representation for common objects:</p>
+                                    <ul>
+                                        <li>rectangle</li>
+                                        <li>ellipse</li>
+                                        <li>line</li>
+                                        <li>polygon</li>
+                                    </ul>
+                                    <p>with attributes:</p>
+                                    <ul>
+                                        <li>co-ordinates</li>
+                                        <li>fill colour</li>
+                                        <li>line colour</li>
+                                    </ul>
+                                    <p>Describe the bit-mapped method of graphics representation.</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Computer Structure</th>
+                                <td>
+                                    <p>Describe the purpose of the basic computer architecture components and how they are linked together:</p>
+                                    <ul>
+                                        <li>processor (registers, ALU, control unit)</li>
+                                        <li>memory locations with unique addresses</li>
+                                        <li>buses (data and address)</li>
+                                    </ul>
+                                    <p>Explain the need for interpreters and compilers to translate high-level program code to binary (machine code instructions).</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Environmental Impact</th>
+                                <td>
+                                    <p>Describe the energy use of computer systems, the implications on the environment and how these could be reduced through:</p>
+                                    <ul>
+                                        <li>settings on monitors</li>
+                                        <li>power down settings</li>
+                                        <li>leaving computers on standby</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Security Precautions</th>
+                                <td>
+                                    <p>Describe the role of firewalls.</p>
+                                    <p>Describe the use made of encryption in electronic communications.</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="topicButton" tabindex="1" id="SDDButton" onclick="toggleBreakdown('SDDBreakdown')"><span>Software Design and Development</span></div>
+                    <div class="breakdown" id="SDDBreakdown">
+                        <p>
+                            Candidates develop knowledge, understanding and practical problem-solving skills in software
+                            design and development, through a range of practical and investigative tasks using
+                            appropriate software development environments. This develops their programming and
+                            computational-thinking skills by implementing practical solutions and explaining how these
+                            programs work. Tasks involve some complex features (in both familiar and new contexts), that
+                            require some interpretation by candidates. They are expected to analyse problems, and
+                            design, implement, test and evaluate their solutions.
+
+                            <table class = "specifications">
+                            <tr>   
+                            <th>Design Methodologies</th>
+                                <td>
+                                    <p>Describe and implement the phases of an iterative development
+                                        process: analysis, design, implementation, testing, documentation,
+                                        and evaluation, within general programming problem-solving.</p>
+                                </td>
+                            </tr>
+                            <tr>   
+                            <th>Analysis</th>
+                                <td>
+                                    <p>Identify the purpose and functional requirements of a problem that
+                                        relates to the design and implementation at this level, in terms of:</p>
+                                    <ul>
+                                        <li>inputs</li>
+                                        <li>processes</li>
+                                        <li>outputs</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>   
+                            <th>Design</th>
+                                <td>
+                                    <p>Identify the data types and structures required for a problem that
+                                        relates to the implementation at this level, as listed below.</p>
+                                    <p>Describe, identify, and be able to read and understand:</p>
+                                    <ul>
+                                        <li>structure diagrams</li>
+                                        <li>flowcharts</li>
+                                        <li>pseudocode</li>
+                                    </ul>
+                                    <p>Exemplify and implement <b>one</b> of the above design techniques to
+                                        design efficient solutions to a problem.</p>
+                                    <p>Describe, exemplify, and implement user-interface design, in terms
+                                        of input and output, using a wireframe.</p>
+                                </td>
+                            </tr>
+                            <tr>   
+                            <th>Implementation (data types and structures)</th>
+                                <td>
+                                    <p>Describe, exemplify, and implement appropriately the following data
+                                        types and structures: <p>
+                                    <ul>
+                                        <li>character</li>
+                                        <li>string</li>
+                                        <li>numeric (integer and real)</li>
+                                        <li>Boolean</li>
+                                        <li>1-D arrays</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>   
+                            <th>Implementation (computational constructs)</th>
+                                <td>
+                                    <p>Describe, exemplify, and implement the appropriate constructs in a
+                                        high-level (textual) language:</p>
+                                    <ul>
+                                        <li>expressions to assign values</li>
+                                        <li>expressions to return values using arithmetic operations
+                                            (addition, subtraction, multiplication, division, and
+                                            exponentiation)</li>
+                                        <li>expressions to concatenate strings</li>
+                                        <li>selection constructs using simple conditional statements with &lt;,
+                                            &gt;, ≤, ≥, =, ≠ operators</li>
+                                        <li>selection constructs using complex conditional statements</li>
+                                        <li>logical operators (AND, OR, NOT)</li>
+                                        <li>iteration and repetition using fixed and conditional loops</li>
+                                        <li>predefined functions (with parameters):
+                                            <ul>
+                                                <li>random </li>
+                                                <li>round</li>
+                                                <li>length </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <p>Read and explain code that makes use of the above constructs.</p>
+                                </td>
+                            </tr>
+                            <tr>   
+                            <th>Implementation (algorithm specifications)</th>
+                                <td>
+                                    <p>Describe, exemplify, and implement standard algorithms: </p>
+                                    <ul>
+                                        <li>input validation </li>
+                                        <li>running total within loop</li>
+                                        <li>traversing a 1-D array</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>   
+                            <th>Testing</th>
+                                <td>
+                                    <p>Describe, identify, exemplify, and implement normal, extreme, and
+                                        exceptional test data for a specific problem, using a test table.</p>
+                                    <p>Describe and identify syntax, execution, and logic errors.</p>
+                                </td>
+                            </tr>
+                            <tr>   
+                            <th>Evaluation</th>
+                            <td>
+                                <p>Describe, identify, and exemplify the evaluation of a solution in
+                                        terms of:</p>
+                                <ul>
+                                    <li>fitness for purpose</li>
+                                    <li>efficient use of coding constructs</li>
+                                    <li>robustness</li>
+                                    <li>readability:
+                                        <ul>
+                                            <li>internal commentary </li>
+                                            <li>meaningful identifiers</li>
+                                            <li>indentation </li>
+                                            <li>white space </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="topicButton" tabindex="1" id="WDDButton" onclick="toggleBreakdown('WDDBreakdown')"><span>Web Design and Development</span></div>
+                    <div class="breakdown" id="WDDBreakdown">
+                        <p>
+                            Candidates develop knowledge, understanding and practical problem-solving skills in web
+                            design and development, through a range of practical and investigative tasks. This allows
+                            candidates to apply computational-thinking skills to analyse, design, implement, test and
+                            evaluate practical solutions to web-based problems, using a range of development tools such
+                            as HTML, CSS and Javascript. Tasks involve some complex features (in both familiar and new
+                            contexts), that require some interpretation by candidates.
+                        </p>
+                        <table class="specifications">
+                            <tr>
+                                <th>Analysis</th>
+                                <td>
+                                    <p>Identify the end-user and functional requirements of a website
+                                       problem that relates to the design and implementation at this level.</p> 
+                                </td>
+                            </tr>
+                             <tr>
+                                <th>Design</th>
+                                <td>
+                                    <p>Describe and exemplify the website structure with a home page, a maximum of four linked multimedia pages, and any necessary external links.</p>
+                                    <p>Describe, exemplify and implement, taking into account end-user requirements, effective user-interface design (visual layout and readability) using wire-framing:</p>
+                                    <ul>
+                                        <li>navigational links</li>
+                                        <li>consistency across multiple pages</li>
+                                        <li>relative vertical positioning of the media displayed</li>
+                                        <li>file formats of the media (text, graphics, video, and audio)</li>
+                                    </ul>
+                                    <p>Describe and identify the implications for individuals and businesses of the Copyright, Designs and Patents Act 1988 relating to:</p>
+                                    <ul>
+                                        <li>web content (text, graphics, video, and audio)</li>
+                                    </ul>
+                                    <p>Compare a range of standard file formats:</p>
+                                    <ul>
+                                        <li>audio standard file formats WAV and MP3 in terms of compression, quality, and file size</li>
+                                        <li>bit-mapped graphic standard file formats JPEG, GIF, and PNG in terms of compression, animation, transparency, and colour depth</li>
+                                    </ul>
+                                    <p>Describe the factors affecting file size and quality, relating to resolution, colour depth, and sampling rate.</p>
+                                    <p>Describe the need for compression.</p>
+                                    <p>Describe, exemplify and implement prototyping (low-fidelity) from wireframe design at this level.</p>    
+                                </td>
+                            </tr>
+                             <tr>
+                                <th>Implementation (CSS)</th>
+                                <td>
+                                    <p>Describe, exemplify and implement internal and external Cascading Style Sheets (CSS):</p>
+                                    <ul>
+                                        <li>selectors, classes and IDs</li>
+                                        <li>properties
+                                            <ul>
+                                                <li>text:
+                                                    <ul>
+                                                        <li>font (family,size)</li>
+                                                        <li>color</li>
+                                                        <li>alignment</li>
+                                                    </ul>
+                                                </li>
+                                                <li>background-color</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <p>Read and explain code that makes use of the above CSS.</p>
+                                </td>
+                            </tr>
+                             <tr>
+                                <th>Implementation (HTML)</th>
+                                <td>
+                                    <p>Describe, exemplify and implement HTML code:</p>
+                                    <ul>
+                                        <li>HTML</li>
+                                        <li>head</li>
+                                        <li>title</li>
+                                        <li>body</li>
+                                        <li>heading</li>
+                                        <li>paragraph</li>
+                                        <li>DIV</li>
+                                        <li>link</li>
+                                        <li>anchor</li>
+                                        <li>IMG</li>
+                                        <li>audio</li>
+                                        <li>video</li>
+                                        <li>lists - ol, ul and li</li>
+                                    </ul>
+                                    <p>Describe and implement hyperlinks (internal and external), relative and absolute addressing.</p>
+                                </td>
+                            </tr>
+                             <tr>
+                                <th>Implementation (JavaScript)</th>
+                                <td>
+                                    <p>Describe and identify JavaScript coding related to mouse events:</p>
+                                    <ul>
+                                        <li>onmouseover</li>
+                                        <li>onmouseout</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                             <tr>
+                                <th>Testing</th>
+                                <td>
+                                    <p>Describe and exemplify testing:</p>
+                                    <ul>
+                                        <li>matches user-interface design</li>
+                                        <li>links and navigation work correctly</li>
+                                        <li>media (such as text, graphics, and video) display correctly</li>
+                                        <li>consistency</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                             <tr>
+                                <th>Evaluation</th>
+                                <td>
+                                    <p>Evaluate solution in terms of:</p>
+                                    <ul>
+                                        <li>fitness for purpose</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="topicButton" tabindex="1" id="DDDButton" onclick="toggleBreakdown('DDDBreakdown')"><span>Database Design and Development</span></div>
+                    <div class="breakdown" id="DDDBreakdown">
+                        <p>
+                            Candidates develop knowledge, understanding and practical problem-solving skills in database
+                            design and development, through a range of practical and investigative tasks. This allows
+                            candidates to apply computational-thinking skills to analyse, design, implement, test, and
+                            evaluate practical solutions, using a range of development tools such as SQL. Tasks involve
+                            some complex features (in both familiar and new contexts), that require some interpretation
+                            by candidates.
+                        </p>
+                        <table class="specifications">
+                            <tr>
+                                <th>Analysis</th>
+                                <td>
+                                    <p>Identify the end-user and functional requirements of a database problem that relates to the implementation at this level.</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Design</th>
+                                <td>
+                                    <p>Describe and identify the implications for individuals and businesses of the UK General Data Protection Regulation (UK GDPR) that data must be:</p>
+                                    <ul>
+                                        <li>processed lawfully, fairly and in a transparent manner in relation to individuals</li>
+                                        <li>used for the declared purpose only</li>
+                                        <li>limited to the data needed for the declared purpose</li>
+                                        <li>accurate</li>
+                                        <li>not kept for longer than necessary</li>
+                                        <li>held securely</li>
+                                    </ul>
+                                    <p>Describe and exemplify entity-relationship diagrams with two entities indicating:</p>
+                                    <ul>
+                                        <li>entity name</li>
+                                        <li>attributes</li>
+                                        <li>relationship (one-to-many)</li>
+                                    </ul>
+                                    <p>Describe and exemplify a data dictionary:</p>
+                                    <ul>
+                                        <li>entity name</li>
+                                        <li>attribute name</li>
+                                        <li>primary and foreign key</li>
+                                        <li>attribute type:
+                                            <ul>
+                                                <li>text</li>
+                                                <li>number</li>
+                                                <li>date</li>
+                                                <li>time</li>
+                                                <li>Boolean</li>
+                                            </ul>
+                                        </li>
+                                        <li>attribute size</li>
+                                        <li>validation:
+                                            <ul>
+                                                <li>presence check</li>
+                                                <li>restricted choice</li>
+                                                <li>field length</li>
+                                                <li>range</li>
+                                            </ul>
+                                        </li>
+                                        <li>Exemplify a design of a solution to the query:
+                                            <ul>
+                                                <li>multiple tables</li>
+                                                <li>fields</li>
+                                                <li>search criteria</li>
+                                                <li>sort order</li>
+                                            </ul>
+                                        </li>    
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Implementation</th>
+                                <td>
+                                    <p>Implement relational databases with two linked tables, to match the design with referential integrity.</p>
+                                    <p>Describe, exemplify and implement SQL operations for pre-populated relational databases, with a maximum of two linked tables:</p>
+                                    <ul>
+                                        <li>select:
+                                            <ul>
+                                                <li>from</li>
+                                                <li>where:
+                                                    <ul>
+                                                        <li>AND, OR, &lt;, &gt;, =</li>
+                                                        <li>order by with a maximum of two fields</li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        <li>insert</li>
+                                        <li>update</li>
+                                        <li>delete</li>
+                                        <li>equi-join between tables</li>
+                                    </ul>
+                                    <p>Read and explain code that makes use of the above SQL.</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Testing</th>
+                                <td>
+                                    <p>Describe and exemplify testing:</p>
+                                    <ul>
+                                        <li>SQL operations work correctly at this level</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Evaluation</th>
+                                <td>
+                                    <p>Evaluate solution in terms of:</p>
+                                    <ul>
+                                        <li>fitness for purpose</li>
+                                        <li>accuracy of output</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="contentHeading"><h1>Revision</h1></div>
+                <div class="contentContainer">
+                    <p>If you're getting ready for your National 5 Computing Science exam, the best way to revise is by breaking it down into simple steps. First, make sure you understand what’s actually in the course. Check the SQA course guide to make sure you know what topics to focus on.</p>
+                    <p>It helps to use different ways to study so things stick in your mind. Flashcards are great for memorising key terms, like different types of loops in programming or important SQL commands. Mind maps can help you connect ideas, like how different parts of a database link together. Quizzing yourself is also a good way to check if you actually remember things rather than just reading over notes.</p>
+                    <p>One of the best ways to prepare for the exam is by practising past papers. You can download them from this website, or the SQA website, and try answering questions under timed conditions. This gets you used to the types of questions that come up and helps you figure out what you still need to work on. Make sure to check the marking schemes so you understand what examiners are looking for—especially in coding questions where small mistakes can cost marks.</p>
+                    <p>Since Computing Science is a practical subject, practising coding is super important. Try writing Python programs that use loops, arrays, and functions so you feel confident with programming questions. For databases, practise writing SQL queries using an online SQL editor or a database program. If web development is a tricky area for you, spend time building simple web pages with HTML, CSS, and JavaScript so you get more comfortable with it.</p>
+                    <p>This website is intended as a revision resource for students stying Computing Science, but there are other online resources that you can use if you are struggling with a topic, such as:</p>
+                    <ul>
+                        <li><a href="https://www.bbc.co.uk/bitesize/subjects/zfs3kqt">BBC Bitesize</a></li>
+                        <li><a href="https://www.w3schools.com/">W3Schools</a></li>
+                        <li><a href="https://scholar.hw.ac.uk/">Scholar</a></li>
+                        <li><a href="https://achieve.hashtag-learning.co.uk/user-start/?next=/">Achieve</a></li>
+                    </ul>
+                    <p>YouTube also has a lot of videos that break down difficult concepts step by step.  Watching someone go through a coding problem can make it easier to understand than just reading about it!  I have included a Past Paper walkthrough in the form of videos on the Past Paper section of this website.</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+    </body>
+</html>
