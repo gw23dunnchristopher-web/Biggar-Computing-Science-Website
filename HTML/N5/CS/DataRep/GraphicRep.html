@@ -2,145 +2,171 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>BHS Computing Science - Home</title>
+        <title>BHS Computing Science - Graphics</title>
+        <script src="/JavaScript/script.js"></script>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
-        <script src="/JavaScript/script.js"> </script>
+        <input type="hidden" id="sidebarPath" value="/HTML/N5/N5Sidebar.html">
     </head>
-    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
-          <header>
-            <h1>BHS Computing Science</h1>
-            <img src="/Images/Header/banner.png" />
-        </header>
-        <div id="pageContainer">
-            <div id="sidebar"></div>
-            <div id="content">
-                <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Data Representation - Graphics</h1></div>
-                <div class="contentContainer">
-                    <h2>Bitmap Graphics and Vector Graphics</h2>
-                    <p>There are two main types of computer images: <b>Bitmap Graphics</b> and <b>Vector Graphics</b>. Each has different uses and strengths.</p>
-                    <h2>Bitmap (Raster) Graphics</h2>
-                    <p>A bitmap image (also called a raster image) is made up of tiny squares called pixels. Each pixel has a specific color, and together, they create the full image.  The <b>pixels are arranged in a grid</b> which makes up the image, and to get the colour, <b>each pixel is assigned a number of bits.</b></p>  
-                     
-                    <table>
-                        <tr>
-                            <th>Bit depth</th>
-                            <td>The more bits that are assigned to each pixel, the greater the number colours can be represented - for example, if 8 bits are used 256 colours can be represented but if 16 bits are used for each pixel, 65,536 colors can be represented. An image that only contains black and white pixels only uses 1 bit per pixel.  The bit can either be 1 (black) or 0 (white).</td>
-                        </tr>
-                        <tr>
-                            <th>Large File Size</th>
-                            <td>As bitmap images have to store information on each pixel, the file size of a raw bitmap file is usually quite large.</td>
-                        </tr>
-                        <tr>
-                            <th>Image Editing</th>
-                            <td>In a bit map file, the colour of each individual pixel can be changed.</td>
-                        </tr>
-                        <tr>
-                            <th>Layers</th>
-                            <td>Only one layer of pixels are used, so you can't put parts of the graphic behind other parts of the graphic.</td>
-                        </tr>
-                        <tr>
-                            <th>Resolution Dependant</th>
-                            <td> If you zoom into a bitmap image, then all it can do is enlarge the existing pixels.  This means that zooming in to a bitmap image will give the image a blurry, blocky look, as shown in the picture below.</td>
-                        </tr>
-                        <tr>
-                            <th>Detailed</th>
-                            <td>Bitmaps can be used for very detailed images, even photographs.</td>
-                        </tr>
-                    </table>
-                    <img class="cImg" width="75%" src="/Images/N5/DataRep/bitmapZoom.jpg" alt="Zooming into a bitmap.">
-                    <p>The image below shows how 1-bit binary is used to make a black and white image.</p> 
+    <body>
+        <div id="loading">Loading...</div>
+        <div id="mainContent" class="content-hidden">
+            <header>
+                <h1>BHS Computing Science</h1>
+                <img src="/Images/Header/banner.png" />
+            </header>
+            <div id="pageContainer">
+                <div id="sidebar"></div>
+                <div id="content">
+                    <div id="mainHeading"><h1>National 5</h1></div>
+                    <div class="contentHeading"><h1>Data Representation - Graphics</h1></div>
+                    <div class="contentContainer">
+                        <h2>Bitmap Graphics and Vector Graphics</h2>
+                        <p>There are two main types of computer images: <b>Bitmap Graphics</b> and <b>Vector Graphics</b>. Each has different uses and strengths.</p>
+                        <h2>Bitmap (Raster) Graphics</h2>
+                        <p>A bitmap image (also called a raster image) is made up of tiny squares called pixels. Each pixel has a specific color, and together, they create the full image.  The <b>pixels are arranged in a grid</b> which makes up the image, and to get the colour, <b>each pixel is assigned a number of bits.</b></p>  
+                        <table>
+                            <tr>
+                                <th>Bit depth</th>
+                                <td>The more bits that are assigned to each pixel, the greater the number colours can be represented - for example, if 8 bits are used 256 colours can be represented but if 16 bits are used for each pixel, 65,536 colors can be represented. An image that only contains black and white pixels only uses 1 bit per pixel.  The bit can either be 1 (black) or 0 (white).</td>
+                            </tr>
+                            <tr>
+                                <th>Large File Size</th>
+                                <td>As bitmap images have to store information on each pixel, the file size of a raw bitmap file is usually quite large.</td>
+                            </tr>
+                            <tr>
+                                <th>Image Editing</th>
+                                <td>In a bit map file, the colour of each individual pixel can be changed.</td>
+                            </tr>
+                            <tr>
+                                <th>Layers</th>
+                                <td>Only one layer of pixels are used, so you can't put parts of the graphic behind other parts of the graphic.</td>
+                            </tr>
+                            <tr>
+                                <th>Resolution Dependant</th>
+                                <td> If you zoom into a bitmap image, then all it can do is enlarge the existing pixels.  This means that zooming in to a bitmap image will give the image a blurry, blocky look, as shown in the picture below.</td>
+                            </tr>
+                            <tr>
+                                <th>Detailed</th>
+                                <td>Bitmaps can be used for very detailed images, even photographs.</td>
+                            </tr>
+                        </table>
+                        <img class="cImg" width="75%" src="/Images/N5/DataRep/bitmapZoom.jpg" alt="Zooming into a bitmap.">
+                        <p>The image below shows how 1-bit binary is used to make a black and white image.</p> 
 
-                    <img class="cImg" width="75%" src="/Images/N5/DataRep/1bit.jpg" alt="Zooming into a bitmap."> 
-                    <h2>Vector Graphics</h2>
-                    <p>A vector image is made using <b>mathematical formulas</b>, not pixels. Instead of storing colors for each pixel, it stores information about shapes, lines, and curves.</p>
-                    <div class="ImgAndText">
-                    <div>
-                    <table>
-                        <tr>
-                            <th>Objects and Attributes</th>
-                            <td>A vector graphic file contains a list of objects and their attributes (characteristics).  Some attributes that every object has are:
-                                <ul>
-                                    <li><i>Co-ordinates</i> - where the object is drawn.</li>
-                                    <li><i>Fill Colour</i> - the colour inside the object. </li>
-                                    <li><i>Line Colour</i> - the colour of the line used to draw the object. </li>
-                                    <li><i>Line Thickness</i> - The width of the line used to draw the object.</li>
-                                </ul>
-                            </td>
-                        </tr>
-                         <tr>
-                            <th>Small File Size</th>
-                            <td>As the computer only has to stored instructions to draw the objects rather than information on every pixel, vector images usually have a smaller file size.</td>
-                        </tr>
-                         <tr>
-                            <th>Resolution Independent</th>
-                            <td>When you zoom into a vector graphic, the computer simply redraws it. 
-                                 This means that it remains just as sharp no matter how much you zoom in.
-                            </td>
-                        </tr>
-                         <tr>
-                            <th>Layers</th>
-                            <td>Objects remain separate when drawn, so you can move them around or even move them in front or behind each other.</td>
-                        </tr>
-                        <tr>
-                            <th>Image Editing</th>
-                            <td>Images are edited by changing the object attributes.</td>
-                        </tr>
-                        <tr>
-                            <th>Simple Images</th>
-                            <td>Vector graphics are usually used for simpler images, such as logos. 
-                                 This is because the images have to consist of individual objects.
-                            </td>
-                        </tr>
-                    </table>
-                    </div>
-                        <img style="width:370px; height:450px;" src="/Images/N5/DataRep/vectorImage.jpg" alt="A sample vector image.">
-                    <div>
-                    </div>
-                    </div>
+                        <img class="cImg" width="75%" src="/Images/N5/DataRep/1bit.jpg" alt="Zooming into a bitmap."> 
+                        <h2>Vector Graphics</h2>
+                        <p>A vector image is made using <b>mathematical formulas</b>, not pixels. Instead of storing colors for each pixel, it stores information about shapes, lines, and curves.</p>
+                        <div class="ImgAndText">
+                        <div>
+                        <table>
+                            <tr>
+                                <th>Objects and Attributes</th>
+                                <td>A vector graphic file contains a list of objects and their attributes (characteristics).  Some attributes that every object has are:
+                                    <ul>
+                                        <li><i>Co-ordinates</i> - where the object is drawn.</li>
+                                        <li><i>Fill Colour</i> - the colour inside the object. </li>
+                                        <li><i>Line Colour</i> - the colour of the line used to draw the object. </li>
+                                        <li><i>Line Thickness</i> - The width of the line used to draw the object.</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                             <tr>
+                                <th>Small File Size</th>
+                                <td>As the computer only has to stored instructions to draw the objects rather than information on every pixel, vector images usually have a smaller file size.</td>
+                            </tr>
+                             <tr>
+                                <th>Resolution Independent</th>
+                                <td>When you zoom into a vector graphic, the computer simply redraws it. 
+                                     This means that it remains just as sharp no matter how much you zoom in.
+                                </td>
+                            </tr>
+                             <tr>
+                                <th>Layers</th>
+                                <td>Objects remain separate when drawn, so you can move them around or even move them in front or behind each other.</td>
+                            </tr>
+                            <tr>
+                                <th>Image Editing</th>
+                                <td>Images are edited by changing the object attributes.</td>
+                            </tr>
+                            <tr>
+                                <th>Simple Images</th>
+                                <td>Vector graphics are usually used for simpler images, such as logos. 
+                                     This is because the images have to consist of individual objects.
+                                </td>
+                            </tr>
+                        </table>
+                        </div>
+                            <img style="width:370px; height:450px;" src="/Images/N5/DataRep/vectorImage.jpg" alt="A sample vector image.">
+                        <div>
+                        </div>
+                        </div>
 
-                    <p>The table below shows common vector objects.</p>
-                    <table style="max-width:1400px;">
-                        <tr>
-                            <th>Object</th>
-                            <th>Example Code</th>
-                            <th>Image</th>
-                        </tr>
-                        <tr>
-                            <th style="background-color:lightgreen;">Rectangle</td>
-                            <td>&lt;rect x="50" y="50" width="40" height="40" stroke="purple" fill="yellow" /&gt;</td>
-                            <td><svg><rect x="50" y="50" width="40" height="40" stroke="purple" fill="yellow"></svg></td>
-                        </tr>
-                        <tr>
-                            <th style="background-color:lightgreen;">Ellipse</td>
-                            <td>&lt;ellipse cx="50" cy="50" rx="40" ry="20" stroke="red" fill="pink" /&gt;</td>
-                            <td><svg><ellipse cx="50" cy="50" rx="40" ry="20" stroke="red" fill="pink"></svg></td>
-                        </tr>
-                        <tr>
-                            <th style="background-color:lightgreen;">Line</td>
-                            <td>&lt;line x1="100" y1="10" x2="350" y2="366" stroke="black" /&gt;</td>
-                            <td><svg><line x1="100" y1="10" x2="350" y2="366" stroke="black"></svg></td>
-                        </tr>
-                        <tr>
-                            <th style="background-color:lightgreen;">Polygon</td>
-                            <td>&lt;polygon points ="30,20  50,40  30,70  100,70  130,40  100,20" stroke="orange" fill="lime" /&gt;</td>
-                            <td><svg><polygon points ="30,20  50,40  30,70  100,70  130,40  100,20" stroke="orange" fill="lime"></svg></td>
-                        </tr>
+                        <p>The table below shows common vector objects.</p>
+                        <table style="max-width:1400px;">
+                            <tr>
+                                <th>Object</th>
+                                <th>Example Code</th>
+                                <th>Image</th>
+                            </tr>
+                            <tr>
+                                <th style="background-color:lightgreen;">Rectangle</td>
+                                <td>&lt;rect x="50" y="50" width="40" height="40" stroke="purple" fill="yellow" /&gt;</td>
+                                <td><svg><rect x="50" y="50" width="40" height="40" stroke="purple" fill="yellow"></svg></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color:lightgreen;">Ellipse</td>
+                                <td>&lt;ellipse cx="50" cy="50" rx="40" ry="20" stroke="red" fill="pink" /&gt;</td>
+                                <td><svg><ellipse cx="50" cy="50" rx="40" ry="20" stroke="red" fill="pink"></svg></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color:lightgreen;">Line</td>
+                                <td>&lt;line x1="100" y1="10" x2="350" y2="366" stroke="black" /&gt;</td>
+                                <td><svg><line x1="100" y1="10" x2="350" y2="366" stroke="black"></svg></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color:lightgreen;">Polygon</td>
+                                <td>&lt;polygon points ="30,20  50,40  30,70  100,70  130,40  100,20" stroke="orange" fill="lime" /&gt;</td>
+                                <td><svg><polygon points ="30,20  50,40  30,70  100,70  130,40  100,20" stroke="orange" fill="lime"></svg></td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
+            </div>
+            <footer>
+                <div id="left">
+                    <p>Biggar High School</p>
+                    <p>Market Rd, Biggar</p>
+                    <p>ML12 6AG</p>
+                </div>
+                <div id="center"></div>
+                <div id="right">
+                    <p>&copy;C Dunn, 2025</p>
+                </div>
+            </footer>
         </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', initializePage);
+            function initializePage() {
+                const sidebarPath = document.getElementById('sidebarPath').value;
+                loadSidebar(sidebarPath, 'sidebar');
+                // Add your loading screen logic here. For example:
+                const loadingScreen = document.getElementById('loading');
+                const mainContent = document.getElementById('mainContent');
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    mainContent.classList.remove('content-hidden');
+                }, 1000); //Simulate a 1-second load time
+            }
+            function loadSidebar(path, elementId) {
+                fetch(path)
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById(elementId).innerHTML = html;
+                    });
+            }
 
-        <footer>
-            <div id="left">
-                <p>Biggar High School</p>
-                <p>Market Rd, Biggar</p>
-                <p>ML12 6AG</p>
-            </div>
-            <div id="center"></div>
-            <div id="right">
-                <p>&copy;C Dunn, 2025</p>
-            </div>
-        </footer>
+        </script>
     </body>
 </html>
