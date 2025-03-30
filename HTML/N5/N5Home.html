@@ -3,15 +3,14 @@
     <head>
         <meta charset="UTF-8">
         <title>BHS Computing Science - N5 Home</title>
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            // Start loading sidebar immediately
+            preloadSidebar('/HTML/N5/N5Sidebar.html');
+        </script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-        <script src="/JavaScript/script.js"></script>
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                preloadSidebar('/HTML/N5/N5Sidebar.html');
-            });
-        </script>
     </head>
     <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
         <header>
