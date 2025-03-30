@@ -81,8 +81,8 @@ main {
 }
 
 .contentContainer{
-    max-width: 1200px;
-    width: 90%;
+    max-width: 1440px;
+    width: 100%;
     margin: 10px auto;
     text-align: left;
     padding: 10px;
