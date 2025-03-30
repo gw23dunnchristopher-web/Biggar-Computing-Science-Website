@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>BHS Computing Science - Home</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Computer Architecture - Data Flow and the Processor</h1></div>
+                <div class="contentContainer">
+                    <h2>The Flow of Data in a Computer</h2>
+                            <p>Computers receive information from input devices, like the mouse or keyboard, this data is then sent to the processor for processing. The processor then sends the results back to output devices, such as a monitor or speakers.</p>
+                            <p>While the data is being processed, the processor may have to retrieve data from memory or storage, and it also may have to send data to memory or storage.</p>
+
+                    <p>The flow of data is shown in the diagram below.</p>
+                    <img class="cImg" width="600px" src="/Images/N5/Architecture/DataFlow.jpg" alt="Processor Flow Diagram">
+                    <table>
+                        <tr>
+                            <th><strong>Component</strong></th>
+                            <th>Description</th>
+                            <th>Examples</th>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Input Devices</th>
+                            <td>Devices that allow the user to input data into the computer.</td>
+                            <td>Keyboard, mouse</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Output Devices</th>
+                            <td>Devices that allow the user to output data from the computer.</td>
+                            <td>Monitor, speakers</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Main Memory</th>
+                            <td>Very fast computer storage that stores data and instructions currently in use.</td>
+                            <td>RAM (Random Access Memory)</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Storage</th>
+                            <td>Computer storage that is used to store data and instructions that are not currently in use.</td>
+                            <td>Hard drives, solid state drives</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Processor</th>
+                            <td>The 'brain' of the computer. Responsible for executing instructions.</td>
+                            <td>Intel Core i7, AMD Ryzen 7</td>
+                        </tr>
+                    </table>
+                    <h2>The Processor</h2>
+                   
+                   
+                        
+                    <p>The processor is the <b>central processing unit (CPU)</b> of a computer, and is often called the 'brain' of the computer. It is responsible for executing instructions, performing calculations, and controlling the flow of data in the system. The processor fetches instructions from memory, decodes them, and then executes them, performing the necessary operations on data.</p>
+                    <p>The processor actually consists of three main parts - the ALU, the Control Unit and the Registers.</p>
+                    <div style="display:flex; flex-direction:row; align-content:center; justify-content: center;">
+                    <img style="max-width:400px;" src="/Images/N5/Architecture/Processor.jpg">
+                     <img style="max-width:400px;" src="/Images/N5/Architecture/intel.jpg" alt="Intel CPU">
+                    </div>
+                        <table>
+                        <tr>
+                            <th><strong>ALU</strong></th>
+                            <td>The Arithmetic Logic Unit (ALU) is responsible for performing arithmetic and logical operations on data. It is also responsible for performing comparisons.</td>
+                        </tr>
+                        <tr>
+                            <th><strong>Control Unit</strong></th>
+                            <td>The Control Unit is responsible for controlling the flow of data within the computer. It is also responsible for managing the flow of data between different components of the computer.</td>
+                        </tr>
+                        <tr>
+                            <th><strong>Registers</strong></th>
+                            <td>The Registers are small, temporary memory locations that are used to store data and instructions. They are also used to store the results of arithmetic and logical operations.</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>BHS Computing Science - Home</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Computer Architecture - Buses</h1></div>
+                <div class="contentContainer">
+                    <p>A computer bus is a communication system that transfers data between different components of a computer. It consists of a set of parallel wires or circuits that allow data, instructions, and power to move between the CPU, memory, storage, and peripheral devices.</p>
+                    <p>There are three kinds of computer buses that you need to be aware of - data buses, address buses, and control buses.</p>
+                    <img class="cImg" style="max-width:600px;" src="/Images/N5/Architecture/BusDiagram.jpg" alt="Computer Buses">
+                    <table>
+                        <tr>
+                            <th>Data Bus</th>
+                            <td>
+                                <ul>
+                                    <li>The data bus carries data between the processor and memory.</li>
+                                    <li>It is <b>bi-directional</b> - this means that data can travel in both directions on this bus, from the processor to memory and back again.</li>
+                                    <li>The width of the data bus is known as <b>word length</b>.</li>
+                                    <li>The word length determines how many bits can be transferred between the memory and the processor at a time, so it influences computer performance.</li>
+                                    <li>The word length also dictates how much data is store in each memory location.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Address Bus</th>
+                            <td>
+                                <ul>
+                                    <li>The address bus indicates which location in memory is currently being accessed by the processor.</li>
+                                    <li>It is uni-directional, data can only travel along it from the processor to memory.</li>
+                                    <li>The width of the address bus dictates the number of memory locations that the computer has.</li>
+                                    <li>Number of Memory Locations = 2<sup>address bus</sup></li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Control Bus</th>
+                            <td>
+                                <ul>
+                                    <li>The control bus is a set of signals used to manage and coordinate the activities of the computer system components.</li>
+                                    <li>It differs from the Address and Control buses because each wire on the control bus has a different function (for example: Memory Read, Memory Write, Clock Signals, Bus Requests, etc).</li>
+                                    <li>It carries control signals from the CPU to other hardware components to ensure proper data transfer and execution of instructions.</li>
+                                    <li>Some control signals are unidirectional (from CPU to other components), while others are bidirectional (communication between devices)</li>
+                                    <li> It ensures data is transferred correctly by controlling the operations of the data and address buses.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                    <p>The diagram below shows how and when the buses are accessed by the different parts of the computer:</p>
+                    <img class="cImg" style="max-width:600px;" src="/Images/N5/Architecture/BusAccess.jpg" alt="Bus Access">
+                </div>
+        </div>
+
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+    </body>
+</html>

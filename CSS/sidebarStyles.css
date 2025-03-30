@@ -6,8 +6,10 @@
     width: 320px; /* Fixed width */
     background-color: #333;
     color: #fff;
-    height: calc(100vh - 100px); /* From mainHeading to footer */
+    height: calc(100vh - 250px); /* From mainHeading to footer */
     overflow-y: auto; /* Scroll sidebar if needed */
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(0);
 }
 
 /* Base menu styles */
@@ -75,4 +77,10 @@
 
 .arrow.down {
     transform: rotate(90deg);
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        transform: translateX(-320px); /* Move sidebar offscreen */
+    }
 }

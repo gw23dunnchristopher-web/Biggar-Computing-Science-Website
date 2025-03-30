@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>BHS Computing Science - Home</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Computer Architecture - Interpreters and Compilers</h1></div>
+                <div class="contentContainer">
+                    <p>Programs are sets of instructions for the computer.</p>
+                    <p>They are written using High Level Languages that contain English so that the programmer can understand them.  Examples of High Level Languages include Python, Visual Basic, C++ and C#.</p>
+                    <p>These High level languages must be translated into machine code (binary) in order for the processor to understand and execute them.</p>
+                   <div style="display:flex; flex-direction:row; align-content:center; justify-content: center;">
+                        <img style="max-width:400px; padding:10px;" src="/Images/N5/Architecture/HighLevel.jpg" alt="Python" />
+                        <img style="max-width:400px; padding:10px;" src="/Images/N5/Architecture/MachineCode.jpg" alt="Python" />
+                    </div>
+
+                    <p>There are two types of translators used for this purpose - Interpreters and Compilers.</p>
+                    <h2>Compilers</h2>
+                    <ul>
+                        <li>A compiler translates the high level language to machine code in a single operation.</li>
+                        <li>The original high-level program is called the source code.</li>
+                        <li>Once the object code has been created, the source code is no longer required. It creates an executable file for the program that runs without the original coding environment.</li>
+                        <li>It runs fast, but once if any changes are to be made it must be translated again.</li>
+                    </ul>
+                    <h2>Interpreters</h2>
+                    <ul>
+                        <li>An interpreter changes the high-level language into machine code line by line as the program runs.</li>
+                        <li>Interpreted programs run more slowly than compiled programs, because the interpreter must translate each line every time the program is run.</li>
+                        <li>However, the interpreter can also report any errors in the code right away as it runs.</li>
+                    </ul>
+                    <h2>Compilers vs Interpreters</h2>
+                    <table>
+                        <tr>
+                            <th>Compiler</th>
+                            <th>Interpreter</th>
+                        </tr>
+                        <tr>
+                            <td>Run fast.</td>
+                            <td>Run slow.</td>
+                        </tr>
+                        <tr>
+                            <td>Report mistakes at the end of compilation.</td>
+                            <td>Report mistakes immediately.</td>
+                        </tr>
+                        <tr>
+                            <td>Whole program is translated (compiled) at once.</td>
+                            <td>Code is translated one line at a time.</td>
+                        </tr>
+                        <tr>
+                            <td>Translate and run are seperate processes.</td>
+                            <td>Translate and run is a single process.</td>
+                        </tr>
+                        <tr>
+                            <td>Can save translated code as an executable.</td>
+                            <td>Cannot save the translated version of the code.</td>
+                        </tr>
+                        <tr>
+                            <td>Compiler not required to run the code once it has been compiled.</td>
+                            <td>The Interpreter is required to run the code.</td>
+                        </tr>
+                    </table>
+                    
+            </div>
+        </div>
+
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+    </body>
+</html>

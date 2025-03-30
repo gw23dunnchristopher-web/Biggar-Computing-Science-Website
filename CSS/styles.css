@@ -27,8 +27,9 @@ main {
 
 
 #content {
+    display:flex;
+    flex-direction:column;
     width: calc(100% - 320px);
-    min-width: 1024px;
     margin-left: 320px;
     box-sizing: border-box;
     text-align: center;
@@ -37,6 +38,7 @@ main {
 }
 
 .contentHeading {
+    max-width:1400px;
     font-family:arial;
     padding-bottom:5px;
     margin-bottom: 5px;
@@ -49,6 +51,7 @@ main {
 }
 
 .contentContainer{
+    max-width:1400px;
     margin:10px;
     margin-right:auto;
     text-align:left;
@@ -98,7 +101,7 @@ table {
     border-color:black;
     border-collapse: collapse;
     margin:5px auto;
-    max-width:900px;
+    max-width:800px;
 }
 
 th, td {
@@ -221,7 +224,7 @@ th {
     display:flex;
     flex-direction:row;
     align-content:center;
-    justify-content: center;
+    justify-content: space-between;
 }
 
 .ImgAndText img {
