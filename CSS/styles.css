@@ -7,15 +7,13 @@ main {
 
 
 #content {
-    width: calc(100% - 320px); /* Fill remaining width */
+    width: calc(100% - 320px);
     min-width: 1024px;
-    margin-left:320px;
-    margin-bottom:100px;
+    margin-left: 320px;
     box-sizing: border-box;
     text-align: center;
-    padding: 10px;
-    overflow-y: auto; /* Allow vertical scrolling */
-    
+    padding: 10px 10px 100px 10px;
+    overflow-y: auto;
 }
 
 .contentHeading {
