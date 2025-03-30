@@ -25,6 +25,7 @@ body {
     #pageContainer {
         flex-direction: column;
         margin-top: 120px;
+        padding: 10px;
     }
     #content {
         width: 100%;
@@ -36,7 +37,19 @@ body {
     }
     table {
         max-width: 100%;
-        font-size: 14px;
+        font-size: 12px;
+    }
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    .contentContainer div[style*="display:flex"] {
+        flex-direction: column !important;
+    }
+    .contentContainer div[style*="display:flex"] img {
+        max-width: 100% !important;
+        width: auto !important;
+        margin: 5px auto !important;
     }
 }
 

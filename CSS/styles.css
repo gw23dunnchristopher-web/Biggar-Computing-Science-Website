@@ -159,6 +159,13 @@ table {
         overflow-x: auto;
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
+        font-size: 12px;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    table th, table td {
+        padding: 5px;
     }
     
     img {
@@ -172,12 +179,27 @@ table {
     
     .ImgAndText img {
         width: 100%;
-        margin: 10px 0;
+        max-width: 300px;
+        margin: 10px auto;
     }
     
     .topicButton {
         width: 100%;
         max-width: 100%;
+    }
+
+    .contentContainer img {
+        max-width: 100%;
+        height: auto;
+        margin: 10px auto;
+        display: block;
+    }
+
+    .rImg, .lImg, .cImg {
+        float: none;
+        max-width: 100%;
+        margin: 10px auto;
+        display: block;
     }
 }
 
