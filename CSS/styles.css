@@ -251,6 +251,32 @@ th {
     display:none;
 }
 
+@media (max-width: 768px) {
+    .breakdown {
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        font-size: 14px;
+        padding: 5px;
+    }
+    .breakdown table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        font-size: 10px;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .breakdown th, .breakdown td {
+        padding: 5px;
+    }
+    .breakdown table td {
+        white-space: nowrap;
+    }
+}
+
 .specifications th, .specifications tr td {
     border:1px solid;
     border-color:black;
@@ -258,6 +284,22 @@ th {
     margin-left:auto;
     margin-right:auto;
     padding:20px;
+}
+
+@media (max-width: 768px) {
+    .specifications {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        font-size: 12px;
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .specifications th, .specifications td {
+        padding: 5px;
+    }
 }
 
 .specifications tr td ul {
