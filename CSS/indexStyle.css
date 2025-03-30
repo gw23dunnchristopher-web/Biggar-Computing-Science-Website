@@ -9,21 +9,32 @@ body {
 }
 
 header {
-    position: fixed; /* Stays at top */
+    position: fixed;
     top: 0;
     left: 0;
-    width: 100%; /* Full width */
+    width: 100%;
     height: 100px;
     background-color: black;
-    min-width: 1024px;
-    z-index: 10; /* Ensure it’s above other elements */
+    z-index: 10;
+}
+
+@media (max-width: 768px) {
+    header {
+        height: 80px;
+    }
+    header h1 {
+        font-size: 24px;
+        left: 10px;
+    }
+    header img {
+        height: 80px;
+    }
 }
 
 header h1 {
     position:absolute;
     top:10px;
     left:30px;
-    min-width:1024px;
     color:white;
     padding:20px;
     font-size:40px;
@@ -49,11 +60,26 @@ footer {
     width: 100%;
     background-color: black;
     height: 100px;
-    min-width: 1024px;
+    z-index: 10;
     display: flex;
     flex-wrap: nowrap;
-    z-index: 10;
 }
+
+@media (max-width: 768px) {
+    footer {
+        height: 80px;
+    }
+    footer > div {
+        font-size: 10px;
+    }
+    #left p {
+        padding-left: 10px;
+    }
+    #right {
+        padding-right: 10px;
+    }
+}
+
 
 footer > div {
     width:33%;
@@ -103,14 +129,29 @@ body main {
 }
 
 body #coursePanels {
-  
     display: flex;
-    flex:1;
-    height:100%;
-    justify-content: center; /* Horizontally center items */
+    flex: 1;
+    height: 100%;
+    justify-content: center;
     gap: 5px;
     width: 100%;
     align-items: center;
+}
+
+@media (max-width: 768px) {
+    body #coursePanels {
+        flex-direction: column;
+        padding: 20px;
+    }
+    body #coursePanels div img {
+        max-width: 100%;
+        height: auto;
+    }
+    body main {
+        height: auto;
+        margin-top: 80px;
+        margin-bottom: 80px;
+    }
 }
 
 body #coursePanels div img {
