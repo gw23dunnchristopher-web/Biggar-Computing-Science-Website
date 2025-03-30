@@ -27,14 +27,44 @@ main {
 
 
 #content {
-    display:flex;
-    flex-direction:column;
+    display: flex;
+    flex-direction: column;
     width: calc(100% - 320px);
     margin-left: 320px;
     box-sizing: border-box;
     text-align: center;
     padding: 10px 10px 100px 10px;
     overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    #content {
+        width: 100%;
+        margin-left: 0;
+        padding: 15px;
+        align-items: center;
+    }
+    
+    .contentContainer {
+        max-width: 100%;
+        margin: 10px auto;
+        padding: 15px;
+    }
+    
+    .contentHeading {
+        width: 100%;
+        margin: 0 auto;
+    }
+    
+    table {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    img {
+        max-width: 100%;
+        height: auto;
+    }
 }
 
 .contentHeading {
