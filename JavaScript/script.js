@@ -9,15 +9,6 @@ function darken(event) {
 let sidebarCache = '';
 let sidebarPromise = null;
 
-function initializePage() {
-    const sidebarPath = document.getElementById('sidebarPath').value;
-    preloadSidebar(sidebarPath).then(() => {
-        loadSidebar(sidebarPath, 'sidebar');
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('mainContent').classList.remove('content-hidden');
-    });
-}
-
 // Preload the sidebar
 function preloadSidebar(menuLoc) {
     if (!sidebarPromise) {
