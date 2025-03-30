@@ -12,5 +12,9 @@ deploymentTarget = "static"
 publicDir = "/"
 
 [[deployment.rewrites]]
+from = "/HTML/*"
+to = "/HTML/*"
+
+[[deployment.rewrites]]
 from = "/*"
 to = "/index.html"
