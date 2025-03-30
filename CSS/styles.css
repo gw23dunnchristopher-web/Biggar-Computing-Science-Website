@@ -68,7 +68,7 @@ main {
 }
 
 .contentHeading {
-    max-width:1400px;
+    max-width:2400px;
     font-family:arial;
     padding-bottom:5px;
     margin-bottom: 5px;
@@ -81,13 +81,13 @@ main {
 }
 
 .contentContainer{
-    max-width: 1440px;
+    max-width: 1800px;
     width: 100%;
     margin: 10px auto;
     text-align: left;
     padding: 10px;
     padding-bottom: 0px;
-    font-size: 16px;  
+    font-size: 18px;  
     flex: 1;
 }
 
@@ -149,8 +149,12 @@ table {
     border-color:black;
     border-collapse: collapse;
     margin:5px auto;
-    max-width:800px;
+    max-width:1000px;
     width: 100%;
+}
+
+.contentContainer{
+    margin-bottom:30px;
 }
 
 @media (max-width: 768px) {
@@ -214,7 +218,7 @@ th {
 }
 
 .topicButton {
-    width:800px;
+    max-width:1000px;
     display:block;
     border:1px solid;
     margin-left:auto;
@@ -245,7 +249,7 @@ th {
 }
 
 .breakdown{
-    width:800px;
+    max-width:1000px;
     margin-left:auto;
     margin-right:auto;
     display:none;
