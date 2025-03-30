@@ -117,15 +117,18 @@ body {
 }
 
 body main {
-    min-height: 100vh;
-    margin: 0;
-    padding: 100px 20px;
+    position: absolute;
+    top: 100px;
+    bottom: 100px;
+    left: 0;
+    right: 0;
     display: flex;
     background-color:#03030c;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    box-sizing: border-box;
+    padding: 0 20px;
+    margin: 0;
 }
 
 body #coursePanels {
