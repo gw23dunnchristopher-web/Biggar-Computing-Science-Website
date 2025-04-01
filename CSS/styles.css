@@ -25,6 +25,9 @@ main {
     margin-bottom:100px;
 }
 
+h2 {
+    padding-top:20px;
+}
 
 #content {
     display: flex;
@@ -207,12 +210,12 @@ table {
     }
 }
 
-th, td {
+table tr th, table tr td {
     border:1px solid black;
     padding:10px;
 } 
 
-th {
+table tr th {
     text-align:center;
     background-color:lightblue;
 }
@@ -221,6 +224,7 @@ th {
     max-width:1000px;
     display:block;
     border:1px solid;
+    border-radius:10px;
     margin-left:auto;
     margin-right:auto;
     margin-top:10px;
@@ -390,3 +394,40 @@ ol li {
     padding-top:10px;
     margin-left:30px;
 }
+
+.answerButton {
+    border:1px solid black;
+    border-radius:10px;
+    padding:10px;
+    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
+    margin:auto;
+    display:block;
+    width:200px;
+    text-align:center;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.hiddenElement {
+    display:none;
+}
+
+.codeBox {
+    max-width:800px;
+    margin:auto;
+    margin-top:20px;
+    margin-bottom:20px;
+    text-align:left;
+    padding:20px;
+    border:solid 1px black;
+    background-color:#1c2112;
+    color:white;
+    font-family:"Courier New", Courier, monospace;
+}
+
+.codeBox table, .codeBox th, .codeBox td {
+    border:none;
+    padding:5px;
+}
+
+.borderless table, .borderless th, .borderless td {border:none; background-color:transparent;}

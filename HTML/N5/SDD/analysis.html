@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - SDD Analysis</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="../../../Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentContainer">
+                    <p>During the analysis phase we need to identify the purpose of the program and its functional requirements.</p>
+                    <p>The purpose of the program is simply what the program will do, but the functional requirements can be broken down into three parts: input, process and output.</p>
+                    <h2>Functional Requirements</h2>
+                    <img style="max-width:200px" width="50%" class="rImg" src="/Images/N5/SDD/Analysis.jpg" alt="Magnifying Glass">
+                    <ul>
+                        <li><b>Input</b> - This is the data that the user will need to enter into the program so that it can perform its function.</li>
+                        <li><b>Processes</b> - For this you describe the tasks that the program must carry out, such as what it does with the data that was entered.</li>
+                        <li><b>Output</b> - This describes what information will be displayed by the program.</li>
+                    </ul>
+                    <h2>Example - Car Speed</h2>
+                    <p>You have been asked to create a program that will calculate the speed of a moving car using the formula 'speed = distance / time'.  The program will take in the distance the car has travelled in meters and the time it took to travel that distance in seconds.  It will then calculate the speed of the car in m/s and display the result. List the inputs, processes and outputs for this program.</p>
+                    <table>
+                        <tr>
+                            <th>Input</th>
+                            <td><p>Distance in meters</p><p>Time in seconds</p></td>
+                        </tr>
+                        <tr>
+                            <th>Processes</th>
+                            <td><p>Calculate the speed using (speed = distance / time)</p></td>
+                        </tr>
+                            <th>Output</th>
+                            <td><p>Speed in m/s</p></td>
+                    </table>
+                    <h2>Example 2 - Pupil Usernames</h2>
+                    <p>A program is being created for the school to create a list of usernames for pupils.  The program should ask the user to enter the number of pupils, the first name and last name of each pupil and their age.  The program needs to make sure that each age entered is between 14 and 18, will then create and display the usernames in the following format (first name + last name + age).  List the inputs, processes and outputs for this progam.</p>
+
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <table>
+                        <tr>
+                            <th width="200px">Input</th>
+                            <td><div class = "hiddenElement answer1"><p>Number of pupils</p><p>first name of each pupil</p><p> last name of each pupil</p><p>age of each pupil</p></div></td>
+                        </tr>
+                        <tr>
+                            <th>Processes</th>
+                            <td><div  class = "hiddenElement answer1"><p>Check to make sure the age entered is between 14 and 18</p><p>display an error message if it is not</p><p>create a username for each pupil (first name + last name + age)</p><p>add the username to a list</p</div></td>
+                        </tr>
+                            <th>Output</th>
+                            <td><div  class = "hiddenElement answer1"><p>List of usernames</p></div></td>
+                    </table>
+                    <h2>Example 3 - Book Store Program</h2>
+                    <p>You are creating a simple program for an online bookstore that allows a customer to choose books, calculate the total price, and display the order details. The program should let the customer select books, enter the number of books they want to buy, and then calculate the total cost, with each book priced at £10. If the customer buys more than 5 books, a 10% discount is applied. Finally, the program should display the final total cost to the customer. Your task is to identify the inputs, processes, and outputs of this program.</p>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    <table>
+                    <tr>
+                        <th width="200px">Input</th>
+                        <td><div class = "hiddenElement answer2"><p>Number of books the customer wants to buy.</p></div></td>
+                    </tr>
+                    <tr>
+                        <th>Processes</th>
+                        <td><div  class = "hiddenElement answer2"><p>Multiply the number of books by £10 to get the total cost.</p><p>If the number of books is more than 5, apply a 10% discount (multiply the total by 0.9)</p></div></td>
+                    </tr>
+                        <th>Output</th>
+                        <td><div  class = "hiddenElement answer2"><p>The total cost of the books after the discount is applied.</p></div></td>
+                    </table>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+    </body>
+</html>

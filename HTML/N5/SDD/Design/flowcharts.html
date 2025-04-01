@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Flowcharts</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Flowcharts</h1></div>
+                <div class="contentContainer">
+                    <p>A flowchart is a graphical notation style that uses shapes and text to show the steps in the design for a program - this can be easier to understand than pseudocode.  Flowchats use symbols that match programming constructs such as selection and repitition.  At the N5 level you need to be able to read a flowchart.</p>
+
+                    <h2>Flowchart Symbols</h2>
+                     <table>
+                         <tr>
+                             <th>Symbol</th>
+                             <th>Name</th>
+                             <th>Meaning</th>
+                         </tr>
+                         <tr>
+                             <td><img width="100px" class="cImg" src="/Images/N5/SDD/Design/Flowchart/flowline.jpg" alt="An arrow"></td>
+                             <td>Flow line</td>
+                             <td>Shows the direction between symbols</td>
+                         </tr>
+                         <tr>
+                              <td><img width="100px" class="cImg" src="/Images/N5/SDD/Design/Flowchart/terminal.jpg" alt="An oval"></td>
+                              <td>Terminal</td>
+                              <td>Used at the “start” and “end” of a design</td>
+                          </tr>
+                         <tr>
+                              <td><img width="100px" class="cImg" src="/Images/N5/SDD/Design/Flowchart/initialisation.jpg" alt="A hexagon"></td>
+                              <td>Initialisation</td>
+                              <td>Used to declare variables or assign an initial value</td>
+                          </tr>
+                         <tr>
+                              <td><img width="100px" class="cImg" src="/Images/N5/SDD/Design/Flowchart/input-output.jpg" alt="A parallelogram"></td>
+                              <td>Input/output</td>
+                              <td>Shows input or output</td>
+                          </tr>
+                         <tr>
+                              <td><img width="100px" class="cImg" src="/Images/N5/SDD/Design/Flowchart/decision.jpg" alt="A diamond"></td>
+                              <td>Decision</td>
+                              <td>Program may take different actions depending on conditions</td>
+                          </tr>
+                         <tr>
+                              <td><img width="100px" class="cImg" src="/Images/N5/SDD/Design/Flowchart/process.jpg" alt="A rectangle"></td>
+                              <td>Process</td>
+                              <td>Used for any a process e.g. a calculation</td>
+                          </tr>
+                         <tr>
+                              <td><img width="100px" class="cImg" src="/Images/N5/SDD/Design/Flowchart/predefined.jpg" alt="A rectangle with two internal lines"></td>
+                              <td>Predefined process</td>
+                              <td>Used for a predefined function</td>
+                          </tr>
+                         <tr>
+                              <td><img width="100px" class="cImg" src="/Images/N5/SDD/Design/Flowchart/connector.jpg" alt="A circle"></td>
+                              <td>On-page connector</td>
+                              <td>May be used to split a flowchart to keep it on a single page.</td>
+                          </tr>
+                     </table>  
+                    <h2>Flowchart - Example 1</h2>
+                    <p>The flowchart below show a program that allows the user to input two values.  It then adds them together.</p>
+                    <img  class="cImg" src="/Images/N5/SDD/Design/Flowchart/Flowchart1.jpg" alt="Flowchart Example 1">
+                    
+                    <h2>Flowchart - Example 2</h2>
+                    <p>This example shows a program that asks the user to enter thier age.  It will then tell them if they are old enough to drive.</p>
+                    <img  class="cImg" src="/Images/N5/SDD/Design/Flowchart/Flowchart2.jpg" alt="Flowchart Example 2">
+                    
+                    <h2>Past Paper Question - 2022 Q4 (a) and (b)</h2>
+                    <p>A train company is designing a program to handle passenger complaints. Part of the 
+                    design is shown below.</p>
+                    <img  class="cImg" src="/Images/N5/SDD/Design/Flowchart/PPFlowchart.jpg" alt="The Flowchart for the Past Paper Question">
+                    <p>
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">(a)</th><td><p>State which type of loop is used in this design.</p></td>
+                                <td width="30px" style="text-align:right;">1</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" ><p class = "hiddenElement answer1">This is a conditional loop, as it continues 
+                                    to loop until the passenger is satisfied with the outcome.</p></td>
+                            </tr>
+                        </table>
+                       <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <br>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(b)</th><td><p>When a train is delayed, passengers are entitled to a 25% refund on the cost of 
+                            their ticket.</p>
+                                <p>Using a design technique of your choice, show how the refund would be 
+                            calculated.</p></td>
+                            <td width="30px" style="text-align:right;">2</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" ><div class = "hiddenElement answer2"><p>&lt;pseudocode&gt; Set refund to ticketCost x 0.25</p>
+                            <ul>
+                                <li>1 mark for an appropriate variable/descriptor for ticket cost.</li>
+                                <li>1 mark for the refund being correctly calculated as 25% of the ticket cost.</li>
+                            </ul>
+                            </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Structure Diagrams</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Structure Diagrams</h1></div>
+                <div class="contentContainer">
+                    <p>A structure diagram is another type of graphical notation used to create the design for programs.  
+                        The symbols used are a little different to the ones used in a flowchart.</p>  
+                    
+                    <p>At the N5 level, you will be expected to be able to read a structure diagram.  This is how to read a structure diagram:</p>
+                    <ol>
+                        <li><b>Look for the Main Block</b> - At the top you'll usually find a large box or circle. 
+                            This is the main part of the program or problem that you need to solve.</li>
+                        <li><b>Identify the Program's Parts</b> - Branching off from the main component, you'll see smaller blocks or boxes. 
+                            Each box usually represents a specific task or feature of the program.</li>
+                        <li><b>Follow the Connections</b> - Lines link the different parts together, showing how they interact.  Look for these lines.</li>
+                        <li><b>Check the heirarchy</b> - Each of the boxes branching off from the main box may have smaller 
+                            boxes connected to them, these are a further breakdown of the task in the box.</li>
+                        <li><b>Work from top to bottom, left to right</b> - Starting at the top, move down to the 
+                            first box on the left then, if it has onnected boxes, work through those from left to right first.  
+                            Continue until there are no boxes left.</li>
+                    </ol>
+                    <h2>Structure Diagram - Symbols</h2>
+                    <table class="">
+                         <tr>
+                             <th>Symbol</th>
+                             <th>Name</th>
+                             <th>Meaning</th>
+                         </tr>
+                         <tr>
+                             <td><img width="100px" class="cImg" src="/Images/N5/SDD/Design/StructureDiagram/process.jpg" alt="A rectangle"></td>
+                             <td>Process</td>
+                             <td>Used for a function, input, output or a calculation.</td>
+                         </tr>
+                         <tr>
+                              <td><img width="100px" class="cImg" src="/Images/N5/SDD/Design/StructureDiagram/Loop.jpg" alt="An oval"></td>
+                              <td>Terminal</td>
+                              <td>Used when instructions are to be repeated.</td>
+                          </tr>
+                         <tr>
+                              <td><img width="100px" class="cImg" src="/Images/N5/SDD/Design/StructureDiagram//selection.jpg" alt="A hexagon"></td>
+                              <td>Initialisation</td>
+                              <td>Different actions may be taken depending on conditions being true (IF or CASE in code)</td>
+                          </tr>
+                         <tr>
+                              <td><img width="100px" class="cImg" src="/Images/N5/SDD/Design/StructureDiagram/predefined.jpg" alt="A parallelogram"></td>
+                              <td>Input/output</td>
+                              <td>A pre-defined function will be used e.g. random, length or round</td>
+                          </tr>
+                     </table>  
+                    <h2>Structure Diagram - Example 1</h2>
+                    <p>The following structure diagram shows a program that takes in the exam scores from maths, english and computing.  
+                        It then calculates and displays the average result.</p>
+                     <td><img class="cImg" src="/Images/N5/SDD/Design/StructureDiagram/Example1.jpg" alt="Structure Diagram Example 1"></td>
+                    <h2>Structure Diagram - Example 2</h2>
+                    <p>That will calculate and display the total cost of a meal for a number of guests.  If the guests have spent over £80 total they will get a 10% discount.</p>
+                     <td><img class="cImg" src="/Images/N5/SDD/Design/StructureDiagram/Example2.jpg" alt="Structure Diagram Example 2"></td>
+
+                    <h2>Past Paper Question - 2019 Q5 (a), (b) and (c)</h2>
+                    <p>A garden centre requires a program to calculate the price of apple, pear and 
+                    cherry trees being sold.</p>
+                    <p>The design is shown below.</p>
+                    <img  class="cImg" src="/Images/N5/SDD/Design/StructureDiagram/PPStructure.jpg" 
+                        alt="The Structure Diagram for the Past Paper Question">
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">(a)</th><td><p>State the type of loop shown in the design above.</p></td>
+                                <td width="30px" style="text-align:right;">1</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" ><p class = "hiddenElement answer1">This is a fixed loop, 
+                                    as it loops for the number of trees that there are.</p></td>
+                            </tr>
+                        </table>
+                       <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <br>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(b)</th>
+                            <td><p>The design is tested. For the following inputs state the total displayed.</p>
+                                <table>
+                                    <tr>
+                                    <th width="100px">Inputs</th>
+                                    <th width="100px">Total Displayed</th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <p>Number of trees - 2</p>
+                                            <br>
+                                            <p>Type of tree - cherry</p>
+                                            <p>Size of tree - small</p>
+                                            <br>
+                                            <p>Type of tree - Pear</p>
+                                            <p>Size of tree - medium</p>
+                                        </td>
+                                        <td><div class = "hiddenElement answer2"><p>50</p></div></td>
+                                    </tr>
+                                </table></td>
+                            <td width="30px" style="text-align:right;">1</td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    <br>
+                    <table>
+                            <tr>
+                                <th rowspan="2" width="30px">(a)</th><td><p>The garden centre is considering selling orange trees for £23·00.
+                                Explain why the design does not need to be changed.</p></td>
+                                <td width="30px" style="text-align:right;">1</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" ><p class = "hiddenElement answer3">As orange tree is not an apple or 
+                                pear tree it would still be set to £23.</p></td>
+                            </tr>
+                        </table>
+                       <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer3')">Show Answer</div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+    </body>
+</html>

@@ -74,6 +74,31 @@ function hide(element){
     document.getElementById(element).style.display = "none";
 }
 
+
+
+function answerButtonSwitch(element){
+    if (element.innerHTML == "Show Answer"){
+        element.innerHTML = "Hide Answer";
+        element.style.backgroundImage = "linear-gradient(to bottom, lightgreen, green)";
+        
+    }
+    else{
+        element.innerHTML = "Show Answer";
+        element.style.backgroundImage = "linear-gradient(to bottom, lightgrey, lightslategrey)";
+    }
+}
+
+function toggleVisibility(className) {
+    const elements = document.getElementsByClassName(className);
+    for (let i = 0; i < elements.length; i++) {
+        if (elements[i].style.display === 'none' || getComputedStyle(elements[i]).display === 'none') {
+            elements[i].style.display = 'block';
+        } else {
+            elements[i].style.display = 'none';
+        }
+    }
+}
+
 function toggleBreakdown(breakdownId) {
     const breakdown = document.getElementById(breakdownId);
     const button = document.getElementById(breakdownId.replace('Breakdown', 'Button'));

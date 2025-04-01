@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - User Interface Design</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>User Interface Design</h1></div>
+                <div class="contentContainer">
+                    <h2>What is a User Interface?</h2>
+                    <p>A user interface (UI) is the part of a computer, app, or website that you interact with. 
+                        It's everything you see on the screen and how you use it to make the program do what you want.</p>
+                    <p>There are three different types of user interface:</p>
+                    <table>
+                        <tr>
+                            <th>User Interface</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td>Graphical User Interface (GUI)</td>
+                            <td>A GUI uses pictures, icons, buttons, and other visual elements to allow you to interact with a computer or program. 
+                                You click or tap on icons and buttons to perform tasks. It's very visual and user-friendly.</td>
+                            <td><img  width="200px" class="cImg" src="/Images/N5/SDD/Design/UserInterface/GUI.jpg" 
+                                alt="Windows 10 GUI" /></td>
+                        </tr>
+                        <tr>
+                            <td>Menu Driven Interface (MDI)</td>
+                            <td>A menu-driven interface is a type of user interface where users interact with a program or system 
+                                through a series of menus. These menus present options or commands that the user can select, 
+                                typically through the use of a pointer, keyboard, or touchscreen</td>
+                            <td><img  width="200px" class="cImg" src="/Images/N5/SDD/Design/UserInterface/MDI.jpg" 
+                                alt="Computer BIOS MDI" /></td>
+                        </tr>
+                        <tr>
+                            <td>Command Line Interface (CLI)</td>
+                            <td>A CLI is a text-based interface where you type commands to interact with the computer or program. 
+                                There are no pictures or buttons, just lines of text. You type specific commands (like "dir" 
+                                to list files or "cd" to change directories) and hit enter to perform actions. It’s less visual, 
+                                but it gives you full control if you know the commands.</td>
+                            <td><img  width="200px" class="cImg" src="/Images/N5/SDD/Design/UserInterface/CLI.jpeg" 
+                                alt="Windows Command Prompt CLI"/></td>
+                        </tr>
+                    </table>
+                    <p>Any questions you get regarding a user interface at the N5 level will likely be asking you to create a GUI for a program.</p>
+                    <h2>User Interface Design</h2>
+                    <p>User Interfaces are designed at this stage to show the inputs and outputs of a program and how it will look to the user.  
+                        Typically they are designed using a wireframe, or a sketch of the user interface.</p>
+                    <img class="cImg" src="/Images/N5/SDD/Design/UserInterface/UIWireframe.jpg" 
+                        alt="A User Interface Wireframe"/>
+                    <h2>Past Paper Question - 2018 Q19 (b)</h2>
+                    <p>A program is being designed that will allow pupils to add money to their lunch 
+                    money account. The user enters their name, an 8 character password and the 
+                    amount of money they want to add. A button is then clicked and the updated 
+                    balance of the account is displayed.</p>
+                    <table>
+                            <tr>
+                                <th rowspan="2" width="30px">(b)</th><td><p>Design a user interface for this program.</p></td>
+                                <td width="30px" style="text-align:right;">3</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" ><p class = "hiddenElement answer1"> <img class="cImg"
+                                    src="/Images/N5/SDD/Design/UserInterface/PPUIWireframe.jpg"  
+                                    alt="An example UI wireframe for the past paper."/></p>
+                                <ul>
+                                    <li>1 mark for adding input boxes for name, password and money to be added.</li>
+                                    <li>1 mark for adding an output box to show the updated balance.</li>
+                                    <li>1 mark for adding the button that will run the program.</li>
+                                    </td>
+                                </ul>
+                            </tr>
+                        </table>
+                       <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+    </body>
+</html>

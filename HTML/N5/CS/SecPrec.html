@@ -6,8 +6,6 @@
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
-        <link rel="stylesheet" href="/CSS/styles.css">
-        <link rel="stylesheet" href="/CSS/frameStyles.css">
         <script src="/JavaScript/script.js"></script>
     </head>
     <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
@@ -19,37 +17,33 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Course Overview</h1></div>
+                <div class="contentHeading"><h1>Security Precautions</h1></div>
                 <div class="contentContainer">
-                    <p>
-                        The National 5 Computing Science course in Scotland is designed to develop learners'
-                        understanding of computational processes and thinking. It explores several central themes
-                        through practical and investigative tasks across various specialized areas. The course
-                        emphasizes the role of computing professionals as problem-solvers and designers, highlighting
-                        the extensive influence of information technology on both the environment and society.
-                    </p>
-                    <p>The course aims to enable learners to:</p>
+                    <p>At the N5 level, when looking at security precautions for computers we need to be aware of two things - firewalls and encryption.</p>
+                    <h2>Firewalls</h2>
+                    <img style="max-width:400px" src="/Images/N5/Security/DataPacket.jpg" alt="Breakdown of a data packet." class="rImg">
+                    <p>Before we talk about firewalls, we must be aware of how data is sent across a network.  When large amounts of data need to be sent (such as a file or a stream), the data is broken up into smaller, manageable pieces called packets. These packets contain not only the actual data but also 'metadata', such as the destination address, the source address, and information to help ensure the data is delivered correctly.</p>
+                    <p>The firewall is a device that is placed in front of the network and is responsible for inspecting these packets.  It inspects both incoming and outgoing packets.</p>
+                    <p>This allows the firewall to:</p>
                     <ul>
-                        <li>Utilize computational-thinking skills in diverse modern contexts.</li>
-                        <li>Apply knowledge of fundamental computing science concepts and processes.</li>
-                        <li>
-                            Engage in the analysis, design, implementation, testing, and evaluation of various digital
-                            solutions.
-                        </li>
-                        <li>
-                            Effectively communicate computing concepts and clearly explain computational behaviors using
-                            appropriate terminology.​
-                        </li>
-                        <li>
-                            Develop an understanding of how computing science contributes to and influences
-                            environmental and societal changes.
-                        </li>
+                        <li>Restrict access to the network, preventing unauthorised access.</li>
+                        <li>Consider the source of the data packets and what type of data they contain.</li>
+                        <li>Discard unauthorised packets, effectively filtering unwanted or dangerous data.</li>
+                        <li>Allow traffic from common programs such as email or web browsers.</li>
+                        <li>Prevent access to certain websites or services to prevent employees from accessing non-work resources.</li>
                     </ul>
+                    <iframe style="display:block; margin:auto;" width="560" height="315" src="https://www.youtube.com/embed/5geL5yHpa2Q?si=kXJdbv7m8rXj4rHl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    <h2>Encryption</h2>
+                    <p>We send sensitive information out over the internet all the time.  Whenever we purchase a product on the internet, we have to send out bank details to the company we are buying it from.  Whenever we send a private message, that message has to be sent across the network to the person receiving it.  Naturally, we don't want hackers to intercept this data and gain access to it, so the data is changed into a code, making it unreadable to anyone but the intended recipient. This process is known as encryption.</p>
+                    <ol>
+                        <li>A public key (a large prime number) which is freely available is used to encode the data.</li>
+                        <li>The encoded data is then transmitted across the network.</li>
+                        <li>A private decryption key (which is never shared) is used by the recipient's computer to decode the data.</li>
+                    </ol>
+                    <img style="max-width:1024px" src="/Images/N5/Security/Encryption.jpg" alt="Breakdown of a data packet." class="cImg">
                 </div>
-                <div class="contentHeading"><h1>Course Specifications</h1></div>
             </div>
-        </div>
-
+        </div>   
         <footer>
             <div id="left">
                 <p>Biggar High School</p>
