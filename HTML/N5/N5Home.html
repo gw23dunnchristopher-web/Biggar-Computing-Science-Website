@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css">
     </head>
     <body>
-        <div id="loading">Loading...</div>
+        <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
         <header>
             <h1>BHS Computing Science</h1>
@@ -558,13 +558,5 @@
             </div>
         </footer>
         </div>
-        <script>
-            // Load sidebar before showing content
-            preloadSidebar('/HTML/N5/N5Sidebar.html').then(() => {
-                loadSidebar('/HTML/N5/N5Sidebar.html', 'sidebar');
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('mainContent').classList.remove('content-hidden');
-            });
-        </script>
     </body>
 </html>

@@ -220,6 +220,10 @@ table tr th {
     background-color:lightblue;
 }
 
+table tr th p, table tr td p {
+    margin:0px;
+}
+
 .topicButton {
     max-width:1000px;
     display:block;
@@ -428,6 +432,10 @@ ol li {
 .codeBox table, .codeBox th, .codeBox td {
     border:none;
     padding:5px;
+}
+
+.codeText {
+    font-family: "Courier New", Courier, monospace;
 }
 
 .borderless table, .borderless th, .borderless td {border:none; background-color:transparent;}

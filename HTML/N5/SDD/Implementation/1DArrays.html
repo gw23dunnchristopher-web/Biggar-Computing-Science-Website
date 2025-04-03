@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - 1D Arrays</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>1D Arrays</h1></div>
+                <div class="contentContainer">
+                    <p>An array is a <b>data structure</b> used to store a number of values of 
+                        the same data type.</p>
+                    <ul>
+                        <li>Arrays can hold multiple values, but all of the values held in the array 
+                            must be the same data type (all strings, all integers, etc).</li>
+                        <li>Python does not have arrays natively, instead it uses lists to simulate 
+                            an array.</li>
+                        <li>Each array has a number of elements, this is the number of values that can 
+                            be stored in the array.</li>
+                        <li>The first value stored in the array is element 0, the second is element 1, 
+                            the third is element 2, and so on.</li>
+                    </ul>
+                    <img class="cImg" src="/Images/N5/SDD/Implementation/Array.jpg" alt="1D Array" />
+                    <h2>Initialising an Array</h2>
+                    <p>We initialise an array using square brackets as shown below:</p>
+                    <table>
+                        <tr>
+                            <th>Code</th>
+                            <th>Explanation</th>
+                        </tr>
+                        <tr>
+                            <td class="codeText"> num = [0] * 4</td>
+                            <td>This will create an array of integers with 4 elements.</td>
+                        </tr>
+                        <tr>
+                            <td class="codeText">names = [“”] * 15</td>
+                            <td>This will create an array of strings with 15 elements.</td>
+                        </tr>
+                        <tr>
+                            <td class="codeText">prices = [0.0] * 5</td>
+                            <td>This will create an array of real numbers with 5 elements.</td>
+                        </tr>
+                        <tr>
+                            <td class="codeText">answers = [False] * 10</td>
+                            <td>This will create an array of Boolean values with 10 elements.</td>
+                        </tr>
+                    </table>
+                    <h2>Inserting values into an Array</h2>
+                    <p>To assign a value to a specific element in an array, we use the name of the array
+                        and then the element number we want to insert the value into in square 
+                        brackets.</p>
+                    <p>For example:</p>
+
+                        <div style="display:flex; flex-direction:row; align-content:center; 
+                            justify-content:center;">
+                        <div><p class="codeBox" style="margin-right:40px;">names[1] = "Bob"</p></div>
+                        <div>
+                            <table class="binaryTable"">
+                                <tr>
+                                    <th style="background-color:lightgreen;" rowspan="2">names</th>
+                                    <th style="width:60px">0</th>
+                                    <th style="width:60px">1</th>
+                                    <th style="width:60px">2</th>
+                                    <th style="width:60px">3</th>
+                                </tr>
+                                <tr>
+                                    <td>" "</td>
+                                    <td>"Bob"</td>
+                                    <td>" "</td>
+                                    <td>" "</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <br>
+                    <p>The code next to the table above would insert the name "Bob" into element 1 of an
+                        array called 'names'.</p>
+                    
+                    <h2>Using a fixed loop to insert values</h2>
+                    <p>We can use a fixed loop to insert values into an 
+                        array.  See the <a href="/HTML/N5/SDD/Implementation/Loops.html">Loops</a> 
+                        section for more information on fixed loops.</p>
+
+                    <p>The code below will ask the user to enter 6 names.  It will then insert the names
+                        into an array.</p>
+
+                    <div class="codeBox">
+                        <p>names = [""] * 6</p>
+                        <br>
+                        <p>for x in range(6)</p>
+                        <p>&emsp;&emsp;print("Enter name of student", (x + 1))</p>
+                        <p>&emsp;&emsp;scores[x] = int(input())</p>
+                    </div>
+
+                    <p>This code will:</p>
+                    <ul>
+                        <li>initialise an array of strings called 'names' with 6 elements.</li>
+                        <li>loop 6 times (with x increasing by 1 with each loop - 0, 1, 2, 3, 4, 5)</li>
+                        <li>ask the user to enter a name, and place it in the element with the same
+                            number as the current iteration number (x) before going back to the start of
+                            the loop.</li>
+                    </ul>
+                    <h2>Using a conditional loop to insert values</h2>
+                    <p>The code below will use a conditional loop to get the user to enter 6 scores.  If
+                        any of the scores entered are less than 10, it will stop the loop and no more
+                        scores will be entered.</p>
+                    
+                    <div class="codeBox">
+                        <p>scores = [0] * 6</p>
+                        <p>counter = 0</p>
+                        <br>
+                        <p>while counter &lt; 6 and score[counter-1] &lt; 10:</p>
+                        <p>&emsp;&emsp;print("Enter score", (counter+1)</p>
+                        <p>&emsp;&emsp;scores[counter] = int(input())</p>
+                        <p>&emsp;&emsp;counter = counter + 1</p>
+                    </div>
+                    <p>This code will:</p>
+                    <ul>
+                        <li>initialise an array of integers called 'scores' with 6 elements.</li>
+                        <li>use a counter to check if all of the numbers have been entered.</li>
+                        <li>exit the loop of the number entered is less than 10.</li>
+                        <li>increase the counter using a running total.</li>
+                    </ul>
+                    <p>Doing it this way allows your loop to have other exit conditions, so that you can 
+                    stop entering values into the elements of the array before it is completely filled.
+                    </p>
+
+                    <h2>Displaying the values in an array</h2>
+                    <p>To display the value stored in one element of the array, you just have to use the
+                        print function, the name of the array and square brackets containing the 
+                        element.</p>
+                    <p>For example, look at the following array:</p>
+                    <div style="display:flex; flex-direction:row; align-content:center; 
+                        justify-content:center">
+                        <div><p class="codeBox" style="margin-right:40px;">print(names[2])</p></div>
+                        <div>
+                            <table class="binaryTable"">
+                                <tr>
+                                    <th style="background-color:lightgreen;" rowspan="2">names</th>
+                                    <th style="width:60px">0</th>
+                                    <th style="width:60px">1</th>
+                                    <th style="width:60px">2</th>
+                                    <th style="width:60px">3</th>
+                                </tr>
+                                <tr>
+                                    <td>"Tom"</td>
+                                    <td>"Bob"</td>
+                                    <td>"Peter"</td>
+                                    <td>"Josh"</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <p>The code above would display the name "Peter" because it is stored in element
+                    2 of the array.</p>
+                    
+                    <h2>Displaying all the values in the array (with a loop)</h2>
+                    <p>The code below will display all of the values in the array using the incremental
+                        number (x) in place of the element number.</p>
+                    <div class="codeBox">
+                        <table>
+                            <tr>
+                                <td>
+                                for x in range(4):
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    &emsp;&emsp;print(names[x])
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <h2>Past Paper Question 1 - 2022 Q8 (c)</h2>
+                    <p>Passengers are allocated an available seat. A data structure named 
+                        <span class="codeText">seats</span> is used to store whether each seat is
+                        available (true) or unavailable (false).</p>
+                    <img class="cImg" src="/Images/N5/SDD/Implementation/Seats.jpg" alt="Seats" />
+                    <table>
+                        <tr>
+                            <th rowspan="3">(i)</th>
+                            <td colspan="2">State the most suitable data structure and data type used to
+                                store the seat availability.</td>
+                            <td rowspan="3" style="width:30px;"><b>2</b></td>
+                        <tr>
+                            <td><p>Data Structure</p></td>
+                            <td style="width:400px"><p class="hiddenElement answer1">1D Array</p></td>
+                        </tr>
+                        <tr>
+                            <td><p>Data Type</p></td>
+                            <td style="width:400px"><p class="hiddenElement answer1">Boolean</p></td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this);
+                         toggleVisibility('answer1')">Show Answer</div>
+                    <br>
+                    <table>
+                        <tr>
+                            <th rowspan="2">(ii)</th>
+                            <td> The following pseudocode design shows how an available seat
+                                is allocated.
+                                
+                                <table class = "borderless codeText">
+                                    <tr>
+                                        <td>1</td>
+                                        <td>generate a random seat number.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>loop while the generated seat is unavailable</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>&emsp;&emsp;generate another random seat number</td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td>end loop</td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td>change seat to unavailable</td>
+                                    </tr>
+                                </table>
+                                
+                                <p>Using a programming language of your choice, write the code required to
+                                implement the above design.</p>
+                            </td>
+                            <td rowspan="2" style="width:30px;"><b>4</b></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="codeBox hiddenElement answer2">
+                                    <p>import randint from random</p>
+                                    <p>randomSeat = randint(1,60)</p>
+                                    <br>
+                                    <p>while seats[randomSeat] = False:</p>
+                                    <p>&emsp;&emsp;randomSeat = randint(1,60)</p>
+                                    <p>seats[randomSeat] = False</p>
+                                </div>
+                                <ul class="hiddenElement answer2">
+                                    <li><b>1 mark</b> - Before loop, store a random number within
+                                        appropriate range (60 seats)</li>
+                                    <li><b>1 mark</b> - Use a while loop with correct condition: data 
+                                        structure 'seats' with random number index = false</li>
+                                    <li><b>1 mark</b> - Store a random number (60 seats) again inside the 
+                                        loop</li>
+                                    <li><b>1 mark</b> - After the loop set the randomly generated index
+                                        number of the seats array to False.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this);
+                         toggleVisibility('answer2')">Show Answer</div>
+                    <br>
+                    <table>
+                        <tr>
+                            <th rowspan="2">(ii)</th>
+                            <td>Explain why the above design becomes less efficient as more passengers 
+                            are allocated seats.</td>
+                            <th rowspan="2" style="width:30px;">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <ul class="hiddenElement answer3">
+                                    <li><b>1 mark</b> - a number/seat generated is more likely to be
+                                        allocated already </li>
+                                    <li><b>1 mark</b> - demonstrating an understanding 
+                                        that the above will cause the program to repeat/loop again</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this);
+                         toggleVisibility('answer3')">Show Answer</div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

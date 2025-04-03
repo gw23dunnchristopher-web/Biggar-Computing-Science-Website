@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Variables and Data Types</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Variables and Data Types</h1></div>
+                <div class="contentContainer">
+                    <h2>What is a variable?</h2>
+                    <p> A variable is like a container or box that can hold a value, such as a number, a
+                        word, or any kind of data. In programming or maths, we use variables to store
+                        information that might change or be used later.</p>
+
+                    <p>For example, if you're working out how much pocket money you get every week, you
+                        might use a variable to store the amount. Let's say you get £10 every week – you
+                        could call this variable "pocketMoney". If next week you get £12, you can change
+                        the value of the variable.</p>
+                    
+                    <p>In maths, variables are usually represented by letters like x or y. So, if you
+                        have the equation "x + 3 = 7", the variable "x" is the unknown value that you're
+                        trying to find. In this case, x would be 4 because 4 + 3 equals 7.</p>
+
+                    <p>So, a variable helps us keep track of parts of our program that can change or need
+                        to be calculated</p>
+
+                    <img class="cImg" src="/Images/N5/SDD/Implementation/Variables.jpg" alt="Variables">
+                    
+                    <h2>Variable Names</h2>
+                    <p>When you're naming a variable, there are a few important rules to keep in mind.
+                        These rules make sure that your program works properly and is easy to
+                        understand.</p>
+                    <ol>
+                        <li><b>Start with a letter</b> - A variable name must begin with a letter, not a
+                            number. So, you can name a variable "score" or "totalAmount", but you can't 
+                            start it with "2ndPrize" or "3points".</li>
+                        <li><b>Only letters, numbers, and underscores</b> - After the first letter, you
+                            can use letters, numbers, and underscores ( _ ). So, "total_earnings", "x1",
+                            and "studentScore2" are all fine. But, you can't use spaces or 
+                            special characters like @, $, or % in a variable name.</li>
+                        <li><b>Keep it meaningful</b> - While not a strict rule, it's a good idea to name
+                            your variables something that makes sense. For example, use "age" for
+                            someone's age or "price" for the price of something. This helps make your
+                            code easier to read and understand.</li>
+                        <li><b>Case-sensitive</b> - Variable names are case-sensitive, which means
+                            "score" and "Score" would be considered two different variables.</li>
+                        <li><b>No spaces</b> - You can't put spaces in variable names. If you need to
+                            separate words, use an underscore ("_") or use camel case, where the first
+                            letter of each word after the first one is capitalised (e.g. "totalAmount" or
+                            "total_amount").</li>
+                    </ol>
+                    
+                   <h2>Data Types</h2>
+                    <p>There are five data types that you need to be aware of at the N5 level:</p>
+                    <ul>
+                        <li><b>Character</b> - a variable that only stores a single character.</li>
+                        <li><b>String</b> - a varaiable that stores a number of characters (letters, symbols and numbers).</li>
+                        <li><b>Numeric (Integer) - a variable that stores a whole number (without the decimal part).</b></li>
+                        <li><b>Numeric (Real) - a variable that stores a number with the decimal part.  
+                            In Python, Real numbers are called ""<i>floats</i>""</b></li>
+                        <li><b>Boolean</b> - a variable that can store two values, either True or False.</li>
+                    </ul>
+                    <table>
+                        <tr>
+                            <th>Data Type</th>
+                            <th>Python Equivalent</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; font-weight:bold; 
+                                background-color:lightgreen;">Character</td>
+                            <td  style="text-align:center;">char</td>
+                            <td>initial = “C”, firstCharacter = “D”</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; font-weight:bold; 
+                                background-color:lightgreen;">String</td>
+                            <td  style="text-align:center;">string</td>
+                            <td>message = “Hello, everyone!”</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; font-weight:bold; 
+                                background-color:lightgreen;">Numeric (Integer)</td>
+                            <td  style="text-align:center;">int</td>
+                            <td>score = 156, points = -20</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; font-weight:bold;
+                                background-color:lightgreen;">Numeric (Real)</td>
+                            <td  style="text-align:center;">float</td>
+                            <td>price = 1.99, discount = 0.1</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; 
+                                font-weight:bold; background-color:lightgreen;">Boolean</td>
+                            <td  style="text-align:center;">bool</td>
+                            <td>Found = True, Found = False</td>
+                        </tr>
+                    </table>
+                    <h2>Type Casting</h2>
+                    <p>In Python, you need to know functions that will change one 
+                        type of data into another.  For example, you cannot compare a string 
+                        to a number to check if the string is higher or lower, even if that string 
+                        contains a number (you could not type 5 > "2", for example).  
+                        The string must be changed into a number using type casting.</p>
+                    
+                    <table>
+                        <tr>
+                            <th>Converting Into</th>
+                            <th>Function</th>
+                            <th>Usage Example</th>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; font-weight:bold; 
+                                background-color:lightgreen;">Character</td>
+                            <td  style="text-align:center;">chr()</td>
+                            <td>asciiChar = chr(77)  <i>(This would make the value in the 
+                                asciiChar variable "M", since 77 is M in ASCII.</i></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; font-weight:bold; 
+                                background-color:lightgreen;">String</td>
+                            <td  style="text-align:center;">str()</td>
+                            <td>total = str(27)  <i>(This would make the value in total "27".  
+                                Note the speech marks, meaning it is now a string.)</i></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; font-weight:bold; 
+                                background-color:lightgreen;">Numeric (Integer)</td>
+                            <td  style="text-align:center;">int()</td>
+                            <td>score = int("27") <i>(This would change the value in the 
+                                score variable to 27)</i></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; font-weight:bold;
+                                background-color:lightgreen;">Numeric (Real)</td>
+                            <td  style="text-align:center;">float()</td>
+                            <td>price = float(“1.99”) <i>(This would change the value in the 
+                                price variable to 1.99)</i></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; 
+                                font-weight:bold; background-color:lightgreen;">Boolean</td>
+                            <td  style="text-align:center;">bool</td>
+                            <td>answer = bool(“True”) <i>(This would set the value in the answer
+                                variable to True, this function is rarely used)</i></td>
+                        </tr>
+                    </table> 
+                    <h2>Past Paper Question - 2022 Q3</h2>
+                    <p>A club requires a program to calculate how much each member needs to pay in 
+                    membership fees.</p>
+                    <table style="border:none; margin:0;" class="borderless">
+                        <tr>
+                            <td>Complete the table below to state which type of variable 
+                                should be used.</td>
+                            <td width="30px"><b>2</b></td>
+                        </tr>
+                    </table>
+                    <table style="text-align:center;">
+                        <tr>
+                            <th><p>Variable</p></th>
+                            <th><p>Sample Data</p></th>
+                            <th><p>Variable Type</p></th>
+                        </tr>
+                        <tr>
+                            <td><p>membershipFee</p></td>
+                            <td><p>37.50</p></td>
+                            <td><p>Real</p></td>
+                        </tr>
+                        <tr>
+                            <td><p>yearsOfMembership</p></td>
+                            <td><p>6</p></td>
+                            <td><p class="hiddenElement answer1">Integer</p></td>
+                        </tr>
+                        <tr>
+                            <td><p>memberName</p></td>
+                            <td><p>Jones</p></td>
+                            <td><p class="hiddenElement answer1">String</p></td>
+                        </tr>
+                    </table>
+                     <div class="answerButton" onClick="answerButtonSwitch(this);
+                         toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

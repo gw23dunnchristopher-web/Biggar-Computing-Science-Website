@@ -29,7 +29,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background-color: transparent; /* Default: no background */
+    background-color: #333333; 
 }
 
 /* Submenu styling */
@@ -48,26 +48,45 @@
 }
 
 /* Highlight child items in an active submenu */
-.sidebar-menu li.active .submenu li a {
-    background-color: #555; /* Gray highlight for level 2 items */
-}
+/*.sidebar-menu li.active .submenu li a {
+    background-color: #a8a8a8; /* Gray highlight for level 2 items */
+/*}
 
 /* Level 1 active: Highlight level 2 children */
-.sidebar-menu li:nth-child(2).active .submenu li a { background-color: #386aa5; } /* Computer Systems */
-.sidebar-menu li:nth-child(3).active .submenu li a { background-color: #a23854; } /* Software Design */
-.sidebar-menu li:nth-child(4).active .submenu li a { background-color: #36834f; } /* Web Design */
-.sidebar-menu li:nth-child(5).active .submenu li a { background-color: #9d7521; } /* Database Design */
+.sidebar-menu li:nth-child(3).active .submenu li a { background-color: #386aa5; } /* Computer Systems */
+.sidebar-menu li:nth-child(4).active .submenu li a { background-color: #a23854; } /* Software Design */
+.sidebar-menu li:nth-child(5).active .submenu li a { background-color: #36834f; } /* Web Design */
+.sidebar-menu li:nth-child(6).active .submenu li a { background-color: #9d7521; } /* Database Design */
 
 /* Level 2 active: Highlight level 3 children */
-.sidebar-menu li:nth-child(2) .submenu li.active .submenu li a { background-color: #193755; }
-.sidebar-menu li:nth-child(3) .submenu li.active .submenu li a { background-color: #571b2b; }
-.sidebar-menu li:nth-child(4) .submenu li.active .submenu li a { background-color: #184226; }
-.sidebar-menu li:nth-child(5) .submenu li.active .submenu li a { background-color: #6c5117; }
+.sidebar-menu li:nth-child(3) .submenu li.active .submenu li a { background-color: #193755; }
+.sidebar-menu li:nth-child(4) .submenu li.active .submenu li a { background-color: #571b2b; }
+.sidebar-menu li:nth-child(5) .submenu li.active .submenu li a { background-color: #184226; }
+.sidebar-menu li:nth-child(6) .submenu li.active .submenu li a { background-color: #6c5117; }
 
-/* No hover effect */
+/* Level 3 active: Highlight level 3 children */
+.sidebar-menu li:nth-child(3) .submenu li.active .submenu li.active .submenu li a{ background-color: #0c243c; }
+.sidebar-menu li:nth-child(4) .submenu li.active .submenu li.active .submenu li a { background-color: #330f19; }
+.sidebar-menu li:nth-child(5) .submenu li.active .submenu li.active .submenu li a{ background-color: #0c2d17; }
+.sidebar-menu li:nth-child(6) .submenu li.active .submenu li.active .submenu li a{ background-color: #3f300e; }
+
+/* hover effect */
 .sidebar-menu li a:hover {
-    background-color: transparent;
-    color: #fff;
+    filter: brightness(150%);
+    color:#ffa861;
+    text-shadow:1px 1px 10px #ff0000;
+}
+
+sidebar-menu .submenu li a:hover {
+    filter: brightness(200%);
+    color:#ffa861;
+    text-shadow:1px 1px 10px #ff0000;
+}
+
+sidebar-menu .submenu .submenu li a:hover {
+    filter: brightness(1000%);
+    color:#ffa861;
+    text-shadow:1px 1px 10px #ff0000;
 }
 
 /* control the arrows on the sidebar */

@@ -112,3 +112,9 @@ function toggleBreakdown(breakdownId) {
         button.classList.add('active');
     }
 }
+
+preloadSidebar('/HTML/N5/N5Sidebar.html').then(() => {
+    loadSidebar('/HTML/N5/N5Sidebar.html', 'sidebar');
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('mainContent').classList.remove('content-hidden');
+});
