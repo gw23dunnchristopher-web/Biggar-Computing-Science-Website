@@ -79,6 +79,39 @@
 
 .toggle-btn {
     display: none;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    .toggle-btn {
+        display: block;
+    }
+    
+    #sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: auto;
+        max-height: 80vh;
+        transform: translateY(-100%);
+        transition: transform 0.3s ease-in-out;
+        overflow-y: auto;
+        z-index: 999;
+    }
+
+    #sidebar.active {
+        transform: translateY(0);
+    }
 }
 
 /* Highlight child items in an active submenu */

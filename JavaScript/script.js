@@ -46,6 +46,11 @@ function loadSidebar(menuLoc, menuID) {
 }
 
 
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active');
+}
+
 function attachMenuListeners() {
     const menuItems = document.querySelectorAll('.sidebar-menu li');
     menuItems.forEach(item => {
