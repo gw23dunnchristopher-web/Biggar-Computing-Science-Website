@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Arithmetic Operations</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Arithmetic Operations</h1></div>
+                <div class="contentContainer">
+                   <p>At N5 level, our programs must also be able to perform arithmetic operations - 
+                       addition, subtraction, multiplication, division and exponentiation (to the power 
+                       of).</p>
+                    <p>The following table shows the symbols used in Python for the different arithmetic
+                        operations, and thier meaning.</p>
+                    <table>
+                        <tr>
+                            <th>Arithmetic Operator</th>
+                            <th>Meaning</th>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;">+</td>
+                            <td>Addition - Adds numbers together.</td> 
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;">-</td>
+                            <td>Subtraction - Subtracts one number from another.</td> 
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;">*</td>
+                            <td>Multiplication - Multiplies two numbers together.</td> 
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;">/</td>
+                            <td>Division - Divides one number by another.</td> 
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;">**</td>
+                            <td>Exponentiation - One number to the power of another.</td> 
+                        </tr>
+                    </table>
+
+                    <p>Here are some examples:</p>
+
+                    <div class="codeBox">
+                        print(5+5)
+                    </div>
+
+                    <p>The code above would display the number 10.</p>
+
+                    <div class="codeBox">
+                        print(10-8)
+                    </div>
+
+                    <p>This code would display the number 2.</p>
+
+                    <div class="codeBox">
+                        print(5*5)
+                    </div>
+
+                    <p>This code would display the number 25.</p>
+
+                    <div class="codeBox">
+                        print(10/2)
+                    </div>
+
+                    <p>This code would display the number 5.</p>
+
+                    <div class="codeBox">
+                        print(5**2)
+                    </div>
+                    
+                    <p>This code would display the number 25 (5 to the power of 2).</p>
+
+                    <p>Variables can also be used with arithmetic operators.  For example, the code
+                        below will ask the user to enter two numbers and then add them together.</p>
+
+                    <div class="codeBox">
+                        <p>num1 = int(input("Enter a number: "))</p>
+                        <p>num2 = int(input("Enter another number: "))</p>
+                        <p>total = num1 + num2</p>
+                        <br>
+                        <p>print("The total is", total)</p>
+                    </div>
+
+                    <p>Usually, we would only really use these operators with integers and floats, but
+                        some of them <i>can</i> be used with strings as well. For example, using the +
+                        operator can add two strings together (concatenation), and using the * multiply
+                        will display the same string multiple times.  You cannot add a numeric value to a
+                        string.</p>
+
+                    <p>The code window below contains a program that will automatically work out the
+                        speed of a moving object, given the time and distance.  Try it to see how it
+                        works.</p>
+
+                    <iframe src="https://trinket.io/embed/python/c55232e5f586" class="trinket" 
+                        allowfullscreen></iframe>
+                    
+                    <h2>BODMAS</h2>
+                    <p>BODMAS stands for Brackets, Orders, Division, Multiplication, Addition.</p>
+                    <p>This is the order that computers perform calculations in when there are 
+                        multiple calculations to be done in the same line.</p>
+                    <p>For example:</p>
+
+                    <div class="codeBox">
+                        totalCost = 30 * adultTickets + 15 * childTickets
+                    </div>
+
+                    <p>This code will calculate the total cost of some tickets, assuming that the
+                    adult tickets cost £30 and the children's tickets cost £15. The multiplications
+                    will performed here first, before the addition, multiplying the number of adults by
+                    30 and the number of children by 15 before adding those two multiplied values
+                    together.</p>
+
+                    <p>The code window below shows a program used to calculate a vehicle's 
+                        acceleration.  Try removing the brackets to see how the answer changes.</p>
+                    <iframe src="https://trinket.io/embed/python/c4363ea14c35" class="trinket"  
+                        allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

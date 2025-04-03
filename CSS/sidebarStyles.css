@@ -47,6 +47,40 @@
     transform: rotate(90deg);
 }
 
+
+@media (max-width: 768px) {
+    #sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        transform: translateY(-100%);
+        transition: transform 0.3s ease-in-out;
+        overflow: hidden; /* Prevent text pushing down */
+    }
+
+    #sidebar.active {
+        transform: translateY(0);
+    }
+
+    .content {
+        margin-left: 0;
+        margin-top: 60px; /* Adjust based on sidebar height */
+    }
+
+    .toggle-btn {
+        display: block;
+        background-color: #333;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        cursor: pointer;
+    }
+}
+
+.toggle-btn {
+    display: none;
+}
+
 /* Highlight child items in an active submenu */
 /*.sidebar-menu li.active .submenu li a {
     background-color: #a8a8a8; /* Gray highlight for level 2 items */
@@ -98,6 +132,7 @@ sidebar-menu .submenu .submenu li a:hover {
     transform: rotate(90deg);
 }
 
+/*
 @media (max-width: 768px) {
     #sidebar {
         transform: translateX(-320px);

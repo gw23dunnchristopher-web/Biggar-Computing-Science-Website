@@ -439,3 +439,10 @@ ol li {
 }
 
 .borderless table, .borderless th, .borderless td {border:none; background-color:transparent;}
+
+.trinket {
+    width:75%;
+    height:400px;
+    margin:20px auto;
+    display:block;
+}

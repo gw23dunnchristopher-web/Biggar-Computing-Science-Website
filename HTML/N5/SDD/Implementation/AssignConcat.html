@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Assignment and Concatenation</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Assignment and Concatenation</h1></div>
+                <div class="contentContainer">
+                    <h2>Assignment</h2>
+                    <p>One of the programming constructs that you must be aware of in N5 is the assignment
+                        of a value to a variable.  This is where you store a value in a variable so that
+                        it can be used later in the program.</p>
+                    <p>The assignment operator is the <strong>=</strong> symbol.</p>
+                    <p>Here are some examples of assignment:</p>
+
+                    <div class="codeBox">
+                        <p>age = 10</p>
+                    </div>
+                    
+                    <p>The above code assigns the integer 10 to a variable called 'age'.</p>
+                    
+                    <div class="codeBox">
+                        <p>name = "Bob"</p>
+                    </div>
+
+                    <p>This code assigns the string 'Bob' to the variable name.  Note that when using a
+                        string, you must surround the string with speech marks.  This is to differentiate
+                        it from other data types, since strings can use numbers, letters or symbols.</p>
+                    
+                    <div class="codeBox">
+                        <p>height = 1.8</p>
+                    </div>
+
+                    <p>This code assigns the float (real number) 1.8 to the variable height.</p>
+
+                    <div class="codeBox">
+                        <p>found = False</p>
+                    </div>
+
+                    <p>The code shown here assigns the Boolean value 'False' to a variable called 'found'.
+                        As this is a Boolean value, it means that the variable can be set either to True
+                        or False, indicating whether whatever you are looking for has been found or not.
+                    </p>
+                    
+                    <h2>The input() function</h2>
+                    <p>This function pauses the program and waits for the user to type something in.
+                        When using the input function, you must remember two things:</p>
+                    <ul>
+                        <li>You must assign the input() function to a variable. If you don't then
+                            whatever you enter will be lost.</li>
+                        <li>The input() function automatically converts whatever you enter into a string.
+                            If you want to enter a number, then you must use typecasting (int() or 
+                            float()) together with the input() function.</li>
+                    </ul>
+                    <p>Here are a couple of examples of using the input() function:</p>
+
+                    <div class="codeBox">
+                        <p>name = input()</p>
+                    </div>
+                    
+                    <p>This code assigns whatever the user enters to the variable 'name'.  The name
+                        entered will be stored as a string. </p>
+
+                    <div class="codeBox">
+                        <p>age = int(input())</p>
+                    </div>
+
+                    <p>Here we have entered a number.  The input function has been placed inside the
+                         int() type casting function.  The input function will take in whatever the age
+                        entered as a string ("10")# and then the int() function will convert it to an
+                        integer (10).</p>
+
+                    <div class="codeBox">
+                        <p>height = float(input())</p>
+                    </div>
+
+                    <p>A similar thing has occured here, only this time the string taken in by the
+                    input() function will be converted into a real number with a decimal point.</p>
+
+                    <p>One more point to note about the input() function is that any string placed in
+                        between the brackets will be displayed as a question for the user when the 
+                        program is waiting for them to enter something:</p>
+
+                    <div class="codeBox">
+                        <p>name = input("Please enter your name: ")</p>
+                    </div>
+                    <p>This code will display the string "Please enter your name: " and then wait for the
+                        user to enter thier name. The name entered will be stored in the variable 'name'.
+                    </p>
+                    <p>You can use this or just use the print() function to display the question.</p>
+                    
+                    <h2>The print() function</h2>
+                    <p>The 'print()' function is used to display a message on the screen.  The message to
+                        be display goes in between the brackets. It should be noted that it cannot display
+                        multiple datatypes unless they are separated by commas.</p>
+                    
+                    <p>Here are a few examples:</p>
+                    
+                    <div class="codeBox">
+                        <p>print("Hello World")</p>
+                    </div>
+                    
+                    <p>This code will display the message 'Hello World' on the screen. As the message is a
+                        string, it is surrounded by speech marks.</p>
+                    
+                    <div class="codeBox">
+                        <p>print(10)</p>
+                    </div>
+                    
+                    <p>This code will display the integer 10 on the screen.  As it is an integer, it does
+                        not need speech marks.</p>
+                    
+                    <div class="codeBox">
+                        <p>print(True)</p>
+                    </div>
+
+                    <p>This will print the word True on the screen, it does need speech marks as it is a
+                        Boolean value.</p>
+
+                    <h2>Concatenation</h2>
+                    <p>Concatenation is the process of joining two strings together.  This is done by 
+                        using either the + or the , symbol.</p> 
+                    <p> The + symbol only works with strings, so any integers or floats used in the 
+                        message must be converted to strings using the str() function.  Using + does not
+                        automatically create a space between the two strings.</p>
+                    <p>Using a comma instead of + will automatically create a space between the two
+                        strings. Additionally, you can also concatenate different datatypes without
+                        having to convert them to strings.</p>
+                    <p>We typically use concatenation to insert values stored in variables into a
+                        message. Look at the code below:</p>
+
+                    <div class="codeBox">
+                        <p>name="Bob"</p>
+                        <p>print("Your name " + name + ".")</p>
+                    </div>
+
+                    <p>This code will display the message 'Your name Bob.' The name "Bob" has been stored
+                        in the variable 'name', and so using 'name' here will insert the value stored in
+                        'name' into the message.</p>
+
+                    <div class="codeBox">
+                        <p>name = "Bob"</p>
+                        <p>print("Your name is", name, ".")"</p>
+                    </div>
+
+                    <p>This code uses the commas instead.  It will display the message "Your name is Bob
+                        .".  There is an additional space before the full stop because the comma 
+                        automatically creates one.</p>
+                    
+                    <div class="codeBox">
+                        <p>age = 10</p>
+                        <p>print("You are " + str(age) + " years old")</p>
+                    </div>
+                    <p>This code will display the message 'You are 10 years old' on the screen. The
+                        number 10 has been stored in the age variable, so it can be used in the message.
+                        The str() function has been used to convert the integer 10 into a string.</p>
+
+                    <div class="codeBox">
+                        <p>age = 10</p>
+                        <p>print("You are", age, "years old")</p>
+                    </div>
+
+                    <p>This is the same code using commas, note that there is no need to put the spaces
+                        in yourself, or to convert age to a string using str().</p>
+
+                    <p>The input() function can be used to get the user to enter information to be used 
+                        later, for example in a message.</p>
+                    
+                    <div class="codeBox">
+                        <p>print("Enter your age:")</p>
+                        <p>age = int(input())</p>
+                        <p>print("You are " + str(age) + " years old.")</p>
+                    </div>
+
+                    <p>This code will:</p>
+                    <ul>
+                        <li>display the message 'Enter your age:' on the screen.</li>
+                        <li>get the user to enter thier age.</li>
+                        <li>convert the string entered into an integer.</li>
+                        <li>display the message "You are (age) years old." on the screen. With (age)
+                            replaced by whatever number the user entered.</li>
+                    </ul>
+
+                    <p>You can try out the program in the code window below.  Feel free to copy and paste
+                        the code above to try it or try your own commands.</p>
+
+                    <iframe src="https://trinket.io/embed/python/a1c106135147" 
+                        class = "trinket" allowfullscreen></iframe>
+                    
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+     </div>
+    </body>
+</html>
