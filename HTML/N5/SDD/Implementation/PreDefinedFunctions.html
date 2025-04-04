@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - Data Types</title>
+        <title>N5 Computing Science - Pre-defined Functions</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
@@ -16,12 +16,118 @@
             <img src="/Images/Header/banner.png" />
         </header>
         <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Data Types</h1></div>
+                <div class="contentHeading"><h1>Pre-defined Functions</h1></div>
                 <div class="contentContainer">
-                   
+                   <h2>What is a Pre-defined Function?</h2>
+                    <p><b>Functions</b> are blocks of code that performs specific tasks.  The block of code is given a name and can be called and used elsewhere in the program.  For example, print() and input() are functions.  
+                        When we use these, the progam looks at the library where the code for the function is located.  We can make our own functions, and we will at Higher level, but at N5 we will make use of some of the pre-
+                        defined functions in Python.</p>  
+                    
+                    <p><b>Arguments</b> are the values that are passed to the function.  For example, when we use the print() function, we can pass it a string, or a number, or a variable, which will be displayed to the user.  When we use
+                        the input() function, we can pass it a question, which will be displayed to the pass it a question, which will be displayed to the user.</p>
+                    
+                    <p>Pre-defined functions are also known as <b>built-in</b> functions because they come with the programming language, you don't have to create them yourself.  They tend to perform common tasks, such as
+                        displaying text in the case of print() and receiving input from the user in the case of input().</p>
+                    
+                    <p>In N5, we will learn to use the following pre-defined functions:</p>
+                    <ul>
+                        <li><b>Round</b> - Rounds a number to a specified decimal place.</li>
+                        <li><b>Random</b> - Generates a random number.</li>
+                        <li><b>Length</b> - Counts the number of characters in a string or elements in an array and returns that as a number.</li>
+                    </ul>
+
+                    <h2>Round</h2>
+                    <p>The round() function rounds a number to a specified decimal place. It takes two arguments, the number to be rounded and the number of decimal places to round to, separated by a comma.</p>
+                    <p>For example, if you typed <span class="codeText">round(3.14525062, 2)</span> it would return 3.15.  This value will have to be stored in a variable or displayed using the print() function.</p>
+                    <p>The code below adds the marks for an English test, a Maths test and a Computing test and divides it by 3 to get the average.  The average is then rounded to 2 decimal places.</p>
+
+                    <div class="codeBox">
+                        <p>print("Enter your English mark:")</p>
+                        <p>english = int(input())</p>
+                        <p>print("Enter your Maths mark:")</p>
+                        <p>maths = int(input())</p>
+                        <p>print("Enter your Computing mark:")</p>
+                        <p>computing = int(input())</p>
+                        <br>
+                        <p>average = (english + maths + computing) / 3</p>
+                        <p>print("Your average mark is " + str(<b>round(average, 2)</b>))</p>
+                    </div>
+                    <p>You can try this program in the window below, try changing the 2 to change the number of decimal points shown.</p>
+
+                    <iframe src="https://trinket.io/embed/python/330960478ed9" class="trinket" allowfullscreen></iframe>
+
+                    <h2>Random</h2>
+                    <p>There are several different functions that generate a random number in Python.  To use any of them you will need to import the 'random' library, a module containing code for the random number generating
+                        functions.  To import the entire random library, you just type <span class="codeText">import random</span> at the beginning of the program.</p>
+
+                    <p>Importing the entire library will mean specifying the library whenever you use any of its functions, like this: <span class="codeText">random.randint()</span></p>
+
+                    <p>For N5, however, we just need to generate an integer, so we might as well import the randint function from the random library.  We can do that by placing: <span class="codeText">from random import 
+                        randint</span></p>
+
+                    <p>This will allow us to just called the randint() function directly - <span class="codeText">randint()</span></p>
+
+                    <p>The <span class="codeText">randint()</span> function takes 2 arguments, the lowest number in the range of numbers it can choose from, and the highest number.  For example, typing 
+                        <span class="codeText">randint(1,10)</span> would return a random integer between 1 and 10.</p>
+                    
+                    <p>The code below generates two random numbers between 1 and 6 and then adds them together.</p>
+                    
+                    <div class="codeBox">
+                        <p>from random import randint</p>
+                        <br>
+                        <p>dice1 = randint(1,6)</p>
+                        <p>dice2 = randint(1,6)</p>
+                        <br>
+                        <p>total = dice1 + dice2</p>
+                        <br>
+                        <p>print("You rolled a " + str(dice1) + " and a " + str(dice2) + " for a total of " + str(total))</p>
+                    </div>
+                     <p>You can try this program in the code window below, try changing the numbers passed into randint to change the range of the random number.</p>
+
+                    <iframe src="https://trinket.io/embed/python/1b7944d7855c" class="trinket" allowfullscreen></iframe>
+
+                    <h2>Length</h2>
+                    <p>The length function returns the number of characters in a string or the number of elements in an array.  This is useful for checking the length of a password, or using a fixed loop to repeat a block of code
+                        a number of times equal to the number of elements in an array.</p>
+                    <p>Python uses the <span class="codeText">len()</span> for this.  For example, if you typed <span class="codeText">len("Hello")</span> it would return 5.</p>
+                    
+                    <p>The code below asks the user to enter a password, and checks that it is at least 8 characters long.</p>
+                    
+                    <div class="codeBox">
+                        <p>print("Enter a password:")</p>
+                        <p>password = input()</p>
+                        <br>
+                        <p>passLength = len(password)</p>
+                        <br>
+                        <p>while len(password) < 8:</p>
+                        <p>&emsp;&emsp;print("Your password must be at least 8 characters.")</p>
+                        <p>&emsp;&emsp;print("Please try again:")</p>
+                        <p>&emsp;&emsp;password = input()</p>
+                        <br>
+                        <p>print("Your password is " + str(passLength) + " characters long.")</p>
+                    </div>    
+                    
+                    <p>You can try this program in the code window below:</p>
+
+                    <iframe src="https://trinket.io/embed/python/9cd7df42908b" class="trinket" allowfullscreen></iframe>
+
+                    <p>As the len() function can also count the number of elements in an array, we will also look at an example of that.  The code below contains an array of names, a fixed loop is used to display the names.  The 
+                        loop will run a number of times equal to the number of elements in the array.</p>
+
+                    <div class="codeBox">
+                        <p>names = ["Bob","Frank","Emily","Kate","Ben","Sam"]</p>
+                        <br>
+                        <p>for x in range(len(names)):</p>
+                        <p>&emsp;&emsp;print(names[x])</p>
+                    </div>
+
+                    <p>This is more useful when you don't know the exact number of elements in the array.  However, you can try adding more names to the program below to see how robust it is:</p>
+                    <iframe src="https://trinket.io/embed/python/b092b8b71308" class="trinket" allowfullscreen></iframe>
+                    
                 </div>
             </div>
         </div>   

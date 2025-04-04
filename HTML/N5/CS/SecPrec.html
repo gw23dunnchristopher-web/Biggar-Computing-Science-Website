@@ -16,6 +16,7 @@
             <img src="../../../Images/Header/banner.png" />
         </header>
         <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
@@ -23,7 +24,7 @@
                 <div class="contentContainer">
                     <p>At the N5 level, when looking at security precautions for computers we need to be aware of two things - firewalls and encryption.</p>
                     <h2>Firewalls</h2>
-                    <img style="max-width:400px" src="/Images/N5/Security/DataPacket.jpg" alt="Breakdown of a data packet." class="rImg">
+                    <img width="100%" style="display:block; margin:auto; max-width:400px" src="/Images/N5/Security/DataPacket.jpg" alt="Breakdown of a data packet." class="rImg">
                     <p>Before we talk about firewalls, we must be aware of how data is sent across a network.  When large amounts of data need to be sent (such as a file or a stream), the data is broken up into smaller, manageable pieces called packets. These packets contain not only the actual data but also 'metadata', such as the destination address, the source address, and information to help ensure the data is delivered correctly.</p>
                     <p>The firewall is a device that is placed in front of the network and is responsible for inspecting these packets.  It inspects both incoming and outgoing packets.</p>
                     <p>This allows the firewall to:</p>
@@ -34,7 +35,7 @@
                         <li>Allow traffic from common programs such as email or web browsers.</li>
                         <li>Prevent access to certain websites or services to prevent employees from accessing non-work resources.</li>
                     </ul>
-                    <iframe style="display:block; margin:auto;" width="560" height="315" src="https://www.youtube.com/embed/5geL5yHpa2Q?si=kXJdbv7m8rXj4rHl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    <iframe style="display:block; margin:auto; max-width:100%;" width="560" height="315" src="https://www.youtube.com/embed/5geL5yHpa2Q?si=kXJdbv7m8rXj4rHl" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     <h2>Encryption</h2>
                     <p>We send sensitive information out over the internet all the time.  Whenever we purchase a product on the internet, we have to send out bank details to the company we are buying it from.  Whenever we send a private message, that message has to be sent across the network to the person receiving it.  Naturally, we don't want hackers to intercept this data and gain access to it, so the data is changed into a code, making it unreadable to anyone but the intended recipient. This process is known as encryption.</p>
                     <ol>
@@ -42,7 +43,7 @@
                         <li>The encoded data is then transmitted across the network.</li>
                         <li>A private decryption key (which is never shared) is used by the recipient's computer to decode the data.</li>
                     </ol>
-                    <img style="max-width:1024px" src="/Images/N5/Security/Encryption.jpg" alt="Breakdown of a data packet." class="cImg">
+                    <img width="100%" style="display:block; margin:auto; max-width:1024px" src="/Images/N5/Security/Encryption.jpg" alt="Breakdown of a data packet." class="cImg">
                 </div>
             </div>
         </div>   

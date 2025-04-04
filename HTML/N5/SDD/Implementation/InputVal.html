@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Input Validation</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar'); countDown('2025-04-25');>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Input Validation</h1></div>
+                <div class="contentContainer">
+                   <h2>What is Input Validation?</h2>
+                    <p>When you ask someone to enter a value into your program, you want to make sure that they enter an acceptable value.  For example, if we were looking for them to enter a number, and they type in a name
+                        instead, then our program won't work.  Similarly, if we ask them to enter an 8-digit password and they only type in five characters, then we can't accept that.  Input validation is used to ensure that the
+                        user enters the correct data by checking what they have enter and, if it wrong, asking them to enter the data again.</p>
+                    
+                    <p>We used a WHILE loop for this, because we want them to be asked to re-enter the data over and over, no matter how many times they get it wrong.</p>
+
+                    <p>Typical <b>pseudocode</b> for input validation looks like this.</p>
+
+                    <div class="codeBox">
+                        <table>
+                            <tr>
+                                <td>1.</td>
+                                <td>Ask the user to enter the data.</td>
+                            </tr>
+                            <tr>
+                                <td>2.</td>
+                                <td>WHILE the data does not meet your criteria:</td>
+                            </tr>
+                            <tr>
+                                <td>3.</td>
+                                <td style="padding-left:40px">Display an error message.</td>
+                            </tr>
+                            <tr>
+                                <td>4.</td>
+                                <td style="padding-left:40px">Ask the user to enter the data again.</td>
+                            </tr>
+                            <tr>
+                                <td>5.</td>
+                                <td>End WHILE Loop</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <h2>Input Validation Examples</h2>
+                    <p>Here are two examples showing input validation:</p>
+                    <p>The first example asks the user to enter a number between 1 and 20, and doesn't let them enter any number below 1 or above 20.</p>
+
+                    <div class="codeBox">
+                        <p>print("Enter a number between 1 and 20")</p>
+                        <p>number = int(input())</p>
+                        <br>
+                        <p>while number < 1 or number > 20:</p>
+                        <p style="padding-left:40px">print("Error, please enter a number between 1 and 20")</p>
+                        <p style="padding-left:40px">number = int(input())</p>
+                        <br>
+                        <p>print("Thank you, you entered " + str(number))"</p>
+                    </div>
+
+                    <p>The second example asks the user to enter "Y"(Yes) or "N"(No) and doesn't let them enter any other data.</p>
+                    
+                    <div class="codeBox">
+                        <p>print("Enter Y or N:")</p>
+                        <p>answer = input()</p>
+                        <br>
+                        <p>while answer != "Y" and answer != "N":</p>
+                        <p style="padding-left:40px">print("Error, please enter Y or N")</p>
+                        <p style="padding-left:40px">answer = input()</p>
+                        <br>
+                        <p>print("Thank you, you entered " + answer)</p>
+                    </div>
+
+                    <p>You can try the second example in the code window below:</p>
+
+                    <iframe src="https://trinket.io/embed/python/5834cc7243e7" class="trinket" allowfullscreen></iframe>
+
+                    <h2>Past Paper Question - 2022 Q9 (b) (i)</h2>
+                    <p><i>The question shown here asks for the user to use a design technique.  I have chosen to use pseudocode.  I have also provided the answer using the python programming language, even though that was not
+                        required in the original question.</i></p>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2">(b)(i)</th>
+                            <td>
+                                <p>The user can search for properties priced from £50,000 to £600,000.</p>    
+                                <p>Using a design technique of your choice, design an efficient solution to check that the price entered is valid.</p>
+                            </td>
+                            <td rowspan="2"><b>4</b></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <table class="borderless hiddenElement answer1">
+                                    <tr><td>1.</td><td>Get the user to enter the property price.</td></tr>
+                                    <tr><td>2.</td><td>WHILE the price is less than £50,000 or greater than £600,000:</td></tr>
+                                    <tr><td>3.</td><td style="padding-left:40px">Display an error message that says "The price must be between £50,000 and £600,000".</td></tr>
+                                    <tr><td>4.</td><td style="padding-left:40px">Ask the user to enter the price of the property again.</td></tr>
+                                    <tr><td>5.</td><td>End WHILE Loop</td></tr>
+                                </table>
+                                <ul class="hiddenElement answer1">
+                                    <li><b>1 mark</b> - use of a conditional loop</li>
+                                    <li><b>1 mark</b> - correct loop condition for valid data (data cannot be greater than 600,000 or less than 50,000)</li>
+                                    <li><b>1 mark</b> - user asked to input price inside loop</li>
+                                    <li><b>1 mark</b> - error message shown inside loop</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <br>
+                    <p class="hiddenElement answer1">This is how the answer would look in Python if you were required to write using a programming language:</p>
+                    <div class="codeBox hiddenElement answer1">
+                        <p>print("Enter the price of the property (Between 50000 and 60000):")</p>
+                        <p>propertyPrice = int(input())</p>
+                        <br>
+                        <p>while propertyPrice < 50000 or propertyPrice > 600000:</p>
+                        <p style="padding-left:40px">print("The prince must be between 50000 and 600000.")</p>
+                        <p style="padding-left:40px">print("Enter the price of the property (Between 50000 and 60000):")</p>
+                        <p style="padding-left:40px">propertyPrice = int(input())</p>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

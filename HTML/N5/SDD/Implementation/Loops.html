@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - Data Types</title>
+        <title>N5 Computing Science - Loops</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
@@ -16,12 +16,113 @@
             <img src="/Images/Header/banner.png" />
         </header>
         <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Data Types</h1></div>
+                <div class="contentHeading"><h1>Loops</h1></div>
                 <div class="contentContainer">
-                   
+                   <p>In programming, a loop is a control structure that allows a set of instructions to be executed repeatedly based on a 
+                       condition or a specific number of times. Loops are used when you need to perform the same task multiple times without
+                       writing the same code over and over.</p>
+
+                    <ul>
+                        <li><b>Fixed Loop</b> - A loop that repeats a specific number of times.</li>
+                        <li><b>Conditional Loop</b> - A loop that repeats based on a condition (e.g. it repeats either while a condition is 
+                            true or until a condition is met.</li>
+                    </ul>
+
+                    <h2>Fixed Loops</h2>
+                    <p>In Python a fixed loop is also known as a FOR loop.  Python uses the range() function to determine the number of times
+                        that the loop repeats - range(startValue, endValue - 1)</p>
+                    
+                    <table>
+                         <tr>
+                             <th colspan="2">Fixed (FOR) Loop Examples</th>
+                         </tr>   
+                        <tr>
+                            <td style="font-family:'courier new'; width:250px;">for x in range(0,3):</td>
+                            <td>This code will repeat 3 times, starting at 0 and ending at 2 (0, 1, 2).</td>
+                        </tr>
+                        <tr>
+                            <td style="font-family:'courier new';">for x in range(1,3):</td>
+                            <td>This code will repeat 2 times, starting at 1 and ending at 2 (1, 2).</td>
+                        </tr>
+                        <tr>
+                            <td style="font-family:'courier new';">for x in range(4):</td>
+                            <td>If a starting value is not specified, then the program will assume that it is 0.  This code will repeat 4
+                                times (0, 1, 2, 3)</td>
+                        </tr>
+                        <tr>
+                            <td style="font-family:'courier new';">for x in range(days):</td>
+                            <td>This program will use whatever value is in the variable ‘days’ to determine the number of times the loop
+                                repeats.</td>
+                        </tr>
+                    </table>
+
+                    <ul>
+                        <li>The ‘x’ value in this code is known as the ‘<b>iteration number</b>’.</li>
+                        <li>It does not need to be x, any variable name will do</li>
+                        <li>When the loop executes for the first time, the iteration number will be set to the starting value in the range
+                            function.</li>
+                        <li>Each time the loop runs, the iteration number will be increased by 1.</li>
+                        <li>The iteration number can be used inside the loop as a variable (displayed using the print function) to show how
+                            many times the loop has executed.  This can also be useful to number the questions being asked in the loop.</li>
+                    </ul>
+
+                    <p>The code window below shows a program that uses a fixed loop.  Note that to show which code is part of the loop, that
+                        code is indented beneath it.  The purpose of this program is to display all the number in a times table entered by 
+                        the user.</p>
+
+                    <iframe src="https://trinket.io/embed/python/5c190df1bab9" class="trinket" allowfullscreen></iframe>
+                    
+                    <h2>Conditional Loops</h2>
+                    <p>In Python a Conditional Loop is known as a WHILE loop.  In a WHILE loop, the loop will continue to repeat the cod
+                        inside it while a specificed condition is true. For more information on the kind of conditions you can use, please 
+                        refer to the <a href="/HTML/N5/SDD/Implementation/Selection.html">Selection</a> section of this website.</p>
+
+                    <table>
+                         <tr>
+                             <th colspan="2">Conditional (WHILE) Loop Examples</th>
+                        </tr>
+                        <tr>
+                            <td style="font-family:'courier new';width:650px;">
+                                <p>while password != "button20":</p>
+                                <p>&emsp;&emsp;print("Password Incorrect!")</p>
+                                <p>&emsp;&emsp;print("Please enter password:")</p>
+                                <p>&emsp;&emsp;password = input()</p>
+                            </td>
+                            <td>This while loop continues to ask the user for their password until the user types "Button20"</td>
+                        </tr>
+                        <tr>
+                            <td style="font-family:'courier new';">
+                                <p>counter = 0</p>
+                                <p>while counter < 10:</p>
+                                <p>&emsp;&emsp;print(counter)</p>
+                                <p>&emsp;&emsp;counter = counter + 1</p>
+                            </td>
+                            <td>This while loop emulates a fixed loop.  The counter will increase by 1 ever time the code in the loop executes.  The program will only exit the
+                                loop when the counter is 11 or more.</td>
+                        </tr>
+                        <tr>
+                            <td style="font-family:'courier new';">
+                                <p>while number < 0 or number > 100:</p>
+                                <p>&emsp;&emsp;print("Please enter a number between 0 and 100!")</p>
+                                <p>&emsp;&emsp;number = int(input())</p>
+                            </td>
+                            <td>This loop will continue to ask the user to enter a number until they enter a number that is between 0 and 100.</td>
+                        </tr>
+                    </table>
+                        <ul>
+                            <li>These loops are used when it is not known how many times the loop will be executed each time that the program is run</li>
+                            <li>The code in the loop is executed while the condition in the while loop is true</li>
+                            <li>The condition is at the start of the loop</li>
+                            <li>The loop may <b>not be executed at all</b> - if the condition is false to start with</li>
+                            <li>The loop may be executed <b>once or many times</b> – while the condition is true</li>
+                        </ul>
+
+                        <p>The code window below shows an example of a conditional (WHILE) loop in Python:</p>
+                        <iframe src="https://trinket.io/embed/python/0fb2bb0523c1" class="trinket" allowfullscreen></iframe>
                 </div>
             </div>
         </div>   

@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - Data Types</title>
+        <title>N5 Computing Science - Selection</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
@@ -16,12 +16,198 @@
             <img src="/Images/Header/banner.png" />
         </header>
         <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Data Types</h1></div>
+                <div class="contentHeading"><h1>Selection</h1></div>
                 <div class="contentContainer">
-                   
+                    <p>A program, or algorithm, is a series of instructions.  The
+                        program will go through these instructions top to bottom, step
+                        by step.  Selection is when the program has reached a point
+                        where there is one or more options available to it, and it must
+                        make a decision on which set of commands to execute.</p>
+
+                    <h2>Boolean Operators</h2>
+                    <p>In order to make a decision, a program has to have a rule (or 
+                        criteria) that tells it what decision to make.  It does this by 
+                        comparing one value to another, using comparison operators.</p>
+                    <p>Boolean operators are used to compare two values.  The result
+                        of the comparison is either true or false.</p>
+                    <p>Here are a list of Boolean operators used in Python and thier 
+                        meaning.</p>
+                    <table style="max-width:500px; text-align:center; margin:20px auto
+                        20px;">
+                        <tr>
+                            <th>Operator</th>
+                            <th>Meaning</th>
+                        </tr>
+                        <tr>
+                            <td>==</td>
+                            <td>Equal to</td>
+                        </tr>
+                        <tr>
+                            <td>!=</td>
+                            <td>Not equal to</td>
+                        </tr>
+                        <tr>
+                            <td>&gt;</td>
+                            <td>Greater than</td>
+                        </tr>
+                        <tr>
+                            <td>&lt;</td>
+                            <td>Less than</td>
+                        </tr>
+                        <tr>
+                            <td>&gt;=</td>
+                            <td>Greater than or equal to</td>
+                        </tr>
+                        <tr>
+                            <td>&lt;=</td>
+                            <td>Less than or equal to</td>
+                        </tr>
+                    </table>
+                    <p>Note: Python uses '==' when comparing two values, rather than
+                        '='.  This is because '=' is used to assign a value to a
+                        variable.</p>
+                    <h2>Simple Selection</h2>
+                    <p>Simple selection is when the program has additional
+                        code to run if a certain condition is true.</p>
+                    <p>For example, a program that is calculating the total cost of a
+                        meal may display that the customer will receive a discount, but
+                        only <i>if</i> the cost of the meal is over £80.  The program
+                        would have to look at the number stored in the mealCost
+                        variable, and if that number is over 80, it would display the
+                        additional message about the discount.</p>
+                    
+                    <p>The program would look something like this:</p>
+                    
+                    <div class="codeBox">
+                        <p>print("Enter the cost of the meal:")</p>
+                        <p>mealCost = float(input())</p>
+                        <br>
+                        <p>if mealCost > 80:</p>
+                        <p>&emsp;&emsp;print("You receive a 10% discount on your next
+                            meal!")</p>
+                        <br>
+                        <p>print("The cost of your meal is £" + str(mealCost))</p>
+                    </div>
+                    
+                    <p>This is a simple example, but this program would only display the
+                        message about the discount if the mealCost that was typed in was
+                        over 80. Note that you can tell which part of the code is inside
+                        the if statement because it is <b>indented</b> (moved 4 spaces
+                        from the edge).  You can try the example yourself in the code
+                        window below.</p>
+
+                    <iframe src="https://trinket.io/embed/python/5a0b74c4bede"
+                        class="trinket" allowfullscreen></iframe>
+                    
+                    <h3>Else Statement</h3>
+                    
+                    <p>The program can also be told what to do if the comparison is
+                        <b>not</b> true.  We can add an 'else:' statement onto the end
+                        for this. The code below is similar to the first set of code, 
+                        but it will also tell the user if they have not spent enough to
+                        receive a discount.</p>
+
+                    <div class="codeBox">
+                        <p>print("Enter the cost of the meal:")</p>
+                        <p>mealCost = float(input())</p>
+                        <br>
+                        <p>if mealCost > 80:</p>
+                        <p>&emsp;&emsp;print("You receive a 10% discount on your next
+                            meal!")</p>
+                        <p>else:</p>
+                        <p>&emsp;&emsp;print("Sorry, you will not receive a discount
+                            this time.")</p>
+                        <br>
+                        <p>print("The cost of your meal is £" + str(mealCost))</p>
+                    </div>
+
+                    <p>You can try this yourself in the code window below:</p>
+
+                    <iframe src="https://trinket.io/embed/python/f4897ed5f35d"
+                        class="trinket" allowfullscreen></iframe>
+                    
+                    <h3>Elif Statement</h3>
+                    <p>It is also possible to add additional conditions.  In our
+                        example, the customer would receive a 10% discount on their 
+                        next purchase if they spend £80, but maybe they could receive a
+                        smaller discount (5%) by spending over £50, and still nothing
+                        if they spent less than that.</p>
+
+                    <p>To do this, we would use 'elif' (else if) to add more conditions.
+                    </p>
+                    
+                    <div class="codeBox">
+                        <p>print("Enter the cost of the meal:")</p>
+                        <p>mealCost = float(input())</p>
+                        <br>
+                        <p>if mealCost > 80:</p>
+                        <p>&emsp;&emsp;print("You receive a 10% discount on your next
+                        meal!")</p>
+                        <p>elif mealCost > 50:</p>
+                        <p>&emsp;&emsp;print("You receive a 5% discount on your next
+                        meal!")</p>
+                        <p>else:</p>
+                        <p>&emsp;&emsp;print("Sorry, you will not receive a discount
+                                this time.")</p>
+                        <br>
+                        <p>print("The cost of your meal is £" + str(mealCost))</p>
+                    </div>
+
+                    <p>While it is possible to do this with multiple elif statements
+                    rather than using elif, it is more efficient to use elif.  This is
+                    because the program will stop checking the conditions on the if
+                    statement once if finds a criteria that is met, rather than                             always having to check all of them.</p>
+                    
+                    <p>You can try this code in the window below:</p>
+                    <iframe src="https://trinket.io/embed/python/13cf4f3daf00"
+                        class="trinket" allowfullscreen></iframe>
+                    
+                    <h2>Complex Selection and Logical Operators</h2>
+                    <p>A complex conditional statment has more than one condition. For
+                        example:</p>
+                    <ul>
+                        <li class="codeText">if age >= 16 and town == "Biggar":</li>
+                        <li class="codeText">if score < 0 or score > 0:</li>
+                    </ul>
+
+                    <p>Remember that a conditional statement like this will only run
+                        the code inside them if the statement is True. In the first
+                        example, with age and town, both statements would have to be
+                        True for the over statement to resolve as True.  In the case of
+                        the second example, either of the statements could be True for
+                        the overall statement to resolve as True.</p>
+
+                    <p>This is done using Logical Operators - AND, OR, NOT.</p>
+
+                    <table  style="max-width:650px; margin:20px auto
+                        20px;">
+                        <tr>
+                            <th style="text-align:center;">AND</th>
+                            <td>Both conditions must be true for the statement to be
+                                true.</td>
+                        </tr>
+                        <tr>
+                            <th style="text-align:center;">OR</th>
+                            <td>Only one condition must be true for the statement to be
+                                true.</td>
+                        </tr>
+                        <tr>
+                            <th style="text-align:center;">NOT</th>
+                            <td>The condition must not be true for the statement to be
+                                true. For example, '<span class="codeText">if not(found
+                                    == True):</span>' (This means that the statement
+                                would be true if the found variable were set to False)
+                            </td>
+                        </tr>
+                    </table>
+                    <p>The code window below shows an example of a program that uses
+                        the AND logical operator.</p>
+                    <iframe src="https://trinket.io/embed/python/13cf4f3daf00"
+                        class="trinket" allowfullscreen></iframe>
                 </div>
             </div>
         </div>   
