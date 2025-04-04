@@ -4,7 +4,13 @@
         <meta charset="UTF-8">
         <title>N5 Computing Science - Home</title>
         <script src="/JavaScript/script.js"></script>
-        <script>setInterval(countdown('Apr 25, 2025 00:00:00'), 1000)</script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
