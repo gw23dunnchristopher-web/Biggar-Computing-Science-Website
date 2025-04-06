@@ -27,6 +27,7 @@ function loadSidebar(menuLoc, menuID) {
     if (sidebarCache) {
         document.getElementById(menuID).innerHTML = sidebarCache;
         attachMenuListeners();
+        setInterval(function() { countdown('2025-04-25'); }, 1000);
         return;
     }
 
@@ -35,6 +36,7 @@ function loadSidebar(menuLoc, menuID) {
         sidebarPromise.then(data => {
             document.getElementById(menuID).innerHTML = data;
             attachMenuListeners();
+            setInterval(function() { countdown('2025-04-25'); }, 1000);
         });
         return;
     }
@@ -43,6 +45,7 @@ function loadSidebar(menuLoc, menuID) {
     preloadSidebar(menuLoc).then(data => {
         document.getElementById(menuID).innerHTML = data;
         attachMenuListeners();
+        setInterval(function() { countdown('2025-04-25'); }, 1000);
     });
 }
 
