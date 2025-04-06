@@ -32,7 +32,7 @@ h2 {
 h3 {
     color:#2d4ba4;
     border-bottom:1px solid #091844;
-    font-size:25px;
+    font-size:20px;
     font-family:arial;
     padding-top:20px;
     margin-bottom:10px;
@@ -438,6 +438,11 @@ ol li {
     font-family:"Courier New", Courier, monospace;
 }
 
+.codebox p{
+    margin:0px;
+    padding:0px;
+}
+
 .codeBox table, .codeBox th, .codeBox td {
     border:none;
     padding:5px;
@@ -454,4 +459,12 @@ ol li {
     height:400px;
     margin:20px auto;
     display:block;
+}
+
+.sideBySide {
+    display:flex;
+    flex-direction:row;
+    align-content:center;
+    justify-content: center;
+    margin:20px auto;
 }

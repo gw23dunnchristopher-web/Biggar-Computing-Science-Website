@@ -165,25 +165,31 @@ sidebar-menu .submenu .submenu li a:hover {
     transform: rotate(90deg);
 }
 
-/*
-@media (max-width: 768px) {
-    #sidebar {
-        transform: translateX(-320px);
-        width: 100%;
-        max-width: 320px;
-        z-index: 1000;
-    }
-    
-    #sidebar.active {
-        transform: translateX(0);
-    }
-    
-    .sidebar-menu li a {
-        padding: 15px 10px;
-        font-size: 16px;
-    }
-    
-    .submenu li a {
-        padding: 12px 20px;
-    }
+#countdowntimer {
+    display:block;
+    margin: 0px auto 40px;
+    min-width:250px;
+    max-width:300px;
+    border:solid 2px #04034f;
+    background-color:white;
+    border-radius:10px;
+    padding:10px;
+    text-align:center;
+}
+
+#countdowntimer h1 {
+    color:black;
+    font-size:20px;
+    background-color:#a4c4fe;
+    border:none;
+    padding:10px;
+    font-family:Arial;
+}
+
+#countdowntimer p {
+    color:black;
+    font-size:25px;
+    border:none;
+    padding:10px;
+    font-family:Arial;
 }

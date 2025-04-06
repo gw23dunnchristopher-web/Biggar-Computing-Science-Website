@@ -22,7 +22,131 @@
                 <div id="mainHeading"><h1>National 5</h1></div>
                 <div class="contentHeading"><h1>Running Total (within Loop)</h1></div>
                 <div class="contentContainer">
-                   
+                   <h2>What is a running total?</h2>
+                    <p>Keeping a running total is a common task in programming. It is when you add up a series of numbers and keep a running total of the
+                        result. For example, if you want to increase a count by 1 every time a button is pressed, you can use a running total to keep a 
+                        running count of the number of times. </p>
+                    <p>To keep a running total in programming, we use a loop.</p>
+
+                    <h2>Running Total Examples</h2>
+                    <p>To keep a running total, you first have to tell the program what number you want to start with.  This usually involves setting the
+                        number contained in the variable storing your total to 0.  After that, Python has two ways to add to this total.</p>
+                    <ul>
+                        <li class="codeText">total = total + (number)</li>
+                        <li class="codeText">total += (number)</li>
+                    </ul>
+
+                    <p>In both cases here, number can be replaced with the value being added onto the total.  The pseudocode for keeping a running total
+                        would look something like this:</p>
+
+                    <div class="codeBox">
+                        <table>
+                            <tr>
+                                <td>1.</td><td>Set total to 0</td>
+                            </tr>
+                            <tr>
+                                <td>2.</td><td>Start fixed loop:</td>
+                            </tr>
+                            <tr>
+                                <td>3.</td><td style="padding-left:40px">Get number from user</td>
+                            </tr>
+                            <tr>
+                                <td>4.</td><td style="padding-left:40px">Add number to total</td>
+                            </tr>
+                            <tr>
+                                <td>5.</td><td>End fixed loop</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <h3>Example 1 - Keeping a total of numbers entered by the user</h3>
+                    <p>This example will keep a running total of the numbers entered by the user.  The program will keep asking the user for a number, 
+                        which it will then add to the total. It will loop 5 times. The program will then display the total at the end.</p>
+
+                            <div class="codeBox">
+                                <p>total = 0</p>
+                                <br>
+                                <p>for x in range(5):</p>
+                                <p style="padding: left 40px;">print("Enter a number:")</p>
+                                <p style="padding: left 40px;">number = int(input())</p>
+                                <p style="padding: left 40px;">total = total + number</p>
+                                <br>
+                                <p>print("The total is " + str(total))</p>
+                            </div>
+
+                    <p>You can try this program below:</p>
+
+                    <iframe src="https://trinket.io/embed/python/23b9c0f30b3a"class="trinket" allowfullscreen></iframe>
+
+                    <h3>Example 2 - Keeping count in a while loop</h3>
+                    <p>The following example will add 1 to a counter over and over until you type "Yes" when asked if you want to stop.  This time, the
+                        running total uses a conditional (while) loop instead of a fixed loop.</p>
+
+                            <div class="codeBox">
+                                <p>counter = 0</p>
+                                <p>stop = False</p>
+                                <br>
+                                <p>while stop == False:</p>
+                                <p style="padding: left 40px;">counter += 1</p>
+                                <p style="padding: left 40px;">print("The current count is " + str(counter))</p>
+                                <p style="padding: left 40px;">print("Do you want to stop?")</p>
+                                <p style="padding: left 40px;">answer = input()</p>
+                                <p style="padding: left 40px;">if answer == "Yes" or answer == "yes" or answer == "y":</p>
+                                <p style="padding: left 40px;">    stop = True</p>
+                                <br>
+                                <p style="padding: left 40px;">print("The counter is " + str(counter))</p>                               
+                            </div>
+
+                    <p>You can try this program below:</p>
+                            
+                    <iframe src="https://trinket.io/embed/python/7b69b6153969" class="trinket" allowfullscreen></iframe>
+
+                    <h2>Past Paper Question - 2023 Q8 (a)</h2>
+
+                    <p>A window replacement company employs a programmer to write a program that 
+                        calculates how much it will cost to fit triple glazed windows.</p>    
+                    <p>Small windows cost £299.99 and large windows cost £499.99 to replace</p>
+                    <p>The algorithm to calculate the cost is shown below</p>
+
+                    <table class="borderless">
+                        <tr><td>1.</td><td>Set totalCost to 0</td></tr>
+                        <tr><td>2.</td><td>Ask for number of rooms</td></tr>
+                        <tr><td>3.</td><td>Loop through number of rooms</td></tr>
+                        <tr><td>4.</td><td style="padding-left:40px;">Ask for number of small windows</td></tr>
+                        <tr><td>5.</td><td style="padding-left:40px;">Ask for number of large windows</td></tr>
+                        <tr><td>6.</td><td style="padding-left:40px;">Calculate and update totalCost</td></tr>
+                        <tr><td>7.</td><td>End loop</td></tr>
+                        <tr><td>8.</td><td>Display totalCost</td></tr>
+                    </table>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2">(a)</th>
+                            <td>
+                                <p>Step 6 in the algorithm calculates and updates the total cost</p>
+                                <p>Using a programming language of your choice, write the code for step 6</p>
+                            </td>
+                            <td rowspan="2"><b>4</b></td>
+                        </tr>
+                        <tr>
+                            <td>
+                               <div class="codeBox hiddenElement answer1">
+                                   <p>subTotal = (smallWindows * 299.99) + (largeWindows * 499.99)</p>
+                                   <p>totalCost += subTotal</p>
+                               </div>
+                                <ul class="hiddenElement answer1">
+                                    <li><b>1 mark</b> - calculation of small windows cost</li>
+                                    <li><b>1 mark</b> - calculation of large windows cost</li>
+                                    <li><b>1 mark</b> - running total updated </li>
+                                    <li><b>1 mark</b> - assignment to totalCost</li>
+                                </ul>
+                                <p class="hiddenElement answer1">There are several ways that you could code this, adding the cost of the windows directly
+                                    onto the total cost (<span class="codeText">totalCost+=(smallWindows*299.99) + (largeWindows*299.99)</span>) or using
+                                    two different variables to get the cost of the large windows and the small windows (<span class="codeText">totalCost =
+                                        totalCost + largeWindowsCost + smallWindowsCost</span>).  Any of those answers would also get you the 4 marks.</p>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
                 </div>
             </div>
         </div>   

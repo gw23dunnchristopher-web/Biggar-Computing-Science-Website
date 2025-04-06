@@ -22,7 +22,90 @@
                 <div id="mainHeading"><h1>National 5</h1></div>
                 <div class="contentHeading"><h1>Traversing a 1D Array</h1></div>
                 <div class="contentContainer">
-                   
+                    <h2>What does it mean?</h2>
+                   <p>Traversing a 1D array is a standard algorithm that uses a loop to either allow users to enter data into an array or check data that
+                       is in an array. This data can then be displayed or used for other purposes.  The pseudocode would look like this:</p>
+                    <div class="codeBox">
+                        <table>
+                            <tr><td>1.</td><td>Start fixed loop</td></tr>
+                            <tr><td>2.</td><td style="padding-left: 40px;">Get data from user and store in array in current iteration number index.</td></tr>
+                            <tr><td>3.</td><td>End fixed loop</td></tr>
+                        </table>
+                    </div>
+                    <h2>Traversing a 1D array Examples</h2>
+                    <p>The following example shows how to traverse a 1D array and use the contents of the array.</p>
+                    <h3>Example 1 - Enter marks into an array and display them</h3>
+                    <p>This example has the user enter 6 test marks into an array.  The program will then display them in a list.</p>
+                        <div class="codeBox">
+                            <p>marks = [0] * 6</p>
+                            <br>
+                            <p>for x in range(6):</p>
+                            <p style="padding-left: 40px;">print("Enter mark for test " + str(x+1) + ":")</p>
+                            <p style="padding-left: 40px;">marks[x] = int(input())</p>
+                            <br>
+                            <p>for x in range(6):</p>
+                            <p style="padding-left: 40px;">print("Test " + str(x+1) + " = " + str(marks[x]))</p>
+                        </div>
+                    
+                    <p>You can find the program below and try it yourself:</p>
+                    <iframe src="https://trinket.io/embed/python/da586500919f" class="trinket" allowfullscreen></iframe>
+
+                    <h3>Example 2 - Which Scores are 50 or more?</h3>
+                    <p>This example looks at an array containing scores, as it moves through the array it will count all the scores that are over 50.</p>
+
+                    <div class="codeBox">
+                        <p>scores = [18,56,32,65,77,14,23,78,81]</p>
+                        <p>counter = 0</p>
+                        <br>
+                        <p>for x in range(len(scores)):</p>
+                        <p style="padding-left: 40px;">if scores[x] > 50:</p>
+                        <p style="padding-left: 40px;">counter = counter + 1</p>
+                        <br>
+                        <p>print("The number of scores over 50 was " + str(counter))</p>
+                    </div>
+
+                    <p>You can try this program in the window below:</p>
+                    <iframe src="https://trinket.io/embed/python/da586500919f" class="trinket" allowfullscreen></iframe>
+
+                    <h2>Past Paper Question - 2024 Q9(d)</h2>
+                    <table>
+                        <tr>
+                            <th rowspan="2">(d)</th>
+                            <td>
+                                <p>The number of guests who stayed at the campsite each night in 2023 is stored 
+                                in the array <span class="codeText">guests</span>.</p>
+
+                                <table class="binaryTable">
+                                    <tr><th><span class="codeText">Index</span></th><td>0</td><td>1</td><td>2</td><td>...</td><td>364</td></tr>
+                                    <tr><th><span class="codeText">Value</span></th><td>271</td><td>240</td><td>153</td><td>...</td><td>87</td></tr>
+                                </table>
+                                <p>The campsite want to know the total number of guests who stayed at the site 
+                                    in 2023.</p>
+                                <p>Using a programming language of your choice, write the code to calculate this 
+                                total.</p>
+                            </td>
+                            <td rowspan="2"><b>4</b></td>
+                        </tr>
+                        <tr>
+                            <td>
+                               <div class="codeBox hiddenElement answer1">
+                                   <p>total=0</p>
+                                   <br>
+                                   <p>for x in range(365):</p>
+                                   <p style="padding-left: 40px;">total = total + guests[x]</p>
+                               </div>
+                                <ul class="hiddenElement answer1">
+                                    <li><b>1 mark</b> - set running total to 0</li>
+                                    <li><b>1 mark</b> - loop 365 times (or use <span class="codeText">len(guests)</span>)</li>
+                                    <li><b>1 mark</b> - running total adding <span class="codeText">guests[x]</span> to total in loop</li>
+                                    <li><b>1 mark</b> - use of incrementing array index (use of incrementing array index (<span class="codeText">[x]
+                                    </span>) in running total</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
                 </div>
             </div>
         </div>   

@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - SDD Testing</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="../../../Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Testing</h1></div>
+                <div class="contentContainer">
+                    <p>Once a program has been completed, it must be tested in order to find out if there are any bugs that aren't obvious at first glance.  If there are, then it may be necessary to return to the 
+                    implementation stage in order to fix them.  Testing is done using different input values to make sure the program works, and there are three types of values that are used:</p>
+                    <table style="max-width:1500px;">
+                        <tr><th style="width:200px;">Normal Testing</th><td>These are typical values that you would expect the program to handle.  For example, in a program that expects an input of a number between 1 and 10,    
+                            this would be any number between 2 and 9.</td></tr>
+                        <tr><th>Extreme Testing</th><td>These are values which are the boundaries of the acceptable input range.  For example, in a program that expects an input of a number between 1 and 10, the extreme values 
+                            would be 1 and 10. If the program expectes a string, the extreme values may be an empty string or a very long string (depending on the context of the program).</td></tr>
+                        <tr><th>Exceptional Testing</th><td>These are values that the program would not be expected to accept.  An invalid or unexpected input.  For example, in a program that expects you to enter a number between 1
+                            and 10, an exceptional value would be a string, like "one", or a number higher than 10 or less than 1.</td></tr>
+                    </table>
+                    <h2>Test Data Table</h2>
+                    <p>A test data table is used when planning how to test a program.  At this level you would typically see a table with six entries - two normal values, two extreme values and two exceptional values.  However, at 
+                        Higher level and above there may be more so that the program is more thoroughly tested.</p>
+                    <p>Here is an example of a Test Data Table for a program that takes in two numbers between 1 and 5, then adds them together.</p>
+                    <table style="text-align:center;">
+                        <tr>
+                            <th>Type of Test Data</th>
+                            <th>Test Data</th>
+                            <th>Expected Output</th>
+                            <th>Actual Output</th>
+                            <th>Comment</th>
+                        </tr>
+                        <tr>
+                            <td>Normal</td>
+                            <td>2,3</td>
+                            <td>5</td>
+                            <td>5</td>
+                            <td>Works as intended</td>
+                        </tr>
+                        <tr>
+                            <td>Normal</td>
+                            <td>4,2</td>
+                            <td>6</td>
+                            <td>6</td>
+                            <td>Works as intended</td>
+                        </tr>
+                        <tr>
+                            <td>Extreme</td>
+                            <td>5,5</td>
+                            <td>10</td>
+                            <td>10</td>
+                            <td>Works as intended</td>
+                        </tr>
+                        <tr>
+                            <td>Extreme</td>
+                            <td>5,1</td>
+                            <td>6</td>
+                            <td>6</td>
+                            <td>Works as intended</td>
+                        </tr>
+                        <tr>
+                            <td>Exceptional</td>
+                            <td>-2,6</td>
+                            <td>Error Message</td>
+                            <td>Error Message</td>
+                            <td>Works as intended</td>
+                        </tr>
+                        <tr>
+                            <td>Exceptional</td>
+                            <td>"one", "three"</td>
+                            <td>Error Message</td>
+                            <td>Error Message</td>
+                            <td>Works as intended</td>
+                        </tr>
+                    </table>
+                    <p>Note that in the Exceptional cases, the program is still working as intended by producing an error message.  This means that it is catching the errors rather than just crashing.</p>
+                    <p><b>If the program produces an output that you do not expect at this stage, then that means there is a problem with the code and you would have to go back to the implementation stage and review it.</b></p>
+
+                    <h2>Errors</h2>
+                    
+                    <p>An error in programming occurs when something goes wrong that prevents the code from executing as intended. There are three types of errors: Syntax, Logic and Execution (Runtime).</p>
+                    <h3>Syntax Errors</h3>
+                    <div class="ImgAndText">
+                        <div>
+                            <p>These occur when the rules of the programming language are violated, like improper indentation, a missing colon or using incorrect keywords. The code won't even run until they're fixed.</p>
+                            <p>Your programming environment (Thonny, Python IDE, Replit, etc.) has various tools to help you spot errors:</p>
+                            <ul>
+                                <li>When you try to run the program, it will crash and the error may be highlighted.</li>
+                                <li>You will receive a comment from the program in the console about the possible location of the error.</li>
+                                <li>Your coding environment may automatically indent code on the following line when you press Enter.</li>
+                                <li>Variable names may be colour coded so you can see where a variable appears that hasn't been used before (i.e. incorrectly spelled).</li>
+                                <li>When there is an error, the programming environment may flag multiple locations where the error may have occured.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <img style="min-width:200px; max-width:300px;" class="rImg" src="/Images/N5/SDD/error.jpg" alt="error cartoon"/>
+                        </div>
+                    </div>
+                    <h3>Logic Errors</h3>
+                    <p>These occur when the program runs, but does not produce the expected output.  For example, if you use AND instead of OR in an IF statement, the program would still run, but the output would be incorrect.</p>
+                    <p>It could be that the lines of the program are in the wrong order, or a variable has been initially set to an incorrect value.</p>
+
+                    <h3>Execution (Runtime) Errors</h3>
+                    <p>In the case of these errors, the program crashes immediately when it is run when it tries to do something that it cannot possibly do.  For example, if the program were asked to divide bby 0, it would try 
+                        and then crash because that's not possible.  If it were asked to peform a function on a string that can only be performed on integers (division for example) then it would try and fail, causing an execution
+                        error.</p>
+                    <p>In these cases, both the logic and the syntax are correct, its just that the program cannot do what you are asking it to.  The programmer would only discover errors like this when they attempt to run the 
+                        program.</p>
+                    <h2>Past Paper Question - 2018 Q19(e)</h2>
+
+                    <p>A program is being designed that will allow pupils to add money to their lunch money account. The user enters their name, an 8 character password and the amount of money they want to add. 
+                        A button is then clicked and the updated balance of the account is displayed</p>                    
+
+                    <table>
+                        <tr>
+                            <th> (e)</th>
+                            <td>
+                                <p>Test data will be used to ensure the validation of the password works correctly.</p>
+                                <p>Complete the test table below.</p>
+                            </td>
+                            <th>3</th>
+                        </tr>
+                    <table>
+                    <table style="text-align:center;">
+                        <tr>
+                            <th width="33%">Type of Test</th>
+                            <th width="33%">Input</th>
+                            <th width="33%">Expected Result</th>
+                        </tr>
+                        <tr>
+                            <td>Normal</td>
+                            <td><div class="hiddenElement answer1">Password</div></td>
+                            <td>Program Continues</td>
+                        </tr>
+                        <tr>
+                            <td><div class="hiddenElement answer1">Exceptional</div></td>
+                            <td>Jaj8up</td>
+                            <td><div class="hiddenElement answer1">Error displayed</div></td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </table>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

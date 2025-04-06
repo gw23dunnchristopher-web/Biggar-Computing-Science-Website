@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - SDD Evaluation</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="../../../Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Evaluation</h1></div>
+                <div class="contentContainer">
+                    <h2>What is Evaluation?</h2>
+                    <p>The Evaluation stage of Software Development is when you look at your program and assess how well it meets its intended purpose and requirements.  In this stage we look at four aspects of your program:</p>
+                    <ul>
+                        <li>Fitness for Purpose</li>
+                        <li>Efficiency</li>
+                        <li>Robustness</li>
+                        <li>Readability</li>
+                    </ul>
+                    <h2>Fitness for Purpose</h2>
+                    <p>For your program to be considered 'Fit for Purpose', it must meet the purpose and functional requirements that were written during the Analysis stage.  You can use the purpose and the inputs, processes and
+                    outputs of the program as a sort of checklist to see if it meets the requirements.</p>
+
+                    <h2>Efficiency</h2>
+                    <p>Your program may complete the task that it was designed to do, but it may not be as efficient as it could be.  What this means is that the program may take longer to complete the task than it could with more 
+                        efficient code.</p>
+                    <p>Check to make sure that there are no unnecessary lines of code in your program - they occupy story space in memory and take up processor time.</p>
+                    <h3>Loops</h3>
+                    <p>Loops can be used to improve the effiency of your code, look at the example below:</p>
+                    <div class="sideBySide">
+                    <div class="codeBox" style="margin:5px;">
+                        <table>
+                                <tr><td>total = 0</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>print("Enter a number:")</td></tr>
+                                <tr><td>number = int(input())</td></tr>
+                                <tr><td>total+=number</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>print("Enter a number:")</td></tr>
+                                <tr><td>number = int(input())</td></tr>
+                                <tr><td>total+=number</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>print("Enter a number:")</td></tr>
+                                <tr><td>number = int(input())</td></tr>
+                                <tr><td>total+=number</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>print("Enter a number:")</td></tr>
+                                <tr><td>number = int(input())</td></tr>
+                                <tr><td>total+=number</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>average = total / 4</td></tr>
+                                <tr><td>print("The average is" + str(average)</td></tr>
+                        </table>
+                    </div>
+                    <div class="codeBox" style="margin:5px;">
+                        <table>
+                                <tr><td>total = 0</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>for x in range(4):</td></tr>
+                                <tr><td style="padding-left:40px;">print("Enter a number:")</td></tr>
+                                <tr><td style="padding-left:40px;">number = int(input())</td></tr>
+                                <tr><td style="padding-left:40px;">total+=number</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>average = total / 4</td></tr>
+                                <tr><td>print("The average is" + str(average)</td></tr>
+                        </table>
+                    </div>
+                    </div>
+                    <p>These two sets of code perform exactly the same function, but the code on the right is more efficient as it uses fewer lines, is quicker to write and takes up less storage space in memory.</p>
+                    <h3>1-D Arrays</h3>
+                    <p>Below are two sets of code - both programs find the average of 4 numbers.</p>
+                    <div class="sideBySide">
+                    <div class="codeBox" style="margin:5px;">
+                        <table>
+                                <tr><td>print("Enter a number:")</td></tr>
+                                <tr><td>number1 = int(input())</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>print("Enter a number:")</td></tr>
+                                <tr><td>number2 = int(input())</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>print("Enter a number:")</td></tr>
+                                <tr><td>number3 = int(input())</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>print("Enter a number:")</td></tr>
+                                <tr><td>number4 = int(input())</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>average = (number1+number2+number3+number4) / 4</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>print("The average is" + str(average)</td></tr>
+                        </table>
+                    </div>
+                    <div class="codeBox" style="margin:5px;">
+                        <table>
+                                <tr><td>number = [0] * 4</td></tr>
+                                <tr><td>total = 0</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>for x in range(4):</td></tr>
+                                <tr><td style="padding-left:40px;">print("Enter a number:")</td></tr>
+                                <tr><td style="padding-left:40px;">number[x] = int(input())</td></tr>
+                                <tr><td style="padding-left:40px;">total+=number[x]</td></tr>
+                                <tr><td></td></tr>
+                                <tr><td>average = total / 4</td></tr>
+                                <tr><td>print("The average is" + str(average)</td></tr>
+                        </table>
+                    </div>
+                    </div>
+                    <p>the code on the right uses an array to store the numbers entered rather than storing each one in an individual variable.  This is more efficient as it, together with the loop, uses fewer lines of code.</p>
+                    <h3>Selection</h3>
+                    <p>Using nested IFs or CASE statements instead of lots of IF statements is efficient as it ensures that no unnecessary lines of code are executed.</p>
+                    <table>
+                        <tr>
+                            <th>Four IFs with complex condition</th>
+                            <th>Nested IFs with simple conditions</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="codeBox">
+                                    <table>
+                                        <tr><td>if mark &gt; 70:</td></tr>
+                                        <tr><td style="padding-left:40px;">grade = "A"</td></tr>
+                                        <tr><td></td></tr>
+                                        <tr><td>if mark &gt;= 60 and mark &lt;= 69:</td></tr>
+                                        <tr><td style="padding-left:40px;">grade = "B"</td></tr>
+                                        <tr><td></td></tr>
+                                        <tr><td>if mark &gt;= 50 and mark &lt;= 59:</td></tr>
+                                        <tr><td style="padding-left:40px;">grade = "C"</td></tr>
+                                        <tr><td></td></tr>
+                                        <tr><td>if mark &lt; 50:</td></tr>
+                                        <tr><td style="padding-left:40px;">grade = "D"</td></tr>
+                                    </table>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="codeBox">
+                                <table>
+                                    <tr><td>if mark &gt;= 70:</td></tr>
+                                    <tr><td style="padding-left:40px;">grade = "A"</td></tr>
+                                    <tr><td></td></tr>
+                                    <tr><td>elif mark &gt;= 60:</td></tr>
+                                    <tr><td style="padding-left:40px;">grade = "B"</td></tr>
+                                    <tr><td></td></tr>
+                                    <tr><td>elif mark &gt;= 50:</td></tr>
+                                    <tr><td style="padding-left:40px;">grade = "C"</td></tr>
+                                    <tr><td></td></tr>
+                                    <tr><td>else:</td></tr>
+                                    <tr><td style="padding-left:40px;">grade = "D"</td></tr>
+                                </table>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>This program always carries out 4 comparisons, no matter what the mark is.</th>
+                            <th>This program carries out either 1, 2, or 3 comparisons, depending on the mark.</th>
+                        </tr>
+                    </table>
+                    <h3>Logical Operators</h3>
+                    <p>Logical operators like AND, OR and NOT can be useful when creating complex conditions, instead of using multiple simple conditions.</p>
+                    <ul>
+                        <li>
+                            The program below uses two simple conditions:
+                        </li>
+                    </ul>
+                    <div class="codeBox">
+                        <table>
+                            <tr><td>if X  &gt; 4:</td></tr>
+                            <tr><td style="padding-left:40px;">if Y &lt; 6:</td></tr>
+                            <tr><td style="padding-left:80px;">quadrant = 2</td></tr>
+                        </table>
+                    </div>
+                    <ul>
+                        <li>
+                            This program uses one complex conditions, using fewer lines:
+                        </li>
+                    </ul>
+                    <div class="codeBox">
+                        <table>
+                            <tr><td>if X  &gt; 4 and Y &lt; 6:</td></tr>
+                            <tr><td style="padding-left:40px;">quadrant = 2</td></tr>
+                        </table>
+                    </div>
+                    <h3>Sequence</h3>
+                    <p>What order you place code in can also effect your program's efficiency.  For example, calculating a running total within the loop that is used when values are being entered by the user and assigned to an
+                        array instead of using one loop to fill the array and then another loop to calculate the running total.</p>
+
+                    <h2>Robustness</h2>
+                    <p>This is the term used for the ability of your program to handled exceptional (or invalid) data without crashing.  If your program uses input validation to catch incorrectly entered inputs and then displays 
+                        an error message to the user before asking them to type in their answer again, it could be considered to be more 'robust'.</p>
+                    
+                    <h2>Readability</h2>
+                    <p>Your code might be understandable to you, but what about to other people?  Your code should be understandable when read by any programmer, and there are several features that can help you to ensure this:</p>                     <table>
+                        <tr>
+                            <th>Internal Commentary</th>
+                            <td>
+                                <ul>
+                                    <li>Comments at the start to describe the program, identidy the author and state when it was written.</li>
+                                    <li>Comments should be used to describe tricky code.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                Meaningful Variable Names
+                            </th>
+                            <td>
+                                <ul>
+                                    <li>Variable names should describe what is being stored in the variable to make the reader aware of their purpose.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Indentation</th>
+                            <td>
+                                <ul>
+                                    <li>Indent code inside an IF, CASE, FOR, REPEAT and WHILE loop to make it easy to read the code and see which lines are in the if statement or loop.</li>
+                                    <li>In Python, proper indentation is required or the program will not work correctly.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>White Space</th>
+                            <td>
+                                <ul>
+                                    <li>Gaps between sections of code make it easier to read.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                    <h2>Past Paper Question - 2022 Q9(c) (i) and (ii)</h2>
+    
+                    <p>A username and password are added to allow users to save searches.</p>
+                    <p>Part of the code is shown below.</p>
+                    <table class="borderless">
+                        <tr><th>...</th><td></td></tr>
+                        <tr><th>Line 9</th><td class="codeText">RECEIVE un FROM KEYBOARD</td></tr>
+                        <tr><th>Line 10</th><td class="codeText">RECEIVE pwd FROM KEYBOARD</td></tr>
+                        <tr><th>Line 11</th><td class="codeText">IF un = sUn or pwd = sPwd THEN</td></tr>
+                        <tr><th>Line 12</th><td class="codeText"style="margin-left:40px">SEND "Welcome to saved searches" TO DISPLAY</td></tr>
+                        <tr><th>Line 13</th><td class="codeText">END IF</td></tr>
+                         <tr><th>...</th><td class="codeText"></td></tr>
+                    </table>
+                          
+                        
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(i)</th>
+                            <td>Explain how indentation is used to make the code above more readable.</td>
+                            <th rowspan="2">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <p>The indentation used here shows clearly that line 13 is inside the IF statement used on Line 12.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2"  width="30px">(ii) </th>
+                            <td>Describe how Line 11 could be made more readable.</td>
+                            <th rowspan="2">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer2">
+                                    <p>Meaningful variable names could be used to show more clearly what the un, sUn, pwd and sPwd variables are for.  White space could be added above Line 11 so that the 
+                                    IF statement is more clearly shown within the code.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>
