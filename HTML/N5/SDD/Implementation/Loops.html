@@ -7,6 +7,13 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
     </head>
     <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
         <div id="loading"></div>

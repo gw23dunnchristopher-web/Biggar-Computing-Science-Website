@@ -167,7 +167,7 @@ sidebar-menu .submenu .submenu li a:hover {
 
 #countdowntimer {
     display:block;
-    margin: 0px auto 40px;
+    margin: 20px auto 20px;
     min-width:250px;
     max-width:300px;
     border:solid 2px #04034f;
