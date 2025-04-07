@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Website Structure</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="../../../Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Website Structure</h1></div>
+                <div class="contentContainer">
+                    <p>At the N5 level, you should be able to exemplify the structure of a website, which should contain a home page and a maximum of four additional pages plus any necessary links.</p>
+                    <p>The design of a website should indicate the type of navigational structure that will be used - usually linear or heirarchical.</p>
+                    <ul>
+                        <li><b>Linear Design</b> - In this kind of design, each page has a link to the next page in a sequence.  Users have to move through the pages in a specific order.</li>
+                        <li><b>Heirarchical Design</b> - Pages are organised in a structured layout, with users being able to access several pages from a central 'home page'.  Content is organised logically into topics, with 
+                            subpages that have information on subtopics within each broad topic.</li>
+                    </ul>
+                    <p>The design should also show the direction of each of the links.  A double arrow shows that the user can go back and forth between the two pages and a single arrow shows that the link only goes one way.
+                    Usually, single arrows are used to represent a link to a page on another website.</p>
+
+                    <h2>Example of Website Structure</h2>
+                    <div class="sideBySide" style="justify-content:space-between;">
+                        <div>
+                            <p>A new website for Scots WaterSport is being developed. The website will consist of five web pages and each of these web pages will have a main heading centred at the top of the page. Further 
+                                requirements for the web pages are as follows.</p>
+                            <p>The home page will provide:</p>
+                            <ul>
+                                <li>a short introduction to the range of water sports available in Scotland.</li>
+                                <li>internal hyperlinks to specialist pages about four different water sports (Kayaking, Surfing, Rafting, and Sailing)</li>
+                                <li>one external link to the water sports page of the VisitScotland website</li>
+                            </ul>
+                            <p>Each of the specialist sports pages will provide:</p>
+                            <ul>
+                                <li>a photo of the sport</li>
+                                <li>a paragraph of information about the sport</li>
+                                <li>a bulleted list of suggested locations and ideas to try out the sport</li>
+                                <li>a hyperlink back to the home page</li>
+                            </ul>
+                            <p>The new website for ScotsWaterSport will have a heirarchical structure.</p>
+                        </div>
+                        <div>
+                            <img class="rImg" style="max-width:400px;" src="/Images/N5/WDD/watersport.jpg" alt="Scots Water Sports"/>
+                        </div>
+                    </div>
+                  
+                    
+                    
+                    <p>This diagram shows the navigational structure of the ScotsWaterSports website.  The arrows on the diagram indicate the direction of the hyperlinks provided on each page.</p>
+
+                    <img class="cImg" style="max-width:800px;" src="/Images/N5/WDD/ScotsWaterSportsNav.jpg" alt="Scots Water Sports Navigation Structure"/>
+                    
+                    <h2>Past Paper Question - 2019 Q18(a)</h2>
+                    <p>The Giants basketball team has a website.</p>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td><p>The website contains the following four pages/</p>
+                                <ul>
+                                    <li>Home page</li>
+                                    <li>Information about the club</li>
+                                    <li>Upcoming fixtures</li>
+                                    <li>How to contact the club</li>
+                                </ul>
+                                <p>All the pages on the site include a link back to the home page. The page 
+                                with fixture information also contains an external hyperlink to the 
+                                Scottish Basketball League.</p>
+                                <p>Draw the navigational structure for this website.</p>
+                            </td>
+                            <th rowspan="2">4</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    
+                                    <img class="cImg" style="max-width:600px;" src="/Images/N5/WDD/PPNav.jpg" alt="Scots Water Sports"/>
+                                    <ul>
+                                        <li><b>1 mark</b> - home page</li>
+                                        <li><b>1 mark</b> - three sub-pages: information, fixtures, contacts</li>
+                                        <li><b>1 mark</b> - double arrow links to three sub-pages</li>
+                                        <li><b>1 mark</b> - single arrow link pointing to an external page from ‘Fixtures’</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Wireframes</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="../../../Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Wireframes</h1></div>
+                <div class="contentContainer">
+                    <h2>What is a Wireframe?</h2>
+                    <div class="sideBySide">
+                        <div>
+                            <p>User interface planning can be illustrated using wireframes - sketches of the user interface that show the layout of the page.  They are used to ensure
+                            consistency between web pages and share details with members of the development team.</p>
+                            <ul>
+                                <li>A separate wireframe is needed for each page on the website.</li>
+                                <li>Each wireframe indicates the intended layout of the page and shows the position of:
+                                    <ul style="list-style-type:square;">
+                                        <li>all text elements on the page.</li>
+                                        <li>any media elements (images, audio clips and video clips).</li>
+                                        <li>elements that allow the user to interact with the page.</li>
+                                        <li>intended position and type of all hyperlinks on the page.</li>
+                                    </ul></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <img style="max-width:300px;" src="/Images/N5/WDD/webwire.jpg" alt="Wireframes"/>
+                        </div>
+                    </div>
+                    <h2>Webpage Elements on a Wireframe</h2>
+                    <p>A wireframe is just a sketch of a webpage, but there are commonly used symbols that are used to represent different elements.</p>
+                    <table>
+                        <tr>
+                            <th>Element</th>
+                            <th>Symbol</th>
+                            <th>Explanation</th>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Text</th>
+                            <td style="text-align:center;">Information on this part of the website.</td>
+                            <td>Wireframes contain placeholders representing larger pieces of information.  A text placeholder would tell the reader what the text in that part of the website would be about.</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Headings</th>
+                            <td><p style="font-size: 30px; font-weight:bold; font-family:'Comic Sans MS'; text-align:center;">Heading</p></td>
+                            <td>Headings on a wireframe are the rough size and shape that they would be on the actual webpage.</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Bullet Points</th>
+                            <td>
+                                <ul>
+                                    <li>Bullet point 1</li>
+                                    <li>Bullet point 2</li>
+                                    <li>Bullet point 3</li>
+                                </ul>
+                            </td>
+                            <td>Bullet points should show an example of what they are being used for, and show the position that they would be in.</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Links</th>
+                            <td style="text-align:center;"><u>Link</u></td>
+                            <td>When using text as a link for the user to click on, this text should be represented by underlining it.</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Images</th>
+                            <td><img class="cImg" src="/Images/N5/WDD/image.jpg" alt="A rectangle with a cross in it."/></td>
+                            <td>Images are shown as a rectangle with a cross in it, this just shows the position of the image.  If a particular image is being used, then the filename of the image will be shown.</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Video</th>
+                            <td><img class="cImg" src="/Images/N5/WDD/video.jpg" alt="A rectangle with the play symbol in it."/></td>
+                            <td>Videos are usually represented by a rectangle with the play symbol, a triangle, in the middle. If there is a particular video that will be used, its filename is noted as well.</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Audio</th>
+                            <td><img width="300px" class="cImg" src="/Images/N5/WDD/audio.jpg" alt="A horizontal bar with a speaker symbol on the left hand side."/></td>
+                            <td>Audio on the website is usually represented by a horizontal bar with a small speaker symbol.  If a file is being used for this, the filename will be noted.</td>
+                        </tr>
+                    </table>
+                    <h2>Wireframe Example</h2>
+                    <p>Below is a wireframe for the Kayaking page of the ScotsWaterSports website.</p>
+                    <img class="cImg" style="max-width:800px;" src="/Images/N5/WDD/wireframeExample.jpg" alt="Wireframe Example"/>
+                    <h3>Past Paper Question - 2022 Q19(a)(i)</h3>
+                    <p>Katrina’s Cars is a car auction website. The HTML and CSS code for the home page is shown below.</p>
+
+                    <div class="htmlCode" style="width:500px;">
+                        <pre>
+                            
+                            &lt;html&gt;
+
+                            &lt;head&gt;
+                            &lt;title&gt;Katrina’s Cars&lt;/title&gt;
+                            &lt;style&gt;
+                            h1{text-align:center;}
+                            h2{text-align:right;}
+                            #heading1{text-align:right;}
+                            #heading2{text-align:left;}
+                            &lt;/style&gt;
+                            &lt;/head&gt;
+
+                            &lt;body&gt;
+                            &lt;div&gt;
+                            &lt;h1 id="heading1"&gt;Katrina’s Cars&lt;/h1&gt;
+
+                            &lt;img src="logo.jpg"&gt;
+                            &lt;/div&gt;
+
+                            &lt;div&gt;
+                            &lt;h2 id="heading2"&gt;Top deals&lt;/h2&gt;
+                            &lt;ul&gt;
+                            &lt;li&gt;Maxi Cupar&lt;/li&gt;
+                            &lt;li&gt;Mizdo CX-5&lt;/li&gt;
+                            &lt;li&gt;Oodi TT&lt;/li&gt;
+                            &lt;/ul&gt;
+
+                            &lt;/div&gt;
+                            &lt;/body&gt;
+
+                            &lt;/html&gt;
+
+                        </pre>
+                    </div>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" style="width:65px;">(a)(i)</th>
+                            <td><p>Draw how this web page will look when viewed in a browser.</p>
+                                <p>Some of the content has already been added.</p>
+
+                                <img class="cImg" style="max-width:800px;" src="/Images/N5/WDD/PPWireframe.jpg" alt="Past Paper Q19a (i)"/>
+
+                            </td>
+                            <th rowspan="2">4</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <img class="cImg" style="max-width:800px;" src="/Images/N5/WDD/PPWireframeA.jpg" alt="Past Paper Q19a (i) answer"/>
+                                    
+                                    <ul>
+                                        <li><b>1 mark</b> - 'Katrina's Cars' above graphic and right aligned</li>
+                                        <li><b>1 mark</b> - ‘Top deals’ left-aligned and below graphic</li>
+                                        <li><b>1 mark</b> - unordered list with bullet points, left-aligned and below ‘Top deals’</li>
+                                        <li><b>1 mark</b> - vertical list of three list items</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

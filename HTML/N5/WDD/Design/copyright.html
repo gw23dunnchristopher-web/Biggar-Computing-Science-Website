@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - WDD Analysis</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="../../../Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentContainer">
+                    <p>Websites use lots of different types of media - images, audio and video.  If the creator of the website does not own the media that they use, they need to be careful or they will use files that fall
+                    under copyright.  As such, even at N5 level it is important that you are aware of Copyright Laws.</p>
+                    
+                    <h2>The Copyright, Designs and Patents Act (1988)</h2>
+                    <div class="sideBySide" style="justify-content:space-between;">
+                        <div>
+                            <p>Individuals and businesses must:</p>
+                            <ul>
+                                <li>consider the copyright status of the following elements of a webpage - text, graphics, video and audio.</li>
+                                <li>not download text, graphics, video or audio files without the permission of the owner.</li>
+                                <li>not give copies of downloads that they have paid for to their friends.</li>
+                                <li>contact the creator of web content and ask permission to use it.</li>
+                                <li>pay for content that they download.</li>
+                            </ul>
+                            <p>Web developers often:</p>
+                            <ul>
+                                <li>include a statement that specifies the various content used on their website and the copyright terms that exist for that content.</li>
+                                <li>do not own the audio, images or video files used on a website so the developer...
+                                    <ul>
+                                        <li>states (on the website) who does own the multimedia they have used.</li>
+                                        <li>seeks permission to use the multimedia before using it - they may need to pay a fee.</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <img class="rImg" style="max-width:500px;" src="/Images/N5/WDD/copyright.jpg" alt="Copyright"/>
+                        </div>
+                    </div>
+                        <h2>Penalties for Breaching Copyright</h2>
+                        <p>Failure to comply with the terms of the Copyright, Designs and Patents Act (1988) can result in fines and prosecutions, this applies to:</p>
+                        <ul>
+                            <li>end-users who illegally download media without the permission of the copyright holder.</li>
+                            <li>businesses who include copyrighted material on thier site without permission.</li>
+                        </ul>
+                        <p>Breaching copyright law can incur a variety of crimes and penalties depending on the offence.  Here are some examples (taken from the gov.uk website):</p>
+                        <table>
+                            <tr>
+                                <th>Offence</th>
+                                <th>Sentence</th>
+                            </tr>
+                            <tr>
+                                <td>Possessing copyrighted materials with a view to committing acts infringing copyright.</td>
+                                <td>Up to 3 months in prison and/or an £5000 fine.</td>
+                            </tr>
+                            <tr>
+                                <td>Distributing copyrighted materials for commercial gain</td>
+                                <td>Up to 6 months in prison and/or an unlimited fine.</td>
+                            </tr>
+                            <tr>
+                                <td>Making recordings of a performer available to others without consent.</td>
+                                <td>Up to 6 months in prison and/or an unlimited fine.</td>
+                            </tr>
+                            <tr>
+                                <td>Infringing on copyright by making a copyrighted work available to public.</td>
+                                <td>Up to 3 months in prison and/or an unlimited fine.</td>
+                            </tr>
+                        </table>
+                        <p>In the case of the unlimited fine, the actual amount that the would need to be paid would be based on the value of the copyrighted materials and the loss to the copyright holder.</p>
+                        <p>For a full list of penalties and copyright charges, you can have a look at the government's official website at this 
+                            <a href="https://www.gov.uk/government/publications/intellectual-property-offences/intellectual-property-offences">link</a>.</p>
+                        <h2>Past Paper Question - 2018 Q13</h2>
+                    <p>The Vulpes fox charity would like a website to increase public knowledge of foxes.</p>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">13</th>
+                            <td><p>Eduardo has created a website to display photos that he has taken.</p>
+                                <p>Explain why Eduardo did not have to consider the Copyright Designs and 
+                                Patents Act when creating his website.</p>
+                            </td>
+                            <th rowspan="2">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <p>As Eduardo took the photos himself, he owns the copyright to them and therefore does not need to consider the Copyright, Designs and Patents Act.</p>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

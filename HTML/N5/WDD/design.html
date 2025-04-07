@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - WDD Analysis</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="../../../Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentContainer">
+                        <p>During the analysis stage of website development, the following requirements should be identified:</p>
+                        <table>
+                            <tr>
+                                <th>End-user requirements:</th>
+                                <td>
+                                    <ul>
+                                        <li>The end users are the people who are going to be using the website</li>
+                                        <li>Their requirements are the tasks they expect to be able to do using the website</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                            <th>Functional requirements:</th>
+                                <td>
+                                    <ul>
+                                        <li>Processes and activities that the system has to perform</li>
+                                        <li>Information that the system has to contain to be able to carry out its functions</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                         </table>
+                        
+                        <p>These requirements will help:</p>
+                        <ul>
+                            <li>clarify the design of each webpage.</li>
+                            <li>identify the features to be implemented on the website.</li>
+                            <li>evaluate whether the system is fit for purpose after development is complete.</li>
+                        </ul>
+                       <h2>Example of End-User and Functional Requirements</h2>
+                       <p>A band wants to develop a website for its fans. The site will provide details about the band, including biographies, music tracks, video clips and concert details.</p>
+                                
+                        <h3>End-user requirements</h3>
+                        <div class="sideBySide" style="justify-content:space-between;">
+                            <div>
+                            <p>Users should be able to...</p>
+                                <ul>
+                                    <li>navigate the site easily.</li>
+                                    <li>view biographies and photos of band members.</li>
+                                    <li>view all upcoming concerts and link to an external booking site.</li>
+                                    <li>view video clips of the band.</li>
+                                    <li>listen to the band’s audio tracks.</li>
+                                </ul>
+                            </div>
+                            <div>   
+                                <img style="max-width:400px; min-width:100px;" src="/Images/N5/WDD/rockband.jpg" alt="Rock Band"/ >
+                            </div>
+                        </div>
+                        <h3>Functional requirements</h3>
+                        <p>The website must contain...</p>
+                        <ul>
+                            <li>a home page that provides internal links to the topic pages (biographies, music, videos and concerts).</li>
+                            <li>individual profile pages that include biography information, with photos of the band member and a link back to the biographies page.</li>
+                            <li>a music page that lists the band's albums and allows individual audio tracks to be played.</li>
+                            <li>a videos page that lists video clips and allows these to be played.</li>
+                            <li>a concerts page listing the upcoming concerts with links to an external booking site.</li>
+                            <li>a link on all of the pages that leads back to the home page.</li>
+                        </ul>
+                    <h3>Past Paper Question - 2023 Q19(a)</h3>
+                    <p>The Vulpes fox charity would like a website to increase public knowledge of foxes.</p>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td><p>The following content is required.</p>
+                                <table class="borderless">
+                                    <td>The website will have pages about different types of foxes where users 
+                                    can view pictures and listen to the sounds made by each fox. The charity 
+                                    logo needs to be visible at the top of each page</td>
+                                </table>
+                                <p>Identify a functional requirement of the above website.</p>
+                            </td>
+                            <th rowspan="2">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <p><b>One mark for any one from:</b></p>
+                                    <p>The website must...</p>
+                                    <ul>
+                                        <li>display the charity logo.</li>
+                                        <li>play sounds of foxes.</li>
+                                        <li>display pictures of foxes.</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

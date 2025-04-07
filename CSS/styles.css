@@ -24,7 +24,9 @@ main {
     margin-top:200px;
     margin-bottom:100px;
 }
-
+h1 {
+    padding-top:10px;
+}
 h2 {
     padding-top:20px;
 }
@@ -467,4 +469,28 @@ ol li {
     align-content:center;
     justify-content: center;
     margin:20px auto;
+}
+
+@media (max-width: 768px) {
+    .sideBySide {
+        flex-direction: column;
+    }
+}
+
+.htmlCode {
+    border:1px solid black;
+    margin:auto; 
+    margin-top:10px;
+}
+
+.htmlCode pre{
+    margin-left:-200px;
+}
+
+ul li ul li{
+    list-style-type:square;
+}
+
+ul li ul li ul li {
+    list-style-type:disc;
 }

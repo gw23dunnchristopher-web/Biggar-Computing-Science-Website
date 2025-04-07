@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - File Formats and Compression</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="../../../Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>File Formats and Compression</h1></div>
+                <div class="contentContainer">
+                    <h2>File Formats</h2>
+                    <p>At the N5 level you need to be aware of the difference between different file formats for images, audio and video files that can be used as content for a website.</p>
+
+                    <h3>Image File Formats</h3>
+                    <p>There are several different file formats that can be used for images on a website.  Below is a table that compares the different formats.  The formats shown here are all bitmap based, so the all have a 
+                        number of bits used for each pixel to indicate the number of colours that can be represented.</p>
+                    
+                    <table>
+                        <tr>
+                            <th width="250px">Format</th>
+                            <th>Details</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; background-color:lightgreen;"><b>JPG</b> (Joint Photographic Expert Group)</td>
+                            <td>
+                                <ul>
+                                    <li>uses lossy compression - level of compression can be varied.</li>
+                                    <li>no animation.</li>
+                                    <li>no transparency.</li>
+                                    <li>colour depth - usually 24bits used per pixel, so 16,777,216 colours are available (2<sup>24</sup>).</li>
+                                </ul>
+                            </td>
+                            <td><img class="cImg" style="max-width:300px" src="/Images/N5/WDD/jpgExample.jpg" alt="JPG Example"/></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; background-color:lightgreen;"><b>PNG</b> (Portable Network Graphic)</td>
+                            <td>
+                                <ul>
+                                    <li>uses lossless compression.</li>
+                                    <li>no animation.</li>
+                                    <li>has different levels of transparency, so some parts of the image can be semi-transparent.</li>
+                                    <li>colour depth - 24 or 48 bits.</li>
+                                </ul>
+                            </td>
+                            <td><img class="cImg" style="max-width:300px" src="/Images/N5/WDD/pngExample.png" alt="PNG Example"/></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; background-color:lightgreen;"><b>GIF</b> (Graphics Interchange Format)</td>
+                            <td>
+                                <ul>
+                                    <li>uses lossless compression.</li>
+                                    <li>can be animated.</li>
+                                    <li>A single level of transparency, so parts of the image can be transparent.</li>
+                                    <li>colour depth - 8, so 256 colours available (2<sup>8</sup>)</li>
+                                    <li>Used for simple graphics.</li>
+                                </ul>
+                            </td>
+                            <td><img class="cImg" style="max-width:300px" src="/Images/N5/WDD/gifExample.gif" alt="GIF Example"/></td>
+                        </tr>
+                    </table>
+
+                    <h3>Audio File Formats</h3>
+                    <p>There are several file formats used for Audio - WAV, MP3, FLAC, AIFF, OGG, etc.  For N5, we will just look at two of these, WAV and MP3.  You can listen to examples of a WAV file and an MP3 file below - they 
+                        sound almost exactly the same, but the MP3 file is a tenth of the size of the WAV file!  Watch how much faster the MP3 loads.</p>
+
+                    <table>
+                        <tr>
+                            <th width="250px">Format</th>
+                            <th>Details</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; background-color:lightgreen;"><b>WAV</b> (WAVeform Audio File Format)</td>
+                            <td>
+                                <ul>
+                                    <li>usually uncompressed.</li>
+                                    <li>high quality.</li>
+                                    <li>can be saved with different sampling rates (e.g. 44.1 KHz).</li>
+                                    <li>can be saved using different bit rates (e.g. 16 bit).</li>
+                                </ul>
+                            </td>
+                            <td><audio controls><source src="/Files/Audio/wavExample.wav" type="audio/wav">Your browser does not support the audio format.</audio></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; background-color:lightgreen;"><b>MP3</b> (MPEG (Moving Picture Experts Group) Audio Layer 3)</td>
+                            <td>
+                                <ul>
+                                    <li>compressed audio file.</li>
+                                    <li>high quality - compression removes sounds that can’t be heard by humans.</li>
+                                    <li>small file size - 10% of the size of a wav file.</li>
+                                </ul>
+                            </td>
+                            <td><audio controls><source src="/Files/Audio/mp3Example.mp3" type="audio/mp3">Your browser does not support the audio format.</audio></td>
+                        </tr>
+                    </table>
+                    
+                    <h3>Video File Formats</h3>
+                    <p>Much like with audio file formats, there are a large number of different formats used for video files.  We will just focus on two of them - AVI and MP4.</p>
+
+                    <table>
+                        <tr>
+                            <th width="250px">Format</th>
+                            <th>Details</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; background-color:lightgreen;"><b>AVI</b> (Audio Video Interleave)</td>
+                            <td>
+                                <ul>
+                                    <li>larger file size (less compression).</li>
+                                    <li>high video quality.</li>
+                                    <li>not ideal for streaming over the internet.</li>
+                                    <li>more control over the bitrate of doing video editing.</li>
+                                </ul>
+                            </td>
+                            <td><video height="240" width="320" controls><source src="/Files/Video/aviExample.avi" type="video/avi">Your browser does not support the video format.</video></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; background-color:lightgreen;"><b>MP4</b> (MPEG (Moving Picture Experts Group)Part 14)</td>
+                            <td>
+                                <ul>
+                                    <li>compressed video file.</li>
+                                    <li>still good quality, even with compression</li>
+                                    <li>small file size.</li>
+                                    <li>Works on almost all devices and platforms.</li>
+                                    <li>Great for online streaming.</li>
+                                </ul>
+                            </td>
+                            <td><video height="240" width="320" controls><source src="/Files/Video/mp4example.mp4" type="video/mp4">Your browser does not support the video format.</video></td>
+                        </tr>
+                    </table>
+                    
+                    <h3>Past Paper Question - 2023 Q19(a)</h3>
+                    <p>The Vulpes fox charity would like a website to increase public knowledge of foxes.</p>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td><p>The following content is required.</p>
+                                <table class="borderless">
+                                    <td>The website will have pages about different types of foxes where users 
+                                    can view pictures and listen to the sounds made by each fox. The charity 
+                                    logo needs to be visible at the top of each page</td>
+                                </table>
+                                <p>Identify a functional requirement of the above website.</p>
+                            </td>
+                            <th rowspan="2">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <p><b>One mark for any one from:</b></p>
+                                    <p>The website must...</p>
+                                    <ul>
+                                        <li>display the charity logo.</li>
+                                        <li>play sounds of foxes.</li>
+                                        <li>display pictures of foxes.</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>
