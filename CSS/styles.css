@@ -169,29 +169,15 @@ table {
 @media (max-width: 768px) {
     table {
         display: block;
-        width: 100%;
-        max-width: 100%;
-        margin: 10px 0;
-        font-size: 14px;
         overflow-x: auto;
+        white-space: nowrap;
         -webkit-overflow-scrolling: touch;
+        font-size: 12px;
+        width: 600px;
     }
     
     table th, table td {
-        padding: 8px;
-        min-width: 120px;
-        word-wrap: break-word;
-    }
-
-    .specifications table,
-    .contentContainer table {
-        font-size: 14px;
-        margin: 10px auto;
-    }
-
-    #marks th, #marks td {
-        width: auto;
-        min-width: 100px;
+        padding: 5px;
     }
     
     img {
