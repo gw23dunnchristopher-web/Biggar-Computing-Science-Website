@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Image Tags</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="../../../Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Image Tags</h1></div>
+                <div class="contentContainer">
+                    <h2>Displaying Images on a Webpage</h2>
+                    <p>Webpages without pictures can be very boring.  To add pictures to your website, you can use the &lt;img&gt; tag.</p>
+                    <p>The image tag has four attributes (an attribute allows you to modify a tag to change what is shown on the webpage):</p>
+                    <ul>
+                        <li><b>&lt;src&gt;</b> - This attribute tells the webpage where the image is located.  If it is saved to the same folder as the webpage this will be the image name and file type. However, if it is saved in a
+                        different folder, then this attribute will have to include the file path of the image.</li>
+                        <li><b>&lt;alt&gt;</b> - If there is a problem and the image cannot be displayed, this attribute displays some text instead.</li>
+                        <li><b>&lt;height&gt;</b> - Controls the height of the image.  This can be a specific number of pixels ("100px"), or a percentage of its original size ("50%").</li>
+                        <li><b>&lt;width&gt;</b> - If there is a problem and the image cannot be displayed, this attribute displays some text instead.</li>
+                    </ul>
+
+                    <p>As it is displayed on the webpage, &lt;img&gt; tags are used inside the &lt;body&gt; tag in the HTML code.  Here is an example if an image tag with its associated attributes, the code has been used in this
+                    website to display the image to the right. The image tag does not have a closing tag.</p>
+                    
+                    
+                    <div class="htmlCode" style="width:900px">
+                        <p style="text-align:center; "><b>&lt;img src="/Images/N5/WDD/cat.jpg" alt="Image of a Cat" height="300px" width="300px"/&gt;</b></p>
+                    </div>
+                    <div>
+                        <img class="cImg" src="/Images/N5/WDD/cat.jpg" alt="Image of a Cat" height="300px" width="300px"/>
+                    </div>
+                
+                    <p>Note that because this image is inside a different folder, the file path is included in the source - "/Images/N5/WDD/".  This indicates that from the root directory of the website, the image is contained in 
+                        the WDD folder, which is inside the N5 folder, which is inside the Images folder.</p>
+
+                    <p>The next example uses an image that is on a different website.  As you can see it uses the website address:</p>
+                    <div class="htmlCode" style="width:900px">
+                        <p style="text-align:center; "><b>&lt;img src="https://thumbs.dreamstime.com/b/cute-cat-portrait-square-photo-beautiful-white-closeup-105311158.jpg"
+                            alt="Image of a Cat" height="300px" width="300px"/&gt;</b></p>
+                    </div>
+                    <div>
+                        <img class="cImg" src="https://thumbs.dreamstime.com/b/cute-cat-portrait-square-photo-beautiful-white-closeup-105311158.jpg" alt="Image of a Cat" height="300px" width="300px"/>
+                    </div>
+
+                    <p>You can try changing the image in the code window below - try changing the height and width.  Please note that to use local images, you would have to upload the image to the Trinket library.</p>
+                    <iframe src="https://trinket.io/embed/html/03565fbb66d3" class="trinket" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2022 Q18(c)</h2>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(c)</th>
+                            <td><p>All the images used on the website are stored in a folder called ‘Graphics’ in 
+                                 the following location.</p>
+                                 <img class="cImg" src="/Images/N5/WDD/PPImageHTML.jpg" alt="2022 Q18 (c)"/>
+                                 <p>Using this structure, complete the following code so that the graphic dog.jpg is 
+                                 displayed on the services.html page.</p>
+                                 <br>
+                                 <p class="htmlCode" style="text-align:center">&lt;img src="<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>"/&gt;</p>
+                            </td>
+                            <th rowspan="2">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <p style="text-align:center; font-size:20px; font-family:Courier;">&lt;img src="<b>/graphics/dog.jpg</b>"&gt;</p>
+                                    <ul>
+                                        <li><b>1 mark</b> - using the 'dog.jpg' file with the correct name in the src attribute.</li>
+                                        <li><b>1 mark</b> - using the correct file path '/graphics/'</li>
+                                    </ul>
+                                    <p>There are other ways to write the file path which are also correct:  <b>'graphics/'</b> and <b>'./graphics/'</b> would also work.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

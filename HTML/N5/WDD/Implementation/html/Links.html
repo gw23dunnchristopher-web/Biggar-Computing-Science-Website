@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - WDD Analysis</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="../../../Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentContainer">
+                    <h2>What are anchor tags?</h2>
+                    <div class="sideBySide">
+                        <div>
+                            <p>Anchor tags, the &lt;a&gt; tag, are used to create hyperlinks on your website. There are several types of link that can be created using anchor tags:</p>
+                            <ul>
+                                <li><b>External Hyperlinks</b> - These are links to a page on another website.</li>
+                                <li><b>Internal Hyperlinks</b> - These are links to other pages on the same website.</li>
+                                <li><b>Jump (Anchor) Hyperlinks</b> - These are links to a specific section of a webpage.</li>
+                            </ul>
+        
+                            <p>Hyperlinks like this use two kinds of addressing, absolute and relative.</p>
+                            <ul>
+                                <li><b>Absolute Addressing</b> - This is the full URL of the page you want to link to.  This is used for external hyperlinks.</li>
+                                <li><b>Relative Addressing</b> - This is the path to the page you want to link to, relative to the current page.  This is used for internal hyperlinks.</li>
+                            </ul>
+        
+                            <p>Jump links use an ID to link to a section of a webpage that is given that ID.</p>
+                        </div>
+                        <div>
+                            <img src="/Images/N5/WDD/anchor.jpg" alt="Anchor"/>
+                        </div>
+                    </div>
+                    <h2>How does this work?</h2>
+                    <p>The anchor tag takes one attribute '<b>href</b>', which stands for <b>hyperlink reference</b>.  This attribute tells the browser where the link is pointing to, as shown below.</p>
+
+                    <img class="cImg" src="/Images/N5/WDD/anchorTag.jpg" alt="Anchor Tag"/>
+
+                    <p>The code window below has two HTML pages, they are linked together using a hyperlink created by an anchor tag.  There is also an extrenal hyperlink on the page that uses an external address.</p>
+
+                    <iframe src="https://trinket.io/embed/html/06c6adfaeaab" class="trinket" allowfullscreen></iframe>
+
+                    <h2>IDs and Anchor Tags</h2>
+                    <p>Anchor tags can also be used to create jump links.  These are links that take you to a specific section of a webpage.  This is done by giving the section you want to link to an ID, and then using that ID in
+                        the anchor tag.  Use the 'id' attribute on any tag in the body of the website, give it a name.  When you create the link earlier in the webpage, use the name of the id with a '#' in front of it to link to 
+                        the ID that you created.The code window below shows an example of this.</p>
+
+                    <p><i>Note: I have used &lt;div&gt; tags in the code below.  These tags are used to divide the website into sections.  It is common to use IDs on this kind of tag.</i></p>
+
+                    <iframe src="https://trinket.io/embed/html/7bea6366bcaf" class="trinket" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2019  Q18(c)</h2>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(c)</th>
+                            <td> 
+                                <p>During testing it was found that the external hyperlink shown below did 
+                                not navigate to the Scottish Basketball League website.</p>
+                                <div class="htmlCode">
+                                    <p style="text-align:center;">&lt;a href="ScottishBasketballLeague.html"&gt;Scottish Basketball League&lt;/a&gt;</p>
+                                </div>
+                                <p>Describe the problem with the addressing that has been highlighted by 
+                                this testing.</p>
+                            </td>
+                            <th rowspan="2">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <p>This hyperlink shown here uses relative addressing rather than absolute addressing.  Absolute addressing is required for an external hyperlink as it uses the full webaddress for the 
+                                        webpage.  The address in the question is just points to a webpage in the same folder as the current webpage.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+                    <h2>Past Paper Question - 2018 Q18 (f)</h2>
+                    <table>
+                        <tr>
+                            <th rowspan="5" width="30px">(c)</th>
+                            <td colspan="2"> 
+                                <p>The user can return to the Home page from the Junior Club page.</p>
+                            </td>
+                            <th rowspan="5">2</th>
+                        </tr>
+                        <tr>
+                            <th>(i)</th>
+                            <td>State the type of hyperlink that has been used to return to the 
+                            Home page.</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="hiddenElement answer2">
+                                    <p>Internal</p>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>(ii)</th>
+                            <td>State the type of addressing that has been used in the hyperlink.</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="hiddenElement answer2">
+                                    <p>Relative</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

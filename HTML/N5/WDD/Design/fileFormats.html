@@ -135,7 +135,7 @@
                                     <li>more control over the bitrate of doing video editing.</li>
                                 </ul>
                             </td>
-                            <td><video height="240" width="320" controls><source src="/Files/Video/aviExample.avi" type="video/x-msvideo">Your browser does not support the video format.</video></td>
+                            <td><img class="cImg" style="max-width:300px" src="/Images/N5/WDD/avi.jpg" alt="AVI"/></td>
                         </tr>
                         <tr>
                             <td style="text-align:center; background-color:lightgreen;"><b>MP4</b> (MPEG (Moving Picture Experts Group)Part 14)</td>
@@ -148,41 +148,106 @@
                                     <li>Great for online streaming.</li>
                                 </ul>
                             </td>
-                            <td><video height="240" width="320" controls><source src="/Files/Video/mp4example.mp4" type="video/mp4" codecs="avc1.42E01E, mp4a.40.2">Your browser does not support the video format.</video></td>
+                            <td><img class="cImg" style="max-width:250px" src="/Images/N5/WDD/mp4.jpg" alt="MP4"/></td>
                         </tr>
                     </table>
-                    
-                    <h3>Past Paper Question - 2023 Q19(a)</h3>
-                    <p>The Vulpes fox charity would like a website to increase public knowledge of foxes.</p>
+                     <iframe width="560" height="315" style="display:block; margin:auto;" src="https://www.youtube.com/embed/tlHkTpw49FI?si=vn0alayF-fuXwjIQ" title="YouTube video player" frameborder="0" 
+                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
+                    <h2>Factors Effecting File Size</h2>
+                    <h3>Images</h3>
+                    <div class="sideBySide" style="justify-content:space-between;">
+                        <div>
+                            <ul>
+                                <li><b>Resolution</b> - The more pixels are used in the image, the higher the file size of the image will be.</li>
+                                <li><b>Colour Depth</b> - Images with a larger colour depth use a greater number of bits to represent the colour of each pixel.  The quality will be better since more colours are available, but the file    
+                                    size will be larger.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <td><img style="max-width:500px" src="/Images/N5/WDD/imageCompression.png" alt="Image Compression"/></td>
+                        </div>
+                    </div>
+
+                    <h3>Audio</h3>                    
+                    <ul>
+                        <li><b>Sample Rate</b> - Higher sample rates (e.g., 44.1 kHz vs 22 kHz) capture more audio details, increasing the file size.</li>
+                        <li><b>Bit Depth</b> - Greater bit depth (e.g., 16-bit vs 24-bit) offers higher sound quality but results in larger files.</li>
+                        <li><b>Channels</b> -  Stereo (2 channels) audio files are smaller than surround sound (e.g., 5.1 channels) audio files.</li>
+                    </ul>
+
+                    <h3>Videos</h3>
+                    <ul>
+                        <li><b>Resolution</b> - Higher resolutions (e.g., 1080p vs 4K) lead to bigger file sizes.</li>
+                        <li><b>Framerate</b> - More frames per second (e.g., 60fps vs 30fps) increase file size.</li>
+                        <li><b>Bit Rate</b> - Higher bit rates ensure better quality but result in larger file sizes.</li>
+                        <li><b>Audio Integration</b> - Embedded audio increases file size depending on its quality and compression.</li>
+                        <li><b>Duration</b> - Longer videos naturally have larger sizes.</li>
+                    </ul>
+
+                    <h2>Compression</h2>
+                    <h3>What is Compression?</h3>
+                    <p>Compression is a technique used to reduce the size of data or files without completely losing their functionality or purpose. This process is widely applied across images, audio, video, and even text to make 
+                        them easier to store, transfer, or process.</p>
+                    <p>It works by identifying patterns or redundancies within the data and replacing them with more efficient representations. There are two types of compression:</p>
+
+                    <ul>
+                        <li><b>Lossless Compression</b> - This method tries to reduce the size of the file without losing any data or quality. It is commonly used for text files, images, and audio files where preserving the 
+                            original data is crucial.</li>
+                        <li><b>Lossy Compression</b> - This method reduces file size by discarding some data, which results in a loss of quality. It is often used for images and video files where a slight loss in quality is 
+                            acceptable to achieve a significant reduction in file size.</li>
+                    </ul>
+
+                    <h3>Why use compression?</h3>
+                    <ul>
+                        <li>Many files are large – e.g. graphic files, audio files or video files</li>
+                        <li>Compressed files use less space on backing storage and in RAM</li>
+                        <li>Compressed files are quicker to transfer across a network</li>
+                    </ul>
+
+                    
+                    
+                    <h3>Past Paper Question - 2022 Q18(d) (i) and (ii)</h3>
+                    <p>The Dog Day Care Centre uploads an image of their dog of the week.</p>
+                    <img class="cImg" style="max-width:500px;" src="/Images/N5/WDD/PPfileFormat.jpg" alt="Past Paper Q18(d)"/>
+                    <p>During testing, the dog of the week image causes the web page to load slowly because the file size is very large</p>
+                    
                     <table>
                         <tr>
-                            <th rowspan="2" width="30px">(a)</th>
-                            <td><p>The following content is required.</p>
-                                <table class="borderless">
-                                    <td>The website will have pages about different types of foxes where users 
-                                    can view pictures and listen to the sounds made by each fox. The charity 
-                                    logo needs to be visible at the top of each page</td>
-                                </table>
-                                <p>Identify a functional requirement of the above website.</p>
+                            <th rowspan="2" width="30px">(i)</th>
+                            <td>
+                                <p>The image has a 24-bit colour depth and does not support transparency.</p>
+                                <p>State a file type used for this image.</p>
                             </td>
                             <th rowspan="2">1</th>
                         </tr>
                         <tr>
                             <td>
                                 <div class="hiddenElement answer1">
-                                    <p><b>One mark for any one from:</b></p>
-                                    <p>The website must...</p>
-                                    <ul>
-                                        <li>display the charity logo.</li>
-                                        <li>play sounds of foxes.</li>
-                                        <li>display pictures of foxes.</li>
-                                    </ul>
+                                    <p>JPG</p>
                                 </div>
                             </td>
                         </tr>
                     </table>
                     <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(ii)</th>
+                            <td>
+                                <p>Other than the colour depth, state one reason why this image has a large file size.</p>
+                            </td>
+                            <th rowspan="2">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer2">
+                                    <p>The image has a very large resolution (4000x2500 pixels).  With a large number of pixels the quality of the image will be high, but the file size will be much larger.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Basic HTML Tags</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="../../../Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Basic HTML Tags</h1></div>
+                <div class="contentContainer">
+                    <h2>What are HTML Tags?</h2>
+                    <p>HTML, or Hypertext Markup Language, is the coding language that websites are written in.  An HTML document is essentially just a text file, but it is written in a specific way that can be interpreted as a 
+                        webpage by internet browsers like Chrome, Edge, Firefox and Safari.  HTML files use 'tags' to order to tell the browser program what to display on the website and in what order.  Most tags have an opening
+                        tag and a closing tag, this tells the browser where the start and end of that element on the webpage is.</p>
+
+                        <p>Here is a list of basic tags that you might see in an HTML document.</p>
+
+                        <table>
+                            <tr>
+                                <th width="180">Opening Tag</th>
+                                <th width="180">Closing Tag</th>
+                                <th>Use</th>
+                            </tr>
+                        
+                            <tr>
+                                <td style="text-align:center;">&lt;!DOCTYPE html&gt;</td>
+                                <td style="text-align:center;"><i>none</i></td>
+                                <td>This tag appears at the top of an HTML document.  It is used to declare the document type and the version of HTML being used.  Developers use it to make sure their website renders correctly.  It 
+                                    does not have a closing tag.</td>
+                            </tr>
+
+                            <tr>
+                                <td style="text-align:center;">&lt;html&gt;</td>
+                                <td style="text-align:center;">&lt;/html&gt;</td>
+                                <td>Signifies the beginning and end of an HTML document.  All of the other tags go (apart from the !DOCTYPE tag), go inside the html tags.</td>
+                            </tr>
+                            
+                            <tr>
+                                <td style="text-align:center;">&lt;head&gt;</td>
+                                <td style="text-align:center;">&lt;/head&gt;</td>
+                                <td>This tag identifies the webpage's header - the part of the webpage that does not appear in your browser.  It is where you place all the metadata for your website (the data about the site).  The 
+                                    title goes here, since that appears in the tab for the webpage and not on the site itself.  This is also where you can place links to stylesheets, and internal CSS and JavaScript functions.</td>
+                            </tr>
+
+                            <tr>
+                                <td style="text-align:center;">&lt;title&gt;</td>
+                                <td style="text-align:center;">&lt;/title&gt;</td>
+                                <td>The title tags go inside the header tag, and define the name of the webpage.  This name will appear in the tab at the top of the browser when the webpage is open.</td>
+                            </tr>
+                            
+                            <tr>
+                                <td style="text-align:center;">&lt;body&gt;</td>
+                                <td style="text-align:center;">&lt;/body&gt;</td>
+                                <td>Defines the main body of your webpage.  Everything in between the two body tags will be displayed on the webpage.</td>
+                            </tr>
+
+                            <tr>
+                                <td style="text-align:center;">&lt;h1&gt;</td>
+                                <td style="text-align:center;">&lt;/h1&gt;</td>
+                                <td>This is largest heading tag. It goes inside the body tag so that the text will appear correctly on the webpage.  By default the text shown by this tag is a bold Sans-serif font. Its default size
+                                    is 32px.</td>
+                            </tr>
+
+                            <tr>
+                                <td style="text-align:center;">&lt;h6&gt;</td>
+                                <td style="text-align:center;">&lt;/h6&gt;</td>
+                                <td>This is smallest heading tag. By default the text shown by this tag is a bold Sans-serif font. Its default size is 10-12px depending on the browser.</td>
+                            </tr>
+
+                            <tr>
+                                <td style="text-align:center;">&lt;p&gt;</td>
+                                <td style="text-align:center;">&lt;/p&gt;</td>
+                                <td>Any text in between these two tags will appear as standard paragraph text on your web page. This will appear as default san-serif non-bold font with a size of about 16px.</td>
+                            </tr>
+                        </table>
+                    <h2>Layout of an HTML document</h2>
+                    <p>A basic html document is laid out like this:</p>
+                    <img class="cImg" style="max-width:1200px" src="/Images/N5/WDD/webpageLayout.jpg" alt="Basic Layout of a webpage">
+                    <p>The code window below shows a webpage with this layout.  Try adding more text to the body using the &lt;h1&gt; and &lt;p&gt; tags to see how the webpage changes when you run it.</p>
+
+                    <iframe src="https://trinket.io/embed/html/26ce8c2d72ea" class="trinket" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

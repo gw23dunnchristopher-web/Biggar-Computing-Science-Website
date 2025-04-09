@@ -134,7 +134,7 @@
 /* Level 3 active: Highlight level 3 children */
 .sidebar-menu li:nth-child(3) .submenu li.active .submenu li.active .submenu li a{ background-color: #0c243c; }
 .sidebar-menu li:nth-child(4) .submenu li.active .submenu li.active .submenu li a { background-color: #330f19; }
-.sidebar-menu li:nth-child(5) .submenu li.active .submenu li.active .submenu li a{ background-color: #0c2d17; }
+.sidebar-menu li:nth-child(5) .submenu li.active .submenu li.active .submenu li a{ background-color: #06140a; }
 .sidebar-menu li:nth-child(6) .submenu li.active .submenu li.active .submenu li a{ background-color: #3f300e; }
 
 /* hover effect */

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Lists</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="../../../Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Lists</h1></div>
+                <div class="contentContainer">
+                    <h2>Types of List</h2>
+                    <p>There are two types of list that are used in HTML - ordered lists and unordered lists.</p>
+                    <ul>
+                        <li><b>Ordered Lists</b> - These are numbered lists, like a list of instructions numbered 1, 2, 3, 4 or a, b, c, d.</li>
+                        <li><b>Unordered Lists</b> - These lists have no particular order, they are just bullet points.</li>
+                    </ul>
+
+                    <h2>List in HTML</h2>
+                    <p>Lists in HTML are created using the &lt;ul&gt; and &lt;ol&gt; tags.  The &lt;ul&gt; tag is used for unordered lists, and the &lt;ol&gt; tag is used for ordered lists.  Each item in the list is created using  
+                        the &lt;li&gt; tag.</p>
+                    
+                    <p>Here is a table showing the code for lists and how they would appear in HTML:</p>
+
+                    <table style="width:650px">
+                        <tr>
+                            <th width="200"></th>
+                            <th>HTML Code</th>
+                            <th>Output</th>
+                        </tr>
+                        <tr>
+                            <th>Unordered List</th>
+                            <td style="padding-left:40px;" class="codeText">
+                                &lt;ul&gt;<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;Item 1&lt;/li&gt;<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;Item 2&lt;/li&gt;<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;Item 3&lt;/li&gt;<br>
+                                &lt;/ul&gt;
+                            </td>
+                            <td>
+                                <ul style="list-style-type:disc;">
+                                    <li>Item 1</li>
+                                    <li>Item 2</li>
+                                    <li>Item 3</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Ordered List</th>
+                            <td style="padding-left:40px;" class="codeText">
+                                &lt;ol&gt;<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;Item 1&lt;/li&gt;<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;Item 2&lt;/li&gt;<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&lt;li&gt;Item 3&lt;/li&gt;<br>
+                                &lt;/ol&gt;
+                            </td>
+                            <td>
+                                <ol>
+                                    <li>Item 1</li>
+                                    <li>Item 2</li>
+                                    <li>Item 3</li>
+                                </ol>
+                            </td>
+                        </tr>
+                    </table>
+                    <p>Below is a code window showing the code for ordered and unordered lists:</p>
+                    <iframe src="https://trinket.io/embed/html/27df44e7a6dc" class="trinket" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2019 Q9</h2>
+                    <p>The HTML code below is used to create a web page.</p>
+                    
+                    <div class="htmlCode" style="width:400px">
+                        <p>&lt;html&gt;</p>
+                        <p>&lt;head&gt;</p>
+                        <p>&lt;title&gt;French Facts&lt;/title&gt;</p>
+                        <p>&lt;style&gt;</p>
+                        <p>h1 {text-align:right;}</p>
+                        <p>&lt;/style&gt;</p>
+                        <p>&lt;/head&gt;</p>
+                        <br>
+                        <p>&lt;body&gt;</p>
+                        <p>&lt;h1&gt;France&lt;/h1&gt;</p>
+                        <p>&lt;p&gt;Facts about France&lt;/p&gt;</p>
+                        <br>
+                        <p>&lt;ul&gt;</p>
+                        <p>&lt;li&gt;Capital: Paris&lt;/li&gt;</p>
+                        <p>&lt;li&gt;Population: 67 m&lt;/li&gt;</p>
+                        <p>&lt;li&gt;Flag: tricolour&lt;/li&gt;</p>
+                        <p>&lt;/ul&gt;</p>
+                        <br>
+                        <p>&lt;/body&gt;</p>
+                        <p>&lt;/html&gt;</p>
+                    </div> 
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">9</th>
+                            <td>
+                                <p>Draw how this web page will look when viewed in a browser</p>
+                                <p>Some of the content has already been added</p>
+                                <img class="cImg" src="/Images/N5/WDD/PPlists.jpg" alt="2019 Q9"/>
+                            </td>
+                            <th rowspan="2" width="30px">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <img class="cImg" width="600px" src="/Images/N5/WDD/PPlistsA.jpg" alt="2019 Q9 Answer"/>
+                                    <ul>
+                                        <li><b>1 mark</b> - 'France' heading above 'Facts about France:', right-aligned.</li>
+                                        <li><b>1 mark</b> - Bullet pointed list below 'Facts about France:' with three items in the correct order, left-aligned.</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

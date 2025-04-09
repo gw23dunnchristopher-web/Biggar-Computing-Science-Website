@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Audio and Video Tags</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="../../../Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Audio and Video Tags</h1></div>
+                <div class="contentContainer">
+                    <h2>Audio and Video</h2>
+                    <p>Websites can also use tags to play audio or display video. Video is probably the more common of the two, as it is more engaging than audio.  However, audio can be used to play music or sound effects.</p>
+                    <p>One way to display video on a website is to embed it using iframes.  Most websites like YouTube have a way to share videos by copying the embed code and pasting it directly into your HTML code.  However, in                         this section we are going to look at using the &lt;audio&gt; and &lt;video&gt; tags to display those elements.</p>
+
+                    <h2>The Audio Tag</h2>
+                    <p>The &lt;audio&gt; tag has an opening and closing tag, with a &lt;source&gt; tag in between the two.  The &lt;source&gt; tag has two attributes: src& and type.  The src attribute is the file path to the audio                         file, and the type attribute is the file type of the audio file. The &lt;audio&gt; itself has several attributes that you can use to control how the audio is played:</p>
+                    <ul>
+                        <li><b>autoplay</b> - If this attribute is present, the audio will start playing as soon as the page loads.</li>
+                        <li><b>controls</b> - If this attribute is present, the audio will have controls to play, pause, and adjust the volume.</li>
+                        <li><b>loop</b> - If this attribute is present, the audio will loop indefinitely.</li>
+                    </ul>
+
+                    <p>Look at this example:</p>
+                    <img class="cImg" style="max-width:100%;" src="/Images/N5/WDD/audioTag.png" alt="Audio Tag"/>
+
+                    <p>This will display the audio player below:</p>
+                    
+                    <audio class="cImg" controls>
+                        <source src="/Files/Audio/sampleMP3.mp3" type="audio/mpeg">
+                    </audio>
+                    <p>The code window below shows the use of the audio tag to play a file on a different website.  Note the URL in the source:</p>
+                    <iframe src="https://trinket.io/embed/html/76fb26ba5031" class="trinket" allowfullscreen></iframe>
+
+                    <h2>The Video Tag</h2>
+                    <p>The &lt;video&gt; tag is very similar to the &lt;audio&gt; tag.  It has an opening and closing tag, with a &lt;source&gt; tag in between the two.  The main difference is that with a video tag, you can 
+                        control the width and height of the video, using those attributes.</p>
+                    <p>Here is an example of a video tag:</p>
+                    <img class="cImg" style="max-width:100%;" src="/Images/N5/WDD/videoTag.png" alt="Video Tag"/>
+
+                    <p>This will display the video player below:</p>
+                    <video class="cImg" height="480" width="640" controls>
+                        <source src="https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_5MB.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <p>The code window below uses an online source on a different website to play the video:</p>
+                    <iframe src="https://trinket.io/embed/html/75918f0cd719" class="trinket" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2019 Q15(c)(ii)</h2>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(ii)</th>
+                            <td>
+                                <p>The code below is added.</p>
+                                <p>Describe two purposes of this code.</p>
+                                <div class="htmlCode">
+                                    <p>&lt;video width="500" height="250" controls&gt;</p>
+                                    <p>&lt;source src="starFrostFree.mp4" type="video/mp4"&gt;</p>
+                                    <p>&lt;/video&gt;</p>
+                                </div>
+                            </td>
+                            <th rowspan="2" width="30px">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <p>Any two from:</p>
+                                    <ul>
+                                        <li>specifies the width of the video (500) pixels</li>
+                                        <li>specifies the height of the video (250) pixels</li>
+                                        <li>locates/displays the file (called “starFrosFreet.mp4”)</li>
+                                        <li>shows video with control buttons</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+                    <h2>Past Paper Question - 2023 Q19(b) (i)</h2>
+                    <p>All the sounds used on the website are stored in a folder called ‘media’ in the following locations.</p>
+                    <img class="cImg" src="/Images/N5/WDD/PPaudio1.jpg" alt="2023 Q19(b)"/>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(i)</th>
+                            <td>
+                                <p>Using this structure, complete the following code to play the sound 
+                                ‘redFoxCry.mp3’ when the play button is pressed on the redFox web 
+                                page.</p>
+                                <div class="htmlCode">
+                                    <p>&lt;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u> controls&gt;</p>
+                                    <p>&lt;source src="<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"</u></p> 
+                                    <p>type="audio/mpeg"&gt;</p>
+                                    <p>&lt;/<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>&gt;</p>
+                                </div>
+                            </td>
+                            <th rowspan="2" width="30px">3</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer2">
+                                    <p class="codeText">&lt;<u>audio</u> controls&gt;</p>
+                                    <p class="codeText">&lt;source src="<u>/media/redFoxCry.mp3</u>"</p> 
+                                    <p class="codeText">type="audio/mpeg"&gt;</p>
+                                    <p class="codeText">&lt;/<u>audio</u>&gt;</p>
+
+                                    <ul>
+                                        <li><b>1 mark</b> - audio opening and closing tags</li>
+                                        <li><b>1 mark</b> - correct path (/media/)</li>
+                                        <li><b>1 mark</b> - correct filename and type (redFoxCry.mp3)</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

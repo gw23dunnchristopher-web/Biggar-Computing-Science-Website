@@ -70,11 +70,6 @@ h3 {
         margin: 0 auto;
     }
     
-    table {
-        width: 100%;
-        max-width: 100%;
-    }
-    
     img {
         max-width: 100%;
         height: auto;
@@ -178,8 +173,7 @@ table {
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
         font-size: 12px;
-        width: 100%;
-        max-width: 100%;
+        width: 600px;
     }
     
     table th, table td {
@@ -187,7 +181,7 @@ table {
     }
     
     img {
-        max-width: 100%;
+        max-width: 400px;
         height: auto;
     }
     
@@ -207,7 +201,7 @@ table {
     }
 
     .contentContainer img {
-        max-width: 100%;
+        max-width: 400px;
         height: auto;
         margin: 10px auto;
         display: block;
@@ -215,7 +209,6 @@ table {
 
     .rImg, .lImg, .cImg {
         float: none;
-        max-width: 100%;
         margin: 10px auto;
         display: block;
     }
@@ -481,6 +474,8 @@ ol li {
     border:1px solid black;
     margin:auto; 
     margin-top:10px;
+    padding:20px;
+    font-family:"Courier New", Courier, monospace;
 }
 
 .htmlCode pre{
