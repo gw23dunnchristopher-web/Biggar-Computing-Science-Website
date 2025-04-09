@@ -168,29 +168,16 @@ table {
 
 @media (max-width: 768px) {
     table {
-        width: 100%;
-        max-width: 100%;
-        font-size: 14px;
-        margin: 10px 0;
-        table-layout: fixed;
-        word-wrap: break-word;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        font-size: 12px;
+        width: 600px;
     }
     
     table th, table td {
-        padding: 8px;
-        font-size: 12px;
-        word-break: break-word;
-        max-width: 120px;
-    }
-
-    .binaryTable {
-        table-layout: auto;
-    }
-    
-    .binaryTable th, .binaryTable td {
-        padding: 4px;
-        font-size: 11px;
-        min-width: auto;
+        padding: 5px;
     }
     
     img {
