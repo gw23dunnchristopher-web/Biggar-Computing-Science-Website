@@ -108,43 +108,61 @@ function applyButtonSwitch(element){
     }
 }
 
+function getActiveStyles() {
+    const buttons = document.querySelectorAll('.answerButton');
+    return {
+        external: Array.from(buttons).find(b => b.parentElement.previousElementSibling.className.includes('external'))?.innerHTML === 'Remove',
+        internal: Array.from(buttons).find(b => b.parentElement.previousElementSibling.className.includes('internal'))?.innerHTML === 'Remove',
+        inline: Array.from(buttons).find(b => b.parentElement.previousElementSibling.className.includes('inline'))?.innerHTML === 'Remove'
+    };
+}
+
+function applyExternalCSS() {
+    const exampleText = document.getElementById('exampleText');
+    const activeStyles = getActiveStyles();
+    
+    // Only apply if no higher precedence styles are active
+    if (activeStyles.external && !activeStyles.internal && !activeStyles.inline) {
+        exampleText.style.color = 'blue';
+        exampleText.style.textAlign = 'left';
+        exampleText.style.fontSize = '14px';
+    }
+}
+
+function applyInternalCSS() {
+    const exampleText = document.getElementById('exampleText');
+    const activeStyles = getActiveStyles();
+    
+    // Apply font size if no inline CSS is active
+    if (activeStyles.internal && !activeStyles.inline) {
+        exampleText.style.fontSize = '16px';
+    }
+}
+
+function applyInlineCSS() {
+    const exampleText = document.getElementById('exampleText');
+    const activeStyles = getActiveStyles();
+    
+    // Inline CSS always takes precedence when active
+    if (activeStyles.inline) {
+        exampleText.style.color = 'red';
+        exampleText.style.textAlign = 'center';
+        exampleText.style.fontSize = '20px';
+    }
+}
+
 function applyCSS(type) {
     const exampleText = document.getElementById('exampleText');
     
-    // External CSS styles
-    if (type === 'external') {
-        if (exampleText.style.color !== 'blue') {
-            exampleText.style.color = 'blue';
-            exampleText.style.textAlign = 'left';
-            exampleText.style.fontSize = '14px';
-        } else {
-            exampleText.style.color = '';
-            exampleText.style.textAlign = '';
-            exampleText.style.fontSize = '';
-        }
-    }
+    // Reset all styles first
+    exampleText.style.color = '';
+    exampleText.style.textAlign = '';
+    exampleText.style.fontSize = '';
     
-    // Internal CSS styles
-    if (type === 'internal') {
-        if (exampleText.style.fontSize !== '16px') {
-            exampleText.style.fontSize = '16px';
-        } else {
-            exampleText.style.fontSize = '';
-        }
-    }
-    
-    // Inline CSS styles
-    if (type === 'inline') {
-        if (exampleText.style.color !== 'red') {
-            exampleText.style.color = 'red';
-            exampleText.style.textAlign = 'center';
-            exampleText.style.fontSize = '20px';
-        } else {
-            exampleText.style.color = '';
-            exampleText.style.textAlign = '';
-            exampleText.style.fontSize = '';
-        }
-    }
+    // Apply styles in order of precedence
+    applyExternalCSS();
+    applyInternalCSS();
+    applyInlineCSS();
 }
 
 
