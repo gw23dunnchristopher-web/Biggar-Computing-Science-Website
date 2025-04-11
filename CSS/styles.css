@@ -100,24 +100,6 @@ h3 {
     flex: 1;
 }
 
-@media (max-width: 768px) {
-    .contentContainer {
-        padding: 5px;
-        font-size: 14px;
-    }
-    
-    .contentContainer img {
-        max-width: 100%;
-        height: auto;
-    }
-    
-    .contentContainer table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-    }
-}
-
 .contentContainer p{
     padding:10px;
 }
@@ -166,53 +148,6 @@ table {
     margin-bottom:30px;
 }
 
-@media (max-width: 768px) {
-    table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-        font-size: 12px;
-        width: 600px;
-    }
-    
-    table th, table td {
-        padding: 5px;
-    }
-    
-    img {
-        max-width: 400px;
-        height: auto;
-    }
-    
-    .ImgAndText {
-        flex-direction: column;
-    }
-    
-    .ImgAndText img {
-        width: 100%;
-        max-width: 300px;
-        margin: 10px auto;
-    }
-    
-    .topicButton {
-        width: 100%;
-        max-width: 100%;
-    }
-
-    .contentContainer img {
-        max-width: 400px;
-        height: auto;
-        margin: 10px auto;
-        display: block;
-    }
-
-    .rImg, .lImg, .cImg {
-        float: none;
-        margin: 10px auto;
-        display: block;
-    }
-}
 
 table tr th, table tr td {
     border:1px solid black;
@@ -267,31 +202,6 @@ table tr th p, table tr td p {
     display:none;
 }
 
-@media (max-width: 768px) {
-    .breakdown {
-        width: 100%;
-        margin-left: auto;
-        margin-right: auto;
-        font-size: 14px;
-        padding: 5px;
-    }
-    .breakdown table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-        font-size: 10px;
-        width: 100%;
-        max-width: 100%;
-    }
-    
-    .breakdown th, .breakdown td {
-        padding: 5px;
-    }
-    .breakdown table td {
-        white-space: nowrap;
-    }
-}
 
 .specifications th, .specifications tr td {
     border:1px solid;
@@ -302,21 +212,6 @@ table tr th p, table tr td p {
     padding:20px;
 }
 
-@media (max-width: 768px) {
-    .specifications {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-        font-size: 12px;
-        width: 100%;
-        max-width: 100%;
-    }
-    
-    .specifications th, .specifications td {
-        padding: 5px;
-    }
-}
 
 .specifications tr td ul {
     list-style-type:disc;
@@ -465,9 +360,7 @@ ol li {
 }
 
 @media (max-width: 768px) {
-    .sideBySide {
-        flex-direction: column;
-    }
+   
 }
 
 .htmlCode {
@@ -488,4 +381,97 @@ ul li ul li{
 
 ul li ul li ul li {
     list-style-type:disc;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+    table {
+        display: block;
+        border:none;
+        overflow-x: auto;
+        white-space: wrap;
+        -webkit-overflow-scrolling: touch;
+        font-size: 12px;
+        max-width: 600px;
+    }
+
+    table th, table td {
+        padding: 5px;
+        max-width:400px;
+    }
+
+    img {
+        max-width: 400px;
+        height: auto;
+    }
+
+    .ImgAndText {
+        flex-direction: column;
+    }
+
+    .ImgAndText img {
+        width: 100%;
+        max-width: 300px;
+        margin: 10px auto;
+    }
+
+    .topicButton {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .contentContainer img {
+        max-width: 400px;
+        height: auto;
+        margin: 10px auto;
+        display: block;
+    }
+
+    .rImg, .lImg, .cImg {
+        float: none;
+        margin: 10px auto;
+        display: block;
+    }
+
+    .breakdown {
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        font-size: 14px;
+        padding: 5px;
+    }
+    .breakdown table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        font-size: 10px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .breakdown th, .breakdown td {
+        padding: 5px;
+    }
+    .breakdown table td {
+        white-space: nowrap;
+    }
+
+    .specifications {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        font-size: 12px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .specifications th, .specifications td {
+        padding: 5px;
+    }
+
+    .sideBySide {
+        flex-direction: column;
+    }
 }

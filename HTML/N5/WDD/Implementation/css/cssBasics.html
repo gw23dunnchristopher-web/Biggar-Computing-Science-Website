@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - CSS Basics</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>CSS Basics</h1></div>
+                <div class="contentContainer">
+                    <h2>What is CSS?</h2>
+                    <p>CSS, or Cascading Style Sheets, is a language used to style and format the appearance of webpages.  While HTML is responsible for the structure and content of the page, CSS defines how it looks.
+                    With CSS, you can control the colours used on your website, the style of the font, text alignment, background colours and many other elements.  The 'Cascading' part of the name refers to hwo styles 
+                    are applied in a specific order of importance.  There are three kinds of CSS, which I will list here in order:</p>
+
+                    <ul>
+                        <li><b>External CSS</b> - CSS rules are stored in the an external .css file which is then linked to the webpage.  This is a really useful kind of CSS as it can allow you to apply the same styles to multiple
+                        webpages on your website.  It is the least important kind of CSS to the browser, as its styles will be overwritten by internal and inline CSS.</li>
+                        <li><b>Internal CSS</b> - This kind of CSS is used to apply style to a single webpage.  The style rules are kept in the &lt;head&gt; tag, inside the &lt;style&gt; tag.  It will override external CSS, but not 
+                            inline CSS.</li>
+                        <li><b>Inline CSS</b> - It is inline because the styles are inside one of the tags on the webpage - the styles only affect that tag and nothing else.  This will override External and Internal CSS.</li>
+                    </ul>
+
+                    <h2>Internal and External CSS rules</h2>
+                    <h3>External CSS</h3>
+                    <p>The file containing External CSS must be linked to your webpages.  The link to the CSS file goes in the &lt;head&gt; tag of the webpage.  The link tag has two attributes:</p>
+                    <ul>
+                        <li><b>rel</b> - This attribute is set to "stylesheet".</li>
+                        <li><b>href</b> - This attribute is the file path to the CSS file.</li>
+                        <li><b>type</b> - This attribute is set to "text/css".</li>
+                    </ul>
+                    <p>Here is an example of a link to an external CSS file:</p>
+                    <div style="width:800px;" class="htmlCode">
+                        <p style="text-align:center;">&lt;link rel="stylesheet" href="/CSS/styles.css" type="text/css"&gt;</p>
+                    </div>
+                    <br>
+                    <p>The rules contained in the CSS file consist of a selector and declarations.  The selector denotes which tag will be affected by the rule, and the declarations are the elements that the rule will change, 
+                        such as the colour of the text or its alignment. Note that, because HTML and CSS were originally created in America, words will use American spellings.  For example, the word 'colour' will be spelled 
+                        'color'.  Here is an example of a CSS rule:</p>
+    
+                    <img class="cImg" style="max-width:400px;" src="/Images/N5/WDD/cssrule.jpg" alt="CSS Rule"/>
+                 
+                    <p>The selector used here is 'p', so this will select all of the &lt;p&gt; tags on the page.  It will changed the text so that it is red, the text will be centered, and the font will be set to size 14. This
+                    will be applied to all of the &lt;p&gt; on any page that is linked to the .css file using the above code.</p>
+
+                    <h3>Internal CSS</h3>
+                    <p>Internal CSS is written inside the &lt;style&gt; tags, which are inside the &lt;head&gt; tags.  Here is an example of internal CSS:</p>
+                    <div style="width:400px;" class="htmlCode">
+                        <p>&lt;style&gt;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;p {</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color:red;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;text-align:center;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font-size:14px;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+                        <p>&lt;/style&gt;</p>
+                    </div>
+                    <p>This will effect all of the &lt;p&gt; tags on the page that has the style tags and the rule itself in the head.</p>
+
+                    <h2>Inline CSS</h2>
+                    <p>Inline CSS is written inside the tag that you want to style.  The style attribute is used to define the CSS rules.  Here is an example of inline CSS:</p>
+
+                    <div style="max-width:900px;text-align:center;" class="htmlCode">
+                        <p>&lt;p style="color:red; text-align:center; font-size:14px;"&gt;Styled text&lt;/p&gt;</p>
+                    </div>
+
+                    <p>This will only effect the &lt;p&gt; tag that it is inside.</p>
+
+                    <h2>Example of External, Internal and Inline CSS</h2>
+                    <p>In the table below, you will see different rules.  Click on the button below each one to apply that style to the text, note how the inline CSS overrides the other other two, and the Internal CSS overrides
+                    the external CSS.</p>
+
+                    <table>
+                        <tr>
+                            <th style="width:33%">External CSS</th>
+                            <th style="width:33%">Internal CSS</th>
+                            <th style="width:33%">Inline CSS</th>
+                        </tr>
+                        <tr class="codeText">
+                            <td>
+                                <p>h1 {</p>
+                                <p>&nbsp;&nbsp;&nbsp;&nbsp;color:blue;</p>
+                                <p>&nbsp;&nbsp;&nbsp;&nbsp;text-align:left;</p>
+                                <p>&nbsp;&nbsp;&nbsp;&nbsp;font-size:14px;</p>
+                                <p>}</p>
+                            </td>
+                            <td >
+                                <p>&lt;style&gt;</p>
+                                <p>&nbsp;&nbsp;&nbsp;&nbsp;h1 {</p>
+                                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;font-size:16px;</p>
+                                <p>&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+                                <p>&lt;/style&gt;</p>
+                            </td>
+                            <td>
+                                <p>&lt;h1 style="color:red; text-align:center; font-size:20px;"&gt;This text will be styled.&lt;/h1&gt;</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> <div class="answerButton" onClick="applyButtonSwitch(this); applyCSS('external')">Apply</div></td>
+                            <td> <div class="answerButton" onClick="applyButtonSwitch(this); applyCSS('internal')">Apply</div></td>
+                            <td> <div class="answerButton" onClick="applyButtonSwitch(this); applyCSS('inline')">Apply</div></td>
+                        </tr>
+                    </table>
+
+                    <table>
+                        <tr>
+                            <td><h1 id="exampleText">This text will be styled.</h1></td>
+                        </tr>
+                    </table>
+                    
+                    
+                    <h2>Past Paper Question - 2023 Q19(a)</h2>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td>
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

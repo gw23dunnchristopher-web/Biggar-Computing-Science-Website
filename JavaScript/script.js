@@ -97,6 +97,19 @@ function answerButtonSwitch(element){
     }
 }
 
+function applyButtonSwitch(element){
+    if (element.innerHTML == "Apply"){
+        element.innerHTML = "Remove";
+        element.style.backgroundImage = "linear-gradient(to bottom, lightgreen, green)";
+
+    }
+    else{
+        element.innerHTML = "Apply";
+        element.style.backgroundImage = "linear-gradient(to bottom, lightgrey, lightslategrey)";
+    }
+}
+
+
 function toggleVisibility(className) {
     const elements = document.getElementsByClassName(className);
     for (let i = 0; i < elements.length; i++) {
