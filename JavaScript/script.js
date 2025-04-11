@@ -125,7 +125,7 @@ function applyExternalCSS() {
     if (activeStyles.external && !activeStyles.internal && !activeStyles.inline) {
         exampleText.style.color = 'blue';
         exampleText.style.textAlign = 'left';
-        exampleText.style.fontSize = '14px';
+        exampleText.style.fontSize = '30px';
     }
 }
 
@@ -135,7 +135,7 @@ function applyInternalCSS() {
     
     // Apply styles if internal is active and no inline CSS
     if (activeStyles.internal && !activeStyles.inline) {
-        exampleText.style.fontSize = '16px';
+        exampleText.style.fontSize = '40px';
         exampleText.style.textAlign = 'right';
         if (activeStyles.external) {
             exampleText.style.color = 'blue';
@@ -151,7 +151,7 @@ function applyInlineCSS() {
     if (activeStyles.inline) {
         exampleText.style.color = 'red';
         exampleText.style.textAlign = 'center';
-        exampleText.style.fontSize = '20px';
+        exampleText.style.fontSize = '50px';
     }
 }
 
