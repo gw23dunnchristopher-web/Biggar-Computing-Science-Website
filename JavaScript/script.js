@@ -110,45 +110,40 @@ function applyButtonSwitch(element){
 
 function applyCSS(type) {
     const exampleText = document.getElementById('exampleText');
-    const buttons = document.querySelectorAll('.answerButton');
-    const activeStyles = {
-        external: false,
-        internal: false,
-        inline: false
-    };
-
-    // Determine which styles are active
-    buttons.forEach(button => {
-        if (button.innerHTML === 'Remove') {
-            const styleType = button.parentElement.previousElementSibling.className.includes('external') ? 'external' :
-                            button.parentElement.previousElementSibling.className.includes('internal') ? 'internal' : 'inline';
-            activeStyles[styleType] = true;
+    
+    // External CSS styles
+    if (type === 'external') {
+        if (exampleText.style.color !== 'blue') {
+            exampleText.style.color = 'blue';
+            exampleText.style.textAlign = 'left';
+            exampleText.style.fontSize = '14px';
+        } else {
+            exampleText.style.color = '';
+            exampleText.style.textAlign = '';
+            exampleText.style.fontSize = '';
         }
-    });
-
-    // Toggle the clicked style
-    activeStyles[type] = !activeStyles[type];
-
-    // Reset all styles
-    exampleText.style.color = '';
-    exampleText.style.textAlign = '';
-    exampleText.style.fontSize = '';
-
-    // Apply styles in order of precedence
-    if (activeStyles.external) {
-        exampleText.style.color = 'blue';
-        exampleText.style.textAlign = 'left';
-        exampleText.style.fontSize = '14px';
     }
     
-    if (activeStyles.internal) {
-        exampleText.style.fontSize = '16px';
+    // Internal CSS styles
+    if (type === 'internal') {
+        if (exampleText.style.fontSize !== '16px') {
+            exampleText.style.fontSize = '16px';
+        } else {
+            exampleText.style.fontSize = '';
+        }
     }
     
-    if (activeStyles.inline) {
-        exampleText.style.color = 'red';
-        exampleText.style.textAlign = 'center';
-        exampleText.style.fontSize = '20px';
+    // Inline CSS styles
+    if (type === 'inline') {
+        if (exampleText.style.color !== 'red') {
+            exampleText.style.color = 'red';
+            exampleText.style.textAlign = 'center';
+            exampleText.style.fontSize = '20px';
+        } else {
+            exampleText.style.color = '';
+            exampleText.style.textAlign = '';
+            exampleText.style.fontSize = '';
+        }
     }
 }
 
