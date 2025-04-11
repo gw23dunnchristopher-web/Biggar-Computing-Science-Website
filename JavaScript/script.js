@@ -133,9 +133,13 @@ function applyInternalCSS() {
     const exampleText = document.getElementById('exampleText');
     const activeStyles = getActiveStyles();
     
-    // Apply font size if no inline CSS is active
+    // Apply styles if internal is active and no inline CSS
     if (activeStyles.internal && !activeStyles.inline) {
         exampleText.style.fontSize = '16px';
+        if (activeStyles.external) {
+            exampleText.style.color = 'blue';
+            exampleText.style.textAlign = 'left';
+        }
     }
 }
 
