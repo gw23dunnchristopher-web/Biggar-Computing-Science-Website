@@ -111,9 +111,9 @@ function applyButtonSwitch(element){
 function getActiveStyles() {
     const buttons = document.querySelectorAll('.answerButton');
     return {
-        external: Array.from(buttons).find(b => b.parentElement.previousElementSibling.className.includes('external'))?.innerHTML === 'Remove',
-        internal: Array.from(buttons).find(b => b.parentElement.previousElementSibling.className.includes('internal'))?.innerHTML === 'Remove',
-        inline: Array.from(buttons).find(b => b.parentElement.previousElementSibling.className.includes('inline'))?.innerHTML === 'Remove'
+        external: buttons[0].innerHTML === 'Remove',
+        internal: buttons[1].innerHTML === 'Remove',
+        inline: buttons[2].innerHTML === 'Remove'
     };
 }
 
