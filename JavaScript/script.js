@@ -151,7 +151,7 @@ function applyInlineCSS() {
     }
 }
 
-function applyCSS(type) {
+function applyCSS() {
     const exampleText = document.getElementById('exampleText');
     
     // Reset all styles first
