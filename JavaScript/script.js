@@ -151,7 +151,7 @@ function applyInlineCSS() {
     }
 }
 
-function applyCSS() {
+function applyCSS(type) {
     const exampleText = document.getElementById('exampleText');
     
     // Reset all styles first
@@ -160,9 +160,19 @@ function applyCSS() {
     exampleText.style.fontSize = '';
     
     // Apply styles in order of precedence
-    applyExternalCSS();
-    applyInternalCSS();
-    applyInlineCSS();
+    if (type === 'external') {
+        applyExternalCSS();
+    } else if (type === 'internal') {
+        applyInternalCSS();
+    } else if (type === 'inline') {
+        applyInlineCSS();
+    }
+    
+    // Apply other active styles
+    const activeStyles = getActiveStyles();
+    if (type !== 'external' && activeStyles.external) applyExternalCSS();
+    if (type !== 'internal' && activeStyles.internal) applyInternalCSS();
+    if (type !== 'inline' && activeStyles.inline) applyInlineCSS();
 }
 
 
