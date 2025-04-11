@@ -101,11 +101,49 @@ function applyButtonSwitch(element){
     if (element.innerHTML == "Apply"){
         element.innerHTML = "Remove";
         element.style.backgroundImage = "linear-gradient(to bottom, lightgreen, green)";
-
     }
     else{
         element.innerHTML = "Apply";
         element.style.backgroundImage = "linear-gradient(to bottom, lightgrey, lightslategrey)";
+    }
+}
+
+function applyCSS(type) {
+    const exampleText = document.getElementById('exampleText');
+    
+    // External CSS styles
+    if (type === 'external') {
+        if (exampleText.style.color !== 'blue') {
+            exampleText.style.color = 'blue';
+            exampleText.style.textAlign = 'left';
+            exampleText.style.fontSize = '14px';
+        } else {
+            exampleText.style.color = '';
+            exampleText.style.textAlign = '';
+            exampleText.style.fontSize = '';
+        }
+    }
+    
+    // Internal CSS styles
+    if (type === 'internal') {
+        if (exampleText.style.fontSize !== '16px') {
+            exampleText.style.fontSize = '16px';
+        } else {
+            exampleText.style.fontSize = '';
+        }
+    }
+    
+    // Inline CSS styles
+    if (type === 'inline') {
+        if (exampleText.style.color !== 'red') {
+            exampleText.style.color = 'red';
+            exampleText.style.textAlign = 'center';
+            exampleText.style.fontSize = '20px';
+        } else {
+            exampleText.style.color = '';
+            exampleText.style.textAlign = '';
+            exampleText.style.fontSize = '';
+        }
     }
 }
 
