@@ -478,4 +478,12 @@ ul li ul li ul li {
 
 .laws{
     background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 10px;
+}
+
+.arrow {
+    margin-left: auto;
 }
