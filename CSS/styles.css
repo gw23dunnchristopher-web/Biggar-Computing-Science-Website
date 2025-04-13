@@ -484,6 +484,22 @@ ul li ul li ul li {
     padding-right: 10px;
 }
 
+#GDPRPrinciples div {
+    background-color:lightgrey;
+}
+
+#GDPRPrinciples {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    max-width:1000px;
+}
+#GDPRPrinciples ol li{
+    max-width:1000px;
+}
+
 .arrow {
     margin-left: auto;
 }
