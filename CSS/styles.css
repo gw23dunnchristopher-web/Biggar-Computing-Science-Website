@@ -383,6 +383,60 @@ ul li ul li ul li {
     list-style-type:disc;
 }
 
+
+.laws{
+    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 10px;
+}
+
+#GDPRPrinciples li {
+    width: 100%;
+    max-width: 1000px;
+}
+
+#GDPRPrinciples div div{
+    background-color:lightgrey;
+}
+
+#GDPRPrinciples {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    max-width:1000px;
+}
+#GDPRPrinciples ol li{
+    max-width:1000px;
+}
+
+#GDPRPrinciples div ul li{
+    padding-right:50px;
+}
+
+.arrow {
+    margin-left: auto;
+}
+
+.laws .arrow {
+    transition: transform 0.3s;
+}
+
+.laws .arrow.down {
+    transform: rotate(90deg); 
+}
+
+.law-content {
+    transition: all 0.5s;
+    padding-left: 20px;
+}
+
+
+
+
 /* Mobile Styles */
 @media (max-width: 768px) {
     table {
@@ -474,49 +528,4 @@ ul li ul li ul li {
     .sideBySide {
         flex-direction: column;
     }
-}
-
-.laws{
-    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-right: 10px;
-}
-
-#GDPRPrinciples li {
-    width: 100%;
-    max-width: 1000px;
-}
-
-#GDPRPrinciples div {
-    background-color:lightgrey;
-}
-
-#GDPRPrinciples {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 20px auto;
-    max-width:1000px;
-}
-#GDPRPrinciples ol li{
-    max-width:1000px;
-}
-
-#GDPRPrinciples div ul li{
-    padding-right:50px;
-}
-
-.arrow {
-    margin-left: auto;
-}
-.laws .arrow {
-    transition: transform 0.3s ease;
-}
-
-.law-content {
-    transition: all 0.3s ease;
-    padding-left: 20px;
 }
