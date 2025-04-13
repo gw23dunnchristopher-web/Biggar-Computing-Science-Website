@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Databases Introduction</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Databases Introduction</h1></div>
+                <div class="contentContainer">
+                    <h2>What is a database?</h2>
+                    <img class="rImg" style="max-width:300px; height:350px;" src="/Images/N5/DDD/filingcabinet.jpg" alt="Filing Cabinet"/>
+                    <p>A database is an organized collection of data that can be easily accessed, managed, and updated. Think of it as a digital filing system, where information is stored in a structured way so it can be quickly 
+                        retrieved or modified when needed. Databases are used in nearly every aspect of technology, from websites and apps to financial systems and beyond.</p>
+                    <p>Before computers became common in the workplace, it was common to use paper-based databases.  We used filing cabinets for this, and whenever we needed to get information from the database we had to open 
+                        the filing cabinet and manually look through the files contained inside to find the information we needed.</p>
+                    <p>Nowadays, we use computers to store and manage our databases, this has a few benefits:</p>
+                    <ul>
+                        <li>It is much faster to search and sort the information in an electronic database.</li>                        
+                        <li>Electronic databases help to ensure that there are no cases of duplicate data.</li>
+                        <li>In paper databases, it was easier to incorrectly file a record, and only one person could look at a record at a time.</li>
+                        <li>Electronic databases take up less space than computer databases.</li>
+                    </ul>
+
+                    <h2>Information and Data</h2>
+                    <p>While when might use the words information and data interchangeably in everyday language, they are very different things in the context of databases.</p>  
+                    <ul>    
+                        <li>Data is the raw facts and figures, numbers and text that have no meaning on their own.</li>  
+                        <li>Information is the data that has been processed and given meaning.</li>   
+                    </ul>
+                    <p>For example, the data '200' has no meaning on its own, but the information '200 students' does.</p>
+
+
+                    <h2>The Structure of a Database</h2>
+                    <p>Databases are set out in Files, Records and Fields.</p>
+                    <table>
+                        <tr>
+                            <th>Structure</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td style="background-color:lightgreen; text-align:center; font-weight:bold">File</td>
+                            <td>A file is a collection of structured information on a specific topic.</td>
+                            <td>Information on all of the students in the school.</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color:lightgreen; text-align:center; font-weight:bold">Record</td>
+                            <td>A record is a collection of structured information on a particular person or thing within that topic. A file contains many records.</td>
+                            <td>Information on a single student.</td>
+                        </tr>
+                        <tr>
+                            <td style="background-color:lightgreen; text-align:center; font-weight:bold">Field</td>
+                            <td>A field is a single piece of data which is contained in each record. Records are made up of, usually, 2 or more fields. A record contains many fields.</td>
+                            <td>The student's first name.</td>
+                        </tr>
+                    </table>
+        
+                    <img class="cImg" src="/Images/N5/DDD/databaseExample.jpg" alt="Database Structure"/>
+
+                    <p>In this example, the whole table is a File, the rows are Records and the columns are Fields.</p>
+                    
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

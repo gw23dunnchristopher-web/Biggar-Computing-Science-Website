@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - WDD Analysis</title>
+        <title>N5 Computing Science -CSS Declarations</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
@@ -27,28 +27,175 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentHeading"><h1>CSS Declarations</h1></div>
                 <div class="contentContainer">
-                       
-                    <h2>Past Paper Question - 2023 Q19(a)</h2>
-                    
+                    <p>CSS Rules can change the style of your website in a variety of ways.  For the N5 level, you have to be aware of how to change the size, colour, alignment and style of the font, and the background colour.  
+                        You can find examples of these declarations in the table below:</p>
+
                     <table>
                         <tr>
-                            <th rowspan="2" width="30px">(a)</th>
+                            <th width="250px">Declaration</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; background-color:lightgreen;"><b>font-size</b></td>
                             <td>
+                                <ul>
+                                    <li>Changes the size of the font.</li>
+                                    <li>Can be set using pixels (px) or ems (em).  You can also use a percentage to change the size of the font based on its original size.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li><b>font-size:12px;</b> - Sets the font size to 12 pixels.</li>
+                                    <li><b>font-size:1.5em;</b> - Sets the font size to 1.5 times the original size.</li>
+                                    <li><b>font-size:150%;</b> - Sets the font size to 150% of the original size.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; background-color:lightgreen;"><b>color</b></td>
+                            <td>
+                                <ul>
+                                    <li>Changes the colour of the font.</li>
+                                    <li>Can be set using a colour name, a hex code, or an RGB value.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li><b>color:red;</b> - Sets the font colour to red.</li>
+                                    <li><b>color:#ff0000;</b> - Sets the font colour to red using a hex code.</li>
+                                    <li><b>color:rgb(255,0,0);</b> - Sets the font colour to red using an RGB value.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; background-color:lightgreen;"><b>font-family</b></td>
+                            <td>
+                                <ul>
+                                    <li>Changes the font family.</li>
+                                    <li>Can be set using a font name, or a list of font names.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li><b>font-family:Arial;</b> - Sets the font family to Arial.</li>
+                                    <li><b>font-family:Arial, Helvetica, sans-serif;</b> - Sets the font family to Arial, Helvetica, or a sans-serif font.</li>
+                                    <li><b>font-family:"Times New Roman", Times, serif;</b> - Sets the font family to Times New Roman, Times, or a serif font.</li>
+                                </ul>
+                                <p>Note that if there are spaces in the font name, you have to use speech marks.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; background-color:lightgreen;"><b>text-align</b></td>
+                            <td>
+                                <ul>
+                                    <li>Changes the alignment of the text.</li>
+                                    <li>Can be set to left, right, center, or justify.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li><b>text-align:left;</b> - Sets the text alignment to left.</li>
+                                    <li><b>text-align:right;</b> - Sets the text alignment to right.</li>
+                                    <li><b>text-align:center;</b> - Sets the text alignment to center.</li>
+                                    <li><b>text-align:justify;</b> - Sets the text alignment to justify.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center; background-color:lightgreen;"><b>background-color</b></td>
+                            <td>
+                                <ul>
+                                    <li>Changes the background colour of the element.</li>
+                                    <li>Can be set using a colour name, a hex code, or an RGB value.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li><b>background-color:red;</b> - Sets the background colour to red.</li>
+                                    <li><b>background-color:#ff0000;</b> - Sets the background colour to red using a hex code.</li>
+                                    <li><b>background-color:rgb(255,0,0);</b> - Sets the background colour to red using an RGB value.</li>
+                                </ul>
+                                <p>Note that if you use this on a container element like body, div, or html, it will change the background colour of the container. If used on a text tag like &lt;p&gt; or &lt;h1&gt; it will
+                                change the colour of the line that the text is on.</p>
+                            </td>
+                            </tr>
+                        </table>
+                    <h2>Example CSS Rule</h2>
+                    <p>The &lt;div&gt; tag below has been style using the following CSS rule:</p>
+                    <div class="htmlCode">
+                        <p> div {</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;background-color:lightblue;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;color:darkgreen;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;font-size:20px;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;font-family:"Times New Roman", Times, serif;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;text-align:center;</p>
+                        <p>}</p>
+                    </div>
+                    <p>This is the result:</p>
+                    <div style="background-color:lightblue; color:darkgreen; font-size:20px; font-family:'Times New Roman', Times, serif; padding:20px; text-align:center;">
+                        <p>This is a styled div.</p>
+                    </div>
+
+                    <p>Note that because text styles have been used on the &lt;div&gt; tag, these styles have been used on the text inside the &lt;div&gt;.</p>
+                    
+                    <h2>Past Paper Question - 2022 Q18(b)(i) and (ii)</h2>
+                    <p>Code from the Dog Day Care Centre website is shown below.</p>
+                    <img class="cImg" style="max-width:800px;" src="/Images/N5/WDD/PPCSSDec.jpg" alt="Past Paper Q18(b)"/>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(i)</th>
+                            <td>
+                                <p>State the colour of the ‘Wellbeing’ heading when displayed in a browser.</p>
                             </td>
                             <th rowspan="2"  width="30px">1</th>
                         </tr>
                         <tr>
                             <td>
                                 <div class="hiddenElement answer1">
-                                    
+                                    <p>White - while the wellbeing heading does not have a rule that changes its colour by itself, it is inside a  &lt;div&gt; that has the 'wellbeing' class.  In the CSS, anything with this
+                                    class has its text coloured white (it's the '.wellbeing' rule).</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(ii)</th>
+                            <td>
+                                <p>Additional CSS is required to style ‘&copy; Dog Day Care Centre’ at the bottom of the page.</p>
+                                <p>Write a single style rule that would display the copyright information right aligned and as ‘Arial’ font.</p>
+                                
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <div class="htmlCode" style="max-width:400px;">
+                                        <p>div {</p>
+                                        <p>&nbsp;&nbsp;&nbsp;&nbsp;text-align:right;</p>
+                                        <p>&nbsp;&nbsp;&nbsp;&nbsp;font-family:Arial;</p>
+                                        <p>}</p>
+                                    </div>
+                                        <br>
+                                        <p>This would apply the rule to all of the divs on the webpage, but because the other div shown in the HTML code has a classm that will override this rule and it will not be applied to that 
+                                            div </p>
+                                        <ul>
+                                            <li><b>1 mark</b> - Using the correct selector (div).</li>
+                                            <li><b>1 mark</b> - Correctly using the two declarations (text-align and font-family) with the correct values (right and Arial).</li>
+                                        </ul>
                                 </div>
                             </td>
                         </tr>
                     </table>
                     <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
                     </div>
+                
                 </div>
             </div>
         </div>   

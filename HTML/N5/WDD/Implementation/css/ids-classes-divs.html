@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - WDD Analysis</title>
+        <title>N5 Computing Science - IDs, Classes and Divs</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
@@ -14,6 +14,15 @@
                 }, 1000);
             }
         </script>
+        <style>
+            .CSSCode {
+                max-width:500px;
+            }
+
+            .CSSCode2 {
+                max-width:780px;
+            }
+        </style>
     </head>
     <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
         <div id="loading"></div>
@@ -27,22 +36,120 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentHeading"><h1>IDs, Classes and Divs</h1></div>
                 <div class="contentContainer">
-                       
-                    <h2>Past Paper Question - 2023 Q19(a)</h2>
+                    <h2>What is a div?</h2>
+                    <p>A div is a container element that is used to group other elements together.  It is a block level element, which means that it will take up the full width of its container.  It is a very useful element
+                        as it allows you to apply styles to a group of elements at once.  It is also useful for layout purposes, as it allows you to create sections on your webpage.</p>
+                    <p>Here is an example of the code used to create two divs:</p>
+                    <div class="htmlCode CSSCode2">
+                        <p>&lt;div&gt;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;This is a paragraph inside a div.&lt;/p&gt;</p>
+                        <p>&lt;/div&gt;</p>
+                        <p>&lt;div&gt;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;This is another paragraph inside a div.&lt;/p&gt;</p>
+                        <p>&lt;/div&gt;</p>
+                    </div>
+
+                    <h2>IDs and Classes</h2>
+                    <p>IDs and Classes are used to apply styles to specific elements.  They are both attributes of the tag, and are used in the CSS to select the element.  The difference between them is that an ID can only be
+                        used once on a page, while a class can be used multiple times.  IDs are used to apply styles to a single element, while classes are used to apply styles to a group of elements.</p>
+                    <p>Here is an example of the code used to create two divs with IDs and Classes:</p>
+                    <div class="htmlCode CSSCode2">
+                        <p>&lt;div id="div1"&gt;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;This is a paragraph inside a div with an ID.&lt;/p&gt;</p>
+                        <p>&lt;/div&gt;</p>
+                        <p>&lt;div class="div2"&gt;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;This is another paragraph inside a div with a class.&lt;/p&gt;</p>
+                        <p>&lt;/div&gt;</p>
+                    </div>
+
+                    <h2>IDs and CSS</h2>
+                    <p>CSS can be used to style a div with an ID, to do this the CSS rule would include the ID with a hash tag (#) in front of it as shown below:</p>
+                    <div class="htmlCode CSSCode">
+                        <p>#div1 {</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;background-color:lightgreen;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;color:darkblue;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;font-size:15px;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;font-family:Calibri;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;text-align:right;</p>
+                        <p>}</p>
+                    </div>
+
+                    <p>If the ID (div1) is applied to a div as shown above, you would get the following output:</p>
+                    <div id="div1" style="background-color:lightgreen; color:darkblue; font-size:15px; font-family:Calibri; text-align:right; padding:20px;">
+                        <p>This is a paragraph inside a div with an ID.</p>
+                    </div>
+
+                    <p>IDs denote a single location on the page, so they can only be used in one place.  You cannot use the same ID for multiple divs, for example.</p>
+
+                    <h2>Classes and CSS</h2>
+                    <p>CSS can be used to style a div with a class, to do this the CSS rule would include the class with a dot (.) in front of it as shown below:</p>
+                    <div class="htmlCode CSSCode">
+                        <p>.div2 {</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;background-color:lightblue;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;color:darkred;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;font-size:20px;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;font-family:Arial;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;text-align:center;</p>
+                        <p>}</p>
+                    </div>
+
+                    <p>If the class (div2) is applied to a div as shown above, you would get the following output:</p>
+                    <div class="div2" style="background-color:lightblue; color:darkred; font-size:20px; font-family:Arial; text-align:center; padding:20px;">
+                        <p>This is another paragraph inside a div with a class.</p>
+                    </div>    
+                    
+                    <p>Classes can be used multiple times on a page, so you can use the same class for multiple divs, for example.</p>
+                        
+                    <h2>Interactive Example</h2>
+                    <p>The code window below has a single HTML page and an external CSS file that has been linked to it.  The CSS file contains a rule for a Class and a rule for an ID.  The HTML page contains three divs
+                    One of them uses and ID and the other two use the same Class.</p>
+
+                    <iframe src="https://trinket.io/embed/html/4e593f47e4e0" class="trinket" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2023 Q20(c)</h2>
+                    <p>Part of the code from the ‘Punches’ page is shown below.</p>
+
+                    <img class="cImg" src="/Images/N5/WDD/PPIDs.png" alt="2023 Q20(c)">
                     
                     <table>
                         <tr>
-                            <th rowspan="2" width="30px">(a)</th>
+                            <th rowspan="3" width="30px">(c)</th>
                             <td>
+                                <p>The club have decided to make the lunge punch their training focus. To show this they want the heading below to be red.</p>
+                                <p class="codeText" style="text-align:center;">&lt;h3&gt;Lunge punch&lt;/h3&gt;</p>
+                                <p>Write an external CSS class to style the text and edit the HTML above to implement this change.</p>
                             </td>
-                            <th rowspan="2"  width="30px">1</th>
+                            <th rowspan="3"  width="30px">3</th>
                         </tr>
                         <tr>
                             <td>
+                                <p style="font-weight:bold;">CSS Rule:</p>
                                 <div class="hiddenElement answer1">
-                                    
+                                    <div class="htmlCode" style="width:500px;">
+                                        <p>.lunge {</p>
+                                        <p>&nbsp;&nbsp;&nbsp;&nbsp;color:red;</p>
+                                        <p>}</p>
+                                    </div>
+                                    <p>
+                                        <ul>
+                                            <li><b>1 mark</b> - a CSS rule using a class with an appropriate name (in this case I have used 'lunge' but the name could be anything appropriate, and it needs a '.' in front
+                                            of it to denote it as a class).</li>
+                                            <li><b>1 mark</b> - The correct declaration to change the color of the text to red.</li>
+                                        </ul>
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p style="font-weight:bold;">Edited HTML:</p>
+                                <div class="hiddenElement answer1">
+                                     <p class="codeText" style="text-align:center;">&lt;h3 class="lunge"&gt;Lunge punch&lt;/h3&gt;</p>
+                                    <ul>
+                                        <li><b>1 mark</b> - The code should be edited to add the class used in the CSS rule part to the Lunch Punch &lt;h3&gt; tag.</li>
+                                    </ul>
                                 </div>
                             </td>
                         </tr>

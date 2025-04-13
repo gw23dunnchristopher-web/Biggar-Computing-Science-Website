@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - DDD Analysis</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentContainer">
+                    <h2>End-User and Functional Requirements</h2>
+                    <p>In the Analysis stage of database development, it is important that we identify the End-User Requirements and the Functional Requirements.</p>
+                    <p><b>End-User Reqirements</b></p>
+                    <ul>
+                        <li>The end users are the people who are going to be using the database.</li>
+                        <li>Their requirements are the tasks they expect to be able to do using the database.</li>
+                    </ul>
+
+                    <p><b>Functional Requirements</b></p>
+                    <ul>
+                        <li>Processes and activities that the database has to perform.</li>
+                        <li>Information that the system has to contain to be able to carry out its functions.</li>
+                        <li>The Functional Requirements are usually based on the End-User Requirements.</li>
+                    </ul>
+                    
+                    <h2>Example End-User Requirements</h2>
+                    <p>A used-car dealership has six showrooms in different locations across Scotland. It wants to create a relational database to store details of cars owned by the company and details of each of their showrooms.   
+                        The database will allow sales staff to view details of specific cars and to see which showroom the cars are located in.</p>
+                    <p>The developers have asked some of the sales staff what they would like to see in the database.  Here are some of their comments:</p>
+
+                     <img class="cImg" src="/Images/N5/DDD/DDanalysis.jpg" alt="End-User Requirement Comments"/>
+
+                    <p>We can establish the following user requirements from these comments:</p>
+
+                    <ul>
+                        <li>Sales staff should be able to display details of cars by performing a number of different searches using...
+                            <ul>
+                                <li>Car make and model</li>
+                                <li>Car colour</li>
+                                <li>Range of car prices</li>
+                                <li>Type of fuel used</li>
+                            </ul>
+                        </li>
+                        <li>Search results should display...
+                            <ul>
+                                <li>Car make</li>
+                                <li>Car model</li>
+                                <li>car price</li>
+                                <li>Car colour</li>
+                                <li>Car fuel</li>
+                                <li>Car mileage</li>
+                                <li>Branch Address</li>
+                                <li>Branch Telephone Number</li>
+                            </ul>
+                        </li>
+                        <li>Users should be able to sort the search results in ascending order of mileage and ascending order of price.</li>
+                    </ul>
+
+                    <h2>Example Functional Requirements</h2>
+                    <img class="rImg" src="/Images/N5/DDD/dealership.jpg" style="max-width:400px;" alt="car dealership"/>
+                    <p>The database will be a relational database with two tables (files), one for the cars and one for the store branches.</p>
+                    <p>Each table will require a field that will be used as a Primary Key.  For the cars it will be Car ID, and for the branches it will be Branch ID.</p>
+                    <p>Branch ID will be used in the Car table as a Foreign Key, linking the two tables together.</p>
+                    
+                    
+                    <p>The database should be able to...</p>
+                    <ul>
+                        <li>filter cars, showing only those within a certain price range.</li>
+                        <li>filter cars by make and model.</li>
+                        <li>list cars in order of price (with the cheapest first).</li>
+                        <li>store the fuel type of each car - deisel, petrol or electric.</li>
+                        <li>store the colour of each car.</li>
+                        <li>perform a complex sort, listing cars in descending order of mileage and ascending order of price.</li>
+                    </ul>
+        
+                    <p>Additional fields will be needed for:</p>
+                    <ul>
+                        <li>Car make</li>
+                        <li>Car model</li>
+                        <li>car price</li>
+                        <li>Car colour</li>
+                        <li>Car fuel - deisel, petrol or electric.</li>
+                        <li>Car mileage</li>
+                        <li>Branch Address</li>
+                        <li>Branch Telephone Number</li>
+                    </ul>
+                       
+                    <h2>Past Paper Question - 2019 Q14(a)</h2>
+                    <p>A youth club plans to create a database to store details of club members.</p>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td>
+                                <p>The youth club leaders have been discussing the requirements of the 
+                                new database.</p>
+                                <img class="cImg" src="/Images/N5/DDD/PPDDAnalysis.jpg" alt="2019 Q14(a)"/>
+                                <p>Use the information above to identify two functional requirements.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <p>Any two from:</p>
+                                    <p>The database should be able to...</p>
+                                    <ul>
+                                        <li>insert new activities</li>
+                                        <li>search/list members registered for a particular activity</li>
+                                        <li>search/list details of leaders with first aid qualifications</li>
+                                        <li>sort/list members alphabetically by town</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

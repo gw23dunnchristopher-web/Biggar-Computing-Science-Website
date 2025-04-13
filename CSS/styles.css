@@ -475,3 +475,7 @@ ul li ul li ul li {
         flex-direction: column;
     }
 }
+
+.laws{
+    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
+}

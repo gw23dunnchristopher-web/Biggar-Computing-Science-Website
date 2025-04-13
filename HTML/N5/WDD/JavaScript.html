@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - JavaScript</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>JavaScript</h1></div>
+                <div class="contentContainer">
+                    <h2>What is JavaScript?</h2>
+                    <p>JavaScript is a programming language that is used to make webpages interactive.  It is what's known as a 'client-side' language, which means that it is run on the user's computer, rather than on the server.  
+                        It is used to add functionality to webpages, such as changing the content of a page, changing the style of a page, and responding to user input.</p>
+
+                    <p>Much like CSS, JavaScript can either be placed in the &lt;head&gt; (in between &lt;script&gt; tags) or in a separate .js file which is then linked to the webpage.  The JavaScript itself consists of 
+                        functions which are then linked to sections of the webpage in the html code, and called using events.</p>
+                    
+                    <h2>What you need to know</h2>
+                    <p>For the N5 level, you do not need to know a lot about JavaScript.  You do not need to create JavaScript functions, or add them to a webpage.  You just need to know how and where the functions are called and 
+                        where the events are placed. There are two events you need to know about at N5:</p>
+
+                        <ul>
+                            <li><b>onmouseover</b> - This will call a JavaScript function when the user's cursor moves onto the element.</li>
+                            <li><b>onmouseout</b> - This will call a JavaScript function when the user's cursor moves away from an element.</li>
+                        </ul>
+
+                    <p>Both of these are used as attributes inside the tag for the element that you want to call the function.  Here is an example where a function called 'brighten' is being called when the user moves their
+                    cursor onto the div, and calls a 'darken' function when they move it away again.</p>
+
+                    <div class="htmlCode" style="max-width:650px;">
+                        <p>&lt;div onmouseover="brighten()" onmouseout="darken()"&gt;</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;Sample Text&lt;/p&gt;</p>
+                        <p>&lt;/div&gt;</p>
+                    </div>
+
+                    <p>I have created the functions and used the events on the div below, try moving your mouse over it.</p>
+
+                    <div style="width:300px; margin:auto; text-align:center; font-size:30px; background-color:darkgreen; padding:20px; border:solid 1px black; filter:brightness(100%); border-radius: 10px;"
+                         onmouseover="this.style.filter='brightness(200%)'" onmouseout="this.style.filter='brightness(100%)'">
+                        <p>Sample Text</p>
+                    </div>
+                    
+                    <h2>JavaScript Example</h2>
+                    
+                    <p>The code window below shows an example of a JavaScript function changing the color of a &lt;div&gt;.</p>
+
+                    <iframe src="https://trinket.io/embed/html/45af85d72389" class="trinket" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2023 Q19(c)</h2>
+                    <table>
+                        <tr>
+                            <th rowspan="3" width="30px">(c)</th>
+                            <td>
+                                <p>When the cursor moves over an image of the fox it changes the picture from 
+                                one of a fox in a sitting down position to one of the fox lying down</p>
+                                <p>Identify the language and the event used to implement this.</p>
+                            </td>
+                            <th rowspan="3"  width="30px">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p style="font-weight:bold;">Language:</p>
+                                <div class="hiddenElement answer1">
+                                    <p>JavaScript</p>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p style="font-weight:bold;">Event:</p>
+                                <div class="hiddenElement answer1">
+                                    <p>onmouseover</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

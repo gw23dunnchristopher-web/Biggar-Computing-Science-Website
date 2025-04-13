@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - WDD Testing</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>WDD Testing</h1></div>
+                <div class="contentContainer">
+                    <h2>How do we test a website?</h2>
+                    <div class="sideBySide">
+                        <div>
+                            <p>Testing a website is an important part of the development process.  It is important to test the website to ensure that it works as expected, and that it is accessible to all users.  There are a numbe
+                                of different types of testing that can be carried out, including:</p>
+                            <ul>
+                                <li><b>UI Testing</b> - Making sure that the user interface matches the original design.</li>
+                                <li><b>Hyperlink Testing</b> - Making sure all of the pages are linked together correctly and are accessable, and the navigation works.</li>
+                                <li><b>Media Testing</b> - Making sure all of the media, inluding any images, videos and audio work as expected.</li>
+                                <li><b>Consistency Testing</b> - Making sure that all of the webpages follow a consistent theme and style, and look like they are part of the same website.</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <img class="cImg" style="max-width:300px" src="/Images/N5/WDD/testing.jpg" alt="Testing"/>
+                        </div>
+                    </div>
+                    <h3>UI Testing</h3>
+                    <p>In the design stage, you will have created a wireframe that shows the layout for the website.  When you test the user interface, you will compare your website to this wireframe and make sure that they 
+                        match.  While testing this, you should also look at the end-user requirements collected during the Analysis phase, and make sure that any accessibility requirements (accounting for the needs of users with
+                        colour blindness, etc. are met if nnecessary.</p>
+
+                    <h3>Hyperlink Testing</h3>
+                    <p>Your website may have a lot of different pages, and you want to make sure that all of them are accessible.  You will have to test that all of the links work correctly on each page.  To do this, the easiest
+                    method is to keep a note of all of the links on each page and check them off as you test them.  If any of the links are broken, you can go into the code and figure out why they aren't working, fixing them 
+                    as you go.</p>
+
+                     <img class="cImg" style="border:1px solid black; border-radius:10px; padding:0px; margin-top:20px;" src="/Images/N5/WDD/testingNav.jpg" alt="Navigation Testing"/>
+                    
+                    <h3>Media Testing</h3>
+                    <p>Just as with Hyperlink testing it is wise to make a checklist of images that you have used on your website and what pages you have used them on as you go.  You can use this list to test each page on the 
+                        website to make sure all of the images display correctly and all of the videos play as expected.  The positioning of the images should match the design, if the images cannot be loaded, alternative 
+                        text should appear.  Video and audio should be able to be played, paused and restarted.  Any autoplay video or audio play automatically as expected.</p>
+
+                    <h3>Consistency Testing</h3>
+                    <p>As you test your website, you should be checking that all of the pages follow the same theme and style.  This includes the layout, the colors, the fonts, and the overall look and feel of the website.  You
+                        should also check that all of the pages are consistent in terms of the navigation, and that the navigation is easy to use.</p>
+                    
+                    <h2>Past Paper Question - 2018 Q8</h2>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">8</th>
+                            <td>
+                                <p>Describe one aspect of consistency that should be considered when testing a website.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <p>Any one from:</p>
+                                    <ul>
+                                        <li>text size or font is consistent (across similar elements)</li>
+                                        <li>graphics are the same size</li>
+                                        <li>position of content/navigation bar is consistent across different pages/objects aligned</li>
+                                        <li>colour scheme consistent throughout.</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

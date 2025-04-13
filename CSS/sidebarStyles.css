@@ -120,22 +120,22 @@
 /*}
 
 /* Level 1 active: Highlight level 2 children */
-.sidebar-menu li:nth-child(3).active .submenu li a { background-color: #386aa5; } /* Computer Systems */
-.sidebar-menu li:nth-child(4).active .submenu li a { background-color: #a23854; } /* Software Design */
-.sidebar-menu li:nth-child(5).active .submenu li a { background-color: #36834f; } /* Web Design */
-.sidebar-menu li:nth-child(6).active .submenu li a { background-color: #9d7521; } /* Database Design */
+.sidebar-menu li:nth-child(4).active .submenu li a { background-color: #386aa5; } /* Computer Systems */
+.sidebar-menu li:nth-child(5).active .submenu li a { background-color: #a23854; } /* Software Design */
+.sidebar-menu li:nth-child(6).active .submenu li a { background-color: #36834f; } /* Web Design */
+.sidebar-menu li:nth-child(7).active .submenu li a { background-color: #9d7521; } /* Database Design */
 
 /* Level 2 active: Highlight level 3 children */
-.sidebar-menu li:nth-child(3) .submenu li.active .submenu li a { background-color: #193755; }
-.sidebar-menu li:nth-child(4) .submenu li.active .submenu li a { background-color: #571b2b; }
-.sidebar-menu li:nth-child(5) .submenu li.active .submenu li a { background-color: #184226; }
-.sidebar-menu li:nth-child(6) .submenu li.active .submenu li a { background-color: #6c5117; }
+.sidebar-menu li:nth-child(4) .submenu li.active .submenu li a { background-color: #193755; }
+.sidebar-menu li:nth-child(5) .submenu li.active .submenu li a { background-color: #571b2b; }
+.sidebar-menu li:nth-child(6) .submenu li.active .submenu li a { background-color: #184226; }
+.sidebar-menu li:nth-child(7) .submenu li.active .submenu li a { background-color: #6c5117; }
 
 /* Level 3 active: Highlight level 3 children */
-.sidebar-menu li:nth-child(3) .submenu li.active .submenu li.active .submenu li a{ background-color: #0c243c; }
-.sidebar-menu li:nth-child(4) .submenu li.active .submenu li.active .submenu li a { background-color: #330f19; }
-.sidebar-menu li:nth-child(5) .submenu li.active .submenu li.active .submenu li a{ background-color: #06140a; }
-.sidebar-menu li:nth-child(6) .submenu li.active .submenu li.active .submenu li a{ background-color: #3f300e; }
+.sidebar-menu li:nth-child(4) .submenu li.active .submenu li.active .submenu li a{ background-color: #0c243c; }
+.sidebar-menu li:nth-child(5) .submenu li.active .submenu li.active .submenu li a { background-color: #330f19; }
+.sidebar-menu li:nth-child(6) .submenu li.active .submenu li.active .submenu li a{ background-color: #06140a; }
+.sidebar-menu li:nth-child(7) .submenu li.active .submenu li.active .submenu li a{ background-color: #3f300e; }
 
 /* hover effect */
 .sidebar-menu li a:hover {

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - GDPR</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>General Data Protection Regulation (GDPR)</h1></div>
+                <div class="contentContainer">
+                    <h2>What is GDPR</h2>
+                    <p>The General Data Protection Regulation is a law that covers the suer and storage of people's personal data by any organisation.  Though it was originally drafted and put into practice by the
+                    European Union (EU), it imposes obligations onto organisations everywhere, so long as they target or collect data related to people in the EU.  It was put into effect on May 25th, 2018, and it
+                    levies harsh fines and other penalties against people who violate its privacy and security standards.</p>
+
+                    <p>The GDPR also sets out the rights that individuals have in regards to accessing and amending information that is stored about them.  When an individual gives information to an organisation, they
+                    should be given clear details on what that organisation will use the information for.</p>
+
+                    <h2>How does this relate to databases?</h2>
+                    <p>Databases are used to store information and, when working with databases, it is very likely that at some point either a person's information will be introduced into your database.  Information
+                    such as a person's name, thier telephone number, thier address and even their date of birth could all be considered to be quite sensitive, and therefor fall under GDPR.  If you are going to use someone's 
+                    information, GDPR dictates that the person in question must first allow the use of their information and be told what it will be used for.</p>
+
+                    <h2>Principles of GDPR</h2>
+                    <p>GDPR has seven key principles that you have to be aware of:</p>
+                    <ol>
+                        <li>
+                            <p class="laws"><b>Lawfulness, fairness and transparency</b><span class="arrow">&#9654;</span></p>
+                            <p>Personal data being held by an organisation shall be processed lawfully, fairly and in a transparent manner in relation to individuals.</p>
+                            
+                            <p><i><b>Lawfulness</b></i></p>
+                            <ul>
+                                <li>The data held by the organisation must have appropriate lawful basis for processing the information.</li>
+                                <li>If they are processing special category data or criminal offence data they must have identified a condition for needing to do so.</li>
+                                <li>The data is not to be used for anything that is against the law.</li>
+                            </ul>
+                            
+                            <p><i><b>Fairness</b></i></p>
+                            <ul>
+                                <li>The organisation must be fair and not deceive or mislead people about the purpose of the data collection.</li>
+                                <li>They must have considered the needs and rights of the people whose data they are collecting.</li>
+                                <li>They can only handle people's data in ways that people would expect and consider appropriate, they should be able to explain why the process is justified.</li>
+                            </ul>
+                            
+                            <p><i><b>Transparency</b></i></p>
+                            <ul>
+                                <li>The organisation must be open and honest about what they are doing with the data.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <p class="laws"><b>Purpose limitation</b><span class="arrow">&#9654;</span></p>
+                            <p>Data is only used for the purposes that were declared when the data was gathered.</p>
+                            <ul>
+                                <li>The organisation must have a clear purpose for collecting the data.</li>
+                                <li>That purpose must be documented by the organisation, so that there is a record of it.</li>
+                                <li>This information must be provided to the people whose data will be processed. For example, in Privacy Information.</li>
+                                <li>They must regularly review their processing and, if necessary, update the documentation and privacy information for individuals.</li>
+                                <li>If they plan to use the data they have collected for a new purpose, then it must either be compatible with the original purpose, or they need to get consent from the people whose information
+                                they are using for the new purpose.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <p class="laws"><b>Data minimisation</b><span class="arrow">&#9654;</span></p>
+                            <p>The data is limited to the data needed for the declared purpose.</p>
+                            <ul>
+                                <li>Only data needed for the specified purpose is to be collected.</li>
+                                <li>Sufficient data must be collected to fulfill the specified purpose.</li>
+                                <li>The data collected must be periodically reviewed, and anything that is no longer needed must be deleted.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <p class="laws"><b>Accuracy</b><span class="arrow">&#9654;</span></p>
+                            <p>All data gathered / stored needs to be accurate and should be updated if the purpose requires it to be.</p>
+                            <ul>
+                                <li>The accuracy of any personal data collected must be ensured.</li>
+                                <li>Approriate processes must be in place to check the accuracy of collected data, and the source of the data must be recorded.</li>
+                                <li>A process must be in place to identify when the data needs to be updated to fulfil the organisations purpose, and it must be updated as necessary.</li>
+                                <li>If a record needs to be kept of a mistake, then it should be clearly identified as a mistake.</li>
+                                <li>The records need to clearly identify where the data stored refers to a matter of opinion and, where appropriate, whose opinion it is and any relevent changes to the underlying facts.</li>
+                                <li>The organisation should comply with an individuals right to rectification and carefully consider any challenges to the accuracy of personal data.</li>
+                                <li>A note should be kept of any challenges to the accuracy of personal data.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <p class="laws"><b>Storage limitation</b><span class="arrow">&#9654;</span></p>
+                            <ul>
+                                <li>The organisation should keep a record of what personal data they hold and why they need it.</li>
+                                <li>They need to consider and be able to justify how long they need to keep personal data for.</li>
+                                <li>They should have a policy regarding how long they will keep the data for, and this policy should be in line with documentation obligations.</li>
+                                <li>The data that they hold should be regularly reviewed, and any personal data that is no longer needed should be anonymised or erased completely.</li>
+                                <li>Appropriate processes should be in place to comply with an individuals requests for erasure under the 'Right to be Forgotten'.</li>
+                                <li>Personal data that needs to be kept for public interest archiving, scientific or historical research, or statistical purposes must be clearly identified.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <p class="laws"><b>Integrity and confidentiality</b><span class="arrow">&#9654;</span></p>
+                            <p>All data must be held securely, this could use password protected systems, encryption, etc. The data is also required to be backed up in case the data gets lost.</p>
+                            <ul>
+                                <li>The organisation must analyse the risks presented by processing personal data, and assess the appropriate level of security that needs to be put in place.</li>
+                                <li>When deciding what measures to implement, they must take into account the costs of implementing it and what procedures are current and up-to-date.</li>
+                                <li>They should have an information security policy (or equivalent) and take steps to make sure it is implemented.</li>
+                                <li>Where necessary, they should have additional policies and ensure that controls are in place to enforce them.</li>
+                                <li>They need to regularly review their information security policies and, where necessary, improve them.</li>
+                                <li>They should put basic technical controls in place, such as those specified by established frameworks like Cyber Essentials.</li>
+                                <li>Depending any the circumstances and the type of personal data processed, they may need to put other technical measures in place.  If required, this must also be done.</li>
+                                <li>Where appropriate, encryption and pseudonymisation (using a false name instead of real names for individuals) should be used. </li>
+                                <li>The organisation must understand the requirements of confidentiality, integrity and availability for the personal data they process.</li>
+                                <li>They must make sure that, in the event of any incidents, they can restore access to personal data.  For example, they should make appropriate backups of the data.</li>
+                                <li>Regular testing and reviews of an organisation's security measures should be conducted to ensure that they remain effective, and if the tests highlight areas for improvement, then they should
+                                be acted upon.</li>
+                                <li>Where appropriate, they should also ensure that any data processor used by the organisation also implements appropriate technical and organisational measures.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <p class="laws"><b>Accountability</b><span class="arrow">&#9654;</span></p>
+                            <p>Organisations must be able to demonstrate that they are complying with the GDPR.</p>
+                            <ul>
+                                <li>They should keep appropriate processes and records that show they are complying with the regulations.</li>
+                                <li>Complying with the other principles of data protection will assist in accountability.</li>
+                                <li>Data breaches should be reported, and codes of conduct should be followed.</li>
+                                <li>Where appropriate, a Data Protection Officer (DPO) should be appointed, and the organisation should ensure that they are involved in all matters relating to data protection.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    
+                    <h2>Past Paper Question - 2023 Q19(a)</h2>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td>
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

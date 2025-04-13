@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - WDD Evaluation</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>WDD Evaluation</h1></div>
+                <div class="contentContainer">
+                    <h2>Evaluating a Website</h2>
+                         <img class="rImg" style="max-width:300px" src="/Images/N5/WDD/evaluation.jpg" alt="Evaluation"/>
+                        <p>After the website has been tested to make sure everything works, it must be evaluated to make sure that it is <b>fit for purpose</b>.  A website is considered to be fit for purpose if it meets the:</p>
+                        <ul>
+                            <li><b>End-User Requirements</b> determined in the Analysis phase.</li>
+                            <li><b>Functional Requirements</b> determined in the Analysis phase.</li>
+                        </ul>
+
+                    <p>These requirements can be used as a checklist to determine whether or not the site meets the criteria.  If the website does not meet all of these requirements then it is considered to be unfit for
+                    purpose it may be necessary to go back to the implementation or even the design stage to rework the site.</p>
+                    
+                    <h2 style="clear:both;">Past Paper Question - 2023 Q16(a)</h2>
+                    <p>The Armin Fair website allows customers to buy tickets for shows taking place during the fair.</p>
+                    <p>The web page for the Bracken Stage is shown below.</p>
+                    
+                    <img class="cImg" src="/Images/N5/WDD/PPEvaluation.jpg" alt="2023 Q16(a)"/>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td>
+                                <p>State two reasons why the above web page is not fit for purpose.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <p>Any two from:</p>
+                                    <ul>
+                                        <li>name missing</li>
+                                        <li>buy button missing</li>
+                                        <li>price missing</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>
