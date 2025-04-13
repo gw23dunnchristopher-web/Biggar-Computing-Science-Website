@@ -422,11 +422,8 @@ ul li ul li ul li {
 }
 
 .laws .arrow {
-    transition: transform 0.3s;
-}
-
-.laws .arrow.down {
-    transform: rotate(90deg); 
+    transition: transform 0.3s ease;
+    display: inline-block;
 }
 
 .law-content {

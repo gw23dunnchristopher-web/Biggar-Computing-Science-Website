@@ -67,7 +67,7 @@ function attachMenuListeners() {
                 // Toggle submenu visibility
                 submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
                 arrow.classList.toggle('down');
-                
+
                 // Toggle active class on the parent li
                 this.classList.toggle('active');
             }
@@ -89,7 +89,7 @@ function answerButtonSwitch(element){
     if (element.innerHTML == "Show Answer"){
         element.innerHTML = "Hide Answer";
         element.style.backgroundImage = "linear-gradient(to bottom, lightgreen, green)";
-        
+
     }
     else{
         element.innerHTML = "Show Answer";
@@ -120,7 +120,7 @@ function getActiveStyles() {
 function applyExternalCSS() {
     const exampleText = document.getElementById('exampleText');
     const activeStyles = getActiveStyles();
-    
+
     // Only apply if no higher precedence styles are active
     if (activeStyles.external && !activeStyles.internal && !activeStyles.inline) {
         exampleText.style.color = 'blue';
@@ -132,28 +132,13 @@ function applyExternalCSS() {
 function applyInternalCSS() {
     const exampleText = document.getElementById('exampleText');
     const activeStyles = getActiveStyles();
-    
+
     // Apply styles if internal is active and no inline CSS
     if (activeStyles.internal && !activeStyles.inline) {
         exampleText.style.fontSize = '40px';
         exampleText.style.textAlign = 'right';
         if (activeStyles.external) {
             exampleText.style.color = 'blue';
-
-
-function toggleLaw(element) {
-    const content = element.nextElementSibling.nextElementSibling;
-    const arrow = element.querySelector('.arrow');
-    
-    if (content.style.display === 'none' || content.style.display === '') {
-        content.style.display = 'block';
-        arrow.style.transform = 'rotate(90deg)';
-    } else {
-        content.style.display = 'none';
-        arrow.style.transform = 'rotate(0deg)';
-    }
-}
-
         }
     }
 }
@@ -161,7 +146,7 @@ function toggleLaw(element) {
 function applyInlineCSS() {
     const exampleText = document.getElementById('exampleText');
     const activeStyles = getActiveStyles();
-    
+
     // Inline CSS always takes precedence when active
     if (activeStyles.inline) {
         exampleText.style.color = 'red';
@@ -172,12 +157,12 @@ function applyInlineCSS() {
 
 function applyCSS(type) {
     const exampleText = document.getElementById('exampleText');
-    
+
     // Reset all styles first
     exampleText.style.color = '';
     exampleText.style.textAlign = '';
     exampleText.style.fontSize = '';
-    
+
     // Apply styles in order of precedence
     if (type === 'external') {
         applyExternalCSS();
@@ -186,7 +171,7 @@ function applyCSS(type) {
     } else if (type === 'inline') {
         applyInlineCSS();
     }
-    
+
     // Apply other active styles
     const activeStyles = getActiveStyles();
     if (type !== 'external' && activeStyles.external) applyExternalCSS();
@@ -220,6 +205,19 @@ function toggleBreakdown(breakdownId) {
     }
 }
 
+function toggleLaw(element) {
+    const content = element.nextElementSibling;
+    const arrow = element.querySelector('.arrow');
+
+    if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+        arrow.style.transform = 'rotate(90deg)';
+    } else {
+        content.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+    }
+}
+
 preloadSidebar('/HTML/N5/N5Sidebar.html').then(() => {
     loadSidebar('/HTML/N5/N5Sidebar.html', 'sidebar');
     document.getElementById('loading').style.display = 'none';
@@ -231,7 +229,7 @@ function countdown(testDate) {
     const countDownDate = new Date(testDate).getTime();
     const now = new Date().getTime();
     const distance = countDownDate - now;
-    
+
     if (distance < 0) {
         document.getElementById("countdown").innerHTML = "EXPIRED";
         return;
