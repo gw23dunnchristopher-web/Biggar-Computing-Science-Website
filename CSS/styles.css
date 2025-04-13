@@ -482,7 +482,11 @@ ul li ul li ul li {
     justify-content: space-between;
     align-items: center;
     padding-right: 10px;
+}
+
+#GDPRPrinciples li {
     width: 100%;
+    max-width: 1000px;
 }
 
 #GDPRPrinciples div {
