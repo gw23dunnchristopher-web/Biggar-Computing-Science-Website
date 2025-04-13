@@ -211,10 +211,10 @@ function toggleLaw(element) {
 
     if (content.style.display === 'none' || content.style.display === '') {
         content.style.display = 'block';
-        arrow.style.transform = 'rotate(90deg)';
+        arrow.classList.add('rotated');
     } else {
         content.style.display = 'none';
-        arrow.style.transform = 'rotate(0deg)';
+        arrow.classList.remove('rotated');
     }
 }
 

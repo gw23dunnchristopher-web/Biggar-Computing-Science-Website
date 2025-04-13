@@ -424,6 +424,11 @@ ul li ul li ul li {
 .laws .arrow {
     transition: transform 0.3s ease;
     display: inline-block;
+    transform: rotate(0deg);
+}
+
+.laws .arrow.rotated {
+    transform: rotate(90deg);
 }
 
 .law-content {
