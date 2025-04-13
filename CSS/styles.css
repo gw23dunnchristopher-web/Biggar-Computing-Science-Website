@@ -481,7 +481,9 @@ ul li ul li ul li {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-right: 10px;
+    padding: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 #GDPRPrinciples li {
