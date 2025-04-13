@@ -505,6 +505,10 @@ ul li ul li ul li {
     max-width:1000px;
 }
 
+#GDPRPrinciples div ul li{
+    padding-right:50px;
+}
+
 .arrow {
     margin-left: auto;
 }
