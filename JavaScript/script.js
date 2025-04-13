@@ -139,6 +139,21 @@ function applyInternalCSS() {
         exampleText.style.textAlign = 'right';
         if (activeStyles.external) {
             exampleText.style.color = 'blue';
+
+
+function toggleLaw(element) {
+    const content = element.nextElementSibling.nextElementSibling;
+    const arrow = element.querySelector('.arrow');
+    
+    if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+        arrow.style.transform = 'rotate(90deg)';
+    } else {
+        content.style.display = 'none';
+        arrow.style.transform = 'rotate(0deg)';
+    }
+}
+
         }
     }
 }

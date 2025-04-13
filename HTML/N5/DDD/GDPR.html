@@ -13,6 +13,12 @@
                     countdown('2025-04-25');
                 }, 1000);
             }
+            function toggleLaw(element) {
+                const content = element.nextElementSibling;
+                content.style.display = content.style.display === 'block' ? 'none' : 'block';
+                const arrow = element.querySelector('.arrow');
+                arrow.textContent = content.style.display === 'block' ? '▼' : '▶';
+            }
         </script>
     </head>
     <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
@@ -46,23 +52,23 @@
                     <p>GDPR has seven key principles that you have to be aware of:</p>
                     <ol id="GDPRPrinciples">
                         <li>
-                            <p class="laws"><b>Lawfulness, fairness and transparency</b><span class="arrow">&#9654;</span></p>
+                            <p class="laws" onclick="toggleLaw(this)"><b>Lawfulness, fairness and transparency</b><span class="arrow">&#9654;</span></p>
                             <p>Personal data being held by an organisation shall be processed lawfully, fairly and in a transparent manner in relation to individuals.</p>
-                            <div>
+                            <div class="law-content" style="display: none;">
                                 <p><i><b>Lawfulness</b></i></p>
                                 <ul>
                                     <li>The data held by the organisation must have appropriate lawful basis for processing the information.</li>
                                     <li>If they are processing special category data or criminal offence data they must have identified a condition for needing to do so.</li>
                                     <li>The data is not to be used for anything that is against the law.</li>
                                 </ul>
-                                
+
                                 <p><i><b>Fairness</b></i></p>
                                 <ul>
                                     <li>The organisation must be fair and not deceive or mislead people about the purpose of the data collection.</li>
                                     <li>They must have considered the needs and rights of the people whose data they are collecting.</li>
                                     <li>They can only handle people's data in ways that people would expect and consider appropriate, they should be able to explain why the process is justified.</li>
                                 </ul>
-                                
+
                                 <p><i><b>Transparency</b></i></p>
                                 <ul>
                                     <li>The organisation must be open and honest about what they are doing with the data.</li>
@@ -70,9 +76,9 @@
                             </div>
                         </li>
                         <li>
-                            <p class="laws"><b>Purpose limitation</b><span class="arrow">&#9654;</span></p>
+                            <p class="laws" onclick="toggleLaw(this)"><b>Purpose limitation</b><span class="arrow">&#9654;</span></p>
                             <p>Data is only used for the purposes that were declared when the data was gathered.</p>
-                            <div>
+                            <div class="law-content" style="display: none;">
                                 <ul>
                                     <li>The organisation must have a clear purpose for collecting the data.</li>
                                     <li>That purpose must be documented by the organisation, so that there is a record of it.</li>
@@ -84,9 +90,9 @@
                             </div>
                         </li>
                         <li>
-                            <p class="laws"><b>Data minimisation</b><span class="arrow">&#9654;</span></p>
+                            <p class="laws" onclick="toggleLaw(this)"><b>Data minimisation</b><span class="arrow">&#9654;</span></p>
                             <p>The data is limited to the data needed for the declared purpose.</p>
-                            <div>
+                            <div class="law-content" style="display: none;">
                                 <ul>
                                     <li>Only data needed for the specified purpose is to be collected.</li>
                                     <li>Sufficient data must be collected to fulfill the specified purpose.</li>
@@ -95,9 +101,9 @@
                             </div>
                         </li>
                         <li>
-                            <p class="laws"><b>Accuracy</b><span class="arrow">&#9654;</span></p>
+                            <p class="laws" onclick="toggleLaw(this)"><b>Accuracy</b><span class="arrow">&#9654;</span></p>
                             <p>All data gathered / stored needs to be accurate and should be updated if the purpose requires it to be.</p>
-                            <div>
+                            <div class="law-content" style="display: none;">
                                 <ul>
                                     <li>The accuracy of any personal data collected must be ensured.</li>
                                     <li>Approriate processes must be in place to check the accuracy of collected data, and the source of the data must be recorded.</li>
@@ -110,8 +116,8 @@
                             </div>
                         </li>
                         <li>
-                            <p class="laws"><b>Storage limitation</b><span class="arrow">&#9654;</span></p>
-                            <div>
+                            <p class="laws" onclick="toggleLaw(this)"><b>Storage limitation</b><span class="arrow">&#9654;</span></p>
+                            <div class="law-content" style="display: none;">
                                 <ul>
                                     <li>The organisation should keep a record of what personal data they hold and why they need it.</li>
                                     <li>They need to consider and be able to justify how long they need to keep personal data for.</li>
@@ -123,9 +129,9 @@
                             </div>
                         </li>
                         <li>
-                            <p class="laws"><b>Integrity and confidentiality</b><span class="arrow">&#9654;</span></p>
+                            <p class="laws" onclick="toggleLaw(this)"><b>Integrity and confidentiality</b><span class="arrow">&#9654;</span></p>
                             <p>All data must be held securely, this could use password protected systems, encryption, etc. The data is also required to be backed up in case the data gets lost.</p>
-                            <div>
+                            <div class="law-content" style="display: none;">
                                 <ul>
                                     <li>The organisation must analyse the risks presented by processing personal data, and assess the appropriate level of security that needs to be put in place.</li>
                                     <li>When deciding what measures to implement, they must take into account the costs of implementing it and what procedures are current and up-to-date.</li>
@@ -144,9 +150,9 @@
                             </div>
                         </li>
                         <li>
-                            <p class="laws"><b>Accountability</b><span class="arrow">&#9654;</span></p>
+                            <p class="laws" onclick="toggleLaw(this)"><b>Accountability</b><span class="arrow">&#9654;</span></p>
                             <p>Organisations must be able to demonstrate that they are complying with the GDPR.</p>
-                            <div>
+                            <div class="law-content" style="display: none;">
                                 <ul>
                                     <li>They should keep appropriate processes and records that show they are complying with the regulations.</li>
                                     <li>Complying with the other principles of data protection will assist in accountability.</li>
@@ -156,9 +162,9 @@
                             </div>
                         </li>
                     </ol>
-                    
+
                     <h2>Past Paper Question - 2023 Q19(a)</h2>
-                    
+
                     <table>
                         <tr>
                             <th rowspan="2" width="30px">(a)</th>
@@ -169,7 +175,7 @@
                         <tr>
                             <td>
                                 <div class="hiddenElement answer1">
-                                    
+
                                 </div>
                             </td>
                         </tr>

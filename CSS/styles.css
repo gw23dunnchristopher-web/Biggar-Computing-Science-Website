@@ -512,3 +512,11 @@ ul li ul li ul li {
 .arrow {
     margin-left: auto;
 }
+.laws .arrow {
+    transition: transform 0.3s ease;
+}
+
+.law-content {
+    transition: all 0.3s ease;
+    padding-left: 20px;
+}
