@@ -480,15 +480,22 @@ ul li ul li ul li {
     background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     padding: 10px;
-    width: 100%;
+    width: calc(100% - 20px);
+    flex-wrap: nowrap;
 }
 
 #GDPRPrinciples li {
     width: 100%;
     max-width: 1000px;
     margin-bottom: 10px;
+}
+
+#GDPRPrinciples li p {
+    margin: 0;
+    padding: 0;
+    flex: 1;
 }
 
 #GDPRPrinciples div {
