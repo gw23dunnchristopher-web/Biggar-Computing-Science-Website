@@ -422,9 +422,10 @@ ul li ul li ul li {
 }
 
 .laws .arrow {
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease-in-out;
     display: inline-block;
     transform: rotate(0deg);
+    font-size: 16px;
 }
 
 .laws .arrow.rotated {

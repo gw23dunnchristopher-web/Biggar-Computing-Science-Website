@@ -13,12 +13,6 @@
                     countdown('2025-04-25');
                 }, 1000);
             }
-            function toggleLaw(element) {
-                const content = element.nextElementSibling;
-                content.style.display = content.style.display === 'block' ? 'none' : 'block';
-                const arrow = element.querySelector('.arrow');
-                arrow.textContent = content.style.display === 'block' ? '▼' : '▶';
-            }
         </script>
     </head>
     <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
