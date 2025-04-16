@@ -216,15 +216,14 @@ function toggleBreakdown(breakdownId) {
 
 function toggleLaw(element) {
     const content = element.nextElementSibling;
-    const arrow = element.querySelector('.arrow');
-
+    
     if (content.style.display === 'none' || content.style.display === '') {
         content.style.display = 'block';
-        arrow.classList.add('rotated');
     } else {
         content.style.display = 'none';
-        arrow.classList.remove('rotated');
     }
+    
+    element.classList.toggle('active');
 }
 
 preloadSidebar('/HTML/N5/N5Sidebar.html').then(() => {
