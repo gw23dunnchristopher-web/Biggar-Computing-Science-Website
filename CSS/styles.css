@@ -503,8 +503,8 @@ ul li ul li ul li {
     .contentContainer img,
     .shadow,
     .shadowImage {
-        width: 100% !important;
         max-width: 100% !important;
+        width: auto !important;
         height: auto !important;
         box-sizing: border-box;
         padding: 10px;
