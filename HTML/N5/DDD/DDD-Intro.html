@@ -80,7 +80,30 @@
                     <img class="cImg" src="/Images/N5/DDD/databaseExample.jpg" alt="Database Structure"/>
 
                     <p>In this example, the whole table is a File, the rows are Records and the columns are Fields.</p>
+
+
+                    <h2>Flat File vs Relational Databases</h2>
+                    <p>A Flat File database contains only one table (file), and a Relational Database contains two or more tables that are linked together in a relationship.  When considering large sets of data, it is 
+                    better to use a Relational Database rather than a Flat File Database because:</p>
+                    <ul>
+                        <li>It breaks the data down into smaller, more manageable data sets.</li>
+                        <li>It is easier to update a Relational Database.  For example, if you have a database of people and cars, and you need to update a person's address you would just have to update it once on the person
+                        table rather than having to do it for every car.</li>
+                        <li>It avoids duplication of data, such as in the car example where you would have to enter the name of the owner over an over in a Flat File Database.</li>
+                    </ul>
+
+                    <h2>Primary Keys</h2>
+                    <p>Each record must have a field dedicated to uniquely identify that record - this is known as the Primary Key.  The data stored in this field will be unique to each record.  For example, a database of 
+                    customers could have an customer ID for each person, this would be used as the Primary Key for those records.</p>
+
+                    <img class="cImg" src="/Images/N5/DDD/primaryKey.jpg" alt="Primary Key Example"/>
                     
+                    <h2>Foreign Keys</h2>
+                    <p>When you have a relational database with two or more tables, Foreign Keys will be used to link the tables together.  A Foreign Key is the Primary Key of one table which has been copied into another.  For
+                        example, if a customer owns many cars then thier Customer ID might be used as the Foreign Key in a Cars table.  Their Customer ID on the record of any car that they own in the table, linking the
+                        information about that customer to each car.</p>
+
+                    <img class="cImg" src="/Images/N5/DDD/foreignKey.jpg" alt="Foreign Key Example"/>
                     </div>
                 </div>
             </div>

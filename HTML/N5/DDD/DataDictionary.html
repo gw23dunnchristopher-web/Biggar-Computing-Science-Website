@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Data Dictionaries</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Data Dictionaries</h1></div>
+                <div class="contentContainer">
+                    <h2>What is a Data Dictionary?</h2>
+                    <p>Data Dictionaries are created during the design phase to define the structure of a database. They contain all of the elements to be present in the database once it is implemented.</p>
+                    <p>The data dictionary should include:</p>
+                    <ul>
+                        <li>The names of any entities (tables) in the database.</li>
+                        <li>The names of the attributes (fields) of each entity.</li>
+                        <li>Primary and Foreign Keys.</li>
+                        <li>The data type of each attribute.</li>
+                        <li>The size of any of the text attributes.</li>
+                        <li>Whether or not any of the attributes are required.</li>
+                    </ul>
+
+                    <p>Here is an example of a data dictionary for a database with two entities - Cars and Customers:</p>
+
+                    <img class="cImg" src="/Images/N5/DDD/dataDictionaryExample.jpg" alt="Data Dictionary Example"/>
+
+                    <h2>Data Dictionary Breakdown</h2>
+                    <h3>Entity Name</h3>
+                    <p>This will be the name of one of the tables that is being used in the database.  It is important to give the table a name that describes what it contains.  In the case of the example above, one of the tables 
+                        is called 'Cars' so we know that it contains information about cars, and the other is called 'Customers', so that we know that it contains information about customers.</p>
+
+                    <h3>Attribute Names and Types</h3>
+                    <p>Attributes are the names of the fields in each table.  These fields should be given appropriate names as well to identify the data that they will contain.  For example, the Cars entity has the the following 
+                        attributes: License No., Make, Model, Colour, Price and Customer ID.  Each attribute must be assigned a type of data that can be entered into it, this will be stated next to the name of the attribute in the 
+                        data dictionary.  The attribute types are listed in the table below:</p>
+
+                    <table>
+                        <tr>
+                            <th style="background-color:darkblue; color:white;" colspan="3">Attribute Types</th>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Text</th>
+                            <td>Letters, numbers and symbols</td>
+                            <td>Yellow, SC11 THZ, bob@emailacct.com</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Number</th>
+                            <td>Numbers only</td>
+                            <td>1, 0.05, -912</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Date</th>
+                            <td>Day, Month, Year</td>
+                            <td>11/12/24, 11th December 2024</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Time</th>
+                            <td>Hours, Minutes, Seconds</td>
+                            <td>13:00, 13:00:00, 1.00pm</td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Boolean</th>
+                            <td>Stores a Boolean value, 1 or 0, yes or no, true or false.  It can be represented by a checkbox.</td>
+                            <td>Yes, No, True, False</td>
+                        </tr>
+                    </table>
+
+                    <h3>Key</h3>
+                    <p>This is used to identify whether or not the attribute is a Primary Key or a Foreign Key.  The Primary Key is the attribute that uniquely identifies each record in the table, and the Foreign Key is the 
+                        Primary Key from another table used to link the two tables together.</p>
+
+                    <p>In a data dictionary, a Primary Key is represented by <b>PK</b> and a Foreign Key is represented by <b>FK</b>.</p>
+
+                    <h3>Size</h3>
+                    <p>Text fields can normally contain up to 255 characters, letters, or symbols.  Using the full amount of characters for every text field will make your database take up more space than it needs to.  In order
+                    to reduce the amount of space used, you can limit the number of characters that can be entered into each field by putting a limit on it.  This number is what you will enter into the Size column of your data 
+                    dictionary.</p>
+                    <p>In the example dictionary above, you can see that the 'First Name' attribute has a 30 in this column. That means that the user cannot enter more than 30 characters in that field (it is unlikely that 
+                    someone's first name would be more than 30 characters long.)</p>
+
+                    <h3>Required</h3>
+                    <p>This is used to identify whether or not the attribute is required to be filled in.  If it is required, then the user will not be able to add a new record to the database until they have entered a value into 
+                    that field.  In the data dictionary, any field which must be entered before the record can be added will have a <b>Y</b> or <b>Yes</b> in this column.</p>
+
+                    <h3>Validation</h3>
+                    <p>This is used to identify any validation that needs to be done on the data entered into the field.  There are four types of validation that you will need to be aware of:</p>
+                    <table>
+                        <tr>
+                            <th style="background-color:darkblue; color:white;" colspan="3">Validation Types</th>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Range Check</th>
+                            <td>This is used to specify a range of numbers that can be entered into the field.  For example, if you had a field for a person's age, you would only want to allow numbers between 0 
+                            and 120 to be entered.</td>
+                            <td><img class="shadowImage" src="/Images/N5/DDD/rangeCheck.jpg" alt="Range Check Example"/></td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Length Check</th>
+                            <td>This will require the user to enter a certain number of letters before they can add the record.  For example, if you were entering a postcode, you would need to enter at least 5 
+                            characters for it to be valid.</td>
+                            <td><img class="shadowImage"src="/Images/N5/DDD/lengthCheck.jpg" alt="Range Check Example"/></td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Restricted Choice</th>
+                            <td>This will require the user to choose from a list of options.  For example, if you were entering a person's gender, you would only want them to be able to choose from Male,
+                            Female or Other.  The options that you will be able to choose from should be listed in the data dictionary.</td>
+                            <td><img class="shadowImage" src="/Images/N5/DDD/restrictedChoice.jpg" alt="Range Check Example"/></td>
+                        </tr>
+                        <tr>
+                            <th style="background-color:lightgreen;">Presence Check</th>
+                            <td>This has already been covered in the required column, as it determines whether or not the field must be filled in before the record can be submitted.  If a presence check is 
+                            required, just put "Yes" in the Required column of the data dictionary.</td>
+                            <td><img class="shadowImage" src="/Images/N5/DDD/presenceCheck.jpg" alt="Range Check Example"/></td>
+                        </tr>
+                    </table>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

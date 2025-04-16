@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Field Properties</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <style>
+            #fieldProperties{
+                list-style-type:none;
+                max-width:1000px;
+                margin:auto;
+            }
+        </style>
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Field Properties</h1></div>
+                <div class="contentContainer">
+                    <h2>Field Types and Properties</h2>
+                    <p>In the Design View of MS Access, whenever you have a field selected the properties of that field will appear at the bottom of the page.  Different types of field have different properties, so if you
+                    want an explanation of how changing these properties will affect the field, click on one of the field types below.</p>
+                    
+                    <ul id="fieldProperties">
+                        <li>
+                            <p class="fieldtype" onclick="toggleLaw(this); toggleActive(this)"><b>Short Text</b></p>
+                            <div class="fieldProperty" style="display: none;">
+                                <br>
+                                <img class="shadowImage" src="/Images/N5/DDD/Access/ShortTextProperties.jpg" alt="Short Text Properties">
+                                <p>Short Text fields are the most common type of field, they are used for text that is less than 255 characters long.  The properties of a Short Text field that you will need to use at the N5
+                                    level are:</p>
+                                <ul>
+                                    <li><b>Field Size</b> - This is the maximum number of characters that can be entered into the field.  The default is 255, but you can change this to whatever you need.</li>
+                                    <li><b>Default Value</b> - This is the initial value that will be entered before the user types anything, usually this is blank.</li>
+                                    <li><b>Validation Rule</b> - This is the rule that will be used to validate the text entered into the field.</li>
+                                    <li><b>Validation Text</b> - This is the text that will be displayed if the validation rule is not met.</li>
+                                    <li><b>Required</b> - This is whether or not the field is required.  The default is No, but you can change this to Yes if you need the user to enter something in this field to create a 
+                                    record.</li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="fieldtype" onclick="toggleLaw(this)"><b>Number</b></p>
+                            <div class="fieldProperty" style="display: none;">
+                                <br>
+                                <img class="shadowImage" src="/Images/N5/DDD/Access/NumberProperties.jpg" alt="Number Properties">
+                                <p>Number fields are used to store numerical data, the type of numerical data can be adjusted in the properties.  At N5, you need to be aware of:</p>
+                                <ul>
+                                    <li><b>Field Size</b> - In a number field this is set to 'Long Integer', which is a number with no decimal places ranging from -2,147,483,648 to +2,147,483,647.  This can be set to:
+                                    <ul>
+                                        <li>Single - a decimal number that can store up to 7 decimal places (uses 4 bytes).</li>
+                                        <li>Double - a decimal number that can store up to 15 decimal places (uses 8 bytes).</li>
+                                        <li>Decimal - a decimal number that can store up to 28 decimal places (uses 12 bytes).</li>
+                                    </ul>
+                                    </li>
+                                    <li><b>Default Value</b> - This is the initial value that will be entered before the user types anything, usually this is 0 in a number field.</li>
+                                    <li><b>Decimal Places</b> - This sets the number of decimal places that the number entered will be rounded to. Initially this is set to Auto, which means it will not round the number until the 
+                                        maximum number of decimal places for the field size is reached.</li>
+                                    <li><b>Validation Rule</b> - This is the rule that will be used to validate the number entered into the field.</li>
+                                    <li><b>Validation Text</b> - This is the text that will be displayed if the validation rule is not met.</li>
+                                    <li><b>Required</b> - This is whether or not the field is required.  The default is No, but you can change this to Yes if you need the user to enter something in this field to create a 
+                                    record.</li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="fieldtype" onclick="toggleLaw(this)"><b>Currency</b></p>
+                            <div class="fieldProperty" style="display: none;">
+                                <br>
+                                <img class="shadowImage" src="/Images/N5/DDD/Access/CurrencyProperties.jpg" alt="Currency Properties">
+                                <p>Currency fields in access are a type of number field - they can be used to store amounts of money, but they can also be used to store percentages.  At N5, the properties you should be aware of
+                                    are:</p>
+                                <ul>
+                                    <li><b>Format</b> - Allows you to change which kind of currency is being used.  By default it is set to £ (UK pounds), but it can be set to Euros, percentages, or scientific notation.</li>
+                                    <li><b>Decimal Places</b> - This sets the number of decimal places that the number entered will be rounded to. Initially this is set to Auto, which is 2 for the currency field, but it can
+                                    be set to go all the way up to 15.</li>
+                                    <li><b>Default Value</b> - This is the initial value that will be entered before the user types anything, usually this is 0 in a currency field.</li>
+                                    <li><b>Validation Rule</b> - This is the rule that will be used to validate the amount entered into the field.</li>
+                                    <li><b>Validation Text</b> - This is the text that will be displayed if the validation rule is not met.</li>
+                                    <li><b>Required</b> - This is whether or not the field is required.  The default is No, but you can change this to Yes if you need the user to enter something in this field to create a 
+                                    record.</li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="fieldtype" onclick="toggleLaw(this)"><b>Date/Time</b></p>
+                            <div class="fieldProperty" style="display: none;">
+                                <br>
+                                <img class="shadowImage" src="/Images/N5/DDD/Access/DateTimeProperties.jpg" alt="Date/Time Properties">
+                                <p>Date/Time fields store dates or times. At N5 you will need to be aware of the following properties:</p>
+                                <ul>
+                                    <li><b>Format</b> - Allows you to specify how the date or time being entered is displayed, you will have access to the following options:
+                                        <ul>
+                                            <li>General Date - 16/04/2025 15:24:00 (The date followed by the time in hours, minutes and seconds)</li>
+                                            <li>Long Date - 16 April 2025 (The date fully typed out)</li>
+                                            <li>Medium Date - 16-Apr-25 (The day with the month abbreviated)</li>
+                                            <li>Short Date - 16/04/2025 (Just the date, no time)</li>
+                                            <li>Long Time - 15:24:00 (The time fully typed out in hours, minutes and seconds)</li>
+                                            <li>Medium Time - 03:24 PM (The time with AM and PM)</li>
+                                            <li>Short Time - 15:24 (The time in hours and minutes)</li>
+                                        </ul>
+                                        If this is not set, then it will allow you to enter a date and/or a time in any format.
+                                    </li>
+                                    <li><b>Default Value</b> - This is the initial value that will be entered before the user types anything, usually this is blank.</li>
+                                    <li><b>Validation Rule</b> - This is the rule that will be used to validate the date or time entered into the field.</li>
+                                    <li><b>Validation Text</b> - This is the text that will be displayed if the validation rule is not met.</li>
+                                    <li><b>Required</b> - This is whether or not the field is required.  The default is No, but you can change this to Yes if you need the user to enter something in this field to create a 
+                                    record.</li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="fieldtype" onclick="toggleLaw(this)"><b>Yes/No</b></p>
+                            <div class="fieldProperty" style="display: none;">
+                                <br>
+                                <img class="shadowImage" src="/Images/N5/DDD/Access/YesNoProperties.jpg" alt="Yes/No Properties">
+                                <p>Yes/No is MS Access's version of a Boolean field, in the Access Datasheet it will be represented by a checkbox.  If the box is checked then that means 'Yes', otherwise it means 'No'.  You have to 
+                                    be aware if the following properties for this field type at the N5 level:</p>
+                                <ul>
+                                    <li><b>Format</b> - This can be set to Yes/No, True/False or On/Off. By default this will be 'Yes/No'.</li>
+                                    <li><b>Default Value</b> - You can set it so that the checkbox is checked or not checked when the record is created.  By default this will be set to 'No'. </li>
+                                </ul>
+                                <p>While there are options to validate a Yes/No field, you will not use them at the N5 level.</p>
+                            </div>
+                        </li>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

@@ -55,6 +55,15 @@ function toggleSidebar() {
     sidebar.classList.toggle('active');
 }
 
+function toggleActive(element){
+    if (element.classList.contains('active')){
+        element.classList.remove('active');
+    }
+    else {
+        element.classList.add('active');
+    }
+}
+
 function attachMenuListeners() {
     const menuItems = document.querySelectorAll('.sidebar-menu li');
     menuItems.forEach(item => {

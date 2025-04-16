@@ -237,6 +237,24 @@ table tr th p, table tr td p {
     background-color:lightyellow;
 }
 
+.fieldtype{
+    text-align:center;
+    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
+    padding:5px;
+    border:1px solid black;
+    margin-top:10px;
+    margin-bottom:10px;
+    font-size:20px;
+}
+
+.fieldtype:hover, .fieldtype.active {
+    background-image: linear-gradient(to bottom, lightblue , rgb(73, 161, 196));
+}
+
+.fieldProperty {
+    background-color:#C5E3ED;
+    list-style-type:circle;
+}
 
 .specifications th {
     text-align:center;
@@ -279,6 +297,15 @@ table tr th p, table tr td p {
     margin-left:auto;
     margin-right:auto;
     padding: 20px;
+}
+
+.shadowImage {
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+    border:1px solid black; 
+    border-radius:10px; 
+    box-shadow:5px 5px 5px rgba(0,0,0,0.18);
 }
 
 .ImgAndText {
@@ -390,6 +417,7 @@ ul li ul li ul li {
     justify-content: space-between;
     align-items: center;
     padding-right: 10px;
+    border: 1px solid black;
 }
 
 #GDPRPrinciples li {

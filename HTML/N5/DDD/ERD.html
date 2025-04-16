@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Entity Relationship Diagrams</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Entity Relationship Diagrams</h1></div>
+                <div class="contentContainer">
+                    <h2>What is an Entity Relationship Diagram?</h2>
+                    <p>An Entity Relationship (ER) Diagram is a graphical representation of the relationships between tables that make up a database.</p>
+                    <ul>
+                        <li><b>Entities</b> - The entities within the ER diagram are the names of the tables that will make up the database.</li>
+                        <li><b>Attributes</b> - The attributes are the names of the fields that will be in the tables.</li>
+                        <li><b>Primary Key</b> - An attribute that uniquely identifies each record in an entity.</li>
+                        <li><b>Foreign Key</b> - An attribute that is a Primary Key in a different entity, linking the two entities together.</li>
+                    </ul>
+
+                    <h2>Relationships</h2>
+                    <p>The relationship between two entities show how the tables are linked together.  There are three possible descriptions of this relationship, but you will only be using one of these in N5.</p>
+                    <p>The three descriptions are:</p>
+                    <ul>
+                        <li>One to one</li>
+                        <li>One to many</li>
+                        <li>Many to many</li>
+                    </ul>
+
+                    <h3>One to One</h3>
+                    <p>This is when the relationship between two entities implies that one record in an entity will be connected one record in another entity.  For example, if there were a database with one table containing
+                    information on people and a second table containing information on passport numbers, that would be a one to one relationship, because each person can only have one passport, and a valid British passport will
+                    only be about one person.</p>
+
+                    <h3>One to Many (or Many to One)</h3>
+                    <p>This is when the relationship between two entities implies that one record in one table could be linked to many records in another table (or vice versa).  For example, if we consider a database containing a 
+                        table of students a table of library books, one student could borrow many books from the library, but one book could not be borrowed by more than one student at a time.</p>
+
+                    <h3>Many to Many</h3>
+                    <p>This is when both entities have many examples of each other.  For example, in a database could include a table of teachers and a table of classes.  Each teacher could teach many classes, and each class could 
+                    have many teachers.  This is normally considered to be a bad relationship between entities though, and it would normally be better to insert a third entity between the two entities.</p>
+
+                    <p><b>At the N5 level, you will only be expected to use the One to Many relationship.</b></p>
+
+                    <h2>Primary and Foreign Keys</h2>
+                    <p>When creating an ER diagram, you will need to identify the Primary Key and any Foreign Key for each entity. Normally, the Primary Key for each entity will be underlined, and any Foreign Keys will have a
+                    star next to the name.  Below is an example of an ER Diagram for Customers and Cars.</p>
+
+                    <img class="cImg" src="/Images/N5/DDD/ERD.jpg" alt="ER Diagram Example"/>
+
+                    <p><b>Note the prongs on one side of the line connecting the two entities.  This indicates a One to Many relationship, where one customer can own many cars. Additional, you should name the relationship 
+                        between entities, in this case the relationship has been named 'owns' because one customer 'owns' many cars.</b></p>
+                    
+                    <h2>Past Paper Question - 2023 Q14(a)</h2>
+                    <p>A window cleaning company wishes to create a database to store information about staff and the houses they clean. The company provides examples of information they would like to include.</p>
+                    <img class="cImg" src="/Images/N5/DDD/PPERD.jpg" alt="2023 Q14"/>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td>
+                                <p>Each staff member is allocated a number of houses to clean. They clean the windows of the same houses each month.</p>
+                                <p>Use the information provided to complete the entity relationship diagram below by:</p>
+                                <ul>
+                                    <li>adding the missingkey attribute</li>
+                                    <li>drawing the relationship between the entities</li>
+                                    <li>Naming the relationship between the entities.</li>
+                                </ul>
+                                <img class="cImg" src="/Images/N5/DDD/PPERD2.png" alt="2023 Q14(a)"/>
+                            </td>
+                            <th rowspan="2"  width="30px">4</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <img class="cImg" src="/Images/N5/DDD/PPERDA.jpg" alt="2023 Q14(a) - answer"/>
+                                    <ul>
+                                        <li><b>1 mark</b> - for showing a Many to One relationship (many houses cleaned by one staff member). </li>
+                                        <li><b>1 mark</b> - for naming the relationship (I have named it 'cleans' in the example, because a staff member 'cleans' many houses.</li>
+                                        <li><b>1 mark</b> - for adding StaffID as an attribute of the House entity.</li>
+                                        <li><b>1 mark</b> - for identifying StaffID as a Foreign Key (using the *).</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Creating a Data Dictionary</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Creating a Data Dictionary</h1></div>
+                <div class="contentContainer">
+                    <h2>A Worked Example</h2>
+                    <p>Consider the following example:</p>
+                    <p>A local furniture company holds info in its products and its designers. It stocks tables, chairs and desks. They hold the <b>item number</b>, <b>name</b> and <b>description</b>, it’s <b>price</b> and 
+                        <b>type</b> and also the <b>amount of it they have in stock</b>. They will also store the information on the designer including their <b>ID</b>, <b>name</b>, <b>email address</b> and <b>phone number</b>.</p>
+
+                    <p>From this, we can get the following attributes:</p>
+                    <ul>
+                        <li>Item Number</li>
+                        <li>Item Name</li>
+                        <li>Item Description</li>
+                        <li>Item Price</li>
+                        <li>Item Type</li>
+                        <li>Amount of Item in Stock</li>
+                        <li>Designer ID</li>
+                        <li>Designer Name</li>
+                        <li>Designer Email</li>
+                        <li>Designer Phone</li>
+                    </ul>
+
+                    <h2>Step 1 - Identify the Entities</h2>
+                    <p>From the list of attributes we have create, we can identify to distinct entities - items and designers.  Each one of the attributes would fall into one of those two categories.</p>
+                    <img class="cImg" src="/Images/N5/DDD/DDStep1.jpg" alt="Creating Data Dictionary Step 1"/>
+
+                    <h2>Step 2 - Identifying the Attributes</h2>
+                    <p>Now we have to decide which of the attributes in our list below to each entity.  Attributes concerning the items will belong to the Items entity, and the rest will belong to the Designers entity.</p>
+                    <img class="cImg" src="/Images/N5/DDD/DDStep2.jpg" alt="Creating Data Dictionary Step 2"/>
+
+                    <h2>Step 3 - Identify the Relationship</h2>
+                    <p>There will be a relationship between the two entties, and we have to decide what it is.</p>
+                    <ul>
+                        <li>One item can only have one designer.</li>
+                        <li>However, a designer can design many items.</li>
+                        <li>So it will be a one to many relationship between the Item and Designer.</li>
+                    </ul>
+                    <p>In the image below, you can see that I have added a prong to the side of the relationship line on the side of the relationship entity.  This shows that there can be one designer for many items. I have
+                    named this relationship 'design' because one designer can <b>design</b> many items.</p>
+                    <img class="cImg" src="/Images/N5/DDD/DDStep3.jpg" alt="Creating Data Dictionary Step 3"/>
+
+                    <h2>Step 4 - Identify the Field Types and Sizes for Entity 1</h2>
+                    <p>Now we need to decide what type of data each attribute will contain, and the size of the field if it is a text field.  We will start with the Designer entity because each item will only have one designer.</p>
+                    
+                    <ul>
+                        <li>Designer ID - Text (Sample Data: MSMI01), this will have a maximum of 6 characters.</li>
+                        <li>Designer Name - Text (Sample Data: Mary Smith), this will have a maximum of 20 characters - it is unlikely our database will have longer names.</li>
+                        <li>Designer Email - Text (Sample Data: mary.smith@email.com) this will have a maximum of 30 characters - it is unlikely our database will have longer emails than that.</li>
+                        <li>Designer Phone - Text (Sample Data: 07700900989), this will also be text because using number would not include the first 0 in the phone number, phone numbers are 11 numbers long.</li>
+                    </ul>
+
+                    <p>We will use this information to start filling in the data dictionary:</p>
+                    <img class="cImg" src="/Images/N5/DDD/DDStep4.jpg" alt="Creating Data Dictionary Step 4"/>
+
+
+                    <h2>Step 5 - Identify any Keys in Entity 1</h2>
+                    <p>A Primary Key is a field that is unique to each record in the entity.  In this case it would be unique to each Designer - the Designer ID is unique to each designer, so we will add PK in the Key column
+                    to show that this is the Primary Key.  A Foreign Key is a Primary Key in another entity that links the two entities together - since there is only one designer for each item, there will be no Foreign Key in the
+                    Designers table.</p>
+
+                    <img class="cImg" src="/Images/N5/DDD/DDStep5.jpg" alt="Creating Data Dictionary Step 5"/>
+
+                    <h2>Step 6 - Add any Validation Checks for Entity 1</h2>
+                    <p>Now we need to add any validation checks that need to be done on the data entered into the fields:</p>
+                    <ul>
+                        <li>Primary keys are ALWAYS required, so we will put a Yes in the Required Column.</li>
+                        <li>In order to record information about a designer, we will at the very least need their name and phone number, so those will also be required.</li>
+                        <li>A valid phone number will always be 11 numbers long, so we will need to include a length check to make sure that the user enters 11 characters.</li>
+                    </ul>
+                    <p>The data dictionary below has been updated with the Validation Checks for the Designers entity.</p>
+                    <img class="cImg" src="/Images/N5/DDD/DDStep6.jpg" alt="Creating Data Dictionary Step 6"/>
+                    
+                    <h2>Step 7 - Identify the Field Types and Sizes for Entity 2</h2>
+                    <p>We will now do the same for the Items entity, getting the field types and sizes (where appropriate).</p>
+                    <ul>
+                        <li>Item Number - Number (Sample Data: 1).</li>
+                        <li>Item Name - Text (Sample Data: Oak Table), this will have a maximum of 20 characters.</li>
+                        <li>Description - Text (Sample Data: A large oak table), this will have a maximum of 50 characters.</li>
+                        <li>Price - Number (Sample Data: £150).</li>
+                        <li>Type - Text (Sample Data: Table), this will have a maximum of 10 characters.</li>
+                        <li>Amount - Number (Sample Data : 6).</li>
+                    </ul>
+                    <p>As each of these items will have a designer, we should also include the Designer ID field from the Designers Entity.  It will have the same size and type as it does in that entity (Text, size 6).</p>
+                    
+                    <p>This information can be placed at the bottom of the data dictionary.</p>
+                    <img class="cImg" src="/Images/N5/DDD/DDStep7.jpg" alt="Creating Data Dictionary Step 7"/>
+
+                    <h2>Step 8 - Identify any Keys in Entity 2</h2>
+                    <p>The unique identifier for each item is Item No, so this will be the Primary Key.  There is a Foreign Key this time too, as the Primary Key from the Designers Entity is also in the Items entity to link the 
+                        two tables together.  In addition to placing a PK next to Item No, we should also place an FK next to Designer ID in the Items Entity to show that it is a Foreign Key.</p>
+                    <img class="cImg" src="/Images/N5/DDD/DDStep8.jpg" alt="Creating Data Dictionary Step 8"/>
+
+                    <h2>Step 9 - Add any Validation Checks for Entity 2</h2>
+                    <p>We now need to add the validation checks for the Items entity.</p>
+                    <ul>
+                        <li>As the Primary Key, the Item Number will be required.</li>
+                        <li>The Item will also need a name for us to record it, so the Item Name will also be required.</li>
+                        <li>The price for an item would have to be greater than 0, since there can't be any item sold for a negative price.</li>
+                        <li>The type of the item should be restricted to the types of items that exist, in this case "table, chair and desk".</li>
+                        <li>There also cannot be a negative number of items, but there can be 0 left in stock.  So this field must be greater than or equal to 0.</li>
+                        <li>The list of designer IDs will be looked up from the Designer table.  This field will also be required since each item must have a designer.</li>
+                    </ul>
+                    <p>This information can be added to the data dictionary, which will complete it.  You can see the completed data dictionary below:</p>
+                    <img class="cImg" src="/Images/N5/DDD/DDStep9.jpg" alt="Creating Data Dictionary Step 9"/>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>
