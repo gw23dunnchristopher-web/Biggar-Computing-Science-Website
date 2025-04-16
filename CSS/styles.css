@@ -247,7 +247,12 @@ table tr th p, table tr td p {
     font-size:20px;
 }
 
-.fieldtype:hover, .fieldtype.active {
+.fieldtype:hover {
+    background-image: linear-gradient(to bottom, lightblue , rgb(73, 161, 196));
+    cursor: pointer;
+}
+
+.fieldtype.active {
     background-image: linear-gradient(to bottom, lightblue , rgb(73, 161, 196));
 }
 
