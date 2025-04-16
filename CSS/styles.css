@@ -500,9 +500,14 @@ ul li ul li ul li {
         max-width:400px;
     }
 
-    img {
-        max-width: 400px;
-        height: auto;
+    .contentContainer img,
+    .shadow,
+    .shadowImage {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        box-sizing: border-box;
+        padding: 10px;
     }
 
     .ImgAndText {
