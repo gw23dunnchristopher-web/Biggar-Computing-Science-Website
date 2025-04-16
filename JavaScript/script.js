@@ -218,14 +218,14 @@ function toggleLaw(element) {
     const content = element.nextElementSibling;
     const arrow = element.querySelector('.arrow');
     
-    element.classList.toggle('active');
-    
     if (content.style.display === 'none' || content.style.display === '') {
         content.style.display = 'block';
         if (arrow) arrow.classList.add('rotated');
+        element.classList.add('active');
     } else {
         content.style.display = 'none';
         if (arrow) arrow.classList.remove('rotated');
+        element.classList.remove('active');
     }
 }
 
