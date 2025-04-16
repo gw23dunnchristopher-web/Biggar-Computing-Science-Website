@@ -534,10 +534,12 @@ ul li ul li ul li {
     }
 
     .shadow, .shadowImage {
-        display:block;
-        margin-left:auto;
-        margin:right;
-        max-width:100px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 100%;
+        height: auto;
+        box-sizing: border-box;
     }
     
     .breakdown {
