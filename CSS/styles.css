@@ -237,6 +237,12 @@ table tr th p, table tr td p {
     background-color:lightyellow;
 }
 
+#fieldProperties{
+    list-style-type:none;
+    max-width:1000px;
+    margin:auto;
+}
+
 .fieldtype{
     text-align:center;
     background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
@@ -305,12 +311,16 @@ table tr th p, table tr td p {
 }
 
 .shadowImage {
+    margin-right:auto;
+}
+
+.shadow, .shadowImage {
     display:block;
     margin-left:auto;
-    margin-right:auto;
     border:1px solid black; 
     border-radius:10px; 
     box-shadow:5px 5px 5px rgba(0,0,0,0.18);
+    max-width:500px;
 }
 
 .ImgAndText {
@@ -523,6 +533,13 @@ ul li ul li ul li {
         display: block;
     }
 
+    .shadow, .shadowImage {
+        display:block;
+        margin-left:auto;
+        margin:right;
+        max-width:100px;
+    }
+    
     .breakdown {
         width: 100%;
         margin-left: auto;

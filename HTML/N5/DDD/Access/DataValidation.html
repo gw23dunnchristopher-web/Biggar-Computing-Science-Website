@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Data Validation</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Data Validation</h1></div>
+                    <div class="contentContainer">
+                       <h2>What is data validation?</h2>
+                        <p>Data validation is the process of ensuring that the data entered into a database is valid.  This is done by setting rules that the data must follow, if the data does not follow the rules then it will
+                            be rejected and the user will be asked to enter the data again.</p>
+
+                        <p>There are four types of data validation that you need to be aware of at the N5 level:</p>
+                        <ul>
+                            <li><b>Presence Check</b> - Checks to make sure the user has entered data in the field before it allows them to create a record.</li>
+                            <li><b>Range Check</b> - Checks to make sure that the number entered is within a certain range.</li>
+                            <li><b>Length Check</b> - Checks to make sure that the user has entered a certain number of characters.</li>
+                            <li><b>Restricted Choice</b> - Gives the user a list of options to choose from.</li>
+                        </ul>
+
+                        <p>This page will give you a tutorial on how to set up each type of validation in MS Access.  Click on the buttons below to get information on each one.</p>
+
+                        <h2>Data Validation Tutorials</h2>
+                        <ul id="fieldProperties">
+                            <li>
+                                <p class="fieldtype" onclick="toggleLaw(this)"><b>Presence Check</b></p>
+                                <div class="fieldProperty" style="display: none; padding:20px;">
+                                    <ol>
+                                        <li>
+                                            <div class="sideBySide">
+                                                <p>Open your database in the Design View.</p>
+                                                 <img class="shadow push" src="/Images/N5/DDD/Access/DesignViewIcon.jpg" alt="Design View Icon">
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="sideBySide">
+                                                <p>Click on the Short Text field that you want to make required.</p>
+                                                <img class="shadow" src="/Images/N5/DDD/Access/TextFieldSelect.jpg" alt="Selecting a text field">
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="sideBySide">
+                                                <p>In the properties for that field, change the 'Required' value to 'Yes'.</p>
+                                                <img class="shadow" src="/Images/N5/DDD/Access/Required.jpg" alt="Changing the Required Property">
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="sideBySide">
+                                                <p>Return to the datasheet view, you will be asked to save your table.  Click 'Yes'.</p>
+                                                <div>
+                                                    <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/DSView.jpg" alt="Datasheet View Icon">
+                                                    <img class="shadow" src="/Images/N5/DDD/Access/SaveTable.jpg" alt="Saving the table">
+                                                </div>
+                                             </div>
+                                        </li>
+                                    </ol>
+                                    <p>Now, if you try to create a record without entering anything in that field, it will give you an error.</p>
+                                </div>
+                            </li>
+                            <li>
+                                <p class="fieldtype" onclick="toggleLaw(this)"><b>Length Check</b></p>
+                                <div class="fieldProperty" style="display: none;">
+                                    <br>
+
+
+                                </div>
+                            </li>
+                            <li>
+                                <p class="fieldtype" onclick="toggleLaw(this)"><b>Range Check</b></p>
+                                <div class="fieldProperty" style="display: none;">
+                                    <br>
+
+
+                                </div>
+                            </li>
+                            <li>
+                                <p class="fieldtype" onclick="toggleLaw(this)"><b>Restricted Choice</b></p>
+                                <div class="fieldProperty" style="display: none;">
+                                    <br>
+
+
+                                </div>
+                            </li>
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>
