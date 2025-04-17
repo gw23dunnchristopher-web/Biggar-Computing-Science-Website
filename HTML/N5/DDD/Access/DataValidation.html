@@ -6,6 +6,15 @@
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <style>
+            .subheader {
+                background-color:lightgreen;
+            }
+
+            table tr td {
+                background-color:white;
+            }
+        </style>
         <script src="/JavaScript/script.js"></script>
         <script>
             window.onload = function() {
@@ -30,8 +39,8 @@
                 <div class="contentHeading"><h1>Data Validation</h1></div>
                     <div class="contentContainer">
                        <h2>What is data validation?</h2>
-                        <p>Data validation is the process of ensuring that the data entered into a database is valid.  This is done by setting rules that the data must follow, if the data does not follow the rules then it will
-                            be rejected and the user will be asked to enter the data again.</p>
+                        <p>Data validation is the process of ensuring that the data entered into a database is valid.  This is done by setting rules that the data must follow, if the data does not follow the rules then 
+                            it will be rejected and the user will be asked to enter the data again.</p>
 
                         <p>There are four types of data validation that you need to be aware of at the N5 level:</p>
                         <ul>
@@ -50,31 +59,21 @@
                                 <div class="fieldProperty" style="display: none; padding:20px;">
                                     <ol>
                                         <li>
-                                            <div class="sideBySide">
-                                                <p>Open your database in the Design View.</p>
-                                                 <img class="shadow push" src="/Images/N5/DDD/Access/DesignViewIcon.jpg" alt="Design View Icon">
-                                            </div>
+                                            <p>Open your database in the Design View.</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/DesignViewIcon.jpg" alt="Design View Icon">
                                         </li>
                                         <li>
-                                            <div class="sideBySide">
-                                                <p>Click on the Short Text field that you want to make required.</p>
-                                                <img class="shadow" src="/Images/N5/DDD/Access/TextFieldSelect.jpg" alt="Selecting a text field">
-                                            </div>
+                                            <p>Click on the Short Text field that you want to make required.</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/TextFieldSelect.jpg" alt="Selecting a text field">
                                         </li>
                                         <li>
-                                            <div class="sideBySide">
-                                                <p>In the properties for that field, change the 'Required' value to 'Yes'.</p>
-                                                <img class="shadow" src="/Images/N5/DDD/Access/Required.jpg" alt="Changing the Required Property">
-                                            </div>
+                                            <p>In the properties for that field, change the 'Required' value to 'Yes'.</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/Required.jpg" alt="Changing the Required Property">
                                         </li>
                                         <li>
-                                            <div class="sideBySide">
-                                                <p>Return to the datasheet view, you will be asked to save your table.  Click 'Yes'.</p>
-                                                <div>
-                                                    <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/DSView.jpg" alt="Datasheet View Icon">
-                                                    <img class="shadow" src="/Images/N5/DDD/Access/SaveTable.jpg" alt="Saving the table">
-                                                </div>
-                                             </div>
+                                            <p>Return to the datasheet view, you will be asked to save your table.  Click 'Yes'.</p>
+                                            <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/DSView.jpg" alt="Datasheet View Icon">
+                                            <img class="shadow" src="/Images/N5/DDD/Access/SaveTable.jpg" alt="Saving the table">
                                         </li>
                                     </ol>
                                     <p>Now, if you try to create a record without entering anything in that field, it will give you an error.</p>
@@ -82,28 +81,164 @@
                             </li>
                             <li>
                                 <p class="fieldtype" onclick="toggleLaw(this)"><b>Length Check</b></p>
-                                <div class="fieldProperty" style="display: none;">
-                                    <br>
-
-
+                                <div class="fieldProperty" style="display: none; padding:20px;">
+                                    <p>Setting the field length of a field in its properties will prevent the user from entering any more than that number of characters.  However, you may want the user to enter a certain 
+                                        number of characters.  In Access, we can do that using the 'Len()' function.</p>
+                                    <ol>
+                                        <li>
+                                            <p>Open your database in the Design View.</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/DesignViewIcon.jpg" alt="Design View Icon">
+                                        </li>
+                                        <li>
+                                            <p>Click on the Short Text field that you want to make set the minimum length for.  In this example, I have selected the field for the Designer's phone number, which must be 11 
+                                                characters long as phone numbers are 11 numbers with 0 at the start.</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/SelectPhoneField.jpg" alt="Selecting the phone number field.">
+                                        </li>
+                                        <li>
+                                            <p>In the properties for that field, click on the validation rule box and type in <b>Len([Phone Number]) = 11</b>.  The Len() function checks the length of anything in 
+                                                between the brackets.  In this case we are checking the Phone Number field - the field name is typed in between square brackets.  We are saying to the program that the 
+                                                length of the data in the specified field must be exactly equal to 11.</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/LenCheck.jpg" alt="Using the Len() function">
+                                            <p><i> You do not have to use =, if you want the user to enter <b>at least</b> a number of characters you could use &gt; instead.</i></p>
+                                        </li>
+                                        <li>
+                                            <p>Below the Validation Rule, in Validation Text, you will enter an error message that will appear if the user attempts to enter something other than what you have specified. 
+                                                In this case, the message will say that the user must enter 11 characters for a phone number.</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/LenCheckValText.jpg" alt="Length Check Validation Text"">
+                                        </li>
+                                        <li>
+                                            <p>Return to the datasheet view.  You will be asked to save your table.</p>
+                                            <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/DSView.jpg" alt="Datasheet View Icon">
+                                            <img class="shadow" src="/Images/N5/DDD/Access/SaveTable.jpg" alt="Saving the table">
+                                        </li>
+                                        <li>
+                                            <p>You may see the following messages if you have already typed something into your table.</p>
+                                            <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/DataIntegrity.png" alt="Data Integrity Message">
+                                            <img class="shadow" src="/Images/N5/DDD/Access/DataIntegrity2.jpg" alt="Existing Data Error Message">
+                                            <p>This just means that existing data may not meet your new rule, you can click 'Yes' to both of these.</p>
+                                        </li>
+                                    </ol>
+                                    <p>Now, if you try to enter an incorrect number of characters in this field it will display the error message that you created in Validation text.</p>
                                 </div>
                             </li>
                             <li>
                                 <p class="fieldtype" onclick="toggleLaw(this)"><b>Range Check</b></p>
-                                <div class="fieldProperty" style="display: none;">
-                                    <br>
+                                <div class="fieldProperty" style="display: none; padding:20px;">
+                                    <p>Much in the same way that we edited the validation rule to do a length check, we can also edit it to do a range check for a number field.  The table below shows the different 
+                                        symbols that you can use in thie Validation Rule box to check if the number beinging entered is withing the range you want.  There are also some examples of validation rules that 
+                                        you could use.</p>
 
+                                    <table>
+                                        <tr>
+                                            <th>Symbol/Phrase</th>
+                                            <th>Description</th>
+                                            <th>Example</th>
+                                            <th>Usage</th>
+                                        </tr>
+                                        <tr>
+                                            <th class="subheader">&gt;</th>
+                                            <td>Greater than</td>
+                                            <td>&gt; 0</td>
+                                            <td>This could be used to ensure that a a number less than 0 isn't entered for an age.</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="subheader">&lt;</th>
+                                            <td>Less than</td>
+                                            <td>&lt; 120</td>
+                                            <td>This could be used to ensure that a number greater than 120 isn't entered for an age.</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="subheader">&gt;=</th>
+                                            <td>Greater than or equal to</td>
+                                            <td>&gt;= 0</td>
+                                            <td>This could be used to ensure that the number entered for a quantity is greater than or equal to 0.</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="subheader">&lt;=</th>
+                                            <td>Less than or equal to</td>
+                                            <td>&lt;= 100</td>
+                                            <td>This could be used to ensure that the number entered for a quantity is less than or equal to 100.</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="subheader">Between</th>
+                                            <td>Between two numbers</td>
+                                            <td>Between 0 And 100</td>
+                                            <td>This could be used to ensure that the number entered for a quantity is between 0 and 100.</td>
+                                    </table>
 
+                                    <p>You can follow these steps to set up a range check.  In this example, we will ensure that the amount of items entered into the Items table is greater than or equal to 0, because 
+                                        there can't be a negative stock of items.</p>
+                                    <ol>
+                                        <li>
+                                            <p>Open your database in the Design View.</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/DesignViewIcon.jpg" alt="Design View Icon">
+                                        </li>
+                                        <li>
+                                            <p>Click on the number field that you want to validate with a range check.</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/SelectAmount.jpg" alt="Selecting a number field">
+                                        </li>
+                                        <li>
+                                            <p>In the properties for that field, enter the validation rule into the 'validation rule' box.  In this case, we want all numbers entered to be greater than or equal to 0, so                                               we will enter ">=0".</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/RangeCheck2.jpg" alt="Validation Rule for Range Check">
+                                        </li>
+                                        <li>
+                                            <p>Below the Validation Rule, in Validation Text, you will enter an error message that will appear if the user attempts to enter something other than what you have specified. 
+                                                In this case, the message will say that says that the amount entered must be greater than or equal to 0..</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/RangeCheck3.jpg" alt="Validation Text for Range Check"">
+                                        </li>
+                                        <li>
+                                            <p>Return to the datasheet view.  You will be asked to save your table.</p>
+                                            <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/DSView.jpg" alt="Datasheet View Icon">
+                                            <img class="shadow" src="/Images/N5/DDD/Access/SaveTable.jpg" alt="Saving the table">
+                                        </li>
+                                        <li>
+                                            <p>You may see the following messages if you have already typed something into your table.</p>
+                                            <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/DataIntegrity.png" alt="Data Integrity Message">
+                                            <img class="shadow" src="/Images/N5/DDD/Access/DataIntegrity2.jpg" alt="Existing Data Error Message">
+                                            <p>This just means that existing data may not meet your new rule, you can click 'Yes' to both of these.</p>
+                                        </li>
+                                    </ol>
+                                    <p>Now, if you try to enter a number into the field with this validation that is outside of the range you are checking for, you will get an error.</p>
                                 </div>
                             </li>
                             <li>
                                 <p class="fieldtype" onclick="toggleLaw(this)"><b>Restricted Choice</b></p>
-                                <div class="fieldProperty" style="display: none;">
-                                    <br>
-
-
+                                <div class="fieldProperty" style="display: none; padding:20px;">
+                                    <p>Creating restricted choice validation means creating a dropdown box that the user will have to select from when they try to add data to a field in your table.  In the example below, 
+                                        we will add restricted choice validation to the Type field in the Items table, so that the user must select from 'Chairs, Desks or Tables'.</p>
+                                    <ol>
+                                        <li>
+                                            <p>Open your database in the Design View.</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/DesignViewIcon.jpg" alt="Design View Icon">
+                                        </li>
+                                        <li>
+                                            <p>Change the data type of the field that you want to impose restricted choice validation on to Lookup Wizard.</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/LookupWizard.jpg" alt="Select Lookup Wizard"">
+                                        </li>
+                                        <li>
+                                            <p>In the window that appears, choose "I will type the values that I want" and click "Next".</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/LookupWizard2.jpg" alt="Lookup Wizard Screen 1">
+                                        </li>
+                                        <li>
+                                            <p>In Column 1 of the window that opens, type the options that you want the users to choose from.  I will type in "Chairs", "Desks" and "Tables".  Click "Next"</p>
+                                            <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/LookupWizard3.jpg" alt="Lookup Wizard Screen 2">
+                                        </li>
+                                        <li>
+                                            <p>On the next screen, click on 'Finish'.</p>
+                                            <img class="shadow" src="/Images/N5/DDD/Access/LookupWizard4.jpg" alt="Lookup Wizard Screen 3">
+                                        </li>
+                                        <li>
+                                            <p>Return to the datasheet view.  You will be asked to save your table.</p>
+                                            <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/DSView.jpg" alt="Datasheet View Icon">
+                                            <img class="shadow" src="/Images/N5/DDD/Access/SaveTable.jpg" alt="Saving the table">
+                                        </li>
+                                    </ol>
+                                    <p>Now, if you click on that field, you will be given a dropdown list for the user to choose from:</p>
+                                    <img class="shadowImage" src="/Images/N5/DDD/Access/DropdownList.jpg" alt="Dropdown List">
                                 </div>
                             </li>
+                        </ul>
+                        <h2>Data Validation - Video Tutorial</h2>
                     </div>
                 </div>
             </div>

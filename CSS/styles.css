@@ -51,30 +51,7 @@ h3 {
     overflow-y: auto;
 }
 
-@media (max-width: 768px) {
-    #content {
-        width: 100%;
-        margin-left: 0;
-        padding: 15px;
-        align-items: center;
-    }
-    
-    .contentContainer {
-        max-width: 100%;
-        margin: 10px auto;
-        padding: 15px;
-    }
-    
-    .contentHeading {
-        width: 100%;
-        margin: 0 auto;
-    }
-    
-    img {
-        max-width: 100%;
-        height: auto;
-    }
-}
+
 
 .contentHeading {
     max-width:2400px;
@@ -310,13 +287,18 @@ table tr th p, table tr td p {
     padding: 20px;
 }
 
+.shadow {
+    margin-right:10px;
+   
+}
+
 .shadowImage {
+    display:block;
+    margin-left:auto;
     margin-right:auto;
 }
 
 .shadow, .shadowImage {
-    display:block;
-    margin-left:auto;
     border:1px solid black; 
     border-radius:10px; 
     box-shadow:5px 5px 5px rgba(0,0,0,0.18);
@@ -399,6 +381,10 @@ ol li {
     align-content:center;
     justify-content: center;
     margin:20px auto;
+}
+
+.vertAlign {
+    align-items: center;
 }
 
 @media (max-width: 768px) {
@@ -507,7 +493,6 @@ ul li ul li ul li {
         width: auto !important;
         height: auto !important;
         box-sizing: border-box;
-        padding: 10px;
     }
 
     .ImgAndText {
@@ -538,13 +523,16 @@ ul li ul li ul li {
         display: block;
     }
 
-    .shadow, .shadowImage {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
+    .shadow, .shadowImage { 
         max-width: 100%;
         height: auto;
         box-sizing: border-box;
+    }
+
+    .shadowImage {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
     }
     
     .breakdown {
@@ -587,5 +575,28 @@ ul li ul li ul li {
 
     .sideBySide {
         flex-direction: column;
+    }
+    
+    #content {
+        width: 100%;
+        margin-left: 0;
+        padding: 15px;
+        align-items: center;
+    }
+
+    .contentContainer {
+        max-width: 100%;
+        margin: 10px auto;
+        padding: 15px;
+    }
+
+    .contentHeading {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
     }
 }
