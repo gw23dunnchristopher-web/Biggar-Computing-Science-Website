@@ -73,12 +73,12 @@ h3 {
     text-align: left;
     padding: 10px;
     padding-bottom: 0px;
-    font-size: 12px;  
     flex: 1;
 }
 
 .contentContainer p{
     padding:10px;
+    font-size: 12px;
 }
 
 .contentContainer h2 {
