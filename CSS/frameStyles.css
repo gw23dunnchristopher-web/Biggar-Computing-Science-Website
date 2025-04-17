@@ -149,6 +149,14 @@ footer > div {
 }
 
 @media (max-width: 768px) {
+    header {
+        height: 60px;
+    }
+    
+    #mainHeading {
+        top: 60px;
+    }
+    
     footer > div {
         font-size: 10px;
     }
