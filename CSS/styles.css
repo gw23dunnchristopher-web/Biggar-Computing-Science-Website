@@ -289,7 +289,7 @@ table tr th p, table tr td p {
 
 .shadow {
     margin-right:10px;
-   
+
 }
 
 .shadowImage {
@@ -388,7 +388,7 @@ ol li {
 }
 
 @media (max-width: 768px) {
-   
+
 }
 
 .htmlCode {
@@ -534,7 +534,7 @@ ul li ul li ul li {
         margin-left: auto;
         margin-right: auto;
     }
-    
+
     .breakdown {
         width: 100%;
         margin-left: auto;
@@ -576,7 +576,7 @@ ul li ul li ul li {
     .sideBySide {
         flex-direction: column;
     }
-    
+
     #content {
         width: 100%;
         margin-left: 0;
