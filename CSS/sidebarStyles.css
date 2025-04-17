@@ -189,11 +189,18 @@ sidebar-menu .submenu .submenu li a:hover {
     }
 
     #countdowntimer {
-        width:300px;
+        width: 90%;
+        max-width: 300px;
+        margin: 10px auto;
     }
 
-    #countdowntimer h1, p {
-        font-size:20px;
-        padding:5px;
+    #countdowntimer h1 {
+        font-size: 18px;
+        padding: 5px;
+    }
+
+    #countdowntimer p {
+        font-size: 16px;
+        padding: 5px;
     }
 }
