@@ -76,21 +76,21 @@
     }
     
     #sidebar {
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: auto;
         max-height: 100vh;
-        transform: translateY(-100%);
-        transition: transform 0.3s ease-in-out;
+        padding-bottom: 50px;
         overflow-y: auto;
         z-index: 1000;
         background-color: #333;
     }
 
     #sidebar.active {
-        transform: translateY(0);
+        display: block;
     }
 }
 
