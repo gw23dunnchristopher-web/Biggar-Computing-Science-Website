@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - WDD Analysis</title>
+        <title>N5 Computing Science - DDD Testing</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
@@ -27,22 +27,162 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentHeading"><h1>Testing</h1></div>
                 <div class="contentContainer">
+                    <h2>How do you test a database?</h2>
+                    <p>Once you have implemented your database, it must be tested to make sure that it works as expected and meets the requirements that was set out in the Analysis phase.  The following features
+                    must be tested:</p>
+                    <ul>
+                        <li><b>Fields</b> - The data must be checked to ensure that the correct fields are being displayed.</li>
+                        <li><b>Data validation</b> - Any data validation that has been set up must be tested to ensure that it works as expected.</li>
+                        <li><b>SQL Operations</b> - The database must be tested using SQL operations to show that they work as expected and provide the correct output.</li>
+                    </ul>
 
-                    <h2>Past Paper Question - 2023 Q19(a)</h2>
+                    <h3>Fields</h3>
+                    <p>When testing the fields, you must check that the correct fields are being displayed and that the data is being displayed in the correct format.  For example, if you have a date field, you must
+                        check that the date is being displayed in the correct format (e.g. dd/mm/yyyy).  You should also check to make sure that there aren't any unnecessary fields or data that has been duplicated in 
+                        multiple tables.</p>
 
+                    <h3>Data Validation</h3>
+                    <p>Remember that there are four types of data validation:<p></p>
+                    <ul>
+                        <li><b>Presence Check</b> - Try to create a record without typing any data into the field with the presence check, it should not allow you to do so.</li>
+                        <li><b>Range Check</b> - Try to enter data outside the lower and upper ranges of a field with a range check, the program should give you an error message.</li>
+                        <li><b>Length Check</b> - It is not enough to just change the field length of a field, since this will only set a maximum number of characters.  You should make sure that the user cannot enter
+                        any less than the requisite number of characters too using the len() function in the Design View.  If they do not enter the right amount of characters, it should display an error message.</li>
+                        <li><b>Restricted Choice</b> - Ensure that the correct choices are being displayed on fields with a restricted choice, and that the user cannot enter any data other that that which appears
+                            on the list.</li>
+                    </ul>
+                    <p>You must test each of these to make sure that they work as expected.</p>
+
+                    <h3>SQL Operations</h3>
+                    <p>Even if an SQL Operation has been processed successfully, you must check the results to ensure that it is giving you the correct output.</p>
+
+                    <ul>
+                        <li>
+                            <p><b>Inappropriate data</b> - Check the output to ensure that the data produced is what you would expect.  For example, if you were to perform the SQL Search below on the Theme Parks database
+                            you would not expect any rides other than Rollercosters to be displayed.</p>
+                            <div class="codeBox">
+                                <p>SELECT * FROM Ride WHERE Type = 'Rollercoaster';</p>
+                            </div>
+                        </li>
+                        <li>
+                            <p><b>Sorted Correctly</b> - If you have used ORDER BY to apply a sort to your data, you must check to make sure that the data is being displayed in the correct order.  One of the most common
+                            mistakes in this case is to accidentally add a space as the first character in data.  When sorting that field, the database will place any records that contain this space before the others 
+                            in the table, displaying them in an incorrect order.  For example, the table below from the music store database has been sorted using the following SQL statement.  Space have been added to 
+                            some of the titles, so you can see that it appears out of order.</p>
+
+                            <div class="codeBox">
+                                <p>SELECT * FROM CD ORDER BY Title ASC;</p>
+                            </div>
+
+                            <img class="cImg" src="/Images/N5/DDD/SQL/SortError.jpg" alt="Sort Error">
+                        </li>
+                        <li>
+                            <p><b>Data Range</b> - If you range a query expecting it to return data that is within a range, ensure that the data returned is actually withing that range.  For example, if you were to
+                            use the SQL query below on the Music Store database, you would expect the following result.</p>
+                            <div class="codeBox">
+                                <p>SELECT * FROM CD WHERE cost &gt;= 7.5 AND cost &lt;= 9,99</p>
+                                <p> ORDER BY cost ASC;</p>
+                            </div>
+                            <img class="cImg" src="/Images/N5/DDD/SQL/RangeError.jpg" alt="Range Error">
+                        </li>
+                    </ul>
+
+                    <h2>Checking the Source Data</h2>
+                    <p>Once method you could use to help you test the database is to check the source data.  This is the data from the full table before it has been sorted or filtered.  MS Access provides easy access
+                    to the source data just by double clicking on the table name on the left hand side of the screen to open that table.  You can then compare the data in the table to the results from any queries you
+                    make to make sure that the result of the query is what you would expect.</p>
+
+                    <h2>Temporary Filters</h2>
+                    <p>You can also user a temporary filter on the data in the table using the MS Access GUI, as shown in the <a href = "/HTML/N5/DDD/Access/SortingandSearching.html">'MS Access - Sorting and Searching' 
+                    </a>page.  This will allow you to show only the records containing relavant data before you create a query, and you may be able to see if there are any problems with the data.</p>
+
+                    <h2>Other Tests</h2>
+                    <p>You may also want to test the following:</p>
+                    <ul>
+                        <li><b>Relationships</b> - Check that the relationships between tables are correct and that the correct fields are being used as Primary and Foreign Keys. You can check this by attempt to 
+                        enter data into the foreign key which has not been entered into the primary key in the corrected table.  If you are able to do so, it would suggest that your database does not have 
+                        <b>referential integrity</b> as every foreign key value has to be a value in the other table's primary key.</li>
+                        <li><b>Primary Keys</b> - Check that the primary key is unique for each record in the table.  You can do this by attempting to enter a duplicate primary key value into the table.  If you are
+                        able to do so, it would suggest that your database does not have <b>entity integrity</b> as every primary key value has to be unique.</li>
+                        <li><b>Data Range</b> - Use a wide range of data to test your data validation.</li>
+                    </ul>
+
+                    <h2>Past Paper Question - 2018 Q20(d)(i)</h2>
+                    
+                    <p>A database stores information about a walking club.</p>
+                    <p>The table ‘Route’ stores all the available routes.</p>
+                    <p>The table ‘Walk’ stores information when one of these routes is completed.</p>
+                    <p>Part of the information stored in each table is shown below</p>
+
+                    <img class="cImg" src="/Images/N5/DDD/SQL/PPTesting.jpg" alt="2018 Q20(d)(i)">
                     <table>
                         <tr>
                             <th rowspan="2" width="30px">(a)</th>
                             <td>
+                                <p>Read the SQL statement below.</p>
+                                <div class="codeBox">
+                                    <p>SELECT start, routeType, minutesTaken</p>
+                                    <p>FROM Route, Walk</p>
+                                    <p>WHERE Route.routeID = Walk.routeID</p>
+                                    <p>AND rating = 2;</p>
+                                </div>
+                                <p>Complete the table below to show the expected output from this 
+                                SQL statement.</p>
+
+                                <table style="max-width:600px;">
+                                    <tr>
+                                        <th style="width:30%">start</th>
+                                        <th style="width:30%">routeType</th>
+                                        <th style="width:30%">minutesTaken</th>
+                                    </tr>
+                                    <tr style="height:40px">
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="height:40px"></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="height:40px"></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </table>
                             </td>
-                            <th rowspan="2"  width="30px">1</th>
+                            <th rowspan="2"  width="30px">3</th>
                         </tr>
                         <tr>
                             <td>
                                 <div class="hiddenElement answer1">
-
+                                    <table style="max-width:600px; text-align:center;">
+                                        <tr>
+                                            <th style="width:30%">start</th>
+                                            <th style="width:30%">routeType</th>
+                                            <th style="width:30%">minutesTaken</th>
+                                        </tr>
+                                        <tr>
+                                            <td>Rackwick</td>
+                                            <td>Coastal</td>
+                                            <td>213</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Rackwick</td>
+                                            <td>Coastal</td>
+                                            <td>167</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Pitlochry</td>
+                                            <td>Forest</td>
+                                            <td>180</td>
+                                        </tr>
+                                    </table>
+                                    <p>You get one mark for each correct row of the table.</p>
+                                    <p>The order of the rows is not important, as there is no ORDER BY in the query.</p>
                                 </div>
                             </td>
                         </tr>

@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - WDD Analysis</title>
+        <title>N5 Computing Science - Queries</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
@@ -27,22 +27,201 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentHeading"><h1>Queries</h1></div>
                 <div class="contentContainer">
-                       
-                    <h2>Past Paper Question - 2023 Q19(a)</h2>
+                    <h2>What is a database query?</h2>
+                    <p>Queries are another method for searching and sorting a database, they are useful for:</p>
+                    <ul>
+                        <li>Saving a particular search or sort so you can easily access it again.</li>
+                        <li>Performing a Complex Search or Complex Sort involving 2 or more fields.</li>
+                        <li>Only showing the fields that you need to see, rather than all of the fields.</li>
+                    </ul>
+
+                    <p>If you are going to complete the Database section in your exam, there may be a question that asks you to create a query.</p>
+
+                    <h2>MS Access Query View</h2>
+                    <p>In MS Access, you can create a query by going to the Create tab and clicking on Query Design.  This will open the Query View, you can see a screenshot of this below:</p>
+
+                    <img class="cImg" style="max-width:100%" src="/Images/N5/DDD/Access/QueryView.jpg" alt="Query View">
+                    
+                    <h2>Students Database Download</h2>
+                    
+                    <p>The following tutorials will show you how to create a query and use it to perform a Complex
+                        database search of the Students database. If you have not downloaded this database already
+                        you can do so by clicking on the button below.</p>
+
+                    <div class="button" style="margin:20px auto;">
+                        <a href="/Files/Resources/N5/DDD/SQL-Students.accdb" download="SQL-Students.accdb">Access Students Database</a>
+                    </div>
+                    
+                     <h2>MS Access Query Tutorials</h2>
+                    
+                    <p>The following tutorials will show you how to perform queries for one table, and for two linked tables in a relational database.  To see other criteria that you can use for searches in Query view
+                    go to the '<a href="/HTML/N5/DDD/Access/Criteria.html">Queries - Search Criteria</a>' page.  Click on the buttons below to see the tutorials.</p>
+                    
+                    <p class="fieldtype tutorial" onclick="toggleLaw(this)"><b>Single Table Query</b></p>
+                    <div class="fieldProperty tutorial" style="display: none; padding:20px;">
+                        <p>We will create a query that searches for all of students who are in House Fiddich and are 15 or younger, then sort them by
+                            last name.  We will only show the last name, first name and gender fields.</p>
+                        <ol>
+                            <li>
+                                <p>If you have not downloaded the Students Database, do so now and then open it.  Click on the Create tab at the top of the screen and then Query Design.</p>
+                                <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/CreateTab2.jpg" alt="Create Tab and Query Design Button"">
+                            </li>
+                            <li>
+                                <p>On the right hand side of the window, you should see an 'Add Tables' section.  If you do not see this section, <b>right-click</b> on the large gray space and select 'Show Table' from 
+                                    the menu that appears.</p>
+                                <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/ShowTable.jpg" alt="Show Table Button">
+                            </li>
+                            <li>
+                                <p>In the 'Add Tables' section, you will see a list of all of the tables in the database.  <b>Double-Click</b> on the Students table to add it to the query.</p>
+                                <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/AddTable.jpg" alt="Adding the Students Table">
+                                <p>The table should appear in the query view with a list of its fields.</p>
+                                <img class="shadow" src="/Images/N5/DDD/Access/StudentsTableQuery.jpg" alt="Students Table in Query View">
+                            </li>
+                            <li>
+                                <p>In the students table that appeared in the query view, <b>double-click</b> on all of the fields that will be used in in the query.  In this case we will use first_name, last_name,
+                                    house, gender and age.  If you cannot see all of the fields, you can click and drag at the edges of the table to expand it, or just use the scroll bar that will appear at the right 
+                                    hand side of it.  When you double-click on each field, you will see it appear at the bottom of the screen as shown below.</p>
+                                <img class="shadow" style="max-width:100%;" src="/Images/N5/DDD/Access/SelectFields.jpg" alt="Selecting Fields">
+                            </li>
+                            <li>
+                                <p>We are only going to show the first_name, last_name and gender fields, so uncheck the the checkboxes in the 'Show' row for the other ones.</p>
+                                <img class="shadow" style="max-width:100%;"src="/Images/N5/DDD/Access/ShowFields.jpg" alt="Show Fields">
+                            </li>
+                            <li>
+                                <p>In the 'Criteria' row, we are going to enter the criteria that we will be searching for:  in that row under 'house' enter 'Fiddich' and under age enter '&lt;=15'.  This will search for
+                                    all students who are in house Fiddich and are 15 or younger when we run the query.</p>
+                                <img class="shadow" style="max-width:100%;" src="/Images/N5/DDD/Access/Criteria.jpg" alt="Criteria">
+                                <p>Note that when you type 'Fiddich' into the house critiera, the program will automatically put speech marks around it.  This is because it is a text field, rather than a number.</p>
+                            </li>
+                            <li>
+                                <p>In the 'Sort' row, we are going to enter either Ascending or Descending under the field that we want to sort, depending on how we want to sort it.  In this case, we want to sort the 
+                                students in alphabetical order by last name, so under last_name in the sort row, type 'Ascending'.</p>
+                                <img class="shadow" style="max-width:100%;" src="/Images/N5/DDD/Access/Sort.jpg" alt="Sort">
+                            </li>
+                            <li>
+                                <p>Once you have entered all of the information, click on the Run button in the top left of the screen.  If you cannot see the Run button, it is in the Query Design tab.</p>
+                                <img class="shadow" src="/Images/N5/DDD/Access/RunButton.jpg" alt="Run Button">
+                            </li>
+                            <li>
+                                <p>This will display the result of your query, you can see what it should look like below:</p>
+                                <img class="shadow" src="/Images/N5/DDD/Access/QueryResult.jpg" alt="Query Result">
+                                <p>You can see that it has only shown the fields that we selected, and it has only shown the records that meet the criteria that we entered.</p>
+                                <p>You can also see that it has sorted the records by last name in alphabetical order.</p>
+                            <li>
+                                <p>To save this query, you can click the save button in the top left of the screen or press 'Ctrl+S'. You will be asked to give the Query a name, call it 'Fiddich Students'. Then 
+                                click OK.  You will see the query appear under your tables on the left hand side of the screen.</p>
+                                <img class="shadow" style="display:block; margin-bottom:20px;" src="/Images/N5/DDD/Access/SaveQuery.jpg" alt="Save Query">
+                                <img class="shadow" style="display:block;" src="/Images/N5/DDD/Access/SavedQuery.jpg" alt="Saved Query">
+                            </li>
+                        </ol>
+                    </div>
+
+                    <p class="fieldtype tutorial" onclick="toggleLaw(this)"><b>Linked Tables Query</b></p>
+                    <div class="fieldProperty tutorial" style="display: none; padding:20px;">
+                        <p>For this next tutorial, first make sure that the students and houses tables are linked together.  You can check by going into the Database Tools tab, and then clicking on Relationships.  You 
+                            should see a line drawn between the two tables.  If you do not, follow the link the house field in the Houses table to the house field in the Students table using the tutorial on the 
+                            <a href="/HTML/N5/DDD/Access/RelationalDatabases.html">Relational Databases</a> page.</p>
+                        <p>We are going to create a query that shows the guidance teachers for all of the male students who are 17.  The guidance teachers are in the Houses  table, so we will need both tables for this. 
+                            We should only show the first and last names of each student, and their guidance teacher and we will sort them alphabetically by guidance teacher.</p>
+                        <ol>
+                            <li>
+                                <p>Click on the Create tab at the top of the screen and then Query Design.</p>
+                                <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/CreateTab2.jpg" alt="Create Tab and Query Design Button"">
+                            </li>
+                            <li>
+                                <p>On the right hand side of the window, you should see an 'Add Tables' section.  If you do not see this section, <b>right-click</b> on the large gray space and select 'Show Table' from 
+                                    the menu that appears.</p>
+                                <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/ShowTable.jpg" alt="Show Table Button">
+                            </li>
+                            <li>
+                                <p>In the 'Add Tables' section, you will see a list of all of the tables in the database.  <b>Double-Click</b> on the Students <b>and</b>the Houses table to add them both to the query.</p>
+                                <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/AddTable.jpg" alt="Adding the Students Table">
+                                <p>The tables should appear in the query view with a list of thier fields, you should also be able to see the link between the two of them.</p>
+                                <img class="shadow" src="/Images/N5/DDD/Access/LinkedTablesQuery.jpg" alt="Linked Table in Query View" 
+                            </li>
+                            <li>
+                                <p>We are now going to add the fields we need from the two tables, we will need the first_name, last_name, gender, and age fields from the Students table, as well as the guidance_teacher 
+                                    field from the Houses table.  Double click each of these fields on the tables in the query view, and you should see them appear at the bottom of the screen, note that you can also
+                                    see which table each of the fields belongs to.</p>
+                                <img class="shadow" style="max-width:100%;" src="/Images/N5/DDD/Access/SelectFields2.jpg" alt="Selecting Fields">
+                            </li>
+                            <li>
+                                <p>We are only going to show the first_name, last_name and guidance_teacher fields, so uncheck the the checkboxes in the 'Show' row for gender and age.</p>
+                                <img class="shadow" style="max-width:100%;"src="/Images/N5/DDD/Access/ShowFields2.jpg" alt="Show Fields">
+                            </li>
+                            <li>
+                                <p>In the 'Criteria' row, we are going to enter the criteria that we will be searching for:  in that row under 'gender' enter 'male' and under age enter '17'.  This will search for
+                                    all students who are male and are 17 when we run the query.</p>
+                                <img class="shadow" style="max-width:100%;" src="/Images/N5/DDD/Access/Criteria2.jpg" alt="Criteria">
+                                <p>Note that when you type 'male' into the gender critiera, the program will automatically put speech marks around it.  This is because it is a text field, rather than a number.</p>
+                            </li>
+                            <li>
+                                <p>In the 'Sort' row, we are going to enter either Ascending or Descending under the field that we want to sort, depending on how we want to sort it.  In this case, we want to sort the 
+                                students in alphabetical order by guidance teacher, so under guidance_teacher in the sort row, type 'Ascending'.</p>
+                                <img class="shadow" style="max-width:100%;" src="/Images/N5/DDD/Access/Sort2.jpg" alt="Sort">
+                            </li>
+                            <li>
+                                <p>Once you have entered all of the information, click on the Run button in the top left of the screen.  If you cannot see the Run button, it is in the Query Design tab.</p>
+                                <img class="shadow" src="/Images/N5/DDD/Access/RunButton.jpg" alt="Run Button">
+                            </li>
+                            <li>
+                                <p>This will display the result of your query, you can see what it should look like below:</p>
+                                <img class="shadow" src="/Images/N5/DDD/Access/QueryResult2.jpg" alt="Query Result">
+                                <p>You can see that it has only shown the fields that we selected, and it has only shown the records that meet the criteria that we entered.</p>
+                                <p>You can also see that it has sorted the records by last name in alphabetical order.</p>
+                            <li>
+                                <p>To save this query, you can click the save button in the top left of the screen or press 'Ctrl+S'. You will be asked to give the Query a name, call it 'Male Students Query'. Then 
+                                click OK.  You will see the query appear under your tables on the left hand side of the screen.</p>
+                                <img class="shadow" style="display:block; margin-bottom:20px;" src="/Images/N5/DDD/Access/SaveQuery2.jpg" alt="Save Query">
+                                <img class="shadow" style="display:block;" src="/Images/N5/DDD/Access/SavedQuery2.jpg" alt="Saved Query">
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    <h2>Past Paper Question - 2023 Q15(a)</h2>
+                    
+                    <p>Bright Stars organise and run classes for children. Classes are organised into blocks, 
+                    each running for 8 weeks.</p>
+                    <p>The table <span class="codeText">Class</span> stores data about the classes available.</p>
+                    <p>The table <span class="codeText">Booking</span> stores data about the children and their parents/guardians.</p>
+                    <p>Sample data from each table is shown below.</p>
+                    <img class="cImg" src="/Images/N5/DDD/Access/ClassTable.jpg" alt="Class Table">
+                    <img class="cImg" src="/Images/N5/DDD/Access/BookingTable.jpg" alt="Booking Table">
                     
                     <table>
                         <tr>
                             <th rowspan="2" width="30px">(a)</th>
                             <td>
+                                <p>Spring classes for babies are ending soon. An email needs to be sent to all 
+                                parents to offer them a place in the Summer classes.</p>
+                                <p>Design a query that could be used to generate a list of names and email 
+                                addresses of parents with a child who attends a Spring class for babies.</p>
+                                <table>
+                                    <tr><th>Field(s)</th><td style="width:75%"></td></tr>
+                                    <tr><th>Tables(s)</th><td style="width:75%"></td></tr>
+                                    <tr><th>Search Criteria</th><td style="width:75%"></td></tr>
+                                </table>
                             </td>
-                            <th rowspan="2"  width="30px">1</th>
+                            <th rowspan="2"  width="30px">4</th>
                         </tr>
                         <tr>
                             <td>
                                 <div class="hiddenElement answer1">
-                                    
+                                    <table>
+                                        <tr><th>Field(s)</th><td style="width:75%">parentName, email</td></tr>
+                                        <tr><th>Tables(s)</th><td style="width:75%">Class, Booking</td></tr>
+                                        <tr><th>Search Criteria</th><td style="width:75%">sessionBlock=Spring, classAge=Babies</td></tr>
+                                    </table>
+
+                                    <p>One mark each for:</p>
+                                    <ul>
+                                        <li>parentName, email with no other fields</li>
+                                        <li>Class, Booking</li>
+                                        <li>sessionBlock = Spring</li>
+                                        <li>classAge = Babies</li>
+                                    </ul>
                                 </div>
                             </td>
                         </tr>

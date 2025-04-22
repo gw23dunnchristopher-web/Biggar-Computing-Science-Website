@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - WDD Analysis</title>
+        <title>N5 Computing Science - Relational Databases</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
@@ -27,22 +27,119 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentHeading"><h1>Relational Databases</h1></div>
                 <div class="contentContainer">
-                       
-                    <h2>Past Paper Question - 2023 Q19(a)</h2>
-                    
+                    <h2>Creating a Relational Database</h2>
+                    <p>To make a relational database, you have to link two tables together.  At least one field in one of the tables with be designated as
+                        a foreign key, and this key will be used as a link between the tables.  For example, in a database of items and designers, each item 
+                        will have one designer, so we can assign each item one of the designer IDs from the designer table.</p>
+
+                    <h3>Referential Integrity</h3>
+                    <p>Referential integrity is a rule that ensures that the foreign key in one table matches a primary key in another table.  In the example 
+                        we are using, this means that you can't have a foreign key in the items table that doesn't have a corresponding primary key in the 
+                        designers table.  This is important because it means that you can't have an item with a designer that doesn't exist.</p>
+
+                    <p>Below is a tutorial on how to create a relational database in MS Access.  I will use the database with the Designers and Items tables  
+                        for this.</p>
+                    <p class="fieldtype tutorial" onclick="toggleLaw(this)"><b>Relational Database Tutorial</b></p>
+                    <div class="fieldProperty tutorial" style="display: none; padding:20px;">
+                    <ol>
+                        <li>
+                            <p>Before we can link the two tables, we need to enter some data into both tables.  I have entered the data shown here into the 
+                                datasheet view for each table.</p>
+                            <img class="shadow" style="max-width:100%;" src="/Images/N5/DDD/Access/Designers.jpg" alt="Designers Table">
+                            <img class="shadow" style="max-width:100%;" src="/Images/N5/DDD/Access/Items.jpg" alt="Items Table">
+                            <p>Note that the Designer ID field in the Items table has been left blank for the moment.</p>
+                        </li>
+                        <li>
+                            <p><b>Close the Designers Table, otherwise this will not work</b>.  Now go into the Design View for the Items table.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/DesignViewIcon.jpg" alt="Design View Icon">
+                        </li>
+                        <li>
+                            <p>Change the field type for the field that you want to use as a foreign key (in this case the Designer ID) and change it to
+                            Lookup Wizard.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/LookupWizard6.jpg" alt="Lookup Wizard">
+                        </li>
+                        <li>
+                            <p>In the window that appears, choose "I want the lookup field to get the values from another table or query." and click 
+                                "Next".</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/LookupWizard7.jpg" alt="Lookup Wizard Screen 1">
+                        </li>
+                        <li>
+                            <p>In the next window, choose the table that you want to use as the source of the foreign key (in this case the Designers table),
+                                then click "Next".</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/LookupWizard8.jpg" alt="Lookup Wizard Screen 2">
+                        </li>
+                        <li>
+                            <p>In the next window, choose the field that you want to use as the foreign key (in this case the Designer ID), click the single 
+                                arrow to place it in the 'Selected Fields' box, then click 'Next'.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/LookupWizard9.jpg" alt="Lookup Wizard Screen 3">
+                        </li>
+                        <li>
+                            <p>In the next window, you can choose if your want to display the dropdown list in Ascending order (A-Z) or Descending Order
+                                (Z-A).  I have chosen Ascending Order.  Click 'Next'.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/LookupWizard10.jpg" alt="Lookup Wizard Screen 4">
+                        </li>
+                        <li>
+                            <p>In the next window, you will be given a preview of how your dropdown box will look.  Click 'Next'.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/LookupWizard11.jpg" alt="Lookup Wizard Screen 5">
+                        </li>
+                        <li>
+                            <p>In the next window you will be able to create a lable for the dropdown box.  You do not have to change it.  However, <b>You
+                            must click the checkbox for 'Enable Data Integrity'</b>, otherwise you will have to delete the field and start again.  Once you
+                            have done that, you can click 'Finish'.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/LookupWizard12.jpg" alt="Lookup Wizard Screen 6">
+                        </li>
+                        <li>
+                            <p>You will now be asked to save the table.  Click 'Yes'.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/SaveRelationship.jpg" alt="Saving the table">
+                        </li>
+                        <li>
+                            <p>This will have created a one to many relationship between the two tables, if you click on Database Tools on the ribbon at the   
+                                top of the screen and then on the Relationships button you will be able to see it.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/RelationshipsButton.png" alt="Relationships Button">
+                            <img class="shadow" src="/Images/N5/DDD/Access/RelationshipsScreen.jpg" alt="Relationships">
+                        </li>
+                        <li>
+                            <p>Now, if you open the Items table, the Designer ID field will have a dropdown box where you can choose a Designer ID for each
+                            item from the Designers Table.</p>
+                            <img class="shadow" style="max-width:100%;" src="/Images/N5/DDD/Access/DesignersDropdownList.jpg" alt="Designer ID Dropdown List">
+                            <p><b>Note that if you try to enter a Designer ID in the items table that is not in the Designers table, you will get the 
+                                following Referential Integrity Error.</b></p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/RefIntegrityError.jpg" alt="Referential Integrity Error">
+                        </li>
+                        <li>
+                            <p>Once you have chosen data for the foreign key for each record, you can return to the Designers table and
+                            you will see that each record there now has an expandable + symbol that shows the linked Item records for each designer.</p>
+                            <img class="shadow" style="max-width:100%;" src="/Images/N5/DDD/Access/LinkedRecords.jpg" alt="Linked Records">
+                            <p>This is a visual representation of the relationship between the two tables.</p>
+                        </li>
+                    </ol>
+                    </div>
+
+
+                    <h2>Past Paper Question - 2023 Q14(c)</h2>
+                        <p>The relational database is implemented. Sample data from both tables is shown below</p>
+                        <img class="cImg" src="/Images/N5/DDD/Access/PPrelational.jpg" alt="2023 Q14">
+                        
                     <table>
                         <tr>
-                            <th rowspan="2" width="30px">(a)</th>
+                            <th rowspan="2" width="30px">(c)</th>
                             <td>
+                                <p>The following details are to be added into the <span class="codeText">House</span> table.</p>
+                                <img class="cImg" src="/Images/N5/DDD/Access/PPRelational2.jpg" alt="2023 Q14b"
+                                <p>When attempting to add this data, the following error message is displayed.</p>
+                                <img class="cImg" src="/Images/N5/DDD/Access/PPRelational3.jpg" alt="2023 Q14b Error Message">
+                                <p>Explain the reason for this.</p>
                             </td>
                             <th rowspan="2"  width="30px">1</th>
                         </tr>
                         <tr>
                             <td>
                                 <div class="hiddenElement answer1">
-                                    
+                                    <p>The data that the that the user is trying to enter into the staffID field is not in the 
+                                        <span class="codeText">Staff</span> table, which will cause a referential integrity error since the two tables are
+                                        linked with staffID as a foreign key in the <span class="codeText">House</span> table.</p>
                                 </div>
                             </td>
                         </tr>

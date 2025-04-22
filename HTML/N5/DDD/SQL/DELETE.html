@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - WDD Analysis</title>
+        <title>N5 Computing Science - SQL DELETE</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
@@ -27,27 +27,167 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentHeading"><h1>SQL DELETE</h1></div>
                 <div class="contentContainer">
+                    <h2>SQL DELETE Statements</h2>
+                    <p>DELETE statements are used to delete data from a database.  A DELETE statement consists of 2 main parts:</p>
+                    <ol>
+                        <li>Specify the table that has the information to be deleted.</li>
+                        <li>The criteria for which records to delete.</li>
+                    </ol>
 
-                    <h2>Past Paper Question - 2023 Q19(a)</h2>
+                    <h2>DELETE Query - Layout</h2>
+                    <p>All DELETE queries should have the following layout:</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/DELETELayout.jpg" alt="DELETE Layout">
+
+                    <h2>Example</h2>
+                    <p>For this example, we are going to use a database of Theme Park rides.  This database will contain two tables - Ride and Theme Park.  The Theme Park table will contain a list of different Theme 
+                        Parks, and the Ride table will contain a list of rides at those theme parks.  The two tables are linked via the ParkID field.  You can see the tables below:</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/ThemeParks.jpg" alt="Theme Park Tables">
+
+
+                    <p>If you wish to download the Theme Parks database to try the query, you can download it by clicking on the button below:</p>
+                    <div class="button"><a href="/Files/Resources/N5/DDD/Theme%20Parks.accdb" download="ThemeParks.accdb">Download Theme Parks Database</a></div>
+
+                    <h3>Deleting a single record</h3>
+                    <p>Imagine that the ride "Nemesis" has been deemed unsafe and has been closed down.  It will need to be removed from the database.</p>
 
                     <table>
                         <tr>
-                            <th rowspan="2" width="30px">(a)</th>
+                            <th>Step</th>
+                            <th style="width:65%;">Action</th>
+                            <th>Code</th>
+                        </tr>
+                        <tr>
+                            <th class="subheader">1</th>
+                            <td>Specify the table that you want to delete the record from.</td>
                             <td>
+                                <p><b>DELETE FROM Ride</b></p>
+                            </td>
+                            </tr>
+                        <tr>
+                            <th class="subheader">2</th>
+                            <td>Specify the criteria for which record to delete.  In this case, we want to delete the record where the ride name is "Nemesis".  There is only one ride called "Nemesis" on the list, so we 
+                                do not have to worry about deleting other records by doing this.</td>
+                            <td>
+                                <p>DELETE FROM Ride</p>
+                                <p><b>WHERE RideName = 'Nemesis';</b></p>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <p>Be careful when using the DELETE clause, as it is easy to accidentally delete additional records if you use the wrong criteria.</p>
+
+                    <p>This is how the SQL query would appear and the output.</p>
+                    <table>
+                        <tr>
+                            <th>Query</th>
+                            <th>Result</th>
+                        </tr>
+                        <tr>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/DELETEQuery1.jpg" alt="DELETE Query 1"></td>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/DELETEResult1.jpg" alt="DELETE Query 1 Result"></td>
+                        </tr>
+                    </table>
+
+                    <h3>Deleting multiple records</h3>
+                    <p>Imagine that Park 1 has been closed for renovations and will have all new rides when it reopens.  All of the current rides in Park 1 will have to be deleted from the Ride table.</p>
+
+                    <table>
+                        <tr>
+                            <th>Step</th>
+                            <th style="width:65%;">Action</th>
+                            <th>Code</th>
+                        </tr>
+                        <tr>
+                            <th class="subheader">1</th>
+                            <td>Specify the table that you want to delete the record from.</td>
+                            <td>
+                                <p><b>DELETE FROM Ride</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">2</th>
+                            <td>Specify the criteria for which records to delete.  In this case, we want to delete the records where the parkID is 'Pk1'.</td>
+                            <td>
+                                <p>DELETE FROM Ride</p>
+                                <p><b>WHERE parkID = 'Pk1';</b></p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <p>This will delete 6 records from the database, all of the records where the parkID is 'Pk1'.</p>
+                    <p>The table below will show the SQL query as typed into the Query View, and the resulting table before it has been closed and reopened to fully remove the deleted records.</p>
+
+                    <table>
+                        <tr>
+                            <th>Query</th>
+                            <th>Result</th>
+                        </tr>
+                        <tr>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/DELETEQuery2.jpg" alt="DELETE Query 2"></td>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/DELETEResult2.jpg" alt="DELETE Query 2 Result"></td>
+                        </tr>
+                    </table>
+                    
+                    <h2>Past Paper Question - 2023 Q15(c)(i) and (ii)</h2>
+                    <p>Some data needs to be removed from this table.</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/PPDELETE.jpg" alt="2023 Q15(c)(i) and (ii)">
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(i)</th>
+                            <td>
+                                <p>Claire is no longer able to run the 3-4 Years class on a Tuesday in the 
+                                Autumn block.</p>
+                                <p>The SQL statement below is written to make the change.</p>
+                                <div class="codeBox">
+                                    <p>DELETE FROM Class</p>
+                                    <p>WHERE leaderName = "Claire"</p>
+                                    <p>AND className = "3-4 Years"</p>
+                                </div>
+                                <p>Give one reason why this SQL statement is not fit for purpose.</p>
                             </td>
                             <th rowspan="2"  width="30px">1</th>
                         </tr>
                         <tr>
                             <td>
                                 <div class="hiddenElement answer1">
-
+                                    <p>The SQL statement does not specify the day of the week or the block that the class is taking place in.</p>
+                                    <p>This means that it will delete all records where the leaderName is Claire and the className is 3-4 Years, regardless of the day of the week or the block.</p>
                                 </div>
                             </td>
                         </tr>
                     </table>
                     <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(ii)</th>
+                            <td>
+                                <p>The Gorebridge classes are no longer running.</p>
+                                <p>Write the SQL statement to remove all the Gorebridge classes.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer2">
+                                    <div class="codeBox">
+                                        <p>DELETE FROM Class</p>
+                                        <p>WHERE location = "Gorebridge";</p>
+                                    </div>
+
+                                    <p>You will gain marks for the following:</p>
+                                    <ul>
+                                        <li>DELETE FROM Class</li>
+                                        <li>WHERE location = "Gorebridge"</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
                     </div>
                 </div>
             </div>

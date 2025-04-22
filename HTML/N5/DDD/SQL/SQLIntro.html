@@ -2,10 +2,23 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - WDD Analysis</title>
+        <title>N5 Computing Science - S</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <style>
+            ul .fieldtype {
+                max-width:400px;
+                margin:auto;
+                list-style-type:none;
+                
+            }
+
+            ul li a {
+                text-decoration:none;
+                color:black;
+            }
+        </style>
         <script src="/JavaScript/script.js"></script>
         <script>
             window.onload = function() {
@@ -27,27 +40,85 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentHeading"><h1>SQL Introduction</h1></div>
                 <div class="contentContainer">
+                    <h2>What is SQL?</h2>
+                    <p>SQL stands for Structured Query Language.  It is a programming language that is used to manage and manipulate relational databases. It enables the user to perform a variety of tasks in a 
+                        database such as querying data, creating and modifying database structures. SQL is widely used across various database management systems.  Even MS Access is just a graphical user interface
+                        covering an SQL based system.  Whenever you create a table, perform a search or sort data in Access, it actually runs the SQL code to do so in the background.</p>
 
-                    <h2>Past Paper Question - 2023 Q19(a)</h2>
+                    <p>It is pronounced either S-Q-L or "sequel".</p>
 
-                    <table>
-                        <tr>
-                            <th rowspan="2" width="30px">(a)</th>
-                            <td>
-                            </td>
-                            <th rowspan="2"  width="30px">1</th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
+                    <p>Microsoft Access provides a graphical user interface to query our database without using SQL using the "Query Design View" and the "Query Wizard".</p>
 
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <p>Any query created with these tools can be viewed in the SQL view to examine the code that Access generated. At National 5 level you will be expected to
+                    create queries without using the Graphical User Interface.</p>
+
+                    <h2>How can you access SQL code?</h2>
+
+                    You can access SQL code either from within MS Access or using an online SQL editor.  Both of these methods will be covered below.
+                    
+                    <p class="fieldtype tutorial" style="margin-top:10px;" onclick="toggleLaw(this)"><b>Using SQL in MS Access</b></p>
+                    <div class="fieldProperty tutorial" style="display:none; padding:20px; margin-top:5px; margin-bottom:5px;">
+                        <p>If you want to access SQL from within Access, you first have to create a query, by clicking on the Create Tab at the top of the screen and then clicking on Query Design.</p>
+                        <img class="shadowImage" src="/Images/N5/DDD/Access/CreateTab2.jpg" alt="Creating a Query">
+                        <p>An SQL View button will appear in the top left corner of the window, which you can click on to enter the SQL View.</p>
+                        <img class="shadowImage" src="/Images/N5/DDD/Access/SQLViewButton.jpg" alt="SQL View Button">
+                        <p>The SQL View is where you can type in SQL code to perform tasks in your database.  If you open it after having just generated a blank query, it should look like this:</p>
+                        <img class="shadowImage" src="/Images/N5/DDD/Access/SQLViewBlank.jpg" alt="SQL View Blank">
+                        <p>After typing the code you want to run in the SQL window, you can click on the Run button in the top left of the window to run it.</p>
+                        <img class="shadowImage" src="/Images/N5/DDD/Access/RunButton.jpg" alt="Run SQL Button">
+                    </div>
+    
+                    <p class="fieldtype tutorial" style="margin-top:10px;" onclick="toggleLaw(this)"><b>Using SandboxSQL</b></p>
+                    <div class="fieldProperty tutorial" style="display:none; padding:20px; margin-top:5px; margin-bottom:5px;">
+                        <p>SandboxSQL is an online SQL editor and compiler. It uses SQLite as its language, and it is completely seperate from MS Access.  This means that it does not use the Access '.accd' files, and 
+                            instead uses '.sqlite' files. However, if you want to exclusively practice SQL code, this is a good way to do it without using access.  For this reason, I will supply the Students database 
+                            that I have used  in previous examples as a .sqlite file.  You can download it by clicking on the button below.</p>
+    
+                        <div class="button"><a href="/Files/Resources/N5/DDD/student_database.sqlite" download="student_database.sqlite">Student Database SQLite</a></div>
+    
+                        <p>To use SandboxSQL with this file, first click on the link below:</p>
+                        <a href="https://sandboxsql.com/" style="display:block; text-align:center; margin:20px auto;"><img class="shadowImage" src="/Images/N5/DDD/Access/SandboxSQL.jpg" alt="SandboxSQL"></a> 
+    
+                        <p>On this webpage, click on New, next to the SandboxSQL logo.</p>
+                        <img class="shadowImage" src="/Images/N5/DDD/Access/SandboxSQLNew.jpg" alt="SandboxSQL New">
+    
+                        <p>In the menu that appears, click on 'Upload File'.</p>
+                        <img class="shadowImage" src="/Images/N5/DDD/Access/UploadFile.jpg" alt="SandboxSQL Upload">
+    
+                        <p>Search for and open the SQLite file that you downloaded above.  The website will ask you to give the database a name - call it Students.</p>
+                        <img class="shadowImage" src="/Images/N5/DDD/Access/UploadFile2.jpg" alt="SandboxSQL Upload 2">
+    
+                        <p>This will open the window below, you can see the tables on the left and an area to enter SQL code at the bottom of the screen.  Whenever you want to run code, you can click on Execute.</p>
+                        <img class="shadowImage" style="max-width:100%" src="/Images/N5/DDD/Access/SandboxSQLWindow.jpg" alt="SandboxSQL Window">
+    
+                        <p><b>For your assignment, it would be better to use Access, since you will probably not have access to the SQLite file you would need.</b></p>
+                    </div>
+                        
+                    <h2>SQL Code</h2>
+                    <p>When creating queries in SQL, you should take note of the following:</p>
+                    <ul>
+                        <li>SQL Code could all be written on a single line, in the tutorials it is split up onto multiple lines to make it easier to read.</li>
+                        <li>A full SQL query always ends in a semi-colon (;).  Look at the example below and note that there is only one semi-colon at the end.</li>
+                        <li>SQL code is <b>not</b> case sensitive.  This means that you can type in the code in any case that you want, and it will still work.</li>
+                        <li>However, to make it easier to read, it is good practice to capitalise <b>keywords</b> like SELECT, WHERE, and FROM.</li>
+                    </ul>
+
+                    <p>Here is an example of SQL Code, written using the SQL View in MS Access.</p>
+                    <img class="SQLImage" src="/Images/N5/DDD/Access/SQLExample.jpg" alt="SQL Example">
+
+                    
+                    <p>At the N5 level, we will be studying the following SQL Code, click on one to see a tutorial on it.</p>
+
+                    <ul>
+                        <li class="fieldtype"><a href="/HTML/N5/DDD/SQL/SELECT.html">SELECT...FROM...WHERE</a></li>
+                        <li class="fieldtype"><a href="/HTML/N5/DDD/SQL/UPDATE.html">UPDATE</a></li>
+                        <li class="fieldtype"><a href="/HTML/N5/DDD/SQL/INSERTINTO.html">INSERT INTO...VALUES</a></li>
+                        <li class="fieldtype"><a href="/HTML/N5/DDD/SQL/DELETE.html">DELETE FROM...WHERE</a></li>
+                        <li class="fieldtype"><a href="/HTML/N5/DDD/SQL/Equi-Join.html">Equi-Join</a></li>
+                    </ul>
+
                     </div>
                 </div>
             </div>

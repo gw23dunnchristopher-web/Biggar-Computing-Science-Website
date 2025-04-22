@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>N5 Computing Science - Queries (Search Criteria)</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <script src="/JavaScript/script.js"></script>
+        <script>
+            window.onload = function() {
+                setInterval(function() {
+                    countdown('2025-04-25');
+                }, 1000);
+            }
+        </script>
+    </head>
+    <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png" />
+        </header>
+        <div id="pageContainer">
+             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>National 5</h1></div>
+                <div class="contentHeading"><h1>Queries - Search Criteria</h1></div>
+                <div class="contentContainer">
+                    <h2>Search Criteria</h2>
+                    <p>In the Query View, you can enter criteria for each field in the Criteria row. Click on a button below to see the criteria that you can use on a specific field type.</p>
+                    <p class="fieldtype tutorial" onclick="toggleLaw(this)"><b>Text Fields</b></p>
+                    <div class="fieldProperty tutorial" style="display: none; padding:20px;">
+
+                        <table class="white">
+                            <tr>
+                                <th>Criteria</th>
+                                <th>Description</th>
+                                <th>Example</th>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Exact match</th>
+                                <td>Searches for a text field that contains this data.</td>
+                                <td>"Fiddich"</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Does not match</th>
+                                <td>Shows all records that do not contain this data.</td>
+                                <td>Not "Fiddich"</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Begins with</th>
+                                <td>Shows records where the specified field's data begins with a specific character.</td>
+                                <td>Like F*</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Does not Begin with</th>
+                                <td>Shows records where the specified field's data does not begin with a specific character.</td>
+                                <td>Not Like F*</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Contains specific text</th>
+                                <td>Shows records where the specified field's data contains specific text.</td>
+                                <td>Like "*Mark*"</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Does not Contain specific text</th>
+                                <td>Shows records where the specified field's data does not contain specific text.</td>
+                                <td>Not Like "*Mark*"</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Ends with</th>
+                                <td>Shows records where the specified field's data ends with a specific character.</td>
+                                <td>Like *h</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Does not end with</th>
+                                <td>Shows records where the specified field's data does not end with a specific character.</td>
+                                <td>Not Like *h</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">In this list?</th>
+                                <td>Shows records where the specified field contains data in the list.</td>
+                                <td>In("Mark", "Colin", "Peter")</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <p class="fieldtype tutorial" onclick="toggleLaw(this)"><b>Number Fields</b></p>
+                    <div class="fieldProperty tutorial" style="display: none; padding:20px;">
+                        <table class="white">
+                            <tr>
+                                <th>Criteria</th>
+                                <th>Description</th>
+                                <th>Example</th>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Equal to</th>
+                                <td>Shows records where the specified field's data is equal to the number entered.</td>
+                                <td>15</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Not Equal to</th>
+                                <td>Shows records where the specified field's data is not equal to the number entered.</td>
+                                <td>Not 15</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Greater than</th>
+                                <td>Shows records where the specified field's data is greater than the number entered.</td>
+                                <td>&gt;15</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Less than</th>
+                                <td>Shows records where the specified field's data is less than the number entered.</td>
+                                <td>&lt;15</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Greater than or equal to</th>
+                                <td>Shows records where the specified field's data is greater than or equal to the number entered.</td>
+                                <td>&gt;=15</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Less than or equal to</th>
+                                <td>Shows records where the specified field's data is less than or equal to the number entered.</td>
+                                <td>&lt;=15</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Between two values</th>
+                                <td>Shows records where the specified field's data is between two values.</td>
+                                <td>Between 13 and 17</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <p class="fieldtype tutorial" onclick="toggleLaw(this)"><b>Date/Time Fields</b></p>
+                    <div class="fieldProperty tutorial" style="display: none; padding:20px;">   
+                        <p>Dates and times require that you put a hash (#) at either side of the date you are looking for.</p>
+                        
+                        <table class="white">
+                            <tr>
+                                <th>Criteria</th>
+                                <th>Description</th>
+                                <th>Example</th>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Exact match</th>
+                                <td>Shows records where the specified field's data is equal to the date entered.</td>
+                                <td>#12/12/2023#</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Do not match</th>
+                                <td>Shows records where the specified field's data is not equal to the date entered.</td>
+                                <td>Not #12/12/2023#</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Before</th>
+                                <td>Shows records where the specified field's data is before the date entered.</td>
+                                <td>&lt;#12/12/2023#</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">After</th>
+                                <td>Shows records where the specified field's data is after the date entered.</td>
+                                <td>&gt;#12/12/2023#</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Between two dates</th>
+                                <td>Shows records where the specified field's data is between two dates.</td>
+                                <td>Between #12/12/2023# And #12/12/2024#</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">In this list?</th>
+                                <td>Shows records where the specified field contains data in the list.</td>
+                                <td>In(#12/12/2023#, #12/12/2024#, #12/12/2025#)</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <p class="fieldtype tutorial" onclick="toggleLaw(this)"><b>Any Field Type</b></p>
+                    <div class="fieldProperty tutorial" style="display: none; padding:20px;">
+                        <table class="white">
+                            <tr>
+                                <th>Criteria</th>
+                                <th>Description</th>
+                                <th>Example</th>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Is Null</th>
+                                <td>Shows records where the specified field is empty.</td>
+                                <td>Is Null</td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Is Not Null</th>
+                                <td>Shows records where the specified field is not empty.</td>
+                                <td>Is Not Null</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                 
+                    </div>
+                </div>
+            </div>
+        </div>   
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+            </div>
+    </body>
+</html>

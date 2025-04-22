@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - WDD Analysis</title>
+        <title>N5 Computing Science - SQL UPDATE</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
@@ -27,27 +27,193 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentHeading"><h1>SQL UPDATE</h1></div>
                 <div class="contentContainer">
+                    <h2>UPDATE SQL Statements</h2>
+                    <p>UPDATE statements are used to update data in a database.  An UPDATE statement consists of 3 main parts:</p>
+                    <ol>
+                        <li>Specify the table that has the information to be updated.</li>
+                        <li>What the new values are going to be.</li>
+                        <li>The criteria for which records to update.</li>
+                    </ol>
 
-                    <h2>Past Paper Question - 2023 Q19(a)</h2>
+                    <h2>UPDATE Query - Layout</h2>
+                    <p>All UPDATE queries should have the following layout:</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/UPDATELayout.jpg" alt="UPDATE Layout">
+
+                    <p>You have to be careful when choosing the criteria for which records will be updated, multiple records may be updated at once.  For example, if you were to type 'WHERE cost=11.99' then ALL of
+                    the records where the price was £11.99 would be updated.</p>
+                    
+                    <h2>Examples</h2>
+                    
+                    <p>For these examples, we are going to use the database for a Music Store, it contains two tables - CD and Label.  You can see the two tables below:</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/MusicStore.jpg" alt="Music Store Tables">
+
+                    If you wish to download the database to try these queries out for yourself, you can download it by clicking on the button below.</a>
+                    <div class="button"><a href="/Files/Resources/N5/DDD/MusicStore.accdb" download="MusicStore.accdb">Music Store Database</a></div>
+
+                    <h3>Updating one record</h3>
+                    <p>When you want to update just one record, you should use the unique identifier for that record in the criteria.  For exampole, let's say that we wanted to update the CD with the title '+' so
+                    that it was 'Plus' instead.</p>
+                    <table>
+                        <tr>
+                            <th>Step</th>
+                            <th>Action</th>
+                            <th>Code</th>
+                        </tr>
+                        <tr>
+                            <th class="subheader">1</th>
+                            <td>Specify the table that has the information to be updated.</td>
+                            <td>
+                                <p><b>UPDATE CD</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">2</th>
+                            <td>What the new values are going to be.</td>
+                            <td>
+                                <p>UPDATE CD</p>
+                                <p><b>SET title = 'Plus'</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">3</th>
+                            <td>The criteria for which records to update.</td>
+                            <td>
+                                <p>UPDATE CD</p>
+                                <p>SET title = 'Plus'</p>
+                                <p><b>WHERE CDCode = '5J8Y'</b></p>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <p>Here is how the query would look in the Query View in MS Access, and the result when you run it. MS Access will tell you how many records you are going to update with this query, and will 
+                    ask you if you are sure.</p>
+                    <table>
+                        <tr>
+                            <th>Query</th>
+                            <th>Result</th>
+                        </tr>
+                        <tr>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/UPDATEQuery1.jpg" alt="UPDATE Query 1"></td>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/UPDATEResult1.jpg" alt="UPDATE Query 1 Result"></td>
+                        </tr>
+                    </table>
+
+                    <h3>Updating multiple records</h3>
+                    <p>If you want to update multiple records, you can use a condition in the WHERE statement.  For example, let's say that the music store was having a sale, and all of the CDs that cost over £9.99
+                        were reduced to £9.99.</p>
+                    <table>
+                        <tr>
+                            <th>Step</th>
+                            <th>Action</th>
+                            <th>Code</th>
+                        </tr>
+                        <tr>
+                            <th class="subheader">1</th>
+                            <td>Specify the table that has the information to be updated.</td>
+                            <td>
+                                <p><b>UPDATE CD</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">2</th>
+                            <td>What the new values are going to be.</td>
+                            <td>
+                                <p>UPDATE CD</p>
+                                <p><b>SET cost = 9.99</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">3</th>
+                            <td>The criteria for which records to update.</td>
+                            <td>
+                                <p>WHERE cost > 9.99</p>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <p>This will update all of the records where the cost is over 9.99 so that the cost is now 9.99.</p>
+                    <p>Here is what the SQL query would look like in the SQL View, and what the output would be.</p>
 
                     <table>
                         <tr>
-                            <th rowspan="2" width="30px">(a)</th>
+                            <th>Query</th>
+                            <th>Result</th>
+                        </tr>
+                        <tr>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/UPDATEQuery2.jpg" alt="UPDATE Query 2"></td>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/UPDATEResult2.jpg" alt="UPDATE Query 2 Result"></td>
+                        </tr>
+                    </table>
+                    
+                    <p>This query will update 5 records, and MS Access will check to make sure that's what you want to do before it does it.</p>
+                    
+                    <h2>Past Paper Question - 2019 Q17(c)</h2>
+                    <p>A company uses a relational database to store details of job vacancies for 
+                    current employees. Each employee can apply for only one vacancy</p>
+
+                    <p>The tables below show current job vacancies and employees.</p>
+
+                    <img class="cImg" src="/Images/N5/DDD/SQL/PPUPDATE.jpg" alt="2019 Q17c">
+
+                    <p>The pay grade for H Patel should be pay grade 2 and not pay grade 3. 
+                        The SQL statement below is written to make the change.</p>
+
+                        <div class="codeBox">
+                            <p>UPDATE Employee</p>
+                            <p>SET payGrade = 3</p>
+                            <p>WHERE surname = "Patel";</p>
+                        </div>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(i)</th>
                             <td>
+                                <p>Give two reasons why this SQL statement is not fit for purpose.</p>
                             </td>
-                            <th rowspan="2"  width="30px">1</th>
+                            <th rowspan="2"  width="30px">2</th>
                         </tr>
                         <tr>
                             <td>
                                 <div class="hiddenElement answer1">
-
+                                    <ul>
+                                        <li>It will update all employees with the surname Patel, not just H Patel.</li>
+                                        <li>It will set the pay grade to 3, not 2.</li>
+                                    </ul>
                                 </div>
                             </td>
                         </tr>
                     </table>
                     <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(ii)</th>
+                            <td>
+                                <p>Re-write the SQL statement to make it fit for purpose.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer2">
+                                    
+                                    <div class="codeBox">
+                                        <p>UPDATE Employee</p>
+                                        <p>SET payGrade = 2</p>
+                                        <p>WHERE appRef = 327;</p>
+                                    </div>
+
+                                    <p>One mark each for:</p>
+                                    <ul>
+                                        <li>Correctly setting the payGrade to 2 instead of 3.</li>
+                                        <li>Using the correct appRef to identify H Patel.  Alternatively, you could use 'WHERE initial = "H" AND surname = "Patel"'.</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
                     </div>
                 </div>
             </div>

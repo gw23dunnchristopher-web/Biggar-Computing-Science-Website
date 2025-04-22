@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - WDD Analysis</title>
+        <title>N5 Computing Science - SQL SELECT</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
@@ -27,22 +27,192 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentHeading"><h1>SQL SELECT</h1></div>
                 <div class="contentContainer">
+                    <h2>SELECT SQL Statements</h2>
+                    <p>SELECT statements are used to retrieve data from a database.  A SELECT statement consists of 4 main parts:</p>
+                    <ol>
+                        <li>The fields that you want to display in your results.</li>
+                        <li>The table or tables that you want to retrieve the data from.</li>
+                        <li>The criteria for your search.</li>
+                        <li>The order that you want the results to be displayed in.</li>
+                    </ol>
 
-                    <h2>Past Paper Question - 2023 Q19(a)</h2>
+                    <h2>SELECT Query - Layout</h2>
+                    <p>All SELECT queries should have the following layout:</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/SELECTLayout.jpg" alt="SELECT Layout">
+                    <p>Note that instead of specifying field names in the first line, you can use an asterisk instead (*).  The asterisk represents <b>ALL</b> fields.  So placing in the first line
+                    (for example: SELECT *) will display all of the fields in your table.</p>
+                    
+                    <h2>Examples</h2>
+                    <p>For these examples, I will use the Students database, which contains two tables, Students and Houses.  Here is the top part of each of the tables in the Student's Database:</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/tables.jpg" alt="Students Tables">
+                    <p>There are many more records in the 'students' table than you can see here, but we can use these tables to construct SELECT SQL queries.</p>
 
+                    <h3>SELECT - One Condition</h3>
+                    <p>Show the first name, last name, and gender of each student in S4 and display them in alphabetical order by last name.</p>
+                    <table>
+                        <tr>
+                            <th>Step</th>
+                            <th>Action</th>
+                            <th>Code</th>
+                        </tr>
+                        <tr>
+                            <th class="subheader">1</th>
+                            <td>Select the fields that you want to display.</td>
+                            <td>
+                                <p><b>SELECT first_name, last_name, gender</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">2</th>
+                            <td>Select the table(s) that you want to retrieve the data from.</td>
+                            <td>
+                                <p>SELECT first_name, last_name, gender</p>
+                                <p><b>FROM Students</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">3</th>
+                            <td>Enter the criteria for your search.</td>
+                            <td>
+                                <p>SELECT first_name, last_name, gender</p>
+                                <p>FROM Students</p>
+                                <p><b>WHERE Year = 'S4'</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">4</th>
+                            <td>Enter the order that you want the results to be displayed in.</td>
+                            <td>
+                                <p>SELECT first_name, last_name, gender</p>
+                                <p>FROM Students</p>
+                                <p>WHERE year = 'S4'</p>
+                                <p><b>ORDER BY last_name ASC;</b></p>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <ul>
+                        <li>Note that 'S4' has been entered in inverted commas, this is because S4 is text.  You can also use speech marks.</li>
+                        <li>ORDER BY will tell the program to organise the data in order by one of the fields.  It can be organised either in Ascending (ASC) or Descending (DESC) order.</li>
+                        <li>The ORDER BY statement has a semi-colon at the end, this is because it is the last line in the query.</li>
+                    </ul>
+                    <p>Here is how the query would look in the Query View in MS Access, and the result when you run it.</p>
+                    <table>
+                        <tr>
+                            <th>Query</th>
+                            <th>Result</th>
+                        </tr>
+                        <tr>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/SELECTQuery1.jpg" alt="SELECT Query 1"></td>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/SELECTResult1.jpg" alt="SELECT Query 1 Result"></td>
+                    </table>
+                    <h3>SELECT - More than one condition</h3>
+                    <p>We want to show the First Name, Last Name and Year of all of the students who are over 15 in house Fiddich, the students should be ordered by age from oldest to youngest.</p>
+                    <table>
+                        <tr>
+                            <th>Step</th>
+                            <th>Action</th>
+                            <th>Code</th>
+                        </tr>
+                        <tr>
+                            <th class="subheader">1</th>
+                            <td>Select the fields that you want to display.</td>
+                            <td>
+                                <p><b>SELECT first_name, last_name, year</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">2</th>
+                            <td>Select the table(s) that you want to retrieve the data from.</td>
+                            <td>
+                                <p>SELECT first_name, last_name, year</p>
+                                <p><b>FROM Students</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">3</th>
+                            <td>Enter the criteria for your search.</td>
+                            <td>
+                                <p>SELECT first_name, last_name, year</p>
+                                <p>FROM Students</p>
+                                <p><b>WHERE age &gt; 15 AND house = 'Fiddich'</b></p>
+                            </td>
+                        </tr>
+                            <tr>
+                                <th class="subheader">4</th>
+                                <td>Enter the order that you want the results to be displayed in.</td>
+                                <td>
+                                    <p>SELECT first_name, last_name, year</p>
+                                    <p>FROM Students</p>
+                                    <p>WHERE age &gt; 15 AND house = 'Fiddich'</p>
+                                    <p><b>ORDER BY age DESC;</b></p>
+                                </td>
+                            </tr>
+                        </table>
+
+                    <ul>
+                        <li>Here DESC has been used to display the students in reverse order of age, so from oldest to youngest.</li>
+                        <li>AND has been used to add another condition to the WHERE statement.  You can add as many conditions as you want to the WHERE statement, just make sure to use AND between each one.</li>
+                        <li>OR can be used instead of AND, but instead of displaying records that meet all of the conditions, it will display records that meet any of the conditions.</li>
+                        <li>You can also use OR and AND together in the same query, just make sure to use brackets to group the conditions you want together.</li>
+                    </ul>
+
+                    <p>Here is how the query would look in the Query View in MS Access, and the result when you run it.</p>
+                    <table>
+                        <tr>
+                            <th>Query</th>
+                            <th>Result</th>
+                        </tr>
+                        <tr>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/SELECTQuery2.jpg" alt="SELECT Query 2"></td>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/SELECTResult2.jpg" alt="SELECT Query 2 Result"></td>
+                    </table>
+                    
+                    <h2>Past Paper Question - 2022 Q12(a)</h2>
+
+                    <p>A database table stores the following data.</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/PPSELECT.jpg" alt="2022 Q12a">
                     <table>
                         <tr>
                             <th rowspan="2" width="30px">(a)</th>
                             <td>
+                                <p>The following SQL statement is implemented in the database.</p>
+                                <div class="codeBox">
+                                    <p>SELECT forename, surname</p>
+                                    <p>FROM Result</p>
+                                    <p>WHERE test1 < 10 OR test2 > 90</p>
+                                </div>
+                                <p>Write the expected output from the SQL statement</p>
                             </td>
-                            <th rowspan="2"  width="30px">1</th>
+                            <th rowspan="2"  width="30px">3</th>
                         </tr>
                         <tr>
                             <td>
                                 <div class="hiddenElement answer1">
+                                    <table style="max-width:400px; margin:auto; text-align:center;">
+                                        <tr>
+                                            <th>forename</th>
+                                            <th>surname</th>
+                                        </tr>
+                                        <tr>
+                                            <td>Julie</td>
+                                            <td>White</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Olivia</td>
+                                            <td>Arran</td>
+                                        </tr>
+                                    </table>
 
+                                    <p>One mark each from:</p>
+                                    <ul>
+                                        <li>forename and surname headings in that order.</li>
+                                        <li>Julie White.</li>
+                                        <li>Olivia Arran.</li>
+                                    </ul>
+                                    
                                 </div>
                             </td>
                         </tr>

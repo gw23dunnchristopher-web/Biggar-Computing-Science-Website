@@ -8,6 +8,17 @@
                 padding:1px;
                 margin:0;
             }
+            <style>
+                ol li ul li {
+                    margin:0; padding:0;
+                    margin-left:40px;
+                    margin-right:40px;
+                }
+
+                ol li ul {
+
+                }
+            </style>
         </style>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
@@ -36,116 +47,90 @@
                 <div class="contentHeading"><h1>Creating a New Database in MS Access</h1></div>
                 <div class="contentContainer">
                     <h2>What is MS Access?</h2>
-                    <p>MS (Microsoft) Access is a database management system (DBMS) that allows users to create, manage, and manipulate databases. It is part of the Microsoft Office suite and is widely used for creating and 
-                        managing  databases for small to medium-sized businesses and organizations.</p>
+                    <p>MS (Microsoft) Access is a database management system (DBMS) that allows users to create, manage, and manipulate databases. It is part of the Microsoft Office suite and is widely used for creating 
+                        and managing  databases for small to medium-sized businesses and organizations.</p>
 
-                    <p>In National 5 Database Design and Development, we will be using MS Access because it not only has a graphical user interface, making it a little easier to understand, but also access to a SQL view, allowing 
-                        us to perform SQL queries in it as well.</p>
+                    <p>In National 5 Database Design and Development, we will be using MS Access because it not only has a graphical user interface, making it a little easier to understand, but also access to a SQL view, 
+                        allowing us to perform SQL queries in it as well.</p>
 
-                    <p>In the MS Access Tutorials on this site, you will see how to create a new database, add and delete records, use data validation and create queries using the MS Access GUI.  First, we will look at the 
-                        creation of a new database with two tables.</p>
+                    <p>In the MS Access Tutorials on this site, you will see how to create a new database, add and delete records, use data validation and create queries using the MS Access GUI.</p>
 
                     <h2>Creating a New Database</h2>
-                    <div style="max-width:1000px; background-color:#C5E3ED; margin:auto; padding:20px;">
+                    <p>This tutorial will show you how to create a database using MS Access with two tables, Items and Designers.</p>
+                    <p class="fieldtype tutorial" onclick="toggleLaw(this)"><b>New Database Tutorial</b></p>
+                    <div class="fieldProperty tutorial" style="display: none; padding:20px;">
                     <ol>
                         <li>
-                            <div class="sideBySide">
-                            <p><b>Open MS Access</b> - if you click on the Start button on your desktop (it looks like the Windows symbol) and 'Access' into the search bar, you should see it appear.  Click on it to open it.  The 
-                                symbol for access is displayed here.</p>
-                            <img class="shadowImage" src="/Images/N5/DDD/Access/access.jpg" alt="Access Icon">    
-                            </div>
+                            <p><b>Open MS Access</b> - if you click on the Start button on your desktop (it looks like the Windows symbol) and 'Access' into the search bar, you should see it appear.  Click on it to open 
+                                it.  The symbol for access is displayed here.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/access.jpg" alt="Access Icon">    
                         </li>
                         <li>
-                            <div class="sideBySide">
-                            <p><b>Blank Database</b> - Once access is open, you will have to create a blank database.  You can click on the icon to the right in order to do so.  Any databases you were working on that you have     
-                                saved will also be listed on this screen or, if not, you can click on open to navigate to them.</p>
-                            <img class="shadowImage" src="/Images/N5/DDD/Access/blankDB.jpg" alt="Blank Database Icon">    
-                            </div>
+                            <p><b>Blank Database</b> - Once access is open, you will have to create a blank database.  You can click on the icon to the right in order to do so.  Any databases you were working on that you 
+                                have saved will also be listed on this screen or, if not, you can click on open to navigate to them.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/blankDB.jpg" alt="Blank Database Icon">    
                         </li>
                         <li>
-                            <div class="sideBySide">
-                            <p><b>Name your database</b> - You will now have to give your database a name.  In this example, as we are creating the database for Items and Designers, we will give the database the name 'Designs'.</p>
-                            <img class="shadowImage" src="/Images/N5/DDD/Access/DBName.jpg" alt="Naming the database">    
-                            </div>
+                            <p><b>Name your database</b> - You will now have to give your database a name.  In this example, as we are creating the database for Items and Designers, we will give the database the name 
+                                'Designs'.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/DBName.jpg" alt="Naming the database">    
                         </li>
                         <li>
-                            <div class="sideBySide">
-                            <p><b>Save your database in the right folder</b> - By click on the small folder next to the name, you will be able to choose where to save your database.  You should save it in your own 'Computing' 
-                                folder.</p>
-                            <img class="shadowImage" src="/Images/N5/DDD/Access/DBName2.jpg" alt="Saving the database">    
-                            </div>
+                            <p><b>Save your database in the right folder</b> - By click on the small folder next to the name, you will be able to choose where to save your database.  You should save it in your own 
+                                'Computing' folder.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/DBName2.jpg" alt="Saving the database">    
                         </li>
                         <li>
-                            <div class="sideBySide">
                             <p><b>Click the Create button</b> - Once you have chosen the right folder to save your database in, you can click the Create button to create it.</p>
-                            <img class="shadowImage" src="/Images/N5/DDD/Access/CreateButton.png" alt="Create Button">    
-                            </div>
+                            <img class="shadow" src="/Images/N5/DDD/Access/CreateButton.png" alt="Create Button">    
                         </li>
                         <li>
-                            <div class="sideBySide">
-                            <p><b>Go to the Design View</b> - A blank datasheet will appear.  MS Access automatically creates one blank table for you.  Go to the Design view by clicking on the Design View Icon in the top left 
-                                of the screen.</p>
-                            <img class="shadowImage" src="/Images/N5/DDD/Access/DesignViewIcon.jpg" alt="Design View Icon">    
-                            </div>
+                            <p><b>Go to the Design View</b> - A blank datasheet will appear.  MS Access automatically creates one blank table for you.  Go to the Design view by clicking on the Design View Icon in the top 
+                                left of the screen.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/DesignViewIcon.jpg" alt="Design View Icon">    
                         </li>
                         <li>
-                            <div class="sideBySide">
-                            <p><b>Give the table a name</b> - When entering the Design View of a new table for the first time, you will be asked to give the table a name.  We will call this table 'Designers'.  After you name
-                            the table, you can click OK to open the Design View.</p>
-                            <img class="shadowImage" src="/Images/N5/DDD/Access/NameTable.jpg" alt="Save As Dialogue Box (Table)">    
-                            </div>
+                            <p><b>Give the table a name</b> - When entering the Design View of a new table for the first time, you will be asked to give the table a name.  We will call this table 'Designers'.  After you 
+                                name the table, you can click OK to open the Design View.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/NameTable.jpg" alt="Save As Dialogue Box (Table)">    
                         </li>
                         <li>
-                            <div class="sideBySide">
-                            <p><b>Add field names</b> - This is the design view, it will list the fields your table will use and their properties.  It will start with a primary key field called 'ID', you can see that this is
-                            a primary key field because of the small key next to it.  ID will be automatically be given the type 'Autonumber'.  We are going to change this to 'Designer ID' and set the field type to 'Short Text'.
-                            We will also add the following fields below it - Designer Name, Email and Phone Number.  All of these will also be Short Text fields.</p>
-                            <div>
-                            <img class="shadowImage" style="margin-bottom:20px" src="/Images/N5/DDD/Access/DesignView.jpg" alt="New Table Design View">   
-                            <img class="shadowImage" src="/Images/N5/DDD/Access/DesignView2.jpg" alt="Design View with Fields"> 
-                            </div>
-                            </div>
+                            <p><b>Add field names</b> - This is the design view, it will list the fields your table will use and their properties.  It will start with a primary key field called 'ID', you can see that 
+                                this is a primary key field because of the small key next to it.  ID will be automatically be given the type 'Autonumber'.  We are going to change this to 'Designer ID' and set the field 
+                                type to 'Short Text'. We will also add the following fields below it - Designer Name, Email and Phone Number.  All of these will also be Short Text fields.</p>
+                            <img class="shadow" style="margin-bottom:20px, display:block;" src="/Images/N5/DDD/Access/DesignView.jpg" alt="New Table Design View">   
+                            <img class="shadow" src="/Images/N5/DDD/Access/DesignView2.jpg" alt="Design View with Fields"> 
+                            
                             <p><i>Short Text fields have a maximum of 255 characters, it is better to use these than Long Text, that can store up to a gigabyte of data!  This is because using Short Text will make your
                             database take up less space.</i></p>
                             <p><i>Additional, if you want to delete a field, just right-click on it and click 'Delete Rows'.</i></p>
                         </li>
                         <li>
-                            <div class="sideBySide">
-                            <p><b>Add field lengths</b> - You should add a field length for any text fields.  The length of the text field can be found in its properties - whenever you click on one of the field names in the 
-                            design view, you will be able to see the properties of that field at the bottom of the screen (for more information on the properties of different field types, go to the 
-                            <a href="/HTML/N5/DDD/Access/FieldProperties.html">Field Properties</a> page).  The field size is the length of the field, and it is set to the maximum of 255 by default, but you can delete this and 
-                            change it.  As per our data dictionary, set the length of the Designer ID to 6, Designer Name to 20, Email to 30 and Phone Number to 11.</p>
-                            <img class="shadowImage" src="/Images/N5/DDD/Access/fieldLength.jpg" alt="Field Size Property">    
-                            </div>
+                            <p><b>Add field lengths</b> - You should add a field length for any text fields.  The length of the text field can be found in its properties - whenever you click on one of the field names in 
+                                the design view, you will be able to see the properties of that field at the bottom of the screen (for more information on the properties of different field types, go to the 
+                            <a href="/HTML/N5/DDD/Access/FieldProperties.html">Field Properties</a> page).  The field size is the length of the field, and it is set to the maximum of 255 by default, but you can delete 
+                                this and change it.  As per our data dictionary, set the length of the Designer ID to 6, Designer Name to 20, Email to 30 and Phone Number to 11.</p>
+                            <img class="shadow" src="/Images/N5/DDD/Access/fieldLength.jpg" alt="Field Size Property">    
                         </li>
                         <li>
-                            <div class="sideBySide">
-                            <p><b>Return to the Datasheet View</b> - You can now click on the Datasheet icon in the top left to return to the Datasheet view.  You will be asked to save your table when you do this, and can click 
-                                'Yes' to do so.  Once in the datasheet view, you can type in data to add records to your database.</p>
-                            <div>
-                                <img class="shadowImage" style="margin-bottom:20px" src="/Images/N5/DDD/Access/DSView.jpg" alt="Datasheet View Icon">
-                                <img class="shadowImage" src="/Images/N5/DDD/Access/SaveTable.jpg" alt="Saving the Table">
-                            </div>
-                            </div>
+                            <p><b>Return to the Datasheet View</b> - You can now click on the Datasheet icon in the top left to return to the Datasheet view.  You will be asked to save your table when you do this, and 
+                                can click 'Yes' to do so.  Once in the datasheet view, you can type in data to add records to your database.</p>
+
+                            <img class="shadow" style="margin-bottom:20px" src="/Images/N5/DDD/Access/DSView.jpg" alt="Datasheet View Icon">
+                            <img class="shadow" src="/Images/N5/DDD/Access/SaveTable.jpg" alt="Saving the Table">
                         </li>
                         <li>
-                            <div class="sideBySide">
-                            <p><b>Create the Second Table</b> - Our database has two tables, Designers and Items.  We have created the Designers Table, now we should also create the Items table.  Click on the Create tab at the top 
-                                of the screen, then click on the Table Icon.</p>
-                                <div>
-                                    <img class="shadowImage" style="margin-bottom:20px" src="/Images/N5/DDD/Access/CreateTab.jpg" alt="Create Tab">
-                                    <img class="shadowImage" src="/Images/N5/DDD/Access/NewTable.jpg" alt="Create Table Icon">
-                                </div>  
-                            </div>
+                            <p><b>Create the Second Table</b> - Our database has two tables, Designers and Items.  We have created the Designers Table, now we should also create the Items table.  Click on the Create tab 
+                                at the top of the screen, then click on the Table Icon.</p>
+                                <img class="shadow" style="margin-bottom:20px" src="/Images/N5/DDD/Access/CreateTab.jpg" alt="Create Tab">
+                                    <img class="shadow" src="/Images/N5/DDD/Access/NewTable.jpg" alt="Create Table Icon">
                         </li>
                         <li>
-                            <div class="sideBySide">
-                            <p><b>Go to the Design View and Name the Second Table</b> - Click on the Design View Icon again and it will ask you to name the new table.  Call this one 'Items' and click OK to open the Design View.</p>
-                                <div>
-                                    <img class="shadowImage" style="margin-bottom:20px" src="/Images/N5/DDD/Access/DesignViewIcon.jpg" alt="Design View Icon">
-                                    <img class="shadowImage" src="/Images/N5/DDD/Access/NameTableItems.jpg" alt="Items Table Name">
-                                </div>    
-                            </div>
+                            <p><b>Go to the Design View and Name the Second Table</b> - Click on the Design View Icon again and it will ask you to name the new table.  Call this one 'Items' and click OK to open the 
+                                Design View.</p>
+
+                                <img class="shadow" style="margin-bottom:20px" src="/Images/N5/DDD/Access/DesignViewIcon.jpg" alt="Design View Icon">
+                                <img class="shadow" src="/Images/N5/DDD/Access/NameTableItems.jpg" alt="Items Table Name">   
                         </li>
                         <li>
                             <div class="sideBySide">
@@ -163,7 +148,8 @@
                                 Remember to adjust the field size for each of the Short Text fields in the properties for each field.</p>
                             </p>
                             </div>
-                            <img class="shadowImage" style="max-height:176px;" src="/Images/N5/DDD/Access/ItemDesignView.jpg" alt="Item Table Design View">    
+                            <div>
+                            <img class="shadow" style="max-height:176px;" src="/Images/N5/DDD/Access/ItemDesignView.jpg" alt="Item Table Design View">    
                             </div>
                         </li>
                         <li>
@@ -172,8 +158,7 @@
                         </li>
                     </ol>
                     </div>
-                    <h2>Creating a New Database in MS Access - Video Tutorial</h2>
-                    <p>The video below will talk you through the steps described above:</p>
+
                 </div>
             </div>
         </div>   

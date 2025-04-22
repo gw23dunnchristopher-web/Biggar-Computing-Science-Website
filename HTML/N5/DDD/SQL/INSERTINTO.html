@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - WDD Analysis</title>
+        <title>N5 Computing Science - SQL INSERT</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
@@ -27,22 +27,190 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentHeading"><h1>SQL INSERT</h1></div>
                 <div class="contentContainer">
 
-                    <h2>Past Paper Question - 2023 Q19(a)</h2>
+                    <h2>SELECT SQL Statements</h2>
+                    <p>An INSERT statement is used to add a new record into the database.</p>
+
+                    <p>For example, to add a new student to the Students table, we would use the command:</p>
+
+                    <img class="cImg" src="/Images/N5/DDD/SQL/INSERTLayout.jpg" alt="INSERT SQL Statement">
+
+                    <p>Note that the word 'year' is in purple here.  This is because 'year' is also the name of a function that can be used in SQL.  However, it won't actually affect this SQL statement.</p>
+
+                    <p>We specify the table name, then in brackets the fields we wish to insert to (you can add to all or only some).</p>
+
+                    <p>Next, we must specify the values to add to the database.</p>
+                    
+                    <h2>Examples</h2>
+                    <p>For these examples, we will use a database for a Hardware Store.  The database contains two tables - Manufacturer and Product.  The Manufacturer table contains data on the Manufacturers of the 
+                        products, and the Product table contains information on those products.  The two tables are linked via the manufacturer ID.</p>
+
+                    <p>You can see the two tables below:</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/HardwareStore.jpg" alt="Hardware Store Tables">
+
+                    <p>If you wish to download the table to try some of the queries below for yourself, click on the button below.</p>
+                    <div class="button"><a href="/Files/Resources/N5/DDD/HardwareStore.accdb" download="HardwareStore.accdb">Hardware Store Database</a></div>
+
+                    <h3>Inserting a single new record</h3>
+                    <p>A new Screwdriver has arrived from Craft Supplies (ManufacturerID 441), it will be given the productCode 'SD20', will cost £2.99 and is not on order at the moment, but there are 24 in stock.  This 
+                        should be added to the database.</p>
 
                     <table>
                         <tr>
-                            <th rowspan="2" width="30px">(a)</th>
+                            <th>Step</th>
+                            <th style="width:400px">Action</th>
+                            <th style="max-width:400px">Code</th>
+                        </tr>
+                        <tr>
+                            <th class="subheader">1</th>
+                            <td>Specify the table that you want to add the record to, if you are going to add data to every field you do not need to specify the fields.</td>
                             <td>
+                                <p><b>INSERT INTO Product (productName, productCode, numberInStock, onOrder, costPrice, manufacturerID)</b></p>
                             </td>
-                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                        <tr>
+                            <th class="subheader">2</th>
+                            <td>Specify the values that you want to add to the database.  If you do not specify the fields, then these values must be in the order the fields appear in your database.</td>
+                            <td>
+                                <p>INSERT INTO Product (productCode, numberInStock, onOrder, costPrice, manufacturerID)</p>
+                                <p><b>VALUES ('Screwdriver', 'SD20', 24, False, 2.99, 441);</b></p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <ul>
+                        <li>onOrder is a Boolean field, in SQL this is represented by True or False.  True to put a tick in the checkbox, and False not to.  You can also use 1 for True and 0 for False.</li>
+                        <li><b>Remember that if you are not going to be entering data into <i>all</i> of the fields, you <i>must</i> specify which fields you will be entering data into on the first line and then enter 
+                            them in order on the VALUES line.</b></li>
+                    </ul>
+
+                    <p>This is how the SQL query would appear and the output.</p>
+                    <table>
+                        <tr>
+                            <th>Query</th>
+                            <th>Result</th>
+                        </tr>
+                        <tr>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/INSERTQuery1.jpg" alt="INSERT Query 1"></td>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/INSERTResult1.jpg" alt="INSERT Query 1 Result"></td>
+                        </tr>
+                    </table>
+
+                    <h3>Inserting multiple new records</h3>
+
+                    <p><b>This method works in MySQL or SandboxSQL, but it does not work in MS Access.  Unfortunately in MS Access you can only add one record at a time with INSERT INTO.</b></p>
+                    <p>Imagine that you had to add the following records to the Product table:</p>
+                    <table style="text-align:center;">
+                        <tr>
+                            <th>productName</th>
+                            <th>productCode</th>
+                            <th>numberInStock</th>
+                            <th>onOrder</th>
+                            <th>costPrice</th>
+                            <th>manufacturerID</th>
+                        </tr>
+                        <tr>
+                            <td>Nail (Size 8d)</td>
+                            <td>N08D</td>
+                            <td>1000</td>
+                            <td>0</td>
+                            <td>0.05</td>
+                            <td>531</td>
+                        </tr>
+                        <tr>
+                            <td>Nail (Size 10d)</td>
+                            <td>N10D</td>
+                            <td>800</td>
+                            <td>0</td>
+                            <td>0.10</td>
+                            <td>531</td>
+                        </tr>
+                        <tr>
+                            <td>Nail (Size 12d)</td>
+                            <td>N12D</td>
+                            <td>600</td>
+                            <td>0</td>
+                            <td>0.15</td>
+                            <td>531</td>
+                        </tr>
+                    </table>
+
+                    <p>You could write three separate INSERT INTO statements, but there is a quicker way.  You can write one INSERT INTO statement and then specify the values for each record in brackets.  Like so:</p>
+
+                    <table>
+                        <tr>
+                            <th>Step</th>
+                            <th style="width:400px">Action</th>
+                            <th style="max-width:400px">Code</th>
+                        </tr>
+                        <tr>
+                            <th class="subheader">1</th>
+                            <td>Specify the table that you want to add the record to, if you are going to add data to every field you do not need to specify the fields.</td>
+                            <td>
+                                <p><b>INSERT INTO Product (productCode, numberInStock, onOrder, costPrice, manufacturerID)</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">2</th>
+                            <td>Specify the values that you want to add to the database.  You can add the additional records in brackets below the first - note that each new record is separated by a comma (,).</td>
+                            <td>
+                                <p>INSERT INTO Product (productCode, numberInStock, onOrder, costPrice, manufacturerID)</p>
+                                <p><b>VALUES ('Nail (Size 8d)', 'N08D', 1000, 0, 0.05, 531),</b></p>
+                                <p><b>('Nail (Size 10d)', 'N10D', 800, 0, 0.10, 531),</b></p>
+                                <p><b>('Nail (Size 12d)', 'N12D', 600, 0, 0.15, 531);</b></p>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <h2>Past Paper Question - 2022 Q14(c)</h2>
+                    <p>The relational database is implemented. The data it currently stores is shown below</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/PPINSERT.jpg" alt="2022 Q14(c)">
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(c)</th>
+                            <td>
+                                <p>A porch is to be built onto the front of the house.
+                                The porch is added as a new room by executing the following SQL statement.</p>
+
+                                <div class="codeBox">
+                                    <p>INSERT INTO Room (name,width,length,height,floor)</p>
+                                    <p>VALUES ("Porch",1.20,1.40,2.10,"ground");</p>
+                                </div>
+
+                                <p>The task ‘construct porch’ needs to be added. This task was started by a 
+                                builder on 19 April 2022. The work is not completed so the hours taken and 
+                                cost are not yet known</p>
+
+                                <p>Write an SQL statement that will add this work to the Task table.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">3</th>
                         </tr>
                         <tr>
                             <td>
                                 <div class="hiddenElement answer1">
+                                    <div class="codeBox">
+                                        <p>INSERT INTO Task (taskID, description, dateStarted, completed, tradesPerson, name)</p>
+                                        <p>VALUES (9, "construct porch", "19/4/2022", False, "builder", "Porch");</p>
+                                    </div>
 
+                                    <p>You will gain marks for the following:</p>
+                                    <ul>
+                                        <li>SQL commands correct -
+                                            <ul>
+                                                <li>INSERT INTO Task</li>
+                                                <li>VALUES</li>
+                                            </ul>
+                                        </li>
+                                        <li>Correct 6 fields identified within SQL clause</li>
+                                        <li>Correct 6 matching values identified within SQL clause</li>
+                                    </ul>
+
+                                    <p>Note that as you are not able to enter data into the cost and hoursTaken fields, you must specify the field names you are entering the remaining data into.</p>
+                                    <p>1 mark is awarded for the last two bullets if the number of fields matches number of values but there are more or less than the correct 6 fields and values.</p>
+                                    <p>The taskID must be greater than or equal to 9.</p>
                                 </div>
                             </td>
                         </tr>

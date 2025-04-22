@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - WDD Analysis</title>
+        <title>N5 Computing Science - SQL Equi-Join</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
@@ -27,22 +27,131 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentHeading"><h1>SQL Equi-Join</h1></div>
                 <div class="contentContainer">
+                    <h2>What is an Equi-Join?</h2>
+                    <p>An Equi-Join is a type of join that is used to combine rows from two or more tables based on a related column between them.  The most common type of join is an INNER JOIN, which returns 
+                        only the rows that have matching values in both tables.  Foreign Keys are an example of this.</p>
 
-                    <h2>Past Paper Question - 2023 Q19(a)</h2>
+                    <p>For example, look at the tables in the Theme Parks database shown below:</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/ThemeParks.jpg" alt="Theme Park Tables">
+                    
+                    <p>You can see that the "parkID" field appears in both tables.  SQL uses 'dot notation' to specify which table a field is in.  For example, the parkID field in the Ride table would be 
+                        <b>'Ride.parkID'</b> and the parkID field in the Theme Park table would be <b>[Theme Park].parkID</b>.</p>
 
+                    <p>Note that because the 'Theme Park' table has a space in the name, square brackets are used in the dot notation.</p>
+
+                    <p>So how would you display the ride names and types for all of the rides in Thorpe Park?</p>
+
+                    <img class="cImg" src="/Images/N5/DDD/SQL/EquiJoinLayout.jpg" alt="Equi-Join Example">
+
+                    <p>We are joining the results from the two tables using the parkID field.  It is a Primary Key in the Theme Park table, and a Foreign Key in the Ride table, so telling the database that we only
+                    want to see results where the parkID in both tables matches.  Once we do this, we can add other criteria to narrow down our search - in this case the query will check the Theme park table to see which 
+                    record has the ParkName 'Thorpe Park'.</p>
+                    
+                    <p>It will then look at Thorpe Park's parkID and only show records from the Ride table with that parkID.</p>
+
+                    <h2>Example</h2>
+                    <p>Let's say we want a list of all of the water rides, with their name, minimum height and the city that they are located in.</p>
+
+                    <table>
+                        <tr>
+                            <th>Step</th>
+                            <th style="width:40%;">Action</th>
+                            <th>Code</th>
+                        </tr>
+                        <tr>
+                            <th class="subheader">1</th>
+                            <td>Specify the fields that you want to appear in the output, you may have to use dot notation if two of the fields have are in different tables and have the same name.  This is not
+                            the case in this instance.</td>
+                            <td>
+                                <p><b>SELECT RideName, minHeight, City</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">2</th>
+                            <td>Specify the tables that you want to select the data from.</td>
+                            <td>
+                                <p>SELECT RideName, minHeight, City</p>
+                                <p><b>FROM Ride, [Theme Park]</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">3</th>
+                            <td>Perform the equi-join this will allow you to list information from both tables.  We have to only display results where the Primary Key in one table matches the Foreign Key in the other 
+                                one.</td>
+                            <td>
+                                <p>SELECT RideName, minHeight, City</p>
+                                <p>FROM Ride, [Theme Park]</p>
+                                <p><b>WHERE Ride.parkID = [Theme Park].parkID</b></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">4</th>
+                            <td>Now that we have joined the two tables, we can use AND to add additional criteria. In this case we want to list all of the rides that have the type 'Water Ride'.</td>
+                            <td>
+                                <p>SELECT RideName, minHeight, City</p>
+                                <p>FROM Ride, [Theme Park]</p>
+                                <p>WHERE Ride.parkID = [Theme Park].parkID</p>
+                                <p><b>AND Type = 'Water Ride';</b></p>
+                            </td>
+                    </table>
+
+                    <p>This is how the SQL query would appear and the output.</p>
+                    <table>
+                        <tr>
+                            <th>Query</th>
+                            <th>Result</th>
+                        </tr>
+                        <tr>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/EquiQuery1.jpg" alt="Equi-Join Query 1"></td>
+                            <td><img class="SQLImage" src="/Images/N5/DDD/SQL/EquiResult1.jpg" alt="Equi-Join Query 1 Result"></td>
+                        </tr>
+                    </table>
+                    
+                    <h2>Past Paper Question - 2022 Q13(b)(ii)</h2>
+                    <p>Aabish populates the database with several studios and hundreds of 
+                    characters. Sample data from each table is shown below</p>
+
+                    <img class="cImg" src="/Images/N5/DDD/SQL/PPEqui.jpg" alt="2022 Q13(b)"/>
+                    
                     <table>
                         <tr>
                             <th rowspan="2" width="30px">(a)</th>
                             <td>
+                                <p>Aabish uses the database to identify the characters with the least 
+                                number of appearances from all studios.</p>
+                                <img class="cImg" src="/Images/N5/DDD/SQL/PPEqui2.jpg" alt="2022 Q13(b) (ii)"/>
+                                <p>Aabish wants to produce similar output for only the Desney studio 
+                                characters.</p>
+                                <p>Complete the SQL statement below that would produce this output.</p>
+                                 <img class="cImg" src="/Images/N5/DDD/SQL/PPEqui3.jpg" alt="2022 Q13(b) (ii) Question"/>
                             </td>
-                            <th rowspan="2"  width="30px">1</th>
+                            <th rowspan="2"  width="30px">5</th>
                         </tr>
                         <tr>
                             <td>
                                 <div class="hiddenElement answer1">
+                                    <div class="codeBox">
+                                        <p>SELECT name, style, appearances</p>
+                                        <p>FROM Studio, Character</p>
+                                        <p>WHERE Studio.StudioID = Character.StudioID</p>
+                                        <p>AND studioName = "Desney"</p>
+                                        <p>ORDER BY appearances ASC;</p>
+                                    </div>
 
+                                    <p>Each of the points below is worth one mark:</p>
+                                    <ul>
+                                        <li>SELECT name, style, appearances</li>
+                                        <li>FROM Studio, Character</li>
+                                        <li>WHERE studioName = "Desney"</li>
+                                        <li>AND Studio.StudioID = Character.StudioID</li>
+                                        <li>ORDER BY appearances (ASC)</li>
+                                    </ul>
+
+                                    <p>Ignore second sort, as long as appearances is the first sort.</p>
+                                    <p>Select fields must be in the order given (name, style, appearances).</p>
+                                    <p>The table names in FROM and the WHERE conditions may be in any order.</p>
                                 </div>
                             </td>
                         </tr>

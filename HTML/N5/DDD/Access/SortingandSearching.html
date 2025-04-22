@@ -2,10 +2,21 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>N5 Computing Science - WDD Analysis</title>
+        <title>N5 Computing Science - Sorting and Searching</title>
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <style>
+            ol li ul li {
+                margin:0; padding:0;
+                margin-left:40px;
+                margin-right:40px;
+            }
+
+            ol li ul {
+                 
+            }
+        </style>
         <script src="/JavaScript/script.js"></script>
         <script>
             window.onload = function() {
@@ -27,27 +38,176 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>National 5</h1></div>
-                <div class="contentHeading"><h1>Analysis</h1></div>
+                <div class="contentHeading"><h1>Sorting and Searching</h1></div>
                 <div class="contentContainer">
-                       
-                    <h2>Past Paper Question - 2023 Q19(a)</h2>
+                    <h2>What is sorting?</h2>
+                    <p>One of the useful features of a database is being able to organise the records based on the
+                    different fields. For example, in a database of students you might want to sort all of the
+                    records so that they appear alphabetically by last name.</p>
+
+                    <h2>What is searching?</h2>
+                    <p>In addition to sorting the records, you can also perform a search. This searches through the
+                    database and only shows records that meet certain criteria. For this reason, searching the database
+                    could also be called 'filtering' it, as it hides all of the records that don't containn the 
+                    information that you're looking for.  An example would be searching a database of students, 
+                    you could have the database only show you the students who are in 4th year.</p>
                     
-                    <table>
-                        <tr>
-                            <th rowspan="2" width="30px">(a)</th>
-                            <td>
-                            </td>
-                            <th rowspan="2"  width="30px">1</th>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
-                                    
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <h2>Simple vs Complex</h2>
+                    <p>When a search or sort is considered to be 'simple' it means that it only uses one field.  For example, sorting all of the students in 
+                        the database by their last name would be simple sort, but if you wanted to sort them by thier last name and then thier first name 
+                        (just in case two students have the same last name), that would be complex sort.</p>
+
+                    <p>When searching a database, if you use just one criteria to search through the records - for example, searching for all of the students 
+                        with over 90% attendance, that would be a simple search.  If you had two criteria though, for example searching for all of the 
+                        students who are in 4th year and have an attendance of over 90%, that would be complex search.</p>
+
+                    <h2>Sorting and Searching Tutorials</h2>
+                    <p>Below are tutorials on how to sort and search a database in MS Access. For these tutorials, we will use a pre-constructed database of  
+                        students.  You can download this database by clicking on the button below.</p>
+
+                    <div class="button" style="margin:20px auto;">
+                        <a href="/Files/Resources/N5/DDD/SQL-Students.accdb" download="SQL-Students.accdb">Access Students Database</a>
+                    </div>
+
+                    <p>Click on either Sorting or Searching below to see the tutorial on that skill.  Note that Searching is divided into Text and Number fields, this is because the options you get when searching 
+                        different field types is slightly different.</p>
+
+                    <ul id="fieldProperties">
+                        <li>
+                            <p class="fieldtype" onclick="toggleLaw(this)"><b>Sorting</b></p>
+                            <div class="fieldProperty" style="display: none; padding:20px;">
+                                <p>In this tutorial, we will sort the records in the Students table by age.</p>
+                                <ol>
+                                    <li>
+                                        <p>Download and open the Students Database.  Once the database is open, open the Students table.</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/StudentsTable.jpg" alt="Students Table">
+                                    </li>
+                                    <li>
+                                        <p>Click on the Age field name to select that field.</p>
+                                        <img class="shadow" style="max-width:100%" src="/Images/N5/DDD/Access/ClickAge.jpg" alt="Click on Age">
+                                    </li>
+                                    <li>
+                                        <p>In the ribbon at the top of the screen, click on <b>Ascending</b> to sort the records
+                                        alphabetically (A-Z) or in numerical order (1,2,3...), or click on <b>Descending</b> to sort it reverse alphabetically (Z-A) 
+                                        or in reverse numerical order (...3,2,1).</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/AscendingDescending.jpg" alt="Ascending and Descending buttons">
+                                    </li>
+                                    <li>
+                                        <p>To remove the sort, click on <b>Remove Sort</b>.  This would allow you to perform another simple sort.</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/RemoveSort.jpg" alt="Remove Sort button">
+                                        <p>However, if you wish to perform a <b>complex sort</b>, just select another field name and then click <b>Ascending</b> or <b>Descending</b> again.</p>
+                                    </li>
+                                </ol>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="fieldtype" onclick="toggleLaw(this)"><b>Searching (Text Fields)</b></p>
+                            <div class="fieldProperty" style="display:none; padding:20px;">
+                                <p>In this tutorial, we will search the database for all students in S4.</p>
+                                <ol>
+                                    <li>
+                                        <p>If you have not downloaded the Students Database, do so now.  Open the database and open the datasheet view of the table you want to search, in this case the Students table.</p>
+                                         <img class="shadow" src="/Images/N5/DDD/Access/StudentsTable.jpg" alt="Students Table">
+                                    </li>
+                                    <li>
+                                        <p>Click on the text field name that you want to filter.  In this case, click on the Year field name.</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/SelectYear.jpg" alt="Selecting the year field">
+                                    </li>
+                                    <li>
+                                        <p>On the ribbon at the top of the screen, click on the Filter button.</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/FilterButton.jpg" alt="Filter Button">
+                                    </li>
+                                    <li>
+                                        <p>A menu will appear over the field you selected, in the menu click on 'text filters'.</p>
+                                        <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/FilterMenuText.jpg" alt="Filter Menu (Text Fields)">
+                                    </li>
+                                    <li>
+                                        <p>A submenu for text filters will appear with a list of search terms.  For this tutorial, we will click on 'Equals'.</p>
+                                        <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/TextFilters.jpg" alt="Text Filters">
+                                        <p>Here are what each of these filters do:</p>
+                                        <ul style="margin:0; padding:0;">
+                                            <li><b>Equals</b> - Only shows records where the field contains the text you enter.</li>
+                                            <li><b>Does Not Equal</b> - Only shows records where the field does not contain the text you enter.</li>
+                                            <li><b>Begins With</b> - Only shows records where the data in the field begins with the text you enter.</li>
+                                            <li><b>Does Not Begin With</b> - Only shows records where the data in the field does not begin with the text you enter.</li>
+                                            <li><b>Contains</b> - Only shows records where the data in the field contains the text you enter.</li>
+                                            <li><b>Does Not Contain</b> - Only shows records where the data in the field does not contain the text you enter.</li>
+                                            <li><b>Ends with</b> - Only shows records where the data in the field ends with the text that you enter.</li>
+                                            <li><b>Does Not End With</b> - Only shows records where the data in the field does not end with the text that you enter.</li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <p>In the box that appears, type in the text that you want to search for.  In this case, we will type in 'S4'.  Once you have typed in the text, click 'OK'.</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/EnterText.jpg" alt="Entering the text to search for">
+                                    </li>
+                                    <li>
+                                        <p>Now, the database will only show you the records where the Year field contains 'S4'.</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/S4Search.jpg" alt="Searching for S4">
+                                        <p>You can see the number of records in this search at the bottom of the window, in this case there are 33.</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/RecordCount.jpg" alt="Record Count">
+                                        <p>Only one field has been filtered so for, so this is a Simple Search.  You can filter another field in the same way to make this a complex search.</p>
+                                    </li>
+                                    <li>
+                                        <p>If you want to perform another simple search, you will have to remove the filter.  To do this, click on the 'Toggle Filter' button in the ribbon.</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/ToggleFilter.jpg" alt="Toggle Filter Button">
+                                    </li>
+                                </ol>
+                            </div>
+                        </li>
+                        <li>
+                            <p class="fieldtype" onclick="toggleLaw(this)"><b>Searching (Number Fields)</b></p>
+                            <div class="fieldProperty" style="display:none; padding:20px;">
+                                <p>In this tutorial, we will search the database for all students who are 16 or older.</p>
+                                <ol>
+                                    <li>
+                                        <p>If you have not downloaded the Students Database, do so now.  Open the database and open the datasheet view of the table you want to search, in this case the Students table.</p>
+                                         <img class="shadow" src="/Images/N5/DDD/Access/StudentsTable.jpg" alt="Students Table">
+                                    </li>
+                                    <li>
+                                        <p>Click on the text field name that you want to filter.  In this case, click on the Age field name.</p>
+                                         <img class="shadow" style="max-width:100%" src="/Images/N5/DDD/Access/ClickAge.jpg" alt="Click on Age">
+                                    </li>
+                                    <li>
+                                        <p>On the ribbon at the top of the screen, click on the Filter button.</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/FilterButton.jpg" alt="Filter Button">
+                                    </li>
+                                    <li>
+                                        <p>A menu will appear over the field you selected, in the menu click on 'number filters'.</p>
+                                        <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/FilterMenuNumbers.jpg" alt="Filter Menu (Number Fields)">
+                                    </li>
+                                    <li>
+                                        <p>A submenu for number filters will appear with a list of search terms.  For this tutorial, we will click on 'Greater Than or Equal to'.</p>
+                                        <img class="shadow" style="margin-bottom:20px;" src="/Images/N5/DDD/Access/NumberFilters.jpg" alt="Number Filters">
+                                        <p>Here are what each of these filters do:</p>
+                                        <ul style="margin:0; padding:0;">
+                                            <li><b>Equals</b> - Only shows records where the field contains the exact number you enter.</li>
+                                            <li><b>Does Not Equal</b> - Only shows records where the field does not contain the exact number you enter.</li>
+                                            <li><b>Less Than or Equal to</b> - Only shows records where number in the field is less than or equal to the number you enter.</li>
+                                            <li><b>Greater Than or Equal to</b> - Only shows records where number in the field is greater than or equal to the number you enter.</li>
+                                            <li><b>Between</b> - Only shows records where the number in the field is between the two numbers that you enter.</li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <p>In the box that appears, type in the number that you want to search for.  In this case, we will type in '16', because we are searching for students who are 16 or over.  
+                                            Once you have typed in the number, click 'OK'.</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/EnterNumber.jpg" alt="Entering the text to search for">
+                                    </li>
+                                    <li>
+                                        <p>Now, the database will only show you the records where the Age field contains the number 16 or over.</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/AgeSearch.jpg" alt="Searching for 16 or over">
+                                        <p>You can see the number of records in this search at the bottom of the window, in this case there are 54.</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/RecordCount2.jpg" alt="Record Count">
+                                        <p>Only one field has been filtered so for, so this is a Simple Search.  You can filter another field in the same way to make this a complex search.</p>
+                                    </li>
+                                    <li>
+                                        <p>If you want to perform another simple search, you will have to remove the filter.  To do this, click on the 'Toggle Filter' button in the ribbon.</p>
+                                        <img class="shadow" src="/Images/N5/DDD/Access/ToggleFilter.jpg" alt="Toggle Filter Button">
+                                    </li>
+                                </ol>
+                            </div>
+                        </li>
+                    </ul>
+                    
                     </div>
                 </div>
             </div>
