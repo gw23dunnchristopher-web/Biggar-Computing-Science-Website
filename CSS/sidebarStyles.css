@@ -80,9 +80,9 @@
         position: fixed;
         top: 0;
         left: 0;
+        right: 0;
         width: 100vw;
-        height: auto;
-        max-height: 100vh;
+        height: 100vh;
         padding: 60px 0 50px;
         overflow-y: auto;
         z-index: 1000;
