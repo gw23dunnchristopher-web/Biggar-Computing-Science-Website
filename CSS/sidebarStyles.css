@@ -77,13 +77,13 @@
     
     #sidebar {
         display: none;
-        position: sticky;
+        position: fixed;
         top: 0;
         left: 0;
-        width: 100%;
+        width: 100vw;
         height: auto;
         max-height: 100vh;
-        padding-bottom: 50px;
+        padding: 60px 0 50px;
         overflow-y: auto;
         z-index: 1000;
         background-color: #333;
