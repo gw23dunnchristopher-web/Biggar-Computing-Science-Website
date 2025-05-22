@@ -630,6 +630,8 @@
 
     // Check the user's answer
     checkAnswer() {
+      if (this.showFeedback && this.isCorrect) return; // Don't process if already answered correctly
+      
       const input = document.getElementById(`${this.container.id}-input`);
       this.userAnswer = input.value.trim();
 
@@ -649,11 +651,11 @@
         correct = normalizedUserAnswer === this.currentBinary;
       }
 
-      // Update score if enabled
+      // Update score if enabled and not already answered correctly
       if (this.options.showScores) {
-        if (correct) {
+        if (correct && !this.showFeedback) {
           this.scores[scoreType].correct++;
-        } else {
+        } else if (!correct) {
           this.scores[scoreType].incorrect++;
         }
       }
