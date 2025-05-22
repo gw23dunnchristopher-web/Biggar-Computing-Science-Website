@@ -348,13 +348,20 @@
                     </div>
 
                     <h2>Two's Complement Practice Questions</h2>
-                    <div
+                    <div id="twos-complement-converter"
                       data-twos-complement-converter
                       data-mode="decimal-to-binary"
                       data-primary-color="#2094F3"
                       data-show-header="true"
                       data-show-scores="true"
                     ></div>
+                    <script>
+                      window.addEventListener('load', function() {
+                        if (typeof initTwosComplementConverter === 'function') {
+                          initTwosComplementConverter('twos-complement-converter');
+                        }
+                      });
+                    </script>
                     
                     <h2>Past Paper Question - 2018 Q1</h2>
                     <table>
