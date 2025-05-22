@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Positive and Negative Integers</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <script src="/JavaScript/twos-complement-embed.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+        <style>
+            .binary {
+                width:8%;
+                text-align:center;
+            }
+
+            .white {
+                background-color:white;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Positive and Negative Integers</h1></div>
+                <div class="contentContainer">
+                    <h2>Positive Integers</h2>
+                    <p>Just as with N5 you will be expected to understand how to convert a binary integer to a denary (decimal) integer and vice versa. 
+                    <p>The place values in the <b>decimal</b> system are based on <b>powers of 10</b> (1, 10, 100, 100, etc) because we have 10 available digits (0, 1, 2, 3, 4, 
+                        5, 6, 7, 8, and 9).</p>
+                    
+                    <p><b>Binary</b> only has 2 available digits (1 and 0) so its place values are based on <b>powers of 2</b> as shown in the table below.</p>
+                    
+                    <table class="binaryTable">
+                        <tr>
+                            <th>2<sup>7</sup></th>
+                            <th>2<sup>6</sup></th>
+                            <th>2<sup>5</sup></th>
+                            <th>2<sup>4</sup></th>
+                            <th>2<sup>3</sup></th>
+                            <th>2<sup>2</sup></th>
+                            <th>2<sup>1</sup></th>
+                            <th>2<sup>0</sup></th>
+                        </tr>
+                        <tr>
+                            <td>128</td>
+                            <td>64</td>
+                            <td>32</td>
+                            <td>16</td>
+                            <td>8</td>
+                            <td>4</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                    </table>
+
+                    <h2>Binary to Denary</h2>
+                    <p>To convert a binary value to a denary one, you have to create a binary table, and then add up all the numbers with 1 underneath them.</p>
+                    <p>The example below shows how to convert 0011 0011 to a denary number:</p>
+                    </ul>
+                    <table class="binaryTable">
+                        <tr>
+                            <th>2<sup>7</sup></th>
+                            <th>2<sup>6</sup></th>
+                            <th>2<sup>5</sup></th>
+                            <th>2<sup>4</sup></th>
+                            <th>2<sup>3</sup></th>
+                            <th>2<sup>2</sup></th>
+                            <th>2<sup>1</sup></th>
+                            <th>2<sup>0</sup></th>
+                        </tr>
+                        <tr>
+                            <td>128</td>
+                            <td>64</td>
+                            <td>32</td>
+                            <td>16</td>
+                            <td>8</td>
+                            <td>4</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                        <tr style="background-color:lightgrey;">
+                            <td>0</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                    </table>
+
+                    <ul>
+                        <li><b>32 + 16 + 2 + 1 = 51</b></li>
+                        <li>The binary number 0011 0011 is <b>51</b> in denary.</li>
+                    </ul>
+
+                    <h2>Denary to Binary</h2>
+                    <p>
+                        To convert a denary number to a binary number, you have to subtract the place value you numbers from the number you are given.  If you cannot       
+                        subtract the number without going below 0, then that place value will be 0.
+                    </p>
+                    <p>For example, to convert the number <b>51</b> back to binary...</p>
+                    <ul>
+                        <li>51 - 128 = -77  <b>(0)</b></li>
+                        <li>51 - 64 = -13 <b>(0)</b></li>
+                        <li>51 - 32 = 19 <b>(1)</b></li>
+                        <li>19 - 16 = 3 <b>(1)</b></li>
+                        <li>3 - 8 = -5 <b>(0)</b></li>
+                        <li>3 - 4 = -1 <b>(0)</b></li>
+                        <li>3 - 2 = 1 <b>(1)</b></li>
+                        <li>1 - 1 = 0 <b>(1)</b></li>
+                    </ul>
+                    <p>So in binary, 51 is <b>0011 0011</b>.</p>
+
+
+                    <h2>Positive and Negative Integers using Two's Compliment</h2>
+                    <p>Two's complement is used when the computer has to store a <b>negative numbers</b> in addition to positive numbers.</p>
+                    <p>It uses the <b>leftmost column</b> to represent the sign of the number (0 for positive and 1 for negative) instead of its usual place value.</p>
+                    <p>To write the two's complement for a negative number (positive numbers can be written normally) use the following steps:</p>
+                    <ul>
+                        <li>Write the positive version of the number.</li>
+                        <li>Change all the 0s to 1s and vice versa.</li>
+                        <li>Add 1 to the number (remember that numbers will carry over if adding a number would increase them above 1).</li>
+                    </ul>
+                    
+                    <h3>Worked Examples</h3>
+
+                    <div class="example">
+                        <p style="font-size:20px; font-style:italic;"><b>Example 1</b></p>
+                        <p>What is the <b>8 bit</b> <i>two's complement</i> representation of the number -17?</p>
+                        <table>
+                            <tr>
+                                <th></th>
+                                <th>Sign</th>
+                                <th>64</th>
+                                <th>32</th>
+                                <th>16</th>
+                                <th>8</th>
+                                <th>4</th>
+                                <th>2</th>
+                                <th>1</th>
+                            </tr>
+                            <tr>
+                                <td class="subheader">Write the number 17 in binary.</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                            </tr>
+                            <tr>
+                                <td class="subheader">Flip all the numbers.</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                            </tr>
+                            <tr>
+                                <td class="subheader">Add 1 to the result.</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                            </tr>
+                        </table>
+                        <p>So -17 in binary using <i>two's complement</i> is <b>1110 1111</b>.</p>
+                    </div>
+
+                    <div class="example">
+                        <p style="font-size:20px; font-style:italic;"><b>Example 2</b></p>
+                        <p>What is the <b>8 bit</b> <i>two's complement</i> representation of the number -72?</p>
+                        <table>
+                            <tr>
+                                <th></th>
+                                <th>Sign</th>
+                                <th>64</th>
+                                <th>32</th>
+                                <th>16</th>
+                                <th>8</th>
+                                <th>4</th>
+                                <th>2</th>
+                                <th>1</th>
+                            </tr>
+                            <tr>
+                                <td class="subheader">Write the number 72 in binary.</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">0</td>
+                            </tr>
+                            <tr>
+                                <td class="subheader">Flip all the numbers.</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                            </tr>
+                            <tr>
+                                <td class="subheader">Add 1 to the result <i>(Note that the 1s carry over, so it goes in the rightmost column that contains a 0)</i>.</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                            </tr>
+                        </table>
+                        <p>So -72 in binary using <i>two's complement</i> is <b>1011 0101</b>.</p>
+                    </div>
+
+                    <div class="example">
+                        <p style="font-size:20px; font-style:italic;"><b>Example 3</b></p>
+                        <p>What is 1011 0101 as a decimal number when using <i>two's complement</i>?</p>
+                        <table>
+                            <tr>
+                                <th></th>
+                                <th>Sign</th>
+                                <th>64</th>
+                                <th>32</th>
+                                <th>16</th>
+                                <th>8</th>
+                                <th>4</th>
+                                <th>2</th>
+                                <th>1</th>
+                            </tr>
+                            <tr>
+                                <td class="subheader">Write 1011 0101.</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                            </tr>
+                            <tr>
+                                <td class="subheader">Subtract 1.</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">0</td>
+                            </tr>
+                            <tr>
+                                <td class="subheader">Flip the numbers</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                            </tr>
+                        </table>
+                        <p><b>64 + 8 + 2 + 1 = 75</b></p>
+                        <p>So in <i>two's complement</i>, 1011 0101 is <b>-75</b>.</p>
+                    </div>
+
+                    <div class="example">
+                        <p style="font-size:20px; font-style:italic;"><b>Example 4</b></p>
+                         <p>What is 1001 0101 as a decimal number when using <i>two's complement</i>?</p>
+                        <table>
+                            <tr>
+                                <th></th>
+                                <th>Sign</th>
+                                <th>64</th>
+                                <th>32</th>
+                                <th>16</th>
+                                <th>8</th>
+                                <th>4</th>
+                                <th>2</th>
+                                <th>1</th>
+                            </tr>
+                            <tr>
+                                <td class="subheader">Write 1001 0101.</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                            </tr>
+                            <tr>
+                                <td class="subheader">Subtract 1.</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">0</td>
+                            </tr>
+                            <tr>
+                                <td class="subheader">Flip the numbers</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">0</td>
+                                <td class="binary white">1</td>
+                                <td class="binary white">1</td>
+                            </tr>
+                        </table>
+                        <p><b>64 + 32 + 8 + 4 = 108</b></p>
+                        <p>So in <i>two's complement</i>, 1001 0101 is <b>-108</b>.</p>
+                    </div>
+
+                    <h2>Two's Complement Practice Questions</h2>
+                    <div
+                      data-twos-complement-converter
+                      data-mode="decimal-to-binary"
+                      data-primary-color="#2094F3"
+                      data-show-header="true"
+                      data-show-scores="true"
+                    ></div>
+                    
+                    <h2>Past Paper Question - 2018 Q1</h2>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">1</th>
+                            <td>
+                                <p>Convert the number −120 into 8 bit two’s complement.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <table>
+                                            <tr>
+                                                <th></th>
+                                                <th>Sign</th>
+                                                <th>64</th>
+                                                <th>32</th>
+                                                <th>16</th>
+                                                <th>8</th>
+                                                <th>4</th>
+                                                <th>2</th>
+                                                <th>1</th>
+                                            </tr>
+                                            <tr>
+                                                <td class="subheader">Write the number 120 in binary.</td>
+                                                <td class="binary white">0</td>
+                                                <td class="binary white">1</td>
+                                                <td class="binary white">1</td>
+                                                <td class="binary white">1</td>
+                                                <td class="binary white">1</td>
+                                                <td class="binary white">0</td>
+                                                <td class="binary white">0</td>
+                                                <td class="binary white">0</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="subheader">Flip all the numbers.</td>
+                                                <td class="binary white">1</td>
+                                                <td class="binary white">0</td>
+                                                <td class="binary white">0</td>
+                                                <td class="binary white">0</td>
+                                                <td class="binary white">0</td>
+                                                <td class="binary white">1</td>
+                                                <td class="binary white">1</td>
+                                                <td class="binary white">1</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="subheader">Add 1 to the result <i>(Note that the 1s carry over, so it goes in the rightmost column that contains a 0)</i>.</td>
+                                                <td class="binary white">1</td>
+                                                <td class="binary white">0</td>
+                                                <td class="binary white">0</td>
+                                                <td class="binary white">0</td>
+                                                <td class="binary white">1</td>
+                                                <td class="binary white">1</td>
+                                                <td class="binary white">1</td>
+                                                <td class="binary white">1</td>
+                                            </tr>
+                                        </table>
+
+                                        <p>The answer is <b>1000 1111</b>.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

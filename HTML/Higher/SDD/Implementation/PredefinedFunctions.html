@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Predefined Functions</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Predefined Functions</h1></div>
+                <div class="contentContainer">
+                    <h2>Predefined Functions at Higher Level</h2>
+                    <p>At the National 5 level, we learned about three different predefined function and how to use them.  These functions were:</p>
+
+                    <table>
+                        <tr><th>Function</th><th>Description</th><th>Code</th></tr>
+                        <tr><td>Random</td><td>Generates a random number between two values.</td><td><span class="codeText">random.randint(1,6)</span></td></tr>
+                        <tr><td>Round</td><td>Rounds a number to a specified number of decimal places.</td><td><span class="codeText">round(1.2345,2)</span></td></tr>
+                        <tr><td>Length</td><td>Returns the length of a string or array.</td><td><span class="codeText">len("Hello")</span></td></tr>
+                    </table>
+
+                    <p>At the Higher level, there are a few more predefined functions that we have to know about - <span class="codeText">ord()</span>, 
+                        <span class="codeText">chr()</span>, <span class="codeText">int()</span> and modulus.</p>
+
+                    <h2>Convert from character to ASCII and vice versa</h2>
+                    <p>The ord() and chr() functions can be used to convert a character to its equivalent ASCII value and vice versa as shown below:</p>
+
+                    <table style="width:400px; text-align:center">
+                        <tr><th>Function</th><th>Returned Value</th></tr>
+                        <tr><td><span class="codeText">ord("A")</span></td><td>Returns 65</td></tr>
+                        <tr><td><span class="codeText">ord("!")</span></td><td>Returns 33</td></tr>
+                        <tr><td><span class="codeText">chr(65)</span></td><td>Returns "A"</td></tr>
+                        <tr><td><span class="codeText">chr(35)</span></td><td>Returns "#"</td></tr>
+                    </table>
+
+                    <h2>Converting from Floating-Point Numbers to Integers</h2>
+                    <p>If the <span class="codeText">int()</span> function is used on a floating-point number, it will 
+                        remove everything after the decimal point.</p>
+                    <p>For example:</p>
+                    <table style="width:400px; text-align:center">
+                        <tr><th>Function</th><th>Returned Value</th></tr>
+                        <tr><td><span class="codeText">int(1.2345)</span></td><td>Returns 1</td></tr>
+                        <tr><td><span class="codeText">int(1.9999)</span></td><td>Returns 1</td></tr>
+                        <tr><td><span class="codeText">int(-1.2345)</span></td><td>Returns -1</td></tr>
+                        <tr><td><span class="codeText">int(-2.9999)</span></td><td>Returns -2</td></tr>
+                    </table>
+
+                    <h2>Modulus</h2>
+                    <p>The modulus (or modulo) operation finds the remainder when one number is divided by another. For example, if you divide 10 by 3, the result is 3 with a
+                        remainder of 1.</p>
+                    <p>Many programs have a separate pre-defined function that is used to perform a modulus operation.  However, in Python it is represented by the '%' 
+                        symbol, and performing a modulus operation is as easy as replacing the '/' symbol with '%' in a division.</p>
+                    <p>For example:</p>
+                    <table style="width:400px; text-align:center">
+                        <tr><th>Code</th><th>Returned Value</th></tr>
+                        <tr><td><span class="codeText">10 % 3</span></td><td>Returns 1</td></tr>
+                        <tr><td><span class="codeText">10 % 2</span></td><td>Returns 0</td></tr>
+                    </table>
+
+                    <h2>Working Example</h2>
+                    <iframe src="https://trinket.io/embed/python3/485160056b1e" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2024 Q6(a)</h2>
+                    <p>A prime number is only divisible by one and itself. The first five prime numbers are 
+                    shown below:</p>
+                    <p style="text-align:center;">2, 3, 5, 7, 11,...</p>
+                    
+                    <p>The code below checks if a number is prime.</p>
+                    <table class="pseudocode borderless" style="text-align:left;">
+                        <tr><th width="80px;">Line 1</th><td>FUNCTION checkPrime(INTEGER n) RETURNS BOOLEAN</td></tr>
+                        <tr><th>Line 2</th><td style="padding-left:20px;">DECLARE validPrime INITIALLY TRUE</td></tr>
+                        <tr><th>Line 3</th><td style="padding-left:20px;">IF n < 2 THEN</td></tr>
+                        <tr><th>Line 4</th><td style="padding-left:40px;">SET validPrime TO FALSE</td></tr>
+                        <tr><th>Line 5</th><td style="padding-left:20px;">ELSE</td></tr>
+                        <tr><th>Line 6</th><td style="padding-left:40px;">FOR divisor FROM 2 TO (n-1) DO</td></tr>
+                        <tr><th>Line 7</th><td style="padding-left:60px;">IF &lt;the remainder of n divided by the divisor is equal to 0&gt; THEN</td></tr>
+                        <tr><th>Line 8</th><td style="padding-left:80px;">SET validPrime TO FALSE</td></tr>
+                        <tr><th>Line 9</th><td style="padding-left:60px;">END IF</td></tr>
+                        <tr><th>Line 10</th><td style="padding-left:40px;">END FOR</td></tr>
+                        <tr><th>Line 11</th><td style="padding-left:20px;">RETURN validPrime</td></tr>
+                        <tr><th>Line 12</th><td>END FUNCTION</td></tr>
+                        <tr><th>...</th><td></td></tr>
+                        <tr><th>Line 43</th><td>DECLARE inputNum AS INTEGER INITIALLY FROM KEYBOARD</td></tr>
+                        <tr><th>Line 44</th><td>&lt;set isPrime by calling the function checkPrime to 
+                        identify if inputNum is prime or not&gt;</td></tr>
+                        <tr><th>Line 45</th><td>IF isPrime = TRUE THEN</td></tr>
+                        <tr><th>Line 46</th><td style="padding-left:20px;">SEND inputNum & " is prime." TO DISPLAY</td></tr>
+                        <tr><th>Line 47</th><td>ELSE</td></tr>
+                        <tr><th>Line 48</th><td style="padding-left:20px;">SEND inputNum & " is not prime." TO DISPLAY</td></tr>
+                        <tr><th>Line 49</th><td>END IF</td></tr>
+                    </table>
+                    
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">(a)</th>
+                                <td>
+                                    <p>Using a programming language of your choice, write the code for Line 7.</p>
+                                </td>
+                                <th rowspan="2"  width="30px">2</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <div class="codeBox">
+                                            <p>n % divisor == 0</p>
+                                        </div>
+                                        <hr>
+                                        <p>One mark each for:</p>
+                                        <ul>
+                                            <li>Use of mod function/operatior (%)</li>
+                                            <li>Arguments (n, divisor) in order with comparison to 0.</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); 
+                                toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

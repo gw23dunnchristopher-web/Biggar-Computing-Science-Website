@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Online Threats</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Online Threats</h1></div>
+                <div class="contentContainer">
+                    <p>You need to be aware of the following Encryption methods at higher level:</p>
+                    <ul>
+                        <li><b>Asymmetric Encryption</b> - a secure communication method where a public key encrypts data and a corresponding private key decrypts it.</li>
+                        <li><b>Digital Signatures</b> - a cryptographic method that ensures the authenticity and integrity of a digital document or message.</li>
+                        <li><b>Digital Certificates</b> - an electronic document issued by a trusted authority to verify the identity of a user, organization, or website.</li>
+                    </ul>
+
+                    <h2>Asymmetric Encryption</h2>
+                    <p>
+                        Encryption is a method of securing data by converting it into a code that can only be read by someone with the correct key.  Symmetric encryption is 
+                        where the key (cipher) used to encode the data is the same as the key used to decode it.  However, at the Higher level you also have to be aware of 
+                        Asymmetric Encryption, this is where the two ciphers, the one used to encdoe the data and the one used to decode it, are different. 
+                    </p>
+                    <p>
+                        In the case of Asymmetric Encryption, the cipher used to encode the data is called the <b>Public Key</b>, and the cipher used to decode the data is 
+                        called the <b>Private Key</b>.  Both of these keys are mathematically linked, so that the data encoded with the Public Key can only be decoded with the
+                        Private Key.
+                    </p>
+                    <p>
+                        This means that the Public Key can be shared with anyone, and the data can be sent securely, as only the person with the Private Key can decode it. These
+                        Keys are typically large prime numbers, which makes it computationally difficult to decode the data without the Private Key.
+                    </p>
+
+                    <img class="cImg" src="/Images/Higher/CS/Security/asymmetric.jpg" alt="Asymmetric Encryption">
+                    
+                    <h2>Digital Signatures</h2>
+                    <p>
+                        A digital signature is a cryptographic technique that is used to validate the authenticity, integrity and origin of digital data.  You can think of it 
+                        like a paper signature,
+                    </p>
+
+                    <h2>Digital Certificate</h2>
+                    <img class="rImg shadow" style="margin:20px; width:50%;" src="/Images/Higher/CS/Security/amazonCert.jpg" alt="Digital Certificate">
+                    <p>
+                        This certificate is issued to a website by a trusted third party called a Certificate Authority (CA) to verify the website's authenticity.  CAs include 
+                        companies  like Verisign, Entrust, Geotrust and Digicert.
+                    </p>
+                    <p>
+                        When a user visits a website, the browser checks the website's digital certificate to ensure that it is genuine.  If the certificate is valid, the 
+                        browser will display  a padlock icon in the address bar, and the website will be considered secure.  If the certificate is not valid, the browser will 
+                        display a warning message and the website will not be considered secure.
+                    </p>
+                    <p>
+                        The digital certificate contains:
+                    </p>
+                    <ul>
+                        <li>a digital signature that was encrypted using a <b>private key</b> to confirm the identity of the server.</li>
+                        <li>the server's public key that is used to...
+                            <ul>
+                                <li>decrypt the server's digital signature.</li>
+                                <li>encrypt the data that is sent.</li>
+                            </ul>
+                        </li>
+                        <li>details of the Certificate Authority (e.g. Digicert, Verisign, etc)</li>
+                        <li>a uniquely identifying serial number, start date and expiry date</li>
+                    </ul>
+                    <p>
+                        Digital certificates prove that a website is legitimate and secure, and this increases customer trust. The customer can be sure that any communication
+                        between themselves and the website is genuine and has not been intercepted or tampered with.  This is why you see the padlock icon in the address bar
+                        of most commercial websites.
+                    </p>
+                    <img class="cImg" style="width:50%; clear:both;" src="/Images/Higher/CS/Security/digitalCert.png" alt="Digital Certificate">
+
+                    <h2>Digital Signature</h2>
+                    <p>
+                        Much like signing a paper document with your signature, the purpose of a digital signature is to guarantee that a digital document is actually from the
+                        sender and is not forged.  It also ensures that the document has not been tampered with or altered in any way during the sending.
+                    </p>
+                    <p>
+                        There are three algorithms used in this process:
+                    </p>
+                    <ul>
+                        <li>
+                            <b>Key generation algorithm</b> - creates a pair of keys, a public key and a private key.
+                        </li>
+                        <li>
+                            <b>Signing algorithm</b> - encrypts the data using the private key to create the digital signature.
+                        </li>
+                        <li>
+                            <b>Signature verification algorithm</b> - decrypts the data using the public key to verify the digital signature proving that the sender is genuine
+                            and that the message has not been changed.
+                        </li>
+                    </ul>
+                    <img class="cImg" style="width:50%; clear:both;" src="/Images/Higher/CS/Security/digitalSig.png" alt="Digital Signature">
+                    
+                    <h2>Past Paper Question - 2023 Q4</h2>
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">4</th>
+                                <td>
+                                    <p>State the purpose of the public key in the secure transmission of data.</p>
+                                </td>
+                                <th rowspan="2"  width="30px">1</th>
+                            </tr>
+                                <tr>
+                                    <td>
+                                        <div class="hiddenElement answer1">
+                                          <p>The Public Key encrypts/encodes data so that it cannot be intercepted and read by anyone who isn't the recipient.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="answerButton" onClick="answerButtonSwitch(this); 
+                                toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

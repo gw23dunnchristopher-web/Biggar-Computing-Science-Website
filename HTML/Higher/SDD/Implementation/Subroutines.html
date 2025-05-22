@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Subroutines</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Subroutines</h1></div>
+                <div class="contentContainer">
+                    <h2>Functions and Procedures</h2>
+                    <p>
+                        At Higher level, programs that you create must be modular, meaning that the must be broken down into different subroutines.
+                        The terms sub-program, subroutine, procedure and function are used by computer scientists to describe an independent block of code within a program.
+                        Each block can be reused, if necessary, either within the same program or as part of a module within a module library.
+                        When a main program ‘calls’ a sub-program it will run the code contained within the sub-program.
+                    </p>
+
+                    <p>
+                        To be safe, in an exam, it is always wise to refer to functions and procedures as <b>sub-programs</b> or <b>subroutines</b> unless asked about 
+                        them specifically.
+                    </p>
+
+                    <ul>
+                        <li>A sub-program, or subroutine, is a block of code that can be called and accessed by a main program.</li>
+                        <li>Procedures are subroutines designed to perform a series of commands with values sometimes passed from or to another part of the program.</li>
+                        <li>Functions are subroutines designed to always return a single value to another part of the program.</li>
+                        <li><span style="font-weight:bold; text-decoration:underline;">In Python only</span> a function may return more than one value.</li>
+                    </ul>
+
+                    <h2>Example of a Function</h2>
+                    <p>This is an example of a function created to find the maximum value in a list:</p>
+                    <div class="codeBox">
+                        <p>def findMax(testScore):</p>
+                        <p style="padding-left:20px;">max = testScore[0]</p>
+                        <p style="padding-left:20px;">for x in list:</p>
+                        <p style="padding-left:40px;">if x > max:</p>
+                        <p style="padding-left:60px;">max = x</p>
+                        <p style="padding-left:20px;">return max</p>
+                    </div>
+
+                    <p>When called, this function will return the value stored in the local variable called 'max'.</p>
+
+                    <h2>Calling a Function</h2>
+                    <p>When a function is called, the value that it returns must be stored in a variable.  For example, the function on the example above could
+                    be calleed as follows:</p>
+                    <div class="codeBox">
+                        <p>maxScore = findMax(testScore)</p>
+                    </div>
+                    <p>In this example, the value returned by the function is stored in the variable called 'maxScore'.</p>
+                    <p>Note that, in Python, it is also possible for a Function to return multiple values, these values would each have to be stored in a separate variable.
+                    Below is an example of a function that would return multiple values, as well as how it would be called.</p>
+                    <div class="codeBox">
+                        <p>def findMinMax(testScore):</p>
+                        <p style="padding-left:20px;">max = testScore[0]</p>
+                        <p style="padding-left:20px;">min = testScore[0]</p>
+                        <p style="padding-left:20px;">for x in list:</p>
+                        <p style="padding-left:40px;">if x > max:</p>
+                        <p style="padding-left:60px;">max = x</p>
+                        <p style="padding-left:40px;">if x < min:</p>
+                        <p style="padding-left:60px;">min = x</p>
+                        <p style="padding-left:20px;">return min, max</p>
+                        <br>
+                        <p>minScore, maxScore = findMinMax(testScore)</p>
+                    </div>
+
+                    <p>
+                        The purpose of this function is to return the maximum and minimum scores in the <span class="codeText">testScore</span> array.  You can see that when it 
+                        is called it stores the maximum and minimum values in the variables <span class="codeText">minScore</span> and <span class="codeText">maxScore</span>.  
+                        The variables are separated by a comma and typed in the same order as the values are returned.
+                    </p>
+
+                    <h2>Example of a Procedure</h2>
+                    <p>This is an example of a procedure created to display the values in a list:</p>
+                    <div class="codeBox">
+                        <p>def displayList(testScore):</p>
+                        <p style="padding-left:20px;">for x in list:</p>
+                        <p style="padding-left:40px;">print(x)</p>
+                    </div>
+                    <p>When called, this procedure will display the values stored in the array called <span class="codeText">testScore</span>.</p>
+
+                    <h2>Calling a Procedure</h2>
+                    <p>
+                        When a procedure is called, it does not return a value, so it does not need to be stored in a variable.  For example, the procedure on the example above 
+                        could be calleed as follows:
+                    </p>
+                    <div class="codeBox">
+                        <p>displayList(testScore)</p>
+                    </div>
+                    
+                    <h2>Parameters</h2>
+                    <p>
+                        A parameter is a special kind of variable that used in a function or procedure to refer to one of the
+                        pieces of data provided as input.  These inputs are known as arguments when the function is called.
+                    </p>
+                    <p>
+                        It is important to remember that local variables are essentially placeholders for the arguments that are passed to the function.
+                        This means that the local variable will take on the value of the argument that is passed to it.  If the argument passed in is a 
+                        variable, then it could have a different name from the corrosponding parameter.  This means that:
+                    </p>
+                    <ul>
+                        <li>subroutines can be re-used with different arguments.</li>
+                        <li>subroutines from module libraries do not need to be edited to account for different arguments.</li>
+                        <li>different people can write subroutines that work together.</li>
+                    </ul>
+
+                    <h3>Actual Parameters</h3>
+                    <p>This is the value that is passed to the subroutine when it is called.  The terms 'actual parameter' and argument' are often used interchangably, but
+                    there is a subtle difference between the two.  The actual parameter can refer to the name of a variable that is passed into a function, but the argument
+                    refers to the value that is being passed into that function.</p>
+
+                    <h>Formal Parameters</h3>
+                    <p>
+                        This is the parameter that is stated when the subroutine is declared.  In many programming languages we can control how data flows into the subroutine
+                        by passing this parameter by reference or by value.
+                    </p>  
+                    <p>
+                        If it is <b>passed by value</b>, that means that what the subroutine actually handles is a 'copy' of the value passed into it.  This means that the 
+                        original value will not be affected if the copy changes within the subroutine.
+                    </p>
+                    <p>
+                        However, if it is <b>passed by reference</b>, then the subroutine will reference the original value passed into it, and any changes made to that value 
+                        will change the value in the main program.
+                    </p>
+                    <p>
+                        <i>
+                            Python always uses a third method called '<b>pass by assignment</b>' which is similar to pass by reference, but not the same. With this method, if a 
+                            value such as a string or integer is passed into the subroutine then it will receive a copy of the data and the original data will not be affected.  
+                            However, if a list or array is passed in, then any changes made to the list or array within the subroutine will affect the original.
+                        </i>
+                    </p>
+
+                    <h3>Example of Formal and Actual Parameters</h3>
+                    
+                    <p>In the example below, the formal parameters are shown in green and the actual parameters shown in red.</p>
+                    <div class="codeBox">
+                        <p>def addNumbers(<span style="color:lightgreen;">num1</span>, <span style="color:lightgreen;">num2</span>):</p>
+                        <p style="padding-left:20px;">return num1 + num2</p>
+                        <br>
+                        <p>first = 14</p>
+                        <p>result = addNumbers(<span style="color:red;">first</span>, <span style="color:red;">10</span>)</p>
+                    </div>
+
+
+                    <h2>Working Example</h2>
+                    <iframe src="https://trinket.io/embed/python3/ae9d3246c79b" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2023 Q7(b)</h2>
+                
+                    <p>A word is a palindrome if it reads the same backwards as forwards, for example:</p>
+                    <p style="text-align:center"><i>mum, noon, madam, kayak, racecar</i></p>
+                    <p>A program identifies if a word is a palindrome by checking if the first and last 
+                    characters are the same. If they are, it then checks the second and second last 
+                    characters and so on.</p>
+                    <p>The incomplete program is shown below:</p>
+                
+                    <table class="pseudocode borderless">
+                        <tr><th>Line 1</th>
+                            <td>FUNCTION checkPalindrome(STRING word) RETURNS BOOLEAN</td>
+                        </tr>
+                        <tr><th>Line 2</th>
+                            <td style="padding-left:20px">DECLARE left INITIALLY 0</td>
+                        </tr>
+                        <tr><th>Line 3</th>
+                            <td style="padding-left:20px">DECLARE roght INITIALLY length(word) - 1</td>
+                        </tr>
+                        <tr><th>Line 4</th>
+                            <td style="padding-left:20px">DECLARE validPalin INITIALLY TRUE</td>
+                        </tr>
+                        <tr><th>Line 5</th>
+                            <td style="padding-left:20px">WHILE left &lt; right AND _____________________ DO</td>
+                        </tr>
+                        <tr><th>Line 6</th>
+                            <td style="padding-left:40px">IF word[left] = word[right] THEN</td>
+                        </tr>
+                        <tr><th>Line 7</th>
+                            <td style="padding-left:60px">SET left TO left + 1</td>
+                        </tr>
+                        <tr><th>Line 8</th>
+                            <td style="padding-left:60px">SET right TO right - 1</td>
+                        </tr>
+                        <tr><th>Line 9</th>
+                            <td style="padding-left:40px">ELSE</td>
+                        </tr>
+                        <tr><th>Line 10</th>
+                            <td style="padding-left:60px">SET validPalin TO FALSE</td>
+                        </tr>
+                        <tr><th>Line 11</th>
+                            <td style="padding-left:40px">END IF</td>
+                        </tr>
+                        <tr><th>Line 12</th>
+                            <td style="padding-left:20px">END WHILE</td>
+                        </tr>
+                        <tr><th>Line 13</th>
+                            <td style="padding-left:20px">RETURN validPalin</td>
+                        </tr>
+                        <tr><th>Line 14</th>
+                            <td>END fUNCTION</td>
+                        </tr>
+                        <tr><th>...</th>
+                            <td></td>
+                        </tr>
+                        <tr><th>Line 25</th>
+                            <td>RECEIVE userWord FROM KEYBOARD</td>
+                        </tr>
+                        <tr><th>Line 26</th>
+                            <td>____________________________________________________</td>
+                        </tr>
+                        <tr><th>Line 27</th>
+                            <td>IF palindrome = TRUE THEN</td>
+                        </tr>
+                        <tr><th>Line 28</th>
+                            <td style="padding-left:20px">SEND userWord & " is a palindrome" TO DISPLAY</td>
+                        </tr>
+                        <tr><th>Line 29</th>
+                            <td>ELSE</td>
+                        </tr>
+                        <tr><th>Line 28</th>
+                            <td style="padding-left:20px">SEND userWord & " is not a palindrome" TO DISPLAY</td>
+                        </tr>
+                        <tr><th>Line 30</th>
+                            <td>END IF</td>
+                        </tr>
+                    </table>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(b)</th>
+                            <td>
+                                <p>Using a programming language of your choice, write the missing code at Line 26 to call the function.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <div class="codeBox">
+                                        <p>palindrome = checkPalindrome(userWord)</p>
+                                    </div>
+                                    <hr>
+                                    <p>One mark each for the following:</p>
+                                    <ul>
+                                        <li>Function <span class="codeText">checkPalindrome</span>
+                                        called correctly with single 
+                                        parameter <span class="codeText">userWord</span></li>
+                                        <li>Assigning result to <span class="codeText">palindrome</span></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

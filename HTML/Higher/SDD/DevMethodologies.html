@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Development Methodologies</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Development Methodologies</h1></div>
+                <div class="contentContainer">
+                    <h2>The Iterative Method</h2>
+                    <p>
+                        The traditional method of Software Development is known as the Iterative Method.  This is also known as the waterfall method because it consists of
+                        a series of development stages, flowing from the analysis stage to the final evaluation stage. 
+                    </p>
+                    <p>
+                        It is called the Iterative Method because it is an iterative process, meaning that it is repeated until the software is complete.  There is constant
+                        revision and evaluation at each of the stages.  Large scale commercial projects have traditionally following this development process as far as 
+                        possible in order to create successful products.
+                    </p>
+
+                    <h3>Reasons it is used</h3>
+                    <ul>
+                        <li>
+                            It evolved as software developers have attempted to reduce the time and money spent creating and maintaining the increasingly complex applications 
+                            they are asked to create.
+                        </li>
+                        <li>
+                            Commercial software development is a process undertaken by a team of people who need to be able to work together in a structured and efficient way.
+                        </li>
+                        <li>
+                            It ensures quality and efficiency in the final product.
+                        </li>
+                    </ul>
+
+                    <h3>Iteration</h3>
+                    <p>
+                        Iteration means to repeat. If a programmer is following the waterfall approach, they will revisit stages like design, implementation and testing fairly 
+                        regularly. Programmers iterate because of new information, such as a test table with incorrect results.
+                    </p>
+
+                    <img class="cImg" src="/Images/Higher/SDD/iterative.JPG" alt="The Iterative Method">
+
+                    <h2>The Agile Method</h2>
+                    <p>
+                        The Agile method of software development is a set of principles and practices aimed at delivering software through iterative, flexible, and collaborative 
+                        processes. Unlike the traditional iterative method, which often involve rigid, upfront planning and long development cycles, Agile focuses on continuous 
+                        improvement, adaptive planning, and a high level of customer involvement.
+                    </p>
+                    
+                    <p>Here are some features of this method:</p>
+
+                    <ul>
+                        <li>The Software Requirements are gathered as the software is being developed.
+                            <ul>
+                                <li>This is flexible, as specifications can change throughout the development process.</li>
+                                <li>It results in reduced development time and costs.</li>
+                            </ul>    
+                        </li>
+                        <li>
+                            Prototyping:
+                            <ul>
+                                <li>Short iterations of work involve creating prototypes that are shown to the client.</li>
+                                <li>
+                                    The client gives feedback - face to face communication is highly valued as it is believed to lead to very well devised and highly effective 
+                                    products.
+                                </li>
+                                <li>The developers can quickly respond if there are any changes to the requirements.</li>
+                            </ul>
+                        </li>
+                        <li>There is greater customer collaboration and cooperation, often leading to more satisfied customers.</li>
+                        <li>Emphasis is put on communication, team work, leadership and project management within the software development team.</li>
+                        <li>The Agile Method suits the development of smaller projects.</li>
+                        <li>It is less rigid than the waterfall method.</li>
+                    </ul>
+
+                    <h3>Reasons it is used</h3>
+                    <ul>
+                        <li>If all of the requirements for the software can't be gathered upfront, the Agile Method is useful.</li>
+                        <li>It is also useful if the requirments that have been gathered are likely to change.</li>
+                        <li>It allows the development team to be flexible and advise the client if changes need to be made due to lack of time or budget.</li>
+                    </ul>
+
+                    <h3>Benefits of this method</h3>
+                    <ul>
+                        <li>Reduced development time.</li>
+                        <li>Increased responsiveness to changing circumstances.</li>
+                        <li>Reduced costs due to the efficiency of using small groups of developers.</li>
+                    </ul>
+
+                    <img class="cImg" src="/Images/Higher/SDD/agile.JPG" alt="The Agile Method">
+
+                    <h2>Comparing the Iterative and Agile Methods</h2>
+                    <table><thead>
+                      <tr>
+                        <th></th>
+                        <th>Iterative</th>
+                        <th>Agile</th>
+                      </tr></thead>
+                    <tbody>
+                      <tr>
+                        <th class="subheader">Client Interaction</td>
+                        <td>The client is heavily involved in the initial analysis stage and at the end of development, when evaluating if the software meets 
+                            their needs and matches the agreed specification.</td>
+                        <td>The client is involved throughout the process, giving constant feedback on prototypes of the software during development. This 
+                            feedback is acted upon, quickly ensuring the software evolves throughout the project.<br><br>Changing goals during the development can be positive in 
+                            terms of final client satisfaction with the product.</td>
+                      </tr>
+                      <tr>
+                        <th class="subheader">Teamwork</td>
+                        <td >Teams of analysts, programmers, testers and documenters work independently on each   phase of development. Teams mainly work in 
+                            isolation with some communication required between each phase.</td>
+                        <td >Teams of developers communicate and collaborate, rather than teams of experts operating in isolation. <br>     <br>During a project, 
+                            fast, face-to-face communication between individuals with different skills is an important factor in progressing the project quickly.</td>
+                      </tr>
+                      <tr>
+                        <th class="subheader">Documentation</td>
+                        <td>A detailed project specification is created at the beginning of a project. Significant time is spent during the project on design, 
+                            program commentary and test plans.</td>
+                        <td>While modelling solutions remains important, creating large documents that are never updated or referred to again upon completion of 
+                            the project are not.<br>     <br> Agile focuses on reducing documentation. It spends time on small cycles of coding, testing and adapting to change. 
+                            Any documentation produced (for example internal commentary in code) should focus purely on progressing the   project.</td>
+                      </tr>
+                      <tr>
+                        <th class="subheader">Measurement of Progress</td>
+                        <td>Follows a strict plan, with progress measured against timescales set at the beginning of the project.</td>
+                        <td>Breaks a project down into a series of short development goals (often called “sprints”). <br>     <br>This involves cross-functional 
+                            teams working on: planning, analysis, design, coding, unit testing, and acceptance testing. Progress is measured by the time it takes to produce 
+                            prototypes or working components of the software. Agile focuses on delivering software as quickly as possible.</td>
+                      </tr>
+                    </tbody></table>
+
+                    <h2>Past Paper Question - 2023 Q2</h2>
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">2</th>
+                                <td>
+                                    <p>
+                                        A software development project can be progressed using an agile methodology or 
+                                        an iterative development process.
+                                    </p>
+                                    <p>
+                                        Describe two advantages of the agile methodology when compared to iterative.
+                                    </p>
+                                </td>
+                                <th rowspan="2"  width="30px">2</th>
+                            </tr>
+                                <tr>
+                                    <td>
+                                        <div class="hiddenElement answer1">
+                                            <p>Aware <b>1 mark</b> for each bullet:</p>
+                                            <ul>
+                                                <li>Communication/feedback between client and developer occurs throughout the process.</li>
+                                                <li>Prototypes/Software available (for review)</li>
+                                                <li>Repeated testing/evaluation</li>
+                                                <li>Reduced documentation</li>
+                                                <li>Communication within the development team.</li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="answerButton" onClick="answerButtonSwitch(this); 
+                                toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

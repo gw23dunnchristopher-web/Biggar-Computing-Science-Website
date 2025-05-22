@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Number Range</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Number Range</h1></div>
+                <div class="contentContainer">
+                    <h2>Positive Integers Number Range</h2>
+                    <p>
+                        Without using <i>two's complement</i>, we cannot represent negative numbers. If only considering
+                        positive numbers, then the minimum value we can have is 0 (when all the binary numbers are set to  
+                        0) and the maximum amount that we can have is when all the binary numbers are set to 1.  Therefor 
+                        the maxmimum amount would depend on the number of binary characters that we have - the number of 
+                        bits used for the binary number.
+                    </p>
+
+                    <p>
+                        For example, the maximum number you could get with 8 bits would be 255, which is 1111 1111 in 
+                        binary (or 2<sup>8</sup> - 1). This means that the number range that you can get with an 8-bit 
+                        number would be <b>0-255</b>.
+                    </p>
+
+                    <p>If you are only considering positive integers, you can calculate the maximum number of any number   
+                        of bits using the following formula:</p>
+
+                    <div class="example1">
+                        <p>Minimum = 0</p>
+                        <p>Maximum = 2<sup>n</sup>-1</p>
+                    </div>
+
+                    <p>Where <i>n</i> is the number of bits.</p>
+
+                    <h2>Negative to Positive - Two's Complement</h2>
+                    <p>
+                        If we introduce <i>two's complement</i> we can now represent a different range of numbers, with    
+                        the minimum value being negative.
+                    </p>
+                    <p>
+                        In <i>two's complement</i>, one of the bits is used as the sign bit, so this will deduct 1 from 
+                        the number used to calculate the maximum number. For example, the maximum number you could get 
+                        with 8 bits would be 127, which is 0111 1111 in binary (or 2<sup>7</sup>-1).
+                    </p>
+                    <p>
+                        To calculate the minumum number, we can take the maximum number and add 1, then make it negative.
+                        For example, the minimum number you could get with 8 bits would be -128, which is 1000 0000 in
+                        binary (or -2<sup>7</sup>).
+                    </p>
+                    <p>The range for 8 bits in <i>two's complement</i> would therefore be <b>-128 to 127</b>.</p>.
+                    <p>You can calculate the minimum and maximum using the following formula.</p>
+
+                    <div class="example1">
+                        <p>Minimum = -2<sup>(n-1)</sup></p>
+                        <p>Maximum = 2<sup>(n-1)</sup>-1</p>
+                    </div>
+
+                    <h2>Worked Examples</h2>
+                        <div class="example">
+                        <p style="font-size:20px; font-style:italic;"><b>Example 1</b></p>
+                        <p>What is the number range for a 12-bit number?</p>
+                        <div class="example1">
+                            <p>Minimum = -2<sup>(12-1)</sup> = -2<sup>11</sup> = -2048</p>
+                            <p>Maximum = 2<sup>(12-1)</sup>-1 = 2<sup>11</sup>-1 = 2047</p>
+                        </div>
+                        <p><b>Number Range = -2048 to 2047</b></p>
+                    </div>
+                    
+                    <div class="example">
+                        <p style="font-size:20px; font-style:italic;"><b>Example 2</b></p>
+                        <p>What is the number range for a 16-bit number?</p>
+                        <div class="example1">
+                            <p>Minimum = -2<sup>(16-1)</sup> = -2<sup>15</sup> = -32768</p>
+                            <p>Maximum = 2<sup>(16-1)</sup>-1 = 2<sup>15</sup>-1 = 32767</p>
+                        </div>
+                        <p><b>Number Range = -32768 to 32767</b></p>
+                    </div>
+                    
+                    <h2>Past Paper Question - 2022 Q1</h2>
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">1</th>
+                                <td>
+                                    <p>Two’s complement can be used to represent positive and negative integers.</p>
+                                    <p>State the range of denary values that can be represented using 32‑bit two’s 
+                                    complement.</p>
+                                </td>
+                                <th rowspan="2"  width="30px">2</th>
+                            </tr>
+                                <tr>
+                                    <td>
+                                        <div class="hiddenElement answer1">
+                                                <div class="example1">
+                                                    <p>Minimum = -2<sup>(32-1)</sup> = -2<sup>31</sup> = -2147483648</p>
+                                                    <p>Maximum = 2<sup>(32-1)</sup>-1 = 2<sup>31</sup>-1 = 
+                                                        2147483647</p>
+                                                </div>
+                                                <p><b>Number Range = -2147483648 to 2147483647</b></p>
+                                                <p>You would get 1 mark for <b>-2147483648</b> and another mark for
+                                                <b>2147483647</b>.</p>
+                                                <p>You could just write <b>-2<sup>(31)</sup> to -2<sup>31</sup>-1</b>
+                                                and you would still get the marks.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="answerButton" onClick="answerButtonSwitch(this); 
+                                toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

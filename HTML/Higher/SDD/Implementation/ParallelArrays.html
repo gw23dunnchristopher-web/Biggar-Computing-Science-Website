@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Parallel 1D Arrays</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Parallel 1D Arrays</h1></div>
+                <div class="contentContainer">
+                    <h2>What are parallel arrays?</h2>
+                    <p>
+                        When we have two or more arrays that are related to each other, we call them parallel arrays.  The arrays will be processed together, and are used to
+                        store related data in each index.  For example, if we have three arrays - firstName, surname and prelimMarks, then the data in element 0 of the firstName
+                        array would hold a person's first name, the data in element 0 of the surname array would hold the same person's surname, and the data in element 0 of the
+                        prelimMarks array would hold the same person's prelim mark.
+                    </p>
+
+                    <div class="codeBox">
+                        <p>firstName = [""] * 19</p>
+                        <p>surname = [""] * 19</p>
+                        <p>prelimMarks = [0] * 19</p>
+                    </div>
+
+                    <p>This set of parallel arrays may contain information such as the data in the table below:</p>
+
+                    <table>
+                        <tr>
+                            <th> </th>
+                            <th>0</th>
+                            <th>1</th>
+                            <th>2</th>
+                            <th>3</th>
+                            <th>...</th>
+                            <th>19</th>
+                        </tr>
+                        <tr>
+                            <th>firstName</th>
+                            <td>John</td>
+                            <td>Jane</td>
+                            <td>Bob</td>
+                            <td>Alice</td>
+                            <td>...</td>
+                            <td>Elliot</td>
+                        </tr>
+                        <tr>
+                            <th>surname</th>
+                            <td>Smith</td>
+                            <td>Doe</td>
+                            <td>Brown</td>
+                            <td>Johnson</td>
+                            <td>...</td>
+                            <td>Anderson</td>
+                        </tr>
+                        <tr>
+                            <th>prelimMarks</th>
+                            <td>52</td>
+                            <td>78</td>
+                            <td>45</td>
+                            <td>83</td>
+                            <td>...</td>
+                            <td>76</td>
+                        </tr>
+                    </table>
+
+                    <h2>Using Append</h2>
+                    <p>In Python, we can 'append' data to an array using the '.append()' function.  This will add the data onto then end of the array, and it will increase the 
+                        size of the array to do so if there is no aditional space.  The function looks like this:</p>
+                    <div class="example1 codeText" style="max-width:300px;">
+                        <p>arrayName.append(data)</p>
+                    </div>
+
+                    <p>
+                        For example, if we wanted to add the name add Jim Butcher, who got a score of 64 in his prelim, to our parallel arrays, we could use the following code:
+                    </p>
+
+                    <div class="codeBox">
+                        <p>firstName.append("Jim")</p>
+                        <p>surname.append("Butcher")</p>
+                        <p>prelimMarks.append(64)</p>
+                    </div>
+
+                    <h2>Looping through an Array with variable size</h2>
+                    <p>When we are using arrays that have a variable size, we can still use a for loop to loop through the array.  You could used the len() function to get the 
+                        length of the array and then loop through the array that many times.  However, it is more efficient to do it this way instead:</p>
+                        <div class="codeBox">
+                            <p>for element in array:</p>
+                            <p style="padding-left:20px;"># do something</p>
+                        </div>
+
+                    <p>For example if you have an array called <span class="codeText">firstName</span>, you can loop through it like this:</p>
+                        <div class="codeBox">
+                            <p>for name in firstName:</p>
+                            <p style="padding-left:20px;">print(name)</p>
+                        </div>
+
+                    <h2>Working Example</h2>
+                    <p>
+                        Below I have created a program that uses parallel arrays to store information about a number of students entered by the user.  It will store this 
+                        information and output it as a basic table.
+                    </p>
+                    <p>
+                        Note that in this program I have used f strings to format the output.  This is a way of formatting strings in Python that allows you to insert variables
+                        into a string.  It looks like this:
+                    </p>
+                        <div class="codeBox">
+                            <p>print(f"You are {age} years old.")</p>
+                        </div>
+                    <p>    
+                        This will output the string with the variable inserted into it.  I have also used the ':<10' to format each string so that the output is 10 characters 
+                        wide and left aligned within that space.  This is not part of the curriculum, but it is a useful tool to know.
+                    </p>
+
+                    <iframe src="https://trinket.io/embed/python3/105affd88b66" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2023 Q9(e)</h2>
+                        <p>
+                            A software developer is creating a program for a dog grooming company that has branches in Dundee, Edinburgh, Glasgow and Stirling. The following 
+                            data is stored about each dog:
+                        </p>
+                        <ul>
+                            <li>dog ID</li>
+                            <li>name of the dog</li>
+                            <li>branch the dog attends</li>
+                            <li>number of visits to the branch</li>
+                        </ul>
+                        <p>One feature of the program is to offer a discount to customers that have visited the Dundee or the Stirling branch more than four times.</p>
+                    
+                        <p>The data shown below is stored in four parallel 1D arrays to test this feature.</p>
+
+                        <img class="cImg" src="/Images/Higher/SDD/Implementation/2023Q9.jpg" alt="2023 Q9">
+
+                        <p>The code below was created to display the dogID for those customers that are to be offered a discount.</p>
+                        <div class="pseudocode">
+                            <table>
+                                <tr><td style="width:100px;"">Line 1</td><td>PROCEDURE customerSearch (ARRAY OF STRING petNo,
+                                ARRAY OF STRING city, ARRAY OF INTEGER visits)</td></tr>
+                                <tr><td>Line 2</td><td style="padding-left:40px;">FOR i FROM 0 TO length(petNo)-1 DO</td></tr>
+                                <tr><td>Line 3</td><td style="padding-left:80px;">IF city[i]= "Stirling" OR
+                                 (city[i]= "Dundee" AND visits[i] > 4) THEN</td></tr>
+                                <tr><td>Line 4</td><td style="padding-left:120px;">SEND petNo[i] TO DISPLAY</td></tr>
+                                <tr><td>Line 5</td><td style="padding-left:80px;">END IF</td></tr>
+                                <tr><td>Line 6</td><td style="padding-left:40px;">END FOR</td></tr>
+                                <tr><td>Line 7</td><td>END PROCEDURE</td></tr>
+                                <tr><td>...</td><td></td></tr>
+                                <tr><td>Line 20</td><td>DECLARE dogID INITIALLY ["G123", "A872","D321","G876","A423","D872"]</td></tr>
+                                <tr><td>Line 21</td><td>DECLARE dogName INITIALLY ["Rover","Roman","Keeva","Bailey","Jack","Ozzy"]</td></tr>
+                                <tr><td>Line 22</td><td>DECLARE branch INITIALLY ["Glasgow","Stirling", "Dundee","Edinburgh","Stirling","Dundee"]</td></tr>
+                                <tr><td>Line 23</td><td >DECLARE noOfVisits INITIALLY [7,2,6,6,5,2]</td></tr>
+                                <tr><td>Line 24</td><td>customerSearch(dogID, branch, noOfVisits)</td></tr>
+                            </table>
+                        </div>
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">(e)</th>
+                                <td>
+                                    <p>The area manager wants to know how many dogs have made more than five visits to a particular branch.</p>
+                                    <p>
+                                        Using a programming language of your choice, the arrays <span class="codeText">branch</span> and <span class="codeText">
+                                        noOfVisits</span>, write the code to ask the user for the branch name and to display how many dogs have made more than five visits 
+                                        to this branch.</p>
+                                    </div>
+                                </td>
+                                <th rowspan="2"  width="30px">4</th>
+                            </tr>
+                                <tr>
+                                    <td>
+                                        <div class="hiddenElement answer1">
+                                            <div class="codeBox">
+                                                <p>searchBranch = input("Enter the name of the branch:")</p>
+                                                <p>count = 0</p>
+                                                <p>for x in range(len(branch)):</p>
+                                                <p style="padding-left:20px;">if branch[x] == searchBranch and noOfVisits[x] > 5:</p>
+                                                <p style="padding-left:40px;">count += 1</p>
+                                                <p>print(f"There are {count} dogs that have made more than 5 visits to {searchBranch}.")</p>
+                                            </div>
+                                            <hr>
+                                            Award <b>1 mark</b> for each bullet:
+                                            <ul>
+                                                <li>Initialise and increment counter.</li>
+                                                <li>Useof fixed loop, branch input (and counter output).</li>
+                                                <li>IF condition matching user input of <span class="codeText">branch[]</span> array.</li>
+                                                <li>And condition <span class="codeText">noOfVisits[]</span> > 5</li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="answerButton" onClick="answerButtonSwitch(this); 
+                                toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

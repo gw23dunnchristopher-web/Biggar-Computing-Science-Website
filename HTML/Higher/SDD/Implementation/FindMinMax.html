@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Find Minimum and Maximum</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Find Minimum and Maximum</h1></div>
+                <div class="contentContainer">
+                    <h2>Find Minimum</h2>
+                    <p>This standard algorithm finds the smallest value in an array.  If follows these steps:</p>
+                    <ul>
+                        <li>Set the minimum value to the first value in the array.</li>
+                        <li>Loop through the array, comparing each value to the current minimum.</li>
+                        <li>If a value is smaller than the current minimum, set the minimum to that value.</li>
+                        <li>After the loop has finished, the minimum value will be the smallest value in the array.</li>
+                    </ul>
+                    <p>You can also use this method to find the position of the lowest number in the array by setting a position variable to 0 and then updating it with
+                    the current iteration number when lower values are found.</p>
+
+                    <table class="pseudocode borderless">
+                        <tr><th colspan="2" style="background-color:darkblue; color:white">Pseudocode (SQA Reference Language)</th></tr>
+                        <tr><th>Line 1</th><td>SET min TO array[0]</td></tr>
+                        <tr><th>Line 2</th><td>SET position TO 0</td></tr>
+                        <tr><th>Line 3</th><td>FOR index FROM 1 TO end of array DO</td></tr>
+                        <tr><th>Line 4</th><td style="padding-left:40px;">IF array[index] &lt; min THEN</td></tr>
+                        <tr><th>Line 5</th><td style="padding-left:80px;">SET min TO array[index]</td></tr>
+                        <tr><th>Line 6</th><td style="padding-left:80px;">SET position TO index</td></tr>
+                        <tr><th>Line 7</th><td style="padding-left:40px;">END IF</td></tr>
+                        <tr><th>Line 8</th><td>END FOR</td></tr>
+                        <tr><th>Line 9</th><td>SEND "The minimum value is " & min & " at position " & position TO DISPLAY</td></tr>
+                        <tr><th colspan="2" style="background-color:darkblue; color:white">Python Code</th></tr>
+                        <tr><td colspan="2" class="codeBox" style="background-color:#1c2112;">
+                            <p>min = array[0]</p>
+                            <p>position = 0</p>
+                            <br>
+                            <p>for index in range(1, len(array)):</p>
+                            <p style="padding-left:40px;">if array[index] &lt; min:</p>
+                            <p style="padding-left:80px;">min = array[index]</p>
+                            <p style="padding-left:80px;">position = index</p>
+                            <br>
+                            <p>print("The minimum value is", min, "at position", position)</p>
+                        </td></tr>
+                    </table>
+
+                    <h3>Working Example</h3>
+                    <iframe src="https://trinket.io/embed/python3/06bf53bfd780" class="trinket" frameborder="0"marginwidth="0" marginheight="0" allowfullscreen></iframe>
+
+                    <h2>Find Maximum</h2>
+                    <p>This standard algorithm finds the largest value in an array.  If follows these steps:</p>
+                        <ul>
+                            <li>Set the maximum value to the first value in the array.</li>
+                            <li>Loop through the array, comparing each value to the current maximum.</li>
+                            <li>If a value is larger than the current maximum, set the maximum to that value.</li>
+                            <li>After the loop has finished, the maximum value will be the largest value in the array.</li>
+                        </ul>
+                    <p>Just as with the Find Minimum standard algorithm, the Find Maximum standard algorithm can be used to find the position of the largest value in 
+                    the array.</p>
+
+                    
+                    <table class="pseudocode borderless">
+                        <tr><th colspan="2" style="background-color:darkblue; color:white">Pseudocode (SQA Reference Language)</th></tr>
+                        <tr><th>Line 1</th><td>SET max TO array[0]</td></tr>
+                        <tr><th>Line 2</th><td>SET position TO 0</td></tr>
+                        <tr><th>Line 3</th><td>FOR index FROM 1 TO end of array DO</td></tr>
+                        <tr><th>Line 4</th><td style="padding-left:40px;">IF array[index] &gt; max THEN</td></tr>
+                        <tr><th>Line 5</th><td style="padding-left:80px;">SET max TO array[index]</td></tr>
+                        <tr><th>Line 6</th><td style="padding-left:80px;">SET position TO index</td></tr>
+                        <tr><th>Line 7</th><td style="padding-left:40px;">END IF</td></tr>
+                        <tr><th>Line 8</th><td>END FOR</td></tr>
+                        <tr><th>Line 9</th><td>SEND "The maximum value is " & max & " at position " & position TO DISPLAY</td></tr>
+                        <tr><th colspan="2" style="background-color:darkblue; color:white">Python Code</th></tr>
+                        <tr><td colspan="2" class="codeBox" style="background-color:#1c2112;">
+                            <p>max = array[0]</p>
+                            <p>position = 0</p>
+                            <br>
+                            <p>for index in range(1, len(array)):</p>
+                            <p style="padding-left:40px;">if array[index] &gt; max:</p>
+                            <p style="padding-left:80px;">max = array[index]</p>
+                            <p style="padding-left:80px;">position = index</p>
+                            <br>
+                            <p>print("The maximum value is", max, "at position", position)</p>
+                        </td></tr>
+                    </table>
+
+                    <h3>Working Example</h3>
+                    <iframe src="https://trinket.io/embed/python3/3555478e6d02" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2023 Q11(c)</h2>
+                    <p>A shop sells a range of 80 different washing machines. Sample data about the 
+                    washing machines is shown below:</p>
+                    <table>
+                        <tr>
+                            <th>Brand</th>
+                            <th>RefNo</th>
+                            <th>Maximum was load (kg)</th>
+                            <th>Sping speed (rpm)</th>
+                            <th>Price (£)</th>
+                            <th>Number in Stock</th>
+                        </tr>
+                        <tr>
+                            <td>Doolton</td>
+                            <td>D120</td>
+                            <td>11</td>
+                            <td>1400</td>
+                            <td>398.99</td>
+                            <td>34</td>
+                        </tr>
+                        <tr>
+                            <td>Hisky</td>
+                            <td>H873</td>
+                            <td>10</td>
+                            <td>1400</td>
+                            <td>289.99</td>
+                            <td>42</td>
+                        </tr>
+                        <tr>
+                            <td>Aarch</td>
+                            <td>A423</td>
+                            <td>10</td>
+                            <td>1500</td>
+                            <td>279.00</td>
+                            <td>3</td>
+                        </tr>
+                        <tr>
+                            <td>Doolton</td>
+                            <td>D232</td>
+                            <td>12</td>
+                            <td>1500</td>
+                            <td>279.29</td>
+                            <td>22</td>
+                        </tr>
+                        <tr>
+                            <td>Aarch</td>
+                            <td>A189</td>
+                            <td>12</td>
+                            <td>1600</td>
+                            <td>349.99</td>
+                            <td>12</td>
+                        </tr>
+                        <tr>
+                            <td>Doolton</td>
+                            <td>D387</td>
+                            <td>10</td>
+                            <td>1500</td>
+                            <td>299.00</td>
+                            <td>36</td>
+                        </tr>
+                        <tr>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                    </table>
+                    <p>A program is designed to help customers decide which washing machine to buy</p>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(c)</th>
+                            <td>
+                                <p>Step 3 finds the price of the cheapest washing machine(s) that meets the 
+                                entered criteria. If there is not a washing machine that meets the criteria then 
+                                <span class="codeText">found</span> is set to <span class="codeText">false</span>.</p>
+
+                                <p><i>The criteria for this question can be found in Q11(b).  The user will enter:</i></p>
+                                <ul>
+                                    <li><i>A minimum wash load they are looking for.</i></li>
+                                    <li><i>The minimum spin speed they are looking for.</i></li>
+                                </ul>
+                                
+                                <p>Using a programming language of your choice, write the code for step 3. Your 
+                                answer should use the data structure created in part (a).</p>
+
+                                <p><i>The data structure created in part (a) was:</i></p>
+                                <div class="codeBox">
+                                    <p>@dataclass</p>
+                                    <p>class feature():</p>
+                                    <p style="padding-left:40px;">brand: str = ""</p>
+                                    <p style="padding-left:40px;">refNo: str = ""</p>
+                                    <p style="padding-left:40px;">maxLoad: int = 0</p>
+                                    <p style="padding-left:40px;">spinSpeed: int = 0</p>
+                                    <p style="padding-left:40px;">price: float = 0.0</p>
+                                    <p style="padding-left:40px;">stock: int = 0</p>
+                                    <br>
+                                    <p>machines = [feature() for x in range(80)]</p>
+                                </div>
+                            </td>
+                            <th rowspan="2"  width="30px">7</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <div class="codeBox">
+                                        <p>cheapestPrice = 999999999</p>
+                                        <p>found = False</p>
+                                        <br>
+                                        <p>for x in range(len(machines)):</p>
+                                        <p style="padding-left:40px;">if machines[x].maxLoad >= smallestWash and machines[x].spinSpeed >= slowestSpin and machines[x].price 
+                                            &lt; cheapestPrice:</p>
+                                        <p style="padding-left:80px;">cheapest = machines[x].price</p>
+                                        <p style="padding-left:80px;">found = True</p>
+                                    </div>
+                                        
+                                    <hr>
+                                        
+                                    <p>One mark for:</p>
+                                        
+                                    <ul>    
+                                        <li>Suitable initialisation of cheapest price (in the example it has been set to 99999999 but it could equally be set to 
+                                            machines[0].price).</li>
+                                        <li>[].maxLoad >= smallestWash AND [].spinSpeed >= slowestSpin</li>
+                                        <li>[].price &lt; cheapestPrice</li>
+                                        <li>Assign cheapest</li>
+                                        <li>Found set to false, changed to true when all conditions met.</li>
+                                        <li>Use of array of records - <span class="codeText">machines</span>.</li>
+                                        <li>with matching fields from a(i) (dot notation).</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                            
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

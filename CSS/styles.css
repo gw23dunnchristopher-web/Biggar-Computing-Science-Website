@@ -16,6 +16,8 @@ body {
     align-items: center;
 }
 
+
+
 .content-hidden {
     display: none !important;
 }
@@ -56,7 +58,7 @@ h3 {
 .contentHeading {
     max-width:2400px;
     font-family:arial;
-    margin-bottom:5px;
+    margin-bottom:20px;
     padding-bottom:5px;
     color:#17479b;
     background-color: #c5f1ff;
@@ -283,13 +285,19 @@ table .subheader {
 }
 
 .example1 {
-    width:600px;
+    width:80%;
     margin:auto;
     text-align:center;
     font-size:30px;
     background-color:lightyellow;
     padding:20px;
     border:solid 1px black;
+}
+
+.example {
+    background-color:#E3FFD8;
+    margin-top:10px;
+    padding:10px;
 }
 
 .rImg {
@@ -423,6 +431,7 @@ ol li {
     font-family:"Courier New", Courier, monospace;
 }
 
+
 .codebox p{
     margin:0px;
     padding:0px;
@@ -430,7 +439,32 @@ ol li {
 
 .codeBox table, .codeBox th, .codeBox td {
     border:none;
+    padding:0;
+}
+
+.pseudocode {
+    font-family:"Courier New", Courier, monospace;
+    text-align:left;
+    margin:auto;
+    margin-top:20px;
+    margin-bottom:20px;
+    background-color:white;
+    color:black;
     padding:5px;
+    max-width:800px;
+}
+
+.pseudocode tr th{
+    font-family:arial;
+    text-align:center;
+    background-color:lightblue;
+    padding-top:5px;
+    padding-bottom:5px;
+}
+
+.pseudocode tr td {
+    padding-top:5px;
+    padding-bottom:5px;
 }
 
 .codeText {

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - SDD Evaluation</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>SDD Evaluation</h1></div>
+                <div class="contentContainer">
+                    <h2>Fitness for purpose</h2>
+                    <p>This reflects whether the software carries out all the tasks required of the software specification.</p>
+                    <p>Your evaluation should identify any discrepancies between the software specification and the completed software.</p>
+
+                    <h2>Efficient use of Coding Constructs</h2>
+                    <p>This reflects whether the software uses the correct coding constructs and whether they are used efficiently.</p>
+                    <ul>
+                        <li><b>Suitable data types or Structures</b> - Have suitable data types been used?  Do the data strucutres match the ones in the original design?</li>
+                        <li><b>Efficient use of loops</b> - Have loops been used efficiently?  Have they been used where appropriate?</li>
+                        <li><b>Arrays</b> - Have arrays been used appropriately where you need to store large amounts of the same data type?</li>
+                        <li>
+                            <b>Nested Selection</b> - Are your selection statements efficient?  Do they use ELSE IF (elif) where appropriate?  Do they use logic operators 
+                            (AND, OR, NOT) where necessary?
+                        </li>
+                        <li><b>Subroutines/Subprograms</b> - Have procedures and functions been implemented to reduce the amount of code that needs to be written by the 
+                            programmer and parsed by the computer?</li>
+                    </ul>
+                    <p>
+                        Your evaluation should identify where your coding has been efficient.  In an exam or assignment, always refer directly to the code you are evaluating 
+                        when writing about efficient use of constructs.
+                    </p>
+
+                    <h2>Usability</h2>
+                    <p>This reflects how intuitive the software is from a user’s perspective and should include:</p>
+                    <ul>
+                        <li>The general user interface</li>
+                        <li>The user prompts</li>
+                        <li>The screen layout</li>
+                        <li>Any help screens</li>
+                    </ul>
+                    <p>Your evaluation should identify features of the software that have enhanced usability for the user.</p>
+
+                    <h2>Maintainability</h2>
+                    <p>This reflects how easy it is to maintain or alter the software.  It includes:</p>
+                    <ul>
+                        <li><b>Readability of the Code</b> - made easier by using meaningful variable names, comments, indentation and whitespace.</li>
+                        <li><b>Amount of modularity</b> - using functions and procedures effectively.</li>
+                    </ul>
+                    <p>Your evaluation should identify how your code helps with the maintainability of the software.</p>
+
+                    <h2>Robustness</h2>
+                    <p>This reflects how well the software handles errors and exceptions.  It includes:</p>
+                    <ul>
+                        <li>Exceptional data, e.g., the computer crashing with an "out of range" error.</li>
+                        <li>Incorrect data entered.</li>
+                    </ul>
+                    <p>Your evaluation should reflect the testing that has been undertaken to meet the specification, as well as to demonstrate some degree of robustness.</p>
+                    
+                    <h2>Past Paper Question - 2024 Q10</h2>
+                    <p>Lewis uses a smart watch to track the distance he walks each day for a week. His 
+                    target is to walk 5 kilometres or more each day.</p>
+                    <p>The program will find the highest the number of consecutive days Lewis meets this 
+                    target.</p>
+                    <p>For example, if the data was <b>5.2, 4.2, 4.0, 4.8, 5.8, 5.2, 6.4</b> the expected output should be <b>3</b>.</p>
+                    <p>The following code has been developed to find the highest number of consecutive 
+                    days Lewis has met his target but there is an error.</p>
+
+                    <table class="pseudocode borderless">
+                        <tr><th width="100px">...</th><td></td></tr>
+                        <tr><th>Line 09</th><td>FUNCTION consecutiveDays (ARRAY OF REAL values) RETURNS INTEGER</td></tr>
+                        <tr><th>Line 10</th><td style="padding-left:40px;">DECLARE counter INITIALLY 0</td></tr>
+                        <tr><th>Line 11</th><td style="padding-left:40px;">DECLARE longestStreak INITIALLY -1</td></tr>
+                        <tr><th>Line 12</th><td style="padding-left:40px;">FOR index FROM 0 TO LENGTH(values) -1 DO</td></tr>
+                        <tr><th>Line 13</th><td style="padding-left:80px;">SET counter TO 0</td></tr>
+                        <tr><th>Line 14</th><td style="padding-left:80px;">IF values[index] &gt;= 5.0 THEN</td></tr>
+                        <tr><th>Line 15</th><td style="padding-left:120px;">SET counter TO counter + 1</td></tr>
+                        <tr><th>Line 16</th><td style="padding-left:80px;">ELSE</td></tr>
+                        <tr><th>Line 17</th><td style="padding-left:120px;">IF counter &gt; longestStreak THEN</td></tr>
+                        <tr><th>Line 18</th><td style="padding-left:160px;">SET longestStreak TO counter</td></tr>
+                        <tr><th>Line 19</th><td style="padding-left:120px;">END IF</td></tr>
+                        <tr><th>Line 20</th><td style="padding-left:120px;">SET counter TO 0</td></tr>
+                        <tr><th>Line 21</th><td style="padding-left:80px;">END IF</td></tr>
+                        <tr><th>Line 22</th><td style="padding-left:40px;">END FOR</td></tr>
+                        <tr><th>Line 23</th><td style="padding-left:40px;">IF counter &gt; longestStreak THEN</td></tr>
+                        <tr><th>Line 24</th><td style="padding-left:80px;">SET longestStreak TO counter</td></tr>
+                        <tr><th>Line 25</th><td style="padding-left:40px;">END IF</td></tr>
+                        <tr><th>Line 26</th><td style="padding-left:40px;">RETURN longestStreak</td></tr>
+                        <tr><th>Line 27</th><td>END FUNCTION</td></tr>
+                        <tr><th>...</th><td></td></tr>
+                        <tr><th>Line 46</th><td>SET distances TO [5.2, 4.2, 4.0, 4.8, 5.8, 5.2, 6.4]</td></tr>
+                        <tr><th>Line 47</th><td>SET daysMet TO consecutiveDays(distances)</td></tr>
+                        <tr><th>...</th><td></td></tr>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(e)</th>
+                            <td>
+                                <p>Describe how modular programming increases the efficiency and 
+                                maintainability of the code.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <p><b>Efficiency</b> - </p>
+                                            <ul>
+                                                <li>The function can be called more 
+                                                than once/reused (with different 
+                                                parameters)</li>
+                                                <li>Local variables/parameters only
+                                                held in memory while being 
+                                                executed</li>
+                                            </ul>
+
+                                        <p><b>Maintainability</b> -</p>
+                                            <ul>
+                                                <li>
+                                                    If there is an error with that part 
+                                                    of the program then the bug is 
+                                                    easier to find/easier to identify 
+                                                    errors in a section of code
+                                                </li>
+                                                <li>
+                                                    Is increased because modules 
+                                                    with local variables can be edited 
+                                                    without affecting the other 
+                                                    modules in the program
+                                                </li>
+                                                <li>
+                                                    Any new modules or changes to 
+                                                    existing modules can be 
+                                                    edited/tested individually
+                                                </li>
+                                            </ul>
+                                        <hr>
+                                        <p>Award 1 mark for any one bullet about efficiency.</p>
+                                        <p>Award 1 mark for any one bullet about maintainability.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

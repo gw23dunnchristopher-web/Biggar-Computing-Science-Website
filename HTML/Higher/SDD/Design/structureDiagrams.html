@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Structure Diagrams</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Structure Diagrams</h1></div>
+                <div class="contentContainer">
+                    <h2>Structure Diagrams at Higher Level</h2>
+                    <p>
+                        Much like pseudocode, structure diagrams now also have to top level design that shows data flow.  Below you can see a structure diagram for the same
+                        program from the pseudocode page.  As before, the purpose of this program is to read the name, prelim mark and coursework mark for 20 pupils from a file.
+                    </p>
+
+                    <h3>Top Level Design and Data Flow</h3>
+                    <p>
+                        In a structure diagram, the data flow is shown by arrows in the top level design, arrows pointing down are outputs from a subprogram or subroutine and 
+                        arrows pointing up are inputs.
+                    </p>
+
+                    <img src="/Images/Higher/SDD/Design/structureDiagram1.JPG" alt="Structure Diagram Example" class="cImg">
+
+                    <h3>Refinements</h3>
+                    <p>
+                        The subprograms shown in the Top Level Design will be broken down into smaller steps.  They can be shown separately from the Top Level Design as they 
+                        are individual subprograms.
+                    </p>
+                    <div class="sideBySide">
+                        <img style="max-height:350px;" src="/Images/Higher/SDD/Design/structureDiagram2.JPG" alt="Structure Diagram Example" class="cImg">
+                        <img src="/Images/Higher/SDD/Design/structureDiagram3.JPG" alt="Structure Diagram Example" class="cImg">
+                    </div>
+                    <h2>Past Paper Question - 2022 Q7(b)</h2>
+                        <p>An app can be used to record two players’ scores on a 9 hole mini‑golf course.</p>
+                        <p>A player wins a hole if they have fewer shots than their opponent. For example, 
+                        Claire has won the first hole taking only two shots compared to Tina’s four shots.</p>
+                        <p>After nine holes, Claire has won four holes and Tina has won two.</p>
+
+                        <img class="cImg" src="/Images/Higher/SDD/Analysis/2022Q7.JPG" alt="2022 Q7(a)">
+
+                        <p>Both players’ names and their nine scores are entered.</p>
+                        <p>The app displays the name of the player who wins the most holes or a message 
+                            stating the game has been drawn if the number of holes won is the same.</p>
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">(e)</th>
+                                <td>
+                                    <p>The top‑level design of the main steps of the program is shown below.</p>
+                                    <p>Complete the diagram to show the data flow for the program.</p>
+
+                                    <img class="cImg" src="/Images/Higher/SDD/Design/2022Q7b.JPG" alt="2022 Q7(b)">
+                                </td>
+                                <th rowspan="2"  width="30px">2</th>
+                            </tr>
+                                <tr>
+                                    <td>
+                                        <div class="hiddenElement answer1">
+                                            <img class="cImg" src="/Images/Higher/SDD/Design/2022Q7b-answer.JPG" alt="2022 Q7(b)">
+
+                                            <hr>
+
+                                            <p>Any additional inputs or outputs for 
+                                            either step then do not award the 
+                                            mark for that step.</p>
+                                            <p>Indication of IN must be shown.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="answerButton" onClick="answerButtonSwitch(this); 
+                                toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

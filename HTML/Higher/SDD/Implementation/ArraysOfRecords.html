@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Arrays of Records</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Arrays of Records</h1></div>
+                <div class="contentContainer">
+                    <h2>What is a record in programming?</h2>
+                    <p>A record is a data structure that contains a group of values of different types.  Each one of these values is referred to as an 'attribute'.</p>
+                    <p>
+                        The record structure must be defined.  For example, a record of a city might contain four attributes - cityName (string), population (integer), 
+                        areaKm (integer) and capital (Boolean).
+                    </p>
+                    <p>Python does not actually use records, instead we use Classes to simulate the use of records.  For example:</p>
+
+                    <div class="codeBox">
+                        <p>from dataclasses import dataclass</p>
+                        <br>
+                        <p>@dataclass</p>
+                        <p>class cityData:</p>
+                        <p style="padding-left:20px;">cityName: str = ""</p>
+                        <p style="padding-left:20px;">population: int = 0</p>
+                        <p style="padding-left:20px;">areaKm: int = 0</p>
+                        <p style="padding-left:20px;">capital: bool = False</p>
+                    </div>
+
+                    <h2>Creating an Array of Records</h2>
+                    <p>
+                        An array of records is an array where each element is a record.  For example, we could create an array of records called 'cities' that contains 10 
+                        records of the type 'cityData'.
+                    </p>
+                    <p>We can create this using a combination of the code to initialise an array and a fixed loop.  For example:</p>
+
+                    <div class="codeBox">
+                        <p>cities = [cityData() for x in range(10)]</p>
+                    </div>
+
+                    <h2>Dot Notation</h2>
+                    <p>To access the attributes of a record, we use dot notation.  This can be used to both read and write to the attributes.  For example:</p>
+
+                    <div class="codeBox">
+                        <p>cities[0].cityName = "Edinburgh"</p>
+                        <p>cities[0].population = 500000</p>
+                        <p>cities[0].areaKm = 200</p>
+                        <p>cities[0].capital = True</p>
+                        <br>
+                        <p>print(cities[0].cityName)</p>
+                        <p>print(cities[0].population)</p>
+                        <p>print(cities[0].areaKm)</p>
+                        <p>print(cities[0].capital)</p>
+                    </div>
+
+                    <p>
+                        The above code will write the values 'Edinburgh', 500000, 200 and True, to the cityData record located in element 0 of the array, and then display
+                        the values held in the attributes of that element.
+                    </p>
+
+                    <p>
+                        Note that when using dot notation, you use the name of the array, followed by the index number of the element you want to access in square brackets, 
+                        followed by a dot the name of the attribute you want to access.
+                    </p>
+
+                    <h2>Writing to an Array of Records</h2>
+                    <p>A fixed loop can be used to write to an Array of Records.  Just like with an ordinary array, you can either loop for the length of the array or, if it
+                    does not have a fixed length, the append function can be used.</p>
+                    <p>For example, the following code will loop 10 times, and each time it will ask the user to enter the name, population, area and whether or not the city is
+                        a capital.  It will then write these values to the attributes of the record in the current element of the array.</p>
+                    <div class="codeBox">
+                        <p>for x in range(10):</p>
+                        <p style="padding-left:20px;">cities[x].cityName = input("Enter the name of the city: ")</p>
+                        <p style="padding-left:20px;">cities[x].population = int(input("Enter the population of the city: "))</p>
+                        <p style="padding-left:20px;">cities[x].areaKm = int(input("Enter the area of the city in km: "))</p>
+                        <p style="padding-left:20px;">cities[x].capital = input("Is the city a capital? (True/False): ")</p>
+                        <p style="padding-left:20px;">if cities[x].capital == "True":</p>
+                        <p style="padding-left:40px;">cities[x].capital = True</p>
+                        <p style="padding-left:20px;">else:</p>
+                        <p style="padding-left:40px;">cities[x].capital = False</p>
+                    </div>
+                    
+                    <h2>Past Paper Question - 2023 Q11 (a)</h2>
+
+                    <p>A shop sells a range of 80 different washing machines. Sample data about the washing machines is shown below:</p>
+                    <img class="cImg" src="/Images/Higher/SDD/Implementation/2023Q11.JPG" alt="2023 Q11">
+                    <p>A program is designed to help customers decide which washing machine to buy.</p>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(i)</th>
+                            <td>
+                                <p>Using a programming language of your choice, define a suitable record data structure for the washing machine data above.</p>
+                                <p>The record data structure should be called <span class="codeText">feature</span>.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <div class="codeBox">
+                                        <p>from dataclasses import dataclass</p>
+                                        <br>
+                                        <p>@dataclass</p>
+                                        <p>class feature:</p>
+                                        <p style="padding-left:20px;">brand: str = ""</p>
+                                        <p style="padding-left:20px;">refNo: str = ""</p>
+                                        <p style="padding-left:20px;">maxLoad: int = 0</p>
+                                        <p style="padding-left:20px;">spinSpeed: float = 0.0</p>
+                                        <p style="padding-left:20px;">price: float = 0.0</p>
+                                        <p style="padding-left:20px;">numberInStock: int = 0</p>
+                                    </div>
+                                    <hr>
+                                    <p>One mark each for:</p>
+                                    <ul>
+                                        <li>Record structure with name <span class="codeText">feature</span></li>
+                                        <li>Six fields specified.</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                        
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(ii)</th>
+                            <td>
+                                <p>
+                                    Using a programming language of your choice, declare the variable called 
+                                    <span class="codeText">machines</span> which can store the details of the 80 washing machines. 
+                                    Your answer should use the record data structure created in part (i).
+                                </p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer2">
+                                    <div class="codeBox">
+                                        <p>machines = [feature() for x in range(80)]</p>
+                                    </div>
+                                    <hr>
+                                    <p>One mark each for:</p>
+                                    <ul>
+                                        <li>Array structure and size (named <span class="codeText">machines</span>)</li>
+                                        <li>Using <span class="codeText">feature</span> data type</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

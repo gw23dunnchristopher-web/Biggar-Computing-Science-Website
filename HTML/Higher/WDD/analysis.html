@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - WDD Analysis</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>WDD Anaylsis</h1></div>
+                <div class="contentContainer">
+                    <h2>End-User and Functional Requirements</h2>
+                    <p>During the analysis stage of website development, the following requirements should be identified:</p>
+                    <p><b>End-User Requirements</b></p>
+                    <ul>
+                        <li>The end users are the people who are going to be using the website.</li>
+                        <li>Their requirements are the tasks they expect to be able to do using the website.</li>
+                    </ul>
+                    <p><b>Functional Requirements</b></p>
+                    <ul>
+                        <li>These are the tasks that the website must be able to perform.</li>
+                        <li>Also information that the system has to contain to be able to carry out its functions.</li>
+                    </ul>
+                    <p>These requirements will help to:</p>
+                    <ul>
+                        <li>clarify the design for each webpage.</li>
+                        <li>identify the features to be implemented on the website (videos, audio, images, search bar, naviation bar, etc).</li>
+                        <li>evaluate whether the website is fit for purpose after development is complete.</li>
+                    </ul>
+
+                    <h2>Example of End-User and Functional Requirements</h2>
+                    <p>Imaging that a new website is being created about lawn care.  The client wants the website to give users information on planting lawns, different
+                    types of grasses, lawnmowers and fertiliser.</p>
+
+                    <h3>End-User Requirements</h3>
+                    <img class="rImg" width="25%" src="/Images/Higher/WDD/Analysis/lawn.JPG">
+                    <p>Users should be able to...</p>
+                    <ul>
+                        <li>Navigate the website easily.</li>
+                        <li>Find out information on two categories of grass with advice on which type to select.</li>
+                        <li>Find out information about lawnmowers and how to select the right one for the right type of grass.</li>
+                        <li>View photographs of different lawnmowers.</li>
+                        <li>Find out information about organic and inorganic fertilisers.</li>
+                        <li>Watch videos that will show them how to plant lawns - including sowing and turfing.</li>
+                    </ul>
+
+                    <h3>Functional Requirements</h3>
+                    <p>The website must contain:</p>
+                    <ul>
+                        <li>a navigation bar that allows users to navigate the website easily.</li>
+                        <li>a home page that provides internal links to different topic pages (Grass Types, Lawnmowers, fertiliser and Planting Lawns).</li>
+                        <li>individual pages for each of the topics listed above - all of these should link back to the home page.</li>
+                        <li>a heading on each page that clearly states what the page is about.</li>
+                        <li>information on two different types of grass.</li>
+                        <li>information on how to select the right type of grass.</li>
+                        <li>images of different lawnmowers and information on each type.</li>
+                        <li>video tutorials on sowing and turfing lawns.</li>
+                        <li>information on organic and inorganic fertilisers.</li>
+                        <li>links to pages that recommend organic and inorganic fertilisers.</li>
+                        <li>Inorganic and Organic Fertiliser pages that link back to the main Fertiliser page.</li>
+                    </ul>
+                    
+                    <h2>Past Paper Question - 2022 Q17</h2>
+                    <p>
+                        A new video sharing website is being developed. This site should allow users to 
+                        upload new videos to the site, watch uploaded videos and comment on them. Users 
+                        should sign into the site using a username and password.
+                    </p>
+                    
+                    <p>
+                        Once signed in, users should be able to navigate to one of three pages — a profile 
+                        page, a videos page and a settings page.
+                    </p>
+                    
+                    <p>
+                        From the profile page, users should be able to navigate to a page where they can 
+                        upload videos and read comments left by other users, a page where they can edit 
+                        their profile and a page where they can edit the details of previously uploaded 
+                        videos.
+                    </p>
+                    
+                    <p>
+                        From the videos page, users should be able to view a page with the top ten 
+                        trending videos and view a page showing the videos that they have watched most 
+                        recently.
+                    </p>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td>
+                                <p>State one functional requirement of this website.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <p>Award 1 mark for each bullet. Maximum 1 mark.</p>
+                                        <ul>
+                                            <li>A form to:
+                                                <ul>
+                                                    <li>Add/Read Comments</li>
+                                                    <li>allow users to sign in.</li>
+                                                    <li>allow users to upload videos or edit profiles.</li>
+                                                </ul>
+                                            </li>
+                                            <li>An element to:
+                                                <ul>
+                                                    <li>Upload videos</li>
+                                                    <li>Watch videos</li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

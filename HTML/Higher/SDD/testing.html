@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - SDD Testing</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+        <style>
+            ol, ol li {padding:5px !important; padding-left:40px !important; margin:0 !important;} 
+            .laws, .law-content {max-width:1000px; margin:auto;}
+            .law-content {border:1px solid black;}
+            img {padding-right:20px;}
+        </style>
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>SDD Testing</h1></div>
+                <div class="contentContainer">
+                    <h2>Comprehensive Testing Plans</h2>
+                    <p>
+                        A comprehensive final test plan should ensure that the functional requirements are met. A test plan can be created after the analysis stage. Testing 
+                        should include normal, exceptional and extreme data. <b>It should also ensure that every line of code has been tested</b>.
+                    </p>
+
+                    <h2>Debugging Techniques</h2>
+                    <p>
+                        Debugging is the process of finding and fixing errors in a program.  It is an important skill for a programmer to have, and is a key part of the 
+                        testing process.  At Higher level, you have to be aware of the following debugging techniques:
+                    </p>             
+
+                    <p class="laws" onclick="toggleLaw(this)"><b>Dry Run</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <p>A dry run is a paper-based analysis of code. A programmer...</p>
+                        <ol>
+                            <li>Looks at the program on the screen or at a print out of the code.</li>
+                            <li>Uses a pen and paper and executes the program line by line in their head.</li>
+                            <li>Notes down the changes to values of each variable in a trace table.</li>
+                            <li>Checks that the variables are used and updated as expected.</li>
+                        </ol>
+                        <p>This helps to find logic and execution errors and can be carried out during design, implementation, testing or maintenance.</p>
+                    </div>
+
+                    <p class="laws" onclick="toggleLaw(this)"><b>Trace Tables/Tools</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <div class="sideBySide vertAlign">
+                            <p>
+                                Each programming environment has a feature that shows a table of values revealing the contents of several variables as each line stepped 
+                                through. Trace tables can also be created on paper as part of a dry run, showing how the variables change as the user moves through the 
+                                program.
+                            </p>
+                            <img width="400px" src="/Images/Higher/SDD/Testing/traceTable.jpg">
+                        </div>
+                    </div>
+
+                    <p class="laws" onclick="toggleLaw(this)"><b>Breakpoints</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <div class="sideBySide vertAlign">
+                            <p>
+                                Pre-defined points can be set in a program that allows the execution of code to be stopped so the programmer can examine the values stored in 
+                                variables at that time and compare them with the expected values.
+                            </p>
+                            <div>
+                                <img style="width:300px;" src="/Images/Higher/SDD/Testing/breakpoints.JPG">
+                                <p style="font-size:12px;"><i>In Thonny, Breakpoints are represented by a red dot.  One is shown here at line 6.</i></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="laws" onclick="toggleLaw(this)"><b>Watchpoints</b><span class="arrow">&#9654;</span></p>
+                    
+                    <div class="law-content" style="display: none;">
+                        <p>
+                            A special breakpoint that stops your program when the value of a variable changes or a pre-set condition is met. The stored values can be 
+                            compared with what the programmer expected.  Not all programming environments use watchpoints, in this case it is common practice to temporarily 
+                            use print statements that display the changing value as the program runs.
+                        </p>
+                    </div>
+
+                    <h2>On Debugging Large Programs</h2>
+                    <p>When debugging large programs...</p>
+                    <ul>
+                        <li>A trace table may be used to find out which value is not as it should be.</li>
+                        <li>The programmer can then set breakpoints to stop/pause program at defined points.</li>
+                        <li>The values of the variables are compared with the expected value in the trace table to see if they match.</li>
+                    </ul>
+                    
+                    <h2>Past Paper Question - 2023 Q8</h2>
+                    <p>
+                        A number matching game stores four winning numbers and compares them to a 
+                        player’s input of four numbers. 250 points are awarded for each number matched. 
+                        For example, two matched numbers would be awarded 500 points.
+                    </p>
+                    <p>The code below contains an error, as the player is always awarded 1000 points.</p>
+
+                    <table class="pseudocode borderless">
+                        <tr><th width="100px">...</th><td></td></tr>
+                        <tr><th>Line 10</th><td>DECLARE winningNos INITIALLY [10, 14, 21, 33]</td></tr>
+                        <tr><th>Line 11</th><td>DECLARE numMatches INITIALLY 0</td></tr>
+                        <tr><th>Line 12</th><td>DECLARE points INITIALLY 0</td></tr>
+                        <tr><th>Line 13</th><td>RECEIVE no1 FROM KEYBOARD</td></tr>
+                        <tr><th>Line 14</th><td>RECEIVE no2 FROM KEYBOARD</td></tr>
+                        <tr><th>Line 15</th><td>RECEIVE no3 FROM KEYBOARD</td></tr>
+                        <tr><th>Line 16</th><td>RECEIVE no4 FROM KEYBOARD</td></tr>
+                        <tr><th>Line 17</th><td>FOR index FROM 0 TO 3 DO</td></tr>
+                        <tr><th>Line 18</th><td style="padding-left:40px;">IF no1 = winningNos[index] THEN</td></tr>
+                        <tr><th>Line 19</th><td style="padding-left:80px;">SET numMatches TO numMatches + 1</td></tr>
+                        <tr><th>Line 20</th><td style="padding-left:40px;">ELSE IF no2 = winningNos[index] THEN</td></tr>
+                        <tr><th>Line 21</th><td style="padding-left:80px;">SET numMatches TO numMatches + 1</td></tr>
+                        <tr><th>Line 22</th><td style="padding-left:40px;">ELSE IF no3 = winningNos[index] THEN</td></tr>
+                        <tr><th>Line 23</th><td style="padding-left:80px;">SET numMatches TO numMatches + 1</td></tr>
+                        <tr><th>Line 24</th><td style="padding-left:40px;">ELSE</td></tr>
+                        <tr><th>Line 25</th><td style="padding-left:80px;">SET numMatches TO numMatches + 1</td></tr>
+                        <tr><th>Line 26</th><td style="padding-left:40px;">END IF</td></tr>
+                        <tr><th>Line 27</th><td>END FOR</td></tr>
+                        <tr><th>Line 28</th><td>SET points TO 250 * numMatches</td></tr>
+                        <tr><th>Line 29</th><td>SEND "You matched "& numMatches & " numbers and have won " & points TO DISPLAY</td></tr>
+                        <tr><th>...</th><td></td></tr>
+                    </table>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td>
+                                <p>
+                                    A breakpoint is set at Line 26 and the program is tested using the following 
+                                    four player numbers as input:
+                                </p>
+                                <table class="binaryTable" style="width:200px">
+                                    <tr><th>no1</th><th>no2</th><th>no3</th><th>no4</th></tr>
+                                    <tr><td>5</td><td>10</td><td>15</td><td>21</td></tr>
+                                </table>
+
+                                <p>
+                                    Complete the trace table to show the values stored when the breakpoint is 
+                                    activated on the first two iterations of the loop.
+                                </p>
+
+                                <table style="width:600px; text-align:center">
+                                    <tr><th width="33%">Breakpoint</th><th width="33%">Variable</th><th width="33%">Value</th></tr>
+                                    <tr><td rowspan="3">1st Iteration</td><td class="codeText">Index</td><td>0</td></tr>
+                                    <tr><td class="codeText">winningNos</td><td></td></tr>
+                                    <tr><td class="codeText">numMatches</td><td></td></tr>
+                                    <tr><td rowspan="3">2nd Iteration</td><td class="codeText">Index</td><td>1</td></tr>
+                                    <tr><td class="codeText">winningNos</td><td></td></tr>
+                                    <tr><td class="codeText">numMatches</td><td></td></tr>
+                                </table>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <table style="width:600px; text-align:center">
+                                            <tr><th width="33%">Breakpoint</th><th width="33%">Variable</th><th width="33%">Value</th></tr>
+                                            <tr><td rowspan="3">1st Iteration</td><td class="codeText">Index</td><td>0</td></tr>
+                                            <tr><td class="codeText">winningNos</td><td>10</td></tr>
+                                            <tr><td class="codeText">numMatches</td><td>1</td></tr>
+                                            <tr><td rowspan="3">2nd Iteration</td><td class="codeText">Index</td><td>1</td></tr>
+                                            <tr><td class="codeText">winningNos</td><td>14</td></tr>
+                                            <tr><td class="codeText">numMatches</td><td>2</td></tr>
+                                        </table>
+
+                                        <hr>
+
+                                        <p>One mark each for:</p>
+                                        <ul>
+                                            <li>correct values in winningNos[index] - 10 and 14</li>
+                                            <li>Correct value of numMatches - 1 and 2</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(b)</th>
+                            <td>
+                               <p>
+                                   Explain, with reference to the code, why the number of matches always results 
+                                   in 4.
+                               </p>
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer2">
+                                        <p>
+                                            The code always increments the number of matches by 1, regardless of whether the number entered by the player matches any of the
+                                            winning numbers.  This is because the final ELSE statement on line 24 always executes, as the IF statements above it are only
+                                            true if the player's number matches the winning number.
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

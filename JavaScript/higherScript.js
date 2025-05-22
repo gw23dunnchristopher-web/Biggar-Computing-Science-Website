@@ -1,0 +1,259 @@
+function brighten(event) {
+    event.target.style.filter='brightness(100%) grayscale(0%)';
+}
+
+function darken(event) {
+    event.target.style.filter='brightness(50%) grayscale(100%)';
+}
+
+let sidebarCache = '';
+let sidebarPromise = null;
+
+// Preload the sidebar
+function preloadSidebar(menuLoc) {
+    if (!sidebarPromise) {
+        sidebarPromise = fetch(menuLoc)
+            .then(response => response.text())
+            .then(data => {
+                sidebarCache = data;
+                return data;
+            });
+    }
+    return sidebarPromise;
+}
+
+function loadSidebar(menuLoc, menuID) {
+    window.scrollTo(0, 0);
+    if (sidebarCache) {
+        document.getElementById(menuID).innerHTML = sidebarCache;
+        attachMenuListeners();
+        setInterval(function() { countdown('2025-04-25'); }, 1000);
+        return;
+    }
+
+    // If already preloading, use that promise
+    if (sidebarPromise) {
+        sidebarPromise.then(data => {
+            document.getElementById(menuID).innerHTML = data;
+            attachMenuListeners();
+            setInterval(function() { countdown('2025-04-25'); }, 1000);
+        });
+        return;
+    }
+
+    // Otherwise load normally
+    preloadSidebar(menuLoc).then(data => {
+        document.getElementById(menuID).innerHTML = data;
+        attachMenuListeners();
+        setInterval(function() { countdown('2025-04-25'); }, 1000);
+    });
+}
+
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active');
+}
+
+function toggleActive(element){
+    if (element.classList.contains('active')){
+        element.classList.remove('active');
+    }
+    else {
+        element.classList.add('active');
+    }
+}
+
+function attachMenuListeners() {
+    const menuItems = document.querySelectorAll('.sidebar-menu li');
+    menuItems.forEach(item => {
+        item.addEventListener('click', function(event) {
+            event.stopPropagation();
+            const submenu = this.querySelector('.submenu');
+            const arrow = this.querySelector('.arrow');
+
+            if (submenu) {
+                // Toggle submenu visibility
+                submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+                arrow.classList.toggle('down');
+
+                // Toggle active class on the parent li
+                this.classList.toggle('active');
+            }
+        });
+    });
+}
+
+function show(element){
+    document.getElementById(element).style.display = "block";
+}
+
+function hide(element){
+    document.getElementById(element).style.display = "none";
+}
+
+
+
+function answerButtonSwitch(element){
+    if (element.innerHTML == "Show Answer"){
+        element.innerHTML = "Hide Answer";
+        element.style.backgroundImage = "linear-gradient(to bottom, lightgreen, green)";
+
+    }
+    else{
+        element.innerHTML = "Show Answer";
+        element.style.backgroundImage = "linear-gradient(to bottom, lightgrey, lightslategrey)";
+    }
+}
+
+function applyButtonSwitch(element){
+    if (element.innerHTML == "Apply"){
+        element.innerHTML = "Remove";
+        element.style.backgroundImage = "linear-gradient(to bottom, lightgreen, green)";
+    }
+    else{
+        element.innerHTML = "Apply";
+        element.style.backgroundImage = "linear-gradient(to bottom, lightgrey, lightslategrey)";
+    }
+}
+
+function getActiveStyles() {
+    const buttons = document.querySelectorAll('.answerButton');
+    return {
+        external: buttons[0].innerHTML === 'Remove',
+        internal: buttons[1].innerHTML === 'Remove',
+        inline: buttons[2].innerHTML === 'Remove'
+    };
+}
+
+function applyExternalCSS() {
+    const exampleText = document.getElementById('exampleText');
+    const activeStyles = getActiveStyles();
+
+    // Only apply if no higher precedence styles are active
+    if (activeStyles.external && !activeStyles.internal && !activeStyles.inline) {
+        exampleText.style.color = 'blue';
+        exampleText.style.textAlign = 'left';
+        exampleText.style.fontSize = '30px';
+    }
+}
+
+function applyInternalCSS() {
+    const exampleText = document.getElementById('exampleText');
+    const activeStyles = getActiveStyles();
+
+    // Apply styles if internal is active and no inline CSS
+    if (activeStyles.internal && !activeStyles.inline) {
+        exampleText.style.fontSize = '40px';
+        exampleText.style.textAlign = 'right';
+        if (activeStyles.external) {
+            exampleText.style.color = 'blue';
+        }
+    }
+}
+
+function applyInlineCSS() {
+    const exampleText = document.getElementById('exampleText');
+    const activeStyles = getActiveStyles();
+
+    // Inline CSS always takes precedence when active
+    if (activeStyles.inline) {
+        exampleText.style.color = 'red';
+        exampleText.style.textAlign = 'center';
+        exampleText.style.fontSize = '50px';
+    }
+}
+
+function applyCSS(type) {
+    const exampleText = document.getElementById('exampleText');
+
+    // Reset all styles first
+    exampleText.style.color = '';
+    exampleText.style.textAlign = '';
+    exampleText.style.fontSize = '';
+
+    // Apply styles in order of precedence
+    if (type === 'external') {
+        applyExternalCSS();
+    } else if (type === 'internal') {
+        applyInternalCSS();
+    } else if (type === 'inline') {
+        applyInlineCSS();
+    }
+
+    // Apply other active styles
+    const activeStyles = getActiveStyles();
+    if (type !== 'external' && activeStyles.external) applyExternalCSS();
+    if (type !== 'internal' && activeStyles.internal) applyInternalCSS();
+    if (type !== 'inline' && activeStyles.inline) applyInlineCSS();
+}
+
+
+function toggleVisibility(className) {
+    const elements = document.getElementsByClassName(className);
+    for (let i = 0; i < elements.length; i++) {
+        if (elements[i].style.display === 'none' || getComputedStyle(elements[i]).display === 'none') {
+            elements[i].style.display = 'block';
+        } else {
+            elements[i].style.display = 'none';
+        }
+    }
+}
+
+function toggleBreakdown(breakdownId) {
+    const breakdown = document.getElementById(breakdownId);
+    const button = document.getElementById(breakdownId.replace('Breakdown', 'Button'));
+
+    // Toggle visibility and active state
+    if (breakdown.style.display === 'block' || getComputedStyle(breakdown).display === 'block') {
+        breakdown.style.display = 'none';
+        button.classList.remove('active');
+    } else {
+        breakdown.style.display = 'block';
+        button.classList.add('active');
+    }
+}
+
+function toggleLaw(element) {
+    const content = element.nextElementSibling;
+    const arrow = element.querySelector('.arrow');
+    
+    if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+        if (arrow) arrow.classList.add('rotated');
+        element.classList.add('active');
+    } else {
+        content.style.display = 'none';
+        if (arrow) arrow.classList.remove('rotated');
+        element.classList.remove('active');
+    }
+}
+
+preloadSidebar('/HTML/Higher/HigherSidebar.html').then(() => {
+    loadSidebar('/HTML/Higher/HigherSidebar.html', 'sidebar');
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('mainContent').classList.remove('content-hidden');
+});
+
+function switchImage(imageElement, newSrc){
+    imageElement.src = newSrc;
+}
+
+/* Countdown Function */
+function countdown(testDate) {
+    const countDownDate = new Date(testDate).getTime();
+    const now = new Date().getTime();
+    const distance = countDownDate - now;
+
+    if (distance < 0) {
+        document.getElementById("countdown").innerHTML = "EXPIRED";
+        return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById("countdown").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+}

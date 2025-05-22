@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Margins</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Margins</h1></div>
+                <div class="contentContainer">
+                    <p>Using the margins property in CSS will determine the amount of space there is between elements. 
+                        You can use margins in CSS with the following properties:</p>
+                    <ul class="codeText">
+                        <li>margin</li>
+                        <li>margin-top</li>
+                        <li>margin-right</li>
+                        <li>margin-bottom</li>
+                        <li>margin-left</li>
+                    </ul>
+
+                    <p>These properties may have the values:</p>
+                    <ul>
+                        <li><span class="codeText">auto</span> - the browser calculates the margin.</li>
+                        <li><span class="codeText">length</span> - a fixed margin in px, cm, etc.</li>
+                        <li><span class="codeText">%</span> - a percentage of the width of the containing element.</li>
+                    </ul>
+
+                    <h3>Simultaneous Declaration of Margins</h3>
+                    <p>You can declare all four margins at once using the <span class="codeText">margin</span> property.  The values are applied in the following order:</p>
+                    <ul>
+                        <li>Top</li>
+                        <li>Right</li>
+                        <li>Bottom</li>
+                        <li>Left</li>
+                    </ul>
+                    <p>For example, the following code will set the top margin to 10px, the right margin to 20px, the bottom margin to 30px and the left margin to 40px.</p>
+                    <div class="codeBox">
+                        <p style="text-align:center;">margin: 10px 20px 30px 40px;</p>
+                    </div>
+                    <p>Just using one value with the <span class="codeText">margin</span> property will set all of the margins to that value. For example:</p>
+                    <div class="codeBox">
+                        <p style="text-align:center;">margin: 10px;</p>
+                    </div>
+                    <p>You can also set the top and bottom margins to one value and the left and right margins to another value. For example:</p>
+                    <div class="codeBox">
+                        <p style="text-align:center;">margin: 10px 20px;</p>
+                    </div>
+                    <p>This will set the top and bottom margins to 10px and the left and right margins to 20px.</p>
+
+                    <h3>Margins Example</h3>
+                    <div class="sideBySide vertAlign">
+                        <div>
+                            <p>
+                                In the example website, CSS declarations for the main page elements (<span class="codeText">&lt;header&gt;, &lt;nav&gt;, &lt;div&gt;</span> 
+                                and <span class="codeText">&lt;footer&gt;</span>) are used to separate out content when displayed.
+                            </p>
+                            <p>
+                                The small gap at the top of each area is implemented by styling a margin of 5 pixels at the top of the four elements. For example:
+                            </p>
+                            <div class="codeBox">
+                                <p style="text-align:center;">nav, header, main, footer {margin-top: 5px;}</p>
+                            </div>
+                            <p>This results in the image that you can see to the right.</p>
+                        </div>
+                        <img class="cImg" width="35%" src="/Images/Higher/WDD/Implementation/css/margins.jpg" alt="Margins Example">
+                    </div>
+
+                    <h3>Auto Margins</h3>
+                    <p>
+                        Auto margins are used to position an element in the middle of the browser’s window or within another element. In the example website, the 900 pixel   
+                        wide page <span class="codeText">&lt;body&gt;</span> element is always positioned in the middle of the window:
+                    </p>
+                    <div class="codeBox">
+                        <p style="text-align:center;">body {margin: 0 auto;}</p>
+                    </div>
+                    <p>This results in the following look for the example website:</p>
+                    <img class="cImg" width="50%" src="/Images/Higher/WDD/Implementation/css/autoMargins.jpg" alt="Auto Margins Example">
+                    <p>
+                        Note that in order to use automatic margins, the element's <span class="codeText">display</span> property must be set to 
+                        <span class="codeText">block</span> in CSS.  Many elements, such as <span class="codeText">&lt;h1&gt;</span> and <span class="codeText">&lt;p&gt;
+                        </span> are block elements by default, but others, such as <span class="codeText">&lt;a&gt;</span> and <span class="codeText">&lt;img&gt;</span> are 
+                        not.
+                    </p>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

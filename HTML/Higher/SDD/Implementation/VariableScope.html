@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Variable Scope</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Variable Scope</h1></div>
+                <div class="contentContainer">
+                    
+                    <h2>Variable Scope</h2>
+                    <p>The 'scope' of a variable determines the parts of the program where the variable can be accessed.  You can limit the scope of a variable by:</p>
+                    <ul>
+                        <li>creating a local variable that is declared inside a subroutine.</li>
+                        <li>creating a formal parameter which is useable inside a subroutine</li>
+                    </ul>
+                    <div class="sideBySide">
+                        <div>
+                            <h3>Global Variables</h3>
+                            <ul>
+                                <li>Declared outside of subprograms.</li>
+                                <li>Accessible by every line of the program - main program and every sub-program.</li>
+                                <li>In RAM throughout execution of the entire program - causing a greater demand on system resources.</li>
+                                <li>
+                                    Dangerous for programmers as can be “seen” by the whole program and its name, e.g. total, may “overlap” with a variable elsewhere and cause 
+                                    confusion.
+                                </li>
+                            </ul>
+                        </div>
+                        <img src="/Images/Higher/SDD/Implementation/global.png" class="cImg"  width="15%" height="15%" alt="Global Icon">
+                    </div>
+                    <div class="sideBySide">
+                        <div>
+                            <h3>Local Variables</h3>
+                            <ul>
+                                <li>Declared inside a subprogram.</li>
+                                <li>Only accessible within the subprogram that it has been declared in.</li>
+                                <li>
+                                    Only present in RAM during the execution of the sub-program where they are located - more efficient in terms of demands on system resources.
+                                </li>
+                            </ul>
+                        </div>
+                        <img src="/Images/Higher/SDD/Implementation/local.png" class="cImg" width="15%" height="15%" alt="Local Icon">
+                    </div>
+     
+                    <h2>Past Paper Question - 2019 Q18(a)</h2>
+                    <p>Part of the program code is shown below.</p>
+                    <table class="pseudocode borderless">
+                        <tr><th>Line 1</th>
+                            <td>DECLARE emails AS ARRAY OF STRING INITIALLY []</td>
+                        </tr>
+                        <tr><th>Line 2</th>
+                            <td>DECLARE uniques AS ARRAY OF STRING INITIALLY []</td>
+                        </tr>
+                        <tr><th>...</th>
+                            <td></td>
+                        </tr>
+                        <tr><th>Line 11</th>
+                            <td>importEmails(emails)</td>
+                        </tr>
+                        <tr><th>Line 12</th>
+                            <td>sortEmails(emails)</td>
+                        </tr>
+                        <tr><th>Line 13</th>
+                            <td>removeDuplicates(emails, uniques)</td>
+                        </tr>
+                        <tr><th>Line 14</th>
+                            <td>chooseWinner(uniques)</td>
+                        </tr>
+                        <tr><th>...</th>
+                            <td></td>
+                        </tr>
+                        <tr><th>Line 70</th>
+                            <td>PROCEDURE removeDuplicates(ARRAY OF STRING list, 
+                            ARRAY of STRING newList)</td>
+                        </tr>
+                        <tr><th>Line 71</th>
+                            <td style="padding-left:20px">DECLARE position INITIALLY 0</td>
+                        </tr>
+                        <tr><th>Line 72</th>
+                            <td style="padding-left:20px">SET newList[position] TO list[0]</td>
+                        </tr>
+                        <tr><th>Line 73</th>
+                            <td style="padding-left:20px">FOR index FROM 1 to length(list)-1 DO</td>
+                        </tr>
+                        <tr><th>Line 74</th>
+                            <td style="padding-left:40px">IF list[index] ≠ newList[position] THEN</td>
+                        </tr>
+                        <tr><th>Line 75</th>
+                            <td style="padding-left:60px">SET position TO position + 1</td>
+                        </tr>
+                        <tr><th>Line 76</th>
+                            <td style="padding-left:60px">SET newList[position] TO list[index]</td>
+                        </tr>
+                        <tr><th>Line 77</th>
+                            <td style="padding-left:40px">END IF</td>
+                        </tr>
+                        <tr><th>Line 78</th>
+                            <td style="padding-left:20px">END FOR</td>
+                        </tr>
+                        <tr><th>Line 79</th>
+                            <td>END PROCEDURE</td>
+                        </tr>
+                    </table>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td>
+                                <p>Identify from the code shown above</p>
+                                <table>
+                                    <tr><th>(i)</th><td>a formal parameter</td></tr>
+                                    <tr><th>(ii)</th><td>an actual parameter</td></tr>
+                                </table>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <table>
+                                    <tr><th>(i)</th><td>List or newList</td></tr>
+                                    <tr><th>(ii)</th><td>Emails or uniques</td></tr>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

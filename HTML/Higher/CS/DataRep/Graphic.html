@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Graphic Representation</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Graphic Representation</h1></div>
+                <div class="contentContainer">
+                    <h2>Bitmap Graphics vs Vector Graphics</h2>
+                    <div class="sideBySide vertAlign"">
+                        <div>
+                        <h3>Bitmapped Graphics</h3>
+                            <ul>
+                                <li>Stored as a grid of pixels where each pixel is represented by a binary number to     
+                                    indicate the colour of the pixel.</li>
+                                
+                                <li>The file size is fixed, and only depends on the number of pixels used in the image.
+                                </li>
+                            </ul>
+                        </div>
+                        <img class="cImg" src="/Images/Higher/CS/DataRep/bitmapApple.PNG" alt="Bitmap Apple">
+                    </div>
+
+                    <div class="sideBySide vertAlign">
+                        <div>
+                            <h3>Vector Graphics</h3>
+                            <ul>
+                                <li>Stores a list of objects (shapes) and thier attributes (position, line colour, line 
+                                    thickness, x and y coordinates).</li>
+                                <li>The file size of the image can change based on the number of objects drawn in the 
+                                    image, the more objects there are the more instructions will be required and so the 
+                                    larger the file size will be.</li>
+                            </ul>
+                        </div>
+                        <img class="cImg" src="/Images/Higher/CS/DataRep/vectorApple.PNG" alt="Vector Apple">
+                    </div>
+
+                    <h2>Advantages of Bitmapped Graphics vs Vector Graphics</h2>
+                    <p>Each individual pixel in a bitmap graphic can be edited, this allows you to create some 
+                        extremely detailed images.</p>
+                    <p>Because you are just changing the colour of the pixels, adding more details or features to an 
+                        image will not increase the file size.  The file size is solely based on the number of pixels 
+                        there are and the number of colours that each pixel can represent.</p>
+                    <p>Due to the amount of detail they can have, bitmaps are used for images with high amounts of 
+                        realism.  Photographs are stored in bitmap format, for example.</p>
+
+                    <h2>Disadvantages of Bitmapped Graphics vs Vector Graphics</h2>
+                    <p>Bitmaps have a <b>fixed resolution</b> meaning that they can become blurry or pixellated when 
+                        you enlarge them or zoom into them.  On the other hand, Vector graphics are <b>resolution 
+                        independent</b> - this means that the image will appear just as crisp and clean no matter 
+                        how much you enlarge it.  Vector images redraw objects every time you zoom in or change them in 
+                        any way.</p>
+                    <p>On a bitmap, you cannot move an individual piece of the image without leaving a white gap where 
+                        it once was.  Vector images, however, are layered - you can move individual objects without 
+                        affecting any of the other other objects in the image. Objects can even be placed in front of 
+                        or behind each other.</p>
+                    <p>
+                        Operations such as resize, delete and move, which are available in Vector graphics, cannot be 
+                        used as easily in bitmap graphics as only the pixels are edited.
+                    </p>
+                    <p>
+                        File sizes for Bitmap graphics tend to be larger, as the size of the file is based on the 
+                        number of pixels and the number of colours that each pixel can represent.  Vector graphics have 
+                        a smaller file size as the file size is based on the number of objects in the image.</p>
+                    </p>
+                    <h2>Past Paper Question - 2022 Q3</h2>
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">1</th>
+                                <td>
+                                    <p>LottoScot has a logo shown below in diagram 1. They want to change the logo to 
+                                    the one in diagram 2</p>
+
+                                    <img class="cImg" src="/Images/Higher/CS/DataRep/LottoScot.jpg" alt="2022 Q3">
+                                    
+                                    <p>In diagram 2 the rectangle has been moved forward.</p>
+                                    <p>Explain the advantage of making this change using a vector graphic application 
+                                    compared to a bit‑mapped graphic application.</p>
+                                </td>
+                                <th rowspan="2"  width="30px">2</th>
+                            </tr>
+                                <tr>
+                                    <td>
+                                        <div class="hiddenElement answer1">
+                                                <p><i><b>Vector</b></i></p>
+                                                <ul>
+                                                    <li>individual objects/attributes can 
+                                                    be edited/moved independently</li>
+                                                    <li>Objects can be layered.</li>
+                                                </ul>
+
+                                                <p><i><b>Bitmap</b></i></p>
+                                                <ul>
+                                                    <li>Individual pixels are edited.</li>
+                                                </ul>
+                                                <hr>
+                        
+                                                <ul>
+                                                    <li>1 mark from Vector</li>
+                                                    <li>1 mark from Bitmap</li>
+                                                    <li>Maximum 2 marks</li>
+                                                </ul>
+                                                <p>Reference to moving shapes/
+                                                rectangles is in the stem. Must 
+                                                reference objects, attributes or 
+                                                layers.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="answerButton" onClick="answerButtonSwitch(this); 
+                                toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

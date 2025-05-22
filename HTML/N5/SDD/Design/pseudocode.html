@@ -39,15 +39,14 @@
                     </ul>
                     <h2>Pseudocode Example</h2>
                     <p>The following is pseudocode for a program that calculates the area of a rectangle. If the area of the rectangle is greater than 100, then the program will output "Big rectangle". If the area of the rectangle is less than or equal to 20, then the program will output "Small rectangle".  If it is in between then it will output "Average rectangle".</p>
-                    <div class="codeBox">
-                        <p><b>Algorithm</b></p>
+                    <div class="pseudocode">
+                        
                         <table>
+                            <tr><th colspan="2">Algorithm</th></tr>
                             <tr><td>1.</td><td>Get the rectangle's height and width from the user.</td></tr>
                             <tr><td>2.</td><td>Calculate the rectangle's area.</td></tr>
                             <tr><td>3.</td><td>Determine if the rectangle is large or small and display this information with the total area.</td></tr>
-                        </table>
-                        <p><b>Refinements</b></p>
-                        <table>
+                            <tr><th colspan="2">Refinements</th></tr>
                             <tr><td>1.1</td><td>Display "Enter rectangle's height in cm:".</td></tr>
                             <tr><td>1.2</td><td>Get rectHeight from keyboard.</td></tr>
                             <tr><td>1.3</td><td>Display "Enter rectangle's width in cm:".</td></tr>
@@ -68,19 +67,17 @@
                     <p> The following two questions are from past papers, and can be solved by reading and writing in pseudocode.</p>
                     <h2>Past Paper Question 1 - 2022 Q8(b)</h2>
                     <p>The design below shows how the total cost of a booking is calculated.</p>
-                    <div class="codeBox">
-                        <p><b>Algorithm</b></p>
+                    <div class="pseudocode">
                         <table>
+                            <tr><th colspan="2">Algorithm</th></tr>
                             <tr><td>1.</td><td>Find ticket Costs</td></tr>
                             <tr><td>2.</td><td>Get quantity of passengers</td></tr>
                             <tr><td>3.</td><td>Calculate initial cost of booking</td></tr>
                             <tr><td>4.</td><td>Update cost of booking if bag(s) are added</td></tr>
                             <tr><td>5.</td><td>Display final cost of booking</td></tr>
-                        </table>
-                        <p><b>Refinements</b></p>
-                        <table>
-                             <tr><td>2.1</td><td>Get quantity of adult passengers</td></tr>
-                             <tr><td>2.2</td><td>Get quantity of child passengers</td></tr>
+                            <tr><th colspan="2">Refinements</th></tr>
+                            <tr><td>2.1</td><td>Get quantity of adult passengers</td></tr>
+                            <tr><td>2.2</td><td>Get quantity of child passengers</td></tr>
                         </table>
                     </div>
                     <p>The app provides an option to add bags to the booking. Each passenger is 
@@ -88,8 +85,8 @@
                     passenger who decides to take a bag.</p>
                     <p>Using a design technique of your choice, <b>refine step 4</b>.</p>
                     <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
-                    <div class="hiddenElement codeBox answer1">
-                        <table>
+                    <div class="hiddenElement answer1">
+                        <table class="pseudocode">
                             <tr><td>3.1</td><td>Loop for the number of passengers</td></tr>
                             <tr><td>3.2</td><td style="padding-left:40px;">Ask if passenger wants a bag</td></tr>
                             <tr><td>3.3</td><td style="padding-left:40px;">If answer = "Yes" then:</td>
@@ -105,9 +102,9 @@
                     <h2>Past Paper Question 2 - 2023 10(b)</h2>
                     <p>The design below shows how a customer’s average monthly data usage is 
                     calculated and displayed.</p>
-                    <div class="codeBox">
-                        <p><b>Algorithm</b></p>
+                    <div class="pseudocode">
                         <table>
+                            <tr><th colspan="2">Algorithm</th></tr>
                             <tr><td>1.</td><td>Store each month's data usage</td></tr>
                             <tr><td>2.</td><td>Calculate the average monthly data usage</td></tr>
                             <tr><td>3.</td><td>Display the average monthly data usage</td></tr>
@@ -118,8 +115,8 @@
                     usage.</p>
                     <p>Using a design technique of your choice, <b>refine step 2</b>.</p>
                     <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
-                    <div class="hiddenElement codeBox answer2">
-                        <table>
+                    <div class="hiddenElement answer2">
+                        <table class="pseudocode">
                             <tr><td>2.1</td><td>Loop 12 times</td></tr>
                             <tr><td>2.2</td><td style="padding-left:40px;">Set total to total month [index]</td></tr>
                             <tr><td>2.3</td><td>End loop</td>

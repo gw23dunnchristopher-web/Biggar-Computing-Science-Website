@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Horizontal Navigation Bar</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Horizontal Navigation Bar</h1></div>
+                <div class="contentContainer">
+                    <p>
+                        The HTML 5 <span class="codeText">&lt;nav&gt;</span> element is used to contain website navigational links.  Essentially, it functions in the 
+                        same way as a <span class="codeText">&lt;div&gt;</span> tag, but it is a semantic tag that used for the navigation bar.  To create a navigation bar 
+                        you would first declare it as an unordered list of hyperlinks, as shown below:
+                    </p>
+
+                    <div class="codeBox">
+                        <p>&lt;nav&gt;</p>
+                        <p style="padding-left:40px">&lt;ul&gt;</p>
+                        <p style="padding-left:80px">&lt;li&gt;&lt;a href="index.html"&gt;Home&lt;/a&gt;&lt;/li&gt;</p>
+                        <p style="padding-left:80px">&lt;li&gt;&lt;a href="about.html"&gt;Sport&lt;/a&gt;&lt;/li&gt;</p>
+                        <p style="padding-left:80px">&lt;li&gt;&lt;a href="contact.html"&gt;Music&lt;/a&gt;&lt;/li&gt;</p>
+                        <p style="padding-left:80px">&lt;li&gt;&lt;a href="contact.html"&gt;Study&lt;/a&gt;&lt;/li&gt;</p>
+                        <p style="padding-left:80px">&lt;li&gt;&lt;a href="contact.html"&gt;Drama&lt;/a&gt;&lt;/li&gt;</p>
+                        <p style="padding-left:40px">&lt;/ul&gt;</p>
+                        <p>&lt;/nav&gt;</p>
+                    </div>
+
+                    <h2>Styling the Navigation Bar</h2>
+                    <p>
+                        The look and feel of the navigation bar can then be created using CSS.  Below is an example of the steps you would take to change the unordered list
+                        above into a horizontal navigation bar:
+                    </p>
+
+                    <h3>Step 1 - Remove the Bullet Points</h3>
+                    <p>
+                        changing the <span class="codeText">list-style-type</span> property of the unordered list element to <span class="codeText">none</span>removes the 
+                        bullet points from the list:
+                    </p>
+                    <div class="codeBox">
+                        <p>nav ul {list-style-type:none;}</p>
+                    </div>
+                    <img src="/Images/Higher/WDD/Implementation/css/rmvBulletPoints.jpg" class="cImg" width="66%">
+
+                    <h3>Step 2 - Position the List Items Horizontally</h3>
+                    <p>
+                        To ensure the list of hyperlinks is distributed horizontally, each list item should be floated to the left. This can be done by changing the
+                        <span class="codeText">float</span> property of the list items to <span class="codeText">left</span>:
+                    </p>
+                    <div class="codeBox">
+                        <p>nav ul li {float:left;}</p>
+                    </div>
+                    <img src="/Images/Higher/WDD/Implementation/css/floatLeft.jpg" class="cImg" width="66%">
+
+                    <h3>Step 3 - Space Out List Items</h3>
+                    <p>
+                        To create space between each list item, a width is delcared and the link text is centered.  This will move the text to the center of each 
+                        block, creating buttons.
+                    </p>
+                    <div class="codeBox">
+                        <p>nav ul li {float:left; width:100px; text-align:center;}</p>
+                    </div>
+                    <img class="cImg" width="66%" src="/Images/Higher/WDD/Implementation/css/spaceOut.jpg">
+
+                    <h3>Step 4 - Creating Clickable Boxes</h3>
+                    <p>
+                        At the moment, you would only be able to click on the words within the button to move to the new page, but you want to be able to click any part of 
+                        the button!  To do this you must set the <span class="codeText">&lt;a&gt;</span> element to display as a block.  This will make it take up the whole 
+                        area of the list item, and ensure that the area around the words can also be clicked.
+                    </p>
+                    <div class="codeBox">
+                        <p>nav ul li a {display:block;}</p>
+                    </div>
+
+                    <h3>Step 5 - Controlling the Vertical Alignment</h3>
+                    <p>
+                        The vertical position of the text within the button can be controlled by declaring the height of the <span class="codeText">&lt;nav&gt;</span>
+                        element and including padding in the <span class="codeText">&lt;a&gt;</span> element.  
+                    </p>
+                    <div class="codeBox">
+                        <p>nav {height:50px;}</p>
+                        <p>nav ul li a {display:block; padding-top:15px;}</p>
+                    </div>
+
+                    <h3>Step 6 - Adding Interactive Colours</h3>
+                    <p>
+                        To make the navigation bar interactive, you can add different colours to the buttons when the user hovers over them and when they click on them.
+                        We can do this by using the <span class="codeText">:hover</span> pseudo-class.
+                    </p>
+                    <div class="codeBox">
+                        <p>nav ul li a:hover {background-color:black; color:white;}</p>
+                    </div>
+
+                    <p>With this code, for example, the background of the button will turn black and the text will turn white when you hover the cursor over the button.</p>
+                    <img class="cImg" width="66%" src="/Images/Higher/WDD/Implementation/css/hover.jpg">
+
+                    <h3>Step 7 - Removing the Underlines</h3>
+                    <p>
+                        You can remove the underlines from the hyperlinks by setting the <span class="codeText">text-decoration</span> property to 
+                        <span class="codeText">none</span>.
+                    </p>
+                    <div class="codeBox">
+                        <p>nav ul li a {display:block; padding:8px; text-decoration:none;}</p>
+                    </div>
+                    <img class="cImg" width="66%" src="/Images/Higher/WDD/Implementation/css/noUnderline.jpg">
+
+                    <h2>Working Example</h2>
+                    <iframe src="https://trinket.io/embed/html/1bbd03b9a79c" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2023 Q19</h2>
+                    <p>
+                        A new website is being designed to help teenagers and young adults apply for 
+                        online learning courses.
+                    </p>
+                    <p>
+                        One of the pages of the website should allow users to enter all of the following 
+                        details:
+                    </p>
+                    <ul>
+                        <li>full name</li>
+                        <li>email address</li>
+                        <li>date of birth</li>
+                        <li>recent work experience</li>
+                        <li>most recent type of education - school, college or university</li>
+                    </ul>
+                    <p>A low-fidelity prototype for the website’s navigation bar is shown below.</p>
+                    <img class="cImg" style="border:1px solid black; margin-top:20px; margin-bottom:20px;" src="/Images/Higher/WDD/Implementation/css/2023Q19b.jpg" alt="2023 Q19b">
+                    <p>Some of the CSS code used to implement the navigation bar is shown below:</p>
+                    <img class="cImg" src="/Images/Higher/WDD/Implementation/css/2023Q19b2.jpg" alt="2023 Q19b">
+                    <p>
+                        During testing, it was found that the code for the navigation bar did not 
+                        produce the expected output.
+                    </p>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(i)</th>
+                            <td>
+                                <p>State two reasons why the navigation bar did not display as intended.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <p>One mark for each each bullet:</p>
+                                        <ul>
+                                            <li><span class="codeText">list-style-type:none</span> will remove the bullet points.</li>
+                                            <li><span class="codeText">li a color:grey</span> overwrites the <span class="codeText">li a color:black</span>
+                                            so you won't be able to read the grey text on the grey background (until you hover over the text).</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(ii)</th>
+                            <td>
+                                <p>Both of the CSS rules below are used to style the web page.</p>
+                                <table style="max-width:400px;">
+                                    <tr>
+                                        <th>CSS Rule 1</th><th>CSS Rule 2</th>
+                                    </tr>
+                                    <tr class="codeText">
+                                        <td>
+                                            <p>li a:hover {</p>
+                                            <p style="padding-left:40px">color:white;</p>
+                                            <p>}</p>
+                                        </td>
+                                        <td>
+                                            <p>a:hover {</p>
+                                            <p style="padding-left:40px">color:yellow;</p>
+                                            <p>}</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <p>Explain the difference between these two CSS rules.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer2">
+                                        <p>One mark for each each bullet:</p>
+                                        <ul>
+                                            <li>CSS Rule 1 changes the colour of the text of anchor/links in a list to white when hovered over.</li>
+                                            <li>CSS Rule 2 changes the colour of the text of every anchor/link to yellow when hovered over.</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

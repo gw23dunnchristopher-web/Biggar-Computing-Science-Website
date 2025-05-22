@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Floating Point Representation</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <script src="/JavaScript/floating-point-converter.js"></script>
+       
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+        <style type="text/css">
+            .tg  {border-collapse:collapse;border-spacing:0; clear:both;}
+            .tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:16px;
+              overflow:hidden;padding:10px 5px;word-break:normal;}
+            .tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:16px;
+              font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+            .tg .tg-iuan{background-color:#DDEBF7;font-weight:bold;text-align:center;vertical-align:bottom; width:15%}
+            .tg .tg-r5v8{background-color:#EFC3CA;font-weight:bold;text-align:center;vertical-align:bottom; width:55%}
+            .tg .tg-40cz{background-color:#FFF2CC;font-weight:bold;text-align:center;vertical-align:bottom; width:30%}
+            .tg .tg-8d8j{text-align:center;vertical-align:bottom; background-color:white; height:40px;}
+        </style>
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Course Overview</h1></div>
+                <div class="contentContainer">
+                    <h2>What is Floating Point Representation?</h2>
+                    
+                    <p> 
+                        A number with a fractional part is stored using floating-point representation. This is known
+                        as a <b>real</b> number.  For example, 4.2341 or 0.31 would be real numbers.
+                    </p>
+                    <p>
+                        The reason we need floating point representation is because a computer can only represent 
+                        numbers using bits, and bits can only really be converted into whole decimal numbers, so we need 
+                        a way for the computer to represent fractions.
+                    </p>
+
+                    <p>
+                        To convert a number to floating point representation involves moving the point so the number is 
+                        a fractional value, and then counting how many decimal places you have moved the point.
+                    </p>
+                    <p>
+                        Three parts are stored - the <b>signed bit</b>, the <b>mantissa</b> and the <b>exponent</b>.
+                    </p>
+
+                    <table>
+                        <tr>
+                            <th>Signed Bit</th>
+                            <td>
+                                <p>A single bit used to indicate the sign of the real number (0 represents a positive    
+                                number and 1 represents a negative number).</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Mantissa</th>
+                            <td>
+                                <p>These are the numbers that are stored after the point, once the point has been moved 
+                                    to the left of the first digit that is greater than 0.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Exponent</th>
+                            <td>
+                                <p>This is the number of decimal places that the point has been moved to the left.  The 
+                                exponent is stored in binary, and the number of bits used to store the exponent will 
+                                determine the maximum number that can be stored.</p>
+
+                                <p>If the point has to be moved to the right (for example in the case of a number such 
+                                    as 0.001) then the exponent will be negative.</p>
+
+                            </td>
+                        </tr>
+                    </table>
+
+                    <h2>Bit Allocation</h2>
+                    <p>
+                        A number of bits will be allocated to each of the three parts of the floating point number. In
+                        the Computing Science exam, they usually use 16 bits for the sign bit <b>and</b> the mantissa, 
+                        and 8 bits for the exponent, as shown in the example below.
+                    </p>
+
+                    <img class="cImg" src="/Images/Higher/CS/DataRep/BitAllocation.PNG" alt="Bit Allocation">
+
+                    <p>This may not always be the case though, so ensure that you look to see how many bits are being 
+                        allocated to each one!</p>
+
+                    <h3>Changing the Bit Allocation</h3>
+                    <p>
+                        If a greater number of bits are assigned to the mantissa then it increases the precision of the 
+                        number.  For example, 0.19283 would require more bits for the mantissa than 0.2.
+                    </p>
+                    <p>
+                        If a greater number of bits are assigned to the exponent then it increases the range of the 
+                        number.  The maximum and minimum number that can be represented both increase.
+                    </p>
+
+                    <h2>Worked Examples</h2>
+                    <p>
+                        In an exam, questions like this will be worth three marks.  You will get one mark for 
+                        correctly showing the sign bit, one for the mantissa and one for the exponent.
+                    </p>
+
+                    <div class="example">
+                        <p style="font-size:20px; font-style:italic;"><b>Example 1</b></p>
+                        <p>The decimal number 6.125 converted to binary is 110.001.</p>
+                        <p>
+                            Convert 110.001 to <i>floating point representation</i>. There are <b>16 bits</b> for the 
+                            mantissa (including the sign bit) and <b>8 bits</b> for the exponent.
+                        </p>
+                        <ol>
+                            <li>
+                                <b>Determine the Sign bit</b> - This is a positive number so the Sign Bit will be 0.    
+                                <table class="tg"><thead>
+                                  <tr>
+                                    <th class="tg-iuan">Sign Bit</th>
+                                    <th class="tg-r5v8" colspan="15">Matissa</th>
+                                    <th class="tg-40cz" colspan="8">Exponent</th>
+                                  </tr></thead>
+                                <tbody>
+                                  <tr>
+                                    <td class="tg-8d8j">0</td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                  </tr>
+                                </tbody>
+                                </table>
+                                <li>
+                                    <b>Determine the Mantissa</b> - The first digit will be the first 1 on the number, 
+                                    fill in the remaining spaces with 0s.   
+                                    <table class="tg"><thead>
+                                      <tr>
+                                        <th class="tg-iuan">Sign Bit</th>
+                                        <th class="tg-r5v8" colspan="15">Matissa</th>
+                                        <th class="tg-40cz" colspan="8">Exponent</th>
+                                      </tr></thead>
+                                    <tbody>
+                                      <tr>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                      </tr>
+                                    </tbody>
+                                </table>
+                            </li>
+                            <li>  
+                                
+                                <b>Calculate the Exponent</b> - The point has moved 3 spaces to the left, so the
+                                    exponent will be 3.  If we convert 3 to 8 bits, we get 0000 0011.
+                                <img class="cImg" src="/Images/Higher/CS/DataRep/floatingPoint1.PNG" width="40%" 
+                                    alt="Point moving three spaces to the left">
+                                    <table class="tg"><thead>
+                                      <tr>
+                                        <th class="tg-iuan">Sign Bit</th>
+                                        <th class="tg-r5v8" colspan="15">Matissa</th>
+                                        <th class="tg-40cz" colspan="8">Exponent</th>
+                                      </tr></thead>
+                                    <tbody>
+                                      <tr>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                      </tr>
+                                    </tbody>
+                                </table>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="example">
+                        <p style="font-size:20px; font-style:italic;"><b>Example 2</b></p>
+                        <p>
+                            Convert 110.001 to <i>floating point representation</i>. There are <b>16 bits</b> for the 
+                            mantissa (including the sign bit) and <b>8 bits</b> for the exponent.
+                        </p>
+                        <ol>
+                            <li>
+                                <b>Determine the Sign bit</b> - This is a negative number so the Sign Bit will be 1.    
+                                <table class="tg"><thead>
+                                  <tr>
+                                    <th class="tg-iuan">Sign Bit</th>
+                                    <th class="tg-r5v8" colspan="15">Matissa</th>
+                                    <th class="tg-40cz" colspan="8">Exponent</th>
+                                  </tr></thead>
+                                <tbody>
+                                  <tr>
+                                    <td class="tg-8d8j">1</td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                  </tr>
+                                </tbody>
+                                </table>
+                                <li>
+                                    <b>Determine the Mantissa</b> - The first digit will be the first 1 on the number, 
+                                    fill in the remaining spaces with 0s.   
+                                    <table class="tg"><thead>
+                                      <tr>
+                                        <th class="tg-iuan">Sign Bit</th>
+                                        <th class="tg-r5v8" colspan="15">Matissa</th>
+                                        <th class="tg-40cz" colspan="8">Exponent</th>
+                                      </tr></thead>
+                                    <tbody>
+                                      <tr>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                      </tr>
+                                    </tbody>
+                                </table>
+                            </li>
+                            <li>  
+
+                                <b>Calculate the Exponent</b> - The point has moved 11 spaces to the left, so the
+                                    exponent will be 11.  If we convert 11 to 8 bits, we get 0000 1011.
+                                <img class="cImg" src="/Images/Higher/CS/DataRep/floatingPoint2.png" width="40%" 
+                                    alt="Point moving 11 spaces to the left">
+                                    <table class="tg"><thead>
+                                      <tr>
+                                        <th class="tg-iuan">Sign Bit</th>
+                                        <th class="tg-r5v8" colspan="15">Matissa</th>
+                                        <th class="tg-40cz" colspan="8">Exponent</th>
+                                      </tr></thead>
+                                    <tbody>
+                                      <tr>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                      </tr>
+                                    </tbody>
+                                </table>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="example">
+                        <p style="font-size:20px; font-style:italic;"><b>Example 3</b></p>
+                        <p>
+                            Convert -0.0001101 to <i>floating point representation</i>. There are <b>16 
+                            bits</b> for the mantissa (including the sign bit) and <b>8 bits</b> for the exponent.
+                        </p>
+                        <ol>
+                            <li>
+                                <b>Determine the Sign bit</b> - This is a negative number so the Sign Bit will be 1.    
+                                <table class="tg"><thead>
+                                  <tr>
+                                    <th class="tg-iuan">Sign Bit</th>
+                                    <th class="tg-r5v8" colspan="15">Matissa</th>
+                                    <th class="tg-40cz" colspan="8">Exponent</th>
+                                  </tr></thead>
+                                <tbody>
+                                  <tr>
+                                    <td class="tg-8d8j">1</td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                    <td class="tg-8d8j"> </td>
+                                  </tr>
+                                </tbody>
+                                </table>
+                                <li>
+                                    <b>Determine the Mantissa</b> - The first digit will be the first 1 on the number, 
+                                    fill in the remaining spaces with 0s.   
+                                    <table class="tg"><thead>
+                                      <tr>
+                                        <th class="tg-iuan">Sign Bit</th>
+                                        <th class="tg-r5v8" colspan="15">Matissa</th>
+                                        <th class="tg-40cz" colspan="8">Exponent</th>
+                                      </tr></thead>
+                                    <tbody>
+                                      <tr>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                      </tr>
+                                    </tbody>
+                                </table>
+                            </li>
+                            <li>  
+
+                                <b>Calculate the Exponent</b> - This time the point has moved 3 spaces to the right
+                                    (negative 3), so the exponent will be -3.  If we convert -3 to 8 bits using
+                                    two's compliment (because it's negative, we get 1111 1011.
+                                <img class="cImg" src="/Images/Higher/CS/DataRep/floatingPoint3.png" width="40%" 
+                                    alt="Point moving 3 spaces to the right">
+                                    <table class="tg"><thead>
+                                      <tr>
+                                        <th class="tg-iuan">Sign Bit</th>
+                                        <th class="tg-r5v8" colspan="15">Matissa</th>
+                                        <th class="tg-40cz" colspan="8">Exponent</th>
+                                      </tr></thead>
+                                    <tbody>
+                                      <tr>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">1</td>
+                                        <td class="tg-8d8j">0</td>
+                                        <td class="tg-8d8j">1</td>
+                                      </tr>
+                                    </tbody>
+                                </table>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <h2>Floating Point Question Practice</h2>
+                    <p>Use the tool below to practice converting binary numbers to floating point representation.</p>
+                    <div id="floating-point-converter"></div>
+                    
+                    <h2>Past Paper Question - 2023 Q3 </h2>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td>
+                                <p>Convert the binary number below into floating-point representation.</p>
+                                <p style="text-align:center"><b>-0.0000 0101 0000 1111</b></p>
+                                <p>There are 16 bits for the mantissa (including the sign bit) and 8 bits for the 
+                                exponent.</p>
+                                
+                                <table class="tg"><thead>
+                                      <tr>
+                                        <th class="tg-iuan">Sign Bit</th>
+                                        <th class="tg-r5v8" colspan="15">Matissa</th>
+                                        <th class="tg-40cz" colspan="8">Exponent</th>
+                                      </tr></thead>
+                                    <tbody>
+                                      <tr>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                        <td class="tg-8d8j"> </td>
+                                      </tr>
+                                    </tbody>
+                                    </table>
+                            </td>
+                            <th rowspan="2"  width="30px">3</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <table class="tg"><thead>
+                                              <tr>
+                                                <th class="tg-iuan">Sign Bit</th>
+                                                <th class="tg-r5v8" colspan="15">Matissa</th>
+                                                <th class="tg-40cz" colspan="8">Exponent</th>
+                                              </tr></thead>
+                                            <tbody>
+                                              <tr>
+                                                <td class="tg-8d8j">1</td>
+                                                <td class="tg-8d8j">1</td>
+                                                <td class="tg-8d8j">0</td>
+                                                <td class="tg-8d8j">1</td>
+                                                <td class="tg-8d8j">0</td>
+                                                <td class="tg-8d8j">0</td>
+                                                <td class="tg-8d8j">0</td>
+                                                <td class="tg-8d8j">0</td>
+                                                <td class="tg-8d8j">1</td>
+                                                <td class="tg-8d8j">1</td>
+                                                <td class="tg-8d8j">1</td>
+                                                <td class="tg-8d8j">1</td>
+                                                <td class="tg-8d8j">0</td>
+                                                <td class="tg-8d8j">0</td>
+                                                <td class="tg-8d8j">0</td>
+                                                <td class="tg-8d8j">0</td>
+                                                <td class="tg-8d8j">1</td>
+                                                <td class="tg-8d8j">1</td>
+                                                <td class="tg-8d8j">1</td>
+                                                <td class="tg-8d8j">1</td>
+                                                <td class="tg-8d8j">1</td>
+                                                <td class="tg-8d8j">0</td>
+                                                <td class="tg-8d8j">1</td>
+                                                <td class="tg-8d8j">1</td>
+                                              </tr>
+                                            </tbody>
+                                            </table>
+                                    </div>
+                                    <p>You will get 1 point each for the correct Sign Bit, Mantissa and Exponent.</p>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="answerButton" onClick="answerButtonSwitch(this); 
+                            toggleVisibility('answer1')">Show Answer</div>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(b)</th>
+                            <td>
+                                <p>State the effect of increasing the number of bits allocated to the mantissa.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer2">
+                                            <p>Increasing the number of bits used for the mantissa will increase the 
+                                                accuracy (or precision) of the number.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="answerButton" onClick="answerButtonSwitch(this); 
+                            toggleVisibility('answer2')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Initialize the converter with the ID of the container element
+                    window.initFloatingPointConverter('floating-point-converter');
+                });
+            </script>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

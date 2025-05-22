@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Float</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Float</h1></div>
+                <div class="contentContainer">
+                    <p>
+                        An element can be positioned on the left or right side of its container using the <span class="codeText">float</span> property. This is useful for 
+                        positioning images and other elements on the same line as text.
+                    </p>
+                    <p>
+                        The <span class="codeText">float</span> property has many values that it can be set to, but at the Higher level you should only be concerned with two 
+                        of them:
+                    </p>
+                    <ul>
+                        <li><b><span class="codeText">float:left</span></b> - the element is positioned on the left side of its container.</li>
+                        <li><b><span class="codeText">float:right</span></b> - the element is positioned on the right side of its container.</li>
+                    </ul>
+
+                    <h2>Float Examples</h2>
+                    <p>The following examples will demonstrate how the <span class="codeText">float</span> property is used to position an image.</p>
+                    
+                    <h3>Example 1</h3>
+                    <p>
+                        In the example below, the <span class="codeText">&lt;img&gt;</span> element has been position on the right side of its container, the 
+                        <span class="codeText">&lt;header&gt;</span> element, using the <span class="codeText">float:right</span> property.
+                    </p>
+
+                    <table>
+                        <tr><th>HTML</th></tr>
+                        <tr>
+                            <td class="codeBox">
+                                <p>&lt;header&gt;</p>
+                                <p style="padding-left:40px;">&lt;h1&gt;School Activities&lt;/h1&gt;</p>
+                                <p style="padding-left:40px;">&lt;img class="imageBanner" src="activitiesBanner.jpg" alt="Banner"&gt;</p>
+                                <p>&lt;/header&gt;</p>
+                            </td>
+                        </tr>
+                        <tr><th>CSS</th></tr>
+                        <tr>
+                            <td class="codeBox">
+                                <p>header h1 {font-family:Arial; font-size:60px; display:inline;}</p>
+                                <p>.imageBanner {width:200px; height:80px; <span style="color:yellow">float:right;</span>}</p>
+                            </td>
+                        </tr>
+                    </table>
+                    <p>
+                        Note that the <span class="codeText">&lt;header&gt;</span> element has been given the <span class="codeText">&lt;display:inline&gt;</span> property
+                        so that it doesn't take up the full width of the container and the image can appear beside it.
+                    </p>
+
+                    <iframe src="https://trinket.io/embed/html/6c354d6d40e7" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+
+                    <h3>Example 2</h3>
+                    <p>
+                        The <span class="codeText">float</span> property can also be used to word-wrap text around an image, as demonstrated in the football club page 
+                        below.  The addition of the margins creates whitespace around the image, pushing the text away from it.
+                    </p>
+                    <p>Look at the example below:</p>
+
+                    <table>
+                        <tr><th>HTML</th></tr>
+                        <tr>
+                            <td class="codeBox">
+                                <p>&lt;section class="club"&gt;</p>
+                                <p style="padding-left:40px;">&lt;h1&gt;School Football Club&lt;/h1&gt;</p>
+                                <p style="padding-left:40px;">&lt;img src="footballClub.jpg" id="footballImg"&gt;</p>
+                                <p style="padding-left:40px;">&lt;p&gt;Are you passionate about football?  Do you dream of scoring the winning goal or making that
+                                    game saving tackle? Whether you're a seasoned player or just starting out, the School Football Club is the perfect place
+                                    for you!&lt;/p&gt;</p>
+
+                                <p style="padding-left:40px;">&lt;p&gt;Our club offers&lt;/p&gt;</p>
+                                <p style="padding-left:40px;">&lt;ul&gt;</p>
+                                <p style="padding-left:80px;">&lt;li&gt;&lt;b&gt;Weekly Training Sessions&lt;/b&gt;: Improve your skills with professional 
+                                    coaching.&lt;/li&gt;</p>
+                                <p style="padding-left:80px;">&lt;li&gt;&lt;b&gt;Friendly Matches&lt;/b&gt;: Compete against other schools and local teams.&lt;/li&gt;</p>
+                                <p style="padding-left:80px;">&lt;li&gt;&lt;b&gt;Team Spirit&lt;/b&gt;: Build lasting friendships and learn the value of teamwork
+                                    .&lt;/li&gt;</p>
+                                <p style="padding-left:80px;">&lt;li&gt;&lt;b&gt;Fun Events&lt;/b&gt;: Participate in football camps, tournaments and social gatherings
+                                    .&lt;/li&gt;</p>
+                                <p style="padding-left:40px;">&lt;/ul&gt;</p>
+
+                                <p style="padding-left:40px;">&lt;p&gt;Come and be a part of our soccer family!  Lace up your boots, bring your enthusiasm, and let's hit the 
+                                    field together!&lt;/p&gt;</p>
+                                <p style="padding-left:40px;">&lt;p&gt;For more information, visit our school website or contact Mr. Smith, our&lt;/p&gt;</p>
+                                <p>&lt;/section&gt;</p>
+                            </td>
+                        </tr>
+                        <tr><th>CSS</th></tr>
+                        <tr>
+                            <td class="codeBox">
+                                <p>#footballImg {width:200px; <span style="color:yellow">float:right;</span> margin:10px;}</p>
+                            </td>
+                        </tr>
+                    </table>
+                    <iframe src="https://trinket.io/embed/html/b7686f8e2a92" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <h2>Clear</h2>
+                    <p>
+                        The effect of floating elements can be removed using the <span class="codeText">clear</span> property.  This is useful if you want to stop text
+                        from wrapping around an image.  It also helps to prevent elements from overlapping.
+                    </p>
+                    <p>
+                        To ensure that the four main page elements - <span class="codeText">&lt;header&gt;, &lt;nav&gt;, &lt;main&gt; and &lt;footer&gt;</span> 
+                         - start a new line and remain unaffected by any float properties applied elsehwere on the page, the following CSS rule is used: 
+                    </p>
+                    <div class="codeBox">
+                        <p>header, nav, main, footer {display:block; <span style="color:yellow;">clear:both;</span>}</p>
+                    </div>
+                    <p>If you do not do this then you will get instances of large elements overlapping onto other sections of your web page.</p>
+                    
+                    <h2>Past Paper Question - 2019 Q16</h2>
+                    <p>
+                        Bailey’s Dog Kennels is developing a website. The website will have a multi-level 
+                        structure, consisting of a home page with a horizontal navigational bar that 
+                        links to four main web pages: Kennels, Grooming, Gallery and Contact Us.
+                        The grooming web page will have links to three sub-pages showing costs, 
+                        treatments and photos.
+                    </p>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(b)</th>
+                            <td>
+                                <p>A browser displays the header element of the home page as shown below.</p>
+                                <img class="cImg" src="/Images/Higher/WDD/Implementation/css/2019Q16b.jpg" alt="2019 Q16 (b)">
+                                <p>Complete the CSS below to style the header.</p>
+                                <img class="cImg" src="/Images/Higher/WDD/Implementation/css/2019Q16b2.jpg" alt="2019 Q16 (b) 2">
+                            </td>
+                            <th rowspan="2"  width="30px">3</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <div class="codeBox">
+                                        <p>header {</p>
+                                        <div style="padding-left:40px;">
+                                            <p><span style="text-decoration:underline">background-color/border-color</span>:lightgrey;</p>
+                                            <p>padding:0px;</p>
+                                        </div>
+                                        <p>}</p>
+                                        <br>
+                                        <p>.imageBanner {</p>
+                                        <div style="padding-left:40px;">
+                                            <span style="text-decoration:underline">margin</span>:20px;</p>
+                                            <p>float:left;</p>
+                                            <p>padding:0px;</p>
+                                            <p>height:90px;</p>
+                                            <p>width:130px</p>
+                                        </div>
+                                        <p>}</p>
+                                        <br>
+                                        <p>h1 {</p>
+                                        <div style="padding-left:40px;">
+                                            <p><span style="text-decoration:underline">float:right</span>;</p>
+                                            <p>margin-right:30px;</p>
+                                            <p>margin-top:30px;</p> 
+                                            <p>color:white;</p>
+                                            <p>display:inline;</p>
+                                        </div>
+                                        <p>}</p>
+                                        </div>
+                                        <hr>
+                                        <p>One mark for each bullet point:</p>
+                                        <ul>
+                                            <li><span class="codeText">background-color</span> in <span class="codeText">header</span> selector <b>OR</b> <span class="codeText">border-color</span></li>
+                                            <li><span class="codeText">margin</span> in <span class="codeText">imageBanner</span> class</li>
+                                            <li><span class="codeText">float:right</span> in <span class="codeText">h1</span> selector</li>
+                                        </ul>
+                                    </div> 
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

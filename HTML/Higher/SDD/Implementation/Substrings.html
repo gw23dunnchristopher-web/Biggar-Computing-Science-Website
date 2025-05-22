@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Substrings</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Substrings</h1></div>
+                <div class="contentContainer">
+                    <h2>What is a substring?</h2>
+                    <p>A substring is smaller part of a bigger string.  If you have a long word or sentence, such as the word 'sunflower', you can extract a substring from
+                    it, for example the word 'sun' or 'flower', or even 'unflo'.  Any of these would be considered substrings.</p>
+                    <p>Many programming languages use pre-defined functions to extract substrings from strings. Python, however, treats strings as an array of characters, so 
+                        it can use this fact to extract characters from the string in the same way you would use an index number to exract a value from an array.</p>
+
+                    <h2>Creating Substrings</h2>
+                    <p>Look at the example below:</p>
+                    <div class="codeBox">
+                        <p>name = "Mr. Dunn"</p>
+                        <p>letter = name[0]</p>
+                    </div>
+
+                    <p>In this example, the variable <span class="codeText">letter</span> will be assigned the value <b>"M"</b>.</p>
+
+                    <h3>How this works</h3>
+                    <ul>
+                        <li>If we think of a string as an array, it places the first letter in element 0, the second letter in element 1 and so on.</li>
+                    </ul>
+
+                    <table style="text-align:center">
+                        <tr><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr>
+                        <tr><td>M</td><td>r</td><td>.</td><td></td><td>D</td><td>u</td><td>n</td><td>n</td></tr>
+                    </table>
+
+                    <ul><li>It can also count from the end of the string using negative numbers.</li></ul>
+
+                    <table style="text-align:center">
+                        <tr><th>-8</th><th>-7</th><th>-6</th><th>-5</th><th>-4</th><th>-3</th><th>-2</th><th>-1</th></tr>
+                        <tr><td>M</td><td>r</td><td>.</td><td></td><td>D</td><td>u</td><td>n</td><td>n</td></tr>
+                    </table>
+
+                    <ul><li>So if we entered the following code:</li></ul>
+
+                    <div class="codeBox">
+                        <p>name = "Mr. Dunn"</p>
+                        <p>letter = name[-1]</p>
+                    </div>
+
+                    <ul>
+                        <li>The variable <span class="codeText">letter</span> would be assigned the value <b>"n"</b>.</li>
+                        <li>
+                            Additionally, we can use a colon to tell the program where we want to start and end. We type variableName[start:end-1]. 
+                            Look at the examples below:
+                        </li>
+                    </ul>
+
+                    <table style="text-align:center">
+                        <tr><th>Code</th><th>Value placed in <span class="codeText">substring</span></th></tr>
+                        <tr><td><span class="codeText">substring = name[0:2]</span></td><td>"Mr"</td></tr>
+                        <tr><td><span class="codeText">substring = name[4:7]</span></td><td>"Dun"</td></tr>
+                        <tr><td><span class="codeText">substring = name[-3:0]</span></td><td>"unn"</td></tr>
+                    </table>
+
+                    <p><b>Note that the number to the right of the colon is the index of the last letter you want to display plus 1!</b></p>
+                    
+                    <p>It should also be noted that if the character on the left side of the colon is left blank, it will default to 0.  If the character on the right side 
+                        is left blank, it will default to the last character in the string. For example:</p>
+
+                    <div class="codeBox">
+                        <p>substring = name[:3]</p>
+                    </div>
+
+                    <p>This would be the same as:</p>
+
+                    <div class="codeBox">
+                        <p>substring = name[0:3]</p>
+                    </div>
+
+                    <p>Both of these would assign the value "Mr" to the variable <span class="codeText">substring</span>.</p>
+
+                    <div class="codeBox">
+                        <p>substring = name[2:]</p>
+                    </div>
+
+                    <p>Would be the same as:</p>
+                    <div class="codeBox">
+                        <p>substring = name[2:8]</p>
+                    </div>
+                    
+                    <p>Both of these would assign the value ". Dunn" to the variable <span class="codeText">substring</span>.</p>
+
+                    <h2>Working Example</h2>
+                    <iframe src="https://trinket.io/embed/python3/b59352d17e11" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2019 Q2</h2>
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">(e)</th>
+                                <td>
+                                    <p>A string variable called month has been assigned the value ‘April’ and another 
+                                    string variable called year has been assigned the value ‘2019’ as shown 
+                                    below.</p>
+
+                                    <table class="pseudocode borderless">
+                                        <tr><th>Line 1</th><td>DECLARE month INITIALLY "April"</td></tr>
+                                        <tr><th>Line 2</th><td>DECLARE year INITIALLY "2019"</td></tr>
+                                        <tr><th>Line 3</th><td>___________________________________</td></tr>
+                                    </table>
+
+                                    <p>The variable <span class="codeText">shortDate</span> is to be assigned the value ‘Apr19’ using substring 
+                                    operations</p>
+                                    <p>Using a programming language of your choice write line 3.</p>
+                                </td>
+                                <th rowspan="2"  width="30px">2</th>
+                            </tr>
+                                <tr>
+                                    <td>
+                                        <div class="hiddenElement answer1">
+                                            <div class="codeBox">
+                                                <p>shortDate = month[0:3] + year[2:4]</p>
+                                            </div>
+                                            <p style="text-align:center;">OR</p>
+                                            <div class="codeBox">
+                                                <p>shortDate = month[:3] + year[2:]</p>
+                                            </div>
+                                            <p style="text-align:center;">OR</p>
+                                            <div class="codeBox">
+                                                <p>shortDate = month[0:3] + year[-2:0]</p>
+                                            </div>
+                                            <hr>
+                                            <p>One mark each for:</p>
+                                            <ul>
+                                                <li>Both substrings</li>
+                                                <li>Assignment and concatenation</li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="answerButton" onClick="answerButtonSwitch(this); 
+                                toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

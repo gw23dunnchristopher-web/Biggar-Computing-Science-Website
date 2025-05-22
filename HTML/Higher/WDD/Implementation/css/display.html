@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - The Display Property</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>The Display Property</h1></div>
+                <div class="contentContainer">
+                    <p>The display property is used in CSS to determine how an element is displayed on a webpage.  It can be set to the following values:</p>
+                    <ul>
+                        <li><b><span class="codeText">display:block</span></b> - the element takes up the entire width of the element that it is contained inside.</li>
+                        <li><b><span class="codeText">display:inline</span></b> - the element only takes up as much width as it needs.</li>
+                        <li><b><span class="codeText">display:inline-block</span></b> - the element takes up as much width as it needs, but can have padding and margins.</li>
+                        <li><b><span class="codeText">display:none</span></b> - the element is not displayed.</li>
+                        <li><b><span class="codeText">display:grid</span></b> - the element is split into columns.</li>
+                    </ul>
+                    <p>
+                        The default value of the display property varies depending on the element.  For example, the <span class="codeText">&lt;p&gt;</span> and
+                        <span class="codeText">&lt;h1&gt;</span> elements default to <span class="codeText">display:block</span>, while the <span class="codeText">&lt;a&gt;
+                        </span> element defaults to <span class="codeText">display:inline</span>.
+                    </p>
+
+                    <p>
+                        <b>At higher level, you only need to be able to use the <span class="codeText">block</span>, <span class="codeText">inline</span> and
+                        <span class="codeText">none</span> values.</b>
+                    </p>
+
+                    <h2>Display:block and Display:inline</h2>
+                    <p>
+                        In the <span class="codeText">&lt;header&gt;</span> element of the example website below, the <span class="codeText">&lt;h1&gt;</span> heading uses 
+                        <span class="codeText">display:inline</span>. This allows the image to be floated level with the heading.
+                    </p>
+
+                    <div class="codeBox">
+                        <p>header h1 {font-family:arial; font-size:60px; <span style="color:yellow;">display:inline;</span>}</p>
+                    </div>
+
+                    <img src="/Images/Higher/WDD/Implementation/css/displayInline.JPG" alt="Image inline with text" class="cImg" width="50%">
+
+                    <p>If <span class="codeText">display:block</span> were used instead it would force the image to float on a new line.</p>
+
+                    <img src="/Images/Higher/WDD/Implementation/css/displayBlock.JPG" alt="Image on new line" class="cImg" width="50%">
+
+                    <h2>Display:none</h2>
+                    <p>
+                        The <span class="codeText">display:none</span> value is often used to hide elements when a page loads, they can later be displayed with JavaScript.  
+                        The code below demonstrates this - note that there is a separate CSS file for this code to make it more readable.  On this website, all of the events 
+                        elements are hidden when the  webpage loads by using display:none in the CSS file, then JavaScript is used to hide and unhide the elements.  For more 
+                        detail on the JavaScript function, check the <a href="/HTML/Higher/WDD/Implementation/js/HideReveal.html">Hide and Reveal</a> page in the JavaScript 
+                        section.
+                    </p>
+
+                    <p>
+                        The code in the example below shows the <span class="codeText">display:none</span> property in action, using JavaScript to hide and reveal elements on 
+                        the page with the click of a button.
+                    </p>
+
+                    <iframe src="https://trinket.io/embed/html/fac50d36a1b0" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+
+                    <h2>Grid</h2>
+
+                    <p>
+                        <b>You do not need to know this value as part of the Higher specifications, though it is useful for you to know if you wish to make 
+                        your own websites.</b>
+                    </p>
+
+                    <p>
+                        The above example also uses <span class="codeText">display:grid</span> to align the clickable buttons.  The <span class="codeText">grid</span> value 
+                        allows you to display items as if you were displaying them on a table, making it easy to line them up or space them out.  You can specify the number 
+                        of columns in your grid element by using <span class="codeText">grid-template-columns</span> in the CSS rule for the element where you want to use a 
+                        grid. 
+                    </p>
+                    <p>
+                        Simply type the word <span class="codeText">auto</span> after <span class="codeText">grid-template-columns:</span> a number of times equal to 
+                        the number of columns you want; this will give you evenly spaced columns.  You can specify how wide columns should be instead using a percentage or a 
+                        number of pixels.
+                    </p>
+
+                    <div class="codeBox">
+                        <p>.grid {</p>
+                        <p style="padding-left:40px; color:yellow;">display:grid;</p>
+                        <p style="padding-left:40px; color:yellow;">grid-template-columns: auto auto auto;</p>
+                        <p>}</p>
+                    </div>
+
+                    <p>
+                        The above code will split any element with the class <b>'.grid'</b> into three evenly spaced columns.  You can see how this is used in the example 
+                        below:
+                    </p>
+
+                    <iframe src="https://trinket.io/embed/html/600c2f64de31" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2022 Q16</h2>
+                    <p>
+                        An energy supplier’s website allows customers to log in and manage their account 
+                        online.
+                    </p>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(c)</th>
+                            <td>
+                                <p>
+                                    One of the web pages uses multiple <span class="codeText">&lt;p&gt;</span> elements as shown below:
+                                </p>
+                                <div class="codeBox">
+                                    <p>&lt;p&gt;Tariff one&lt;/p&gt;</p>
+                                    <p>&lt;p&gt;Tariff two&lt;/p&gt;</p>
+                                    <p>&lt;p&gt;Tariff three&lt;/p&gt;</p>
+                                </div>
+
+                                <p>They are to be displayed as shown below.</p>
+
+                                 <img class="cImg" src="/Images/Higher/WDD/Implementation/css/2022Q16c.JPG" alt="2022 Q16 (c)">
+
+                                <p>The CSS rule below is added:</p>
+
+                                <div class="codeBox">
+                                    <p>p {display: inline;}</p>
+                                </div>
+
+                                <p>Explain why this CSS rule displays the contents of the elements side by side.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <p>An element with an inline property
+                                        only takes up the width that is 
+                                        needed.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

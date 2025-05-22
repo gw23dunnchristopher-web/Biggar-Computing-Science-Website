@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - File Handling</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>File Handling</h1></div>
+                <div class="contentContainer">
+                    <h2>What is File Handling?</h2>
+                    <p>
+                        File handling is the process of creating, reading, writing, and managing files on a computer. It's a fundamental part of software development because 
+                        it allows programs to store and retrieve data, which is essential for many applications.  This allows you to save data permanently, efficiently 
+                        retrieve it when needed, and manage it in a structured way.
+                    </p>
+                    <p>As such, File Handling is an important skill for Higher Level Computing Science.</p>
+                    
+                    <h2>Opening a File</h2>
+                    <p>
+                        Python has a number of functions that can be used to handle files.  In my opinion, though, the best method is '<span class="codeText">with 
+                        open(filename, mode) as file</span>'.
+                    </p>
+                    <p>
+                        This is because this method <b>automatically closes the file</b> when you have finished using it, rather than you having to use a separate function
+                        to do so.
+                    </p>
+                    <p>Files can be opened in read mode ('r'), write mode ('w'), or append mode ('a').</p>
+                    <ul>
+                        <li><b>Read mode</b> - allows your program to read data from a file, but not write to that file.</li>
+                        <li><b>Write mode</b> - allows your program to write data to a file.  If the file does not exist then attempting to open it in write mode will create 
+                        it.  If the file already exists then any data currently in the file will be overwritten.</li>
+                        <li><b>Append mode</b> - opens the file for appending data.  Any data written to the file will be added to the end.</li>
+                    </ul>
+                    <p>At this level, we will focus on <b>Read mode</b> and <b>Write mode</b>.</p>
+
+                    <table>
+                        <tr><th>Opening a file for reading</th><td class="codeText">with open(filename.txt, "r") as file:</td></tr>
+                        <tr><th>Opening a file for writing</th><td class="codeText">with open(filename.txt, "w") as file:</td></tr>
+                    </table>
+
+                    <h2>Reading from a File</h2>
+                    <p>To do this one must first open a file for reading, then each line of the file can be stored in an array.  There are two useful functions for doing 
+                        this  - <span class="codeText">strip()</span> and <span class="codeText">split()</</span>.</p>
+                    <ul>
+                        <li><b><span class="codeText">strip()</span></b> - Removes any spaces and new line characters from a string.</li>
+                        <li><b><span class="codeText">split()</span></b> - Breaks a long piece of text into smaller parts, using a chosen character to decide where to cut.  
+                            These parts are then stored in an array.</li>
+                    </ul>
+
+                    <p>The following example will read the file "sample.txt" into parallel arrays, splitting up each line at the commas.</p>
+
+                    <iframe src="https://trinket.io/embed/python3/25d738e4665d" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+
+                    <h2>Writing to a File</h2>
+                    <p>To do this, a file must first be opened in <b>write mode</b>.  Then the <span class="codeText">fileName.write()</span> function can be used to write 
+                        data to the file.</p>
+                    <p>Remember that in write mode, and <b>data that is currently in the file will be overwritten.</b></p>
+                    <p>If you want to append new text to a file without erasing the text already present in it, then you would use <b>append mode ("a")</b>.</p>
+                    <p>The example below will demonstrate using write mode to write to a file:</p>
+
+                    <iframe src="https://trinket.io/embed/python3/d06372155818" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+
+
+                    <h2>TXT Files vs CSV Files</h2>
+                    <p>There are two main types of file that you will be expected to work with at Higher level - TXT files and CSV files.</p>
+                    <p><b>Text (.txt)</b> files contain plain text and can have any structure.  They are often used for notes, instructions, or any kind of unformatted text.
+                        You can open and edit them with a text editor.</p>
+                    <p><b>Comma Separated Value (.csv)</b> files store data in a tabular format, with rows and columns separated by commas.  They are commonly used for 
+                        spreadsheets and databases.</p>
+                    <p>For your purposes, working on these two files will feel the same.  At Higher Level, the data found in a text file is usually seperated by commas 
+                        anyway.  You just have to remember use the correct file type when you open the file for reading or writing.</p>
+                    
+                    <h2>Past Paper Question - 2023 Q10(b)</h2>
+                    <p>A check digit is the number at the end of a series of characters that can confirm 
+                        that something is correct.</p>
+                    <p>A program is to be written to add a check digit to a user’s password. The password 
+                    is input and then the program totals the ASCII values of all the characters, divides 
+                    the total by 11 and calculates the remainder. This remainder is then attached to 
+                    the original password as a check digit. For example, for the password ‘Fox’:</p>
+
+                    <table style="text-align:center; max-width:400px">
+                        <tr><th>Character</th><th>ASCII Value</th></tr>
+                        <tr><td>F</td><td>70</td></tr>
+                        <tr><td>o</td><td>111</td></tr>
+                        <tr><td>x</td><td>120</td></tr>
+                        <tr><th>Total</th><td>301</td></tr>
+                        <tr><td colspan="2">301/11 = 27 remainder 4</td></tr>
+                    </table>
+
+                    <p>The updated password is 'Fox4'.</p>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(b)</th>
+                            <td>
+                                <p>Using a recognised design technique, design an algorithm that would create 
+                                the updated password and store it in a file.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">5</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <div class="codeBox">
+                                            <p>total = 0</p>
+                                            <p>password = input("Enter your password: ")</p>
+                                            <br>
+                                            <p>for x in range(len(password)):</p>
+                                            <p style="padding-left:40px;">total += ord(password[x])</p>
+                                            <p>remainder = total % 11</p>
+                                            <p>password += str(remainder)</p>
+                                            <br>
+                                            <p>with open("passwords.txt", "w") as file:</p>
+                                            <p style="padding-left:40px;">file.write(password + "\n")</p>
+                                        </div>
+                                        <hr>
+                                        <p>One mark each for:</p>
+                                        <ul>
+                                            <li>Initialise and update total.</li>
+                                            <li>Loop for length of password and get ASCII value of current character.</li>
+                                            <li>Use of mod 11 (% 11 in the case of Python) to get the remainder</li>
+                                            <li>Concatenate remainder to original password.</li>
+                                            <li>Open/write to/close file.</li>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="answerButton" onClick="answerButtonSwitch(this); 
+                                toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

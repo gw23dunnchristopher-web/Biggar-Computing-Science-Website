@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Wireframes and Low Fidelity Prototype</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Wireframes and Low Fidelity Prototypes</h1></div>
+                <div class="contentContainer">
+                    <p>We will be using the same example website for this topic, click on the button below to see its requirements:</p>
+                    <p class="laws" onclick="toggleLaw(this)" style="max-width:1000px; margin:auto;">
+                        <b>List of Lawn Care Website Requirements</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none; border:1px solid black; max-width:1000px; margin:auto;"">
+                       <p>
+                           A new website is being created about lawn care. The client wants the website give users information on planting lawns, different types of grasses, 
+                           lawnmowers and fertilizer.
+                       </p>
+                        <p>The <b>homepage</b> will provide:</p>
+                        <ul>
+                            <li>A short introduction to the website and lawn care.</li>
+                            <li>Internal Hyperlinks to the following subpages - Planting Lawns, Grass Types, Lawnmowers and Fertilisers</li>
+                        </ul>
+
+                        <p>The <b>Planting Lawns</b> page will contain:</p>
+                        <ul>
+                            <li>Two videos - tutorials on sowing and turf laying.</li>
+                        </ul>
+
+                        <p>The <b>Lawnmowers</b> page will contain:</p>
+                        <ul>
+                            <li>Information on different types of lawnmower and how to select the right one.</li>
+                            <li>A list of simple rules on how and when to cut lawn grass.</li>
+                            <li>Photographs showing different types of lawnmower.</li>
+                        </ul>
+
+                        <p>The <b>Fertlisers</b> page will contain:</p>
+                        <ul>
+                            <li>Information on organic and inorganic fertilisers.</li>
+                            <li>Links to pages that recommend organic and inorganic fertilisers.</li>
+                        </ul>
+
+                        <p>The <b>Grass Types</b> page will contain:</p>
+                        <ul>
+                            <li>Information on two different types of grass.</li>
+                            <li>Information on how to select the right type of grass.</li>
+                        </ul>
+                    </div>
+
+                    <h2>Wireframes</h2>
+                    <p>
+                        User-interface planning should be illustrated using wireframes.  As we learned in N5, a wireframe is a simple sketch that shows the layout of all of 
+                        the elements on a webpage. 
+                    </p>
+                    <ul>
+                        <li>A separate wireframe is needed for each webpage.</li>
+                        <li>Each wireframe indicates the intended layout of the page and shows the: 
+                            <ul>
+                                <li>Horizontal Navigation Bar.</li>
+                                <li>Relative horizontal and vertical positioning of the media.</li>
+                                <li>File formats of the media elements - text, images, audio clips and video clips.</li>
+                                <li>Form inputs.</li>
+                                <li>Elements that allow the user to interact with the page.</li>
+                                <li>Position and type of all hyperlinks on the page.</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <p>The wireframe below shows the layout of the Planting Lawns page from the example website: </p>
+                    
+                    <img class="cImg" width="75%" src="/Images/Higher/WDD/Design/wireframe.jpg" alt="Wireframe for the Planting Lawns Page">
+
+
+                    <h2>Low Fidelity Prototypes</h2>
+                    <p>Low fidelity prototypes are similar to wireframes but much more detailed, though they are also usually drawn on paper.  They show the layout of the 
+                        page, but they also include:</p>
+                    <ul>
+                        <li>Text content.</li>
+                        <li>Images.</li>
+                        <li>Video and audio placeholders.</li>
+                    </ul>
+                    <p>They are used to test the layout of the page and to check that the text content fits in the space provided.  Additionally, they are used in 
+                        <b>usability testing</b>, as shown in the video below.</p>
+
+                    <iframe width="560" height="315" style="display:block; margin:auto;" src="https://www.youtube.com/embed/aDqbMOI13o4?si=SgczIk9Rmgtkb82Z" title="YouTube 
+                        video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

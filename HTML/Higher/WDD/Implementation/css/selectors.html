@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Selectors</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Selectors</h1></div>
+                <div class="contentContainer">
+                    <h2>Grouping Selectors</h2>
+                    <p>Grouping selectors using commas reduces the amount of code required and is more efficient than writing each CSS declaration separately.</p>
+
+                    <table>
+                        <tr><th>Seperate Declarations</th><th>Grouped Declarations</th></tr>
+                        <tr>
+                            <td class="codeText">
+                                <p><span style="color:green"><b>header</b> </span>{margin-top:5px;}</p>
+                                <p><span style="color:blue"><b>footer</b> </span>{margin-top:5px;}</p>
+                                <p><span style="color:red"><b>nav</b> </span>{margin-top:5px;}</p>
+                                <p><span style="color:purple"><b>main</b> </span>{margin-top:5px;}</p>
+                                <p><span style="color:green"><b>h1</b> </span>{font-family:arial;}</p>
+                                <p><span style="color:blue"><b>p</b> </span>{font-family:arial;}</p>
+                            </td>
+                            <td class="codeText">
+                                <p><span style="color:green"><b>header</b></span>, <span style="color:blue"><b>footer</b> </span>, <span style="color:red"><b>nav</b> </span>, <span style="color:purple"><b>main</b> </span> {margin-top:5px;}</p>
+                                <p><span style="color:green"><b>h1</b> </span>, <span style="color:blue"><b>p</b> </span> {font-family:arial;}</p>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <h2>Descendant Selector</h2>
+                    <p>Descendant Selectors are used in CSS to tell the browser to modify elements that are specifically inside other elements.  For example:</p>
+                    <div class="codeBox">
+                        <p><span style="color:yellow; font-weight:bold">header h1</span> { font-size:80px; font-family:Impact; color:white; }</p>
+                    </div>
+
+                    <p>
+                        This CSS rule will modify the size, font and color of the <span class="codeText">&lt;h1&gt;</span> tag, but only the <span class="codeText">&lt;h1&gt;</span> tag that is inside the header tag.  <b>Note that you do not use a 
+                        comma in between the different element names as you would with a grouping selector.</b>
+                    </p>
+                    <p>
+                        If there is a rule in CSS for all of the elements on the page with the same tag, using a descendant selector will override the rule for the tag inside the parent element.  For example:
+                    </p>
+                    <div class="codeBox">
+                        <p>p { font-size: 20px; font-family:Arial; color:black; }</p>
+                        <p><span style="color:yellow; font-weight:bold">.blackbox p</span> { color:white; }</p>
+                    </div>
+
+                    <p>
+                        In this example, all of the paragraph text on the page will be coloured black, but any paragraph text inside an element with the blackbox class will appear white.  You can see this example below - note that even though the    
+                        text is white rather than black, it retains all of the attributes from the original rule (it is still size 20 and in the Arial font).
+                    </p>
+
+                    <h2>Working Example</h2>
+                    <iframe src="https://trinket.io/embed/html/59967ef6b966?runMode=autorun" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2022 Q15</h2>
+                    <p>Kelly runs a company offering driving lessons.</p>
+                    <p>
+                        She wants a website where users can view her profile page and from there directly 
+                        access individual pages about each of her instructors: Anne, Sarah, Jamal and 
+                        Eilidh. The website should also detail the courses offered, a frequently asked 
+                        questions page and a page where users can contact the company.
+                    </p>
+                    <p></p>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(d)</th>
+                            <td>
+                                <p>
+                                    On the ‘Courses’ page there are a large number of different course packages 
+                                    that are offered. A sample of the HTML code used to implement this page is 
+                                    shown below.
+                                </p>
+
+                                <div class="codeBox">
+                                    <p>&lt;h1&gt;We offer varying courses including:&lt;/h1&gt;</p>
+                                    <p>&lt;ul&gt;</p>
+                                    <p style="padding-left:40px;">&lt;li&gt;Beginners&lt;/li&gt;</p>
+                                    <p style="padding-left:40px;">&lt;li&gt;Refreshers&lt;/li&gt;</p>
+                                    <p>&lt;/ul&gt;</p>
+                                    <br>
+                                    <p>&lt;h2&gt;Course Details&lt;/h2&gt;</p>
+                                    <p>&lt;ol&gt;</p>
+                                    <p style="padding-left:40px;">&lt;li&gt;Beginners Course&lt;/li&gt;</p>
+                                    <p style="padding-left:40px;">&lt;ul&gt;</p>
+                                    <p style="padding-left:80px;">&lt;li&gt;Cost: £30 per lesson&lt;/li&gt;</p>
+                                    <p style="padding-left:80px;">&lt;li&gt;Minimum Lessons: 2&lt;/li&gt;</p>
+                                    <p style="padding-left:80px;">&lt;li&gt;Lesson Length: 1 hr&lt;/li&gt;</p>
+                                    <p style="padding-left:40px;">&lt;/ul&gt;</p>
+                                    <p style="padding-left:40px;">&lt;li&gt;Refreshers Course&lt;/li&gt;</p>
+                                    <p style="padding-left:40px;">&lt;ul&gt;</p>
+                                    <p style="padding-left:80px;">&lt;li&gt;Cost: £25 per lesson&lt;/li&gt;</p>
+                                    <p style="padding-left:80px;">&lt;li&gt;Minimum Lessons: 1&lt;/li&gt;</p>
+                                    <p style="padding-left:80px;">&lt;li&gt;Lesson Length: 1.5 hr&lt;/li&gt;</p>
+                                    <p style="padding-left:40px;">&lt;/ul&gt;</p>
+                                    <p>&lt;/ol&gt;</p>
+                                </div>
+                                <p>The CSS rules shown below are used to style the ‘Courses’ page.</p>
+                                <div class="codeBox">
+                                    <p>ul {color: yellow;}</p>
+                                    <p>ol ul li{color: blue;}</p>
+                                </div>
+                                <p>Describe the effect of these CSS rules on this page.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <p>One mark for each of the bullet points:</p>
+                                        <ul>
+                                            <li>All of the text inside the <span class="codeText">&lt;ul&gt;</span> elements will be yellow.</li>
+                                            <li>All of the text inside the <span class="codeText">&lt;ul&gt;</span> elements that are inside the <span class="codeText">&lt;ol&gt;</span> elements will be blue.</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Height and Width</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Height and Width</h1></div>
+                <div class="contentContainer">
+                    <p>Web page design and implementation involves creating areas that either have a fixed size of change size with the content or display (changing
+                    window size or resolution.</p>
+                    <p>In the example website about Lawn Care, the <span class="codeText">&lt;body&gt;</span> of each web page is set to a fixed width of 880px:</p>
+                    <div class="codeBox">
+                        <p>body {width: 880px;}</p>
+                    </div>
+                    <p>The height of the <span class="codeText">&lt;header&gt;</span>, <span class="codeText">&lt;nav&gt;</span> and <span class="codeText">&lt;footer&gt;]
+                    </span> are all set to a fixed height, which will remain constant on every page of the website:</p>
+                    <div class="codeBox">
+                        <p>header {height: 100px;}</p>
+                        <p>nav {height: 50px;}</p>
+                        <p>footer {height: 50px;}</p>
+                    </div>
+                    <p>
+                        The reason for the odd numbers (880px rather than 900px) is because when you use padding, it increases the size of the lement to accomodate the 
+                        padding.  The body in this example has a padding of 10px.  This creates 10 additional pixels on either side of the contents of the element, a total of 
+                        20 for the left and right sides:
+                    </p>
+                    <p><b>20 + 880 = 900 pixels</b></p>
+
+                    <h2>Height and Width Working Example</h2>
+                    <p>
+                        You can see in the example below how the height and width of the elements are set in the CSS code and how padding effects the size of the elements.
+                    </p>
+
+                    <iframe src="https://trinket.io/embed/html/cbb127027a96" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

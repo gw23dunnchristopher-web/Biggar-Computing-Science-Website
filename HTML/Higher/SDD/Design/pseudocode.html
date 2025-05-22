@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Pseudocode</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+            <header>
+                <h1>BHS Computing Science</h1>
+                <img src="/Images/Header/banner.png">
+            </header>
+            <div id="pageContainer">
+                <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+                <div id="sidebar"></div>
+                <div id="content">
+                    <div id="mainHeading"><h1>Higher</h1></div>
+                    <div class="contentHeading"><h1>Pseudocode</h1></div>
+                    <div class="contentContainer">
+                        <h2>Pseudocode at Higher Level</h2>
+                        <p>When using pseudocode to design efficient solutions to a modular problem, you must include:</p>
+                        <ul>
+                            <li><b>Top Level Design</b> -  the major steps of the design. In the example below, numbered 1 to 4.</li>
+                            <li><b>Data Flow</b> - shows the information that must flow In or Out from the sub-programs. In the example below, written to the right of the top-level 
+                                design.</li>
+                            <li><b>Refinements</b> - breaks down the design from the top level when required. In the example below, numbered as a sub-number of the top level.</li>
+                        </ul>
+
+                        <h2>Example of Pseudocode</h2>
+                        <p>
+                            This design is for a program that reads the name, prelim mark and coursework mark for 20 pupils from a file. It adds each of their prelim marks and 
+                            coursework together and calculates a percentage, then displays the name of the pupil with the highest percentage and their percentage.
+                        </p>
+
+                        <table class="pseudocode">
+                          <tr>
+                            <th colspan="2">Top Level Design and Data Flow</th>
+                          </tr>
+                          <tr>
+                            <td>1</td>
+                            <td>Get results (OUT: pupil name(), prelim mark(), course mark())</td>
+                          </tr>
+                          <tr>
+                            <td>2</td>
+                            <td>Calculate percentages (IN: prelim mark(), course mark() OUT: percentage())</td>
+                          </tr>
+                          <tr>
+                            <td>3</td>
+                            <td>Find position of pupil with top mark (IN: percentage() OUT: top position)</td>
+                          </tr>
+                          <tr>
+                            <td>4</td>
+                            <td>Display pupil with top mark (IN: pupil name(), top position)</td>
+                          </tr>
+                          <tr>
+                            <th colspan="2">Refinements</th>
+                          </tr>
+                          <tr>
+                            <td>1.1</td>
+                            <td>Open marks file</td>
+                          </tr>
+                          <tr>
+                            <td>1.2</td>
+                            <td>Start fixed loop for each pupil</td>
+                          </tr>
+                          <tr>
+                            <td>1.3</td>
+                            <td style="padding-left:80px;">Get pupil name()</td>
+                          </tr>
+                          <tr>
+                            <td>1.4</td>
+                            <td style="padding-left:80px;">Get prelim mark()</td>
+                          </tr>
+                          <tr>
+                            <td>1.5</td>
+                            <td style="padding-left:80px;">Get course mark()</td>
+                          </tr>
+                          <tr>
+                            <td>1.6</td>
+                            <td>End fixed loop</td>
+                          </tr>
+                          <tr>
+                            <td>1.7</td>
+                            <td>Close marks file</td>
+                          </tr>
+                          <tr>
+                            <td></td>
+                            <td></td>
+                          </tr>
+                          <tr>
+                            <td>2.1</td>
+                            <td>Start fixed loop for each pupil</td>
+                          </tr>
+                          <tr>
+                            <td>2.2</td>
+                            <td style="padding-left:80px;">percentage() equals (prelim mark() + course mark()) divided by 1.5</td>
+                          </tr>
+                          <tr>
+                            <td>2.3</td>
+                            <td">End fixed loop</td>
+                          </tr>
+                          <tr>
+                            <td></td>
+                            <td></td>
+                          </tr>
+                          <tr>
+                            <td>3.1</td>
+                            <td>top position equals first position</td>
+                          </tr>
+                          <tr>
+                            <td>3.2</td>
+                            <td>Start fixed loop from second pupil</td>
+                          </tr>
+                          <tr>
+                            <td>3.3</td>
+                            <td style="padding-left:80px;">If percentage() is greater than current top percentage Then</td>
+                          </tr>
+                          <tr>
+                            <td>3.4</td>
+                            <td style="padding-left:160px;">set position as new top position</td>
+                          </tr>
+                          <tr>
+                            <td>3.5</td>
+                            <td style="padding-left:80px;">End If</td>
+                          </tr>
+                          <tr>
+                            <td>3.6</td>
+                            <td>End fixed loop</td>
+                          </tr>
+                          <tr>
+                            <td></td>
+                            <td></td>
+                          </tr>
+                          <tr>
+                            <td>4.1</td>
+                            <td>Display “Top pupil is”, pupil name(top position), “with”, percentage(top position), “percent”</td>
+                          </tr>
+                       </table>
+                        
+                        <h2>Past Paper Question - 2023 Q10(b)</h2>
+
+                        <p> 
+                            A check digit is the number at the end of a series of characters that can confirm 
+                            that something is correct.
+                        </p>
+                      
+                        <p>
+                            A program is to be written to add a check digit to a user’s password. The password 
+                            is input and then the program totals the ASCII values of all the characters, divides 
+                            the total by 11 and calculates the remainder. This remainder is then attached to 
+                            the original password as a check digit. For example, for the password ‘Fox’:
+                        </p>
+
+                        <table style="max-width:300px; text-align:center;">
+                          <tr>
+                            <th>Character</th>
+                            <th>ASCII Value</th>
+                          </tr>
+                          <tr>
+                            <td>F</td>
+                            <td>70</td>
+                          </tr>
+                          <tr>
+                            <td>o</td>
+                            <td>111</td>
+                          </tr>
+                          <tr>
+                            <td>x</td>
+                            <td>120</td>
+                          </tr>
+                          <tr>
+                            <td>Total</td>
+                            <td>301</td>
+                          </tr>
+                          <tr>
+                            <td></td>
+                            <td>301/11 = 27 remainder 4</td>
+                          </tr>
+                        </table>
+
+                        <p>
+                            The updated password is‘Fox4’.
+                        </p>
+                      
+                      
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">(b)</th>
+                                <td>
+                                    <p>Using a recognised design technique, design an algorithm that would create 
+                                    the updated password and store it in a file.</p>
+                                </td>
+                                <th rowspan="2"  width="30px">5</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <table class="tg">
+                                          <tr>
+                                            <td class="tg-7zrl">1</td>
+                                            <td class="tg-7zrl">Set total to 0</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="tg-7zrl">2</td>
+                                            <td class="tg-7zrl">For character in password:</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="tg-7zrl">3</td>
+                                            <td class="tg-7zrl">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Get ASCII value of current character.</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="tg-7zrl">4</td>
+                                            <td class="tg-7zrl">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Add ASCII value to total.</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="tg-7zrl">5</td>
+                                            <td class="tg-7zrl">End For</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="tg-7zrl">6</td>
+                                            <td class="tg-7zrl">Divide total by 11, use modulus to get remainder and store in the variable 'remainder'.</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="tg-7zrl">7</td>
+                                            <td class="tg-7zrl">Set newPassword to password + remainder</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="tg-7zrl">8</td>
+                                            <td class="tg-7zrl">Open "passwords.txt" file for writing.</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="tg-7zrl">9</td>
+                                            <td class="tg-7zrl">Write newPassword to file.</td>
+                                          </tr>
+                                          <tr>
+                                            <td class="tg-7zrl">10</td>
+                                            <td class="tg-7zrl">Close file.</td>
+                                          </tr>
+                                        </table>
+                                        <hr>
+                                        
+                                      <p><b>1 mark</b> for each bullet:</p>
+                                            <ul>
+                                                <li>Initialise and update total.</li>
+                                                <li>Loop for length of password and get ASCII value of current character.</li>
+                                                <li>Use of mod 11 to get remainder.</li>
+                                                <li>Concatenate remainder to original password.</li>
+                                                <li>Open/write to/close file.</li>
+                                            </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div id="left">
+                    <p>Biggar High School</p>
+                    <p>Market Rd, Biggar</p>
+                    <p>ML12 6AG</p>
+                </div>
+                <div id="center"></div>
+                <div id="right">
+                    <p>&copy;C Dunn, 2025</p>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>

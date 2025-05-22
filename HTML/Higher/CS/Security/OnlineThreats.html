@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Online Threats</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Online Threats</h1></div>
+                <div class="contentContainer">
+                    <p>When studying the Computing Science Higher, you have to be aware of:</p>
+                    <ul>
+                        <li><b>Tracking Cookies</b> - data files stored on your device by websites to monitor your online activities and preferences.</li>
+                        <li><b>DOS and DDOS Attacks</b> - attempta to overwhelm a network, server, or website with excessive traffic or requests.</li>
+                    </ul>
+                    
+                    <h2>Tracking Cookies</h2>
+                    <img class="rImg" src="/Images/Higher/CS/Security/cookies.jpg" alt="Cookie">
+                    <p>
+                        These are text files that contain information about your browsing habits - such as the websites you have visited and the username used to access them.  They can track the amount of time
+                        that you have spent on a website and any links that you have clicked on.  They can also be used to store your preferences and your login details, so that you don't have to enter them the
+                        next time you visit the website.
+                    </p>
+                    <p>
+                        Tracking Cookies are saved on your computer to reduce the load on servers, and they are accessed by the websites you visit.  Whenever you visit a website that uses cookies, you will be 
+                        able to see a legal disclaimer at the bottom of the page - you have to agree to allow the website to use cookies.  It should be noted that while cookies are not harmful, they do send as 
+                        much information as possible to external servers, or third parties, which can then track your online activities. This is why it is important to be aware of which websites you allow to use
+                        cookies.
+                    </p>
+                    <p>These cookies have the following uses:</p>
+                    <ul>
+                        <li>Market research with no theft of data.</li>
+                        <li>Sending usernames and passwords to third parties.</li>
+                        <li>Targeting users with personalised advertisements.</li>
+                    </ul>
+                    
+                    <h2>DOS (Denial of Service) Attacks</h2>
+                    <p>
+                        DOS or <b>Denial of Service</b> attacks, are when a website or online service is targeted with the intention of making it unavailable to users.  This is done by flooding it with so many 
+                        requests that it will either run very slowly or crash completely.  At the Higher level, you need to be aware of the symptoms, effects and costs of a DOS attack, the reasons someone might #
+                        perform one of these attacks, as well as the different types of DOS attack that can be performed.
+                    </p>
+                    <ul>
+                        <li><b>Symptoms</b> - If a website or service is targetted it may become either very slow or unavailable (if it crashes).</li>
+                        <li><b>Effects</b> - Users will find themselves unable to access the website or service, this could result in the effected company losing the trust of its customers.</li>
+                        <li><b>Costs</b> - The website or service lose money due to the cost of rectifying the fault, as well as any lost revenue due to customers being unable to access the service.</li>
+                        <li><b>Reasons</b> - Attackers can have many reasons to perform a DOS attack.  They could be...
+                            <ul>
+                                <li>
+                                    Financially motivated - either they are being paid to do it by a third party, or they are using it to distract from a different Cyberattack that would allow them to steal money.
+                                </li>
+                                <li>Politically motivated - attacks on government websites may have this motivation.  The attacker may be doing it to disrupt the services of a government institution they do not 
+                                    like, or they may be from a different company, working to disrupt the operation of an enemy country's government.</li>
+                                <li>Personally motivated - Some hackers perform these attacks just for fun, to show that they can, or to make a point.</li>
+                            </ul>
+                    </ul>
+
+                    <h3>Types of DOS Attack</h3>
+                    <p>
+                        To understand how DOS attacks work, you have to be able to understand what happens when your computer accesses a website.  When you click on a link, your computer goes through the 
+                        following steps:
+                    </p>
+                    <ol>
+                        <li>You enter a URL (Uniform Resource Locator, the http address) into the browser.</li>
+                        <li>Your browser uses the DNS (Domain Name Service) to find the website's IP address.</li>
+                        <li>The browser requests a connection to the website, sending a packet of data to do so.</li>
+                        <li>If the request is received, then your browser downloads the website data, the HTML, CSS, and JavaScript data, to your computer.</li>
+                        <li>The browser interprets this data and the website opens on your screen.</li>
+                    </ol>
+
+                    <p>The table below shows the different types of attack and how they disrupt this process.</p>
+                    
+                    <table>
+                        <tr>
+                            <th>Type of Attack</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <th class="subheader">Bandwidth Consumption</th>
+                            <td>
+                                <p>
+                                    The attacker sends a large amount of requests to access the target website.  The website server can only handle a certain number of requests at a time, so doing this will
+                                    cause users who send legitimate requests to have to wait for their request to be received. In some cases, the server can become completely overloaded and shut down.
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">Resource Starvation</th>
+                            <td>
+                                <p>
+                                    Specialised packets of data can be sent to the website or service to request use of a specific resource, like memory or disk space.  For example, a tiny 1 byte ping request
+                                    sent continuously can slow down or crash a system by eating up RAM meant for genuine user traffic.
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="subheader">DNS (Domain Name Service) Flood Attacks</th>
+                            <td>
+                                <p>
+                                    DNS is like an address book for the internet, it is a server containing a list of URLs along with the IP addresses of the computers and servers that contain the associated 
+                                    websites. In a DNS flood, an attacker floods a particular domain's DNS server in an attempt to disrupt it.  If users cannot access the DNS server, they cannot lookup the IP 
+                                    address for the computer and cannot access the website. This renders the website (and any other websites that use the same DNS server) unavailable to users.
+                                </p>
+                                <p>
+                                    DNS flood attacks can be difficult to distinguish from normal heavy internet traffic, because the large volume of traffic often comes from a large variety of sources, 
+                                    requesting records on the domain and mimicking legitimate traffic.</p>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <h3>DDOS Attacks</h3>
+                    <p>
+                        A DOS attack generally comes from either a single source or a small number of networked sources.  On the other hand, a <b>DDOS (Distributed Denial of Service)</b> attack can come from 
+                        hundreds, thousands or even tens of thousands of different sources.  This is achieved by harnessing a <b>Botnet</b></p>, which is a network of computers that have been infected with 
+                        malware that allows the attacker to control them remotely.  The attacker can then use these computers to send requests to the target website or service and overwhelm it.  This allows them
+                        access to a much greater number of resources than they would have if they were just using their own computer or network.  DNS Flood attacks, for example, are a common type of DDOS attack.
+
+                    <img class="cImg" src="/Images/Higher/CS/Security/botnet.jpg" alt="How a DDOS attack works">
+
+                    <h2>Digital Signatures</h2>
+                    <p>
+                        A digital signature is a cryptographic technique that is used to validate the authenticity, integrity and origin of digital data.  You can think of it like a paper signature, in that it 
+                        proves the identity of the person who sent the data.  Digital signatures use asymmetric encryption, which uses a pair of keys - a public key and a private key. </p>
+                    
+                    <h2>Past Paper Question - 2024 Q9(d) (i) and (ii)</h2>
+                    <p>The company has been the target of a Denial of Service (DOS) attack involving resource starvation.</p>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(i)</th>
+                            <td>
+                                <p>Describe what is meant by a resource starvation DOS attack.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                          <p>System resources such as processor/backing storage/RAM are exhausted/fully utilised</p>     
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(ii)</th>
+                            <td>
+                               <p>State one cost to the company as a result of a DOS attack</p>
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer2">
+                                    <p>Any one from:</p>
+                                    <ul>
+                                        <li>Loss of revenue</li>
+                                        <li>Repair (of damage due to attack)</li>
+                                        <li>Cost of putting in measures for prevention of future attacks</li>
+                                    </ul>
+                                    <hr>
+                                    <p>Maintenance would be ongoing and not solely as a result of a DOS attack</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

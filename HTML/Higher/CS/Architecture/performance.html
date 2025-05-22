@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Factors Effecting Performance</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Factors Effecting Performance</h1></div>
+                <div class="contentContainer">
+                    <h2>Number of Processors (Cores)</h2>
+                    <div class="sideBySide vertAlign">
+                        <div>
+                            <ul>
+                                <li>There has been a development of several sets of processor components in one microprocessor.</li>
+                                <li>A dual core processor has two separate CPUs in one chip and a quad core processor has four separate CPUs in one chip.</li>
+                                <li>The <b>more cores</b> a processor has, the <b>more sets of instructions</b> the processor can receive and process at the same time.</li>
+                                <li>For example, a quad-core processor can be used to improve load times for web apps containing client-side scripts or multimedia elements.</li>
+                                <li>A dual core processor is not as fast as a single core processor running at twice the speed.</li>
+                            </ul>
+                        </div>
+                        <img class="shadowImage" src="/Images/Higher/CS/Architecture/cores.jpg" alt="Cores">
+                    </div>
+                    
+                    <h2>Width of the Data Bus</h2>
+                    <div class="sideBySide vertAlign">
+                        <img class="shadowImage" src="/Images/Higher/CS/Architecture/databus.jpg" alt="Databus Width">
+                        <div>
+                            <ul>
+                                <li>Data Bus - Set of parallel wires that connect the processor with memory and other hardware devices.</li>
+                                <li>By increasing the data bus from 32 wires to 64 wires, the computer can transfer twice as much data at one time.</li>
+                                <li>Increasing the size of the data bus improves the system performance of the computer</li>
+                                <li>The amount of data that can be transferred in one cycle of the processor is known as the 'word length' of the bus.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h2>Cache Memory</h2>
+                    <ul>
+                        <li>Cache memory is a <b>very small amount of memory that is built into, or at least very close to, the processor</b>.</li>
+                        <li>It can be referred to as Level 1, Level 2 or Level 3, which indicates how close it is to the processor.  Level 1 is built right into the processor 
+                            itself.</li>
+                        <li>Cache memory contains frequently used instructions and data.</li>
+                        <li>The processor checks to see if an instruction is in cache memory first (it checks Level 1, then 2, then 3) and if it is not in cache memory it goes to 
+                            retrieve it from main memory.</li>
+                        <li>It is much faster to read and write from cache memory than it is from regular memory because it is so close to the processor cores, so using cache 
+                            memory can lead to an increase in computer performance.</li>
+                        <li>Cache hit - Data is found in the cache and can be quickly retrieved.</li>
+                        <li>Cache miss - Data is not found in the cache and has to be retrieved from main memory, which is much slower.</li>
+                        <li>A larger cache will result in more cache hits.</li>
+                    </ul>
+                    <img class="cImg" src="/Images/Higher/CS/Architecture/cache.jpg" alt="Caches">
+
+                    <h2>Clock Speed</h2>
+                    <div class="sideBySide vertAlign">
+                        <div>
+                            <ul>
+                                <li>The processor's clock generates a series of 'pulses' at a constant rate, allowing everything that the processor does to be kept in time with the 
+                                    clock.</li>
+                                <li>One single pulse is known as a <b>Clock Cycle</b>.</li>
+                                <li>The rate at which it generates these pulses is known as the <b>Clock Speed</b>.</li>
+                                <li>The processor's clock speed is measured in <b>MHz (Megahertz)</b> or, more commonly, <b>GHz (Gigahertz)</b>.</li>
+                                <li>A <b>1 GHz</b> processor will generate pulses <b>one thousand million times a second</b>.</li>
+                                <li>Different instructions to the processer will take different amounts of clock cycles to fetch, but the higher your clock speed the faster the 
+                                    processor can do this.</li>
+                                <li>Increasing the clock speed of the computer's processor will speed up the rate at which it can fetch instructions, improving performance.</li>
+                                <li>You can <b>overclock</b> a processor, manually increasing the clock speed, but doing so will generate a lot of heat and may damage the 
+                                    processor.</li>
+                            </ul>
+                        </div>
+                        <img class="shadowImage" src="/Images/Higher/CS/Architecture/clockSpeed.jpg" alt="Clock Speed">
+                    </div>
+                    
+                    <h2>Past Paper Question - 2022 Q4</h2>
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">4</th>
+                                <td>
+                                    <p>Explain why a processor with larger cache would outperform an identical processor 
+                                    with smaller cache.</p>
+                                </td>
+                                <th rowspan="2"  width="30px">2</th>
+                            </tr>
+                                <tr>
+                                    <td>
+                                        <div class="hiddenElement answer1">
+                                            <p><b>1 mark</b> for each bullet, maximum 2 marks.</p>
+                                            <ul>
+                                                <li>larger cache stores more 
+                                                instructions/data</li>
+                                                <li>more cache hits/fewer cache 
+                                                misses</li>
+                                                <li>reduces fetches from main 
+                                                memory</li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="answerButton" onClick="answerButtonSwitch(this); 
+                                toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

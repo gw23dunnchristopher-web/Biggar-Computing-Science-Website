@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Navigational Structure</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Navigational Structure</h1></div>
+                <div class="contentContainer">
+                    <h2>Types of Website Structure</h2>
+                    <p>
+                        The design of a website should indicate the type of navigational structure that will be used — usually linear or hierarchical. The design should also  
+                        show the direction of each of the links.
+                    </p>
+                    <ul>
+                        <li><b>Linear Structure</b> - This is also known as a sequential structure, because the webpages follow a sequence, one webpage links to the next a 
+                            which links to the next and so on.  These are traditionally used by businesses that don't have a lot of content.  There are no subpages.</li>
+                        <li><b>Hierarchical Structure</b> - This is the most common type of structure.  It has a home page which leads to a set of top-level pages. Each of 
+                            these pages can then have subpages.  This is the structure that we will be using at Higher Level.</li>         
+                    </ul>
+                    
+                    <p>Click on the button below to see the list of requirements for the website that we will be using in the examples.</p>
+                    
+                    <p class="laws" onclick="toggleLaw(this)" style="max-width:1000px; margin:auto;">
+                        <b>List of Lawn Care Website Requirements</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none; border:1px solid black; max-width:1000px; margin:auto;"">
+                       <p>
+                           A new website is being created about lawn care. The client wants the website give users information on planting lawns, different types of grasses, 
+                           lawnmowers and fertilizer.
+                       </p>
+                        <p>The <b>homepage</b> will provide:</p>
+                        <ul>
+                            <li>A short introduction to the website and lawn care.</li>
+                            <li>Internal Hyperlinks to the following subpages - Planting Lawns, Grass Types, Lawnmowers and Fertilisers</li>
+                        </ul>
+                        
+                        <p>The <b>Planting Lawns</b> page will contain:</p>
+                        <ul>
+                            <li>Two videos - tutorials on sowing and turf laying.</li>
+                        </ul>
+                        
+                        <p>The <b>Lawnmowers</b> page will contain:</p>
+                        <ul>
+                            <li>Information on different types of lawnmower and how to select the right one.</li>
+                            <li>A list of simple rules on how and when to cut lawn grass.</li>
+                            <li>Photographs showing different types of lawnmower.</li>
+                        </ul>
+                        
+                        <p>The <b>Fertlisers</b> page will contain:</p>
+                        <ul>
+                            <li>Information on organic and inorganic fertilisers.</li>
+                            <li>Links to pages that recommend organic and inorganic fertilisers.</li>
+                        </ul>
+
+                        <p>The <b>Grass Types</b> page will contain:</p>
+                        <ul>
+                            <li>Information on two different types of grass.</li>
+                            <li>Information on how to select the right type of grass.</li>
+                        </ul>
+                    </div>
+
+                    <h2>Navigational Structure</h2>
+                    <p>The diagram shows the website structure for the above example website, please note the:</p>
+                    <ul>
+                        <li>
+                            The <b>Shaded Background</b> shows pages on the horizontal navigational bar at the each page in the site are shown in this box (aside from the 
+                            homepage). In this example it has been coloured yellow.  <i>The homepage is assumed to be on the navigational bar</i>.
+                        </li>
+                        <li>
+                            <b>Horizontal lines</b> show pages can all be accessed from each other.
+                        </li>
+                        <li>
+                            <b>Vertical lines</b> - show pages that can only be accessed from one page and only link back to that page.
+                        </li>
+                    </ul>
+                    <p>
+                        The pages on the navigational bar are referred to as <b>Level 1</b> pages - they are coloured blue in the diagram below. The pages that can only be 
+                        accessed from one of the pages on the navigational bar (the subpages) are known as <b>Level 2</b> pages - show here in light purple.  If the subpages 
+                        had their own subpages, those would be <b>Level 3</b> pages, and so on.
+                    </p>
+                    
+                    <img class="cImg" src="/Images/Higher/WDD/Design/navStructure.JPG" alt="Navigational Structure for the Lawn Care Website">
+
+                    <h2>Past Paper Question - 2023 Q17</h2>
+                    <p>
+                        A new video sharing website is being developed. This site should allow users to 
+                        upload new videos to the site, watch uploaded videos and comment on them. Users 
+                        should sign into the site using a username and password.
+                    </p>
+
+                    <p>
+                        Once signed in, users should be able to navigate to one of three pages — a profile 
+                        page, a videos page and a settings page.
+                    </p>
+
+                    <p>
+                        From the profile page, users should be able to navigate to a page where they can 
+                        upload videos and read comments left by other users, a page where they can edit 
+                        their profile and a page where they can edit the details of previously uploaded 
+                        videos.
+                    </p>
+
+                    <p>
+                        From the videos page, users should be able to view a page with the top ten 
+                        trending videos and view a page showing the videos that they have watched most 
+                        recently.
+                    </p>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(b)</th>
+                            <td>
+                                <p>Draw a diagram to show the navigational structure of this website.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <img class="cImg" style="width:75%" src="/Images/Higher/WDD/Design/2023Q17b.jpg" alt="Navigational Structure for the Video Sharing Website">
+                                        <hr>
+                                        <p>One mark each for:</p>
+                                        <ul>
+                                            <li>Correctly identifying the Level 1 pages.</li>
+                                            <li>Correctly identifying the Level 2 pages.</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

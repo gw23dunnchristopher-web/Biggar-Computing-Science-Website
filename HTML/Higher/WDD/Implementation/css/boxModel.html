@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - The Box Model</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+        <style>
+            .codeBlocks {display:block; margin:auto; margin-top:20px; margin-bottom:20px; padding:10px; border:1px solid black; width:50%}
+        </style>
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>The Box Model</h1></div>
+                <div class="contentContainer">
+                    <h2>What is the Box Model?</h2>
+                    <p><b>Margins</b> and <b>Padding</b> are used to push content away from the outer and inner edges of an element.</p>
+                    <p>The box model allows us to define the space between elements as shown below:</p>
+                    <img class="cImg" width="50%" src="/Images/Higher/WDD/Implementation/css/boxModel.jpg" alt="The Box Model">
+
+                    <p>Click on the buttons below to see more information about margins or padding.</p>
+
+                    <div class="sideBySide">
+                        <img width="10%" style="margin:0 20px;" src="/Images/Higher/WDD/Implementation/css/marginsBtn.png" alt="Margins" 
+                            onClick="window.location.href='/HTML/Higher/WDD/Implementation/css/margins.html';"
+                            onmouseover="switchImage(this, '/Images/Higher/WDD/Implementation/css/marginsBtnOn.png');"
+                            onmouseout="switchImage(this, '/Images/Higher/WDD/Implementation/css/marginsBtn.png');">
+                        <img width="10%" style="margin:0 20px;" src="/Images/Higher/WDD/Implementation/css/paddingBtn.png" alt="Padding"
+                            onmouseover="switchImage(this, '/Images/Higher/WDD/Implementation/css/paddingBtnOn.png');"
+                            onmouseout="switchImage(this, '/Images/Higher/WDD/Implementation/css/paddingBtn.png');"
+                            onClick="window.location.href='/HTML/Higher/WDD/Implementation/css/padding.html';">
+                    </div>
+                   
+                    <h2>Universal Selector</h2>
+                    <p>In CSS, the universal selector (*) is used to select all elements on a page.  It can be used to set the margin and padding to 0 for all elements as
+                    shown below.</p>
+                    <div class="codeBox">
+                        <p style="text-align:center;">* {margin:0; padding:0;}</p>
+                    </div>
+                    
+                    <p>This is useful as it removes the default margin and padding that browsers apply to elements.</p>
+
+                    <h2>Margins and Padding Working Example</h2>
+                    <iframe src="https://trinket.io/embed/html/2c398cf5daf0" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2022 Q16</h2>
+                    <p>An energy supplier’s website allows customers to log in and manage their account 
+                    online.</p>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td>
+                                <p>
+                                    They are redesigning their home page and want to implement the spacings 
+                                    shown below.
+                                </p>
+                                <img class="cImg" src="/Images/Higher/WDD/Implementation/css/2022Q16a.jpg" alt="2022 Q16a">
+                                <p>
+                                    Using the partially completed code below, complete the CSS rules to 
+                                    implement the appropriate spacing as shown above.
+                                </p>
+                                <img class="cImg" src="/Images/Higher/WDD/Implementation/css/2022Q16a2.jpg" alt="2022 Q16a">
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <p>One mark for each bullet:</p>
+                                        <ul class="codeText">
+                                            <li>margin-top: 30px;</li>
+                                            <li>padding-top: 20px;</li>
+                                        </ul>
+                                        <hr>
+                                        <p>The following is also acceptable:</p>
+                                        <ul class="codeText">
+                                            <li>margin: 30px 0 0 0;</li>
+                                            <li>padding: 20px 0 0 0;</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

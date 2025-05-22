@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Count Occurences</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Count Occurences</h1></div>
+                <div class="contentContainer">
+                    <p>This standard algorithm checks an array for the presence of a particular item and counts the number of times said item is found in the array.</p>
+                    <ul>
+                        <li>the user must be asked what they are searching for (a target).</li>
+                        <li>a variable storing the number of times the item is found is set to zero.</li>
+                        <li>each item in the array will be compared to the target, and if the item matches the target then the total will be updated by one.</li>
+                    </ul>
+
+                    <table class="pseudocode borderless">
+                        <tr><th colspan="2" style="background-color:darkblue; color:white">Pseudocode (SQA Reference Language)</th></tr>
+                        <tr><th>Line 1</th><td>SET total TO 0</td></tr>
+                        <tr><th>Line 2</th><td>RECEIVE target FROM KEYBOARD</td></tr>
+                        <tr><th>Line 3</th><td>FOR index FROM 0 TO end of array DO</td></tr>
+                        <tr><th>Line 4</th><td style="padding-left:40px;">IF array[index] = target THEN</td></tr>
+                        <tr><th>Line 5</th><td style="padding-left:80px;">SET total TO total + 1</td></tr>
+                        <tr><th>Line 6</th><td style="padding-left:40px;">END IF</td></tr>
+                        <tr><th>Line 7</th><td>END FOR</td></tr>
+                        <tr><th>Line 8</th><td>SEND target & " found " & total & " times." TO DISPLAY</td></tr>
+                        <tr><th colspan="2" style="background-color:darkblue; color:white">Python Code</th></tr>
+                        <tr><td colspan="2" class="codeBox" style="background-color:#1c2112;">
+                            <p>total = 0</p>
+                            <p>target = input("Enter the data you are searching for: ")</p>
+                            <br>
+                            <p>for index in range(len(array)):</p>
+                            <p style="padding-left:40px;">if array[index] == target:</p>
+                            <p style="padding-left:80px;">total += 1</p>
+                            <br>
+                            <p>print(target, "found", total, "times.")</p>    
+                        </td></tr>
+                    </table>
+
+                    <h3>Working Example</h3>
+                    <iframe src="https://trinket.io/embed/python3/50dff470dc72" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+
+                    <h2>Past Paper Question - 2024 9(c)</h2>
+                    <p>An insurance company requires that a black box is installed in an insured car to 
+                        store data about each journey.</p>
+                    <p>The black box records data for each journey including:</p>
+                    <ul>
+                        <li>date of travel</li>
+                        <li>distance travelled in miles</li>
+                        <li>time spent driving in hours (for example 1 hour 15 minutes is stored as 1.25).</li>
+                    </ul>
+                    <p>A sample of the data is shown below:</p>
+                    <ul style="list-style-type:none">
+                        <li>09/03/2024, 40.25, 1.25</li>
+                        <li>04/04/2024, 5.12, 0.17</li>
+                        <li>04/04/2024, 5.12, 0.21</li>
+                        <li>...</li>
+                    </ul>
+                    <p>A program is written to analyse this data.</p>
+                    <p>The top-level design for the program is shown below.</p>
+                    <ol>
+                        <li>Read the data from a text file into parallel 1D arrays.</li>
+                        <li>Calculate the average speed for each individual journey by dividing the distance 
+                        for that journey by the time taken for that journey.</li>
+                        <li>Calculate the average distance travelled for journeys longer than one hour.</li>
+                        <li>Write the average speed of all journeys that have a greater distance than the 
+                        average distance to a file.</li>
+                    </ol>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(c)</th>
+                            <td>
+                                <p>Step 3 calculates the average distance for journeys longer than one hour.
+                                Using a design technique of your choice, design an algorithm for step 3.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">4</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <table class = "pseudocode borderless">
+                                            <tr><th>Line 1</th><td>SET totalDistance TO 0</td></tr>
+                                            <tr><th>Line 2</th><td>SET journeys TO 0</td></tr>
+                                            <tr><th>Line 3</th><td>FOR index FROM 0 TO end of distance[] array DO</td></tr>
+                                            <tr><th>Line 4</th><td style="padding-left:40px;">IF drivingTime[index] &gt; 1 THEN</td></tr>
+                                            <tr><th>Line 5</th><td style="padding-left:80px;">SET totalDistance TO totalDistance + distance[index]</td></tr>
+                                            <tr><th>Line 6</th><td style="padding-left:80px;">SET journeys TO journeys + 1</td></tr>
+                                            <tr><th>Line 7</th><td style="padding-left:40px;">END IF</td></tr>
+                                            <tr><th>Line 8</th><td>END FOR</td></tr>
+                                            <tr><th>Line 9</th><td>SET averageDistance TO totalDistance / journeys</td></tr>
+                                        </table>
+
+                                        <hr>
+
+                                        <p>One mark each for:</p>
+                                        <ul>
+                                            <li>Initialisation of totalDistance and journeys, increment number of journeys.</li>
+                                            <li>Loop and update total distance.</li>
+                                            <li>If statement with correct condition (drivingTime[index] &gt; 1)</li>
+                                            <li>Correct calculation of average.</li>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Text Representation</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Text Representation</h1></div>
+                <div class="contentContainer">
+                    <h2>Extended ASCII vs Unicode</h2>
+                   
+                    <h3>Extended ASCII</h3>
+                    <ul>
+                        <li>
+                            American Standard Code for Information Interchange.
+                        </li>
+                        <li>
+                            Used as the standard character code by many computers for decades.  As it is used by many 
+                            computers it means that it is easy to transfer data between computers.
+                        </li>
+                        <li>
+                            8 bits are used to represent each character.  This means that there are 256 (2<sup>8</sup> 
+                            possible characters.  This includes non-printable control characters such as TAB or ENTER, and 
+                            printable characters such as letters, numbers and punctuation.
+                        </li>
+                        <li>
+                            Standard ASCII also exists, which uses 7 bits to represent each character.  This means that
+                            there are 128 (2<sup>7</sup>) possible characters.
+                        </li>
+                    </ul>
+
+                    <h3>Unicode</h3>
+                    <ul>
+                        <li>
+                            Unicode is a standard that allows computers to consistently represent and handle text 
+                            expressed in most of the world's writing systems.  It is an International version of ASCII that
+                            includes non-English alphabets.
+                        </li>
+                        <li>
+                            So that it has enough space to account for the additional characters, Unicode uses 16 bits to 
+                            represent each character.  This means that there are 65,536 (2<sup>16</sup>) possible 
+                            characters, many more than ASCII.
+                        </li>
+                        <li>
+                            However, using 16 bits as opposed to 8 bits means that any text file using Unicode would 
+                            take up twice as much space in storage as one using ASCII.
+                        </li>
+                    </ul>
+                        
+                    <h2>Summary</h2>
+                    <table>
+                        <tr>
+                            <th> </th>
+                            <th>ASCII</th>
+                            <th>Unicode</th>
+                        </tr>
+                        <tr>
+                            <th>Advantages</th>
+                            <td>
+                                <ul>
+                                    <li>8 bits per character, so smaller file sizes.</li>
+                                    <li>Used by many computers, so easy to transfer data between computers.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Can represent all characters from all languages.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Disadvantages</th>
+                            <td>
+                                <ul>
+                                    <li>Can only represent 256 characters.</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>16 bits per character, so larger file sizes.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                            
+
+                    
+                    <h2>Past Paper Question - 2018 Q5</h2>
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">1</th>
+                                <td>
+                                    <p>Character sets can be represented using either ASCII or Unicode.</p>
+
+                                    <p>Describe an advantage of using Unicode over ASCII, making reference to the 
+                                    number of bits used to represent a character in each format.</p>
+                                </td>
+                                <th rowspan="2"  width="30px">2</th>
+                            </tr>
+                                <tr>
+                                    <td>
+                                        <div class="hiddenElement answer1">
+                                            <p>Unicode can represent more characters. <b>(1 mark)</b></p>
+
+                                            <p><b>(1 mark)</b> - Any one bullet from:</p>
+                                            <ul>
+                                                <li>
+                                                    2<sup>16</sup> when compared to ASCII 2<sup>8</sup> (or 2<sup>7</sup>
+                                                    in the case of standard ASCII).
+                                                </li>
+                                                <li>uses 16 bits compared to 8/7.</li>
+                                            </ul>
+                                            
+                                            <hr>
+
+                                            <p>More languages on its own does not get first mark</p>
+
+                                            <p>
+                                                Allow different types of Unicode -  UTF-8, UTF-16, UTF-32 or UCS-2 (17 × 
+                                                2<sup>16</sup>)
+                                            </p>
+                        
+                                                
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="answerButton" onClick="answerButtonSwitch(this); 
+                                toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

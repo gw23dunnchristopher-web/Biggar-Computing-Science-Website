@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - SDD Analysis</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>SDD Analysis</h1></div>
+                <div class="contentContainer">
+                    <p>
+                        At the N5 level, in the Analysis phase we had to identify the purpose of the software as well as the functional requirements (the inputs, processes and 
+                        outputs).  At Higher level, we expand on that and, in addition to the functional requirements, we also have to identify the Boundaries and the Scope of 
+                        the software.
+                    </p>
+
+                    <h2>Elements of Analysis</h2>
+                    <h3>Purpose</h3>
+                    <ul>
+                        <li>A general description of the purpose of the software.</li>
+                        <li>Called the software specification - basis of a legal contract between the client (customer) and software company.</li>
+                    </ul>
+
+                    <h3>Scope</h3>
+                    <ul>
+                        <li>A list of what will be handed over to the client or end-user, for example:
+                            <ul>
+                                <li>Design documents</li>
+                                <li>Completed program</li>
+                                <li>Test plan and test results</li>
+                                <li>Evaluation report</li>
+                                <li>Information on how long the project will take to create</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h3>Boundaries</h3>
+                    <ul>
+                        <li>Defines the limits of the software, what is in the project and what is not.</li>
+                        <li>Clarification of any assumptions made by the software developers about the client's requirements.</li>
+                    </ul>
+
+                    <h3>Functional Requirements</h3>
+                    <ul>
+                        <li>Inputs, processes and outputs.</li>
+                        <li>Any other features of the software or functions that must be delivered by the system.</li>
+                    </ul>
+
+                    <h2>Example of Software Analysis</h2>
+
+                    <table>
+                        <tr>
+                            <th>Purpose</th>
+                            <td colspan="2">
+                                The purpose of this program is to take 20 pupil names, their prelim marks and their assignment marks from a file. Calculate the 
+                                percentage, and then find and display the name and percentage of the pupil with the highest percentage.
+                            </td>
+                        </tr>
+                    
+                        <tr>
+                            <th>Scope</th>
+                            <td colspan="2">
+                                This development involves creating a modular program. The deliverables include:
+                                <ul>
+                                    <li>detailed design of the program structure</li>
+                                    <li>test plan with completed test data table</li>
+                                    <li>working program</li>
+                                    <li>results of testing</li>
+                                    <li>evaluation report</li>
+                                    <li>This development work must be completed within 4 hours.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th>Boundaries</th>
+                            <td colspan="2">
+                                The program will read the pupil data (name, prelim mark and assignment mark) for 20 pupils from a sequential file. The data is accurate, 
+                                so there is no need to implement input validation.<br><br> The pupil with the top mark will be the pupil who has the highest percentage. The only 
+                                output needed is the name and percentage of the pupil with the highest percentage.
+                            </td>
+                        </tr>
+                        
+                          <tr>
+                            <th rowspan="7">Functional Requirements</th>
+                            <td colspan="2">
+                                These are defined in terms of the inputs, processes and outputs detailed below. All inputs are imported from a sequential file and all outputs 
+                                displayed on the screen.<br><br> The program is activated by double clicking on the file icon and then selecting “Run” from the menu. Each 
+                                process should be a separate procedure or function that is called from the main program.
+                            </td>
+                          </tr>
+                        
+                          <tr>
+                            <th class="subheader" rowspan="3">Inputs</th>
+                            <td>Pupil name</td>
+                          </tr>
+                        
+                          <tr>
+                            <td>Prelim mark</td>
+                          </tr>
+                        
+                          <tr>
+                            <td>Assignment mark</td>
+                          </tr>
+                        
+                          <tr>
+                            <th class="subheader" rowspan="2">Processes</th>
+                            <td>Calculate the percentage for each pupil</td>
+                          </tr>
+                        
+                          <tr>
+                            <td> Find the name and percentage of the pupil with the highest percentage</td>
+                          </tr>
+                        
+                          <tr>
+                            <th class="subheader">Outputs</th>
+                            <td>Name of the pupil with the highest percentage</td>
+                          </tr>
+                    </table>
+                    
+                    <h2>Past Paper Question - 2022 Q7(a)</h2>
+                    
+                    <p>An app can be used to record two players’ scores on a 9 hole mini‑golf course.</p>
+                    <p>A player wins a hole if they have fewer shots than their opponent. For example, 
+                    Claire has won the first hole taking only two shots compared to Tina’s four shots.</p>
+                    <p>After nine holes, Claire has won four holes and Tina has won two.</p>
+
+                    <img class="cImg" src="/Images/Higher/SDD/Analysis/2022Q7.JPG" alt="2022 Q7(a)">
+
+                    <p>Both players’ names and their nine scores are entered.</p>
+                    <p>The app displays the name of the player who wins the most holes or a message 
+                        stating the game has been drawn if the number of holes won is the same.</p>
+                        <table>
+                            <tr>
+                                <th rowspan="2" width="30px">(a)</th>
+                                <td>
+                                    <p>One boundary of this app is that the app is for games between exactly two 
+                                    players.</p>
+                                    <p>State two other boundaries for this app.</p>
+                                </td>
+                                <th rowspan="2"  width="30px">2</th>
+                            </tr>
+                                <tr>
+                                    <td>
+                                        <div class="hiddenElement answer1">
+                                            <ul>
+                                                <li>shots (per hol) >= 1 <b>OR</b> shots (per game >=9)</li>
+                                                <li>exactly 9 scores for each player</li>
+                                                <li>number of holes-in-one >= 0 <b>OR</b> <= 9</li>
+                                                <li>number of holes won is >= 0 <b>OR</b> <=9</li>
+                                            </ul>
+                                            <hr>
+                                            <p><b>1 mark</b> for each bullet, maximum 2 marks.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="answerButton" onClick="answerButtonSwitch(this); 
+                                toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>
