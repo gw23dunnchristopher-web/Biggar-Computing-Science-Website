@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Higher Computing Science - Blank</title>
+        <title>Higher Computing Science - Forms</title>
         <script src="/JavaScript/higherScript.js"></script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
@@ -20,9 +20,234 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>Higher</h1></div>
-                <div class="contentHeading"><h1>Blank</h1></div>
+                <div class="contentHeading"><h1>Forms</h1></div>
                 <div class="contentContainer">
+                    <p>The HTML <span class="codeText">&lt;form&gt;</span> element defines a form that is used to collect user input:</p>
 
+                    <div class="codeBox">
+                        <p>&lt;form&gt;</p>
+                        <p style="padding-left:40px;">&lt;!-- form elements --&gt;</p>
+                        <p>&lt;/form&gt;</p>
+                    </div>
+
+                    <p>
+                        HTML 5 can be used to create and perform client-side validation on forms, without the need for JavaScript. Form elements implemented at Higher level 
+                        are:
+                    </p>
+                    <ul>
+                        <li><span class="codeText">&lt;input&gt;</span></li>
+                        <ul>
+                            <li><span class="codeText">text</span></li>
+                            <li><span class="codeText">number</span></li>
+                            <li><span class="codeText">radio</span></li>
+                            <li><span class="codeText">submit</span></li>
+                        </ul>
+                        <li><span class="codeText">&lt;textarea&gt;</span></li>
+                        <li><span class="codeText">&lt;select&gt;</span></li>
+                        <li><span class="codeText">&lt;option&gt;</span></li>
+                    </ul>
+                    
+                    <p>Where appropriate, form inputs will be validated using length, presence and range checks.  Here is an example form:</p>
+                    <img src="/Images/Higher/WDD/Implementation/html/exampleForm.JPG" alt="Form Example" class="cImg" width="50%">
+
+                    <h2>Form Inputs</h2>
+                    <h3>Text</h3>
+                    <p>The example below implements two text input boxes, including length and presence checks:</p>
+
+                    <div class="codeBox">
+                        <p>First Name:&lt;br&gt;</p>
+                        <p>&lt;input type="text" name="firstName" maxlength="20" required&gt;&lt;br&gt;&lt;br&gt;</p>
+                        <p>Last Name:&lt;br&gt;</p>
+                        <p>&lt;input type="text" name="lastName" maxlength="20" required&gt;&lt;br&gt;</p>
+                    </div>
+
+                    <p>The above code includes the following:</p>
+
+                    <table>
+                        <tr>
+                            <th class="codeText">type="text"</th>
+                            <td>Identifies the input type of the form element as text.</td>
+                        </tr>
+                        <tr>
+                            <th class="codeText">name="firstName"</th>
+                            <td>
+                                The name attribute is required when a form's data is submitted to the server for processing.  Although submitting a form to a server is 
+                                note required until Advanced Higher, it is good practice to include the name attribute for all form elements.
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="codeText">maxlength="20"</th>
+                            <td>Specifies the maximum number of characters allowed in the input field.</td>
+                        </tr>
+                        <tr>
+                            <th class="codeText">required</th>
+                            <td>Specifies that the input field must be filled out before submitting the form.</td>
+                        </tr>
+                    </table>
+
+                    <h3>Number</h3>
+                    <p>Number input may be limited to a minimum value, maximum value or both:</p>
+
+                    <div class="codeBox">
+                        <p>Number of Tickets Required:&lt;br&gt;</p>
+                        <p>&lt;input type="number" name="age" min="1" max="3"&gt;&lt;br&gt;&lt;br&gt;</p>
+                    </div>
+
+                    <p>The above code includes the following:</p>
+                    <table>
+                        <tr>
+                            <th class="codeText">type="number"</th>
+                            <td>Identifies the input type of the form element as number.</td>
+                        </tr>
+                        <tr>
+                            <th class="codeText">min="1"</th>
+                            <td>Specifies the minimum value allowed for the input field.</td>
+                        </tr>
+                        <tr>
+                            <th class="codeText">max="3"</th>
+                            <td>Specifies the maximum value allowed for the input field.</td>
+                        </tr>
+                    </table>
+                    <h3>Radio Buttons</h3>
+                    <p>Radio buttons are used to select one option from a list of options:</p>
+
+                    <div class="codeBox">
+                        <p>Choose your age:&lt;br&gt;</p>
+                        <p>&lt;input type="radio" name="age" value="12 to 14"&gt;12-14&lt;br&gt;</p>
+                        <p>&lt;input type="radio" name="age" value="15 to 16"&gt;15-16&lt;br&gt;</p>
+                        <p>&lt;input type="radio" name="age" value="Over 16"&gt;Over 16&lt;br&gt;</p>
+                        <p>&lt;br&gt;&lt;br&gt;</p>
+                    </div>
+
+                    <p>
+                        When submitted, the above form would return the name attribute “age” along with one of the listed values: 12 to 14, 15 or 16, 17 or over. Although 
+                        Higher forms are not submitted to a server, it is good practice to include both the name and value attributes.
+                    </p>
+                    <p>To align the radio buttons vertically, place a &lt;br&gt; tag in between each &lt;input&gt; tag.</p>
+
+                    <img src="/Images/Higher/WDD/Implementation/html/radioButtons.JPG" alt="Radio Buttons" class="cImg" width="50%">
+
+                    <h3>Submit</h3>
+                    <p>When a form is submitted, the browser shows any validation errors (check browser versions, as this is browser dependant).</p>
+                    <img src="/Images/Higher/WDD/Implementation/html/submitButton.JPG" alt="Submit Button" class="cImg" width="50%">
+                    
+                    <p>
+                        To allow candidates visual acknowledgement that an action is performed when the submit button is clicked, a JavaScript 
+                        <span class="codeText">onclick</span> event can be applied to the button as shown below. Additionally, an id has been applied to the submit button 
+                        here so that it can be centred using '<span class="codeText">display:block; margin:auto;</span>' in CSS:
+                    </p>
+
+                    <div class="codeBox">
+                        <p>&lt;input type="submit" id="submitButton" value="Submit" onclick="alert('Form Submitted')"&gt;</p>
+                    </div>
+
+                    <p>This would display the following dialogue when the form was submitted:</p>
+                    <img src="/Images/Higher/WDD/Implementation/html/submitAlert.jpg" alt="Submit Alert" class="cImg" width="50%">
+
+                    <p>
+                        Visual acknowledgement that the form is submitted can be helpful to candidates who are not yet experiencing a response generated by server-side 
+                        processing.
+                    </p>
+                    
+                    
+                    <h3>Textarea</h3>
+                    <p>A larger text box, for use with extended text input, can be implemented using the &lt;textarea&gt; form element:</p>
+
+                    <div class="codeBox">
+                        <p>If required, please state any special requirements:&lt;br&gt;</p>
+                        <p>&lt;textarea name="requirements" rows="5" cols="30" maxlength="100"&gt;&lt;/textarea&gt;&lt;br&gt;&lt;br&gt;</p>
+                        <p>&lt;br&gt;&lt;br&gt;</p>
+                    </div>
+
+                    <p>
+                        The width and height of a &lt;textarea&gt; element is set using rows and columns.  If required, a length and presence check can be applied to above
+                        input element.
+                    </p>
+
+                    <h3>Select and Option - Dropdown Menu</h3>
+                    <p>
+                        The <span class="codeText">&lt;select&gt;</span> is used to create a list of possible inputs in the form of a drop-down menu. Input choices are 
+                        placed inside <span class="codeText">&lt;option&gt;</span> elements:
+                    </p>
+
+                    <div class="codeBox">
+                        <p>Select play:&lt;br&gt;</p>
+                        <p>&lt;select name="play"&gt;</p>
+                        <p style="padding-left:40px;">&lt;option value="Hamlet"&gt;Hamlet&lt;/option&gt;</p>
+                        <p style="padding-left:40px;">&lt;option value="Godo"&gt;Waiting for Godo&lt;/option&gt;</p>
+                        <p style="padding-left:40px;">&lt;option value="Bloo Brothers"&gt;Blood Brothers&lt;/option&gt;</p>
+                        <p style="padding-left:40px;">&lt;option value="Romeo and Juliet"&gt;Romeo and Juliet&lt;/option&gt;</p>
+                        <p>&lt;/select&gt;&lt;br&gt;&lt;br&gt;</p>
+                        <p>&lt;br&gt;&lt;br&gt;</p>
+                    </div>
+
+                    <img src="/Images/Higher/WDD/Implementation/html/dropdownMenu.jpg" alt="Dropdown Menu" class="cImg" width="50%">
+                    <p>As previously stated, the name and value attributes are not required at Higher, but it is good practice to include both.</p>
+
+                    <h3>Dropdown Menu (with size attribute)</h3>
+                    <p>
+                        The size attribute can be used within the <span class="codeText">select</span> element, to display a set number of options. If the number of options 
+                        is larger than the size attribute, a scroll bar will automatically appear:
+                    </p>
+
+                    <div class="codeBox">
+                        <p>&lt;select name = "play" <span style="color:yellow">size="3"</span>&gt;</p>
+                    </div>
+
+                    <img src="/Images/Higher/WDD/Implementation/html/dropdownSize.jpg" alt="Dropdown Menu with size attribute" class="cImg" width="50%">
+
+                    <h3>Dropdown menu (with the 'multiple' attribute)</h3>
+                    <p>
+                        The <span class="codeText">multiple</span> attribute can be used within the <span class="codeText">select</span> element, to allow multiple options 
+                        to be selected by holding down the <b>Ctrl</b> button:
+                    </p>
+                    <div class="codeBox">
+                        <p>&lt;select name = "play" size="3" <span style="color:yellow">multiple</span>&gt;</p>
+                    </div>
+
+                    <img src="/Images/Higher/WDD/Implementation/html/dropdownMultiple.jpg" alt="Dropdown Menu with multiple attribute" class="cImg" width="50%">
+
+                    <h2>Pre-populating Form Input</h2>
+                    <p>
+                        To aid user input, form elements can be given values that are displayed when the web page loads. These can be left unchanged, deleted or edited by 
+                        the user, when they are completing the form.
+                    </p>
+                    <h3>Example 1: Text</h3>
+                    <p>The following code will display the text 'forename' in the first name input box:</p>
+                    <div class="codeBox">
+                        <p>&lt;input type="text" name="firstName" <span style="color:yellow">value="forename"</span> maxlength="20" required&gt;&lt;br&gt;&lt;br&gt;</p>
+                    </div>
+                    <img src="/Images/Higher/WDD/Implementation/html/prepopText.jpg" alt="Prepopulated Text" class="cImg" width="50%">
+
+                    <h3>Example 2: Number</h3>
+                    <p>The following code will display the number '1' in the number input box:</p>
+                    <div class="codeBox">
+                        <p>&lt;input type="number" name="tickets" <span style="color:yellow">value="1"</span> min="1" max="3"&gt;&lt;br&gt;&lt;br&gt;</p>
+                    </div>
+                    <img src="/Images/Higher/WDD/Implementation/html/prepopNumber.jpg" alt="Prepopulated Number" class="cImg" width="50%">
+
+                    <h3>Example 3: Textarea</h3>
+                    <p>To pre-populate a textarea element, the text is included between the start and end elements:</p>
+                    <div class="codeBox">
+                        <p>&lt;textarea name="requirements" rows="5" cols="30" maxlength="100"&gt;<span style="color:yellow">None.</span>&lt;
+                            /textarea&gt;&lt;br&gt;&lt;br&gt;</p>
+                    </div>
+                    <img src="/Images/Higher/WDD/Implementation/html/prepopTextarea.jpg" alt="Prepopulated Textarea" class="cImg" width="50%">
+
+                    <h3>Example 4: Radio</h3>
+                    <p>The <b><span class="codeText">checked</span></b> attribute is used to select one of the radio buttons in a form automatically.</p>
+
+                    <div class="codeBox">
+                        <p>&lt;input type="radio" name="age" value="12 to 14" <span style="color:yellow">checked</span> &gt;12-14&lt;br&gt;</p>
+                        <p>&lt;input type="radio" name="age" value="15 to 16"&gt;15-16&lt;br&gt;</p>
+                        <p>&lt;input type="radio" name="age" value="Over 16"&gt;Over 16&lt;br&gt;</p>
+                    </div>
+                    <img src="/Images/Higher/WDD/Implementation/html/prepopRadio.jpg" alt="Prepopulated Radio" class="cImg" width="50%">
+
+                    <h2>Working Example</h2>
+                    <p>Here is a working example of the form discussed above, try modifying the different elements.</p>
+                    <iframe src="https://trinket.io/embed/html/6275ce58ba5a" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    
                     <h2>Past Paper Question - 2019 Q16(e)</h2>
                     <table>
                         <tr>
