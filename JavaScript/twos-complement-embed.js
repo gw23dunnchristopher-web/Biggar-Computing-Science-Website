@@ -633,12 +633,19 @@
 
     // Check the user's answer
     checkAnswer() {
-      if (this.showFeedback && this.isCorrect) return; // Don't process if already answered correctly
-      
       const input = document.getElementById(`${this.container.id}-input`);
       this.userAnswer = input.value.trim();
 
       if (!this.userAnswer) return; // Don't proceed if input is empty
+
+      // If already answered correctly, just show feedback
+      if (this.isCorrect) {
+        const feedback = document.getElementById(`${this.container.id}-feedback`);
+        feedback.className = 'tc-converter-feedback correct';
+        feedback.innerHTML = '<h4>Correct! Well done!</h4>';
+        feedback.style.display = 'block';
+        return;
+      }
 
       let correct = false;
       const scoreType = this.options.mode === 'binary-to-decimal' ? 'binaryToDecimal' : 'decimalToBinary';
