@@ -29,7 +29,7 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div class="contentHeading"><h1>Data Representation - Numbers</h1></div>
-                
+
                 <div class="contentContainer">
                     <h2>Decimal and Binary Systems</h2>
                     <img class="rImg" src="../../../../Images/N5/DataRep/hands.jpg" alt="hands">
@@ -40,7 +40,7 @@
                     <p>The binary system is base 2, so its place values are 1, 2, 4, 8, 16, etc.  Multiples of 2. In a computer system, we read these from the right to left, and the number of place values depends on the number bits that we are using.
                     for example, in an 8-bit system there would be 8 values, starting with the largest one - 128 64 32 16 8 4 2 1.</p>
                 </div>
-                
+
                 <div class="contentContainer">
                     <h2>Converting Binary Integers to Decimal</h2>
                     <p>A 8-bit binary number consists of eight digits, with each digit being 1 or 0.  To convert this into a decimal number we must first draw a binary table.</p>
@@ -93,7 +93,7 @@
                                 <th>128</th><th>64</th><th>32</th><th>16</th><th>8</th><th>4</th><th>2</th><th>1</th>
                             </tr>
                             <tr>
-                                <td>0</td><td>0</td><td>0</td><td>1</td><td></td><td></td><td></td><td></td>
+                                <td> 0</td><td>0</td><td>0</td><td>1</td><td></td><td></td><td></td><td></td>
                             </tr>   
                         </table>
                         <li>You can fit 8 into 12, so place we place a 1 under the 8 and subtract 8 from 12. <b>12-8=4</b></li>
@@ -127,13 +127,20 @@
 
                     <h2>Binary-Denary Conversion Practice Questions</h2>
                     <p>You can use the tool below to practice converting from binary to benary and vice versa.</p>
-                    <div 
+                    <div id="binary-converter" 
                       data-binary-converter 
                       data-mode="binary-to-decimal"
                       data-show-toggle="true"
                       data-primary-color="#6366f1"
                       data-class="my-custom-class"
                     ></div>
+                    <script>
+                      window.addEventListener('load', function() {
+                        if (typeof initBinaryConverter === 'function') {
+                          initBinaryConverter('binary-converter');
+                        }
+                      });
+                    </script>
 
                 </div>
 
@@ -151,7 +158,7 @@
                         <li><b>Exponent</b> - The exponent is the power to which the base is raised.  It is the number of places that the decimal point must be moved so that it sits in front of the mantissa.  If the decimal point has to move in the other direction (for example, if the number were 0.0025), then the exponent would be negative (in the case of 0.0025 it would be -2).</p>
                 <div>
             </div>
-            
+
         </div>
 
         <footer>
