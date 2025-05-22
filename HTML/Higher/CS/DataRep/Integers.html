@@ -38,9 +38,9 @@
                     <p>Just as with N5 you will be expected to understand how to convert a binary integer to a denary (decimal) integer and vice versa. 
                     <p>The place values in the <b>decimal</b> system are based on <b>powers of 10</b> (1, 10, 100, 100, etc) because we have 10 available digits (0, 1, 2, 3, 4, 
                         5, 6, 7, 8, and 9).</p>
-                    
+
                     <p><b>Binary</b> only has 2 available digits (1 and 0) so its place values are based on <b>powers of 2</b> as shown in the table below.</p>
-                    
+
                     <table class="binaryTable">
                         <tr>
                             <th>2<sup>7</sup></th>
@@ -134,7 +134,7 @@
                         <li>Change all the 0s to 1s and vice versa.</li>
                         <li>Add 1 to the number (remember that numbers will carry over if adding a number would increase them above 1).</li>
                     </ul>
-                    
+
                     <h3>Worked Examples</h3>
 
                     <div class="example">
@@ -356,13 +356,21 @@
                       data-show-scores="true"
                     ></div>
                     <script>
-                      window.addEventListener('load', function() {
+                      function initializeConverter() {
                         if (typeof initTwosComplementConverter === 'function') {
                           initTwosComplementConverter('twos-complement-converter');
+                        } else {
+                          setTimeout(initializeConverter, 100);
                         }
-                      });
+                      }
+
+                      if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', initializeConverter);
+                      } else {
+                        initializeConverter();
+                      }
                     </script>
-                    
+
                     <h2>Past Paper Question - 2018 Q1</h2>
                     <table>
                         <tr>
