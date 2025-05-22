@@ -1,5 +1,8 @@
 // Two's Complement Converter Embeddable Version
 (function() {
+  // Prevent multiple initializations
+  if (window.twosComplementInitialized) return;
+  window.twosComplementInitialized = true;
   // Create stylesheet
   const style = document.createElement('style');
   style.textContent = `

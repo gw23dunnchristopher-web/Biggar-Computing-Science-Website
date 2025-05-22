@@ -1,5 +1,8 @@
 // Binary-Decimal Converter Embeddable Version
 (function() {
+  // Prevent multiple initializations
+  if (window.binaryConverterInitialized) return;
+  window.binaryConverterInitialized = true;
   // Create stylesheet
   const style = document.createElement('style');
   style.textContent = `
