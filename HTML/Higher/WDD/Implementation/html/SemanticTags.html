@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Higher Computing Science - Blank</title>
+        <title>Higher Computing Science - Semantic Tags</title>
         <script src="/JavaScript/higherScript.js"></script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
@@ -20,28 +20,77 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>Higher</h1></div>
-                <div class="contentHeading"><h1>Blank</h1></div>
+                <div class="contentHeading"><h1>Semantic Tags</h1></div>
                 <div class="contentContainer">
+                    <h2>What are Semantic Tags?</h2>
+                    <p>Semantic tags clearly describe their purpose to both people reading your HTML code, and the browser that read and display it as a webpage.</p>
+                    <p>
+                        Examples of <b>semantic</b> tags include: <span class="codeText">&lt;header&gt;</span>, <span class="codeText">&lt;main&gt;</span>, 
+                        <span class="codeText">&lt;section&gt;</span>, <span class="codeText">&lt;nav&gt;</span>, <span class="codeText">&lt;footer&gt;</span>, 
+                        <span class="codeText">&lt;img&gt;</span>, <span class="codeText">&lt;table&gt;</span> and <span class="codeText">&lt;article&gt;</span>.
+                    </p>
+                    <p>
+                        Examples of <b>non-semantic</b> tags include: <span class="codeText">&lt;div&gt;</span> and <span class="codeText">&lt;span&gt;</span>. 
+                    </p>
 
-                    <h2>Past Paper Question - 2019 Q16(e)</h2>
+                    <h2>Using Semantic Tags in the &lt;body&gt; tag</h2>
+                    <img src="/Images/Higher/WDD/Implementation/html/semanticTags.jpg" alt="Semantic Tags" class="cImg" width="50%">
+
+                    <h2>Page Layout</h2>
+                    <p>
+                        The example below implements a simple page, with a main element used to contain the page content. The content is then sub-divided using section 
+                        elements:
+                    </p>
+                     <img src="/Images/Higher/WDD/Implementation/html/semanticTags2.jpg" alt="Lawn Care Website Tags Example" class="cImg" width="50%">
+
+                    <h2>Page Layout - Subdivided Content</h2>
+                    <p>
+                        Page content can be sub-divided into different areas using both &lt;section&gt; and &lt;div&gt; elements. Using both elements allows the sub-divided 
+                        content to be independently styled, without the need to implement classes or ids:
+                    </p>
+                    <div class="sideBySide">
+                        <img src="/Images/Higher/WDD/Implementation/html/subSemantic.jpg" alt="Subdivided Semantic Tags" width="50%">
+                        <img src="/Images/Higher/WDD/Implementation/html/subLawn.jpg" alt="Lawn Care Website subdivided Tags" width="50%">
+                    </div>
+
+                    <p>
+                        Here is another example, on this page the content is laid out side by side.
+                    </p>
+
+                    <div class="sideBySide">
+                        <img src="/Images/Higher/WDD/Implementation/html/subSemantic2.jpg" alt="Subdivided Semantic Tags 2" width="50%">
+                        <img src="/Images/Higher/WDD/Implementation/html/subLawn2.jpg" alt="Lawn Care Website subdivided Tags 2" width="50%">
+                    </div>
+
+                    <p>A version of the website that you can try and test is included below:</p>
+
+                    <iframe src="https://trinket.io/embed/html/b6a464ca3c0e" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    
+                    <h2>Past Paper Question - 2022 Q13</h2>
+                    <p>HTML 5 elements have been used to define different parts of a web page shown below.</p>
+                    <img class="cImg" src="/Images/Higher/WDD/Implementation/html/2022Q13.jpg" alt="2022 Q13">
+                    
                     <table>
                         <tr>
-                            <th rowspan="2" width="30px">(e)</th>
+                            <th rowspan="2" width="30px">13</th>
                             <td>
-
+                                <p>State which elements should be used for the parts labelled A and B.</p>
                             </td>
-                            <th rowspan="2"  width="30px">1</th>
+                            <th rowspan="2"  width="30px">2</th>
                         </tr>
                             <tr>
                                 <td>
                                     <div class="hiddenElement answer1">
-
+                                        <p>One mark for each of the bullet points:</p>
+                                        <ul>
+                                            <li><span class="codeText">&lt;nav&gt;</span> for A</li>
+                                            <li><span class="codeText">&lt;section&gt;</span> for B</li>
+                                        </ul>    
                                     </div>
                                 </td>
                             </tr>
                         </table>
                     <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
-                    
                 </div>
             </div>
         </div>
