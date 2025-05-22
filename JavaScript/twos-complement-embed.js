@@ -1,8 +1,9 @@
 // Two's Complement Converter Embeddable Version
 (function() {
-  // Prevent multiple initializations
-  if (window.twosComplementInitialized) return;
-  window.twosComplementInitialized = true;
+  // Check if initialization has already happened
+  const initialized = document.querySelector('[data-twos-complement-initialized]');
+  if (initialized) return;
+  document.body.setAttribute('data-twos-complement-initialized', 'true');
   // Create stylesheet
   const style = document.createElement('style');
   style.textContent = `

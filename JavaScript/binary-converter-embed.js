@@ -1,8 +1,9 @@
 // Binary-Decimal Converter Embeddable Version
 (function() {
-  // Prevent multiple initializations
-  if (window.binaryConverterInitialized) return;
-  window.binaryConverterInitialized = true;
+  // Check if initialization has already happened
+  const initialized = document.querySelector('[data-binary-converter-initialized]');
+  if (initialized) return;
+  document.body.setAttribute('data-binary-converter-initialized', 'true');
   // Create stylesheet
   const style = document.createElement('style');
   style.textContent = `
