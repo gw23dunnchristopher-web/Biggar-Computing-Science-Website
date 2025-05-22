@@ -708,6 +708,7 @@
   // Auto-initialize converters with data attributes
   function initializeAll() {
     const containers = document.querySelectorAll('[data-twos-complement-converter]');
+    let instanceCount = 0;
 
     containers.forEach(container => {
       // Get configuration from data attributes
@@ -718,10 +719,8 @@
         showScores: container.getAttribute('data-show-scores') !== 'false'
       };
 
-      // Ensure container has ID
-      if (!container.id) {
-        container.id = 'twos-complement-converter-' + Math.random().toString(36).substring(2, 9);
-      }
+      // Create a unique ID for each instance
+      container.id = 'twos-complement-converter-instance-' + (++instanceCount);
 
       // Initialize converter
       window.initTwosComplementConverter(container.id, options);

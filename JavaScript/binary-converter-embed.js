@@ -623,6 +623,7 @@
   // Auto-initialize converters with data attributes
   function initializeAll() {
     const containers = document.querySelectorAll('[data-binary-converter]');
+    let instanceCount = 0;
 
     containers.forEach(container => {
       // Get configuration from data attributes
@@ -633,10 +634,8 @@
         className: container.getAttribute('data-class') || ''
       };
 
-      // Ensure container has ID
-      if (!container.id) {
-        container.id = 'binary-converter-' + Math.random().toString(36).substring(2, 9);
-      }
+      // Create a unique ID for each instance
+      container.id = 'binary-converter-instance-' + (++instanceCount);
 
       // Initialize converter
       window.initBinaryConverter(container.id, options);
