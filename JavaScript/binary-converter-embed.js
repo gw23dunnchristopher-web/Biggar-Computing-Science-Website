@@ -1,7 +1,11 @@
 // Binary-Decimal Converter Embeddable Version
 (function() {
-  // Create stylesheet
+  // Check if already initialized
+  if (document.querySelector('#binary-converter-styles')) return;
+  
+  // Create stylesheet with ID
   const style = document.createElement('style');
+  style.id = 'binary-converter-styles';
   style.textContent = `
     .binary-converter-container {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;

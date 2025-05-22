@@ -1,7 +1,11 @@
 // Two's Complement Converter Embeddable Version
 (function() {
-  // Create stylesheet
+  // Check if already initialized
+  if (document.querySelector('#twos-complement-styles')) return;
+  
+  // Create stylesheet with ID
   const style = document.createElement('style');
+  style.id = 'twos-complement-styles';
   style.textContent = `
     .tc-converter-container {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
