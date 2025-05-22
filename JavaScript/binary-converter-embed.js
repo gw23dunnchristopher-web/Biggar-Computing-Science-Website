@@ -557,14 +557,8 @@
 
       if (!this.userAnswer) return; // Don't proceed if input is empty
 
-      // If already answered correctly, just show feedback
-      if (this.isCorrect) {
-        const feedback = document.getElementById(`${this.container.id}-feedback`);
-        feedback.className = 'binary-converter-feedback correct';
-        feedback.innerHTML = '<h4>Correct! Well done!</h4>';
-        feedback.style.display = 'block';
-        return;
-      }
+      // Reset previous state
+      this.isCorrect = false;
 
       let correct = false;
       const scoreType = this.options.mode === 'binary-to-decimal' ? 'binaryToDecimal' : 'decimalToBinary';
