@@ -619,10 +619,14 @@
             </div>
         </div>
             <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Initialize the converter with the ID of the container element
-                    window.initFloatingPointConverter('floating-point-converter');
-                });
+                function initializeConverter() {
+                    if (typeof window.initFloatingPointConverter === 'function') {
+                        window.initFloatingPointConverter('floating-point-converter');
+                    } else {
+                        setTimeout(initializeConverter, 100);
+                    }
+                }
+                document.addEventListener('DOMContentLoaded', initializeConverter);
             </script>
         <footer>
             <div id="left">
