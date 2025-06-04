@@ -4,7 +4,6 @@
         <meta charset="UTF-8">
         <title>Higher Computing Science - Floating Point Representation</title>
         <script src="/JavaScript/higherScript.js"></script>
-        <script src="/JavaScript/floating-point-converter.js"></script>
 
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
@@ -631,5 +630,22 @@
             </div>
         </footer>
         </div>
+
+        <!-- Load floating point converter last to ensure all other page elements are ready -->
+        <script src="/JavaScript/floating-point-converter.js"></script>
+        <script>
+            // Ensure converter initializes only after everything else is loaded
+            window.addEventListener('load', function() {
+                // Add extra delay to ensure sidebar and all page scripts are fully ready
+                setTimeout(function() {
+                    if (typeof initFloatingPointConverter === 'function') {
+                        const converterElement = document.getElementById('floating-point-converter');
+                        if (converterElement && !converterElement.querySelector('.fp-converter-container')) {
+                            initFloatingPointConverter('floating-point-converter');
+                        }
+                    }
+                }, 500); // 500ms delay to ensure everything is stable
+            });
+        </script>
     </body>
 </html>
