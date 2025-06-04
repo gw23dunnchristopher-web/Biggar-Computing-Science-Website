@@ -48,9 +48,16 @@
 
     .fp-converter-card-title {
       margin: 0;
-      text-decoration:none !important;
-      color:white;
+      text-decoration: none !important;
+      color: white;
       font-size: 1.25rem;
+    }
+
+    .fp-converter-card-title,
+    .fp-converter-card-title:hover,
+    .fp-converter-card-title:visited,
+    .fp-converter-card-title:link {
+      text-decoration: none !important;
     }
 
     .fp-converter-card-body {
