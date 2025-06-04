@@ -501,23 +501,6 @@
                     <h2>Floating Point Question Practice</h2>
                     <p>Use the tool below to practice converting binary numbers to floating point representation.</p>
                     <div id="floating-point-converter" data-floating-point-converter></div>
-                    <script>
-                        // Minimal initialization - let the auto-init handle the timing
-                        function ensureConverterInit() {
-                            // Only manually initialize if auto-init hasn't worked
-                            const converter = document.getElementById('floating-point-converter');
-                            if (converter && !converter.querySelector('.fp-converter-container')) {
-                                if (typeof initFloatingPointConverter === 'function') {
-                                    initFloatingPointConverter('floating-point-converter');
-                                }
-                            }
-                        }
-
-                        // Fallback initialization
-                        window.addEventListener('load', function() {
-                            setTimeout(ensureConverterInit, 100);
-                        });
-                    </script>
 
                     <h2>Past Paper Question - 2023 Q3 </h2>
                     <table>

@@ -1138,13 +1138,13 @@
         console.error(`Target element with ID '${targetElementId}' not found.`);
         return;
       }
-      
+
       // Ensure document is in a stable state
       if (document.readyState === 'loading') {
         setTimeout(safeInit, 50);
         return;
       }
-      
+
       try {
         initConverter(targetElementId);
       } catch (error) {
@@ -1159,27 +1159,36 @@
         }, 200);
       }
     }
-    
+
     safeInit();
   };
 
-  // More robust auto-initialization with better error handling
+  // Robust auto-initialization
   function tryAutoInit() {
     try {
       const autoInit = document.querySelector('[data-floating-point-converter]');
-      if (autoInit && autoInit.id) {
-        // Ensure all required functions and DOM elements are ready
-        if (typeof window.initFloatingPointConverter === 'function' && 
-            document.body && 
-            document.head) {
-          window.initFloatingPointConverter(autoInit.id);
-          return true; // Success
-        } else {
-          return false; // Not ready yet
-        }
+      if (!autoInit || !autoInit.id) {
+        return false;
       }
+
+      // Check if already initialized
+      if (autoInit.querySelector('.fp-converter-container')) {
+        return true; // Already initialized
+      }
+
+      // Check if function is available and page is ready
+      if (typeof window.initFloatingPointConverter === 'function' && 
+          document.body && 
+          document.head &&
+          autoInit.offsetParent !== null) { // Element is visible
+
+        window.initFloatingPointConverter(autoInit.id);
+        return true;
+      }
+
+      return false;
     } catch (error) {
-      console.warn('Floating point converter auto-initialization failed:', error);
+      console.warn('Floating point converter initialization error:', error);
       return false;
     }
   }
@@ -1187,15 +1196,15 @@
   // Progressive initialization with multiple fallbacks
   let initAttempts = 0;
   const maxAttempts = 20;
-  
+
   function attemptInit() {
     initAttempts++;
-    
+
     if (tryAutoInit()) {
       // Success - stop trying
       return;
     }
-    
+
     if (initAttempts < maxAttempts) {
       // Try again with increasing delays
       const delay = Math.min(100 + (initAttempts * 25), 500);
@@ -1216,7 +1225,7 @@
       setTimeout(attemptInit, 25);
     });
   }
-  
+
   // Additional fallback for window load event
   window.addEventListener('load', function() {
     if (initAttempts === 0 || !document.querySelector('[data-floating-point-converter] .fp-converter-container')) {
