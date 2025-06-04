@@ -47,9 +47,12 @@
     }
 
     .fp-converter-card-title {
-      margin: 0;
-      color: white;
-      font-size: 1.25rem;
+      margin: 0 !important;
+      color: white !important;
+      font-size: 1.25rem !important;
+      text-decoration: none !important;
+      border: none !important;
+      outline: none !important;
     }
 
     .fp-converter-card-title,
@@ -59,9 +62,13 @@
     .fp-converter-card-title:active,
     .fp-converter-card-title:focus,
     .fp-converter-card-title *,
-    .fp-converter-card-title i {
+    .fp-converter-card-title i,
+    .fp-converter-card-title span {
       text-decoration: none !important;
       color: white !important;
+      border-bottom: none !important;
+      text-decoration-line: none !important;
+      text-decoration-style: none !important;
     }
 
     .fp-converter-card-body {
@@ -1130,21 +1137,39 @@
     }, 100);
   };
 
-  // Auto-initialize with better error handling
+  // More robust auto-initialization
   function tryAutoInit() {
     try {
       const autoInit = document.querySelector('[data-floating-point-converter]');
       if (autoInit && autoInit.id) {
-        window.initFloatingPointConverter(autoInit.id);
+        // Make sure the function exists before calling it
+        if (typeof window.initFloatingPointConverter === 'function') {
+          window.initFloatingPointConverter(autoInit.id);
+        } else {
+          // Retry after a short delay if function not ready
+          setTimeout(tryAutoInit, 50);
+        }
       }
     } catch (error) {
       console.warn('Floating point converter auto-initialization failed:', error);
+      // Retry once more in case of temporary error
+      setTimeout(tryAutoInit, 200);
     }
   }
 
+  // Multiple initialization strategies to prevent white screen
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', tryAutoInit);
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(tryAutoInit, 50);
+    });
+  } else if (document.readyState === 'interactive') {
+    setTimeout(tryAutoInit, 50);
   } else {
-    setTimeout(tryAutoInit, 100);
+    setTimeout(tryAutoInit, 10);
   }
+  
+  // Fallback initialization
+  window.addEventListener('load', function() {
+    setTimeout(tryAutoInit, 100);
+  });
 })();
