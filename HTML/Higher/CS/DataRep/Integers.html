@@ -356,21 +356,6 @@
                       data-show-header="true"
                       data-show-scores="true"
                     ></div>
-                    <script>
-                      function initializeConverter() {
-                        if (typeof initTwosComplementConverter === 'function') {
-                          initTwosComplementConverter('twos-complement-converter');
-                        } else {
-                          setTimeout(initializeConverter, 100);
-                        }
-                      }
-
-                      if (document.readyState === 'loading') {
-                        document.addEventListener('DOMContentLoaded', initializeConverter);
-                      } else {
-                        initializeConverter();
-                      }
-                    </script>
 
                     <h2>Past Paper Question - 2018 Q1</h2>
                     <table>
@@ -453,5 +438,21 @@
             </div>
         </footer>
         </div>
+
+        <!-- Load two's complement converter last to ensure all other page elements are ready -->
+        <script>
+            // Ensure converter initializes only after everything else is loaded
+            window.addEventListener('load', function() {
+                // Add extra delay to ensure sidebar and all page scripts are fully ready
+                setTimeout(function() {
+                    if (typeof initTwosComplementConverter === 'function') {
+                        const converterElement = document.getElementById('twos-complement-converter');
+                        if (converterElement && !converterElement.querySelector('.tc-converter-container')) {
+                            initTwosComplementConverter('twos-complement-converter');
+                        }
+                    }
+                }, 500); // 500ms delay to ensure everything is stable
+            });
+        </script>
     </body>
 </html>
