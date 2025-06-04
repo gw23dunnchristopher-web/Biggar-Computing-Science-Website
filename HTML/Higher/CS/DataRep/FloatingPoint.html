@@ -5,7 +5,7 @@
         <title>Higher Computing Science - Floating Point Representation</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/floating-point-converter.js"></script>
-       
+
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -36,7 +36,7 @@
                 <div class="contentHeading"><h1>Course Overview</h1></div>
                 <div class="contentContainer">
                     <h2>What is Floating Point Representation?</h2>
-                    
+
                     <p> 
                         A number with a fractional part is stored using floating-point representation. This is known
                         as a <b>real</b> number.  For example, 4.2341 or 0.31 would be real numbers.
@@ -197,7 +197,7 @@
                                 </table>
                             </li>
                             <li>  
-                                
+
                                 <b>Calculate the Exponent</b> - The point has moved 3 spaces to the left, so the
                                     exponent will be 3.  If we convert 3 to 8 bits, we get 0000 0011.
                                 <img class="cImg" src="/Images/Higher/CS/DataRep/floatingPoint1.PNG" width="40%" 
@@ -500,8 +500,25 @@
 
                     <h2>Floating Point Question Practice</h2>
                     <p>Use the tool below to practice converting binary numbers to floating point representation.</p>
-                    <div id="floating-point-converter"></div>
-                    
+                    <div id="floating-point-converter" data-floating-point-converter></div>
+                    <script>
+                        // Improved initialization that handles timing better
+                        function initFPConverter() {
+                            if (typeof initFloatingPointConverter === 'function') {
+                                initFloatingPointConverter('floating-point-converter');
+                            } else {
+                                // Retry if function not loaded yet
+                                setTimeout(initFPConverter, 100);
+                            }
+                        }
+
+                        if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', initFPConverter);
+                        } else {
+                            initFPConverter();
+                        }
+                    </script>
+
                     <h2>Past Paper Question - 2023 Q3 </h2>
                     <table>
                         <tr>
@@ -511,7 +528,7 @@
                                 <p style="text-align:center"><b>-0.0000 0101 0000 1111</b></p>
                                 <p>There are 16 bits for the mantissa (including the sign bit) and 8 bits for the 
                                 exponent.</p>
-                                
+
                                 <table class="tg"><thead>
                                       <tr>
                                         <th class="tg-iuan">Sign Bit</th>
@@ -618,16 +635,7 @@
                 </div>
             </div>
         </div>
-            <script>
-                function initializeConverter() {
-                    if (typeof window.initFloatingPointConverter === 'function') {
-                        window.initFloatingPointConverter('floating-point-converter');
-                    } else {
-                        setTimeout(initializeConverter, 100);
-                    }
-                }
-                document.addEventListener('DOMContentLoaded', initializeConverter);
-            </script>
+            
         <footer>
             <div id="left">
                 <p>Biggar High School</p>
