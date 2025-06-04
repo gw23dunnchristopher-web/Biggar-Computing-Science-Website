@@ -502,28 +502,21 @@
                     <p>Use the tool below to practice converting binary numbers to floating point representation.</p>
                     <div id="floating-point-converter" data-floating-point-converter></div>
                     <script>
-                        // Simple, reliable initialization
-                        function initFPConverter() {
-                            if (typeof initFloatingPointConverter === 'function') {
-                                try {
+                        // Minimal initialization - let the auto-init handle the timing
+                        function ensureConverterInit() {
+                            // Only manually initialize if auto-init hasn't worked
+                            const converter = document.getElementById('floating-point-converter');
+                            if (converter && !converter.querySelector('.fp-converter-container')) {
+                                if (typeof initFloatingPointConverter === 'function') {
                                     initFloatingPointConverter('floating-point-converter');
-                                } catch (error) {
-                                    console.error('Failed to initialize floating point converter:', error);
-                                    setTimeout(initFPConverter, 500); // Retry once
                                 }
-                            } else {
-                                setTimeout(initFPConverter, 100);
                             }
                         }
 
-                        // Initialize when everything is ready
-                        if (document.readyState === 'complete') {
-                            setTimeout(initFPConverter, 50);
-                        } else {
-                            window.addEventListener('load', function() {
-                                setTimeout(initFPConverter, 50);
-                            });
-                        }
+                        // Fallback initialization
+                        window.addEventListener('load', function() {
+                            setTimeout(ensureConverterInit, 100);
+                        });
                     </script>
 
                     <h2>Past Paper Question - 2023 Q3 </h2>

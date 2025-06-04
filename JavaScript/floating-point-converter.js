@@ -1131,45 +1131,96 @@
 
   // Expose the init function to the global scope
   window.initFloatingPointConverter = function(targetElementId) {
-    // Use a small delay to ensure DOM is fully ready
-    setTimeout(function() {
-      initConverter(targetElementId);
-    }, 100);
+    // Check if DOM and target element are ready
+    function safeInit() {
+      const targetElement = document.getElementById(targetElementId);
+      if (!targetElement) {
+        console.error(`Target element with ID '${targetElementId}' not found.`);
+        return;
+      }
+      
+      // Ensure document is in a stable state
+      if (document.readyState === 'loading') {
+        setTimeout(safeInit, 50);
+        return;
+      }
+      
+      try {
+        initConverter(targetElementId);
+      } catch (error) {
+        console.error('Error initializing floating point converter:', error);
+        // Retry once after a delay
+        setTimeout(() => {
+          try {
+            initConverter(targetElementId);
+          } catch (retryError) {
+            console.error('Retry failed:', retryError);
+          }
+        }, 200);
+      }
+    }
+    
+    safeInit();
   };
 
-  // More robust auto-initialization
+  // More robust auto-initialization with better error handling
   function tryAutoInit() {
     try {
       const autoInit = document.querySelector('[data-floating-point-converter]');
       if (autoInit && autoInit.id) {
-        // Make sure the function exists before calling it
-        if (typeof window.initFloatingPointConverter === 'function') {
+        // Ensure all required functions and DOM elements are ready
+        if (typeof window.initFloatingPointConverter === 'function' && 
+            document.body && 
+            document.head) {
           window.initFloatingPointConverter(autoInit.id);
+          return true; // Success
         } else {
-          // Retry after a short delay if function not ready
-          setTimeout(tryAutoInit, 50);
+          return false; // Not ready yet
         }
       }
     } catch (error) {
       console.warn('Floating point converter auto-initialization failed:', error);
-      // Retry once more in case of temporary error
-      setTimeout(tryAutoInit, 200);
+      return false;
     }
   }
 
-  // Multiple initialization strategies to prevent white screen
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(tryAutoInit, 50);
-    });
+  // Progressive initialization with multiple fallbacks
+  let initAttempts = 0;
+  const maxAttempts = 20;
+  
+  function attemptInit() {
+    initAttempts++;
+    
+    if (tryAutoInit()) {
+      // Success - stop trying
+      return;
+    }
+    
+    if (initAttempts < maxAttempts) {
+      // Try again with increasing delays
+      const delay = Math.min(100 + (initAttempts * 25), 500);
+      setTimeout(attemptInit, delay);
+    } else {
+      console.error('Failed to initialize floating point converter after', maxAttempts, 'attempts');
+    }
+  }
+
+  // Start initialization immediately if DOM is ready
+  if (document.readyState === 'complete') {
+    setTimeout(attemptInit, 10);
   } else if (document.readyState === 'interactive') {
-    setTimeout(tryAutoInit, 50);
+    setTimeout(attemptInit, 25);
   } else {
-    setTimeout(tryAutoInit, 10);
+    // DOM still loading
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(attemptInit, 25);
+    });
   }
   
-  // Fallback initialization
+  // Additional fallback for window load event
   window.addEventListener('load', function() {
-    setTimeout(tryAutoInit, 100);
+    if (initAttempts === 0 || !document.querySelector('[data-floating-point-converter] .fp-converter-container')) {
+      setTimeout(attemptInit, 50);
+    }
   });
 })();
