@@ -502,21 +502,24 @@
                     <p>Use the tool below to practice converting binary numbers to floating point representation.</p>
                     <div id="floating-point-converter" data-floating-point-converter></div>
                     <script>
-                        // Improved initialization that handles timing better
+                        // Safer initialization with error handling
                         function initFPConverter() {
-                            if (typeof initFloatingPointConverter === 'function') {
-                                initFloatingPointConverter('floating-point-converter');
-                            } else {
-                                // Retry if function not loaded yet
-                                setTimeout(initFPConverter, 100);
+                            try {
+                                if (typeof initFloatingPointConverter === 'function') {
+                                    initFloatingPointConverter('floating-point-converter');
+                                } else {
+                                    // Retry if function not loaded yet
+                                    setTimeout(initFPConverter, 200);
+                                }
+                            } catch (error) {
+                                console.error('Failed to initialize floating point converter:', error);
                             }
                         }
 
-                        if (document.readyState === 'loading') {
-                            document.addEventListener('DOMContentLoaded', initFPConverter);
-                        } else {
-                            initFPConverter();
-                        }
+                        // Wait for both DOM and scripts to be ready
+                        window.addEventListener('load', function() {
+                            setTimeout(initFPConverter, 100);
+                        });
                     </script>
 
                     <h2>Past Paper Question - 2023 Q3 </h2>

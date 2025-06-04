@@ -48,8 +48,7 @@
 
     .fp-converter-card-title {
       margin: 0;
-      text-decoration: none !important;
-      color: white !important;
+      color: white;
       font-size: 1.25rem;
     }
 
@@ -58,14 +57,11 @@
     .fp-converter-card-title:visited,
     .fp-converter-card-title:link,
     .fp-converter-card-title:active,
-    .fp-converter-card-title:focus {
+    .fp-converter-card-title:focus,
+    .fp-converter-card-title *,
+    .fp-converter-card-title i {
       text-decoration: none !important;
       color: white !important;
-    }
-
-    .fp-converter-card-title * {
-      text-decoration: none !important;
-      color: inherit !important;
     }
 
     .fp-converter-card-body {
@@ -1134,21 +1130,21 @@
     }, 100);
   };
 
-  // Auto-initialize if DOM is already loaded
+  // Auto-initialize with better error handling
+  function tryAutoInit() {
+    try {
+      const autoInit = document.querySelector('[data-floating-point-converter]');
+      if (autoInit && autoInit.id) {
+        window.initFloatingPointConverter(autoInit.id);
+      }
+    } catch (error) {
+      console.warn('Floating point converter auto-initialization failed:', error);
+    }
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-      const autoInit = document.querySelector('[data-floating-point-converter]');
-      if (autoInit) {
-        window.initFloatingPointConverter(autoInit.id);
-      }
-    });
+    document.addEventListener('DOMContentLoaded', tryAutoInit);
   } else {
-    // DOM already loaded
-    setTimeout(function() {
-      const autoInit = document.querySelector('[data-floating-point-converter]');
-      if (autoInit) {
-        window.initFloatingPointConverter(autoInit.id);
-      }
-    }, 50);
+    setTimeout(tryAutoInit, 100);
   }
 })();
