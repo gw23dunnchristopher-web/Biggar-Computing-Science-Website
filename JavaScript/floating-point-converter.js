@@ -47,28 +47,8 @@
     }
 
     .fp-converter-card-title {
-      margin: 0 !important;
-      color: white !important;
-      font-size: 1.25rem !important;
-      text-decoration: none !important;
-      border: none !important;
-      outline: none !important;
-    }
-
-    .fp-converter-card-title,
-    .fp-converter-card-title:hover,
-    .fp-converter-card-title:visited,
-    .fp-converter-card-title:link,
-    .fp-converter-card-title:active,
-    .fp-converter-card-title:focus,
-    .fp-converter-card-title *,
-    .fp-converter-card-title i,
-    .fp-converter-card-title span {
-      text-decoration: none !important;
-      color: white !important;
-      border-bottom: none !important;
-      text-decoration-line: none !important;
-      text-decoration-style: none !important;
+      margin: 0;
+      font-size: 1.25rem;
     }
 
     .fp-converter-card-body {
@@ -405,10 +385,10 @@
   // Create the HTML structure
   function createConverterHTML() {
     return `
-      <div class="fp-converter-container" style="text-decoration:none;">
+      <div class="fp-converter-container">
         <div class="fp-converter-card fp-converter-mb-4">
           <div class="fp-converter-card-header fp-converter-d-flex fp-converter-justify-content-between fp-converter-align-items-center">
-            <h3 class="fp-converter-card-title" style="text-decoration:none;">
+            <h3 class="fp-converter-card-title" style="color:white; text-decoration:none;"">
               <i class="fas fa-calculator fp-converter-me-2"></i>
               Binary to Floating-Point Conversion
             </h3>
@@ -854,20 +834,10 @@
         // Calculate the correct answer
         const correctAnswer = getIEEERepresentation(originalBinary, mantissaBits, exponentBits);
 
-        // Debug logging to see what's happening
-        console.log('User answer:', userAnswer);
-        console.log('Correct answer:', correctAnswer);
-        console.log('Original binary:', originalBinary);
-        console.log('Mantissa bits:', mantissaBits, 'Exponent bits:', exponentBits);
-
         // Check each part individually and award points
         const isSignBitCorrect = userAnswer.sign_bit === correctAnswer.sign_bit;
         const isExponentCorrect = userAnswer.exponent === correctAnswer.exponent;
         const isMantissaCorrect = userAnswer.mantissa === correctAnswer.mantissa;
-
-        console.log('Sign bit correct:', isSignBitCorrect);
-        console.log('Exponent correct:', isExponentCorrect);
-        console.log('Mantissa correct:', isMantissaCorrect);
 
         // Calculate points for this question (1 point for each correct part)
         let pointsEarned = 0;
@@ -1131,105 +1101,6 @@
 
   // Expose the init function to the global scope
   window.initFloatingPointConverter = function(targetElementId) {
-    // Check if DOM and target element are ready
-    function safeInit() {
-      const targetElement = document.getElementById(targetElementId);
-      if (!targetElement) {
-        console.error(`Target element with ID '${targetElementId}' not found.`);
-        return;
-      }
-
-      // Ensure document is in a stable state
-      if (document.readyState === 'loading') {
-        setTimeout(safeInit, 50);
-        return;
-      }
-
-      try {
-        initConverter(targetElementId);
-      } catch (error) {
-        console.error('Error initializing floating point converter:', error);
-        // Retry once after a delay
-        setTimeout(() => {
-          try {
-            initConverter(targetElementId);
-          } catch (retryError) {
-            console.error('Retry failed:', retryError);
-          }
-        }, 200);
-      }
-    }
-
-    safeInit();
+    initConverter(targetElementId);
   };
-
-  // Robust auto-initialization
-  function tryAutoInit() {
-    try {
-      const autoInit = document.querySelector('[data-floating-point-converter]');
-      if (!autoInit || !autoInit.id) {
-        return false;
-      }
-
-      // Check if already initialized
-      if (autoInit.querySelector('.fp-converter-container')) {
-        return true; // Already initialized
-      }
-
-      // Check if function is available and page is ready
-      if (typeof window.initFloatingPointConverter === 'function' && 
-          document.body && 
-          document.head &&
-          autoInit.offsetParent !== null) { // Element is visible
-
-        window.initFloatingPointConverter(autoInit.id);
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      console.warn('Floating point converter initialization error:', error);
-      return false;
-    }
-  }
-
-  // Progressive initialization with multiple fallbacks
-  let initAttempts = 0;
-  const maxAttempts = 20;
-
-  function attemptInit() {
-    initAttempts++;
-
-    if (tryAutoInit()) {
-      // Success - stop trying
-      return;
-    }
-
-    if (initAttempts < maxAttempts) {
-      // Try again with increasing delays
-      const delay = Math.min(100 + (initAttempts * 25), 500);
-      setTimeout(attemptInit, delay);
-    } else {
-      console.error('Failed to initialize floating point converter after', maxAttempts, 'attempts');
-    }
-  }
-
-  // Start initialization immediately if DOM is ready
-  if (document.readyState === 'complete') {
-    setTimeout(attemptInit, 10);
-  } else if (document.readyState === 'interactive') {
-    setTimeout(attemptInit, 25);
-  } else {
-    // DOM still loading
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(attemptInit, 25);
-    });
-  }
-
-  // Additional fallback for window load event
-  window.addEventListener('load', function() {
-    if (initAttempts === 0 || !document.querySelector('[data-floating-point-converter] .fp-converter-container')) {
-      setTimeout(attemptInit, 50);
-    }
-  });
 })();
