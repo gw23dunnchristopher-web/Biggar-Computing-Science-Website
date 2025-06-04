@@ -705,6 +705,11 @@
     let instanceCount = 0;
 
     containers.forEach(container => {
+      // Skip if already initialized or if manual initialization is preferred
+      if (container.hasAttribute('data-manual-init') || container.querySelector('.tc-converter-container')) {
+        return;
+      }
+
       // Get configuration from data attributes
       const options = {
         mode: container.getAttribute('data-mode') || 'binary-to-decimal',
@@ -714,14 +719,19 @@
       };
 
       // Create a unique ID for each instance
-      container.id = 'twos-complement-converter-instance-' + (++instanceCount);
+      if (!container.id) {
+        container.id = 'twos-complement-converter-instance-' + (++instanceCount);
+      }
 
       // Initialize converter
       window.initTwosComplementConverter(container.id, options);
     });
   }
 
-  // Initialize when DOM is loaded
+  // Expose the initializeAll function globally for manual use
+  window.initAllTwosComplementConverters = initializeAll;
+
+  // Initialize when DOM is loaded (only for auto-init containers)
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeAll);
   } else {

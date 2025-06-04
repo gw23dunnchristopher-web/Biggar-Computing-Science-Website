@@ -7,7 +7,6 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
-        <script src="/JavaScript/binary-converter-embed.js"></script>
         <script>
             window.onload = function() {
                 setInterval(function() {
@@ -129,18 +128,12 @@
                     <p>You can use the tool below to practice converting from binary to benary and vice versa.</p>
                     <div id="binary-converter" 
                       data-binary-converter 
+                      data-manual-init="true"
                       data-mode="binary-to-decimal"
                       data-show-toggle="true"
                       data-primary-color="#6366f1"
                       data-class="my-custom-class"
                     ></div>
-                    <script>
-                      window.addEventListener('load', function() {
-                        if (typeof initBinaryConverter === 'function') {
-                          initBinaryConverter('binary-converter');
-                        }
-                      });
-                    </script>
 
                 </div>
 
@@ -174,5 +167,28 @@
         </footer>
             </div>
         </div>
+
+        <!-- Load binary converter last to ensure all other page elements are ready -->
+        <script src="/JavaScript/binary-converter-embed.js"></script>
+        <script>
+            // Ensure converter initializes only after everything else is loaded
+            window.addEventListener('load', function() {
+                // Add extra delay to ensure sidebar and all page scripts are fully ready
+                setTimeout(function() {
+                    if (typeof initBinaryConverter === 'function') {
+                        const converterElement = document.getElementById('binary-converter');
+                        if (converterElement && !converterElement.querySelector('.binary-converter-container')) {
+                            const options = {
+                                mode: converterElement.getAttribute('data-mode') || 'binary-to-decimal',
+                                showToggle: converterElement.getAttribute('data-show-toggle') !== 'false',
+                                primaryColor: converterElement.getAttribute('data-primary-color') || '#6366f1',
+                                className: converterElement.getAttribute('data-class') || ''
+                            };
+                            initBinaryConverter('binary-converter', options);
+                        }
+                    }
+                }, 500); // 500ms delay to ensure everything is stable
+            });
+        </script>
     </body>
 </html>

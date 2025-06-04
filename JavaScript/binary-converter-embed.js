@@ -620,6 +620,11 @@
     let instanceCount = 0;
 
     containers.forEach(container => {
+      // Skip if already initialized or if manual initialization is preferred
+      if (container.hasAttribute('data-manual-init') || container.querySelector('.binary-converter-container')) {
+        return;
+      }
+
       // Get configuration from data attributes
       const options = {
         mode: container.getAttribute('data-mode') || 'binary-to-decimal',
@@ -629,14 +634,19 @@
       };
 
       // Create a unique ID for each instance
-      container.id = 'binary-converter-instance-' + (++instanceCount);
+      if (!container.id) {
+        container.id = 'binary-converter-instance-' + (++instanceCount);
+      }
 
       // Initialize converter
       window.initBinaryConverter(container.id, options);
     });
   }
 
-  // Initialize when DOM is loaded
+  // Expose the initializeAll function globally for manual use
+  window.initAllBinaryConverters = initializeAll;
+
+  // Initialize when DOM is loaded (only for auto-init containers)
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeAll);
   } else {
