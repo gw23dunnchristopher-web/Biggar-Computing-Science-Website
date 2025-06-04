@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - N5 Database Implementation Recap</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>N5 Database Implementation Recap</h1></div>
+                <div class="contentContainer">
+                    <h2>Databases and MS Access</h2>
+                    <p>
+                        At the N5 level, you needed to be able to do the following actions using MS Access.  Click on the links below to check the relevant National 5 page
+                        if you are unable to do any of these:
+                    </p>
+                    <ul>
+                        <li><a href="/HTML/N5/DDD/Access/NewAccessDatabase.html">Creating a new database</a></li>
+                        <li><a href="/HTML/N5/DDD/Access/FieldProperties.html">Setting field properties</a></li>
+                        <li><a href="/HTML/N5/DDD/Access/DataValidation.html">Using Data Validation</a></li>
+                        <li><a href="/HTML/N5/DDD/Access/RelationalDatabases.html">Setting up a relational database</a></li>
+                        <li><a href="/HTML/N5/DDD/Access/SortingandSearching.html">Performing a search and sort</a></li>
+                        <li><a href="/HTML/N5/DDD/Access/Queries.html">Creating a query</a></li>
+                        <li><a href="/HTML/N5/DDD/Access/Criteria.html">Using search criteria in queries</a></li>
+                    </ul>
+
+                    <h2>SQL Code at the N5 Level</h2>
+                    <h3>What is SQL?</h3>
+                    <p>You need to be aware of the following:</p>
+                    <div class="sideBySide vertAlign">
+                        <ul>
+                            <li>SQL stands for Structured Query Language.</li>
+                            <li>It is a programming language that is used to manage and manipulate relational databases.</li>
+                            <li>It enables the user to perform a variety of tasks in a database such as querying data, creating and modifying database structures.</li>
+                            <li>MS Access is actually a GUI (graphical user interface) that allows the user to perform SQL functions without needing to use code.</li>
+                            <li>You can access SQL View in MS Access by creating a new query and opening SQL View from there by clicking the SQL view button.</li>
+                        </ul>
+                         <img class="shadowImage" src="/Images/N5/DDD/Access/SQLViewButton.jpg" style="min-width:60px; max-height:100px;" alt="SQL View Button">
+                    </div>
+
+                    <h3>SELECT</h3>
+                    <p>SELECT statements are used to retrieve data from a database.  A SELECT statement consists of 4 main parts:</p>
+                    <ol>
+                        <li>The fields that you want to display in your results.</li>
+                        <li>The table or tables that you want to retrieve the data from.</li>
+                        <li>The criteria for your search.</li>
+                        <li>The order that you want the results to be displayed in.</li>
+                    </ol>
+
+                    <p>All SELECT queries should have the following layout:</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/SELECTLayout.jpg" alt="SELECT Layout">
+                    
+                    <h3>UPDATE</h3>
+                    <p>UPDATE statements are used to update data in a database.  An UPDATE statement consists of 3 main parts:</p>
+                    <ol>
+                        <li>Specify the table that has the information to be updated.</li>
+                        <li>What the new values are going to be.</li>
+                        <li>The criteria for which records to update.</li>
+                    </ol>
+
+                    <p>All UPDATE queries should have the following layout:</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/UPDATELayout.jpg" alt="UPDATE Layout">
+                    
+                    <h3>INSERT INTO</h3>
+                    <p>An INSERT statement is used to add a new record into the database.</p>
+                    <p>For example, to add a new student to the Students table, we would use the command:</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/INSERTLayout.jpg" alt="INSERT SQL Statement">
+                    <p>
+                        Note that the word 'year' is in purple here.  This is because 'year' is also the name of a function that can be used in SQL.  However, it won't    
+                        actually affect this SQL statement.
+                    </p>
+                    <p>We specify the table name, then in brackets the fields we wish to insert to (you can add to all or only some).</p>
+                    <p>Next, we must specify the values to add to the database.</p>
+                    
+                    <h3>DELETE</h3>
+                    <p>DELETE statements are used to delete data from a database.  A DELETE statement consists of 2 main parts:</p>
+                    <ol>
+                        <li>Specify the table that has the information to be deleted.</li>
+                        <li>The criteria for which records to delete.</li>
+                    </ol>
+
+                    <p>All DELETE queries should have the following layout:</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/DELETELayout.jpg" alt="DELETE Layout">
+                    
+                    <h3>Equi-Join</h3>
+                    <p>
+                        An Equi-Join is a type of join that is used to combine rows from two or more tables based on a related column between them.  The most common type of 
+                        join is an INNER JOIN, which returns only the rows that have matching values in both tables.  Foreign Keys are an example of this.
+                    </p>
+
+                    <p>For example, look at the tables in the Theme Parks database shown below:</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/ThemeParks.jpg" alt="Theme Park Tables">
+
+                    <p>
+                        You can see that the "parkID" field appears in both tables.  SQL uses 'dot notation' to specify which table a field is in.  For example, the parkID 
+                        field in the Ride table would be <b>'Ride.parkID'</b> and the parkID field in the Theme Park table would be <b>[Theme Park].parkID</b>.
+                    </p>
+                    <p>Note that because the 'Theme Park' table has a space in the name, square brackets are used in the dot notation.</p>
+                    <p>So how would you display the ride names and types for all of the rides in Thorpe Park?</p>
+                    <img class="cImg" src="/Images/N5/DDD/SQL/EquiJoinLayout.jpg" alt="Equi-Join Example">
+                    <p>
+                        We are joining the results from the two tables using the parkID field.  It is a Primary Key in the Theme Park table, and a Foreign Key in the Ride 
+                        table, so telling the database that we only want to see results where the parkID in both tables matches.  Once we do this, we can add other criteria 
+                        to narrow down our search - in this case the query will check the Theme park table to see which record has the ParkName 'Thorpe Park'.</p>
+
+                    <p>It will then look at Thorpe Park's parkID and only show records from the Ride table with that parkID.</p>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Higher Computing Science - The Box Model</title>
+        <title>Higher Computing Science - The Box Model, Margins and Padding</title>
         <script src="/JavaScript/higherScript.js"></script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
@@ -23,26 +23,132 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>Higher</h1></div>
-                <div class="contentHeading"><h1>The Box Model</h1></div>
+                <div class="contentHeading"><h1>The Box Model, Margins and Padding</h1></div>
                 <div class="contentContainer">
                     <h2>What is the Box Model?</h2>
                     <p><b>Margins</b> and <b>Padding</b> are used to push content away from the outer and inner edges of an element.</p>
                     <p>The box model allows us to define the space between elements as shown below:</p>
                     <img class="cImg" width="50%" src="/Images/Higher/WDD/Implementation/css/boxModel.jpg" alt="The Box Model">
 
-                    <p>Click on the buttons below to see more information about margins or padding.</p>
+                    <h2>Margins and Padding</h2>
+                    <p class="laws" onclick="toggleLaw(this)"><b>Margins</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none; border:1px solid black; padding:10px;">
+                        <p>Using the margins property in CSS will determine the amount of space there is between elements. 
+                            You can use margins in CSS with the following properties:</p>
+                        <ul class="codeText">
+                            <li>margin</li>
+                            <li>margin-top</li>
+                            <li>margin-right</li>
+                            <li>margin-bottom</li>
+                            <li>margin-left</li>
+                        </ul>
 
-                    <div class="sideBySide">
-                        <img width="10%" style="margin:0 20px;" src="/Images/Higher/WDD/Implementation/css/marginsBtn.png" alt="Margins" 
-                            onClick="window.location.href='/HTML/Higher/WDD/Implementation/css/margins.html';"
-                            onmouseover="switchImage(this, '/Images/Higher/WDD/Implementation/css/marginsBtnOn.png');"
-                            onmouseout="switchImage(this, '/Images/Higher/WDD/Implementation/css/marginsBtn.png');">
-                        <img width="10%" style="margin:0 20px;" src="/Images/Higher/WDD/Implementation/css/paddingBtn.png" alt="Padding"
-                            onmouseover="switchImage(this, '/Images/Higher/WDD/Implementation/css/paddingBtnOn.png');"
-                            onmouseout="switchImage(this, '/Images/Higher/WDD/Implementation/css/paddingBtn.png');"
-                            onClick="window.location.href='/HTML/Higher/WDD/Implementation/css/padding.html';">
+                        <p>These properties may have the values:</p>
+                        <ul>
+                            <li><span class="codeText">auto</span> - the browser calculates the margin.</li>
+                            <li><span class="codeText">length</span> - a fixed margin in px, cm, etc.</li>
+                            <li><span class="codeText">%</span> - a percentage of the width of the containing element.</li>
+                        </ul>
+
+                        <h3>Simultaneous Declaration of Margins</h3>
+                        <p>You can declare all four margins at once using the <span class="codeText">margin</span> property.  The values are applied in the following order:</p>
+                        <ul>
+                            <li>Top</li>
+                            <li>Right</li>
+                            <li>Bottom</li>
+                            <li>Left</li>
+                        </ul>
+                        <p>For example, the following code will set the top margin to 10px, the right margin to 20px, the bottom margin to 30px and the left margin to 40px.</p>
+                        <div class="codeBox">
+                            <p style="text-align:center;">margin: 10px 20px 30px 40px;</p>
+                        </div>
+                        <p>Just using one value with the <span class="codeText">margin</span> property will set all of the margins to that value. For example:</p>
+                        <div class="codeBox">
+                            <p style="text-align:center;">margin: 10px;</p>
+                        </div>
+                        <p>You can also set the top and bottom margins to one value and the left and right margins to another value. For example:</p>
+                        <div class="codeBox">
+                            <p style="text-align:center;">margin: 10px 20px;</p>
+                        </div>
+                        <p>This will set the top and bottom margins to 10px and the left and right margins to 20px.</p>
+
+                        <h3>Margins Example</h3>
+                        <div class="sideBySide vertAlign">
+                            <div>
+                                <p>
+                                    In the example website, CSS declarations for the main page elements (<span class="codeText">&lt;header&gt;, &lt;nav&gt;, &lt;div&gt;</span> 
+                                    and <span class="codeText">&lt;footer&gt;</span>) are used to separate out content when displayed.
+                                </p>
+                                <p>
+                                    The small gap at the top of each area is implemented by styling a margin of 5 pixels at the top of the four elements. For example:
+                                </p>
+                                <div class="codeBox">
+                                    <p style="text-align:center;">nav, header, main, footer {margin-top: 5px;}</p>
+                                </div>
+                                <p>This results in the image that you can see to the right.</p>
+                            </div>
+                            <img class="cImg" width="35%" src="/Images/Higher/WDD/Implementation/css/margins.jpg" alt="Margins Example">
+                        </div>
+
+                        <h3>Auto Margins</h3>
+                        <p>
+                            Auto margins are used to position an element in the middle of the browser’s window or within another element. In the example website, the 900 pixel   
+                            wide page <span class="codeText">&lt;body&gt;</span> element is always positioned in the middle of the window:
+                        </p>
+                        <div class="codeBox">
+                            <p style="text-align:center;">body {margin: 0 auto;}</p>
+                        </div>
+                        <p>This results in the following look for the example website:</p>
+                        <img class="cImg" width="50%" src="/Images/Higher/WDD/Implementation/css/autoMargins.jpg" alt="Auto Margins Example">
+                        <p>
+                            Note that in order to use automatic margins, the element's <span class="codeText">display</span> property must be set to 
+                            <span class="codeText">block</span> in CSS.  Many elements, such as <span class="codeText">&lt;h1&gt;</span> and <span class="codeText">&lt;p&gt;
+                            </span> are block elements by default, but others, such as <span class="codeText">&lt;a&gt;</span> and <span class="codeText">&lt;img&gt;</span> are 
+                            not.
+                        </p>
                     </div>
-                   
+
+                    <p class="laws" onclick="toggleLaw(this)"><b>Padding</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none; border:1px solid black; padding:10px;"">
+                        <p>Using the padding property increases the amount of space between the edge of the element and the content inside it.  
+                            You can use padding in CSS with the following properties:</p>
+                        <ul class="codeText">
+                            <li>padding</li>
+                            <li>padding-top</li>
+                            <li>padding-right</li>
+                            <li>padding-bottom</li>
+                            <li>padding-left</li>
+                        </ul>
+
+                        <p>These properties may have the following values:</p>
+                        <ul>
+                            <li><span class="codeText">length</span> - a fixed padding in px, cm, etc.</li>
+                        </ul>
+
+                        <h3>Simultaneous Declaration of Padding</h3>
+                        <p>Just as with margin, you can declare padding on all four sides of the element at the same time using the code below:</p>
+                        <div class="codeBox">
+                            <p style="text-align:center;">padding: 10px 20px 30px 40px;</p>
+                        </div>
+                        <p>This will set the top padding to 10px, the right padding to 20px, the bottom padding to 30px and the left padding to 40px.</p>
+
+                        <p>Similarly, using just one value will set all four sides to the same padding distance:</p>
+                        <div class="codeBox">
+                            <p style="text-align:center;">padding: 10px;</p>
+                        </div>
+
+                        <h3>Example using Padding</h3>
+                        <p>We will use the following CSS code on the Lawn Care website:</p>
+                        <div class="codeBox">
+                            <p style="text-align:center;">header, div, main, footer, section {padding: 10px;}</p>
+                        </div>
+                        <p>You can see how the page would look with this code on the left, and how it would look without it on the right.</p>
+                        <div class="sideBySide vertAlign" style="width:800px;">
+                            <img class="cImg" style="max-height:400px;" src="/Images/Higher/WDD/Implementation/css/padding.jpg" alt="Padding Example">
+                            <img class="cImg" style="max-height:400px;" src="/Images/Higher/WDD/Implementation/css/noPadding.jpg" alt="No Padding Example">
+                        </div>
+                    </div>
+                    
                     <h2>Universal Selector</h2>
                     <p>In CSS, the universal selector (*) is used to select all elements on a page.  It can be used to set the margin and padding to 0 for all elements as
                     shown below.</p>

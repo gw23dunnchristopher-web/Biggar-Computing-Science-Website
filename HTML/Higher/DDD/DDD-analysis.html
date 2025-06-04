@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - DDD Analysis</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>DDD Analysis</h1></div>
+                <div class="contentContainer">
+                    <h2>End-User and Functional Requirements</h2>
+                    <p>During the analysis stage of Database Development, you should identify the following requirements:</p>
+                    <ul>
+                        <li>End-User Requirements</li>
+                        <li>Functional Requirements</li>
+                    </ul>
+
+                    <h3>End-User Requirements</h3>
+                    <p>Specific end user needs are considered when analysing the requirements prior to database development. </p>
+                    <ul>
+                        <li>The end-users are the people who are going to be using the database.</li>
+                        <li>Thier requirements are the tasks that they expect to be able to do using the database.</li>
+                    </ul>
+
+                    <h3>Functional Requirements</h3>
+                    <p>Functional requirements are the tasks that the database must be able to perform in order to meet the end-user requirements.</p>
+                    <ul>
+                        <li>Processes and activities that the system has to perform.</li>
+                        <li>Information that the system has to contain to be able to carry out its functions.</li>
+                    </ul>
+
+                    <p>These requirements will help:</p>
+                    <ul>
+                        <li>clarify the design of the database.</li>
+                        <li>identify the features to be implemented on the database.</li>
+                        <li>evaluate whether the system is fit for purpose after development is complete.</li>
+                    </ul>
+
+                    <h2>Worked Example</h2>
+                    <p>Here is a worked example of the analysis stage of database development:</p>
+                    <div class="example">
+                        <p>
+                            A travel agency wants to create a relational database to store the details of hotel bookings in Scottish Holiday Resorts.  The database will allow travel agents to view details of hotels and make bookings for 
+                            customers.  Four separate entities are required:
+                        </p>
+                        <ul>
+                            <li><b>Hotel</b> - used to store details of hotels in each resort.</li>
+                            <li><b>Resort</b> - used to store details of Scottish holiday resorts.</li>
+                            <li><b>Customer</b> - used to store details of customers who make holiday bookings.</li>
+                            <li><b>Booking</b> - used to store details of hotel bookings.</li>
+                        </ul>
+                        <p>
+                            They have appointed a developer team to carry out an analysis of the database requirements. The
+                            developers ask some of the travel agency staff about the features they would expect to see in the
+                            completed database. The following are a few of the comments made by the staff:
+                        </p>
+                        <img class="cImg" src="/Images/Higher/DDD/Analysis/comments.png" alt="Staff Comments" width="80%">
+                    </div>
+
+                    <h3>End-User Requirements</h3>
+                    <p>From the comments made by the staff, they want to be able to perform a range of searches to display:</p>
+                    <ul>
+                        <li>full details of any booking.</li>
+                        <li>availability of hotels in a particular resort, with specified facilities (meal plan or pool).</li>
+                        <li>details of hotels in a particular type of resort.</li>
+                        <li>details of hotels available for a specified star rating.</li>
+                        <li>resorts that have train stations.</li>
+                    </ul>
+
+                    <p>Staff should be able to sort search results in order of ascending order of price and should be able to
+                    calculate:</p>
+                    <ul>
+                        <li>the total cost of any holiday booking.</li>
+                        <li>the number of hotels within a certain price range or available on a certain start date.</li>
+                    </ul>
+
+
+                    <h3>Functional Requirements</h3>
+                    <p>From the end-user requirements, the developers have identified the following functional requirements:</p>
+                    <ul>
+                        <li>The relational database will have four tables - hotels, resorts, customers and bookings.</li>
+                        <li>Each table will have a suitable primary key, with foreign keys linking the four tables.</li>
+                        <li>In addition to the primary key and any necessary foreign keys, the following fields are required:
+                            
+                            <table style="max-width:400px; margin:auto; margin-top:20px; margin-bottom:20px;">
+                                <tr><th>Hotel</th><th>Customer</th></tr>
+                                <tr><td>hotel name</td><td>first name</td></tr>
+                                <tr><td>start of season date</td><td>surname</td></tr>
+                                <tr><td>check-in time</td><td>address</td></tr>
+                                <tr><td>price per night</td><td>town</td></tr>
+                                <tr><td>meal plan</td><td>postcode</td></tr>
+                                <tr><td>swimming pool</td><td></td></tr>
+                                <tr><td>star rating</td><td></td></tr>
+                                
+                                <tr><th>Resort</th><th>Booking</th></tr>
+                                <tr><td>resort name</td><td>start date</td></tr>
+                                <tr><td>resort type</td><td>number in party</td></tr>
+                                <tr><td>train station</td><td>number of nights</td></tr>
+                            </table>
+                        </li>
+                        <li>The database must use the following:
+                            <ul>
+                                <li>Simple and complex queries to search the database.</li>
+                                <li>a simple sort to order the query results.</li>
+                                <li>a calculation to work out the total cost of a booking.</li>
+                                <li>an aggregate function to work out the number of 4-star hotels located in resorts that have a train station.</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <h2>Past Paper Question - 2022 Q9</h2>
+                    <p>Cara runs a private tutoring company for Computing Science students.</p>
+                    <p>Cara requires a relational database to:</p>
+                    <ul>
+                        <li>store data on students, tutors and sessions</li>
+                        <li>display the contact details for a particular tutor or student</li>
+                        <li>display the number of sessions for a particular date</li>
+                        <li>display the total fees that each tutor has been paid</li>
+                        <li>display the tutor who charges the lowest hourly rate.</li>
+                    </ul>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(a)</th>
+                            <td>
+                                <p>State one functional requirement of the relational database.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <p>One mark for any one bullet:</p>
+                                        <ul>
+                                            <li>(Create a query to) search for the contact details for a particular tutor or student</li>
+                                            <li>(Create a query to) count the number of tutor sessions on a particular date</li>
+                                            <li>(Create a query using SUM to) calculate the total tutor fees that each staff member has been paid</li>
+                                            <li>(Create a query using MIN) to calculate the tutor who charges the lowest hourly rate</li>
+                                            <li>Create/update/delete records to store details of student, staff and tutor sessions</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

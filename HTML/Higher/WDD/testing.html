@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - WDD Testing</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>WDD Testing</h1></div>
+                <div class="contentContainer">
+                    <h2>Usability Testing</h2>
+                    <p>
+                        This kind of testing involves systematic observation of people using a product to determine who easily people can figure out how to use it.  In the case of website design, the 'product' is a website, and usability testing
+                        will help the website developer see how easy the website is to use.  The goal is to recreate real world scenarios - the tester will be given a task that they have to complete on the website without implicitly telling them
+                        what to do. Then, by observing their behavior, the developer will be able to figure out if the website needs to be changed or modified so that it becomes easier to use for newcomers.  Normally, low-fidelity prototypes
+                        are used in usability testing, with testers using a paper based version of the website.  This means that any issues with the design can be hopefully be resolved before the website is coded.
+                    </p>
+
+                    <p>Testers may be given:</p>
+                    <ul>
+                        <li>
+                            <b>A persona</b> - a fictional user profile, usually backed by data from whichever company owns the website.  Personas allow testers to represent various different demographics including, age, ethnicity, technical 
+                            experience, even environmental constraints (such as slow internet).
+                        </li>
+                        <li>
+                            <b>Test Cases</b> - A set of actions that the tester must be executed during the test to verify a particular feature or function of the website. For example, 'Tester must be able to log in to the website using
+                            their email address and password'.
+                        </li>
+                        <li>
+                            <b>Scenarios</b> - A fictional set of goals that the tester must achieve.  These are usually written in the form of a scenario, such as 'You are looking for a new job, and you want to find a job that is
+                            located in Glasgow'.  The tester will then have to use the website to find a job in Glasgow.
+                        </li>
+                    </ul>
+                    <p>
+                        The testers use the low-fidelity prototypes under a variety of conditions, during which they are observed. The observers make notes about any difficulties that the testers experienced and what alterations are required to the 
+                        website design to make it easier to use the website. 
+                    </p>
+
+                    <h3>Example of Usability Testing</h3>
+                    <iframe width="560" height="315" style="display:block; margin:auto;" src="https://www.youtube.com/embed/aDqbMOI13o4?si=XnLNBelHPfAGWAvE" title="YouTube video player" frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+                    <h2>Post-Implementation Website Testing</h2>
+                    <p>There are a number of tests you should carry out on your website to ensure that it meets the functional requirements.</p>
+
+                    <h3>Input Validation</h3>
+                    <p>This involves checking that any forms on your website work correctly.  For example:</p>
+                    <ul>
+                        <li>Your form should not accept text typed into a number field.</li>
+                        <li>If one of the fields in your form requires numbers within a certain range, it should not accept numbers outside that range.</li>
+                        <li>Fields that should only accept a certain number of characters should not accept any data that contains more than the maximum amount or less than the minimum amount.</li>
+                        <li>Any fields that should be pre-populated with data have data in them when the webpage loads.</li>
+                    </ul>
+
+                    <h3>Navigation Testing</h3>
+                    <p>The navigation on the website should be tested to ensure that:</p>
+                    <ul>
+                        <li>the links on the navigation bar take you to the correct pages.</li>
+                        <li>all of the external links work correctly.</li>
+                        <li>you can return to the home page from any of the other pages on the website.</li>
+                        <li>all of the internal links work correctly.</li>
+                        <li>there are no 'orphan' pages (pages that are not connected to any other page).</li>
+                    </ul>
+
+                    <h3>Media</h3>
+                    <p>This involves testing all of the images, text, and videos on your website to ensure that they all work correctly and appear in the correct positions.</p>
+
+                    <h2>Compatability Testing</h2>
+                    <p>Compatability testing involves testing the website on different browsers and devices to ensure that it works correctly on all of them.</p>
+                    <p>Different browsers may use different versions of HTML and CSS, so it is important to test the website on all of the browsers that you expect your users to use.</p>
+                    <p>Different devices may have different screen sizes, and this may cause the website to display differently.  It is possible to emulate different screen sizes on a computer
+                    so that you can see what the website would look like.</p>
+
+                    <h2>Past Paper Question - 2022 Q15(e)</h2>
+                    <p>Kelly wants to add a tutorial page with videos and audio clips as shown in the wireframe below.</p>
+                    <img class="cImg" src="/Images/Higher/WDD/Testing/2022Q15e.jpg" alt="2022 Q15(e)">
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(e)</th>
+                            <td>
+                                <p>State two different compatibility tests that should be carried out on this page.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <p>One mark for each bullet:</p>
+                                    <ul>
+                                        <li>Test that the website functions on different browsers.</li>
+                                        <li>Test that the website functions on different devices.</li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

@@ -48,6 +48,8 @@
 
     .fp-converter-card-title {
       margin: 0;
+      text-decoration:none !important;
+      color:white;
       font-size: 1.25rem;
     }
 
@@ -385,10 +387,10 @@
   // Create the HTML structure
   function createConverterHTML() {
     return `
-      <div class="fp-converter-container">
+      <div class="fp-converter-container" style="text-decoration:none;">
         <div class="fp-converter-card fp-converter-mb-4">
           <div class="fp-converter-card-header fp-converter-d-flex fp-converter-justify-content-between fp-converter-align-items-center">
-            <h3 class="fp-converter-card-title" style="color: var(--white);font-weight: bold;padding: 10px 15px; text-align:center; border-bottom:none;">
+            <h3 class="fp-converter-card-title" style="text-decoration:none;">
               <i class="fas fa-calculator fp-converter-me-2"></i>
               Binary to Floating-Point Conversion
             </h3>
@@ -413,7 +415,7 @@
                   <p>Convert the binary number below into floating-point representation.</p>
 
                   <div class="fp-converter-d-flex fp-converter-align-items-center fp-converter-mb-3">
-                    <h3 style="color:black; text-align:center; border-bottom:none;" id="fp-binary-number" class="fp-converter-font-monospace">Loading...</h3>
+                    <h3 id="fp-binary-number" class="fp-converter-font-monospace">Loading...</h3>
                     <button id="fp-copy-btn" class="fp-converter-btn fp-converter-btn-sm fp-converter-btn-outline-secondary fp-converter-ms-2" title="Copy to clipboard">
                       <i class="fas fa-copy"></i>
                     </button>
@@ -702,36 +704,23 @@
         // The exponent represents how many places to move the decimal point to get this form
         let exponent;
 
-        // For IEEE normalization, we need to place the decimal point immediately to the right
-        // of the first 1, resulting in 1.xxxx format
+        // Calculate exponent: count how many places the decimal point moves 
+        // to get it just to the left of the first 1
         if (firstOnePos < decimalIndex) {
             // Case: First 1 comes before the decimal point (e.g., 10.11, 100.01)
-            // Examples:
-            // 10.11 has first 1 at pos 0, decimal at pos 2
-            // To normalize to 1.011, decimal moves 1 place to the left, so exponent = 1
-            // 
-            // 101.1 has first 1 at pos 0, decimal at pos 3
-            // To normalize to 1.011, decimal moves 2 places to the left, so exponent = 2
-            exponent = decimalIndex - firstOnePos - 1;
+            // The decimal point moves left, so exponent is positive
+            // Example: 10.011 -> move decimal 2 places left -> exponent = 2
+            exponent = decimalIndex - firstOnePos;
         } else {
-            // Case: First 1 comes after the decimal point (e.g., 0.01, 0.001)
-            // Examples:
-            // 0.01 has first 1 at pos 1 after removing decimal, decimal was at pos 0
-            // To normalize to 1.0, decimal moves 2 places to the right, so exponent = -2
-            // 
-            // 0.001 has first 1 at pos 2 after removing decimal, decimal was at pos 0
-            // To normalize to 1.0, decimal moves 3 places to the right, so exponent = -3
-            exponent = -(firstOnePos - decimalIndex + 1);
+            // Case: First 1 comes after the decimal point (e.g., 0.01, 0.001) 
+            // The decimal point moves right, so exponent is negative
+            // Example: 0.0001 -> move decimal 3 places right -> exponent = -3
+            exponent = -(firstOnePos - decimalIndex);
         }
 
-        // Get the mantissa by extracting all bits starting from the first '1'
-        // For IEEE format, the leading 1 is implicit, so we drop it and take all the following bits
-        let mantissa = cleanBinary.substring(firstOnePos + 1);
-
-        // If mantissa is empty (e.g., for binary "1"), add a zero
-        if (mantissa === '') {
-            mantissa = '0';
-        }
+        // Get the mantissa by starting from the first '1' and taking the next digits
+        // Include the first 1 and all following digits
+        let mantissa = cleanBinary.substring(firstOnePos);
 
         return { sign, mantissa, exponent };
     }
@@ -779,12 +768,14 @@
             exponentBinary = exponentBinary.substring(exponentBinary.length - exponentBits); // Truncate if too long
         }
 
-        // Ensure mantissa has the correct number of bits
+        // Ensure mantissa has the correct number of bits (15 bits for mantissa field)
+        // According to the rules: start from first 1 and take next 15 digits, padding with zeros if needed
         let mantissaValue = mantissa;
-        if (mantissaValue.length < mantissaBits - 1) { // -1 because the sign bit is separate
-            mantissaValue = mantissaValue.padEnd(mantissaBits - 1, '0');
+        const mantissaFieldBits = 15; // Always 15 bits for the mantissa field
+        if (mantissaValue.length < mantissaFieldBits) {
+            mantissaValue = mantissaValue.padEnd(mantissaFieldBits, '0');
         } else {
-            mantissaValue = mantissaValue.substring(0, mantissaBits - 1); // Truncate if too long
+            mantissaValue = mantissaValue.substring(0, mantissaFieldBits); // Truncate if too long
         }
 
         return {
@@ -845,10 +836,20 @@
         // Calculate the correct answer
         const correctAnswer = getIEEERepresentation(originalBinary, mantissaBits, exponentBits);
 
+        // Debug logging to see what's happening
+        console.log('User answer:', userAnswer);
+        console.log('Correct answer:', correctAnswer);
+        console.log('Original binary:', originalBinary);
+        console.log('Mantissa bits:', mantissaBits, 'Exponent bits:', exponentBits);
+
         // Check each part individually and award points
         const isSignBitCorrect = userAnswer.sign_bit === correctAnswer.sign_bit;
         const isExponentCorrect = userAnswer.exponent === correctAnswer.exponent;
         const isMantissaCorrect = userAnswer.mantissa === correctAnswer.mantissa;
+
+        console.log('Sign bit correct:', isSignBitCorrect);
+        console.log('Exponent correct:', isExponentCorrect);
+        console.log('Mantissa correct:', isMantissaCorrect);
 
         // Calculate points for this question (1 point for each correct part)
         let pointsEarned = 0;

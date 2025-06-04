@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Higher Computing Science - Query Design</title>
+    <script src="/JavaScript/higherScript.js"></script>
+    <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+    <link rel="stylesheet" href="/CSS/styles.css">
+    <link rel="stylesheet" href="/CSS/frameStyles.css">
+    <style>
+        table tr th {text-align:left !important;}
+        table {max-width:800px !important;}
+        .subheading {background-color:lightgreen !important;}
+    </style>
+</head>
+
+<body>
+    <div id="loading"></div>
+    <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading">
+                    <h1>Higher</h1>
+                </div>
+                <div class="contentHeading">
+                    <h1>Query Design</h1>
+                </div>
+                <div class="contentContainer">
+                    <p>
+                        At Higher level, you will also be expected to be able to design queries to retrieve data from a
+                        database. When you implement these queries, you will
+                        be able to use your design and translate it into SQL code.
+                    </p>
+                    <p>The design of the SQL query should indicate:</p>
+                    <ul>
+                        <li>Any field(s) or computated values required.</li>
+                        <li>The table(s) needed to provide all of the details required.</li>
+                        <li>Any search criteria to be applied.</li>
+                        <li>What grouping is needed (if appropriate).</li>
+                        <li>The field(s) used to sort the data and the type(s) of sorts required.</li>
+                    </ul>
+                    <p>A Query Design table looks like this:</p>
+                    <table style="text-align:left;">
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%"></td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td></td>
+                        </tr>
+                    </table>
+
+                    <h2>Examples</h2>
+                    <p>All of the example Query designs below will used the following scenario:</p>
+                    <p><i>"A travel agency uses a relational database to enable their employees to view details of
+                            hotels in
+                            Scottish holiday resorts and make bookings for customers. The details are stored in four
+                            separate
+                            tables called Hotel, Resort, Booking and Customer."</i></p>
+                    <p>The structure of the tables in this database is shown below:</p>
+                    <img class="cImg" src="/Images/Higher/DDD/Design/queryDesignTables.JPG" alt="Query Design Tables"
+                        width="60%">
+
+                    <h3>Example 1</h3>
+                    <p>
+                        Design a query to display the name, swimming pool details, resort and resort type of any
+                        hotel in a coastal resort that starts with the letter ‘A’.
+                    </p>
+
+                    <table style="text-align:left;">
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">hotelName, swimmingPool, resortName, resortType</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Hotel, Resort</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td>resortType = "coastal" and resortName like "A*"</td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td></td>
+                        </tr>
+                    </table>
+
+                    <h3>Example 2</h3>
+                    <p>
+                        Design a query to display a customer’s full name, booking number, start date, hotel name
+                        and resort name for all customers who have an ‘h’ as the second letter of their surname. List
+                        these
+                        details in alphabetical order of surname; listing customers with the same surname in order of
+                        the
+                        earliest holiday first.
+                    </p>
+
+                    <table>
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">firstName, surname, bookingNo, startDate, hotelName, resortName</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Booking, Customer, Hotel, Resort</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td>surname LiKE "?h"</td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td></td>
+                        </tr>
+                    </table>
+
+                    <h3 style="text-align:left;">Example 3</h3>
+                    <p>
+                        Design a query that uses a readable heading to display the lowest and
+                        highest price per night.
+                    </p>
+
+                    <table>
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">highest price per night = MAX(pricePersonNight), lowest price per
+                                night = MIN
+                                (pricePersonNight)</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Hotel</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td></td>
+                        </tr>
+                    </table>
+
+                    <h3>Example 4</h3>
+                    <p>
+                        Design a query to display the average number of nights booked.
+                    </p>
+
+                    <table style="text-align:left;">
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">AVG(numberNights)</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Booking</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td></td>
+                        </tr>
+                    </table>
+
+                    <h3>Example 5</h3>
+                    <p>
+                        Design a query to display a list of the different types of resort, together with the number
+                        of resorts in each of those categories.
+                    </p>
+
+                    <table style="text-align:left;">
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">resortType, COUNT(*)</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Resort</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td>resortType</td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td></td>
+                        </tr>
+                    </table>
+
+                    <h3>Example 6</h3>
+                    <p>
+                        Design a query to display the number of bookings for hotels in coastal resorts. Show the
+                        resort type and use a readable heading for the results returned by the aggregate function.
+                    </p>
+
+                    <table style="text-align:left;">
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">resortType, numberOfHotels = COUNT(*)</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Resort, Hotel, Booking</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td>resortType = "coastal"</td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td>resortType</td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td></td>
+                        </tr>
+                    </table>
+
+
+                    <h3>Example 7</h3>
+                    <p>
+                        Design a query to display a list of each type of meal plan, together with the number of
+                        bookings made for each of those meal plans. List the details from the least popular meal plan to
+                        the
+                        most popular.
+                    </p>
+
+                    <table style="text-align:left;">
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">mealPlan, COUNT(*)</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Hotel, Booking</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td>mealPlan</td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td>COUNT(*) ASC</td>
+                        </tr>
+                    </table>
+
+                    <h3>Example 8</h3>
+                    <p>
+                        Design a query that uses a readable heading to display the total number of people
+                        booked into a hotel in July.
+                    </p>
+
+                    <table style="text-align:left;">
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">People Booked in July = SUM(numberInParty)</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Booking</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td></td>startDate LIKE "*/07/*"
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td></td>
+                        </tr>
+                    </table >
+
+                    <h3>Example 9</h3>
+                    <p>
+                        Design a SELECT query to display the hotel name and the improved rating, if all hotels in
+                        Ayr gain an extra star (use a readable heading to display the improved ratings).
+                    </p>
+
+                    <table style="text-align:left;">
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">hotelName, Improved rating = startRating+1</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Hotel, Resort</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td>resortName = "Ayr"</td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td></td>
+                        </tr>
+                    </table>
+
+                    <h3>Example 10</h3>
+                    <p>
+                        Design a query to display the surname, booking number, number of nights, number in
+                        party, price per night and the total cost of each booking (with a readable column heading). Display
+                        the dearest booking first.
+                    </p>
+
+                    <table style="text-align:left;">
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">surname, bookingNo, numberNights,
+                            numberInParty, pricePersonNight, Total Cost =
+                            (numberNights * numberInParty *
+                            pricePersonNight)</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Customer, Booking, Hotel</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td>numberNights * numberInParty * pricePersonNight
+                            DESC</td>
+                        </tr>
+                    </table>
+
+                    <h3>Example 11</h3>
+                    <p>
+                        design a query to display the name of the resorts that have hotels with the highest star
+                        rating together with the highest star rating (use a readable heading to display the highest star rating).
+                    </p>
+                    <p>
+                        Since it is not possible to use an aggregate function in a WHERE clause, this solution requires <b>two</b>
+                        separate queries:
+                    </p>
+                    <ul>
+                        <li>the first query is a simple query to generate a single value — in this case, the highest
+                        star rating</li>
+                        <li>the second query makes use of the value generated by the first query</li>
+                    </ul>
+
+                    <p><b>Query 1 — Find Maximum Rating</b></p>
+                    <table style="text-align:left;">
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">Highest Star Rating = MAX(starRating)</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Hotel</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td></td>
+                        </tr>
+                    </table>
+
+                    <p><b>Query 2 — Display Names Of Resorts with Maximum Rating</b></p>
+                    <table style="text-align:left;">
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">resortName, [Highest Star Rating]</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Hotel, [Find Maximum Rating]</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td>starRating = Highest Star Rating</td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td></td>
+                        </tr>
+                    </table>
+
+                    <h3>Example 12</h3>
+                    <p>
+                        Design a query to display details of any hotel with a price per person that is below the
+                        average price per person. The query should display the hotel name, star rating, meal plan and the
+                        price per night. The dearest hotel should be listed first.
+                    </p>
+                    <p>
+                        This solution requires <b>two</b> separate queries:
+                    </p>
+                    <ul>
+                        <li>the first query is used to generate a single value — in this case, the average price per night</li>
+                        <li>the second query makes use of the value generated by the first query</li>
+                    </ul>
+
+                    <p><b>Query 1 — Find Average Per Person</b></p>
+                    <table style="text-align:left;">
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">Average Price per Person (£) =
+                            AVG(pricePersonNight)</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Hotel</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td></td>
+                        </tr>
+                    </table>
+
+                    <p><b>Query 2 — Display Details of Hotels with Price Per Person Below Average</b></p>
+                    <table style="text-align:left;">
+                        <tr>
+                            <th>Field(s) and Calculation(s)</th>
+                            <td style="width:66%">hotelName, starRating, mealPlan,
+                            pricePersonNIght</td>
+                        </tr>
+                        <tr>
+                            <th>Table(s) and Query</th>
+                            <td>Hotel, [Find Average per Person]</td>
+                        </tr>
+                        <tr>
+                            <th>Search Criteria</th>
+                            <td>pricePersonNight = Average Price per Person (£)</td>
+                        </tr>
+                        <tr>
+                            <th>Grouping</th>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>Sorting</th>
+                            <td>pricePersonNight DESC</td>
+                        </tr>
+                    </table>
+                    
+                    <h2>Past Paper Question - 2024 Q13</h2>
+                    <p>
+                        A relational database is used to store details of items for sale in a fruit and 
+                        vegetable shop and of the shop’s suppliers in linked tables.
+                    </p>
+                    <p>
+                        Sample data from two tables is shown below.
+                    </p>
+
+                    <table style="text-align:left;">
+                        <tr><th colspan="7">Item</th></tr>
+                        <tr><th  class="subheading">itemID</th><th  class="subheading">itemName</th><th  class="subheading">type</th><th  class="subheading">buyingPrice</th><th  class="subheading">sellingPrice</th><th  class="subheading">quantity</th><th  class="subheading">supplierRef</th></tr>
+                        <tr><td>145</td><td>Gala apples</td><td>Fruit</td><td>0.40</td><td>0.44</td><td>60</td><td>F96</td></tr>
+                        <tr><td>146</td><td>Iceberg Lettuce</td><td>Veg</td><td>0.52</td><td>0.60</td><td>45</td><td>F216</td></tr>
+                        <tr><td>147</td><td>Satsuma</td><td>Fruit</td><td>0.30</td><td>0.37</td><td>52</td><td>W125P</td></tr>
+                        <tr><td>148</td><td>Red Pepper</td><td>Veg</td><td>0.48</td><td>0.50</td><td>76</td><td>F216</td></tr>
+                        <tr><td>149</td><td>Organic Banana</td><td>Fruit</td><td>0.17</td><td>0.23</td><td>104</td><td>W984</td></tr>
+                        <tr><td>150</td><td>Cauliflower</td><td>Veg</td><td>0.93</td><td>0.95</td><td>34</td><td>F216</td></tr>
+                        <tr><td>151</td><td>Orange</td><td>Fruit</td><td>0.85</td><td>0.89</td><td>23</td><td>W87</td></tr>
+                        <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+                    </table>
+
+                    <table style="max-width:400px !important;">
+                        <tr><th colspan="3">Supplier</th></tr>
+                        <tr><th class="subheading">supplierRef</th><th class="subheading">supplierName</th><th class="subheading">address</th></tr>
+                        <tr><td>W87</td><td>FV Wholesale</td><td>136 Main Street</td></tr>
+                        <tr><td>F216</td><td>Sunnybank</td><td>Sunnybank Road</td></tr>
+                        <tr><td>P1982</td><td>J Barrow</td><td>96 Hillview Street</td></tr>
+                        <tr><td>W984</td><td>Fruit Direct</td><td>26 Glasgow Road</td></tr>
+                        <tr><td>F1982</td><td>Appletree Farm</td><td>Appletree Way</td></tr>
+                        <tr><td>F96</td><td>Smyth’s Farm</td><td>Drover's Brae</td></tr>
+                        <tr><td>W125P</td><td>M White</td><td>42 Nevis Crescent</td></tr>
+                        <tr><td>...</td><td>....</td><td>...</td></tr>
+                    </table>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(c)</th>
+                            <td>
+                                <p>
+                                    The profit that an item makes is calculated by subtracting the price the item is 
+                                    bought for from the price that the item sells for.
+                                </p>
+                                <p>
+                                    The shop would like to know the largest profit for fruits and vegetables. The 
+                                    largest profit should be listed first. The expected output is shown below
+                                </p>
+
+                                <table style="max-width:200px !important;">
+                                    <tr><th>type</th><th>Profit</th></tr>
+                                    <tr><td>Veg</td><td>0.08</td></tr>
+                                    <tr><td>Fruit</td><td>0.07</td></tr>
+                                </table>
+
+                                <p>
+                                    Design the SQL statement to produce this output.
+                                </p>
+                                <table style="text-align:left;">
+                                    <tr>
+                                        <th>Field(s) and Calculation(s)</th>
+                                        <td style="width:66%"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Table(s) and Query</th>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Search Criteria</th>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Grouping</th>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Sorting</th>
+                                        <td></td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <th rowspan="2" width="30px">4</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <table style="text-align:left;">
+                                        <tr>
+                                            <th>Field(s) and Calculation(s)</th>
+                                            <td style="width:66%">type, MAX(sellingPrice-buyingPrice) as Profit</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Table(s) and Query</th>
+                                            <td>Item</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Search Criteria</th>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Grouping</th>
+                                            <td>type</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Sorting</th>
+                                            <td>MAX(sellingPrice-buyingPrice) OR Profit DESC</td>
+                                        </tr>
+                                    </table>
+                                    <hr>
+                                    <p>One mark for each bullet:</p>
+                                    <ul>
+                                        <li>Type field and calculation with 
+                                        alias</li>
+                                        <li>MAX function</li>
+                                        <li>Table and grouping</li>
+                                        <li>Sort using calculation with 
+                                        function/alias DESC</li>
+                                    </ul>
+                                    <hr>
+                                    <p>Do not award bullet 1 if additional 
+                                    fields in Fields & Calculations</p>
+                                    <p>Do not double penalise in bullet 4 if 
+                                    incorrect calculation (from bullet 1) 
+                                    is repeated</p>
+                                    <p>Ignore fruit or veg in search criteria</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show
+                        Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>

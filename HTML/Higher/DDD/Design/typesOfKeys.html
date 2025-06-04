@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Types of Keys</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Types of Keys</h1></div>
+                <div class="contentContainer">
+                    <p>
+                        In a database, a key is a field (or a combination of fields) used to uniquely identify records within a table. Keys are essential for maintaining data 
+                        integrity, ensuring uniqueness, and enabling efficient data retrieval.  At the N5 level, we looked at Primary and Foreign Keys, but at Higher level we
+                        also need to be aware of Composite and Compound Keys.
+                    </p>
+                    
+                    <h2>Primary Key</h2>
+                    <p>
+                        This is an attribute that uniquely identifies each record in an entity.  For example, in a school each student may have a student ID number.  This number could
+                        be used as a primary key in a table of students because it uniquely identifies each one as shown below:
+                    </p>
+                    <img src="/Images/Higher/DDD/Design/primaryKey.JPG" alt="Primary Key" class="cImg"/>
+                    <p>The Primary Key attribute cannot be left blank when a record is created, it must have a value.</p>
+                    
+                    <h2>Foreign Key</h2>
+                    <p>
+                        A foreign key is an attribute in one table that uniquely identifies a row of another table.  This is used to link the two tables together.  For example, if a 
+                        school has three houses - Stewart, Wallace and Anderson, and there is a table containing information about each house, then the name of the house could be used 
+                        as a foreign key in the student table to show that each student belongs to a particular house.
+                    </p>
+                    <img src="/Images/Higher/DDD/Design/foreignKey.JPG" alt="Foreign Key" class="cImg"/>
+                    
+                    <h2>Compound Key</h2>
+                    <p>
+                        Sometimes, it is not possible to uniquely identify a record using a single attribute.  In this case, a compound key can be used.  A compound key is a combination of two or more attributes that are used together to 
+                        uniquely identify each record in the table.  As an example, the table below is used to track which subject is using a particular room on partcular day and period.  None of these attributes are unique by themselves - multiple 
+                        subjects use the same room, and multiple rooms are used on the same day and period.  However, when all three are used together, they can uniquely identify a record.  This is a compound key.
+                    </p>
+                    <img src="/Images/Higher/DDD/Design/compoundKey.jpg" alt="Compound Key" class="cImg" style="max-width:65%;"/>
+                    <p>
+                        Note that in the example, the combination of the data in the Day, Period and Room fields is unique for each row. Much like a Primary Key, a composite key cannot be left blank when you create a record - each of the attributes 
+                        that comprise a compound key must have a value.
+                    </p>
+                    
+                    <h2>Composite Key</h2>
+                    <p>
+                        In the case of a compound key, none of the attributes can uniquely identify any records by themselves.  With a composite key, one of the attributes could be used to uniquely identify a records, possibly in a different table.
+                        For example in the table below, StudentID can be used to uniquely identify a student, and ClassID can be used to uniquely identify a class.  A different table has been created to store the grade that the student achieved in a 
+                        particular class, to identify which grade is connected to a class and student, this table uses both StudentID and ClassID together as a composite key to identify each record.
+                    </p>
+                    <img src="/Images/Higher/DDD/Design/compositeKey.jpg" alt="Composite Key" class="cImg" style="max-width:75%;"/>
+                    <p>Note that the same ClassID can appear more than once in the grade table, and so can the same studentID, but each combination of classID and studentID is unique.</p>
+                    
+                    <h2>Past Paper Question - 2024 Q12</h2>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">12</th>
+                            <td>
+                                <p>
+                                    An e‑sports club runs weekly tournaments. The club uses three linked tables in a 
+                                    relational database to store details of players, tournaments and scores as shown 
+                                    below.
+                                </p>
+                                <img class="cImg" src="/Images/Higher/DDD/Design/2024Q12.jpg" alt="2024 Q12" width="60%">
+                                <p>
+                                    The following SQL statemnt has been written to add a new score to the <span class="codeText">Score</span> table.
+                                </p>
+                                <div class="codeBox">
+                                    <p>INSERT INTO Score (PlayerID, Score)</p>
+                                    <p>VALUES ("P1815", 550);</p>
+                                </div>
+                                <p>The <span class="codeText">tournamentID</span> field is missing from the SQL statement.</p>
+                                <p>Explain why this causes the SQL statement to fail.</p>
+                            </td>
+                            <th rowspan="2" width="30px">2</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <p>One mark for each of the following points:</p>
+                                        <ul>
+                                            <li>The <span class="codeText">tournamentID</span> is part of a Compound/Primary Key</li>
+                                            <li>It cannot be left blank</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

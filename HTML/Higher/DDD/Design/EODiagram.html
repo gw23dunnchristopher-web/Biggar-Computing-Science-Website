@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - Entity Occurance Diagram</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>Entity Occurance Diagram</h1></div>
+                <div class="contentContainer">
+                    <h2>What is an Entity Occurance Diagram?</h2>
+                    <p>
+                        An entity-occurrence diagram illustrates the relationships between the entity occurrences of one
+                        entity, with the entity occurrences within a related entity. The creation of an entity-occurrence
+                        diagram helps to identify the cardinality of the relationship that exists between the two entities.
+                    </p>
+                    <p>
+                        In an entity-occurrence diagram, each entity is shown as a tall oval. Inside each entity, each entity
+                        occurrence is represented by the value of its identifier and each relationship is illustrated by drawing
+                        a line between associated entity occurrences.
+                    </p>
+                    <p>
+                        Examples of entity-occurrence diagrams are shown below.
+                    </p>
+                    
+                    <h2>One-to-one Relationship</h2>
+                    <p>
+                        The following table indicates which School is managed by which Headteacher and which
+                        Headteacher manages which School.
+                    </p>
+                    <table style="text-align:center; max-width:400px; margin:auto; margin-top:20px; margin-bottom:20px;">
+                        <tr><th>School</th><th>Headteacher</th></tr>
+                        <tr><td>IC42</td><td>92</td></tr>
+                        <tr><td>IC57</td><td>84</td></tr>
+                        <tr><td>IC23</td><td>128</td></tr>
+                    </table>
+                    <p>Here is the matching entity-occurence diagram:</p>
+                    <img class="cImg" src="/Images/Higher/DDD/Design/EODiagram1.JPG" alt="EODiagram1"/>
+
+                    <p>
+                        From this entity-occurrence diagram, we can see that each occurrence in the School entity has an
+                        association with one, and only one, entity occurrence in the Headteacher entity. Similarly, each
+                        occurrence in the Headteacher entity has an association with one, and only one, occurrence in the
+                        School entity.
+                    </p>
+                    <p>
+                        This confirms that there is a one-to-one relationship between the School and Headteacher entities.
+                    </p>
+
+                    <h2>One-to-Many Relationship</h2>
+                    <p>
+                        The following table indicates which School employs which Teachers and which Teachers are
+                        employed by which School.
+                    </p>
+                    <table style="text-align:center; max-width:400px; margin:auto; margin-top:20px; margin-bottom:20px;">
+                        <tr><th>School</th><th>Teacher</th></tr>
+                        <tr><td>IC42</td><td>135</td></tr>
+                        <tr><td>IC57</td><td>123</td></tr>
+                        <tr><td>IC23</td><td>111</td></tr>
+                        <tr><td>IC23</td><td>184</td></tr>
+                        <tr><td>IC57</td><td>77</td></tr>
+                        <tr><td>IC57</td><td>295</td></tr>
+                        <tr><td>IC23</td><td>93</td></tr> 
+                    </table>
+                    <p>Here is the matching entity-occurence diagram:</p>
+                    <img class="cImg" src="/Images/Higher/DDD/Design/EODiagram2.JPG" alt="EODiagram2"/>
+
+                    <p>
+                        From this entity-occurrence diagram, we can see that each occurrence in the School entity has an
+                        association with one or more entity occurrences in the Teacher entity. We can also see that each
+                        occurrence in the Teacher entity has an association with one, and only one, occurrence in the School
+                        entity. This confirms that there is a one-to-many relationship between the School and Teacher
+                        entities.
+                    </p>
+
+                    <p>
+                        Note: this diagram is equivalent to the following entity-occurrence diagram.
+                    </p>
+                    <img class="cImg" src="/Images/Higher/DDD/Design/EODiagram2b.jpg" alt="EODiagram2b"/>
+
+                    <h2>Many-to-Many Relationship</h2>
+                    <p>
+                        The following table indicates which Students study which Subjects and which Subjects are studied by
+                        which Students.
+                    </p>
+                    <table style="text-align:center; max-width:400px; margin:auto; margin-top:20px; margin-bottom:20px;">
+                        <tr><th>Student</th><th>Subject</th></tr>
+                        <tr><td>14078</td><td>COMPH1</td></tr>
+                        <tr><td>14079</td><td>MATH2</td></tr>
+                        <tr><td>14080</td><td>ENGH1</td></tr>
+                        <tr><td>14078</td><td>MATH2</td></tr>
+                        <tr><td>14081</td><td>ENGH1</td></tr>
+                        <tr><td>14082</td><td>ENGH1</td></tr>
+                        <tr><td>14082</td><td>COMPH1</td></tr> 
+                        <tr><td>14081</td><td>MATH2</td></tr>
+                    </table>
+                    <p>
+                        Here is the matching entity-occurence diagram:
+                    </p>
+                    <img class="cImg" src="/Images/Higher/DDD/Design/EODiagram3.jpg" alt="EODiagram3"/>
+
+                    <p>
+                        From this entity-occurrence diagram, we can see that each occurrence in the Student entity has an
+                        association with one or more entity occurrences in the Subject entity. We can also see that each
+                        occurrence in the Subject entity has an association with one or more occurrences in the Student
+                        entity.
+                    </p>
+                    <p>
+                        This confirms that there is a many-to-many relationship between the Student and Subject entities.
+                    </p>
+
+                    <h2>Multiple Entities</h2>
+                    <p>
+                        An entity-occurrence diagram may be used to illustrate the relationship between multiple entities as
+                        shown below:
+                    </p>
+                    <img class="cImg" src="/Images/Higher/DDD/Design/EODiagram4.jpg" alt="EODiagram4"/>
+                    
+                    <h2>Past Paper Question - 2024 Q11</h2>
+                    <p>A gym would like to make use of a relational database.</p>
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(b)</th>
+                            <td>
+                                <p>The following sample data shows:</p>
+                                <ul>
+                                    <li>instructors and classes that they run.</li>
+                                    <li>members and classes that they attend.</li>
+                                </ul>
+                                <div class = "sideBySide">
+                                    <table style="max-width:300px; text-align:center">
+                                        <tr><th>Instructor</th><th>Class</th></tr>
+                                        <tr><td>Ins1</td><td>Class1</td></tr>
+                                        <tr><td>Ins2</td><td>Class4</td></tr>
+                                        <tr><td>Ins3</td><td>Class2</td></tr>
+                                        <tr><td>Ins3</td><td>Class3</td></tr>
+                                    </table>
+                                    <table style="max-width:300px; text-align:center">
+                                        <tr><th>Member</th><th>Class</th></tr>
+                                        <tr><td>Mem1</td><td>Class2</td></tr>
+                                        <tr><td>Mem2</td><td>Class2</td></tr>
+                                        <tr><td>Mem3</td><td>Class1</td></tr>
+                                        <tr><td>Mem1</td><td>Class3</td></tr>
+                                        <tr><td>Mem2</td><td>Class4</td></tr>
+                                    </table>
+                                </div>
+                                <p>Using this sample data, complete an entity-occurence diagram.  Your diagram should include the:</p>
+                                <ul>
+                                    <li>name of the entities</li>
+                                    <li>instances for each entity</li>
+                                    <li>association between these instances</li>
+                                </ul>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <img class="cImg" src="/Images/Higher/DDD/Design/EODiagram5.jpg" alt="2024Q11b"/>
+                                        <hr>
+                                        <ul>
+                                            <li><b>1 mark</b> - for entitu and instance names.</li>
+                                            <li><b>1 mark</b> - for correct association between instances.</li>
+                                        </ul>
+                                        <p>Note:Diagram may be reversed.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - JavaScript</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>JavaScript</h1></div>
+                <div class="contentContainer">
+                    <p>JavaScript events are used to implement interactive web content.  Events are placed withing HTML elements as shown below:</p>
+                    <div class="codeBox">
+                        <p>&lt;button <span style="color:yellow">onclick="functionName() onmouseover="functionName()" onmouseout="functionName()"</span>&gt;Click Me&lt;/button&gt;</p>
+                    </div>
+                    <p>The inverted commas contain the action to be executed when the event takes place. Possible actions include:</p>
+                    <ul>
+                        <li>hiding page elements.</li>
+                        <li>revealing page elements.</li>
+                        <li>changing the position of an element.</li>
+                        <li>changing the colour of an element.</li>
+                        <li>changing the size of an element.</li>
+                        <li>changing the appearance of text.</li>
+                    </ul>
+
+                    <p>Actions can be executed by:</p>
+                    <ul>
+                        <li>referring to the element containing the JavaScript event.</li>
+                        <li>referring to a different element, identified by an id.</li>
+                        <li>calling a JavaScript function containing the actions.</li>
+                    </ul>
+
+                    <h2>JavaScript Functions</h2>
+                    <p>Click on the buttons below to get more specific information on using JavaScript at this level:</p>
+
+                    <p class="laws" onclick="toggleLaw(this)"><b>Changing Graphic Sizes</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <h3>Example 1</h3>
+                        <p>Inline JavaScript can be used to increase and decrease the size of an image as the mouse pointer passes over and off of it.</p>
+
+                        <div class="codeBox">
+                            <p>&lt;img src="gas.png"</p>
+                            <p><span style="color:yellow">onmouseover="this.style.width='180px'; this.style.height='180px';"</span></p>
+                            <p><span style="color:yellow">onmouseover="this.style.width='150px'; this.style.height='150px';"</span></p>
+                            <p>class = "mower"&gt;</p>
+                        </div>
+
+                        <p>This example contains two events - <b><span class="codeText">onmouseover</span></b> and <b><span class="codeText">onmouseout</span></b>.  They are used to execute four actions:</p>
+                        <ul>
+                            <li>width='180px'</li>
+                            <li>height='180px'</li>
+                            <li>width='150px'</li>
+                            <li>height='150px'</li>
+                        </ul>
+
+                        <p>Each action in a JavaScript statement is seperated by a semi-colon (;).  Note that each action in the above element is preceded by <b><span class="codeText">this.style</span></b>.</p>
+                        <ul>
+                            <li><b><span class="codeText">this</span></b> - Meaning this element.  In this example it refers to the image (<span class="codeText">&lt;img&gt;</span>) element containing the event.</li>
+                            <li><b><span class="codeText">style</span></b> - The style property is used to change the appearance of an element.</li>
+                        </ul>
+
+                        <p>Here is the example webpage containing the JavaScript shown above:</p>
+                        <iframe src="https://trinket.io/embed/html/fdcbd21554e9" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+
+                        <h3>Example 2</h3>
+                        <p>
+                            JavaScript functions may be called to increase and decrease the size of a graphic, as a mouse pointer passes over and out of a graphic.  Using a function means using less code in each individual element.
+                        </p>
+
+                        <div class="codeBox">
+                            <p>&lt;img src="gas.png"</p>
+                            <p><span style="color:yellow">onmouseover="displayLarger(this);"</span></p>
+                            <p><span style="color:yellow">onmouseover="displaySmaller(this);"</span></p>
+                            <p>class = "mower"&gt;</p>
+                        </div>
+
+                        <p>The JavaScript functions above are passed the parameter this, referring to the element containing the event <span class="codeText">displayLarger(this)</span>.</p>
+                        <p>These events are placed within a <span class="codeText">&lt;script&gt;</span> element in the <span class="codeText">&lt;headt&gt;</span> section of the HTML document:</p>
+                        <p>The parameter is used by each function to implement the same actions as example 1.</p>
+                        <p>Implementing example 2 as a function, allows the same code to be called for multiple events:</p>
+
+                        <table>
+                            <tr><th>JavaScript</th></tr>
+                            <tr>
+                                <td class="codeBox">
+                                    <p>&lt;script&gt;</p>
+                                    <p style="padding-left:40px;">function displayLarger(my_image) {</p>
+                                    <p style="padding-left:80px;">my_image.style.width = '180px';</p>
+                                    <p style="padding-left:80px;">my_image.style.height = '180px';</p>
+                                    <p style="padding-left:40px;">}</p>
+                                    <p style="padding-left:40px;">function displaySmaller(my_image) {</p>
+                                    <p style="padding-left:80px;">my_image.style.width = '150px';</p>
+                                    <p style="padding-left:80px;">my_image.style.height = '150px';</p>
+                                    <p style="padding-left:40px;">}</p>
+                                    <p>&lt;/script&gt;</p>
+                                </td>
+                            </tr>
+                            <tr><th>HTML</th></tr>
+                            <tr>
+                                <td class="codeBox">
+                                    <p>&lt;img src="gas.png"</p>
+                                    <p><span style="color:yellow">onmouseover="displayLarger(this);"</span></p>
+                                    <p><span style="color:yellow">onmouseover="displaySmaller(this);"</span></p>
+                                    <p>class = "mower"&gt;</p>
+                                    <br>
+                                    <p>&lt;img src="Battery-electric-lawn-mower-type.jpg"</p>
+                                    <p><span style="color:yellow">onmouseover="displayLarger(this);"</span></p>
+                                    <p><span style="color:yellow">onmouseover="displaySmaller(this);"</span></p>
+                                    <p>class = "mower"&gt;</p>
+                                    <br>
+                                    <p>&lt;img src="robot.png"</p>
+                                    <p><span style="color:yellow">onmouseover="displayLarger(this);"</span></p>
+                                    <p><span style="color:yellow">onmouseover="displaySmaller(this);"</span></p>
+                                    <p>class = "mower"&gt;</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <p class="laws" onclick="toggleLaw(this)"><b>Creating Rollover Images</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <h3>Example 1</h3>
+                        <p>
+                            Rollover images can be created using two JavaScript events. The first event (<span class="codeText">onmouseover</span>) displays an alternate graphic when the mouse passes over the image element. The second event 
+                            (<span class="codeText">onmouseout</span>) displays the original graphic when the mouse pointer leaves the image.
+                        </p>
+
+                        <div class="codeBox">
+                            <p>&lt;img src="gas.png"</p>
+                            <p><span style="color:yellow">onmouseover="this.src='PetrolMower.png';"</span></p>
+                            <p><span style="color:yellow">onmouseout="this.src='gas.png';"</span>&gt;</p>
+                        </div>
+
+                        <p>The action <span class="codeText">src=' '</span> points the image element towards a given address.</p>
+
+                        <h3>Example 2</h3>
+                        <p>
+                            A rollover image can also be achieved using two functions. The first function is called using <span class="codeText">onmouseover</span>. The second is called using <span class="codeText">onmouseout</span>. Each function 
+                            is passed the img element as a parameter using this. As before each function changes the source (<span class="codeText">src</span>) of the image.
+                        </p>
+
+                        <table>
+                            <tr><th>JavaScript</th></tr>
+                            <tr>
+                                <td class="codeBox">
+                                    <p>&lt;script&gt;</p>
+                                    <p style="padding-left:40px;">function changeImage(element, image) { element.src = image; }</p>
+                                    <p>&lt;/script&gt;</p>
+                                </td>
+                            </tr>
+                            <tr><th>HTML</th></tr>
+                            <tr>
+                                <td class="codeBox">
+                                    <p>&lt;img src="gas.png"</p>
+                                    <p>onmouseover="changeImage(this, 'PetrolMower.png')"</p> 
+                                    <p>onmouseout="changeImage(this, 'gas.png')"&gt;</p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p>
+                            Note that in this example, variables have been used in the JavaScript function so that you only have to use one function for all of the images.   When the function is called, 'element' will be substituted for whatever 
+                            image element is going to change (usually 'this') and 'image' is being substituted for the address of the image that it is going to switch to.
+                        </p>
+                        <p>The example below shows how this works, try hovering your mouse cursor over the images:</p>
+
+                        <iframe src="https://trinket.io/embed/html/8e0847809ddc" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    </div>
+
+                    <p class="laws" onclick="toggleLaw(this)"><b>Dynamically Highlighting Text</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <p>To implement an action on a different page element, an id is required to identify the element the action will be performed on.</p>
+                        <p>An element is identified using <span class="codeText">document.getElementById('      ')</span>.</p>
+                        <p>The example below highlights the paragraph text when the mouse passes over the image next to the paragraph, the text will return to it's normal colour when the mouse moves away:</p>
+
+                        <div class="codeBox">
+                            <p>&lt;img src="gas.png"</p>
+                            <p><span style="color:yellow">onmouseover= "document.getElementById('highlight1').style.color='yellow';"</span></p>
+                            <p><span style="color:yellow">onmouseout= "document.getElementById('highlight1').style.color='white';"</span>&gt;</p>
+                        </div>
+
+                        <p>You can see this in action using the Trinket below:</p>
+                        <iframe src="https://trinket.io/embed/html/d91a76940b51" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    </div>
+
+                    <p class="laws" onclick="toggleLaw(this)"><b>Hiding and Revealing Elements</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                         <p>
+                             When a web page loads, elements may be initially hidden by applying the CSS declaration <span class="codeText">display:none</span>. This can be implemented using an inline or internal style, or by implementing an 
+                             external style (using a class, as shown below): 
+                         </p>
+                         <div class="codeBox">
+                             <p>.hidden {display:none;}</p>
+                         </div>
+                         <p> In the exanoke below, three sections containing text are hidden when the page loads using external CSS:</p>
+                         <div class="codeBox">
+                             <p>#Kentucky, #Fescue, #Bermuda {display:none;}</p>
+                         </div>
+                        <p>
+                            A JavaScript function is written in the html file, that will take in three IDs.  It will show one of them by setting the display attribute to 'block', and hide the other two by setting their 
+                            display attributes to 'none'.
+                        </p>
+                        <p>
+                            Then each of the images will have the section containing the hidden text placed below it, and the <span class="codeText">onclick</span> event will be used in the image to call the function.  When the image is clicked, the 
+                            webpage will show the text with an ID that matches the first one entered into the function.
+                        </p>
+
+                        <table>
+                            <tr><th>JavaScript</th></tr>
+                            <tr>
+                                <td class="codeBox">
+                                    <p>&lt;script&gt;</p>
+                                    <p style="padding-left:40px;">function showText(showTextID, hidden1, hidden2) {</p>
+                                    <p style="padding-left:80px;">document.getElementById(showTextID).style.display = 'block';</p>
+                                    <p style="padding-left:80px;">document.getElementById(hidden1).style.display = 'none';</p>
+                                    <p style="padding-left:80px;">document.getElementById(hidden2).style.display = 'none';</p>
+                                    <p style="padding-left:40px;">}</p>
+                                    <p>&lt;/script&gt;</p>
+                                </td>
+                            </tr>
+                            <tr><th>HTML</th></tr>
+                            <tr>
+                                <td class="codeBox">
+                                    <p>&lt;img src="Bluegrass.jpeg" onclick="showText('Kentucky', 'Fescue', 'Bermuda')"&gt;</p>
+                                    <p>&lt;section id="Kentucky"&gt;</p>
+                                    <p style="padding-left:40px;">&lt;p&gt;Kentucky Bluegrass is known for its lush, dense, and</p>
+                                    <p style="padding-left:40px;">dark green turf. It has a fine texture and forms a</p>
+                                    <p style="padding-left:40px;">beautiful, soft lawn that is pleasant to walk on barefoot.</p>
+                                    <p style="padding-left:40px;">This grass thrives in cooler climates and full sun but is</p>
+                                    <p style="padding-left:40px;">not very drought-tolerant. It is often mixed with other</p>
+                                    <p style="padding-left:40px;">grasses like fescue to improve its shade tolerance.&lt;/p&gt;</p>
+                                    <p>&lt;/section&gt;</p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p>A working example of the above code can be seen in the Trinket below:</p>
+
+                        <iframe src="https://trinket.io/embed/html/741da4d4cc9d" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    </div>
+                    
+                    <h2>Past Paper Question - 2024 Q17(b)</h2>
+                    <p>The wireframe for the 'School Day' web page is shown below.</p>
+                    <img src="/Images/Higher/WDD/Implementation/js/2024Q17b.jpg" alt="2024 Q17b" class="cImg">
+
+                    <p>
+                        When the mouse is moved over the <span class="codeText">mon.jpg</span> graphic, the Monday text should 
+                        appear with information about Monday’s school day. The <span class="codeText">displayMon</span>
+                        JavaScript event executes this feature.
+                    </p>
+                    <p>Part of the HTML code used for this web page is shown below.</p>
+
+                    <div class="codeBox">
+                        <p>...</p>
+                        <p>&lt;img src="mon.jpg"&gt;</p>
+                        <p>...</p>
+                        <p>&lt;section id="monText" style="display:none;"&gt;</p>
+                        <p style="padding-left:40px;">&lt;h2&gt;Monday>&lt;/h2&gt;</p>
+                        <p style="padding-left:40px;">&lt;p&gt;8.55am – 3.45pm&lt;/p&gt;</p>
+                        <p>&lt;/section&gt;</p>
+                        <p>...</p>
+                    </div>
+                    
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(b)(i)</th>
+                            <td>
+                                <p>The HTML code shown above is not fit for purpose.</p>
+                                <p>Re‑write the line of code to correct the error.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                     <div class="codeBox">
+                                        <p>&lt;img src="mon.jpg" <span style="color:yellow">onmouseover="displayMon()"</span>&gt;</p>
+                                     </div>
+                                    <hr>
+                                    <p><span class="codeText">displayMon(this)</span> is also acceptable.</p>
+                                    <p>The brackets in the function call must be included.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(b)(ii)</th>
+                            <td>
+                                <p>
+                                    The function <span class="codeText">displayMon</span> calls another JavaScript function named 
+                                    <span class="codeText">hideAllDays</span> which hides the text for all of the days currently 
+                                    displayed, ensuring only the text for Monday is displayed.
+                                </p>
+                                <div class="codeBox">
+                                    <p>&lt;script&gt;</p>
+                                    <p style="padding-left:40px;">function hideAllDays() {</p>
+                                    <p style="padding-left:80px;">document.getElementById("monText").style.display = "none";</p>
+                                    <p style="padding-left:40px;">}</p>
+                                    <p style="padding-left:40px;">function displayMon() {</p>
+                                    <p style="padding-left:80px;">__________(A)__________</p>
+                                    <p style="padding-left:80px;">document.getElementById("monText").style.display = "___(B)___";</p>
+                                    <p style="padding-left:40px;">}</p>
+                                    <p>&lt;/script&gt;</p>
+                                </div>
+
+                                <p>Complete the missing JavaScript code for the function <span class="codeText">displayMon</span>.</p>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer2">
+                                    <p>A: hideAllDays()</p>
+                                    <p>B: block/inline</p>
+                                    <hr>
+                                    <p>You get one mark for A and one mark for B.</p>
+                                    <p>For A, <span class="codeText">hideAllDays(this)</span> is also acceptable.</p>
+                                    <p>You must include the brackets after the function name for the function call.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

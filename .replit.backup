@@ -1,0 +1,19 @@
+
+run = "Configure Run Command"
+hidden = [".config"]
+compile = "Configure Compile Command"
+
+[nix]
+channel = "stable-22_11"
+
+[deployment]
+deploymentTarget = "static"
+publicDir = "/"
+
+[[deployment.rewrites]]
+from = "/HTML/*"
+to = "/HTML/*"
+
+[[deployment.rewrites]]
+from = "/*"
+to = "/index.html"
