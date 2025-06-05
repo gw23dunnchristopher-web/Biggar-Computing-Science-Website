@@ -2,11 +2,15 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Higher Computing Science - Blank</title>
+        <title>Higher Computing Science - Wildcards</title>
         <script src="/JavaScript/higherScript.js"></script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
+        <style>
+            .subheader th {background-color:lightgreen;}
+            .sideByside {justify-content:space-between; gap:20px;}
+        </style>
     </head>
     <body>
         <div id="loading"></div>
@@ -20,22 +24,217 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>Higher</h1></div>
-                <div class="contentHeading"><h1>Blank</h1></div>
+                <div class="contentHeading"><h1>Wildcards</h1></div>
                 <div class="contentContainer">
+                    <p class="laws" onclick="toggleLaw(this)"><b>Example Database - used in Implementation Examples</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <h3>Database Structure</h3>
+                        <p>All of the examples in the implementation section will use the following database:</p>
+                        <p>
+                            <i>"A travel agency uses a relational database to enable thier employees to view details of hotels in Scottish holiday reosrts and make bookings 
+                                for customers.  The details are stored in four separate tables called Hotel, Resort, Booking and Customer."</i>
+                        </p>
+                        <p>The structure of the tables is shown below:</p>
+                        <img src="/Images/Higher/DDD/Design/resortEntities.JPG" alt="Resort Entities" class="cImg" width="50%"/>
+    
+                        <h3>Sample Records</h3>
+                        <p>A sample record stored in each table is shown below:</p>
+                        <img src="/Images/Higher/DDD/Implementation/resortRecords.jpg" alt="Resort Records" class="cImg" width="50%"/>
 
-                    <h2>Past Paper Question - 2019 Q16(e)</h2>
+                        <p><b>
+                            Note: These solutions have been tested in MS Access, therefore the wildcards used as ? and *.  The field 'customerID#' is enclosed in square 
+                            brackets to avoid syntax errors.
+                        </b></p>
+                    </div>
+
+                    <h2>Using Wildcards</h2>
+                    <p>
+                        A wildcard character is used to replace one or more characters in a string. Wildcards are useful in
+                        situations when incomplete information is available and it would be impossible to write a WHERE
+                        clause using one of the existing logical operators =, &lt;, >, ≤ or ≥.
+                    </p>
+                    <p>
+                        Wildcard characters are used with the SQL <span class="codeText">LIKE</span> operator. The <span class="codeText">LIKE</span> operator is used in a 
+                        WHERE clause to perform search operations. Two different wildcards can be used:
+                    </p>
+                    <ul>
+                        <li><span class="codeText">%</span> - (the percent symbol) used to represent zero, one or multiple characters.</li>
+                        <li><span class="codeText">_</span> - (the underscore symbol) used to represent a single character.</li>
+                    </ul>
+
+                    <p><b>
+                        Note: MS Access uses an asterisk (*) rather than % and a question mark (?) rather than _.
+                    </b></p>
+
+                    <p>The following are some examples of <span class="codeText">LIKE</span> used with the wildcards:</p>
+
+                    <table>
+                        <tr><th width="35%">Example</th><th>Purpose</th></tr>
+                        <tr>
+                            <td class="codeBox" style="border-bottom-color:white;">
+                                <p>WHERE surname LIKE 'Thom%'</p>
+                            </td>
+                            <td>
+                                Used to find any values in the surname field that start with "Thom"
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="codeBox" style="border-bottom-color:white;">
+                                <p>WHERE surname LIKE '%son'</p>
+                            </td>
+                            <td>
+                                Used to find any values in the surname field that end with "son"
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="codeBox" style="border-bottom-color:white;">
+                                <p>WHERE surname LIKE '%is%'</p>
+                            </td>
+                            <td>
+                                Used to find any values in the surname field that have "is" anywhere in them
+                            </td>
+                        </tr>
+                        <tr>
+                             <td class="codeBox" style="border-bottom-color:white;">
+                                <p>WHERE surname LIKE '_h%'</p>
+                            </td>
+                            <td>
+                                Used to find any values in the surname field that have "h" as the second character.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="codeBox" style="border-bottom-color:white;">
+                                <p>WHERE surname LIKE 'M%%'</p>
+                            </td>
+                            <td>
+                                Used to find any values in the surname field that start with "M" and have at least three characters.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="codeBox">
+                                <p>WHERE surname LIKE 'a%z'</p>
+                            </td>
+                            <td>
+                                Used to find any values in the surname field that start with "a" and end with "z".
+                            </td>
+                        </tr>
+                    </table>
+
+                    <h3>Example 1</h3>
+                    <p>
+                        Used to search the database to display the name, swimming pool details, resort and
+                        resort type of any hotel in a coastal resort that starts with the letter 'A'.
+                    </p>
+
+                    <div class="codeBox">
+                        <p>SELECT hotelName, swimmingPool, resortName, resortType</p>
+                        <p>FROM Hotel, Resort</p>
+                        <p>WHERE Hotel.resortID = Resort.resortID AND resortName</p>
+                        <p>LIKE 'A%' AND resortType = 'Coastal';</p>
+                    </div>
+
+                    <h3>Example 2</h3>
+                    <p>
+                        Used to display the customer’s full name, booking number, start date, hotel name and
+                        resort name of all customers who has an 'h' as the second letter of their surname. These details
+                        should be listed in alphabetical order of surname; customers with the same surname should be listed
+                        so that the customer with the earliest holiday should be listed first.
+                    </p>
+
+                    <div class="codeBox">
+                        <p>SELECT firstName, surname, bookingNo, startDate, hotelName, resortName</p>
+                        <p>FROM Customer, Booking, Hotel, Resort</p>
+                        <p>WHERE Customer.[customerID#] = Booking.[customerID#] AND Hotel.hotelRef = Booking.hotelRef</p>
+                        <p>AND Hotel.resortID = Resort.resortID AND surname LIKE '?h*'</p>
+                        <p>ORDER BY surname ASC, startDate ASC;</p>
+                    </div>
+
+                    <h2>Past Paper Question - 2023 Q14</h2>
+                    <p>
+                        A takeaway restaurant is implementing an online ordering system and is using a 
+                        relational database to store details about the dishes, customers and orders.
+                    </p>
+                    <p>
+                        The restaurant can view order details. Customers are able to place and edit orders. 
+                        The four tables used in the database are shown below.
+                    </p>
+
+                    <table>
+                        <tr><th colspan="6">Customer</th></tr>
+                        <tr class="subheader"><th>custID</th><th>forename</th><th>surname</th><th>address</th><th>telephone</th><th>postcode</th></tr>
+                        <tr><td>41</td><td>Henry</td><td>Taylor</td><td>95 Whitehouse St</td><td>01224 931167</td><td>AB25 1SL</td></tr>
+                        <tr><td>42</td><td>Anna</td><td>Smith</td><td>84 Fraser Ave</td><td>01224 474845</td><td>AB16 5LL</td></tr>
+                        <tr><td>43</td><td>Jane</td><td>Robin</td><td>80 Maxwell St</td><td>01224 325715</td><td>AB12 5XN</td></tr>
+                        <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+                    </table>
+
+                    <div class="sideBySide vertAlign">
+                        <table style="max-height:400px; max-width:400px; margin:0;">
+                            <tr><th colspan="3">CustOrder</th></tr>
+                            <tr class="subheader"><th>orderID</th><th>custID</th><th>orderDate</th></tr>
+                            <tr><td>ORD1</td><td>41</td><td>15/05/2023</td></tr>
+                            <tr><td>ORD2</td><td>42</td><td>15/05/2023</td></tr>
+                            <tr><td>ORD3</td><td>41</td><td>16/05/2023</td></tr>
+                            <tr><td>...</td><td>...</td><td>...</td></tr>
+                        </table>
+
+                        <table  style="max-width:400px; margin:0; margin-left:20px;">
+                            <tr><th colspan="3">OrderItem</th></tr>
+                            <tr class="subheader"><th>orderID</th><th>dishID</th><th>quantity</th></tr>
+                            <tr><td>ORD1</td><td>DISH01</td><td>2</td></tr>
+                            <tr><td>ORD1</td><td>DISH05</td><td>3</td></tr>
+                            <tr><td>ORD1</td><td>DISH04</td><td>3</td></tr>
+                            <tr><td>ORD1</td><td>DISH06</td><td>1</td></tr>
+                            <tr><td>ORD2</td><td>DISH02</td><td>2</td></tr>
+                            <tr><td>ORD2</td><td>DISH04</td><td>2</td></tr>
+                            <tr><td>ORD3</td><td>DISH03</td><td>7</td></tr>
+                            <tr><td>ORD3</td><td>DISH04</td><td>6</td></tr>
+                            <tr><td>...</td><td>...</td><td>...</td></tr>
+                        </table>
+                    </div>
+                    <table>
+                        <tr><th colspan="4">Dish</th></tr>
+                        <tr class="subheader"><th>dishID</th><th>description</th><th>course</th><th>price</th></tr>
+                        <tr><td>DISH01</td><td>Pepper and egg sushi</td><td>Starter</td><td>6.99</td></tr>
+                        <tr><td>DISH02</td><td>Poppy and rosemary salad</td><td>Main</td><td>4.99</td></tr>
+                        <tr><td>DISH03</td><td>Ice cream</td><td>Dessert</td><td>3.99</td></tr>
+                        <tr><td>DISH04</td><td>Cappuccino</td><td>Drink</td><td>3.99</td></tr>
+                        <tr><td>DISH05</td><td>Chicken fajita</td><td>Main</td><td>8.99</td></tr>
+                        <tr><td>DISH06</td><td>One pan chicken</td><td>Main</td><td>9.99</td></tr>
+                        <tr><td>DISH07</td><td>Chilli chicken wings</td><td>Starter</td><td>4.99</td></tr>
+                        <tr><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+                    </table>
+                    
                     <table>
                         <tr>
-                            <th rowspan="2" width="30px">(e)</th>
+                            <th rowspan="2" width="30px">(c)</th>
                             <td>
-
+                                <p>
+                                    The manager wants to increase the price of main dishes that contain chicken by £2.00.
+                                </p>
+                                <p>
+                                    Write the SQL statement that would implement this.
+                                </p>
                             </td>
-                            <th rowspan="2"  width="30px">1</th>
+                            <th rowspan="2"  width="30px">3</th>
                         </tr>
                             <tr>
                                 <td>
                                     <div class="hiddenElement answer1">
-
+                                        <div class="codeBox">
+                                            <p>UPDATE Dish</p>
+                                            <p>SET price = price + 2</p>
+                                            <p>WHERE description LIKE '*chicken*' AND course = 'Main';</p>
+                                        </div>
+                                        <hr>
+                                        <p>One mark for each of the following points:</p>
+                                        <ul>
+                                            <li>UPDATE Dish</li>
+                                            <li>SET price = price + 2</li>
+                                            <li>WHERE description LIKE '%chicken%' AND course = 'Main'</li>
+                                        </ul>
+                                        <p>Award 0 marks for the first bullet if SQL clauses are in the wrong order.</p>
+                                        <p>Access: Accept * for wildcard.</p>
                                     </div>
                                 </td>
                             </tr>
