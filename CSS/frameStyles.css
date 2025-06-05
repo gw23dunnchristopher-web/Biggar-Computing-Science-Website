@@ -6,6 +6,19 @@ body {
     display:flex;
     flex-direction: column;
     min-height: 100vh;
+    /* Improve mobile rendering */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+/* Ensure proper loading on mobile */
+.content-hidden {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+#mainContent:not(.content-hidden) {
+    opacity: 1;
 }
 
 #pageContainer {

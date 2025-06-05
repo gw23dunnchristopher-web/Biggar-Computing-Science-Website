@@ -23,9 +23,29 @@ function preloadSidebar(menuLoc) {
 }
 
 function loadSidebar(menuLoc, menuID) {
+    // Ensure DOM is ready before attempting to load sidebar
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSidebarContent(menuLoc, menuID);
+        });
+    } else {
+        loadSidebarContent(menuLoc, menuID);
+    }
+}
+
+function loadSidebarContent(sidebarFile, targetElement) {
     window.scrollTo(0, 0);
+    var targetEl = document.getElementById(targetElement);
+    if (!targetEl) {
+        console.error('Target element not found:', targetElement);
+        // Try again after a short delay
+        setTimeout(function() {
+            loadSidebarContent(sidebarFile, targetElement);
+        }, 100);
+        return;
+    }
     if (sidebarCache) {
-        document.getElementById(menuID).innerHTML = sidebarCache;
+        targetEl.innerHTML = sidebarCache;
         attachMenuListeners();
         setInterval(function() { countdown('2025-04-25'); }, 1000);
         return;
@@ -34,7 +54,7 @@ function loadSidebar(menuLoc, menuID) {
     // If already preloading, use that promise
     if (sidebarPromise) {
         sidebarPromise.then(data => {
-            document.getElementById(menuID).innerHTML = data;
+            targetEl.innerHTML = data;
             attachMenuListeners();
             setInterval(function() { countdown('2025-04-25'); }, 1000);
         });
@@ -42,8 +62,8 @@ function loadSidebar(menuLoc, menuID) {
     }
 
     // Otherwise load normally
-    preloadSidebar(menuLoc).then(data => {
-        document.getElementById(menuID).innerHTML = data;
+    preloadSidebar(sidebarFile).then(data => {
+        targetEl.innerHTML = data;
         attachMenuListeners();
         setInterval(function() { countdown('2025-04-25'); }, 1000);
     });
@@ -92,6 +112,26 @@ function hide(element){
     document.getElementById(element).style.display = "none";
 }
 
+function showMainContent() {
+    var loadingEl = document.getElementById('loading');
+    var mainContentEl = document.getElementById('mainContent');
+
+    if (loadingEl) {
+        loadingEl.style.display = 'none';
+    }
+    if (mainContentEl) {
+        mainContentEl.classList.remove('content-hidden');
+    }
+
+    // Additional mobile-specific initialization
+    if (window.innerWidth <= 768) {
+        // Ensure mobile layout is properly initialized
+        setTimeout(function() {
+            var event = new Event('resize');
+            window.dispatchEvent(event);
+        }, 100);
+    }
+}
 
 
 function answerButtonSwitch(element){
@@ -217,7 +257,7 @@ function toggleBreakdown(breakdownId) {
 function toggleLaw(element) {
     const content = element.nextElementSibling;
     const arrow = element.querySelector('.arrow');
-    
+
     if (content.style.display === 'none' || content.style.display === '') {
         content.style.display = 'block';
         if (arrow) arrow.classList.add('rotated');
