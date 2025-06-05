@@ -412,6 +412,18 @@ ol li {
     text-align:center;
     font-size:20px;
     font-weight:bold;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .answerButton {
+        width: 90%;
+        max-width: 200px;
+        font-size: 16px;
+        padding: 12px 8px;
+        margin: 10px auto;
+        touch-action: manipulation;
+    }
 }
 
 .hiddenElement {
@@ -578,17 +590,59 @@ ul li ul li ul li {
 @media (max-width: 768px) {
     table {
         display: block;
-        border:none;
+        border: none;
         overflow-x: auto;
-        white-space: wrap;
+        white-space: nowrap;
         -webkit-overflow-scrolling: touch;
-        font-size: 12px;
-        max-width: 600px;
+        font-size: 10px;
+        width: 100%;
+        max-width: 100%;
+        margin: 10px 0;
     }
 
     table th, table td {
-        padding: 5px;
-        max-width:400px;
+        padding: 3px 2px;
+        font-size: 10px;
+        line-height: 1.2;
+        word-wrap: break-word;
+        white-space: normal;
+        max-width: 120px;
+        min-width: 60px;
+    }
+
+    table th {
+        font-size: 9px;
+        font-weight: bold;
+    }
+
+    /* Make tables scrollable horizontally */
+    .contentContainer table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Specific table adjustments */
+    .binaryTable {
+        font-size: 8px;
+    }
+
+    .binaryTable th, .binaryTable td {
+        width: 25px;
+        height: 25px;
+        padding: 2px;
+        font-size: 8px;
+    }
+
+    .specifications {
+        font-size: 9px;
+    }
+
+    .specifications th, .specifications td {
+        padding: 5px 3px;
+        font-size: 9px;
     }
 
     .contentContainer img,
@@ -613,10 +667,12 @@ ul li ul li ul li {
     .topicButton {
         width: 100%;
         max-width: 100%;
+        font-size: 16px;
+        padding: 15px 10px;
     }
 
     .contentContainer img {
-        max-width: 400px;
+        max-width: 100%;
         height: auto;
         margin: 10px auto;
         display: block;
@@ -626,6 +682,7 @@ ul li ul li ul li {
         float: none;
         margin: 10px auto;
         display: block;
+        max-width: 100%;
     }
 
     .shadow, .shadowImage { 
@@ -638,6 +695,33 @@ ul li ul li ul li {
         display: block;
         margin-left: auto;
         margin-right: auto;
+    }
+
+    /* Mobile text adjustments */
+    .contentContainer p, 
+    .contentContainer a, 
+    .contentContainer ul, 
+    .contentContainer ol {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .contentContainer h2 {
+        font-size: 20px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+
+    .contentContainer h3 {
+        font-size: 16px;
+        margin-top: 10px;
+        margin-bottom: 8px;
+    }
+
+    .contentContainer ul li,
+    .contentContainer ol li {
+        margin-bottom: 5px;
+        font-size: 14px;
     }
 
     .breakdown {
