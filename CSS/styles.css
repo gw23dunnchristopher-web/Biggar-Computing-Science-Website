@@ -608,11 +608,46 @@ ul li ul li ul li {
         white-space: normal;
         max-width: 120px;
         min-width: 60px;
+        overflow-wrap: break-word;
+        hyphens: auto;
     }
 
     table th {
         font-size: 9px;
         font-weight: bold;
+    }
+
+    /* Ensure paragraph text in tables is properly sized for mobile */
+    table td p, 
+    table th p {
+        font-size: 10px !important;
+        line-height: 1.3 !important;
+        margin: 2px 0 !important;
+        padding: 0 !important;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+    }
+
+    /* Ensure other text elements in tables are mobile friendly */
+    table td ul,
+    table td ol,
+    table td li {
+        font-size: 9px !important;
+        line-height: 1.2 !important;
+        margin: 1px 0 !important;
+        padding: 1px 0 !important;
+    }
+
+    table td .codeText,
+    table th .codeText {
+        font-size: 8px !important;
+        word-break: break-all;
+    }
+
+    table td div {
+        font-size: 10px !important;
+        line-height: 1.2 !important;
     }
 
     /* Make tables scrollable horizontally */
@@ -643,6 +678,40 @@ ul li ul li ul li {
     .specifications th, .specifications td {
         padding: 5px 3px;
         font-size: 9px;
+    }
+
+    /* Specific improvements for past paper questions and answer tables */
+    .specifications td p,
+    .specifications th p {
+        font-size: 9px !important;
+        line-height: 1.2 !important;
+        margin: 1px 0 !important;
+    }
+
+    .specifications td ul li,
+    .specifications td ol li {
+        font-size: 8px !important;
+        margin-bottom: 2px !important;
+    }
+
+    /* Ensure answer content in tables is readable */
+    .hiddenElement p {
+        font-size: 10px !important;
+        line-height: 1.3 !important;
+        margin: 3px 0 !important;
+    }
+
+    .hiddenElement ul,
+    .hiddenElement ol {
+        font-size: 9px !important;
+        margin: 2px 0 !important;
+        padding-left: 15px !important;
+    }
+
+    .hiddenElement li {
+        font-size: 9px !important;
+        line-height: 1.2 !important;
+        margin-bottom: 2px !important;
     }
 
     .contentContainer img,
