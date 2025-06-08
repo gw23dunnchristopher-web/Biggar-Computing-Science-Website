@@ -2,11 +2,14 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Higher Computing Science - Blank</title>
+        <title>Higher Computing Science - UPDATE multiple fields</title>
         <script src="/JavaScript/higherScript.js"></script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
+        <style>
+            .subheader th {background-color:lightgreen;}
+        </style>
     </head>
     <body>
         <div id="loading"></div>
@@ -20,22 +23,145 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>Higher</h1></div>
-                <div class="contentHeading"><h1>Blank</h1></div>
+                <div class="contentHeading"><h1>UPDATE multiple fields</h1></div>
                 <div class="contentContainer">
+                    <p class="laws" onclick="toggleLaw(this)"><b>Example Database - used in Implementation Examples</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <h3>Database Structure</h3>
+                        <p>All of the examples in the implementation section will use the following database:</p>
+                        <p>
+                            <i>"A travel agency uses a relational database to enable thier employees to view details of hotels in Scottish holiday reosrts and make bookings 
+                                for customers.  The details are stored in four separate tables called Hotel, Resort, Booking and Customer."</i>
+                        </p>
+                        <p>The structure of the tables is shown below:</p>
+                        <img src="/Images/Higher/DDD/Design/resortEntities.JPG" alt="Resort Entities" class="cImg" width="50%"/>
 
-                    <h2>Past Paper Question - 2019 Q16(e)</h2>
+                        <h3>Sample Records</h3>
+                        <p>A sample record stored in each table is shown below:</p>
+                        <img src="/Images/Higher/DDD/Implementation/resortRecords.jpg" alt="Resort Records" class="cImg" width="50%"/>
+
+                        <p><b>
+                            Note: These solutions have been tested in MS Access, therefore the wildcards used as ? and *.  The field 'customerID#' is enclosed in square 
+                            brackets to avoid syntax errors.
+                        </b></p>
+                    </div>
+
+                    <h2>Using UPDATE to update multiple fields</h2>
+                    <p>The UPDATE query is used at National 5 to edit the value(s) stored in one field of a database table. For example:</p>
+                    <div class="codeBox">
+                        <p>UPDATE Hotel</p>
+                        <p>SET pricePersonNight = 100</p>
+                        <p>WHERE hotelName = 'Cliff Top';</p>
+                    </div>
+                    <p>This query is used to update the price per night for the hotel called 'Cliff Top'.</p>
+
+                    <p>At Higher level, candidates are required to use a single query to change the values stored in more than one field of a database query.  The general
+                        syntax of this <span class="codeText">UPDATE</span> query is shown below:</p>
+                    <div class="codeBox">
+                        <p>UPDATE tableName</p>
+                        <p>SET field1 = value1, field2 = value2, ..., fieldN = valueN</p>
+                        <p>WHERE condition;</p>
+                    </div>
+
+                    <p>
+                        Note: each expression used in the <span class="codeText">SET</span> clause can be a specific value or an expression (which can, if
+                        required, use arithmetic operators). The <span class="codeText">WHERE</span> clause is optional.
+                    </p>
+
+                    <h3>Example 1</h3>
+                    <p>
+                        Customer Omar Shaheed has move.  The following <span class="codeText">UPDATE</span> query will edit his details to his new address - 31 Pike Place,   
+                        PH31 31P.
+                    </p>
+                    <div class="codeBox">
+                        <p>UPDATE Customer</p>
+                        <p>SET address = '31 Pike Place', postcode = 'PH31 31P'</p>
+                        <p>WHERE firstname = 'Omar' AND surname = 'Shaheed';</p>
+                    </div>
+
+                    <h3>Example 2</h3>
+                    <p>
+                        All the hotels in Fort William (hotel referernces starting with the letters FW) have gained an extra star and increase the price per night by 4%.
+                        Edit the relevant details in the database.
+                    </p>
+                    <div class="codeBox">
+                        <p>UPDATE Hotel</p>
+                        <p>SET starRating = starRating + 1, pricePersonNight = pricePersonNight * 1.04</p>
+                        <p>WHERE hotelRef LIKE 'FW*';</p>
+                    </div>
+                    
+                    <h2>Past Paper Question - 2019 Q17</h2>
+                    <p>
+                        A company offers driving lessons. They have a number of instructors and 
+                        currently organise their customer bookings as shown in the three database 
+                        tables below.
+                    </p>
+
+                    <table style="max-width:300px;">
+                        <tr><th colspan="3">Instructor</th></tr>
+                        <tr class="subheader"><th>instructorID</th><th>forename</th><th>surname</th></tr>
+                        <tr><td>1</td><td>James</td><td>Smith</td></tr>
+                        <tr><td>2</td><td>Anna</td><td>Bloggs</td></tr>
+                        <tr><td>3</td><td>George</td><td>Grant</td></tr>
+                        <tr><td>4</td><td>Rachel</td><td>Smith</td></tr>
+                        <tr><td>...</td><td>...</td><td>...</td></tr>
+                    </table>
+
+                    <table style="max-width:600px;">
+                        <tr><th colspan="6">Booking</th></tr>
+                        <tr class="subheader"><th>bookingID</th><th>instructorID</th><th>customerID</th><th>lessonDuration</th><th>date</th><th>time</th></tr>
+                        <tr><td>BK0001</td><td>4</td><td>1</td><td>30</td><td>01/05/2019</td><td>14:00</td></tr>
+                        <tr><td>BK0002</td><td>1</td><td>2</td><td>1</td><td>22/05/2019</td><td>16:00</td></tr>
+                        <tr><td>BK0003</td><td>4</td><td>1</td><td>2</td><td>08/05/2019</td><td>14:30</td></tr>
+                        <tr><td>BK0004</td><td>2</td><td>3</td><td>2</td><td>12/06/2019</td><td>10:00</td></tr>
+                        <tr><td>BK0005</td><td>3</td><td>2</td><td>1</td><td>29/05/2019</td><td>14:00</td></tr>
+                        <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+                    </table>
+
+                    <table style="max-width:800px;">
+                        <tr><th colspan="6">Customer</th></tr>
+                        <tr class="subheader"><th>customerID</th><th>forename</th><th>surname</th><th>address</th><th>telephone</th><th>postcode</th></tr>
+                        <tr><td>1</td><td>Matthew</td><td>Thomas</td><td>113 Cherry Terrace</td><td>07850843527</td><td>AB43 4SH</td></tr>
+                        <tr><td>2</td><td>Simon</td><td>Wegner</td><td>91 Almo Alley</td><td>07892843825</td><td>AB33 8UP</td></tr>
+                        <tr><td>3</td><td>Micola</td><td>McKay</td><td>9 Prairie Crescent</td><td>07945043032</td><td>AB43 9NZ</td></tr>
+                        <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+                    </table>
+                    
                     <table>
                         <tr>
-                            <th rowspan="2" width="30px">(e)</th>
+                            <th rowspan="2" width="30px">(c)</th>
                             <td>
-
+                                <p>
+                                    The customer Simon Wenger has moved home. His new address and 
+                                    postcode is 27 Drummer Street, AB33 7QR.
+                                </p>
+                                <p>Write the SQL statement to make these changes.</p>
                             </td>
-                            <th rowspan="2"  width="30px">1</th>
+                            <th rowspan="2"  width="30px">3</th>
                         </tr>
                             <tr>
                                 <td>
                                     <div class="hiddenElement answer1">
+                                        <div class="codeBox">
+                                            <p>UPDATE Customer</p>
+                                            <p>SET address = '27 Drummer Street', postcode = 'AB33 7QR'</p>
+                                            <p>WHERE forename = 'Simon' AND surname = 'Wegner';</p>
+                                        </div>
 
+                                        <b><p style="text-align:center">OR</p></b>
+
+                                        <div class="codeBox">
+                                            <p>UPDATE Customer</p>
+                                            <p>SET address = '27 Drummer Street', postcode = 'AB33 7QR'</p>
+                                            <p>WHERE customerID = 2;</p>
+                                        </div>
+                                        <hr>
+                                        <p>One mark for each of the following points:</p>
+                                        <ul>
+                                            <li>UPDATE Customer table</li>
+                                            <li>SET new address and postcode values</li>
+                                            <li>WHERE criteria based on forename and surname <b>OR</b> customer ID</li>
+                                        </ul>
                                     </div>
                                 </td>
                             </tr>

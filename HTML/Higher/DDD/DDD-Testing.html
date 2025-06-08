@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - DDD Testing</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+        <style>
+            img {display:block; margin:auto;}
+            .subheader th {background-color:lightgreen;}
+        </style>
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>DDD Testing</h1></div>
+                <div class="contentContainer">
+                    <h2>SQL Testing Tables</h2>
+                    <p>
+                        At Higher level, you will be required to test the database to ensure that it works as expected.  This will involve testing SQL operations, comparing
+                        the output that you would expect to the actual output produced by the database.
+                    </p>
+                    <p>
+                        To do this you can produce a testing table, showing the type of test, the SQL statement used, the expected output and the actual output.
+                    </p>
+
+                    <h3>Example</h3>
+                    <p>
+                        A car sales dealership uses a relational database to manage the details of the cars they have sold.  The database has four tables - Car, Customer, Sale and Employee.
+                        Click on the table names below to see the details of the tables.
+                    </p>
+
+                    <p class="laws" onclick="toggleLaw(this)"><b>Car</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <table>
+                            <tr>
+                                <th>regNo</th>
+                                <th>make</th>
+                                <th>model</th>
+                                <th>yearProduced</th>
+                                <th>engine</th>
+                                <th>fuelType</th>
+                                <th>price</th>
+                            </tr>
+                            <tr>
+                                <td>AE23 XNM</td>
+                                <td>Tesla</td>
+                                <td>Model 3</td>
+                                <td>2023</td>
+                                <td>Electric</td>
+                                <td>Electric</td>
+                                <td>£42,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>AE72 MGB</td>
+                                <td>Lexus</td>
+                                <td>RX</td>
+                                <td>2022</td>
+                                <td>3.5L V6 Hybrid</td>
+                                <td>Hybrid</td>
+                                <td>£42,500.00</td>
+                            </tr>
+                            <tr>
+                                <td>BX72 MLC</td>
+                                <td>Nissan</td>
+                                <td>Qashqai</td>
+                                <td>2022</td>
+                                <td>1.3L DIG-T</td>
+                                <td>Petrol</td>
+                                <td>£27,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>DV20 XFH</td>
+                                <td>Honda</td>
+                                <td>Civic</td>
+                                <td>2020</td>
+                                <td>1.5L VTEC Turbo</td>
+                                <td>Petrol</td>
+                                <td>£21,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>EA72 ZXR</td>
+                                <td>Ford</td>
+                                <td>Fiesta</td>
+                                <td>2022</td>
+                                <td>1.0L EcoBoost</td>
+                                <td>Petrol</td>
+                                <td>£17,500.00</td>
+                            </tr>
+                            <tr>
+                                <td>HG19 ZMK</td>
+                                <td>Volvo</td>
+                                <td>XC60</td>
+                                <td>2019</td>
+                                <td>2.0L T8 Twin Engine</td>
+                                <td>Hybrid</td>
+                                <td>£40,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>HK19 RZT</td>
+                                <td>Toyota</td>
+                                <td>Corolla</td>
+                                <td>2019</td>
+                                <td>1.8L Hybrid</td>
+                                <td>Hybrid</td>
+                                <td>£22,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>KM20 BVD</td>
+                                <td>Renault</td>
+                                <td>Clio</td>
+                                <td>2020</td>
+                                <td>1.0L TCE</td>
+                                <td>Petrol</td>
+                                <td>£17,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>KS20 LVD</td>
+                                <td>Jaguar</td>
+                                <td>XF</td>
+                                <td>2020</td>
+                                <td>2.0L Ingenium</td>
+                                <td>Deisel</td>
+                                <td>£33,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>LD21 PQU</td>
+                                <td>Volkswagon</td>
+                                <td>Golf</td>
+                                <td>2021</td>
+                                <td>1.5L TSI</td>
+                                <td>Petrol</td>
+                                <td>£23,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>LR21 PFA</td>
+                                <td>Hyundai</td>
+                                <td>Tucson</td>
+                                <td>2021</td>
+                                <td>1.6L Hybrid</td>
+                                <td>Hybrid</td>
+                                <td>£29,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>MJ19 VLO</td>
+                                <td>Audi</td>
+                                <td>A4</td>
+                                <td>2019</td>
+                                <td>2.0L TFSI</td>
+                                <td>Petrol</td>
+                                <td>£25,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>NJ19 XFC</td>
+                                <td>Vauxhall</td>
+                                <td>Astra</td>
+                                <td>2019</td>
+                                <td>1.4L Turbo</td>
+                                <td>Petrol</td>
+                                <td>£21,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>PU23 VYT</td>
+                                <td>Skoda</td>
+                                <td>Octavia</td>
+                                <td>2023</td>
+                                <td>1.5L TSI</td>
+                                <td>Petrol</td>
+                                <td>£25,500.00</td>
+                            </tr>
+                            <tr>
+                                <td>RK20 YFH</td>
+                                <td>BMW</td>
+                                <td>3 Series</td>
+                                <td>2020</td>
+                                <td>2.0: TwinPower Turbo</td>
+                                <td>Deisel</td>
+                                <td>£28,500.00</td>
+                            </tr>
+                            <tr>
+                                <td>TS20 LNZ</td>
+                                <td>Mazda</td>
+                                <td>CX-5</td>
+                                <td>2020</td>
+                                <td>2.5L Skyactiv-G</td>
+                                <td>Petrol</td>
+                                <td>£31,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>VT21 YXZ</td>
+                                <td>Kia</td>
+                                <td>Sportage</td>
+                                <td>2021</td>
+                                <td>1.6L T-GDI</td>
+                                <td>Hybrid</td>
+                                <td>£27,500.00</td>
+                            </tr>
+                            <tr>
+                                <td>WP21 JYB</td>
+                                <td>Mercedes-Benz</td>
+                                <td>C-Class</td>
+                                <td>2021</td>
+                                <td>2.0L Turbo</td>
+                                <td>Deisel</td>
+                                <td>£30,500.00</td>
+                            </tr>
+                            <tr>
+                                <td>WX72 DLF</td>
+                                <td>Peugeot</td>
+                                <td>208</td>
+                                <td>2022</td>
+                                <td>1.2L PureTech</td>
+                                <td>Petrol</td>
+                                <td>£19,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>YD20 RQE</td>
+                                <td>Land Rover</td>
+                                <td>Discovery</td>
+                                <td>2020</td>
+                                <td>3.0L P400 MHEV</td>
+                                <td>Hybrid</td>
+                                <td>£50,000.00</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <p class="laws" onclick="toggleLaw(this)"><b>Customer</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <table style="max-width:100%;">
+                            <tr>
+                                <th>customerID</th>
+                                <th>forename</th>
+                                <th>surname</th>
+                                <th>address</th>
+                                <th>town</td>
+                                <th>postcode</th>
+                                <th>phoneNumber</th>
+                                <th>email</th>
+                            </tr>
+                            <tr>
+                                <td>CUST1345</td>
+                                <td>David</td>
+                                <td>Walker</td>
+                                <td>15 Clyde Road</td>
+                                <td>Hamilton</td>
+                                <td>ML3 6AQ</td>
+                                <td>07781 123456</td>
+                                <td>dwalker93@fastmail.net</td>
+                            </tr>
+                            <tr>
+                                <td>CUST2049</td>
+                                <td>Rachel</td>
+                                <td>Turner</td>
+                                <td>34 Avon Street</td>
+                                <td>Hamilton</td>
+                                <td>ML3 7JG</td>
+                                <td>07856 987654</td>
+                                <td>rachel.t88@outlook.com</td>
+                            </tr>
+                            <tr>
+                                <td>CUST3128</td>
+                                <td>Mark</td>
+                                <td>Thomson</td>
+                                <td>8 Cadzow Lane</td>
+                                <td>Hamilton</td>
+                                <td>ML3 5AX</td>
+                                <td>07599 456123</td>
+                                <td>thomson_mark@email.co.uk</td>
+                            </tr>
+                            <tr>
+                                <td>CUST3491</td>
+                                <td>Lisa</td>
+                                <td>Murray</td>
+                                <td>77 Burnbank Drive</td>
+                                <td>East Kilbride</td>
+                                <td>G74 9HP</td>
+                                <td>07344 789012</td>
+                                <td>lmurray77@webmail.org</td>
+                            </tr>
+                            <tr>
+                                <td>CUST5286</td>
+                                <td>Andrew</td>
+                                <td>Scott</td>
+                                <td>21 Bothwell Road</td>
+                                <td>Blantyre</td>
+                                <td>G72 0DA</td>
+                                <td>07988 654321</td>
+                                <td>andyscott.ml3@gmail.com</td>
+                            </tr>
+                            <tr>
+                                <td>CUST5482</td>
+                                <td>Karen</td>
+                                <td>Bell</td>
+                                <td>65 Strathaven Street</td>
+                                <td>Strathaven</td>
+                                <td>ML10 8FT</td>
+                                <td>07733 654789</td>
+                                <td>kbell_234@zoho.com</td>
+                            </tr>
+                            <tr>
+                                <td>CUST6872</td>
+                                <td>Steven</td>
+                                <td>Clarke</td>
+                                <td>12 Silverton Crescent</td>
+                                <td>Larkhall</td>
+                                <td>ML9 6RS</td>
+                                <td>07899 321456</td>
+                                <td>stevenc82@btinternet.com</td>
+                            </tr>
+                            <tr>
+                                <td>CUST7653</td>
+                                <td>Emma</td>
+                                <td>Hughes</td>
+                                <td>53 Low Waters Road</td>
+                                <td>Lanark</td>
+                                <td>ML11 7QU</td>
+                                <td>07655 987321</td>
+                                <td>emhughes_ml3@live.co.uk</td>
+                            </tr>
+                            <tr>
+                                <td>CUST8794</td>
+                                <td>Peter</td>
+                                <td>Douglas</td>
+                                <td>29 Fairhill Avenue</td>
+                                <td>Carluke</td>
+                                <td>ML8 9ZT</td>
+                                <td>07412 654987</td>
+                                <td>p.douglas93@icloud.com</td>
+                            </tr>
+                            <tr>
+                                <td>CUST9137</td>
+                                <td>Natalie</td>
+                                <td>Fraser</td>
+                                <td>45 Neilsland Road</td>
+                                <td>Rutherglen</td>
+                                <td>G73 8XP</td>
+                                <td>07877 321789</td>
+                                <td>natalie_fraser77@yahoo.com</td>
+                            </tr>
+                        </table>
+                    </div>
+                   
+                    <p class="laws" onclick="toggleLaw(this)"><b>Employee</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <table>
+                            <tr>
+                                <th>employeeNo</th>
+                                <th>forename</th>
+                                <th>surname</th>
+                                <th>position</th>
+                                <th>salary</th>
+                                <th>commission</th>
+                            </tr>
+                            <tr>
+                                <td>36948</td>
+                                <td>Charlotte</td>
+                                <td>Baker</td>
+                                <td>Sales Executive</td>
+                                <td>£30,000.00</td>
+                                <td>10.00%</td>
+                            </tr>
+                            <tr>
+                                <td>47291</td>
+                                <td>James</td>
+                                <td>Robertson</td>
+                                <td>Sales Manager</td>
+                                <td>£40,000.00</td>
+                                <td>14.00%</td>
+                            </tr>
+                            <tr>
+                                <td>53826</td>
+                                <td>Sophie</td>
+                                <td>Evans</td>
+                                <td>Senior Sales Executive</td>
+                                <td>£32,000.00</td>
+                                <td>12.00%</td>
+                            </tr>
+                            <tr>
+                                <td>60473</td>
+                                <td>Olivia</td>
+                                <td>Carter</td>
+                                <td>Sales Executive</td>
+                                <td>£30,000.00</td>
+                                <td>12.00%</td>
+                            </tr>
+                            <tr>
+                                <td>82195</td>
+                                <td>Emma</td>
+                                <td>Harris</td>
+                                <td>Sales Executive</td>
+                                <td>£30,000.00</td>
+                                <td>12.00%</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <p class="laws" onclick="toggleLaw(this)"><b>Sales</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <table>
+                            <tr>
+                                <th>employeeNo</th>
+                                <th>customerID</th>
+                                <th>regNo</th>
+                                <th>advance</th>
+                            </tr>
+                            <tr>
+                                <td>53826</td>
+                                <td>CUST5286</td>
+                                <td>BX72 MLC</td>
+                                <td>£5,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>60473</td>
+                                <td>CUST3128</td>
+                                <td>DV20 XFH</td>
+                                <td>£2,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>53826</td>
+                                <td>CUST6872</td>
+                                <td>EA72 ZXR</td>
+                                <td>£1,500.00</td>
+                            </tr>
+                            <tr>
+                                <td>60473</td>
+                                <td>CUST9137</td>
+                                <td>HG19 ZMK</td>
+                                <td>£8,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>36948</td>
+                                <td>CUST3491</td>
+                                <td>HK19 RZT</td>
+                                <td>£3,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>47291</td>
+                                <td>CUST2049</td>
+                                <td>LD21 PQU</td>
+                                <td>£4,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>36948</td>
+                                <td>CUST1345</td>
+                                <td>MJ19 VLO</td>
+                                <td>£5,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>36948</td>
+                                <td>CUST5482</td>
+                                <td>NJ19 XFC</td>
+                                <td>£2,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>82195</td>
+                                <td>CUST8794</td>
+                                <td>PU23 VYT</td>
+                                <td>£6,000.00</td>
+                            </tr>
+                            <tr>
+                                <td>60473</td>
+                                <td>CUST7653</td>
+                                <td>RK20 YFH</td>
+                                <td>£7,500.00</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <br>
+                    <p>You can download the database for Access by clicking on the button below:</p>
+                    <div class="button" style="margin:20px auto;">
+                        <a href="/Files/Resources/Higher/DDD/SQL-Students.accdb" download="SQL-Students.accdb">Access Car Sale Database</a>
+                    </div>
+                    <p>To test this database, a number of SQL Queries will be performed and the testing table below will be completed.</p>
+
+                    <table style="max-width:100%">
+                        <tr><th width="15%">Test</th><th width="25%">SQL Operation</th><th width="20%">Expected Results</th><th width="50%">Actual Results (Screenshot)</th></tr>
+                        <tr><td>How many petrol cards were produced in each year?</td>
+                            <td class="codeText">
+                                <p>SELECT yearProduced, COUNT(fuelType)</p>
+                                <p>FROM Car</p>
+                                <p>WHERE fuelType = "Petrol"</p>
+                                <p>GROUP BY yearProduced;</p>
+                            </td>
+                            <td>
+                                <table>
+                                    <tr><th>yearProduced</th><th>petrolCount</th></tr>
+                                    <tr><td>2019</td><td>2</td></tr>
+                                    <tr><td>2020</td><td>3</td></tr>
+                                    <tr><td>2021</td><td>1</td></tr>
+                                    <tr><td>2022</td><td>3</td></tr>
+                                    <tr><td>2023</td><td>1</td></tr>
+                                </table>
+                            </td>
+                            <td>
+                                <img src="/Images/Higher/DDD/Testing/query1.jpg" alt="Query 1 Results" width="60%">
+                            </td>
+                        </tr>
+                        <tr><td>Show the names and phone numbers of all customers from Hamilton.</td>
+                            <td class="codeText">
+                                <p>SELECT forename, surname, phoneNumber</p>
+                                <p>FROM Customer</p>
+                                <p>WHERE town = 'Hamilton';</p>
+                            </td>
+                            <td>
+                                <table>
+                                    <tr><th>forename</th><th>surname</th><th>phoneNumber</th></tr>
+                                    <tr><td>David</td><td>Walker</td><td>07781 123456</td></tr>
+                                    <tr><td>Rachel</td><td>Turner</td><td>07856 987654</td></tr>
+                                    <tr><td>Mark</td><td>Thomson</td><td>07599 456123</td></tr>
+                                </table>
+                            </td>
+                            <td>
+                                <img src="/Images/Higher/DDD/Testing/query2.jpg" alt="Query 2 Results" width="80%">
+                            </td></tr>
+                        <tr><td>List the name, car make and model of all customers who bought cars over £25000.</td>
+                            <td class="codeText">
+                                <p>SELECT forename, surname, make, model</p>
+                                <p>FROM Customer, Car, Sales</p>
+                                <p>WHERE Customer.customerID = Sales.customerID AND Car.regNo = Sales.regNo AND Car.price > 25000;</p>
+                            </td>
+                            <td>
+                                <table>
+                                    <tr><th>forename</th><th>surname</th><th>make</th><th>model</th></tr>
+                                    <tr><td>Emma</td><td>Hughes</td><td>BMW</td><td>3 Series</td></tr>
+                                    <tr><td>Andrew</td><td>Scott</td><td>Nissan</td><td>Qashqai</td></tr>
+                                    <tr><td>Natalie</td><td>Fraser</td><td>Volvo</td><td>XC60</td></tr>
+                                    <tr><td>Peter</td><td>Douglas</td><td>Skoda</td><td>Octavia</td></tr>
+                                </table>
+                            </td>
+                            <td>
+                                <img src="/Images/Higher/DDD/Testing/query3.jpg" alt="Query 3 Results" width="90%">
+                            </td></tr>
+                        <tr><td>Update Emma Harris' record so that she is a Senior Sales Executive with a Salary of £32000 and a commission of 14%.</td>
+                            <td>
+                                <div class="codeText">
+                                    <p>UPDATE Employee</p>
+                                    <p>SET position = 'Senior Sales Executive', commission = '0.14', salary = 32000'</p>
+                                    <p>WHERE employeeNo = 82195;</p>
+                                </div>
+                            </td>
+                            <td>
+                               The record for Emma Harris should be updated with the new details.
+                            </td>
+                            <td>
+                                <img src="/Images/Higher/DDD/Testing/query4.jpg" alt="Query 4 Results" width="100%">
+                            </td></tr>
+                    </table>
+                    
+                    <br>
+                    <p>A test table like this could be used to support your evaluation in the next stage.</p>
+                    
+                    <h2>Past Paper Question - 2022 Q10</h2>
+                    <p>
+                        A swimming club uses a database to store details of swimmers and their times in a 
+                        50 metres swim. A sample of the data stored in the <span class="codeText">Swimmer</span> table is shown below.
+                    </p>
+                        
+                    <table style="max-width:400px">
+                        <tr><th colspan="4">Swimmer</th></tr>
+                        <tr class="subheader">
+                            <th>swimmerNo</th>
+                            <th>swimmer</th>
+                            <th>squad</th>
+                            <th>time</th>
+                            </tr>
+                        <tr>
+                            <td>001</td>
+                            <td>M Marston</td>
+                            <td>Dolphins1A</td>
+                            <td>30.25</td>
+                        </tr>
+                        <tr>
+                            <td>002</td>
+                            <td>S Cochrane</td>
+                            <td>Dolphins2A</td>
+                            <td>25.75</td>
+                        </tr>
+                        <tr>
+                            <td>003</td>
+                            <td>L Richards</td>
+                            <td>Dolphins1B</td>
+                            <td>30.23</td>
+                        </tr>
+                        <tr>
+                            <td>004</td>
+                            <td>F Qazi</td>
+                            <td>Dolphins2A</td>
+                            <td>35.45</td>
+                        </tr>
+                        <tr>
+                            <td>005</td>
+                            <td>R Mirza</td>
+                            <td>Dolphins1A</td>
+                            <td>28.15</td>
+                        </tr>
+                        <tr>
+                            <td>006</td>
+                            <td>J Smith</td>
+                            <td>Sharks1A</td>
+                            <td>29.35</td>
+                        </tr>
+                        <tr>
+                            <td>007</td>
+                            <td>L Pascal</td>
+                            <td>Sharks2A</td>
+                            <td>32.25</td>
+                        </tr>
+                        <tr>
+                            <td>008</td>
+                            <td>F McDonald</td>
+                            <td>Sharks1B</td>
+                            <td>31.45</td>
+                        </tr>
+                        <tr>
+                            <td>009</td>
+                            <td>T Madison</td>
+                            <td>Sharks2B</td>
+                            <td>36.54</td>
+                        </tr>
+                        <tr>
+                            <td>010</td>
+                            <td>M Johnston</td>
+                            <td>Sharks1B</td>
+                            <td>39.15</td>
+                        </tr>
+                        <tr>
+                            <td>011</td>
+                            <td>M Davidson</td>
+                            <td>Sharks1A</td>
+                            <td>29.45</td>
+                        </tr>
+                        <tr>
+                            <td>012</td>
+                            <td>Z Habib</td>
+                            <td>Dolphins1A</td>
+                            <td>25.45</td>
+                        </tr>
+                        <tr>
+                            <td>013</td>
+                            <td>K Patel</td>
+                            <td>Sharks1B</td>
+                            <td>33.76</td>
+                        </tr>
+                        <tr>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                    </table>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">10</th>
+                            <td>
+                                <p>
+                                    The head coach would like to produce a report displaying the slowest and fastest 
+                                    times from any of the squads with a ‘1’ in their name, as shown below.
+                                </p>
+
+                                <table style="max-width:400px;">
+                                    <tr>
+                                        <th>Squad</th>
+                                        <th>Slowest Time</th>
+                                        <th>Fastest Time</th>
+                                    </tr>
+                                    <tr>
+                                        <td>Dolphins1A</td>
+                                        <td>30.25</td>
+                                        <td>25.45</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Dolphins1B</td>
+                                        <td>30.23</td>
+                                        <td>30.23</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sharks1A</td>
+                                        <td>29.45</td>
+                                        <td>29.35</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Sharks1B</td>
+                                        <td>39.15</td>
+                                        <td>31.45</td>
+                                    </tr>
+                                </table>
+
+                                <p>The following SQL statement is executed.</p>
+                                <div class="codeBox">
+                                    <p>SELECT squad, MIN(time) AS [Slowest Time], MAX(time) AS [Fastest Time]</p>
+                                    <p>FROM Swimmer</p>
+                                    <p>WHERE squad LIKE "1"</p>
+                                </div>
+
+                                <p>When tested, the actual output did not match the expected output.  Identify the three errors in the above SQL statement.</p>
+                            </td>
+                            
+                            <th rowspan="2"  width="30px">3</th>
+                        </tr>
+                        
+                        <tr>
+                            <td>
+                                <div class="hiddenElement answer1">
+                                    <p>One mark for each error found:</p>
+                                    <table>
+                                        <tr><th>Error 1</th><td>MIN and MAX functions are the wrong way round OR ALIAS assigned to wrong function.</td></tr>
+                                        <tr><th>Error 2</th><td>No wildcard operator on both sides of 1 (eg WHERE squad LIKE "%1%" or "*1*").</td></tr>
+                                        <tr><th>Error 3</th><td>No GROUP BY squad.</td></tr>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

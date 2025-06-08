@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Higher Computing Science - GROUP BY</title>
+        <script src="/JavaScript/higherScript.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css">
+        <link rel="stylesheet" href="/CSS/styles.css">
+        <link rel="stylesheet" href="/CSS/frameStyles.css">
+        <style>
+            .subheader th {background-color:lightgreen;}
+        </style>
+    </head>
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="/Images/Header/banner.png">
+        </header>
+        <div id="pageContainer">
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+            <div id="sidebar"></div>
+            <div id="content">
+                <div id="mainHeading"><h1>Higher</h1></div>
+                <div class="contentHeading"><h1>GROUP BY</h1></div>
+                <div class="contentContainer">
+                    <p class="laws" onclick="toggleLaw(this)"><b>Example Database - used in Implementation Examples</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <h3>Database Structure</h3>
+                        <p>All of the examples in the implementation section will use the following database:</p>
+                        <p>
+                            <i>"A travel agency uses a relational database to enable thier employees to view details of hotels in Scottish holiday reosrts and make bookings 
+                                for customers.  The details are stored in four separate tables called Hotel, Resort, Booking and Customer."</i>
+                        </p>
+                        <p>The structure of the tables is shown below:</p>
+                        <img src="/Images/Higher/DDD/Design/resortEntities.JPG" alt="Resort Entities" class="cImg" width="50%"/>
+
+                        <h3>Sample Records</h3>
+                        <p>A sample record stored in each table is shown below:</p>
+                        <img src="/Images/Higher/DDD/Implementation/resortRecords.jpg" alt="Resort Records" class="cImg" width="50%"/>
+
+                        <p><b>
+                            Note: These solutions have been tested in MS Access, therefore the wildcards used as ? and *.  The field 'customerID#' is enclosed in square 
+                            brackets to avoid syntax errors.
+                        </b></p>
+                    </div>
+
+                    <h2>Using GROUP BY</h2>
+                    <p>
+                        The <span class="codeText">GROUP BY</span>clause is used in a <span class="codeText">SELECT</span> to form sets (or groups) of records.  It does
+                        this by grouping records that have the same value in one or more fields.
+                    </p>
+                    <p>
+                        When used with an aggregate function, the <span class="codeText">GROUP BY</span> clause ensures that one result is returned for each group of
+                        records.  This makes it possible to mix non-aggregate and aggregate expressions in a <span class="codeText">SELECT</span> statement, which is not 
+                        possible without the <span class="codeText">GROUP BY</span> clause.
+                    </p>
+                    <p>
+                        For example, the query below will group the star ratings for each hotel and display the cheapest hotel's name and price in each group:
+                    </p>
+                    <div class="codeBox">
+                        <p>SELECT hotelName, starRating, MIN(pricePersonNight)</p>
+                        <p>FROM Hotel</p>
+                        <p>GROUP BY starRating;</p>
+                        <p>ORDER BY MIN(pricePersonNight)</p>
+                    </div>
+
+                    <p>
+                        Note: whenever a single query has both <span class="codeText">GROUP BY</span> and <span class="codeText">ORDER BY</span> clauses, the 
+                        <span class="codeText">GROUP BY</span> clause <b>always</b> precedes the <span class="codeText">ORDER BY</span> clause. If the clauses are reversed, 
+                        a syntax error will be generated.
+                    </p>
+                        
+                    <h3>Example 1</h3>
+                    <p>
+                        In this example, we will display the number of bookings for hotels in coastal resorts.  The query below will show the resort type and use a
+                        readable heading for the results returned by the aggregate function.
+                    </p>
+                    <div class="codeBox">
+                        <p>SELECT resortType, COUNT(*) AS [Number of Bookings]</p>
+                        <p>FROM Booking, Hotel, Resort</p>
+                        <p>WHERE Booking.hotelRef = Hotel.hotelRef AND Hotel.resortID = Resort.resortID AND resortType = 'coastal'</p>
+                        <p>GROUP BY resortType;</p>
+                    </div>
+
+                    <h3>Example 2</h3>
+                    <p>
+                        This is used to display a list of each type of meal plan together with the number of bookings
+                        made for each of those meal plans. The details should be listed from least popular meal plan to most
+                        popular.
+                    </p>
+                    <div class="codeBox">
+                        <p>SELECT mealPlan, COUNT(*)</p>
+                        <p>FROM Hotel, Booking</p>
+                        <p>WHERE Hotel.hotelRef = Booking.hotelRef</p>
+                        <p>GROUP BY mealPlan</p>
+                        <p>ORDER BY COUNT(*) ASC;</p>
+                    </div>
+                    <p>
+                        <b>Note the sequencing of the <span class="codeText">GROUP BY</span> and <span class="codeText">ORDER BY</span> clauses.</b>
+                    </p>
+                    
+                    <h2>Past Paper Question - 2024 Q14</h2>
+                    <p>
+                        A driving school uses a relational database to store details of driving instructors, 
+                        pupils and bookings in three linked tables.
+                    </p>
+                    <p>The relational database uses the following three tables.</p>
+                    <img src="/Images/Higher/DDD/Implementation/2024Q14.jpg" class="cImg" alt="Tables for 2024 Q14" width="40%"/>
+
+                    <p>Sample data from the pupil table is shown below:</p>
+                    <table>
+                        <tr><th colspan="4">Pupils</th></tr>
+                        <tr class="subheader"><th>pupilRef</th><th>name</th><th>address</th><th>town</th></tr>
+                        <tr><td>PU1</td><td>P Clifford</td><td>21 Clark Street</td><td>Kilmarnock</td></tr>
+                        <tr><td>PU2</td><td>N Price</td><td>76 Burnside Ave</td><td>Greenock</td></tr>
+                        <tr><td>PU3</td><td>M Flood</td><td>41 Sinclair Street</td><td>Greenock</td></tr>
+                        <tr><td>PU4</td><td>A Singh</td><td>92 Rugby Road</td><td>Kilmarnock</td></tr>
+                        <tr><td>PU5</td><td>J Wilson</td><td>8 Stadium Way</td><td>Falkirk</td></tr>
+                        <tr><td>PU6</td><td>M Ali</td><td>56 Lime Road</td><td>Falkirk</td></tr>
+                        <tr><td>PU7</td><td>S McGuire</td><td>118 Craigneuk Ave</td><td>Aidrie</td></tr>
+                        <tr><td>PU8</td><td>D McGregor</td><td>120 Wallace Place</td><td>Greenocj</td></tr>
+                    </table>
+                    
+                    <p>
+                        The driving school use the following SQL statement to display the number of 
+                        pupils in each town.
+                    </p>
+
+                    <div class="codeBox">
+                        <p>SELECT town, COUNT(*) AS [Number Per Town]</p>
+                        <p>FROM Pupil</p>
+                        <p>GROUP BY town</p>
+                        <p>ORDER BY COUNT(*) DESC, town ASC</p>
+                    </div>
+                             
+                    <table>    
+                        <tr>
+                            <th rowspan="2" width="30px">(b)(i)</th>
+                            <td>
+                                Using the sample data provided, write the expected output from the SQL 
+                                statement above.
+                                <table style="max-width: 400px;">
+                                    <tr><th>town</th><th>Number Per Town</th></tr>
+                                    <tr><td></td><td></td></tr>
+                                </table>
+                            </td>
+                            <th rowspan="2"  width="30px">2</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                        <table style="max-width: 400px;">
+                                            <tr><th>town</th><th>Number Per Town</th></tr>
+                                            <tr><td>Greenock</td><td>3</td></tr>
+                                            <tr><td>Falkirk</td><td>2</td></tr>
+                                            <tr><td>Kilmarnock</td><td>2</td></tr>
+                                            <tr><td>Aidrie</td><td>1</td></tr>
+                                        </table>
+                                        <hr>
+                                        <p>One mark for each bullet:</p>
+                                        <ul>
+                                            <li>Totals</li>
+                                            <li>Doubly sorted output</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+
+
+                    <table>    
+                        <tr>
+                            <th rowspan="2" width="30px">(b)(ii)</th>
+                            <td>
+                                <p>The SQL statement above makes use of the <span class="codeText">GROUP BY</span> command.</p>
+                                <p>
+                                    Explain why the <span class="codeText">GROUP BY</span> command is required in the SQL 
+                                    statement above to produce the extpected output.
+                                </p>
+                            </td>
+                            <th rowspan="2"  width="30px">1</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer1">
+                                       One mark for any one bullet:
+                                        <ul>
+                                            <li>Produces a single output for each town.</li>
+                                            <li>Without a GROuP BY it would produce a single output for only one town.
+                                            <li>In hte SELECT clause the two field is a non-aggregate function.</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center"></div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+        </div>
+    </body>
+</html>

@@ -2,11 +2,15 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Higher Computing Science - Blank</title>
+        <title>Higher Computing Science - Aggregate Functions</title>
         <script src="/JavaScript/higherScript.js"></script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
+        <style>
+            .subheader th {background-color:lightgreen;}
+            .sideBySide {justify-content:center;}
+        </style>
     </head>
     <body>
         <div id="loading"></div>
@@ -20,28 +24,429 @@
             <div id="sidebar"></div>
             <div id="content">
                 <div id="mainHeading"><h1>Higher</h1></div>
-                <div class="contentHeading"><h1>Blank</h1></div>
+                <div class="contentHeading"><h1>Aggregate Functions</h1></div>
                 <div class="contentContainer">
+                    <p class="laws" onclick="toggleLaw(this)"><b>Example Database - used in Implementation Examples</b><span class="arrow">&#9654;</span></p>
+                    <div class="law-content" style="display: none;">
+                        <h3>Database Structure</h3>
+                        <p>All of the examples in the implementation section will use the following database:</p>
+                        <p>
+                            <i>"A travel agency uses a relational database to enable thier employees to view details of hotels in Scottish holiday reosrts and make bookings 
+                                for customers.  The details are stored in four separate tables called Hotel, Resort, Booking and Customer."</i>
+                        </p>
+                        <p>The structure of the tables is shown below:</p>
+                        <img src="/Images/Higher/DDD/Design/resortEntities.JPG" alt="Resort Entities" class="cImg" width="50%"/>
 
-                    <h2>Past Paper Question - 2019 Q16(e)</h2>
+                        <h3>Sample Records</h3>
+                        <p>A sample record stored in each table is shown below:</p>
+                        <img src="/Images/Higher/DDD/Implementation/resortRecords.jpg" alt="Resort Records" class="cImg" width="50%"/>
+
+                        <p><b>
+                            Note: These solutions have been tested in MS Access, therefore the wildcards used as ? and *.  The field 'customerID#' is enclosed in square 
+                            brackets to avoid syntax errors.
+                        </b></p>
+                    </div>
+
+                    <h2>What is an Aggregate function?</h2>
+                    <p>
+                        Aggregate functions operate on a set of rows to return a single, statistical value. You apply an
+                        aggregate to a set of rows, which may be:
+                    </p>
+                    <ul>
+                        <li>all the rows in a table</li>
+                        <li>only those rows specified by a <span class="codeText">WHERE</span> clause</li>
+                        <li>those rows created by a <a href="/HTML/Higher/DDD/Implementation/groupby.html"><span class="codeText">GROUP BY</span></a> clause</li>
+                    </ul>
+
+                    <p>The most common aggregate functions used are listed below:</p>
+
+                    <table>
+                        <tr><th>Function</th><th>Description</th></tr>
+                        <tr>
+                            <td><span class="codeText">AVG()</span></td>
+                            <td>Returns the average value of a numeric column or expression.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="codeText">COUNT()</span></td>
+                            <td>Returns the number of rows that match the criteria in the <span class="codeText">WHERE</span> clause.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="codeText">MAX()</span></td>
+                            <td>Returns the largest value of a numeric column or expression.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="codeText">MIN()</span></td>
+                            <td>Returns the smallest value of a numeric column or expression.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="codeText">SUM()</span></td>
+                            <td>Returns the total sum of a numeric column or expression.</td>
+                        </tr>
+                    </table>
+
+                    <p>
+                        In the same way that pre-defined programming functions receive parameter values, SQL aggregate
+                        functions require an expression. This expression is usually a column name but it can be a column
+                        name together with an operator.
+                    </p>
+
+                    <p>
+                        The following points should be noted:
+                    </p>
+                    <ul>
+                        <li>
+                            <span class="codeText">SUM()</span> and <span class="codeText">AVG()</span> only work with numeric data. <span class="codeText">MIN()</span> and 
+                            <span class="codeText">MAX()</span> work with numeric, text and date/time datatypes. <span class="codeText">COUNT()</span> works with all 
+                            datatypes.
+                        </li>
+                        <li>
+                            All aggregate functions ignore <span class="codeText">NULL</span> values except for <span class="codeText">COUNT()</span>.
+                        </li>
+                        <li>
+                            <span class="codeText">COUNT()</span> always returns a positive integer or zero.  The other aggregate functions will return 
+                            <span class="codeText">NULL</span> if there are no rows to evaluate, or the rows only contain <span class="codeText">NULL</span> values.
+                        </li>
+                        <li>
+                            An aggregate function cannot be used in a <span class="codeText">WHERE</span> clause.
+                        </li>
+                        <li>
+                            It is possible to use more than one aggregate function in a single query, as shown here:<br>
+                            <div class="codeBox">
+                                <p>SELECT MIN(pricePersonNight), MAX(pricePersonNight)</p>
+                                <p>FROM Hotel;</p>
+                            </div>
+                        </li>
+                        <li>
+                            Mixing non-aggregate and aggregate expressions in a <span class="codeText">SELECT</span> statement is not allowed.  A 
+                            <span class="codeText">SELECT</span> statement must contain either all non-aggregate expressions or all aggregate expressions.
+                            The query below is illegal as mixes non-aggregate ( <span class="codeText">hotelName</span>) and aggregate 
+                            (<span class="codeText">MIN(pricePersonNight)</span>) expressions:<br>
+                            <div class="codeBox">
+                                <p>SELECT hotelName, MIN(pricePersonNight)</p>
+                                <p>FROM Hotel;</p>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <h2>Aggregate Function Examples</h2>
+                    <h3>Example 1</h3>
+                    <p>This function uses readable headings to display the cheapest and most expensive price per night.</p>
+                    <div class="codeBox">
+                        <p>SELECT MIN(pricePersonNight) AS [Cheapest Price Per Night], MAX(pricePersonNight) AS [Most Expensive Price Per Night]</p>
+                        <p>FROM Hotel;</p>
+                    </div>
+
+                    <h3>Example 2</h3>
+                    <p>This function is used to display the average number of nights booked.</p>
+                    <div class="codeBox">
+                        <p>SELECT ROUND(AVG(numberNights), 2)</p>
+                        <p>FROM Booking;</p>
+                    </div>
+                    <p><b>Note: The SQL <span class="codeText">ROUND()</span> function is used to round the average to 2 decimal places.</b></p>
+
+                    <h3>Example 3</h3>
+                    <p>This function is used to display a list of the different types of resort together with the number of
+                    resorts in each of those categories.</p>
+                    <div class="codeBox">
+                        <p>SELECT resortType, COUNT(*)</p>
+                        <p>FROM Resort</p>
+                        <p>GROUP BY resortType;</p>
+                    </div>
+
+                    <h3>Example 4</h3>
+                    <p>This function is used to display the total number of people booked into a hotel in July.</p>
+                    <div class="codeBox">
+                        <p>SELECT SUM(numberPeople) AS [People on holuday in July]</p>
+                        <p>FROM Booking</p>
+                        <p>WHERE startDate LIKE '*/07/*';</p>
+                    </div>
+
+                    <h2>Computed Values with Aliases</h2>
+                    <p>
+                        Arithmetic expressions can be used to compute values as part of a <span class="codeText">SELECT</span> query. The arithmetic
+                        expressions can contain column names, numeric numbers, and arithmetic operators.
+                    </p>
+                    <p>
+                        Whenever a value is generated by a query, it is allocated its own column in the query answer table. A
+                        computed value is temporary — it only exists within the query. Because of this, computed values are
+                        not stored in the database, which eliminates the need to store data that can be computed at
+                        run-time.
+                    </p>
+                    <p>
+                        An alias can be used to give any column in an answer table a temporary name. Doing this makes the
+                        headings in the answer table more readable. Since it is generated at run-time, an alias only exists for
+                        the duration of the query. An alias is listed in the <span class="codeText">SELECT</span> list by using the 
+                        <span class="codeText">AS</span> statement.
+                    </p>
+
+                    <p>
+                        For example, the query below will display the hotel name, the price per night, and the total price for the booking:
+                    </p>
+                    <div class="codeBox">
+                        <p>SELECT hotelName, bookingNo, pricePersonNight, pricePersonNight * numberInParty * numberNights</p>
+                        <p>FROM Hotel, Booking</p>
+                        <p>WHERE Hotel.hotelRef = Booking.hotelRef;</p>
+                    </div>
+
+                    <p>Executing the query produces the answer table below:</p>
+                    <table>
+                        <tr><th>hotelName</th><th>bookingNo</th><th>pricePersonNight</th><th>pricePersonNight * numberInParty * numberNights</th></tr>
+                        <tr><td>Cliff Top</td><td>134</td><td>58.99</td><td>1238.79</td></tr>
+                        <tr><td>Lochside Heather Retreat</td><td>135</td><td>172.00</td><td>1720.00</td></tr>
+                        <tr><td>Ben Nevis Country House</td><td>136</td><td>126.00</td><td>1512.00</td></tr>
+                        <tr><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+                    </table>
+                    
+                    <p>This is not very readable, so we can use aliases to make it more readable:</p>
+                    <div class="codeBox">
+                        <p>SELECT hotelName, bookingNo, pricePersonNight, pricePersonNight * numberInParty * numberNights AS [Total Price]</p>
+                        <p>FROM Hotel, Booking</p>
+                        <p>WHERE Hotel.hotelRef = Booking.hotelRef;</p>
+                    </div>
+                    
+                    <p>This produces the answer table below:</p>
+                    <table style="max-width: 600px;">
+                        <tr><th>hotelName</th><th>bookingNo</th><th>pricePersonNight</th><th>Total Price</th></tr>
+                        <tr><td>Cliff Top</td><td>134</td><td>58.99</td><td>1238.79</td></tr>
+                        <tr><td>Lochside Heather Retreat</td><td>135</td><td>172.00</td><td>1720.00</td></tr>
+                        <tr><td>Ben Nevis Country House</td><td>136</td><td>126.00</td><td>1512.00</td></tr>
+                        <tr><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+                    </table>
+                    
+                    <p>
+                        The column headings in this second answer table are more readable than those in the first
+                        answer table, due to the use of aliases in the second query.
+                    </p>
+                    
+                    <h2>Past Paper Question - 2023 Q15</h2>
+                    <p>
+                        The Caledonian Drone Racing League stores the results of their first season’s 
+                        competitions in a relational database. Pilots’ times for each race are recorded in 
+                        seconds.
+                    </p>
+                    <img src="/Images/Higher/DDD/Implementation/droneRacing.jpg" class="cImg" alt="Drone Racing Image" width="30%"/>
+                    <p>
+                        The relational database uses the following three tables.
+                    </p>
+                    <img src="/Images/Higher/DDD/Implementation/2023Q15.jpg" class="cImg" alt="Tables for 2023 Q15" width="40%"/>
+                    <p>
+                        Sample data from the three tables is shown below.
+                    </p>
+                    <div class="sideBySide vertAlign">
+                        <table style="max-width:400px;margin-right:0px;">
+                            <tr><th colspan="3">Pilot</th></tr>
+                            <tr class="subheader"><th>pilotID</th><th>forename</th><th>surname</th></tr>
+                            <tr><td>P001</td><td>Matthew</td><td>Thomas</td></tr>
+                            <tr><td>P002</td><td>Ann</td><td>Wilson</td></tr>
+                            <tr><td>P003</td><td>Joseph</td><td>Dow</td></tr>
+                            <tr><td>P004</td><td>Sam</td><td>Friar</td></tr>
+                            <tr><td>...</td><td>...</td><td>...</td></tr>
+                        </table>
+                        <table style="max-width:400px;margin-left:20px;">
+                            <tr><th colspan="3">Race</th></tr>
+                            <tr class="subheader"><th>raceID</th><th>title</th><th>city</th></tr>
+                            <tr><td>1</td><td>Granite Range</td><td>Aberdeen</td></tr>
+                            <tr><td>2</td><td>Clyde Maze</td><td>Glasgow</td></tr>
+                            <tr><td>3</td><td>Factory Frenzy</td><td>Ayr</td></tr>
+                        </table>
+                    </div>
+
+                    <table style="max-width:600px;"> 
+                        <tr><th colspan="4">Entry</th></tr>
+                        <tr class="subheader"><th>raceID</th><th>pilotID</th><th>position</th><th>raceTime</th></tr>
+                        <tr><td>1</td><td>P001</td><td>2</td><td>92.4</td></tr>
+                        <tr><td>1</td><td>P002</td><td>3</td><td>96.5</td></tr>
+                        <tr><td>1</td><td>P003</td><td>1</td><td>86.8</td></tr>
+                        <tr><td>1</td><td>P004</td><td>4</td><td>98.5</td></tr>
+                        <tr><td>1</td><td>P005</td><td>5</td><td>98.9</td></tr>
+                        <tr><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+                        <tr><td>2</td><td>P001</td><td>4</td><td>120.5</td></tr>
+                        <tr><td>2</td><td>P003</td><td>2</td><td>109.7</td></tr>
+                        <tr><td>2</td><td>P002</td><td>1</td><td>101.5</td></tr>
+                        <tr><td>2</td><td>P004</td><td>3</td><td>115.5</td></tr>
+                        <tr><td>2</td><td>P006</td><td>5</td><td>121.0</td></tr>
+                        <tr><td>...</td><td>...</td><td>...</td><td>...</td></tr>
+                        <tr><td>3</td><td>P001</td><td>3</td><td>109.8</td></tr>
+                        <tr><td>3</td><td>P002</td><td>2</td><td>109.6</td></tr>
+                        <tr><td>3</td><td>P003</td><td>1</td><td>106.9</td></tr>
+                        <tr><td>3</td><td>P004</td><td>4</td><td>145.2</td></tr>
+                        <tr><td>...</td><td>...</td><td>...</td><td>...</td></tr> 
+                    </table>
+
+                    <p>
+                        Pilots win £150 for first place. The league would like to produce a list of the names 
+                        and total amount of winnings for those pilots that have come in first place.
+                    </p>
+                    <p>
+                        The expected output is shown below.
+                    </p>
+                    
+                    <table style="max-width:400px;">
+                        <tr><th>pilotID</th><th>forename</th><th>surname</th><th>Winnings</th></tr>
+                        <tr><td>P002</td><td>Ann</td><td>Wilson</td><td>150</td></tr>
+                        <tr><td>P003</td><td>Joseph</td><td>Dow</td><td>300</td></tr>
+                    </table>
+                    
                     <table>
                         <tr>
-                            <th rowspan="2" width="30px">(e)</th>
+                            <th rowspan="2" width="30px">(a)</th>
                             <td>
-
+                                <p>
+                                    Design a query to display the output above.
+                                </p>
+                                <table style="text-align:left;">
+                                    <tr>
+                                        <th>Field(s) and Calculation(s)</th>
+                                        <td style="width:66%"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Table(s) and Query</th>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Search Criteria</th>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Grouping</th>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Sorting</th>
+                                        <td></td>
+                                    </tr>
+                                </table>
                             </td>
-                            <th rowspan="2"  width="30px">1</th>
+                            <th rowspan="2"  width="30px">3</th>
                         </tr>
                             <tr>
                                 <td>
                                     <div class="hiddenElement answer1">
-
+                                        <table style="text-align:left;">
+                                            <tr>
+                                                <th>Field(s) and Calculation(s)</th>
+                                                <td style="width:66%">
+                                                    pilotID, forename, surname, 150*COUNT(*) AS Winnings
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Table(s) and Query</th>
+                                                <td>
+                                                    Pilot, Entry
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Search Criteria</th>
+                                                <td>
+                                                    position = 1
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Grouping</th>
+                                                <td>
+                                                    pilotID, forename, surname
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Sorting</th>
+                                                <td></td>
+                                            </tr>
+                                        </table>
+                                            <hr>
+                                            <p>One mark for each bullet:</p>
+                                            <ul>
+                                                <li>Fields and calculation (with alias)</li>
+                                                <li>Pilot and entry tables, where position = 1</li>
+                                                <li>Group by pilotID and/or forename, surname</li>
+                                            </ul>
                                     </div>
                                 </td>
                             </tr>
                         </table>
                     <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
-                    
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(b)</th>
+                            <td>
+                                <p>
+                                    Write an SQL statement to display the title of each race and the average time 
+                                    for that race.
+                                </p>
+                                <p>The expected output is shown below:</p>
+                                <table style="max-width: 300px;">
+                                    <tr><th>title</th><th>Average Time</th></tr>
+                                    <tr><td>Factory Frenzy</td><td>116.67</td></tr>
+                                    <tr><td>Clyde Maze</td><td>114.27</td></tr>
+                                    <tr><td>Granite Range</td><td>103.22</td></tr>
+                                </table>
+                            </td>
+                            <th rowspan="2"  width="30px">3</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer2">
+                                        <div class="codeBox">
+                                            <p>SELECT title, AVG(raceTime) AS [Average Time]</p>
+                                            <p>FROM Race, Entry</p>
+                                            <p>WHERE Race.raceID = Entry.raceID</p>
+                                            <p>GROUP BY title;</p>
+                                        </div>
+                                        <hr>
+                                        <p>One mark for each bullet:</p>
+                                        <ul>
+                                            <li>SELECT with title and AVG(raceTime)</li>
+                                            <li>ALIAS and join for Entry and Race tables</li>
+                                            <li>GROUP BY title or raceID</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+
+                    <table>
+                        <tr>
+                            <th rowspan="2" width="30px">(c)</th>
+                            <td>
+                                <p>
+                                    A query was created to display the fastest time in any race. This query was 
+                                    saved as ‘Fastest’ and the output of it is shown below.
+                                </p>
+                                <table style="max-width: 100px;">
+                                    <tr><th>Fastest Time</th></tr>
+                                    <tr><td>86.8</td></tr>
+                                </table>
+                                <p>
+                                    Using the ‘Fastest’ query, complete the SQL statement below to display the 
+                                    name of the pilot(s) who achieved this time.
+                                </p>
+                                <div class="codeBox">
+                                    <p>SELECT forename, surname</p>
+                                </div>
+                            </td>
+                            <th rowspan="2"  width="30px">3</th>
+                        </tr>
+                            <tr>
+                                <td>
+                                    <div class="hiddenElement answer3">
+                                        <div class="codeBox">
+                                            <p>SELECT forename, surname</p>
+                                            <p>FROM Pilot, Entry, Fastest</p>
+                                            <p>WHERE Pilot.pilotID = Entry.pilotID AND raceTime = [FastestTime];</p>
+                                        </div>
+                                        <hr>
+                                        <p>One mark for each bullet:</p>
+                                        <ul>
+                                            <li>FROM includes Pilot, Entry with Pilot.pilotID = Entry.pilotID in WHERE</li>
+                                            <li>FROM clause includes ‘Fastest’</li>
+                                            <li>WHERE raceTime =[FastestTime]</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer3')">Show Answer</div>
                 </div>
             </div>
         </div>
