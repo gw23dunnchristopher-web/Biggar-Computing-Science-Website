@@ -1,8 +1,18 @@
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
+    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
 }
 
+/* Loading and visibility states */
 #loading {
     position: fixed;
     top: 0;
@@ -16,30 +26,13 @@ body {
     align-items: center;
 }
 
-
-
 .content-hidden {
     display: none !important;
 }
 
+/* Layout containers */
 main {
-    margin-top:200px;
-    margin-bottom:100px;
-}
-h1 {
-    padding-top:10px;
-}
-h2 {
-    padding-top:10px;
-}
-
-h3 {
-    color:#2d4ba4;
-    border-bottom:1px solid #091844;
-    font-size:20px;
-    font-family:arial;
-    padding-top:20px;
-    margin-bottom:10px;
+    margin: 200px 0 100px 0;
 }
 
 #content {
@@ -47,489 +40,485 @@ h3 {
     flex-direction: column;
     width: calc(100% - 320px);
     margin-left: 320px;
-    box-sizing: border-box;
     text-align: center;
     padding: 10px 10px 100px 10px;
     overflow-y: auto;
 }
 
-
-
-.contentHeading {
-    max-width:2400px;
-    font-family:arial;
-    margin-bottom:20px;
-    padding-bottom:5px;
-    color:#17479b;
-    background-color: #c5f1ff;
-    text-align:center;
-    border-top-style:solid;
-    border-bottom-style:solid;
-    border-color:#376cfd;
+/* Typography */
+h1 {
+    padding-top: 10px;
 }
 
-.contentContainer{
+h2 {
+    padding-top: 10px;
+}
+
+h3 {
+    color: #2d4ba4;
+    border-bottom: 1px solid #091844;
+    font-size: 20px;
+    font-family: arial;
+    padding-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* Content sections */
+.contentHeading {
+    max-width: 2400px;
+    font-family: arial;
+    margin-bottom: 20px;
+    padding-bottom: 5px;
+    color: #17479b;
+    background-color: #c5f1ff;
+    text-align: center;
+    border-top: solid #376cfd;
+    border-bottom: solid #376cfd;
+}
+
+.contentContainer {
     max-width: 1400px;
     width: 100%;
     margin: auto;
     padding: 10px;
-    margin-top:0;
-    padding-top:0;
+    margin-top: 0;
+    padding-top: 0;
     text-align: left;
-    padding-bottom: 0px;
+    padding-bottom: 0;
     flex: 1;
+    margin-bottom: 30px;
 }
 
 .contentContainer p {
-    padding:10px;
+    padding: 10px;
 }
 
-.contentContainer p, a, ul, ol {
+.contentContainer p, 
+.contentContainer a, 
+.contentContainer ul, 
+.contentContainer ol {
     font-size: 18px;
 }
 
 .contentContainer h2 {
-    text-align:left;
-    color:#0c3f71;
-    border-bottom-style:solid;
-    border-color:#5252c8;
-    font-size:25px;
-    margin-top:20px;
-    margin-bottom:20px;
+    text-align: left;
+    color: #0c3f71;
+    border-bottom: solid #5252c8;
+    font-size: 25px;
+    margin: 20px 0;
 }
 
 .contentContainer ul {
-    list-style-type:circle;
-    padding:10px;
-    margin-left:20px;
+    list-style-type: circle;
+    padding: 10px;
+    margin-left: 20px;
 }
 
-
-.contentContainer ul li{
-    margin-bottom:10px;
+.contentContainer ul li {
+    margin-bottom: 10px;
 }
 
-#marks th, #marks td{
-    width:200px;
-    text-align:center;
-    border:1px solid;
-}
-
-#marks th {
-    background-color:lightblue;
-}
-
+/* Tables */
 table {
-    border:1px solid;
-    border-color:black;
+    border: 1px solid black;
     border-collapse: collapse;
-    margin:20px auto 20px;
-    max-width:1000px;
+    margin: 20px auto;
+    max-width: 1000px;
     width: 100%;
 }
 
-.contentContainer{
-    margin-bottom:30px;
-}
-
-
-table tr th, table tr td {
-    border:1px solid black;
-    padding:10px;
-} 
-
-.SQLImage {
+table tr th, 
+table tr td {
     border: 1px solid black;
-    max-width:100%;
-    display:block;
-    margin:auto;
-    margin-top:20px;
-    margin-bottom:20px;
+    padding: 10px;
 }
 
 table tr th {
-    text-align:center;
-    background-color:lightblue;
+    text-align: center;
+    background-color: lightblue;
 }
 
-table tr th p, table tr td p {
-    margin:0px;
+table tr th p, 
+table tr td p {
+    margin: 0;
 }
 
-table .subheader {
-    background-color:lightgreen;
+.subheader {
+    background-color: lightgreen;
 }
 
-.white td{
-    background-color:white;
+.white td {
+    background-color: white;
 }
 
-.topicButton {
-    max-width:1000px;
-    display:block;
-    border:1px solid;
-    border-radius:10px;
-    margin-left:auto;
-    margin-right:auto;
-    margin-top:10px;
-    font-size:20px;
-    text-align:center;
-    font-weight:bold;
-    padding-top:20px;
-    padding-bottom:20px;
-    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
+/* Specialized tables */
+#marks th, 
+#marks td {
+    width: 200px;
+    text-align: center;
+    border: 1px solid;
 }
 
-#CSButton:hover,  #CSButton.active {
-    background-image: linear-gradient(to bottom, lightblue , rgb(73, 161, 196));
+#marks th {
+    background-color: lightblue;
 }
 
-#SDDButton:hover,  #SDDButton.active  {
-    background-image: linear-gradient(to bottom, palevioletred , rgb(179, 47, 47));
-}
-
-#WDDButton:hover,  #WDDButton.active  {
-    background-image: linear-gradient(to bottom, darkseagreen , seagreen);
-}
-
-#DDDButton:hover, #DDDButton.active  {
-    background-image: linear-gradient(to bottom, lightgoldenrodyellow , yellow);
-}
-
-.breakdown{
-    max-width:1000px;
-    margin-left:auto;
-    margin-right:auto;
-    display:none;
-}
-
-
-.specifications th, .specifications tr td {
-    border:1px solid;
-    border-color:black;
-    border-collapse: collapse;
-    margin-left:auto;
-    margin-right:auto;
-    padding:20px;
-}
-
-
-.specifications tr td ul {
-    list-style-type:disc;
-}
-
-.specifications tr td ul li ul{
-    list-style-type:square;
-}
-
-#CSBreakdown .specifications th {
-    background-color:lightblue;
-}
-
-#SDDBreakdown .specifications th {
-    background-color:palevioletred;
-}
-
-#WDDBreakdown .specifications th {
-    background-color:lightgreen;
-}
-
-#DDDBreakdown .specifications th {
-    background-color:lightyellow;
-}
-
-#fieldProperties{
-    list-style-type:none;
-    max-width:1000px;
-    margin:auto;
-}
-
-.fieldtype{
-    text-align:center;
-    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
-    padding:5px;
-    border:1px solid black;
-    margin-top:10px;
-    margin-bottom:10px;
-    font-size:20px;
-}
-
-.fieldtype:hover {
-    background-image: linear-gradient(to bottom, lightblue , rgb(73, 161, 196));
-    cursor: pointer;
-}
-
-.fieldtype.active {
-    background-image: linear-gradient(to bottom, lightblue , rgb(73, 161, 196));
-}
-
-.fieldProperty {
-    background-color:#C5E3ED;
-    list-style-type:circle;
-}
-
-.specifications th {
-    text-align:center;
-}
-
-.binaryTable tr th, .binaryTable tr td {
-    border:solid 1px black;
-    border-collapse:collapse;
-    text-align:center;
-    width:50px;
-    height:50px;
-}
-
-.binaryTable tr th {
-    background-color:lightblue;
-}
-
-.example1 {
-    width:80%;
-    margin:auto;
-    text-align:center;
-    font-size:30px;
-    background-color:lightyellow;
-    padding:20px;
-    border:solid 1px black;
-}
-
-.example {
-    background-color:#E3FFD8;
-    margin-top:10px;
-    padding:10px;
-}
-
-.rImg {
-    float:right;
-    padding:20px;
-}
-
-.lImg {
-    float:left;
-    padding:20px;
-}
-
-.cImg {
-    display:block;
-    margin-left:auto;
-    margin-right:auto;
-    max-width:100%;
+.specifications th, 
+.specifications tr td {
+    border: 1px solid black;
     padding: 20px;
 }
 
-.shadow {
-    margin-right:10px;
+.specifications tr td ul {
+    list-style-type: disc;
+}
 
+.specifications tr td ul li ul {
+    list-style-type: square;
+}
+
+.specifications th {
+    text-align: center;
+}
+
+/* Breakdown sections */
+#CSBreakdown .specifications th {
+    background-color: lightblue;
+}
+
+#SDDBreakdown .specifications th {
+    background-color: palevioletred;
+}
+
+#WDDBreakdown .specifications th {
+    background-color: lightgreen;
+}
+
+#DDDBreakdown .specifications th {
+    background-color: lightyellow;
+}
+
+/* Topic buttons */
+.topicButton {
+    max-width: 1000px;
+    display: block;
+    border: 1px solid;
+    border-radius: 10px;
+    margin: 10px auto 0;
+    font-size: 20px;
+    text-align: center;
+    font-weight: bold;
+    padding: 20px;
+    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
+}
+
+/* Button hover and active states */
+#CSButton:hover, 
+#CSButton.active {
+    background-image: linear-gradient(to bottom, lightblue, rgb(73, 161, 196));
+}
+
+#SDDButton:hover, 
+#SDDButton.active {
+    background-image: linear-gradient(to bottom, palevioletred, rgb(179, 47, 47));
+}
+
+#WDDButton:hover, 
+#WDDButton.active {
+    background-image: linear-gradient(to bottom, darkseagreen, seagreen);
+}
+
+#DDDButton:hover, 
+#DDDButton.active {
+    background-image: linear-gradient(to bottom, lightgoldenrodyellow, yellow);
+}
+
+.breakdown {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: none;
+}
+
+/* Lists and field properties */
+#fieldProperties {
+    list-style-type: none;
+    max-width: 1000px;
+    margin: auto;
+}
+
+.fieldtype {
+    text-align: center;
+    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
+    padding: 5px;
+    border: 1px solid black;
+    margin: 10px 0;
+    font-size: 20px;
+}
+
+.fieldtype:hover, 
+.fieldtype.active {
+    background-image: linear-gradient(to bottom, lightblue, rgb(73, 161, 196));
+    cursor: pointer;
+}
+
+.fieldProperty {
+    background-color: #C5E3ED;
+    list-style-type: circle;
+}
+
+/* Binary table */
+.binaryTable tr th, 
+.binaryTable tr td {
+    border: solid 1px black;
+    border-collapse: collapse;
+    text-align: center;
+    width: 50px;
+    height: 50px;
+}
+
+.binaryTable tr th {
+    background-color: lightblue;
+}
+
+/* Examples and special containers */
+.example1 {
+    width: 80%;
+    margin: auto;
+    text-align: center;
+    font-size: 30px;
+    background-color: lightyellow;
+    padding: 20px;
+    border: solid 1px black;
+}
+
+.example {
+    background-color: #E3FFD8;
+    margin-top: 10px;
+    padding: 10px;
+}
+
+/* Images */
+.rImg {
+    float: right;
+    padding: 20px;
+}
+
+.lImg {
+    float: left;
+    padding: 20px;
+}
+
+.cImg {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    padding: 20px;
+}
+
+.SQLImage {
+    border: 1px solid black;
+    max-width: 100%;
+    display: block;
+    margin: 20px auto;
+}
+
+.shadow, 
+.shadowImage {
+    border: 1px solid black;
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.18);
+    max-width: 500px;
+}
+
+.shadow {
+    margin-right: 10px;
 }
 
 .shadowImage {
-    display:block;
-    margin-left:auto;
-    margin-right:auto;
+    display: block;
+    margin: 0 auto;
 }
 
-.shadow, .shadowImage {
-    border:1px solid black; 
-    border-radius:10px; 
-    box-shadow:5px 5px 5px rgba(0,0,0,0.18);
-    max-width:500px;
-}
-
+/* Layout utilities */
 .ImgAndText {
-    display:flex;
-    flex-direction:row;
-    align-content:center;
+    display: flex;
+    flex-direction: row;
+    align-content: center;
     justify-content: space-between;
 }
 
 .ImgAndText img {
-    padding:20px;
-}
-
-.tutorial {
-    margin:auto; max-width:1000px;
-}
-
-.button, button2 {
-    width:200px;
-    margin:auto;
-    display:block;
-    padding:10px;
-    border:1px solid black;
-    border-radius:10px;
-    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
-    height:auto;
-    text-align:center;
-}
-
-.button {
-    font-size:20px;
-    margin-top:20px;
-    font-weight:bold;
-}
-
-.button a {
-    text-decoration:none;
-    color:black;
-    display:block;
-}
-
-.button2 {
-    margin-top:0;
-}
-
-.button2 a {
-    font-size:15px;
-    font-weight:bold;
-    text-decoration:none;
-    color:black;
-}
-    
-.button:hover {
-    background-image: linear-gradient(to bottom, lightblue , rgb(73, 161, 196));
-    cursor: pointer;
-}
-
-.mi {
-    background-color:#238caf;
-}
-
-ol li {
-    padding-bottom:10px;
-    padding-top:10px;
-    margin-left:30px;
-}
-
-.answerButton {
-    border:1px solid black;
-    border-radius:10px;
-    padding:10px;
-    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
-    margin:auto;
-    display:block;
-    width:200px;
-    text-align:center;
-    font-size:20px;
-    font-weight:bold;
-    cursor: pointer;
-}
-
-@media (max-width: 768px) {
-    .answerButton {
-        width: 90%;
-        max-width: 200px;
-        font-size: 16px;
-        padding: 12px 8px;
-        margin: 10px auto;
-        touch-action: manipulation;
-    }
-}
-
-.hiddenElement {
-    display:none;
-}
-
-.codeBox {
-    max-width:800px;
-    margin:auto;
-    margin-top:20px;
-    margin-bottom:20px;
-    text-align:left;
-    padding:20px;
-    border:solid 1px black;
-    background-color:#1c2112;
-    color:white;
-    font-family:"Courier New", Courier, monospace;
-}
-
-
-.codebox p{
-    margin:0px;
-    padding:0px;
-}
-
-.codeBox table, .codeBox th, .codeBox td {
-    border:none;
-    padding:0;
-}
-
-.pseudocode {
-    font-family:"Courier New", Courier, monospace;
-    text-align:left;
-    margin:auto;
-    margin-top:20px;
-    margin-bottom:20px;
-    background-color:white;
-    color:black;
-    padding:5px;
-    max-width:800px;
-}
-
-.pseudocode tr th{
-    font-family:arial;
-    text-align:center;
-    background-color:lightblue;
-    padding-top:5px;
-    padding-bottom:5px;
-}
-
-.pseudocode tr td {
-    padding-top:5px;
-    padding-bottom:5px;
-}
-
-.codeText {
-    font-family: "Courier New", Courier, monospace;
-}
-
-.borderless table, .borderless th, .borderless td {border:none; background-color:transparent;}
-
-.trinket {
-    width:75%;
-    height:400px;
-    margin:20px auto;
-    display:block;
+    padding: 20px;
 }
 
 .sideBySide {
-    display:flex;
-    flex-direction:row;
-    align-content:center;
+    display: flex;
+    flex-direction: row;
+    align-content: center;
     justify-content: center;
-    margin:20px auto;
+    margin: 20px auto;
 }
 
 .vertAlign {
     align-items: center;
 }
 
-@media (max-width: 768px) {
+/* Buttons */
+.button, 
+.button2 {
+    width: 200px;
+    margin: auto;
+    display: block;
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
+    height: auto;
+    text-align: center;
+}
 
+.button {
+    font-size: 20px;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+.button a {
+    text-decoration: none;
+    color: black;
+    display: block;
+}
+
+.button2 a {
+    font-size: 15px;
+    font-weight: bold;
+    text-decoration: none;
+    color: black;
+}
+
+.button:hover {
+    background-image: linear-gradient(to bottom, lightblue, rgb(73, 161, 196));
+    cursor: pointer;
+}
+
+.answerButton {
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 10px;
+    background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
+    margin: auto;
+    display: block;
+    width: 200px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Code styling */
+.codeBox {
+    max-width: 800px;
+    margin: 20px auto;
+    text-align: left;
+    padding: 20px;
+    border: solid 1px black;
+    background-color: #1c2112;
+    color: white;
+    font-family: "Courier New", Courier, monospace;
+}
+
+.codeBox p {
+    margin: 0;
+    padding: 0;
+}
+
+.codeBox table, 
+.codeBox th, 
+.codeBox td {
+    border: none;
+    padding: 0;
+}
+
+.pseudocode {
+    font-family: "Courier New", Courier, monospace;
+    text-align: left;
+    margin: 20px auto;
+    background-color: white;
+    color: black;
+    padding: 5px;
+    max-width: 800px;
+}
+
+.pseudocode tr th {
+    font-family: arial;
+    text-align: center;
+    background-color: lightblue;
+    padding: 5px 0;
+}
+
+.pseudocode tr td {
+    padding: 5px 0;
+}
+
+.codeText {
+    font-family: "Courier New", Courier, monospace;
+}
+
+/* Utility classes */
+.tutorial {
+    margin: auto;
+    max-width: 1000px;
+}
+
+.mi {
+    background-color: #238caf;
+}
+
+.borderless table, 
+.borderless th, 
+.borderless td {
+    border: none;
+    background-color: transparent;
+}
+
+.trinket {
+    width: 75%;
+    height: 400px;
+    margin: 20px auto;
+    display: block;
 }
 
 .htmlCode {
-    border:1px solid black;
-    margin:auto; 
-    margin-top:10px;
-    padding:20px;
-    font-family:"Courier New", Courier, monospace;
+    border: 1px solid black;
+    margin: 10px auto 0;
+    padding: 20px;
+    font-family: "Courier New", Courier, monospace;
 }
 
-.htmlCode pre{
-    margin-left:-200px;
+.htmlCode pre {
+    margin-left: -200px;
 }
 
-ul li ul li{
-    list-style-type:square;
+.hiddenElement {
+    display: none;
+}
+
+/* Lists styling */
+ol li {
+    padding: 10px 0;
+    margin-left: 30px;
+}
+
+ul li ul li {
+    list-style-type: square;
 }
 
 ul li ul li ul li {
-    list-style-type:disc;
+    list-style-type: disc;
 }
 
-
-.laws{
+/* Law sections */
+.laws {
     background-image: linear-gradient(to bottom, lightgrey, lightslategrey);
     display: flex;
     justify-content: space-between;
@@ -538,43 +527,15 @@ ul li ul li ul li {
     border: 1px solid black;
 }
 
-#GDPRPrinciples li {
-    width: 100%;
-    max-width: 1000px;
-}
-
-#GDPRPrinciples div div{
-    background-color:lightgrey;
-}
-
-#GDPRPrinciples {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 20px auto;
-    max-width:1000px;
-}
-#GDPRPrinciples ol li{
-    max-width:1000px;
-}
-
-#GDPRPrinciples div ul li{
-    padding-right:50px;
-}
-
 .arrow {
     margin-left: auto;
-}
-
-.laws .arrow {
     transition: all 0.3s ease-in-out;
     display: inline-block;
     transform: rotate(0deg);
     font-size: 16px;
 }
 
-.laws .arrow.rotated {
+.arrow.rotated {
     transform: rotate(90deg);
 }
 
@@ -583,11 +544,79 @@ ul li ul li ul li {
     padding-left: 20px;
 }
 
+/* GDPR sections */
+#GDPRPrinciples {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    max-width: 1000px;
+}
 
+#GDPRPrinciples li {
+    width: 100%;
+    max-width: 1000px;
+}
 
+#GDPRPrinciples ol li {
+    max-width: 1000px;
+}
+
+#GDPRPrinciples div div {
+    background-color: lightgrey;
+}
+
+#GDPRPrinciples div ul li {
+    padding-right: 50px;
+}
 
 /* Mobile Styles */
 @media (max-width: 768px) {
+    #content {
+        width: 100%;
+        margin-left: 0;
+        padding: 15px;
+        align-items: center;
+    }
+
+    .contentContainer {
+        max-width: 100%;
+        margin: 10px auto;
+        padding: 15px;
+    }
+
+    .contentHeading {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    /* Typography for mobile */
+    .contentContainer p, 
+    .contentContainer a, 
+    .contentContainer ul, 
+    .contentContainer ol {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .contentContainer h2 {
+        font-size: 20px;
+        margin: 15px 0;
+    }
+
+    .contentContainer h3 {
+        font-size: 16px;
+        margin: 10px 0 8px;
+    }
+
+    .contentContainer ul li,
+    .contentContainer ol li {
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    /* Tables for mobile */
     table {
         display: block;
         border: none;
@@ -600,7 +629,8 @@ ul li ul li ul li {
         margin: 10px 0;
     }
 
-    table th, table td {
+    table th, 
+    table td {
         padding: 4px 3px;
         font-size: 12px;
         line-height: 1.3;
@@ -618,9 +648,10 @@ ul li ul li ul li {
         font-weight: bold;
     }
 
-    /* Ensure paragraph text in tables is properly sized for mobile */
     table td p, 
-    table th p {
+    table th p,
+    table td div,
+    table td span {
         font-size: 12px !important;
         line-height: 1.4 !important;
         margin: 3px 0 !important;
@@ -633,10 +664,8 @@ ul li ul li ul li {
         max-width: 100% !important;
     }
 
-    /* Ensure other text elements in tables are mobile friendly */
     table td ul,
-    table td ol,
-    table td li {
+    table td ol {
         font-size: 11px !important;
         line-height: 1.3 !important;
         margin: 2px 0 !important;
@@ -647,6 +676,12 @@ ul li ul li ul li {
         white-space: normal !important;
     }
 
+    table td li {
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+        margin-bottom: 3px !important;
+    }
+
     table td .codeText,
     table th .codeText {
         font-size: 10px !important;
@@ -655,30 +690,13 @@ ul li ul li ul li {
         white-space: pre-wrap !important;
     }
 
-    table td div {
-        font-size: 12px !important;
-        line-height: 1.3 !important;
-        word-wrap: break-word !important;
-        word-break: break-word !important;
-        overflow-wrap: break-word !important;
-        white-space: normal !important;
-    }
-
-    /* Make tables scrollable horizontally */
-    .contentContainer table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
-        width: 100%;
-        max-width: 100%;
-    }
-
-    /* Specific table adjustments */
+    /* Specialized tables */
     .binaryTable {
         font-size: 11px;
     }
 
-    .binaryTable th, .binaryTable td {
+    .binaryTable th, 
+    .binaryTable td {
         width: 30px;
         height: 30px;
         padding: 3px;
@@ -689,12 +707,12 @@ ul li ul li ul li {
         font-size: 11px;
     }
 
-    .specifications th, .specifications td {
+    .specifications th, 
+    .specifications td {
         padding: 6px 4px;
         font-size: 11px;
     }
 
-    /* Specific improvements for past paper questions and answer tables */
     .specifications td p,
     .specifications th p {
         font-size: 11px !important;
@@ -708,7 +726,7 @@ ul li ul li ul li {
         margin-bottom: 3px !important;
     }
 
-    /* Ensure answer content in tables is readable */
+    /* Answer content */
     .hiddenElement p {
         font-size: 12px !important;
         line-height: 1.4 !important;
@@ -728,16 +746,36 @@ ul li ul li ul li {
         margin-bottom: 3px !important;
     }
 
+    /* Images for mobile */
+    img,
     .contentContainer img,
-    .shadow,
-    .shadowImage {
+    .rImg, 
+    .lImg, 
+    .cImg {
         max-width: 100% !important;
         width: auto !important;
         height: auto !important;
+        float: none;
+        margin: 10px auto;
+        display: block;
         box-sizing: border-box;
     }
 
-    .ImgAndText {
+    .shadow, 
+    .shadowImage {
+        max-width: 100%;
+        height: auto;
+        box-sizing: border-box;
+    }
+
+    .shadowImage {
+        display: block;
+        margin: 0 auto;
+    }
+
+    /* Layout adjustments */
+    .ImgAndText,
+    .sideBySide {
         flex-direction: column;
     }
 
@@ -745,8 +783,10 @@ ul li ul li ul li {
         width: 100%;
         max-width: 300px;
         margin: 10px auto;
+        padding: 10px;
     }
 
+    /* Buttons for mobile */
     .topicButton {
         width: 100%;
         max-width: 100%;
@@ -754,66 +794,22 @@ ul li ul li ul li {
         padding: 15px 10px;
     }
 
-    .contentContainer img {
-        max-width: 100%;
-        height: auto;
-        margin: 10px auto;
-        display: block;
-    }
-
-    .rImg, .lImg, .cImg {
-        float: none;
-        margin: 10px auto;
-        display: block;
-        max-width: 100%;
-    }
-
-    .shadow, .shadowImage { 
-        max-width: 100%;
-        height: auto;
-        box-sizing: border-box;
-    }
-
-    .shadowImage {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    /* Mobile text adjustments */
-    .contentContainer p, 
-    .contentContainer a, 
-    .contentContainer ul, 
-    .contentContainer ol {
-        font-size: 14px;
-        line-height: 1.4;
-    }
-
-    .contentContainer h2 {
-        font-size: 20px;
-        margin-top: 15px;
-        margin-bottom: 15px;
-    }
-
-    .contentContainer h3 {
+    .answerButton {
+        width: 90%;
+        max-width: 200px;
         font-size: 16px;
-        margin-top: 10px;
-        margin-bottom: 8px;
+        padding: 12px 8px;
+        margin: 10px auto;
+        touch-action: manipulation;
     }
 
-    .contentContainer ul li,
-    .contentContainer ol li {
-        margin-bottom: 5px;
-        font-size: 14px;
-    }
-
+    /* Breakdown sections */
     .breakdown {
         width: 100%;
-        margin-left: auto;
-        margin-right: auto;
         font-size: 14px;
         padding: 5px;
     }
+
     .breakdown table {
         display: block;
         overflow-x: auto;
@@ -824,51 +820,26 @@ ul li ul li ul li {
         max-width: 100%;
     }
 
-    .breakdown th, .breakdown td {
+    .breakdown th, 
+    .breakdown td {
         padding: 5px;
     }
+
     .breakdown table td {
         white-space: nowrap;
     }
 
-    .specifications {
-        display: block;
+    /* Code elements */
+    .codeBox {
+        max-width: 100%;
         overflow-x: auto;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-        font-size: 12px;
+        font-size: 10px;
+        padding: 10px;
+    }
+
+    .trinket {
         width: 100%;
         max-width: 100%;
-    }
-
-    .specifications th, .specifications td {
-        padding: 5px;
-    }
-
-    .sideBySide {
-        flex-direction: column;
-    }
-
-    #content {
-        width: 100%;
-        margin-left: 0;
-        padding: 15px;
-        align-items: center;
-    }
-
-    .contentContainer {
-        max-width: 100%;
-        margin: 10px auto;
-        padding: 15px;
-    }
-
-    .contentHeading {
-        width: 100%;
-        margin: 0 auto;
-    }
-
-    img {
-        max-width: 100%;
-        height: auto;
+        height: 300px;
     }
 }
