@@ -5,11 +5,9 @@
 This is an educational web platform for Biggar High School's Computing Science department. The system provides:
 
 - **Educational Content**: Interactive learning materials for National 5, Higher, Games Development, and Cyber Security courses
-- **Assignment System**: Teachers can create coding assignments and students can submit solutions with real-time Python execution
-- **User Management**: Role-based authentication system supporting teachers and students
-- **Class Management**: Teachers can create classes, add students, and manage assignments
+- **Interactive Widgets**: Binary converter, floating-point converter, and two's complement converter for learning data representation
 
-The platform combines static educational content with a dynamic assignment submission system, featuring client-side Python execution using Pyodide and server-side data persistence.
+The platform is a static educational website with interactive learning tools.
 
 ## User Preferences
 
