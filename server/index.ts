@@ -15,6 +15,10 @@ const PgSession = connectPgSimple(session);
 app.use(express.json());
 app.use(express.static('.'));
 
+if (!process.env.SESSION_SECRET) {
+  throw new Error('SESSION_SECRET environment variable must be set');
+}
+
 app.use(
   session({
     store: new PgSession({
@@ -22,7 +26,7 @@ app.use(
       tableName: 'session',
       createTableIfMissing: true,
     }),
-    secret: process.env.SESSION_SECRET || 'your-secret-key-change-this',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -39,6 +43,19 @@ declare module 'express-session' {
   }
 }
 
+async function isClassOwner(userId: number, classId: number): Promise<boolean> {
+  const [cls] = await db.select().from(classes).where(eq(classes.id, classId));
+  return cls && cls.teacherId === userId;
+}
+
+async function isStudentInClass(userId: number, classId: number): Promise<boolean> {
+  const enrollment = await db
+    .select()
+    .from(classStudents)
+    .where(and(eq(classStudents.classId, classId), eq(classStudents.studentId, userId)));
+  return enrollment.length > 0;
+}
+
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, password, fullName, role } = req.body;
@@ -53,7 +70,7 @@ app.post('/api/auth/register', async (req, res) => {
       username,
       password: hashedPassword,
       fullName,
-      role: role || 'student',
+      role: 'student',
     }).returning();
 
     req.session.userId = newUser.id;
@@ -169,6 +186,14 @@ app.get('/api/classes/:classId/students', async (req, res) => {
 
   try {
     const classId = parseInt(req.params.classId);
+    
+    const isOwner = await isClassOwner(req.session.userId, classId);
+    const isEnrolled = await isStudentInClass(req.session.userId, classId);
+    
+    if (!isOwner && !isEnrolled) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
     const enrolledStudents = await db
       .select({
         id: users.id,
@@ -194,6 +219,11 @@ app.post('/api/classes/:classId/students', async (req, res) => {
 
   try {
     const classId = parseInt(req.params.classId);
+    
+    if (!(await isClassOwner(req.session.userId, classId))) {
+      return res.status(403).json({ error: 'Only class owner can add students' });
+    }
+    
     const { studentUsername } = req.body;
 
     const [student] = await db.select().from(users).where(eq(users.username, studentUsername));
@@ -233,6 +263,14 @@ app.get('/api/classes/:classId/assignments', async (req, res) => {
 
   try {
     const classId = parseInt(req.params.classId);
+    
+    const isOwner = await isClassOwner(req.session.userId, classId);
+    const isEnrolled = await isStudentInClass(req.session.userId, classId);
+    
+    if (!isOwner && !isEnrolled) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
     const classAssignments = await db
       .select()
       .from(assignments)
@@ -253,6 +291,11 @@ app.post('/api/assignments', async (req, res) => {
 
   try {
     const { title, description, starterCode, classId, dueDate } = req.body;
+    
+    if (!(await isClassOwner(req.session.userId, classId))) {
+      return res.status(403).json({ error: 'Only class owner can create assignments' });
+    }
+
     const [newAssignment] = await db.insert(assignments).values({
       title,
       description,
@@ -282,6 +325,13 @@ app.get('/api/assignments/:assignmentId', async (req, res) => {
       return res.status(404).json({ error: 'Assignment not found' });
     }
 
+    const isOwner = await isClassOwner(req.session.userId, assignment.classId);
+    const isEnrolled = await isStudentInClass(req.session.userId, assignment.classId);
+    
+    if (!isOwner && !isEnrolled) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
     res.json({ assignment });
   } catch (error) {
     console.error('Get assignment error:', error);
@@ -296,6 +346,15 @@ app.post('/api/submissions', async (req, res) => {
 
   try {
     const { assignmentId, code } = req.body;
+    
+    const [assignment] = await db.select().from(assignments).where(eq(assignments.id, assignmentId));
+    if (!assignment) {
+      return res.status(404).json({ error: 'Assignment not found' });
+    }
+    
+    if (!(await isStudentInClass(req.session.userId, assignment.classId))) {
+      return res.status(403).json({ error: 'You must be enrolled in this class to submit' });
+    }
     
     const existing = await db
       .select()
@@ -332,8 +391,17 @@ app.get('/api/assignments/:assignmentId/submissions', async (req, res) => {
 
   try {
     const assignmentId = parseInt(req.params.assignmentId);
+    
+    const [assignment] = await db.select().from(assignments).where(eq(assignments.id, assignmentId));
+    if (!assignment) {
+      return res.status(404).json({ error: 'Assignment not found' });
+    }
 
     if (req.session.role === 'teacher') {
+      if (!(await isClassOwner(req.session.userId, assignment.classId))) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+      
       const allSubmissions = await db
         .select({
           id: submissions.id,
@@ -351,6 +419,10 @@ app.get('/api/assignments/:assignmentId/submissions', async (req, res) => {
 
       res.json({ submissions: allSubmissions });
     } else {
+      if (!(await isStudentInClass(req.session.userId, assignment.classId))) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
+      
       const [studentSubmission] = await db
         .select()
         .from(submissions)
@@ -372,6 +444,16 @@ app.post('/api/submissions/:submissionId/feedback', async (req, res) => {
   try {
     const submissionId = parseInt(req.params.submissionId);
     const { feedback } = req.body;
+
+    const [submission] = await db.select().from(submissions).where(eq(submissions.id, submissionId));
+    if (!submission) {
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    const [assignment] = await db.select().from(assignments).where(eq(assignments.id, submission.assignmentId));
+    if (!assignment || !(await isClassOwner(req.session.userId, assignment.classId))) {
+      return res.status(403).json({ error: 'Only class owner can provide feedback' });
+    }
 
     const [updated] = await db
       .update(submissions)
