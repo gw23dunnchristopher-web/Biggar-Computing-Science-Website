@@ -47,7 +47,7 @@ function loadSidebarContent(sidebarFile, targetElement) {
     if (sidebarCache) {
         targetEl.innerHTML = sidebarCache;
         attachMenuListeners();
-        setInterval(function() { countdown('2025-04-25'); }, 1000);
+        setInterval(function() { countdown('2026-05-20'); }, 1000);
         return;
     }
 
@@ -56,7 +56,7 @@ function loadSidebarContent(sidebarFile, targetElement) {
         sidebarPromise.then(data => {
             targetEl.innerHTML = data;
             attachMenuListeners();
-            setInterval(function() { countdown('2025-04-25'); }, 1000);
+            setInterval(function() { countdown('2026-05-20'); }, 1000);
         });
         return;
     }
@@ -65,7 +65,7 @@ function loadSidebarContent(sidebarFile, targetElement) {
     preloadSidebar(sidebarFile).then(data => {
         targetEl.innerHTML = data;
         attachMenuListeners();
-        setInterval(function() { countdown('2025-04-25'); }, 1000);
+        setInterval(function() { countdown('2026-05-20'); }, 1000);
     });
 }
 
