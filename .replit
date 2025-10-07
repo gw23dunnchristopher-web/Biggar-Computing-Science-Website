@@ -58,7 +58,7 @@ outputType = "webview"
 
 [[ports]]
 localPort = 80
-externalPort = 80
+externalPort = 8000
 
 [[ports]]
 localPort = 5000
