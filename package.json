@@ -1,0 +1,33 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch server/index.ts",
+    "start": "tsx server/index.ts",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "@types/bcrypt": "^6.0.0",
+    "@types/express": "^5.0.3",
+    "@types/express-session": "^1.18.2",
+    "@types/node": "^24.7.0",
+    "@types/ws": "^8.18.1",
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.2.0",
+    "connect-pg-simple": "^10.0.0",
+    "cors": "^2.8.5",
+    "drizzle-kit": "^0.31.5",
+    "drizzle-orm": "^0.44.6",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "tsx": "^4.20.6",
+    "ws": "^8.18.3"
+  }
+}
