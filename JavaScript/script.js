@@ -6,6 +6,62 @@ function darken(event) {
     event.target.style.filter='brightness(50%) grayscale(100%)';
 }
 
+function filterSidebar() {
+    const searchInput = document.getElementById('sidebarSearch');
+    if (!searchInput) return;
+    
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const sidebarMenu = document.querySelector('.sidebar-menu');
+    if (!sidebarMenu) return;
+    
+    const allItems = sidebarMenu.querySelectorAll('li');
+    
+    if (searchTerm === '') {
+        allItems.forEach(item => {
+            item.style.display = '';
+            const submenu = item.querySelector('.submenu');
+            if (submenu) {
+                submenu.style.display = 'none';
+                const arrow = item.querySelector('.arrow');
+                if (arrow) arrow.classList.remove('down');
+            }
+        });
+        return;
+    }
+    
+    allItems.forEach(item => {
+        const linkText = item.textContent.toLowerCase();
+        const hasLink = item.querySelector('a[href]:not([href="#"])');
+        
+        if (hasLink && linkText.includes(searchTerm)) {
+            item.style.display = '';
+            let parent = item.parentElement;
+            while (parent && parent !== sidebarMenu) {
+                if (parent.tagName === 'UL' && parent.classList.contains('submenu')) {
+                    parent.style.display = 'block';
+                    const parentLi = parent.parentElement;
+                    if (parentLi) {
+                        parentLi.style.display = '';
+                        const arrow = parentLi.querySelector(':scope > a > .arrow');
+                        if (arrow) arrow.classList.add('down');
+                    }
+                }
+                parent = parent.parentElement;
+            }
+        } else if (hasLink) {
+            item.style.display = 'none';
+        } else {
+            const hasVisibleChildren = Array.from(item.querySelectorAll('li')).some(child => {
+                return child.style.display !== 'none' && child.querySelector('a[href]:not([href="#"])');
+            });
+            
+            if (!hasVisibleChildren) {
+                item.style.display = 'none';
+            }
+        }
+    });
+}
+
 let sidebarCache = '';
 let sidebarPromise = null;
 
