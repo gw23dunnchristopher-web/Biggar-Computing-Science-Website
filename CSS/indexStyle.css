@@ -19,6 +19,47 @@ header {
     z-index: 10;
 }
 
+/* Mobile Landscape Styles - Reduce header/footer for better content visibility */
+@media (max-height: 500px) and (orientation: landscape) {
+    header {
+        height: 50px;
+    }
+
+    header h1 {
+        font-size: 14px;
+        left: 5px;
+        padding: 8px;
+        top: 5px;
+    }
+
+    header img {
+        height: 50px;
+    }
+
+    body main {
+        top: 50px;
+        margin-bottom: 50px;
+    }
+
+    footer {
+        height: 50px;
+    }
+
+    footer > div {
+        font-size: 8px;
+        padding-top: 10px;
+    }
+
+    #left p {
+        padding-left: 10px;
+        margin-bottom: 2px;
+    }
+
+    #right {
+        padding-right: 10px;
+    }
+}
+
 @media (max-width: 768px) {
     header {
         height: 80px;

@@ -123,6 +123,58 @@ footer > div {
     margin-bottom: 10px;
 }
 
+/* Mobile Landscape Styles - Reduce header/footer for better content visibility */
+@media (max-height: 500px) and (orientation: landscape) {
+    header {
+        height: 50px;
+    }
+
+    header h1 {
+        font-size: 16px;
+        padding: 8px;
+        top: 5px;
+        left: 10px;
+    }
+
+    header img {
+        height: 50px;
+    }
+
+    #mainHeading {
+        top: 50px;
+        font-size: 12px;
+    }
+
+    #mainHeading h1 {
+        padding: 5px;
+        font-size: 16px;
+    }
+
+    #pageContainer {
+        margin-top: 80px;
+        padding-bottom: 50px;
+        min-height: calc(100vh - 130px);
+    }
+
+    footer {
+        height: 50px;
+    }
+
+    footer > div {
+        font-size: 8px;
+        padding-top: 10px;
+    }
+
+    #left p {
+        padding-left: 10px;
+        margin-bottom: 2px;
+    }
+
+    #right {
+        padding-right: 10px;
+    }
+}
+
 /* Mobile Styles */
 @media (max-width: 768px) {
     #pageContainer {
