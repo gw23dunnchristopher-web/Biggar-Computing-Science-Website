@@ -529,6 +529,34 @@ ul li ul li ul li {
     padding-right: 50px;
 }
 
+/* Mobile Landscape - Content adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+    #content {
+        width: 100% !important;
+        margin-left: 0 !important;
+        padding: 10px;
+        align-items: center;
+    }
+
+    .contentContainer {
+        max-width: 100%;
+        padding: 10px;
+    }
+
+    .contentContainer p,
+    .contentContainer a,
+    .contentContainer ul,
+    .contentContainer ol {
+        font-size: 14px;
+        line-height: 1.3;
+    }
+
+    .contentContainer h2 {
+        font-size: 18px;
+        margin: 10px 0;
+    }
+}
+
 /* Mobile Styles */
 @media (max-width: 768px) {
     .answerButton {

@@ -11,6 +11,7 @@ The platform is a static educational website with interactive learning tools.
 
 ## Recent Changes
 
+- **November 11, 2025**: Mobile landscape sidebar now uses dropdown menu (hamburger button) like portrait mode for better horizontal space management
 - **November 11, 2025**: Added mobile landscape optimization - header and footer now reduce to 50px height when phones are in landscape mode for better content visibility
 - **November 11, 2025**: Added sidebar search functionality - separate search bars for N5 and Higher sections with real-time filtering, scoped search, and auto-expanding parent menus
 
@@ -31,9 +32,9 @@ Preferred communication style: Simple, everyday language.
 - Real-time sidebar search with scoped filtering (N5 searches N5 content only, Higher searches Higher content only)
 
 **Responsive Design**
-- Mobile portrait: Optimized layouts with collapsible sidebar (burger menu)
-- Mobile landscape: Reduced header (50px) and footer (50px) for maximum content visibility
-- Tablet and desktop: Full-size fixed header (100px) and footer (100px)
+- Mobile portrait: Collapsible sidebar with hamburger menu, optimized layouts
+- Mobile landscape: Collapsible sidebar with hamburger menu (same as portrait), reduced header (50px) and footer (50px) for maximum content visibility, full-width content area
+- Tablet and desktop: Fixed sidebar always visible, full-size header (100px) and footer (100px)
 
 **UI Components**
 - Fixed header with school branding
