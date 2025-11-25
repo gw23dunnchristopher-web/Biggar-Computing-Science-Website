@@ -11,6 +11,7 @@ The platform is a static educational website with interactive learning tools.
 
 ## Recent Changes
 
+- **November 25, 2025**: Upgraded search to content-based search - now fetches and searches through actual page content, not just sidebar titles. Results show clickable links to matching pages.
 - **November 11, 2025**: Mobile landscape sidebar now uses dropdown menu (hamburger button) like portrait mode for better horizontal space management
 - **November 11, 2025**: Added mobile landscape optimization - header and footer now reduce to 50px height when phones are in landscape mode for better content visibility
 - **November 11, 2025**: Added sidebar search functionality - separate search bars for N5 and Higher sections with real-time filtering, scoped search, and auto-expanding parent menus
@@ -29,7 +30,8 @@ Preferred communication style: Simple, everyday language.
 - Dynamic sidebar navigation loaded via fetch API
 - Image optimization with srcset for responsive images
 - Interactive educational widgets (binary converter, floating-point converter, two's complement converter)
-- Real-time sidebar search with scoped filtering (N5 searches N5 content only, Higher searches Higher content only)
+- Content-based page search with scoped filtering (N5 search only searches N5 pages, Higher search only searches Higher pages)
+- Search fetches and indexes actual page content, displays matching pages as clickable results
 
 **Responsive Design**
 - Mobile portrait: Collapsible sidebar with hamburger menu, optimized layouts

@@ -6,60 +6,89 @@ function darken(event) {
     event.target.style.filter='brightness(50%) grayscale(100%)';
 }
 
-function filterSidebar() {
+const pageContentCache = {};
+let searchTimeout = null;
+let pagesIndexed = false;
+let pageIndex = [];
+
+function getPageUrlsFromSidebar() {
+    const links = document.querySelectorAll('.sidebar-menu a[href]:not([href="#"])');
+    const urls = [];
+    links.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href && href.includes('/HTML/N5/') && href.endsWith('.html')) {
+            const title = link.textContent.trim();
+            urls.push({ url: href, title: title });
+        }
+    });
+    return urls;
+}
+
+async function fetchPageContent(url) {
+    if (pageContentCache[url]) {
+        return pageContentCache[url];
+    }
+    try {
+        const response = await fetch(url);
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const contentContainer = doc.querySelector('.contentContainer');
+        const content = contentContainer ? contentContainer.textContent.toLowerCase() : '';
+        pageContentCache[url] = content;
+        return content;
+    } catch (error) {
+        console.error('Error fetching page:', url, error);
+        return '';
+    }
+}
+
+async function buildSearchIndex() {
+    if (pagesIndexed) return;
+    const pages = getPageUrlsFromSidebar();
+    const fetchPromises = pages.map(async (page) => {
+        const content = await fetchPageContent(page.url);
+        return { ...page, content: content };
+    });
+    pageIndex = await Promise.all(fetchPromises);
+    pagesIndexed = true;
+}
+
+function searchPages() {
     const searchInput = document.getElementById('sidebarSearch');
-    if (!searchInput) return;
+    const searchResults = document.getElementById('searchResults');
+    if (!searchInput || !searchResults) return;
     
     const searchTerm = searchInput.value.toLowerCase().trim();
-    const sidebarMenu = document.querySelector('.sidebar-menu');
-    if (!sidebarMenu) return;
     
-    const allItems = sidebarMenu.querySelectorAll('li');
-    
-    if (searchTerm === '') {
-        allItems.forEach(item => {
-            item.style.display = '';
-            const submenu = item.querySelector('.submenu');
-            if (submenu) {
-                submenu.style.display = 'none';
-                const arrow = item.querySelector('.arrow');
-                if (arrow) arrow.classList.remove('down');
-            }
-        });
+    if (searchTerm.length < 2) {
+        searchResults.innerHTML = '';
+        searchResults.style.display = 'none';
         return;
     }
     
-    allItems.forEach(item => {
-        const linkText = item.textContent.toLowerCase();
-        const hasLink = item.querySelector('a[href]:not([href="#"])');
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(async () => {
+        searchResults.innerHTML = '<div class="search-loading">Searching...</div>';
+        searchResults.style.display = 'block';
         
-        if (hasLink && linkText.includes(searchTerm)) {
-            item.style.display = '';
-            let parent = item.parentElement;
-            while (parent && parent !== sidebarMenu) {
-                if (parent.tagName === 'UL' && parent.classList.contains('submenu')) {
-                    parent.style.display = 'block';
-                    const parentLi = parent.parentElement;
-                    if (parentLi) {
-                        parentLi.style.display = '';
-                        const arrow = parentLi.querySelector(':scope > a > .arrow');
-                        if (arrow) arrow.classList.add('down');
-                    }
-                }
-                parent = parent.parentElement;
-            }
-        } else if (hasLink) {
-            item.style.display = 'none';
+        await buildSearchIndex();
+        
+        const results = pageIndex.filter(page => {
+            return page.content.includes(searchTerm) || page.title.toLowerCase().includes(searchTerm);
+        });
+        
+        if (results.length === 0) {
+            searchResults.innerHTML = '<div class="search-no-results">No pages found</div>';
         } else {
-            const hasVisibleChildren = Array.from(item.querySelectorAll('li')).some(child => {
-                return child.style.display !== 'none' && child.querySelector('a[href]:not([href="#"])');
+            let html = '<ul class="search-results-list">';
+            results.forEach(page => {
+                html += `<li><a href="${page.url}">${page.title}</a></li>`;
             });
-            
-            if (!hasVisibleChildren) {
-                item.style.display = 'none';
-            }
+            html += '</ul>';
+            searchResults.innerHTML = html;
         }
-    });
+    }, 300);
 }
 
 let sidebarCache = '';
