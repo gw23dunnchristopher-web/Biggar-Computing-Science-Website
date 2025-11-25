@@ -61,13 +61,13 @@ function searchPages() {
     
     const searchTerm = searchInput.value.toLowerCase().trim();
     
+    clearTimeout(searchTimeout);
+    
     if (searchTerm.length < 2) {
         searchResults.innerHTML = '';
         searchResults.style.display = 'none';
         return;
     }
-    
-    clearTimeout(searchTimeout);
     searchTimeout = setTimeout(async () => {
         searchResults.innerHTML = '<div class="search-loading">Searching...</div>';
         searchResults.style.display = 'block';
