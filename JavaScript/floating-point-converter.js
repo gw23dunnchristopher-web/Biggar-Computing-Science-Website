@@ -766,10 +766,10 @@
             exponentBinary = exponentBinary.substring(exponentBinary.length - exponentBits); // Truncate if too long
         }
 
-        // Ensure mantissa has the correct number of bits (15 bits for mantissa field)
-        // According to the rules: start from first 1 and take next 15 digits, padding with zeros if needed
+        // Ensure mantissa has the correct number of bits (mantissaBits - 1 for sign bit)
+        // According to the rules: start from first 1 and take digits, padding with zeros if needed
         let mantissaValue = mantissa;
-        const mantissaFieldBits = 15; // Always 15 bits for the mantissa field
+        const mantissaFieldBits = mantissaBits - 1; // Subtract 1 for the sign bit
         if (mantissaValue.length < mantissaFieldBits) {
             mantissaValue = mantissaValue.padEnd(mantissaFieldBits, '0');
         } else {
