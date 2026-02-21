@@ -1,0 +1,102 @@
+*   Trying 185.230.218.88:80...
+* Connected to 185.230.218.88 (185.230.218.88) port 80 (#0)
+> GET / HTTP/1.1
+> Host: 185.230.218.88
+> User-Agent: curl/7.81.0
+> Accept: */*
+>
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 200 OK
+< Server: nginx/1.18.0 (Ubuntu)
+< Date: Sat, 21 Feb 2026 21:50:10 GMT
+< Content-Type: text/html; charset=utf-8
+< Content-Length: 2229
+< Connection: keep-alive
+< X-Powered-By: Express
+< X-Frame-Options: ALLOWALL
+< Access-Control-Allow-Origin: *
+< Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+< Access-Control-Allow-Headers: Content-Type, Authorization
+< Cache-Control: no-cache
+< Accept-Ranges: bytes
+< Last-Modified: Sat, 21 Feb 2026 21:46:57 GMT
+< ETag: W/"8b5-19c822b8b19"
+<
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>BHS Computing Science - Home</title>
+        <link rel="stylesheet" href="CSS/indexStyle.css">
+        <script src="JavaScript/indexScript.js" defer></script>
+        <link rel="preload" href="Images/Header/banner.png" as="image">
+    </head>
+    <body>
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="Images/Header/banner.png">
+        </header>
+
+        <main>
+            <section id="coursePanels">
+                <div>
+                    <a href="/HTML/N5/N5Home.html"><img src="/Images/Home/N5.jpg" srcset="/Images/Home/N5.jpg 550w" sizes="(max-width: 768px) 100vw, 550px" width="550" height="400" onmouseover="brighten(event)" onmouseout="darken(event)" fetchpriority="high" decoding="async"></a>
+                </div>
+                <div>
+                    <a href="/HTML/Higher/HigherHome.html"><img src="/Images/Home/Higher.jpg" srcset="Images/Home/Higher.jpg 550w" sizes="(max-width: 768px) 100vw, 550px" width="550" height="400" loading="lazy" decoding="async"></a>
+                </div>
+                <div>
+                    <a href="/HTML/GamesDev/GameDevHome.html"><img src="/Images/Home/GamesDev.jpg" srcset="Images/Home/GamesDev.jpg 550w" sizes="(max-width: 768px) 100vw, 550px" width="550" height="400" loading="lazy" decoding="async"></a>
+                </div>
+                <div>
+                    <a href="/HTML/CyberSec/CySecHome.html"><img src="/Images/Home/CyberSec.jpg" srcset="Images/Home/CyberSec.jpg 550w" sizes="(max-width: 768px) 100vw, 550px" width="550" height="400" loading="lazy" decoding="async"></a>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center">
+            </div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+    </body>
+</html>
+* Connection #0 to host 185.230.218.88 left intact
+root@ubuntu:/var/www/bhscomputing# ip addr show
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+2: ens6: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 02:01:76:ff:e7:65 brd ff:ff:ff:ff:ff:ff
+    altname enp0s6
+    inet 185.230.218.88/32 metric 100 scope global dynamic ens6
+       valid_lft 538sec preferred_lft 538sec
+    inet6 fe80::1:76ff:feff:e765/64 scope link
+       valid_lft forever preferred_lft forever
+root@ubuntu:/var/www/bhscomputing# curl -I http://127.0.0.1:80
+HTTP/1.1 200 OK
+Server: nginx/1.18.0 (Ubuntu)
+Date: Sat, 21 Feb 2026 21:50:24 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 2229
+Connection: keep-alive
+X-Powered-By: Express
+X-Frame-Options: ALLOWALL
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Authorization
+Cache-Control: no-cache
+Accept-Ranges: bytes
+Last-Modified: Sat, 21 Feb 2026 21:46:57 GMT
+ETag: W/"8b5-19c822b8b19"
