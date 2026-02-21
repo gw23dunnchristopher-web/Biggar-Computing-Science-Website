@@ -1,0 +1,44 @@
+up to date, audited 133 packages in 737ms
+
+18 packages are looking for funding
+  run `npm fund` for details
+
+6 vulnerabilities (5 moderate, 1 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [bhs-website](ids: [ 0 ])
+[PM2] [bhs-website](0) ✓
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ bhs-website    │ default     │ N/A     │ fork    │ 7178     │ 0s     │ 153  │ online    │ 0%       │ 16.9mb   │ root     │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+root@ubuntu:/var/www/bhscomputing# pm2 status
+curl -I http://localhost:5000
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ bhs-website    │ default     │ N/A     │ fork    │ 7178     │ 6s     │ 153  │ online    │ 0%       │ 60.2mb   │ root     │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+HTTP/1.1 200 OK
+X-Powered-By: Express
+X-Frame-Options: ALLOWALL
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Authorization
+Cache-Control: no-cache
+Accept-Ranges: bytes
+Last-Modified: Sat, 21 Feb 2026 21:46:57 GMT
+ETag: W/"8b5-19c822b8b19"
+Content-Type: text/html; charset=utf-8
+Content-Length: 2229
+Date: Sat, 21 Feb 2026 21:48:17 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
