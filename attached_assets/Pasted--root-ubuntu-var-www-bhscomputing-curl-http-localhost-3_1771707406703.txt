@@ -1,0 +1,51 @@
+
+root@ubuntu:/var/www/bhscomputing# curl http://localhost:3000
+curl: (7) Failed to connect to localhost port 3000 after 0 ms: Connection refused
+root@ubuntu:/var/www/bhscomputing# pm2 logs bhs-website --lines 30
+[TAILING] Tailing last 30 lines for [bhs-website] process (change the value with --lines option)
+/root/.pm2/logs/bhs-website-error.log last 30 lines:
+0|bhs-webs | npm error path /var/www/bhscomputing/package.json
+0|bhs-webs | npm error errno -2
+0|bhs-webs | npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/var/www/bhscomputing/package.json'
+0|bhs-webs | npm error enoent This is related to npm not being able to find a file.
+0|bhs-webs | npm error enoent
+0|bhs-webs | npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-21T20_53_29_410Z-debug-0.log
+0|bhs-webs | npm error code ENOENT
+0|bhs-webs | npm error syscall open
+0|bhs-webs | npm error path /var/www/bhscomputing/package.json
+0|bhs-webs | npm error errno -2
+0|bhs-webs | npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/var/www/bhscomputing/package.json'
+0|bhs-webs | npm error enoent This is related to npm not being able to find a file.
+0|bhs-webs | npm error enoent
+0|bhs-webs | npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-21T20_53_29_591Z-debug-0.log
+0|bhs-webs | npm error code ENOENT
+0|bhs-webs | npm error syscall open
+0|bhs-webs | npm error path /var/www/bhscomputing/package.json
+0|bhs-webs | npm error errno -2
+0|bhs-webs | npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/var/www/bhscomputing/package.json'
+0|bhs-webs | npm error enoent This is related to npm not being able to find a file.
+0|bhs-webs | npm error enoent
+0|bhs-webs | npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-21T20_53_29_775Z-debug-0.log
+0|bhs-webs | npm error code ENOENT
+0|bhs-webs | npm error syscall open
+0|bhs-webs | npm error path /var/www/bhscomputing/package.json
+0|bhs-webs | npm error errno -2
+0|bhs-webs | npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/var/www/bhscomputing/package.json'
+0|bhs-webs | npm error enoent This is related to npm not being able to find a file.
+0|bhs-webs | npm error enoent
+0|bhs-webs | npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-21T20_53_29_967Z-debug-0.log
+
+/root/.pm2/logs/bhs-website-out.log last 30 lines:
+0|bhs-webs |
+0|bhs-webs | > workspace@1.0.0 dev
+0|bhs-webs | > tsx watch server/index.ts
+0|bhs-webs |
+0|bhs-webs |
+0|bhs-webs | > workspace@1.0.0 dev
+0|bhs-webs | > tsx watch server/index.ts
+0|bhs-webs |
+0|bhs-webs |
+0|bhs-webs | > workspace@1.0.0 dev
+0|bhs-webs | > tsx watch server/index.ts
+0|bhs-webs |
+0|bhs-webs | Server running on http://0.0.0.0:5000
