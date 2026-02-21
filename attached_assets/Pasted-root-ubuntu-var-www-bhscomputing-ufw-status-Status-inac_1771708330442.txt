@@ -1,0 +1,66 @@
+root@ubuntu:/var/www/bhscomputing# ufw status
+Status: inactive
+root@ubuntu:/var/www/bhscomputing# ss -tlnp | grep 80
+root@ubuntu:/var/www/bhscomputing# cat /etc/nginx/sites-enabled/bhscomputing
+cat: /etc/nginx/sites-enabled/bhscomputing: No such file or directory
+root@ubuntu:/var/www/bhscomputing# ^C
+root@ubuntu:/var/www/bhscomputing# ls /etc/nginx/sites-available/bhscomputing
+/etc/nginx/sites-available/bhscomputing
+root@ubuntu:/var/www/bhscomputing# nano /etc/nginx/sites-available/bhscomputing
+root@ubuntu:/var/www/bhscomputing# ln -s /etc/nginx/sites-available/bhscomputing /etc/nginx/sites-enabled/
+root@ubuntu:/var/www/bhscomputing# rm -f /etc/nginx/sites-enabled/default
+root@ubuntu:/var/www/bhscomputing# nginx -t
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+root@ubuntu:/var/www/bhscomputing# systemctl start nginx
+systemctl enable nginx
+Synchronizing state of nginx.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable nginx
+root@ubuntu:/var/www/bhscomputing# curl http://localhost:5000
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>BHS Computing Science - Home</title>
+        <link rel="stylesheet" href="CSS/indexStyle.css">
+        <script src="JavaScript/indexScript.js" defer></script>
+        <link rel="preload" href="Images/Header/banner.png" as="image">
+    </head>
+    <body>
+        <header>
+            <h1>BHS Computing Science</h1>
+            <img src="Images/Header/banner.png">
+        </header>
+
+        <main>
+            <section id="coursePanels">
+                <div>
+                    <a href="/HTML/N5/N5Home.html"><img src="/Images/Home/N5.jpg" srcset="/Images/Home/N5.jpg 550w" sizes="(max-width: 768px) 100vw, 550px" width="550" height="400" onmouseover="brighten(event)" onmouseout="darken(event)" fetchpriority="high" decoding="async"></a>
+                </div>
+                <div>
+                    <a href="/HTML/Higher/HigherHome.html"><img src="/Images/Home/Higher.jpg" srcset="Images/Home/Higher.jpg 550w" sizes="(max-width: 768px) 100vw, 550px" width="550" height="400" loading="lazy" decoding="async"></a>
+                </div>
+                <div>
+                    <a href="/HTML/GamesDev/GameDevHome.html"><img src="/Images/Home/GamesDev.jpg" srcset="Images/Home/GamesDev.jpg 550w" sizes="(max-width: 768px) 100vw, 550px" width="550" height="400" loading="lazy" decoding="async"></a>
+                </div>
+                <div>
+                    <a href="/HTML/CyberSec/CySecHome.html"><img src="/Images/Home/CyberSec.jpg" srcset="Images/Home/CyberSec.jpg 550w" sizes="(max-width: 768px) 100vw, 550px" width="550" height="400" loading="lazy" decoding="async"></a>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div id="left">
+                <p>Biggar High School</p>
+                <p>Market Rd, Biggar</p>
+                <p>ML12 6AG</p>
+            </div>
+            <div id="center">
+            </div>
+            <div id="right">
+                <p>&copy;C Dunn, 2025</p>
+            </div>
+        </footer>
+    </body>
+</html>
