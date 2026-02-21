@@ -1,0 +1,27 @@
+root@ubuntu:/var/www/bhscomputing# pm2 restart bhs-website
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [bhs-website](ids: [ 0 ])
+[PM2] [bhs-website](0) ✓
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ bhs-website    │ default     │ N/A     │ fork    │ 5627     │ 0s     │ 47   │ online    │ 0%       │ 16.9mb   │ root     │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+root@ubuntu:/var/www/bhscomputing# pm2 status
+curl -I http://localhost:5000
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ bhs-website    │ default     │ N/A     │ fork    │ 0        │ 0      │ 62   │ errored   │ 0%       │ 0b       │ root     │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+curl: (7) Failed to connect to localhost port 5000 after 0 ms: Connection refused
+root@ubuntu:/var/www/bhscomputing# cd /var/www/bhscomputing
+pm2 start server/index.ts --name bhs-website --interpreter npx -- tsx
+[PM2][ERROR] Script not found: /var/www/bhscomputing/server/index.ts
+root@ubuntu:/var/www/bhscomputing# pm2 list
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ bhs-website    │ default     │ N/A     │ fork    │ 0        │ 0      │ 62   │ errored   │ 0%       │ 0b       │ root     │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+root@ubuntu:/var/www/bhscomputing#
