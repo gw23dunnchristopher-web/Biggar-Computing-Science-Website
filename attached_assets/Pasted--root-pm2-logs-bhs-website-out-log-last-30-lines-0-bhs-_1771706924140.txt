@@ -1,0 +1,41 @@
+/root/.pm2/logs/bhs-website-out.log last 30 lines:
+0|bhs-webs |
+0|bhs-webs | > workspace@1.0.0 dev
+0|bhs-webs | > tsx watch server/index.ts
+0|bhs-webs |
+0|bhs-webs |
+0|bhs-webs | > workspace@1.0.0 dev
+0|bhs-webs | > tsx watch server/index.ts
+0|bhs-webs |
+
+/root/.pm2/logs/bhs-website-error.log last 30 lines:
+0|bhs-webs |     at ws (/var/www/bhscomputing/server/db.ts:9:9)
+0|bhs-webs |     at Object.<anonymous> (/var/www/bhscomputing/server/db.ts:15:51)
+0|bhs-webs |     at Module._compile (node:internal/modules/cjs/loader:1521:14)
+0|bhs-webs |     at Object.transformer (/var/www/bhscomputing/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1104)
+0|bhs-webs |     at Module.load (node:internal/modules/cjs/loader:1266:32)
+0|bhs-webs |     at Module._load (node:internal/modules/cjs/loader:1091:12)
+0|bhs-webs |     at Module.require (node:internal/modules/cjs/loader:1289:19)
+0|bhs-webs |     at require (node:internal/modules/helpers:182:18)
+0|bhs-webs |     at bcrypt (/var/www/bhscomputing/server/index.ts:4:20)
+0|bhs-webs |     at Object.<anonymous> (/var/www/bhscomputing/server/index.ts:511:2)
+0|bhs-webs |
+0|bhs-webs | Node.js v20.20.0
+0|bhs-webs | /var/www/bhscomputing/server/db.ts:9
+0|bhs-webs |   throw new Error(
+0|bhs-webs |         ^
+0|bhs-webs |
+0|bhs-webs |
+0|bhs-webs | Error: DATABASE_URL must be set. Did you forget to provision a database?
+0|bhs-webs |     at ws (/var/www/bhscomputing/server/db.ts:9:9)
+0|bhs-webs |     at Object.<anonymous> (/var/www/bhscomputing/server/db.ts:15:51)
+0|bhs-webs |     at Module._compile (node:internal/modules/cjs/loader:1521:14)
+0|bhs-webs |     at Object.transformer (/var/www/bhscomputing/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1104)
+0|bhs-webs |     at Module.load (node:internal/modules/cjs/loader:1266:32)
+0|bhs-webs |     at Module._load (node:internal/modules/cjs/loader:1091:12)
+0|bhs-webs |     at Module.require (node:internal/modules/cjs/loader:1289:19)
+0|bhs-webs |     at require (node:internal/modules/helpers:182:18)
+0|bhs-webs |     at bcrypt (/var/www/bhscomputing/server/index.ts:4:20)
+0|bhs-webs |     at Object.<anonymous> (/var/www/bhscomputing/server/index.ts:511:2)
+0|bhs-webs |
+0|bhs-webs | Node.js v20.20.0

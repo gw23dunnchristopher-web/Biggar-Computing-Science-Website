@@ -1,16 +1,8 @@
 import express from 'express';
-import session from 'express-session';
-import bcrypt from 'bcrypt';
-import { db } from './db';
-import { users, classes, classStudents, assignments, submissions } from '../shared/schema';
-import { eq, and, desc } from 'drizzle-orm';
-import connectPgSimple from 'connect-pg-simple';
-import { pool } from './db';
+import { db, pool, hasDatabase } from './db';
 
 const app = express();
-const PORT = 5000;
-
-const PgSession = connectPgSimple(session);
+const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 
@@ -19,6 +11,7 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Cache-Control', 'no-cache');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
@@ -27,26 +20,37 @@ app.use((req, res, next) => {
 
 app.use(express.static('.'));
 
-if (!process.env.SESSION_SECRET) {
-  throw new Error('SESSION_SECRET environment variable must be set');
-}
+if (hasDatabase) {
+  const session = require('express-session');
+  const bcrypt = require('bcrypt');
+  const connectPgSimple = require('connect-pg-simple');
+  const { users, classes, classStudents, assignments, submissions } = require('../shared/schema');
+  const { eq, and, desc } = require('drizzle-orm');
 
-app.use(
-  session({
-    store: new PgSession({
-      pool: pool,
-      tableName: 'session',
-      createTableIfMissing: true,
-    }),
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-    },
-  })
-);
+  const PgSession = connectPgSimple(session);
+
+  if (!process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET environment variable must be set');
+  }
+
+  app.use(
+    session({
+      store: new PgSession({
+        pool: pool,
+        tableName: 'session',
+        createTableIfMissing: true,
+      }),
+      secret: process.env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      },
+    })
+  );
+
+} // end if (hasDatabase)
 
 declare module 'express-session' {
   interface SessionData {
@@ -54,6 +58,11 @@ declare module 'express-session' {
     role: string;
   }
 }
+
+if (hasDatabase) {
+  const { users, classes, classStudents, assignments, submissions } = require('../shared/schema');
+  const { eq, and, desc } = require('drizzle-orm');
+  const bcrypt = require('bcrypt');
 
 async function isClassOwner(userId: number, classId: number): Promise<boolean> {
   const [cls] = await db.select().from(classes).where(eq(classes.id, classId));
@@ -505,6 +514,8 @@ app.get('/api/users/students', async (req, res) => {
     res.status(500).json({ error: 'Failed to get students' });
   }
 });
+
+} // end if (hasDatabase) for API routes
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
