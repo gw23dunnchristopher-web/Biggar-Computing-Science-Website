@@ -1,0 +1,124 @@
+; <<>> DiG 9.18.39-0ubuntu0.22.04.2-Ubuntu <<>> bhs-computing.uk
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 19776
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;bhs-computing.uk.              IN      A
+
+;; ANSWER SECTION:
+bhs-computing.uk.       3600    IN      A       185.230.218.88
+
+;; Query time: 23 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53) (UDP)
+;; WHEN: Sat Feb 21 20:43:00 UTC 2026
+;; MSG SIZE  rcvd: 61
+
+
+; <<>> DiG 9.18.39-0ubuntu0.22.04.2-Ubuntu <<>> www.bhs-computing.uk
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 50122
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;www.bhs-computing.uk.          IN      A
+
+;; ANSWER SECTION:
+www.bhs-computing.uk.   3600    IN      A       185.230.218.88
+
+;; Query time: 19 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53) (UDP)
+;; WHEN: Sat Feb 21 20:43:00 UTC 2026
+;; MSG SIZE  rcvd: 65
+
+root@ubuntu:/var/www/bhscomputing# dig www.bhs-computing.uk; <<>> DiG 9.18.39-0ubuntu0.22.04.2-Ubuntu <<>> bhs-computing.uk
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 19776
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;bhs-computing.uk.              IN      A
+
+;; ANSWER SECTION:
+bhs-computing.uk.       3600    IN      A       185.230.218.88
+
+;; Query time: 23 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53) (UDP)
+;; WHEN: Sat Feb 21 20:43:00 UTC 2026
+;; MSG SIZE  rcvd: 61
+
+
+; <<>> DiG 9.18.39-0ubuntu0.22.04.2-Ubuntu <<>> www.bhs-computing.uk
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 50122
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;www.bhs-computing.uk.          IN      A
+
+;; ANSWER SECTION:
+www.bhs-computing.uk.   3600    IN      A       185.230.218.88
+
+;; Query time: 19 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53) (UDP)
+;; WHEN: Sat Feb 21 20:43:00 UTC 2026
+;; MSG SIZE  rcvd: 65
+; <<>> DiG 9.18.39-0ubuntu0.22.04.2-Ubuntu <<>> bhs-computing.uk
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 19776
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;bhs-computing.uk.              IN      A
+
+;; ANSWER SECTION:
+bhs-computing.uk.       3600    IN      A       185.230.218.88
+
+;; Query time: 23 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53) (UDP)
+;; WHEN: Sat Feb 21 20:43:00 UTC 2026
+;; MSG SIZE  rcvd: 61
+
+
+; <<>> DiG 9.18.39-0ubuntu0.22.04.2-Ubuntu <<>> www.bhs-computing.uk
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 50122
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
+;www.bhs-computing.uk.          IN      A
+
+;; ANSWER SECTION:
+www.bhs-computing.uk.   3600    IN      A       185.230.218.88
+
+;; Query time: 19 msec
+;; SERVER: 127.0.0.53#53(127.0.0.53) (UDP)
+;; WHEN: Sat Feb 21 20:43:00 UTC 2026
+;; MSG SIZE  rcvd: 65
+; <<>> DiG 9.18.39-0ubuntu0.22.04.2-Ubuntu <<>> bhs-computing.uk
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 19776
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 65494
+;; QUESTION SECTION:
