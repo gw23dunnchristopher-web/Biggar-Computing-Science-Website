@@ -1,0 +1,1092 @@
+fatal: could not read Username for 'https://github.com': No such device or address
+npm error code ENOENT
+npm error syscall open
+npm error path /var/www/bhscomputing/package.json
+npm error errno -2
+npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/var/www/bhscomputing/package.json'
+npm error enoent This is related to npm not being able to find a file.
+npm error enoent
+npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-21T21_25_02_161Z-debug-0.log
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [bhs-website](ids: [ 0 ])
+[PM2] [bhs-website](0) ✓
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ bhs-website    │ default     │ N/A     │ fork    │ 5433     │ 0s     │ 32   │ online    │ 0%       │ 16.9mb   │ root     │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+Site updated at Sat Feb 21 21:25:02 UTC 2026
+fatal: could not read Username for 'https://github.com': No such device or address
+npm error code ENOENT
+npm error syscall open
+npm error path /var/www/bhscomputing/package.json
+npm error errno -2
+npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/var/www/bhscomputing/package.json'
+npm error enoent This is related to npm not being able to find a file.
+npm error enoent
+npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-21T21_30_01_828Z-debug-0.log
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [bhs-website](ids: [ 0 ])
+[PM2] [bhs-website](0) ✓
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ bhs-website    │ default     │ N/A     │ fork    │ 5871     │ 0s     │ 62   │ online    │ 0%       │ 14.0mb   │ root     │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+Site updated at Sat Feb 21 21:30:02 UTC 2026
+fatal: not a git repository (or any of the parent directories): .git
+npm error code ENOENT
+npm error syscall open
+npm error path /var/www/bhscomputing/package.json
+npm error errno -2
+npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/var/www/bhscomputing/package.json'
+npm error enoent This is related to npm not being able to find a file.
+npm error enoent
+npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-21T21_35_01_313Z-debug-0.log
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [bhs-website](ids: [ 0 ])
+[PM2] [bhs-website](0) ✓
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ bhs-website    │ default     │ N/A     │ fork    │ 6073     │ 0s     │ 77   │ online    │ 0%       │ 12.2mb   │ root     │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+Site updated at Sat Feb 21 21:35:01 UTC 2026
+fatal: not a git repository (or any of the parent directories): .git
+npm error code ENOENT
+npm error syscall open
+npm error path /var/www/bhscomputing/package.json
+npm error errno -2
+npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/var/www/bhscomputing/package.json'
+npm error enoent This is related to npm not being able to find a file.
+npm error enoent
+npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-21T21_40_01_805Z-debug-0.log
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [bhs-website](ids: [ 0 ])
+[PM2] [bhs-website](0) ✓
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ bhs-website    │ default     │ N/A     │ fork    │ 6274     │ 0s     │ 92   │ online    │ 0%       │ 16.8mb   │ root     │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+Site updated at Sat Feb 21 21:40:02 UTC 2026
+fatal: not a git repository (or any of the parent directories): .git
+npm error code ENOENT
+npm error syscall open
+npm error path /var/www/bhscomputing/package.json
+npm error errno -2
+npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/var/www/bhscomputing/package.json'
+npm error enoent This is related to npm not being able to find a file.
+npm error enoent
+npm error A complete log of this run can be found in: /root/.npm/_logs/2026-02-21T21_45_01_287Z-debug-0.log
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [bhs-website](ids: [ 0 ])
+[PM2] [bhs-website](0) ✓
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ bhs-website    │ default     │ N/A     │ fork    │ 6672     │ 0s     │ 122  │ online    │ 0%       │ 13.9mb   │ root     │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+Site updated at Sat Feb 21 21:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+
+up to date, audited 133 packages in 741ms
+
+18 packages are looking for funding
+  run `npm fund` for details
+
+6 vulnerabilities (5 moderate, 1 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [bhs-website](ids: [ 0 ])
+[PM2] [bhs-website](0) ✓
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ bhs-website    │ default     │ N/A     │ fork    │ 7270     │ 0s     │ 154  │ online    │ 0%       │ 16.8mb   │ root     │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+Site updated at Sat Feb 21 21:50:03 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+
+up to date, audited 133 packages in 1s
+
+18 packages are looking for funding
+  run `npm fund` for details
+
+6 vulnerabilities (5 moderate, 1 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [bhs-website](ids: [ 0 ])
+[PM2] [bhs-website](0) ✓
+┌────┬────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name           │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ bhs-website    │ default     │ N/A     │ fork    │ 7354     │ 0s     │ 155  │ online    │ 0%       │ 16.9mb   │ root     │ disabled │
+└────┴────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+Site updated at Sat Feb 21 21:55:03 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 22:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 22:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 22:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 22:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 22:20:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 22:25:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 22:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 22:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 22:40:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 22:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 22:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 22:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 23:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 23:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 23:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 23:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 23:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 23:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 23:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 23:35:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 23:40:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 23:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 23:50:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sat Feb 21 23:55:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 00:00:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 00:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 00:10:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 00:15:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 00:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 00:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 00:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 00:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 00:40:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 00:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 00:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 00:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 01:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 01:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 01:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 01:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 01:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 01:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 01:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 01:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 01:40:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 01:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 01:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 01:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 02:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 02:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 02:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 02:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 02:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 02:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 02:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 02:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 02:40:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 02:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 02:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 02:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 03:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 03:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 03:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 03:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 03:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 03:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 03:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 03:35:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 03:40:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 03:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 03:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 03:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 04:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 04:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 04:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 04:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 04:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 04:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 04:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 04:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 04:40:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 04:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 04:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 04:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 05:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 05:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 05:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 05:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 05:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 05:25:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 05:30:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 05:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 05:40:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 05:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 05:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 05:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 06:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 06:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 06:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 06:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 06:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 06:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 06:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 06:35:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 06:40:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 06:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 06:50:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 06:55:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 07:00:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 07:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 07:10:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 07:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 07:20:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 07:25:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 07:30:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 07:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 07:40:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 07:45:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 07:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 07:55:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 08:00:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 08:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 08:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 08:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 08:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 08:25:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 08:30:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 08:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 08:40:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 08:45:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 08:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 08:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 09:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 09:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 09:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 09:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 09:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 09:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 09:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 09:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 09:40:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 09:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 09:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 09:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 10:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 10:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 10:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 10:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 10:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 10:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 10:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 10:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 10:40:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 10:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 10:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 10:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 11:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 11:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 11:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 11:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 11:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 11:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 11:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 11:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 11:40:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 11:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 11:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 11:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 12:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 12:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 12:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 12:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 12:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 12:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 12:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 12:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 12:40:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 12:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 12:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 12:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 13:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 13:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 13:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 13:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 13:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 13:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 13:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 13:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 13:40:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 13:45:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 13:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 13:55:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 14:00:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 14:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 14:10:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 14:15:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 14:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 14:25:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 14:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 14:35:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 14:40:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 14:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 14:50:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 14:55:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 15:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 15:05:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 15:10:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 15:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 15:20:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 15:25:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 15:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 15:35:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 15:40:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 15:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 15:50:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 15:55:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 16:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 16:05:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 16:10:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 16:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 16:20:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 16:25:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 16:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 16:35:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 16:40:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 16:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 16:50:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 16:55:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 17:00:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 17:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 17:10:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 17:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 17:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 17:25:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 17:30:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 17:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 17:40:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 17:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 17:50:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 17:55:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 18:00:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 18:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 18:10:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 18:15:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 18:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 18:25:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 18:30:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 18:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 18:40:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 18:45:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 18:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 18:55:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 19:00:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 19:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 19:10:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 19:15:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 19:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 19:25:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 19:30:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 19:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 19:40:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 19:45:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 19:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 19:55:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 20:00:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 20:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 20:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 20:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 20:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 20:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 20:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 20:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 20:40:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 20:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 20:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 20:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 21:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 21:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 21:10:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 21:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 21:20:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 21:25:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 21:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 21:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 21:40:03 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 21:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 21:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 21:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 22:00:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 22:05:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 22:10:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 22:15:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 22:20:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 22:25:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 22:30:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 22:35:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 22:40:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 22:45:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 22:50:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 22:55:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+   e15e1ec..7f23108  main       -> origin/main
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+Updating e15e1ec..7f23108
+Fast-forward
+ ...Connected-to-185-230-218-88-1_1771710641658.txt | 102 +++++++++++++++++++++
+ ...ckages-in-737ms-18-packages-a_1771710576172.txt |  51 +++++++++++
+ ...kages-in-737ms-18-packages-ar_1771710508624.txt |  44 +++++++++
+ 3 files changed, 197 insertions(+)
+ create mode 100644 attached_assets/Pasted--Trying-185-230-218-88-80-Connected-to-185-230-218-88-1_1771710641658.txt
+ create mode 100644 attached_assets/Pasted--up-to-date-audited-133-packages-in-737ms-18-packages-a_1771710576172.txt
+ create mode 100644 attached_assets/Pasted-up-to-date-audited-133-packages-in-737ms-18-packages-ar_1771710508624.txt
+
+up to date, audited 133 packages in 1s
+
+18 packages are looking for funding
+  run `npm fund` for details
+
+6 vulnerabilities (5 moderate, 1 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+Use --update-env to update environment variables
+[PM2][ERROR] Process or Namespace bhs-website not found
+Site updated at Sun Feb 22 23:00:04 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 23:05:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 23:10:01 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 23:15:02 UTC 2026
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 23:20:01 UTC 2026
+root@ubuntu:/var/www/n5revision# /var/www/update-site.sh
+From https://github.com/gw23dunnchristopher-web/Biggar-Computing-Science-Website
+ * branch            main       -> FETCH_HEAD
+No changes at Sun Feb 22 23:25:06 UTC 2026
