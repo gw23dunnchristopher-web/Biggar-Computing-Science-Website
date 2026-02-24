@@ -102,6 +102,11 @@ function preloadSidebar(menuLoc) {
             .then(data => {
                 sidebarCache = data;
                 return data;
+            })
+            .catch(err => {
+                console.error('Failed to preload sidebar:', err);
+                sidebarPromise = null;
+                return '';
             });
     }
     return sidebarPromise;
@@ -356,9 +361,12 @@ function toggleLaw(element) {
 
 preloadSidebar('/HTML/N5/N5Sidebar.html').then(() => {
     loadSidebar('/HTML/N5/N5Sidebar.html', 'sidebar');
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('mainContent').classList.remove('content-hidden');
+    showMainContent();
+}).catch(() => {
+    showMainContent();
 });
+
+setTimeout(showMainContent, 5000);
 
 /* Countdown Function */
 function countdown(testDate) {

@@ -102,6 +102,11 @@ function preloadSidebar(menuLoc) {
             .then(data => {
                 sidebarCache = data;
                 return data;
+            })
+            .catch(err => {
+                console.error('Failed to preload sidebar:', err);
+                sidebarPromise = null;
+                return '';
             });
     }
     return sidebarPromise;
@@ -358,9 +363,12 @@ function showMainContent() {
 
 preloadSidebar('/HTML/Higher/HigherSidebar.html').then(() => {
     loadSidebar('/HTML/Higher/HigherSidebar.html', 'sidebar');
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('mainContent').classList.remove('content-hidden');
+    showMainContent();
+}).catch(() => {
+    showMainContent();
 });
+
+setTimeout(showMainContent, 5000);
 
 function switchImage(imageElement, newSrc){
     imageElement.src = newSrc;
