@@ -29,7 +29,7 @@ body {
 
 /* Main content layout */
 main {
-    margin: 200px 0 100px;
+    margin: 200px 0 60px;
 }
 
 #content {
@@ -753,4 +753,74 @@ ul li ul li ul li {
     .breakdown table td {
         white-space: nowrap;
     }
+
+    .page-nav {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px;
+    }
+
+    .page-nav-btn {
+        max-width: 100%;
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
+    .page-nav-title {
+        font-size: 11px;
+    }
+}
+
+/* Page Navigation Buttons */
+.page-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    max-width: 1400px;
+    width: 100%;
+    margin: 30px auto 10px;
+    padding: 10px;
+    gap: 20px;
+}
+
+.page-nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-image: linear-gradient(to bottom, #f0f4ff, #d6e0f5);
+    text-decoration: none;
+    color: #0c3f71;
+    font-size: 16px;
+    font-weight: bold;
+    max-width: 45%;
+    transition: background-image 0.2s, box-shadow 0.2s;
+}
+
+.page-nav-btn:hover {
+    background-image: linear-gradient(to bottom, lightblue, rgb(73, 161, 196));
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.15);
+    color: white;
+}
+
+.page-nav-back {
+    margin-right: auto;
+}
+
+.page-nav-next {
+    margin-left: auto;
+}
+
+.page-nav-title {
+    font-size: 12px;
+    font-weight: normal;
+    color: #555;
+    margin-top: 4px;
+}
+
+.page-nav-btn:hover .page-nav-title {
+    color: #eee;
 }
