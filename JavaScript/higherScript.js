@@ -127,7 +127,6 @@ function loadSidebarContent(sidebarFile, targetElement) {
     var targetEl = document.getElementById(targetElement);
     if (!targetEl) {
         console.error('Target element not found:', targetElement);
-        // Try again after a short delay
         setTimeout(function() {
             loadSidebarContent(sidebarFile, targetElement);
         }, 100);
@@ -136,27 +135,25 @@ function loadSidebarContent(sidebarFile, targetElement) {
 
     window.scrollTo(0, 0);
     if (sidebarCache) {
-        document.getElementById(targetElement).innerHTML = sidebarCache;
+        targetEl.innerHTML = sidebarCache;
         attachMenuListeners();
-        setInterval(function() { countdown('2026-05-20'); }, 1000);
+        showMainContent();
         return;
     }
 
-    // If already preloading, use that promise
     if (sidebarPromise) {
         sidebarPromise.then(data => {
-            document.getElementById(targetElement).innerHTML = data;
+            targetEl.innerHTML = data;
             attachMenuListeners();
-            setInterval(function() { countdown('2026-05-20'); }, 1000);
+            showMainContent();
         });
         return;
     }
 
-    // Otherwise load normally
     preloadSidebar(sidebarFile).then(data => {
-        document.getElementById(targetElement).innerHTML = data;
+        targetEl.innerHTML = data;
         attachMenuListeners();
-        setInterval(function() { countdown('2026-05-20'); }, 1000);
+        showMainContent();
     });
 }
 
@@ -341,6 +338,11 @@ function toggleLaw(element) {
 }
 
 function showMainContent() {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', showMainContent);
+        return;
+    }
+
     var loadingEl = document.getElementById('loading');
     var mainContentEl = document.getElementById('mainContent');
 
@@ -351,9 +353,7 @@ function showMainContent() {
         mainContentEl.classList.remove('content-hidden');
     }
 
-    // Additional mobile-specific initialization
     if (window.innerWidth <= 768) {
-        // Ensure mobile layout is properly initialized
         setTimeout(function() {
             var event = new Event('resize');
             window.dispatchEvent(event);
