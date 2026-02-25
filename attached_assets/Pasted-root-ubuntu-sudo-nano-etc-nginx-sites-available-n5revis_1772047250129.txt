@@ -1,0 +1,64 @@
+root@ubuntu:~# sudo nano /etc/nginx/sites-available/n5revision
+root@ubuntu:~# sudo nginx -t && sudo systemctl reload nginx
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+root@ubuntu:~# sudo nginx -t && curl -vI https://bhs-computing.uk 2>&1 | grep -E "SSL|subject|issuer|CN"
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384
+*  subject: CN=bhs-computing.uk
+*  subjectAltName: host "bhs-computing.uk" matched cert's "bhs-computing.uk"
+*  issuer: C=US; O=Let's Encrypt; CN=E7
+*  SSL certificate verify ok.
+* old SSL session ID is stale, removing
+root@ubuntu:~# cat /etc/nginx/sites-available/bhscomputing
+server {
+    server_name bhs-computing.uk www.bhs-computing.uk 185.230.218.88;
+
+    location / {
+        root /var/www/bhscomputing;
+        index index.html;
+        try_files $uri $uri/ =404;
+
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+        add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+        add_header Cross-Origin-Embedder-Policy "require-corp" always;
+        add_header Cross-Origin-Opener-Policy "same-origin" always;
+        add_header Cross-Origin-Resource-Policy "same-origin" always;
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; frame-src 'none'" always;
+    }
+
+    listen [::]:443 ssl ipv6only=on;
+    listen 443 ssl;
+    ssl_certificate /etc/ssl/cloudflare/bhs-computing.uk.pem;
+    ssl_certificate_key /etc/ssl/cloudflare/bhs-computing.uk.key;
+}
+
+
+server {
+    if ($host = www.bhs-computing.uk) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = bhs-computing.uk) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    listen [::]:80;
+    server_name bhs-computing.uk www.bhs-computing.uk 185.230.218.88;
+    return 404; # managed by Certbot
+
+
+    location / {
+        proxy_pass http://localhost:5000;
+        # ... proxy headers ...
+    }
+
+
+}
