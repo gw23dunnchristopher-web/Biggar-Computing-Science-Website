@@ -9,7 +9,8 @@ packages = ["static-web-server"]
 
 [deployment]
 publicDir = "/"
-deploymentTarget = "static"
+deploymentTarget = "autoscale"
+run = ["npx", "tsx", "server/index.ts"]
 
 [[deployment.rewrites]]
 from = "/HTML/*"
