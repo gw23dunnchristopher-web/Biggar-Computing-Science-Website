@@ -11,6 +11,11 @@ The platform is a static educational website with interactive learning tools.
 
 ## Recent Changes
 
+- **February 25, 2026**: Added security hardening - blocked access to server source/config files, added security headers (X-Frame-Options, X-Content-Type-Options, XSS protection, Referrer-Policy, Permissions-Policy), disabled Express fingerprinting, blocked dotfiles
+- **February 25, 2026**: Fixed broken images (wrong file extensions for LookupWizard7 and PPEvaluation)
+- **February 25, 2026**: Fixed white screen issue on IONOS server - showMainContent now defers to DOM ready, loadSidebarContent calls showMainContent, added error handling and timeout fallbacks
+- **February 25, 2026**: Added Next/Back navigation buttons to all N5 and Higher lesson pages via pageNavigation.js
+- **February 25, 2026**: Reduced footer to 50px height with light grey text, fixed sidebar height to reach footer
 - **November 25, 2025**: Upgraded search to content-based search - now fetches and searches through actual page content, not just sidebar titles. Results show clickable links to matching pages.
 - **November 11, 2025**: Mobile landscape sidebar now uses dropdown menu (hamburger button) like portrait mode for better horizontal space management
 - **November 11, 2025**: Added mobile landscape optimization - header and footer now reduce to 50px height when phones are in landscape mode for better content visibility
@@ -58,6 +63,12 @@ Preferred communication style: Simple, everyday language.
 - Express.js serves static HTML/CSS/JavaScript files
 - No active authentication or database operations
 - Port 5000 configured for Replit webview deployment
+
+**Security**
+- Sensitive files blocked: server source, .git, .env, node_modules, config files all return 404
+- Security headers: X-Frame-Options (SAMEORIGIN), X-Content-Type-Options (nosniff), X-XSS-Protection, Referrer-Policy, Permissions-Policy
+- Express fingerprinting disabled (X-Powered-By removed)
+- Dotfiles denied by static file server
 
 ## External Dependencies
 

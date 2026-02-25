@@ -1,24 +1,37 @@
 import express from 'express';
+import path from 'path';
 import { db, pool, hasDatabase } from './db';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.disable('x-powered-by');
+
 app.use(express.json());
 
 app.use((req, res, next) => {
-  res.setHeader('X-Frame-Options', 'ALLOWALL');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   res.setHeader('Cache-Control', 'no-cache');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+  next();
+});
+
+app.use((req, res, next) => {
+  const blocked = /\/(\.git|\.env|server|shared|node_modules|drizzle|\.config|\.local|\.replit|replit\.md|package\.json|package-lock\.json|tsconfig\.json|drizzle\.config\.ts)/i;
+  if (blocked.test(req.path)) {
+    return res.status(404).send('Not found');
   }
   next();
 });
 
-app.use(express.static('.'));
+const publicRoot = path.resolve('.');
+app.use(express.static(publicRoot, {
+  dotfiles: 'deny',
+  index: ['index.html']
+}));
 
 if (hasDatabase) {
   const session = require('express-session');
