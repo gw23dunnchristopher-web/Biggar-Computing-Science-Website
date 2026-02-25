@@ -8,17 +8,8 @@ channel = "stable-24_11"
 packages = ["static-web-server"]
 
 [deployment]
-publicDir = "/"
 deploymentTarget = "autoscale"
 run = ["npx", "tsx", "server/index.ts"]
-
-[[deployment.rewrites]]
-from = "/HTML/*"
-to = "/HTML/*"
-
-[[deployment.rewrites]]
-from = "/*"
-to = "/index.html"
 
 [workflows]
 runButton = "Project"
