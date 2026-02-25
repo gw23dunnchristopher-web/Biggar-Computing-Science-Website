@@ -198,6 +198,18 @@
     font-family: Arial;
 }
 
+/* Lower resolution monitors - sidebar moves up when header is hidden */
+@media (max-height: 800px) {
+    #sidebar {
+        top: 50px;
+        height: calc(100vh - 100px);
+    }
+
+    .toggle-btn {
+        top: 5px;
+    }
+}
+
 /* Mobile Landscape - Use dropdown menu like portrait mode */
 @media (max-height: 500px) and (orientation: landscape) {
     .toggle-btn {

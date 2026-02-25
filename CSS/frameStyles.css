@@ -148,6 +148,22 @@ footer #right {
     padding-right: 20px;
 }
 
+/* Lower resolution monitors - hide header to maximize content space */
+@media (max-height: 800px) {
+    header {
+        display: none;
+    }
+
+    #mainHeading {
+        top: 0;
+    }
+
+    #pageContainer {
+        margin-top: 50px;
+        min-height: calc(100vh - 100px);
+    }
+}
+
 /* Mobile Landscape Styles - Reduce header/footer for better content visibility */
 @media (max-height: 500px) and (orientation: landscape) {
     header {
