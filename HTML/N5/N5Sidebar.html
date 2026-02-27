@@ -199,7 +199,19 @@
     
         <li class="menu-header">
             <a href="/HTML/N5/PastPapers.html"><span>Past Papers</span></a>
-            <a href="https://n5revision.bhs-computing.uk/"><span>Revision Tool</span></a>
+            <a href="https://n5revision.bhs-computing.uk/" onclick="checkRevisionLink(event)" id="n5RevisionLink"><span>Revision Tool</span></a>
+            <script>
+            function checkRevisionLink(e) {
+                e.preventDefault();
+                var primary = 'https://n5revision.bhs-computing.uk/';
+                var fallback = 'https://exam-revision-app-n-5--gw23dunnchristo.replit.app';
+                fetch(primary, { mode: 'no-cors', cache: 'no-store' }).then(function() {
+                    window.open(primary, '_blank');
+                }).catch(function() {
+                    window.open(fallback, '_blank');
+                });
+            }
+            </script>
         </li>
     </ul>
     <br>
