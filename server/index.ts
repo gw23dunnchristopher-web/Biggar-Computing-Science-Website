@@ -29,6 +29,11 @@ app.use((req, res, next) => {
   next();
 });
 
+function escapeXml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+}
+
 app.post('/api/tts', async (req, res) => {
   const apiKey = process.env.GOOGLE_TTS_KEY;
   if (!apiKey) {
@@ -37,26 +42,30 @@ app.post('/api/tts', async (req, res) => {
   const text = (req.body?.text || '').substring(0, 2000);
   if (!text) return res.status(400).json({ error: 'No text provided' });
 
+  /* Build SSML with <mark> before each word so we can get timepoints back */
+  const words = text.split(/\s+/).filter((w: string) => w.length > 0);
+  const ssmlBody = words.map((w: string, i: number) => `<mark name="w${i}"/>${escapeXml(w)}`).join(' ');
+  const ssml = `<speak>${ssmlBody}</speak>`;
+
   const attempts = 3;
   for (let i = 0; i < attempts; i++) {
     try {
       const response = await fetch(
-        `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
+        `https://texttospeech.googleapis.com/v1beta1/text:synthesize?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            input: { text },
+            input: { ssml },
             voice: { languageCode: 'en-GB', name: 'en-GB-Neural2-A' },
-            audioConfig: { audioEncoding: 'MP3', speakingRate: 0.95 }
+            audioConfig: { audioEncoding: 'MP3', speakingRate: 0.95 },
+            enableTimePointing: ['SSML_MARK']
           })
         }
       );
       if (!response.ok) throw new Error(`TTS API error: ${response.status}`);
-      const data = await response.json() as { audioContent: string };
-      const audioBuffer = Buffer.from(data.audioContent, 'base64');
-      res.setHeader('Content-Type', 'audio/mpeg');
-      return res.send(audioBuffer);
+      const data = await response.json() as { audioContent: string; timepoints?: { markName: string; timeSeconds: number }[] };
+      return res.json({ audioContent: data.audioContent, timepoints: data.timepoints || [] });
     } catch (err) {
       if (i === attempts - 1) {
         return res.status(502).json({ error: 'TTS request failed' });

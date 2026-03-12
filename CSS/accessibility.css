@@ -91,6 +91,16 @@ html.dyslexia-font *::after {
     font-family: 'OpenDyslexic', sans-serif !important;
 }
 
+/* TTS word highlighting */
+span.a11y-word { display: inline; }
+span.a11y-word-active {
+    background: #FFE066;
+    color: #000 !important;
+    border-radius: 3px;
+    outline: 2px solid #F5C800;
+    outline-offset: 1px;
+}
+
 /* Reduced motion */
 html.reduced-motion,
 html.reduced-motion * {
