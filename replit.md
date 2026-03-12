@@ -11,6 +11,7 @@ The platform is a static educational website with interactive learning tools.
 
 ## Recent Changes
 
+- **March 12, 2026**: Added comprehensive accessibility panel (Display Settings) - floating button on all pages with: high contrast mode, custom text/background colours, font size slider (75-200%), line spacing slider, OpenDyslexic font, text-to-speech (browser Web Speech API + optional Google Cloud TTS via GOOGLE_TTS_KEY env var), reduced motion, reading guide, colour overlays. Settings persisted to localStorage. Loaded dynamically from script.js/higherScript.js. Fonts in /Fonts/, styles in CSS/accessibility.css, logic in JavaScript/accessibility.js.
 - **February 25, 2026**: Added security hardening - blocked access to server source/config files, added security headers (X-Frame-Options, X-Content-Type-Options, XSS protection, Referrer-Policy, Permissions-Policy), disabled Express fingerprinting, blocked dotfiles
 - **February 25, 2026**: Fixed broken images (wrong file extensions for LookupWizard7 and PPEvaluation)
 - **February 25, 2026**: Fixed white screen issue on IONOS server - showMainContent now defers to DOM ready, loadSidebarContent calls showMainContent, added error handling and timeout fallbacks
@@ -102,3 +103,6 @@ Preferred communication style: Simple, everyday language.
 **Environment Variables Required**
 - `DATABASE_URL`: PostgreSQL connection string (Neon)
 - `SESSION_SECRET`: Secret key for session encryption
+
+**Environment Variables Optional**
+- `GOOGLE_TTS_KEY`: Google Cloud Text-to-Speech API key. If set, TTS uses Google's Neural2 voice (en-GB-Neural2-A). If not set, TTS falls back to browser's Web Speech API.

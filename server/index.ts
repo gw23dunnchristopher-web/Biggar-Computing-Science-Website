@@ -16,7 +16,7 @@ app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; frame-src https://trinket.io");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://texttospeech.googleapis.com; frame-src https://trinket.io; media-src 'self' blob:");
   res.setHeader('Cache-Control', 'no-cache');
   next();
 });
@@ -27,6 +27,43 @@ app.use((req, res, next) => {
     return res.status(404).send('Not found');
   }
   next();
+});
+
+app.post('/api/tts', async (req, res) => {
+  const apiKey = process.env.GOOGLE_TTS_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'TTS service not configured' });
+  }
+  const text = (req.body?.text || '').substring(0, 2000);
+  if (!text) return res.status(400).json({ error: 'No text provided' });
+
+  const attempts = 3;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const response = await fetch(
+        `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            input: { text },
+            voice: { languageCode: 'en-GB', name: 'en-GB-Neural2-A' },
+            audioConfig: { audioEncoding: 'MP3', speakingRate: 0.95 }
+          })
+        }
+      );
+      if (!response.ok) throw new Error(`TTS API error: ${response.status}`);
+      const data = await response.json() as { audioContent: string };
+      const audioBuffer = Buffer.from(data.audioContent, 'base64');
+      res.setHeader('Content-Type', 'audio/mpeg');
+      return res.send(audioBuffer);
+    } catch (err) {
+      if (i === attempts - 1) {
+        return res.status(502).json({ error: 'TTS request failed' });
+      }
+      await new Promise(r => setTimeout(r, 200));
+    }
+  }
 });
 
 const publicRoot = path.resolve('.');
