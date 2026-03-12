@@ -1,4 +1,37 @@
 (function () {
+    /* Load CSS immediately, before anything else */
+    (function() {
+        if (!document.getElementById('a11y-css')) {
+            var link = document.createElement('link');
+            link.id = 'a11y-css';
+            link.rel = 'stylesheet';
+            link.href = '/CSS/accessibility.css';
+            document.head.appendChild(link);
+        }
+        /* Inject @font-face directly so it's available immediately */
+        if (!document.getElementById('a11y-font-style')) {
+            var style = document.createElement('style');
+            style.id = 'a11y-font-style';
+            style.textContent = [
+                "@font-face {",
+                "  font-family: 'OpenDyslexic';",
+                "  src: url('/Fonts/OpenDyslexic-Regular.otf') format('opentype');",
+                "  font-weight: normal; font-style: normal;",
+                "}",
+                "@font-face {",
+                "  font-family: 'OpenDyslexic';",
+                "  src: url('/Fonts/OpenDyslexic-Bold.otf') format('opentype');",
+                "  font-weight: bold; font-style: normal;",
+                "}",
+                /* Also inline the critical rule so it fires before accessibility.css loads */
+                "html.dyslexia-font, html.dyslexia-font * {",
+                "  font-family: 'OpenDyslexic', sans-serif !important;",
+                "}"
+            ].join('\n');
+            document.head.appendChild(style);
+        }
+    })();
+
     var STORAGE_KEY = 'a11y-settings';
     var DEFAULT_SETTINGS = {
         highContrast: false,
@@ -149,19 +182,49 @@
         hideTTSBanner();
     }
 
-    function speakWithBrowser(text) {
+    /* Pre-load voices as early as possible so Chrome has them ready */
+    var _voicesReady = false;
+    var _voicesCallbacks = [];
+    function _ensureVoices(cb) {
         if (!window.speechSynthesis) return;
+        var voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) { _voicesReady = true; return cb(voices); }
+        var handler = function () {
+            var v = window.speechSynthesis.getVoices();
+            if (v.length > 0) {
+                _voicesReady = true;
+                window.speechSynthesis.removeEventListener('voiceschanged', handler);
+                cb(v);
+            }
+        };
+        window.speechSynthesis.addEventListener('voiceschanged', handler);
+    }
+    /* Kick off voice loading immediately */
+    if (window.speechSynthesis) {
+        _ensureVoices(function () {});
+    }
+
+    function _doSpeak(text, voices) {
         var utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = 0.95;
-        var voices = window.speechSynthesis.getVoices();
-        var enGB = voices.filter(function (v) { return v.lang.startsWith('en-GB') && v.localService; });
-        if (enGB.length === 0) enGB = voices.filter(function (v) { return v.lang.startsWith('en') && v.localService; });
-        if (enGB.length > 0) utterance.voice = enGB[0];
+        if (voices) {
+            var enGB = voices.filter(function (v) { return v.lang.startsWith('en-GB') && v.localService; });
+            if (enGB.length === 0) enGB = voices.filter(function (v) { return v.lang.startsWith('en') && v.localService; });
+            if (enGB.length === 0) enGB = voices.filter(function (v) { return v.lang.startsWith('en'); });
+            if (enGB.length > 0) utterance.voice = enGB[0];
+        }
         utterance.onend = function () { ttsSpeaking = false; hideTTSBanner(); };
         utterance.onerror = function () { ttsSpeaking = false; hideTTSBanner(); };
         ttsSpeaking = true;
         showTTSBanner(text);
         window.speechSynthesis.speak(utterance);
+    }
+
+    function speakWithBrowser(text) {
+        if (!window.speechSynthesis) return;
+        _ensureVoices(function (voices) {
+            _doSpeak(text, voices);
+        });
     }
 
     function speakText(text) {
@@ -433,12 +496,6 @@
     }
 
     function createPanel() {
-        /* Inject CSS */
-        var cssLink = document.createElement('link');
-        cssLink.rel = 'stylesheet';
-        cssLink.href = '/CSS/accessibility.css';
-        document.head.appendChild(cssLink);
-
         /* TTS banner */
         var banner = document.createElement('div');
         banner.id = 'a11y-tts-banner';
