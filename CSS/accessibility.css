@@ -1,20 +1,28 @@
 @font-face {
     font-family: 'OpenDyslexic';
-    src: url('/Fonts/OpenDyslexic-Regular.otf') format('opentype');
+    src: url('/Fonts/OpenDyslexic-Regular.woff2') format('woff2'),
+         url('/Fonts/OpenDyslexic-Regular.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
+    font-display: swap;
 }
 @font-face {
     font-family: 'OpenDyslexic';
-    src: url('/Fonts/OpenDyslexic-Bold.otf') format('opentype');
+    src: url('/Fonts/OpenDyslexic-Bold.woff2') format('woff2'),
+         url('/Fonts/OpenDyslexic-Bold.otf') format('opentype');
     font-weight: bold;
     font-style: normal;
+    font-display: swap;
 }
 
-/* Font and line scale CSS variables */
+/* Line spacing — applied on body so it inherits everywhere */
+body {
+    line-height: calc(1.5 * var(--a11y-line-scale, 1));
+}
+
+/* Font size — applied via JS zoom on #content; body rule kept for sidebar inheritance */
 body {
     font-size: calc(1rem * var(--a11y-font-scale, 1));
-    line-height: calc(1.5 * var(--a11y-line-scale, 1));
 }
 
 /* High contrast */

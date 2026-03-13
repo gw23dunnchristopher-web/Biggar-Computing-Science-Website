@@ -15,15 +15,16 @@
             style.textContent = [
                 "@font-face {",
                 "  font-family: 'OpenDyslexic';",
-                "  src: url('/Fonts/OpenDyslexic-Regular.otf') format('opentype');",
-                "  font-weight: normal; font-style: normal;",
+                "  src: url('/Fonts/OpenDyslexic-Regular.woff2') format('woff2'),",
+                "       url('/Fonts/OpenDyslexic-Regular.otf') format('opentype');",
+                "  font-weight: normal; font-style: normal; font-display: swap;",
                 "}",
                 "@font-face {",
                 "  font-family: 'OpenDyslexic';",
-                "  src: url('/Fonts/OpenDyslexic-Bold.otf') format('opentype');",
-                "  font-weight: bold; font-style: normal;",
+                "  src: url('/Fonts/OpenDyslexic-Bold.woff2') format('woff2'),",
+                "       url('/Fonts/OpenDyslexic-Bold.otf') format('opentype');",
+                "  font-weight: bold; font-style: normal; font-display: swap;",
                 "}",
-                /* Also inline the critical rule so it fires before accessibility.css loads */
                 "html.dyslexia-font, html.dyslexia-font * {",
                 "  font-family: 'OpenDyslexic', sans-serif !important;",
                 "}"
@@ -88,7 +89,17 @@
     }
 
     function applyFontSize() {
-        document.documentElement.style.setProperty('--a11y-font-scale', settings.fontSize / 100);
+        var scale = settings.fontSize / 100;
+        document.documentElement.style.setProperty('--a11y-font-scale', scale);
+        /* Apply zoom to #content so hardcoded px sizes in styles.css also scale */
+        var contentEl = document.getElementById('content');
+        if (contentEl) {
+            if (scale === 1) {
+                contentEl.style.removeProperty('zoom');
+            } else {
+                contentEl.style.zoom = scale;
+            }
+        }
     }
 
     function applyLineSpacing() {
