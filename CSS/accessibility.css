@@ -25,39 +25,38 @@ body {
     font-size: calc(1rem * var(--a11y-font-scale, 1));
 }
 
-/* High contrast */
-html.high-contrast {
-    --hc-bg: #ffffff;
-    --hc-fg: #000000;
-    --hc-primary: hsl(240, 100%, 35%);
-    --hc-border: #000000;
-}
-html.high-contrast body,
-html.high-contrast #mainContent,
-html.high-contrast #pageContainer,
+/* High contrast — scoped to #content only; header, footer and sidebar unchanged */
 html.high-contrast #content,
-html.high-contrast .contentContainer,
-html.high-contrast header,
-html.high-contrast footer {
+html.high-contrast .contentContainer {
     background: #ffffff !important;
     color: #000000 !important;
 }
-html.high-contrast a { color: hsl(240, 100%, 35%) !important; }
-html.high-contrast h1, html.high-contrast h2, html.high-contrast h3,
-html.high-contrast h4, html.high-contrast h5, html.high-contrast h6 {
+html.high-contrast #content h1,
+html.high-contrast #content h2,
+html.high-contrast #content h3,
+html.high-contrast #content h4,
+html.high-contrast #content h5,
+html.high-contrast #content h6 {
     color: #000000 !important;
 }
-html.high-contrast #sidebar, html.high-contrast .sidebar-menu {
-    background: #f0f0f0 !important;
-    border-right: 2px solid #000000 !important;
+html.high-contrast #content a { color: hsl(240, 100%, 35%) !important; }
+html.high-contrast #content p,
+html.high-contrast #content li,
+html.high-contrast #content span,
+html.high-contrast #content label {
+    color: #000000 !important;
 }
-html.high-contrast .sidebar-menu a { color: #000000 !important; }
-html.high-contrast .sidebar-menu a:hover { background: #000000 !important; color: #ffffff !important; }
-html.high-contrast table, html.high-contrast th, html.high-contrast td {
+html.high-contrast #content table,
+html.high-contrast #content th,
+html.high-contrast #content td {
     border: 2px solid #000000 !important;
 }
-html.high-contrast th { background: #000000 !important; color: #ffffff !important; }
-html.high-contrast code, html.high-contrast pre {
+html.high-contrast #content th {
+    background: #000000 !important;
+    color: #ffffff !important;
+}
+html.high-contrast #content code,
+html.high-contrast #content pre {
     background: #f0f0f0 !important;
     border: 1px solid #000000 !important;
     color: #000000 !important;
