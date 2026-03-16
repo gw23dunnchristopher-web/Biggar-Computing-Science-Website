@@ -68,19 +68,20 @@ html.high-contrast .page-nav-btn {
     border: 2px solid #000000 !important;
 }
 
-/* Custom text colour */
-html[data-custom-text] p,
-html[data-custom-text] h1,
-html[data-custom-text] h2,
-html[data-custom-text] h3,
-html[data-custom-text] h4,
-html[data-custom-text] h5,
-html[data-custom-text] h6,
-html[data-custom-text] span,
-html[data-custom-text] label,
-html[data-custom-text] li,
-html[data-custom-text] td,
-html[data-custom-text] th {
+/* Custom text colour — scoped to #content only so sidebar, header,
+   footer and accessibility panel keep their own colours */
+html[data-custom-text] #content p,
+html[data-custom-text] #content h1,
+html[data-custom-text] #content h2,
+html[data-custom-text] #content h3,
+html[data-custom-text] #content h4,
+html[data-custom-text] #content h5,
+html[data-custom-text] #content h6,
+html[data-custom-text] #content span,
+html[data-custom-text] #content label,
+html[data-custom-text] #content li,
+html[data-custom-text] #content td,
+html[data-custom-text] #content th {
     color: var(--a11y-text-colour) !important;
 }
 
