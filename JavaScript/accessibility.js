@@ -106,9 +106,39 @@
         document.documentElement.style.setProperty('--a11y-line-scale', settings.lineSpacing / 100);
     }
 
+    var openDyslexicLoaded = false;
+
+    function loadOpenDyslexicFonts(callback) {
+        if (openDyslexicLoaded) { if (callback) callback(); return; }
+        if (!window.FontFace) { if (callback) callback(); return; }
+        try {
+            var f1 = new FontFace('OpenDyslexic',
+                "url('/Fonts/OpenDyslexic-Regular.woff2') format('woff2')," +
+                "url('/Fonts/OpenDyslexic-Regular.otf') format('opentype')",
+                { weight: 'normal', style: 'normal' });
+            var f2 = new FontFace('OpenDyslexic',
+                "url('/Fonts/OpenDyslexic-Bold.woff2') format('woff2')," +
+                "url('/Fonts/OpenDyslexic-Bold.otf') format('opentype')",
+                { weight: 'bold', style: 'normal' });
+            Promise.all([f1.load(), f2.load()]).then(function (fonts) {
+                fonts.forEach(function (f) { document.fonts.add(f); });
+                openDyslexicLoaded = true;
+                if (callback) callback();
+            }).catch(function (err) {
+                console.warn('OpenDyslexic load error:', err);
+                if (callback) callback();
+            });
+        } catch (e) {
+            console.warn('FontFace API error:', e);
+            if (callback) callback();
+        }
+    }
+
     function applyDyslexiaFont() {
         if (settings.dyslexiaFont) {
-            document.documentElement.classList.add('dyslexia-font');
+            loadOpenDyslexicFonts(function () {
+                document.documentElement.classList.add('dyslexia-font');
+            });
         } else {
             document.documentElement.classList.remove('dyslexia-font');
         }
@@ -467,6 +497,27 @@
         document.addEventListener('mouseenter', function () {
             if (settings.readingGuide) guide.style.display = 'block';
         });
+
+        /* Touch support for mobile */
+        document.addEventListener('touchmove', function (e) {
+            if (!settings.readingGuide) return;
+            var touch = e.touches[0];
+            if (touch) guide.style.top = (touch.clientY - 20) + 'px';
+        }, { passive: true });
+
+        document.addEventListener('touchstart', function (e) {
+            if (!settings.readingGuide) return;
+            var touch = e.touches[0];
+            if (touch) {
+                guide.style.top = (touch.clientY - 20) + 'px';
+                guide.style.display = 'block';
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchend', function () {
+            if (!settings.readingGuide) return;
+            guide.style.display = 'none';
+        }, { passive: true });
 
         applyReadingGuide();
     }

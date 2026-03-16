@@ -401,3 +401,36 @@ html.reading-guide-active #a11y-reading-guide { display: block; }
     color: #555;
     flex-shrink: 0;
 }
+
+/* Mobile: panel takes full width on small screens */
+@media (max-width: 360px) {
+    #a11y-panel {
+        width: 100%;
+        right: -100%;
+    }
+    #a11y-panel.open { right: 0; }
+}
+
+/* Mobile: larger touch targets on toggles and sliders */
+@media (max-width: 768px) {
+    #a11y-trigger {
+        width: 56px;
+        height: 56px;
+        bottom: 70px;
+    }
+    .a11y-toggle {
+        width: 52px;
+        height: 28px;
+    }
+    .a11y-toggle-slider { border-radius: 14px; }
+    .a11y-toggle-slider::before {
+        width: 22px;
+        height: 22px;
+    }
+    .a11y-toggle input:checked + .a11y-toggle-slider::before {
+        transform: translateX(24px);
+    }
+    #a11y-panel-body input[type="range"] {
+        height: 28px;
+    }
+}
