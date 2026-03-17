@@ -1,0 +1,248 @@
+                              <tr>
+                                    <td class="tg-fi3a" colspan="3">
+                                        2. Information Systems Design and
+                                        Development (ISDD)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-y2fr" colspan="3">
+                                        Database Skills (MS Access)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-0vf3">Design View</td>
+                                    <td class="tg-cly1">
+                                        I can create a table and set Field Names
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-0vf3">Data Types</td>
+                                    <td class="tg-cly1">
+                                        I can assign the correct types (Short
+                                        Text, Number, Dat/Time, Yes/No)
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-0vf3">Primary Key</td>
+                                    <td class="tg-cly1">
+                                        I can identify and set the unit field
+                                        (the 'Gold Key).
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-0vf3">Amending Data</td>
+                                    <td class="tg-cly1">
+                                        I can Add a new record, Edit an old one,
+                                        and Delete a record.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-0vf3" rowspan="3">Queries</td>
+                                    <td class="tg-cly1">
+                                        I can use the Query Design tool to:
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-cly1">
+                                        Search: Use the criteria info to find
+                                        records containing a specific value.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-cly1">
+                                        Sort: Order records by one field in
+                                        ascending or descending order.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-y2fr" colspan="3">
+                                        Web Development Skills
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-grvk">Analysis</td>
+                                    <td class="tg-cly1">
+                                        I can identify the Target Audience and
+                                        the Purpose of the site.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-grvk" rowspan="2">Design</td>
+                                    <td class="tg-cly1">
+                                        I can create a Site Map (Structure
+                                        Chart) showing how pages link together.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-cly1">
+                                        I can draw Wireframes for each page
+                                        showing the layout of text
+                                        and&nbsp;&nbsp;&nbsp;images.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-grvk" rowspan="4">
+                                        Implementation
+                                    </td>
+                                    <td class="tg-cly1">
+                                        I can use the following tags:
+                                        &lt;html&gt;, &lt;head&gt;,
+                                        &lt;title&gt; and &lt;body&gt;
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-cly1">
+                                        I can add content using the following
+                                        tags &lt;h1&gt;, &lt;p&gt; and
+                                        &lt;img&gt;
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-cly1">
+                                        I can add Internal Links (to my pages)
+                                        and External Links (to other websites)
+                                        using an anchor tag - &lt;a&gt;
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-cly1">
+                                        I can use CSS to change background
+                                        colours, text colours and font styles.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-grvk" rowspan="2">
+                                        Media and Testing
+                                    </td>
+                                    <td class="tg-cly1">
+                                        I can explain why I used JPG/PNG
+                                        (Compression) to keep file sizes small.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-cly1">
+                                        I have tested that every link works and
+                                        the layout matches my wireframes.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-y2fr" colspan="3">
+                                        Computer Systems
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-cly1" colspan="2">
+                                        I can identify the CPU, RAM,
+                                        Input/Output devices and Storage
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-cly1" colspan="2">
+                                        I am aware of security threats online,
+                                        and know how to defend against them.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-nrix" colspan="3">
+                                        &nbsp;&nbsp;
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-fi3a" colspan="3">
+                                        3. Added Value Unit (AVU)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-0vf3">Analysis</td>
+                                    <td class="tg-cly1">
+                                        I have identified the functional
+                                        requirements of my program/information
+                                        system (What it must do).
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-0vf3">Design</td>
+                                    <td class="tg-cly1">
+                                        I have designed my system using a
+                                        recognised design technique (pseudocode,
+                                        flowcharts, wireframes, etc).
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-0vf3" rowspan="2">
+                                        Implementation
+                                    </td>
+                                    <td class="tg-cly1">
+                                        I have created my program using a high
+                                        level programming language (Python).
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-cly1">
+                                        I have created my information system in
+                                        a suitable program (MS Access,
+                                        Notepad++, Pheonix Code).
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-0vf3" rowspan="2">Testing</td>
+                                    <td class="tg-cly1">
+                                        I have tested my system using the data
+                                        provided, and taken screenshots of the
+                                        tests.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-cly1">
+                                        If there were any errors I fixed them.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-0vf3" rowspan="3">
+                                        Reporting
+                                    </td>
+                                    <td class="tg-cly1">
+                                        I have checked my project against the
+                                        original analysis and can explain how it
+                                        meets the requirements.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-cly1">
+                                        I can describe how I would improve the
+                                        information system I've created.
+                                    </td>
+                                    <td class="tg-cly1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="tg-cly1">
+                                        I can describe any problems or
+                                        difficulties I had in while doing this
+                                        project and how I resolved them.
+                                    </td>
+                                    <td class="tg-cly1"></td>
