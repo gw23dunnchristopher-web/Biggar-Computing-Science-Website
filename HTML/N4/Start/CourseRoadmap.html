@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>N5 Computing Science - Home</title>
+        <title>N4 Computing Science - Course Roadmap</title>
         <script src="/JavaScript/script.js"></script>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
@@ -15,6 +15,172 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <style>
+            /* ── Checklist accordion ── */
+            .n4-checklist {
+                width: 100%;
+                max-width: 860px;
+                margin: 0 auto 24px;
+                font-family: Arial, sans-serif;
+            }
+
+            .checklist-section {
+                border: 1px solid #b0c8e0;
+                border-radius: 6px;
+                margin-bottom: 12px;
+                overflow: hidden;
+            }
+
+            /* ── Section header (clickable) ── */
+            .section-header {
+                background-color: #4d93d9;
+                color: #fff;
+                padding: 12px 16px;
+                cursor: pointer;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 16px;
+                user-select: none;
+                transition: background-color 0.2s;
+            }
+            .section-header:hover { background-color: #3a7fc1; }
+
+            .section-title {
+                font-weight: bold;
+                font-size: 15px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex-shrink: 0;
+            }
+
+            .toggle-icon {
+                display: inline-block;
+                transition: transform 0.25s;
+                font-style: normal;
+            }
+            .checklist-section.collapsed .toggle-icon {
+                transform: rotate(-90deg);
+            }
+
+            /* ── Progress bar ── */
+            .section-progress {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-width: 160px;
+                flex: 1;
+                max-width: 280px;
+            }
+            .progress-bar {
+                flex: 1;
+                background: rgba(255, 255, 255, 0.35);
+                border-radius: 5px;
+                height: 11px;
+                overflow: hidden;
+            }
+            .progress-fill {
+                height: 11px;
+                background: #7fff7f;
+                border-radius: 5px;
+                width: 0%;
+                transition: width 0.35s ease;
+            }
+            .progress-text {
+                font-size: 12px;
+                white-space: nowrap;
+                min-width: 38px;
+                text-align: right;
+            }
+
+            /* ── Section body ── */
+            .section-body { background: #fff; }
+            .section-body.hidden { display: none; }
+
+            /* ── Sub-section header ── */
+            .sub-section-header {
+                background-color: #a6c9ec;
+                color: #153d64;
+                font-style: italic;
+                font-weight: bold;
+                padding: 7px 16px;
+                font-size: 14px;
+                border-bottom: 1px solid #b0c8e0;
+            }
+
+            /* ── Individual rows ── */
+            .checklist-row {
+                display: flex;
+                align-items: stretch;
+                border-bottom: 1px solid #e4edf6;
+                transition: background-color 0.2s;
+            }
+            .checklist-row:last-child { border-bottom: none; }
+
+            .row-topic {
+                width: 130px;
+                min-width: 130px;
+                padding: 8px 10px;
+                background-color: #dae9f8;
+                font-style: italic;
+                font-size: 13px;
+                color: #153d64;
+                display: flex;
+                align-items: center;
+                border-right: 1px solid #b0c8e0;
+            }
+
+            .row-topic-empty {
+                width: 130px;
+                min-width: 130px;
+                background-color: #dae9f8;
+                border-right: 1px solid #b0c8e0;
+            }
+
+            .row-desc {
+                flex: 1;
+                padding: 8px 14px;
+                font-size: 14px;
+                line-height: 1.5;
+                display: flex;
+                align-items: center;
+                transition: color 0.2s;
+            }
+
+            .row-check {
+                width: 52px;
+                min-width: 52px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-left: 1px solid #e4edf6;
+            }
+
+            .checklist-checkbox {
+                width: 22px;
+                height: 22px;
+                cursor: pointer;
+                accent-color: #4d93d9;
+            }
+
+            /* ── Checked state ── */
+            .checklist-row.is-checked { background-color: #f0f9f0; }
+            .checklist-row.is-checked .row-desc {
+                color: #999;
+                text-decoration: line-through;
+            }
+            .checklist-row.is-checked .row-topic { opacity: 0.6; }
+
+            /* ── Mobile ── */
+            @media (max-width: 600px) {
+                .section-header { flex-direction: column; align-items: flex-start; }
+                .section-progress { max-width: 100%; width: 100%; }
+                .row-topic { width: 90px; min-width: 90px; font-size: 12px; }
+                .row-topic-empty { width: 90px; min-width: 90px; }
+                .row-desc { font-size: 13px; }
+            }
+        </style>
     </head>
 
     <body>
@@ -53,7 +219,7 @@
                                 Python), and test it to make sure it works.
                             </li>
                             <li>
-                                <b>How you'll pass</b>: You’ll complete a series
+                                <b>How you'll pass</b>: You'll complete a series
                                 of small coding challenges and a final practical
                                 task where you create a program from scratch.
                             </li>
@@ -63,7 +229,7 @@
                         </h3>
                         <p>
                             This unit looks at how the digital world is built
-                            and managed. It’s split into two main practical
+                            and managed. It's split into two main practical
                             areas: Websites and Databases.
                         </p>
                         <ul>
@@ -84,11 +250,11 @@
                         <p>
                             This is your "Grand Finale." It is a large,
                             independent project that pulls together everything
-                            you’ve learned in the first two units.
+                            you've learned in the first two units.
                         </p>
                         <ul>
                             <li>
-                                <b>What you'll do</b>:You will be given a
+                                <b>What you'll do</b>: You will be given a
                                 "Problem Brief" (like creating a digital system
                                 for a sports club or a shop). You will design,
                                 build, and test the entire solution yourself.
@@ -104,426 +270,257 @@
                             Because N4 is "Pass/Fail", your goal isn't to get
                             100% on a test - it's to provide evidence that you
                             can do the work. Save every version of your code and
-                            every screenshop of your designs!
+                            every screenshot of your designs!
                         </p>
+
                         <h2>N4 Checklist</h2>
                         <p>
-                            This is a checklist for everything that you will
-                            need to know for N4, by clicking on the link below
-                            you will be able to download a copy of this file for
-                            yourself, when you complete each section on the
-                            website, check off that part of the table.
+                            Click each section to expand it. Tick off each item
+                            as you complete it — your progress is saved
+                            automatically in your browser.
                         </p>
-                        <style type="text/css">
-                            .tg {
-                                border-collapse: collapse;
-                                border-spacing: 0;
-                            }
-                            .tg td {
-                                border-color: black;
-                                border-style: solid;
-                                border-width: 1px;
-                                font-family: Arial, sans-serif;
-                                font-size: 14px;
-                                overflow: hidden;
-                                padding: 10px 5px;
-                                word-break: normal;
-                            }
-                            .tg th {
-                                border-color: black;
-                                border-style: solid;
-                                border-width: 1px;
-                                font-family: Arial, sans-serif;
-                                font-size: 14px;
-                                font-weight: normal;
-                                overflow: hidden;
-                                padding: 10px 5px;
-                                word-break: normal;
-                            }
-                            .tg .tg-cly1 {
-                                text-align: left;
-                                vertical-align: middle;
-                            }
-                            .tg .tg-y2fr {
-                                background-color: #a6c9ec;
-                                font-style: italic;
-                                font-weight: bold;
-                                text-align: left;
-                                vertical-align: middle;
-                            }
-                            .tg .tg-0vf3 {
-                                background-color: #dae9f8;
-                                text-align: left;
-                                vertical-align: middle;
-                            }
-                            .tg .tg-fi3a {
-                                background-color: #4d93d9;
-                                color: #fff;
-                                font-weight: bold;
-                                text-align: left;
-                                vertical-align: middle;
-                            }
-                            .tg .tg-grvk {
-                                background-color: #dae9f8;
-                                font-style: italic;
-                                text-align: left;
-                                vertical-align: middle;
-                            }
-                            .tg .tg-vhbs {
-                                background-color: #153d64;
-                                color: #fff;
-                                font-weight: bold;
-                                text-align: left;
-                                vertical-align: bottom;
-                            }
-                            .tg .tg-nrix {
-                                text-align: center;
-                                vertical-align: middle;
-                            }
-                        </style>
-                        <table
-                            class="tg"
-                            style="undefined;table-layout: fixed; width: 838px"
-                        >
-                            <colgroup>
-                                <col style="width: 125px" />
-                                <col style="width: 667px" />
-                                <col style="width: 46px" />
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th class="tg-vhbs" colspan="3">
-                                        N4 Checklist
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="tg-fi3a" colspan="3">
+
+                        <div class="n4-checklist">
+
+                            <!-- ══ Section 1: SDD ══ -->
+                            <div class="checklist-section" data-section="sdd">
+                                <div class="section-header" onclick="toggleSection('sdd')">
+                                    <div class="section-title">
+                                        <span class="toggle-icon">▼</span>
                                         1. Software Design and Development (SDD)
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-grvk">Design</td>
-                                    <td class="tg-cly1">
-                                        I can use a simple design (like a
-                                        flowchart or structure chart) to plan a
-                                        program.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-grvk">Data Types</td>
-                                    <td class="tg-cly1">
-                                        I can use variables to store Text
-                                        (String) and Numbers (Integer).
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-grvk">Input/Output</td>
-                                    <td class="tg-cly1">
-                                        I can get data from a user and display a
-                                        message back.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-grvk">Arithmetic</td>
-                                    <td class="tg-cly1">
-                                        I can make the computer do math (+, -,
-                                        *, /).
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-grvk">Selection</td>
-                                    <td class="tg-cly1">
-                                        I can use if statements to make the
-                                        program make decisions.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-grvk">Repitition</td>
-                                    <td class="tg-cly1">
-                                        I can use a fixed loop to repeat code a
-                                        set number of times.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-grvk">Testing</td>
-                                    <td class="tg-cly1">
-                                        I can show that my program works by
-                                        testing it with "normal" data.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-grvk">Explanation</td>
-                                    <td class="tg-cly1">
-                                        I can describe how my code works using
-                                        terms like variable and loop.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-nrix" colspan="3">
-                                        &nbsp;&nbsp;
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-fi3a" colspan="3">
-                                        2. Information Systems Design and
-                                        Development (ISDD)
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-y2fr" colspan="3">
-                                        Database Skills (MS Access)
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-0vf3">Design View</td>
-                                    <td class="tg-cly1">
-                                        I can create a table and set Field Names
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-0vf3">Data Types</td>
-                                    <td class="tg-cly1">
-                                        I can assign the correct types (Short
-                                        Text, Number, Dat/Time, Yes/No)
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-0vf3">Primary Key</td>
-                                    <td class="tg-cly1">
-                                        I can identify and set the unit field
-                                        (the 'Gold Key).
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-0vf3">Amending Data</td>
-                                    <td class="tg-cly1">
-                                        I can Add a new record, Edit an old one,
-                                        and Delete a record.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-0vf3" rowspan="3">Queries</td>
-                                    <td class="tg-cly1">
-                                        I can use the Query Design tool to:
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-cly1">
-                                        Search: Use the criteria info to find
-                                        records containing a specific value.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-cly1">
-                                        Sort: Order records by one field in
-                                        ascending or descending order.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-y2fr" colspan="3">
-                                        Web Development Skills
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-grvk">Analysis</td>
-                                    <td class="tg-cly1">
-                                        I can identify the Target Audience and
-                                        the Purpose of the site.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-grvk" rowspan="2">Design</td>
-                                    <td class="tg-cly1">
-                                        I can create a Site Map (Structure
-                                        Chart) showing how pages link together.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-cly1">
-                                        I can draw Wireframes for each page
-                                        showing the layout of text
-                                        and&nbsp;&nbsp;&nbsp;images.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-grvk" rowspan="4">
-                                        Implementation
-                                    </td>
-                                    <td class="tg-cly1">
-                                        I can use the following tags:
-                                        &lt;html&gt;, &lt;head&gt;,
-                                        &lt;title&gt; and &lt;body&gt;
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-cly1">
-                                        I can add content using the following
-                                        tags &lt;h1&gt;, &lt;p&gt; and
-                                        &lt;img&gt;
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-cly1">
-                                        I can add Internal Links (to my pages)
-                                        and External Links (to other websites)
-                                        using an anchor tag - &lt;a&gt;
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-cly1">
-                                        I can use CSS to change background
-                                        colours, text colours and font styles.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-grvk" rowspan="2">
-                                        Media and Testing
-                                    </td>
-                                    <td class="tg-cly1">
-                                        I can explain why I used JPG/PNG
-                                        (Compression) to keep file sizes small.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-cly1">
-                                        I have tested that every link works and
-                                        the layout matches my wireframes.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-y2fr" colspan="3">
-                                        Computer Systems
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-cly1" colspan="2">
-                                        I can identify the CPU, RAM,
-                                        Input/Output devices and Storage
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-cly1" colspan="2">
-                                        I am aware of security threats online,
-                                        and know how to defend against them.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-nrix" colspan="3">
-                                        &nbsp;&nbsp;
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-fi3a" colspan="3">
+                                    </div>
+                                    <div class="section-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="sdd-fill"></div>
+                                        </div>
+                                        <span class="progress-text" id="sdd-text">0 / 8</span>
+                                    </div>
+                                </div>
+                                <div class="section-body" id="sdd-body">
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Design</div>
+                                        <div class="row-desc">I can use a simple design (like a flowchart or structure chart) to plan a program.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-design"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Data Types</div>
+                                        <div class="row-desc">I can use variables to store Text (String) and Numbers (Integer).</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-datatypes"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Input / Output</div>
+                                        <div class="row-desc">I can get data from a user and display a message back.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-io"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Arithmetic</div>
+                                        <div class="row-desc">I can make the computer do math (+, -, *, /).</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-arithmetic"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Selection</div>
+                                        <div class="row-desc">I can use if statements to make the program make decisions.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-selection"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Repetition</div>
+                                        <div class="row-desc">I can use a fixed loop to repeat code a set number of times.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-repetition"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Testing</div>
+                                        <div class="row-desc">I can show that my program works by testing it with "normal" data.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-testing"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Explanation</div>
+                                        <div class="row-desc">I can describe how my code works using terms like variable and loop.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-explanation"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ══ Section 2: ISDD ══ -->
+                            <div class="checklist-section" data-section="isdd">
+                                <div class="section-header" onclick="toggleSection('isdd')">
+                                    <div class="section-title">
+                                        <span class="toggle-icon">▼</span>
+                                        2. Information Systems Design and Development (ISDD)
+                                    </div>
+                                    <div class="section-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="isdd-fill"></div>
+                                        </div>
+                                        <span class="progress-text" id="isdd-text">0 / 18</span>
+                                    </div>
+                                </div>
+                                <div class="section-body" id="isdd-body">
+
+                                    <div class="sub-section-header">Database Skills (MS Access)</div>
+
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Design View</div>
+                                        <div class="row-desc">I can create a table and set Field Names.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-designview"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Data Types</div>
+                                        <div class="row-desc">I can assign the correct types (Short Text, Number, Date/Time, Yes/No).</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-datatypes"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Primary Key</div>
+                                        <div class="row-desc">I can identify and set the unique field (the 'Gold Key').</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-primarykey"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Amending Data</div>
+                                        <div class="row-desc">I can Add a new record, Edit an old one, and Delete a record.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-amending"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Queries</div>
+                                        <div class="row-desc">I can use the Query Design tool.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-queries1"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic-empty"></div>
+                                        <div class="row-desc">Search: Use criteria to find records containing a specific value.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-queries2"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic-empty"></div>
+                                        <div class="row-desc">Sort: Order records by one field in ascending or descending order.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-queries3"></div>
+                                    </div>
+
+                                    <div class="sub-section-header">Web Development Skills</div>
+
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Analysis</div>
+                                        <div class="row-desc">I can identify the Target Audience and the Purpose of the site.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-analysis"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Design</div>
+                                        <div class="row-desc">I can create a Site Map (Structure Chart) showing how pages link together.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-design1"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic-empty"></div>
+                                        <div class="row-desc">I can draw Wireframes for each page showing the layout of text and images.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-design2"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Implementation</div>
+                                        <div class="row-desc">I can use the following tags: &lt;html&gt;, &lt;head&gt;, &lt;title&gt; and &lt;body&gt;.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-impl1"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic-empty"></div>
+                                        <div class="row-desc">I can add content using the following tags: &lt;h1&gt;, &lt;p&gt; and &lt;img&gt;.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-impl2"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic-empty"></div>
+                                        <div class="row-desc">I can add Internal Links (to my pages) and External Links (to other websites) using an anchor tag — &lt;a&gt;.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-impl3"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic-empty"></div>
+                                        <div class="row-desc">I can use CSS to change background colours, text colours and font styles.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-impl4"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Media &amp; Testing</div>
+                                        <div class="row-desc">I can explain why I used JPG/PNG (Compression) to keep file sizes small.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-media1"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic-empty"></div>
+                                        <div class="row-desc">I have tested that every link works and the layout matches my wireframes.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-media2"></div>
+                                    </div>
+
+                                    <div class="sub-section-header">Computer Systems</div>
+
+                                    <div class="checklist-row">
+                                        <div class="row-topic-empty"></div>
+                                        <div class="row-desc">I can identify the CPU, RAM, Input/Output devices and Storage.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-cs1"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic-empty"></div>
+                                        <div class="row-desc">I am aware of security threats online, and know how to defend against them.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-cs2"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ══ Section 3: AVU ══ -->
+                            <div class="checklist-section" data-section="avu">
+                                <div class="section-header" onclick="toggleSection('avu')">
+                                    <div class="section-title">
+                                        <span class="toggle-icon">▼</span>
                                         3. Added Value Unit (AVU)
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-0vf3">Analysis</td>
-                                    <td class="tg-cly1">
-                                        I have identified the functional
-                                        requirements of my program/information
-                                        system (What it must do).
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-0vf3">Design</td>
-                                    <td class="tg-cly1">
-                                        I have designed my system using a
-                                        recognised design technique (pseudocode,
-                                        flowcharts, wireframes, etc).
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-0vf3" rowspan="2">
-                                        Implementation
-                                    </td>
-                                    <td class="tg-cly1">
-                                        I have created my program using a high
-                                        level programming language (Python).
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-cly1">
-                                        I have created my information system in
-                                        a suitable program (MS Access,
-                                        Notepad++, Pheonix Code).
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-0vf3" rowspan="2">Testing</td>
-                                    <td class="tg-cly1">
-                                        I have tested my system using the data
-                                        provided, and taken screenshots of the
-                                        tests.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-cly1">
-                                        If there were any errors I fixed them.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-0vf3" rowspan="3">
-                                        Reporting
-                                    </td>
-                                    <td class="tg-cly1">
-                                        I have checked my project against the
-                                        original analysis and can explain how it
-                                        meets the requirements.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-cly1">
-                                        I can describe how I would improve the
-                                        information system I've created.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                                <tr>
-                                    <td class="tg-cly1">
-                                        I can describe any problems or
-                                        difficulties I had in while doing this
-                                        project and how I resolved them.
-                                    </td>
-                                    <td class="tg-cly1"></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                    </div>
+                                    <div class="section-progress">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="avu-fill"></div>
+                                        </div>
+                                        <span class="progress-text" id="avu-text">0 / 9</span>
+                                    </div>
+                                </div>
+                                <div class="section-body" id="avu-body">
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Analysis</div>
+                                        <div class="row-desc">I have identified the functional requirements of my program/information system (what it must do).</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-analysis"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Design</div>
+                                        <div class="row-desc">I have designed my system using a recognised design technique (pseudocode, flowcharts, wireframes, etc).</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-design"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Implementation</div>
+                                        <div class="row-desc">I have created my program using a high level programming language (Python).</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-impl1"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic-empty"></div>
+                                        <div class="row-desc">I have created my information system in a suitable program (MS Access, Notepad++, Phoenix Code).</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-impl2"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Testing</div>
+                                        <div class="row-desc">I have tested my system using the data provided, and taken screenshots of the tests.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-testing1"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic-empty"></div>
+                                        <div class="row-desc">If there were any errors, I fixed them.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-testing2"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic">Reporting</div>
+                                        <div class="row-desc">I have checked my project against the original analysis and can explain how it meets the requirements.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-report1"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic-empty"></div>
+                                        <div class="row-desc">I can describe how I would improve the information system I've created.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-report2"></div>
+                                    </div>
+                                    <div class="checklist-row">
+                                        <div class="row-topic-empty"></div>
+                                        <div class="row-desc">I can describe any problems or difficulties I had while doing this project and how I resolved them.</div>
+                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-report3"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div><!-- end .n4-checklist -->
                     </div>
                 </div>
             </div>
@@ -539,5 +536,83 @@
                 </div>
             </footer>
         </div>
+
+        <script>
+            (function () {
+                var STORAGE_KEY = 'n4-checklist';
+
+                function loadChecks() {
+                    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+                    catch (e) { return {}; }
+                }
+
+                function saveChecks(checks) {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(checks));
+                }
+
+                function updateProgress(sectionId) {
+                    var rows = document.querySelectorAll(
+                        '[data-section="' + sectionId + '"] .checklist-row'
+                    );
+                    var total = rows.length;
+                    var checked = 0;
+                    rows.forEach(function (row) {
+                        var cb = row.querySelector('.checklist-checkbox');
+                        if (cb && cb.checked) checked++;
+                    });
+                    var pct = total > 0 ? (checked / total * 100) : 0;
+                    document.getElementById(sectionId + '-fill').style.width = pct + '%';
+                    document.getElementById(sectionId + '-text').textContent =
+                        checked + ' / ' + total;
+                }
+
+                function handleCheck(e) {
+                    var cb = e.target;
+                    if (!cb.classList.contains('checklist-checkbox')) return;
+                    var sectionId = cb.dataset.section;
+                    var id = cb.dataset.id;
+                    var row = cb.closest('.checklist-row');
+
+                    var checks = loadChecks();
+                    checks[id] = cb.checked;
+                    saveChecks(checks);
+
+                    if (cb.checked) {
+                        row.classList.add('is-checked');
+                    } else {
+                        row.classList.remove('is-checked');
+                    }
+                    updateProgress(sectionId);
+                }
+
+                window.toggleSection = function (sectionId) {
+                    var section = document.querySelector(
+                        '.checklist-section[data-section="' + sectionId + '"]'
+                    );
+                    var body = document.getElementById(sectionId + '-body');
+                    var collapsed = section.classList.contains('collapsed');
+                    if (collapsed) {
+                        section.classList.remove('collapsed');
+                        body.classList.remove('hidden');
+                    } else {
+                        section.classList.add('collapsed');
+                        body.classList.add('hidden');
+                    }
+                };
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    var checks = loadChecks();
+                    document.querySelectorAll('.checklist-checkbox').forEach(function (cb) {
+                        if (checks[cb.dataset.id]) {
+                            cb.checked = true;
+                            cb.closest('.checklist-row').classList.add('is-checked');
+                        }
+                    });
+                    ['sdd', 'isdd', 'avu'].forEach(updateProgress);
+
+                    document.querySelector('.n4-checklist').addEventListener('change', handleCheck);
+                });
+            })();
+        </script>
     </body>
 </html>
