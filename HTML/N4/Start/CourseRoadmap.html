@@ -25,7 +25,7 @@
             }
 
             .checklist-section {
-                border: 1px solid #b0c8e0;
+                border: 1px solid black;
                 border-radius: 6px;
                 margin-bottom: 12px;
                 overflow: hidden;
@@ -33,7 +33,6 @@
 
             /* ── Section header (clickable) ── */
             .section-header {
-                background-color: #4d93d9;
                 color: #fff;
                 padding: 12px 16px;
                 cursor: pointer;
@@ -44,11 +43,17 @@
                 user-select: none;
                 transition: background-color 0.2s;
             }
-            .section-header:hover { background-color: #3a7fc1; }
-
+            
+            #sdd-header {background-color: #2D5AB3;}
+            #sdd-header:hover {background-color: #1E3E7D;}
+            #isdd-header {background-color: #1B855E;}
+            #isdd-header:hover {background-color: #125C41;}
+            #avu-header {background-color: #D97706;}
+            #avu-header:hover {background-color: #B45309;}
+            
             .section-title {
                 font-weight: bold;
-                font-size: 15px;
+                font-size: 18px;
                 display: flex;
                 align-items: center;
                 gap: 10px;
@@ -88,15 +93,19 @@
                 transition: width 0.35s ease;
             }
             .progress-text {
-                font-size: 12px;
+                font-size: 16px;
                 white-space: nowrap;
                 min-width: 38px;
                 text-align: right;
             }
 
             /* ── Section body ── */
-            .section-body { background: #fff; }
-            .section-body.hidden { display: none; }
+            .section-body {
+                background: #fff;
+            }
+            .section-body.hidden {
+                display: none;
+            }
 
             /* ── Sub-section header ── */
             .sub-section-header {
@@ -105,7 +114,7 @@
                 font-style: italic;
                 font-weight: bold;
                 padding: 7px 16px;
-                font-size: 14px;
+                font-size: 16px;
                 border-bottom: 1px solid #b0c8e0;
             }
 
@@ -116,7 +125,9 @@
                 border-bottom: 1px solid #e4edf6;
                 transition: background-color 0.2s;
             }
-            .checklist-row:last-child { border-bottom: none; }
+            .checklist-row:last-child {
+                border-bottom: none;
+            }
 
             .row-topic {
                 width: 130px;
@@ -124,7 +135,7 @@
                 padding: 8px 10px;
                 background-color: #dae9f8;
                 font-style: italic;
-                font-size: 13px;
+                font-size: 16px;
                 color: #153d64;
                 display: flex;
                 align-items: center;
@@ -165,20 +176,39 @@
             }
 
             /* ── Checked state ── */
-            .checklist-row.is-checked { background-color: #f0f9f0; }
+            .checklist-row.is-checked {
+                background-color: #f0f9f0;
+            }
             .checklist-row.is-checked .row-desc {
                 color: #999;
                 text-decoration: line-through;
             }
-            .checklist-row.is-checked .row-topic { opacity: 0.6; }
+            .checklist-row.is-checked .row-topic {
+                opacity: 0.6;
+            }
 
             /* ── Mobile ── */
             @media (max-width: 600px) {
-                .section-header { flex-direction: column; align-items: flex-start; }
-                .section-progress { max-width: 100%; width: 100%; }
-                .row-topic { width: 90px; min-width: 90px; font-size: 12px; }
-                .row-topic-empty { width: 90px; min-width: 90px; }
-                .row-desc { font-size: 13px; }
+                .section-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+                .section-progress {
+                    max-width: 100%;
+                    width: 100%;
+                }
+                .row-topic {
+                    width: 90px;
+                    min-width: 90px;
+                    font-size: 12px;
+                }
+                .row-topic-empty {
+                    width: 90px;
+                    min-width: 90px;
+                }
+                .row-desc {
+                    font-size: 13px;
+                }
             }
         </style>
     </head>
@@ -195,7 +225,7 @@
                 <div id="sidebar"></div>
                 <div id="content">
                     <div id="mainHeading"><h1>National 4</h1></div>
-                    <div class="contentHeading"><h1>Course Roadmap</h1></div>
+                    <div class="contentHeading"><h1>Course Roadmap and Checklist</h1></div>
                     <div class="contentContainer">
                         <h2>N4 Units</h2>
                         <p>
@@ -275,252 +305,684 @@
 
                         <h2>N4 Checklist</h2>
                         <p>
-                            Click each section to expand it. Tick off each item
-                            as you complete it — your progress is saved
-                            automatically in your browser.
+                            Below is a checklist of all of the skills that you
+                            will have to demonstrate to pass your National 4
+                            Computing Science qualification. You can use this to
+                            track your progress throughout the year. The
+                            checklist is divided into three sections, one for
+                            each of the units that you will complete. You have a
+                            choice either to use the interactive checklist
+                            below, or to click on the button below to download a
+                            spreadsheet version.
+                        </p>
+                        <div class="button button2" style="margin:0 auto 0;"><a href="/Files/Resources/N4/N4Checklist.xlsx" 
+                            download="N4 Checklist.xlsx">N4 Checklist Download</a></div>
+                        <p>
+                            If you choose to use the interactive checklist.
+                            Click each section to expand it, then tick off each
+                            item as you complete it — your progress is saved
+                            automatically in your browser. Keep in mind that the
+                            save will only persist if you are using the same
+                            device and browser.
                         </p>
 
                         <div class="n4-checklist">
-
                             <!-- ══ Section 1: SDD ══ -->
-                            <div class="checklist-section" data-section="sdd">
-                                <div class="section-header" onclick="toggleSection('sdd')">
+                            <div class="checklist-section collapsed" data-section="sdd">
+                                <div
+                                    class="section-header" id="sdd-header"
+                                    onclick="toggleSection('sdd')"
+                                >
                                     <div class="section-title">
                                         <span class="toggle-icon">▼</span>
                                         1. Software Design and Development (SDD)
                                     </div>
                                     <div class="section-progress">
                                         <div class="progress-bar">
-                                            <div class="progress-fill" id="sdd-fill"></div>
+                                            <div
+                                                class="progress-fill"
+                                                id="sdd-fill"
+                                            ></div>
                                         </div>
-                                        <span class="progress-text" id="sdd-text">0 / 8</span>
+                                        <span
+                                            class="progress-text"
+                                            id="sdd-text"
+                                            >0 / 8</span
+                                        >
                                     </div>
                                 </div>
-                                <div class="section-body" id="sdd-body">
+                                <div class="section-body hidden" id="sdd-body">
                                     <div class="checklist-row">
                                         <div class="row-topic">Design</div>
-                                        <div class="row-desc">I can use a simple design (like a flowchart or structure chart) to plan a program.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-design"></div>
+                                        <div class="row-desc">
+                                            I can use a simple design (like a
+                                            flowchart or structure chart) to
+                                            plan a program.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="sdd"
+                                                data-id="n4-sdd-design"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic">Data Types</div>
-                                        <div class="row-desc">I can use variables to store Text (String) and Numbers (Integer).</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-datatypes"></div>
+                                        <div class="row-desc">
+                                            I can use variables to store Text
+                                            (String) and Numbers (Integer).
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="sdd"
+                                                data-id="n4-sdd-datatypes"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
-                                        <div class="row-topic">Input / Output</div>
-                                        <div class="row-desc">I can get data from a user and display a message back.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-io"></div>
+                                        <div class="row-topic">
+                                            Input / Output
+                                        </div>
+                                        <div class="row-desc">
+                                            I can get data from a user and
+                                            display a message back.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="sdd"
+                                                data-id="n4-sdd-io"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic">Arithmetic</div>
-                                        <div class="row-desc">I can make the computer do math (+, -, *, /).</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-arithmetic"></div>
+                                        <div class="row-desc">
+                                            I can make the computer do math (+,
+                                            -, *, /).
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="sdd"
+                                                data-id="n4-sdd-arithmetic"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic">Selection</div>
-                                        <div class="row-desc">I can use if statements to make the program make decisions.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-selection"></div>
+                                        <div class="row-desc">
+                                            I can use if statements to make the
+                                            program make decisions.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="sdd"
+                                                data-id="n4-sdd-selection"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic">Repetition</div>
-                                        <div class="row-desc">I can use a fixed loop to repeat code a set number of times.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-repetition"></div>
+                                        <div class="row-desc">
+                                            I can use a fixed loop to repeat
+                                            code a set number of times.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="sdd"
+                                                data-id="n4-sdd-repetition"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic">Testing</div>
-                                        <div class="row-desc">I can show that my program works by testing it with "normal" data.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-testing"></div>
+                                        <div class="row-desc">
+                                            I can show that my program works by
+                                            testing it with "normal" data.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="sdd"
+                                                data-id="n4-sdd-testing"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic">Explanation</div>
-                                        <div class="row-desc">I can describe how my code works using terms like variable and loop.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="sdd" data-id="n4-sdd-explanation"></div>
+                                        <div class="row-desc">
+                                            I can describe how my code works
+                                            using terms like variable and loop.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="sdd"
+                                                data-id="n4-sdd-explanation"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- ══ Section 2: ISDD ══ -->
-                            <div class="checklist-section" data-section="isdd">
-                                <div class="section-header" onclick="toggleSection('isdd')">
+                            <div class="checklist-section collapsed" data-section="isdd">
+                                <div
+                                    class="section-header" id="isdd-header"
+                                    onclick="toggleSection('isdd')"
+                                >
                                     <div class="section-title">
                                         <span class="toggle-icon">▼</span>
-                                        2. Information Systems Design and Development (ISDD)
+                                        2. Information Systems Design and
+                                        Development (ISDD)
                                     </div>
                                     <div class="section-progress">
                                         <div class="progress-bar">
-                                            <div class="progress-fill" id="isdd-fill"></div>
+                                            <div
+                                                class="progress-fill"
+                                                id="isdd-fill"
+                                            ></div>
                                         </div>
-                                        <span class="progress-text" id="isdd-text">0 / 18</span>
+                                        <span
+                                            class="progress-text"
+                                            id="isdd-text"
+                                            >0 / 18</span
+                                        >
                                     </div>
                                 </div>
-                                <div class="section-body" id="isdd-body">
-
-                                    <div class="sub-section-header">Database Skills (MS Access)</div>
+                                <div class="section-body hidden" id="isdd-body">
+                                    <div class="sub-section-header">
+                                        Database Skills (MS Access)
+                                    </div>
 
                                     <div class="checklist-row">
                                         <div class="row-topic">Design View</div>
-                                        <div class="row-desc">I can create a table and set Field Names.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-designview"></div>
+                                        <div class="row-desc">
+                                            I can create a table and set Field
+                                            Names.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-designview"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic">Data Types</div>
-                                        <div class="row-desc">I can assign the correct types (Short Text, Number, Date/Time, Yes/No).</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-datatypes"></div>
+                                        <div class="row-desc">
+                                            I can assign the correct types
+                                            (Short Text, Number, Date/Time,
+                                            Yes/No).
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-datatypes"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic">Primary Key</div>
-                                        <div class="row-desc">I can identify and set the unique field (the 'Gold Key').</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-primarykey"></div>
+                                        <div class="row-desc">
+                                            I can identify and set the unique
+                                            field (the 'Gold Key').
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-primarykey"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
-                                        <div class="row-topic">Amending Data</div>
-                                        <div class="row-desc">I can Add a new record, Edit an old one, and Delete a record.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-amending"></div>
+                                        <div class="row-topic">
+                                            Amending Data
+                                        </div>
+                                        <div class="row-desc">
+                                            I can Add a new record, Edit an old
+                                            one, and Delete a record.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-amending"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic">Queries</div>
-                                        <div class="row-desc">I can use the Query Design tool.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-queries1"></div>
+                                        <div class="row-desc">
+                                            I can use the Query Design tool.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-queries1"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic-empty"></div>
-                                        <div class="row-desc">Search: Use criteria to find records containing a specific value.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-queries2"></div>
+                                        <div class="row-desc">
+                                            Search: Use criteria to find records
+                                            containing a specific value.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-queries2"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic-empty"></div>
-                                        <div class="row-desc">Sort: Order records by one field in ascending or descending order.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-queries3"></div>
+                                        <div class="row-desc">
+                                            Sort: Order records by one field in
+                                            ascending or descending order.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-queries3"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div class="sub-section-header">Web Development Skills</div>
+                                    <div class="sub-section-header">
+                                        Web Development Skills
+                                    </div>
 
                                     <div class="checklist-row">
                                         <div class="row-topic">Analysis</div>
-                                        <div class="row-desc">I can identify the Target Audience and the Purpose of the site.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-analysis"></div>
+                                        <div class="row-desc">
+                                            I can identify the Target Audience
+                                            and the Purpose of the site.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-analysis"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic">Design</div>
-                                        <div class="row-desc">I can create a Site Map (Structure Chart) showing how pages link together.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-design1"></div>
+                                        <div class="row-desc">
+                                            I can create a Site Map (Structure
+                                            Chart) showing how pages link
+                                            together.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-design1"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic-empty"></div>
-                                        <div class="row-desc">I can draw Wireframes for each page showing the layout of text and images.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-design2"></div>
+                                        <div class="row-desc">
+                                            I can draw Wireframes for each page
+                                            showing the layout of text and
+                                            images.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-design2"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
-                                        <div class="row-topic">Implementation</div>
-                                        <div class="row-desc">I can use the following tags: &lt;html&gt;, &lt;head&gt;, &lt;title&gt; and &lt;body&gt;.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-impl1"></div>
+                                        <div class="row-topic">
+                                            Implementation
+                                        </div>
+                                        <div class="row-desc">
+                                            I can use the following tags:
+                                            &lt;html&gt;, &lt;head&gt;,
+                                            &lt;title&gt; and &lt;body&gt;.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-impl1"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic-empty"></div>
-                                        <div class="row-desc">I can add content using the following tags: &lt;h1&gt;, &lt;p&gt; and &lt;img&gt;.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-impl2"></div>
+                                        <div class="row-desc">
+                                            I can add content using the
+                                            following tags: &lt;h1&gt;,
+                                            &lt;p&gt; and &lt;img&gt;.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-impl2"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic-empty"></div>
-                                        <div class="row-desc">I can add Internal Links (to my pages) and External Links (to other websites) using an anchor tag — &lt;a&gt;.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-impl3"></div>
+                                        <div class="row-desc">
+                                            I can add Internal Links (to my
+                                            pages) and External Links (to other
+                                            websites) using an anchor tag —
+                                            &lt;a&gt;.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-impl3"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic-empty"></div>
-                                        <div class="row-desc">I can use CSS to change background colours, text colours and font styles.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-impl4"></div>
+                                        <div class="row-desc">
+                                            I can use CSS to change background
+                                            colours, text colours and font
+                                            styles.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-impl4"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
-                                        <div class="row-topic">Media &amp; Testing</div>
-                                        <div class="row-desc">I can explain why I used JPG/PNG (Compression) to keep file sizes small.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-media1"></div>
+                                        <div class="row-topic">
+                                            Media &amp; Testing
+                                        </div>
+                                        <div class="row-desc">
+                                            I can explain why I used JPG/PNG
+                                            (Compression) to keep file sizes
+                                            small.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-media1"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic-empty"></div>
-                                        <div class="row-desc">I have tested that every link works and the layout matches my wireframes.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-media2"></div>
+                                        <div class="row-desc">
+                                            I have tested that every link works
+                                            and the layout matches my
+                                            wireframes.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-media2"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div class="sub-section-header">Computer Systems</div>
+                                    <div class="sub-section-header">
+                                        Computer Systems
+                                    </div>
 
                                     <div class="checklist-row">
                                         <div class="row-topic-empty"></div>
-                                        <div class="row-desc">I can identify the CPU, RAM, Input/Output devices and Storage.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-cs1"></div>
+                                        <div class="row-desc">
+                                            I can identify the CPU, RAM,
+                                            Input/Output devices and Storage.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-cs1"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic-empty"></div>
-                                        <div class="row-desc">I am aware of security threats online, and know how to defend against them.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="isdd" data-id="n4-isdd-cs2"></div>
+                                        <div class="row-desc">
+                                            I am aware of security threats
+                                            online, and know how to defend
+                                            against them.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="isdd"
+                                                data-id="n4-isdd-cs2"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- ══ Section 3: AVU ══ -->
-                            <div class="checklist-section" data-section="avu">
-                                <div class="section-header" onclick="toggleSection('avu')">
+                            <div class="checklist-section collapsed" data-section="avu">
+                                <div
+                                    class="section-header" id="avu-header"
+                                    onclick="toggleSection('avu')"
+                                >
                                     <div class="section-title">
                                         <span class="toggle-icon">▼</span>
                                         3. Added Value Unit (AVU)
                                     </div>
                                     <div class="section-progress">
                                         <div class="progress-bar">
-                                            <div class="progress-fill" id="avu-fill"></div>
+                                            <div
+                                                class="progress-fill"
+                                                id="avu-fill"
+                                            ></div>
                                         </div>
-                                        <span class="progress-text" id="avu-text">0 / 9</span>
+                                        <span
+                                            class="progress-text"
+                                            id="avu-text"
+                                            >0 / 9</span
+                                        >
                                     </div>
                                 </div>
-                                <div class="section-body" id="avu-body">
+                                <div class="section-body hidden" id="avu-body">
                                     <div class="checklist-row">
                                         <div class="row-topic">Analysis</div>
-                                        <div class="row-desc">I have identified the functional requirements of my program/information system (what it must do).</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-analysis"></div>
+                                        <div class="row-desc">
+                                            I have identified the functional
+                                            requirements of my
+                                            program/information system (what it
+                                            must do).
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="avu"
+                                                data-id="n4-avu-analysis"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic">Design</div>
-                                        <div class="row-desc">I have designed my system using a recognised design technique (pseudocode, flowcharts, wireframes, etc).</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-design"></div>
+                                        <div class="row-desc">
+                                            I have designed my system using a
+                                            recognised design technique
+                                            (pseudocode, flowcharts, wireframes,
+                                            etc).
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="avu"
+                                                data-id="n4-avu-design"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
-                                        <div class="row-topic">Implementation</div>
-                                        <div class="row-desc">I have created my program using a high level programming language (Python).</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-impl1"></div>
+                                        <div class="row-topic">
+                                            Implementation
+                                        </div>
+                                        <div class="row-desc">
+                                            I have created my program using a
+                                            high level programming language
+                                            (Python).
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="avu"
+                                                data-id="n4-avu-impl1"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic-empty"></div>
-                                        <div class="row-desc">I have created my information system in a suitable program (MS Access, Notepad++, Phoenix Code).</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-impl2"></div>
+                                        <div class="row-desc">
+                                            I have created my information system
+                                            in a suitable program (MS Access,
+                                            Notepad++, Phoenix Code).
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="avu"
+                                                data-id="n4-avu-impl2"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic">Testing</div>
-                                        <div class="row-desc">I have tested my system using the data provided, and taken screenshots of the tests.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-testing1"></div>
+                                        <div class="row-desc">
+                                            I have tested my system using the
+                                            data provided, and taken screenshots
+                                            of the tests.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="avu"
+                                                data-id="n4-avu-testing1"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic-empty"></div>
-                                        <div class="row-desc">If there were any errors, I fixed them.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-testing2"></div>
+                                        <div class="row-desc">
+                                            If there were any errors, I fixed
+                                            them.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="avu"
+                                                data-id="n4-avu-testing2"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic">Reporting</div>
-                                        <div class="row-desc">I have checked my project against the original analysis and can explain how it meets the requirements.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-report1"></div>
+                                        <div class="row-desc">
+                                            I have checked my project against
+                                            the original analysis and can
+                                            explain how it meets the
+                                            requirements.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="avu"
+                                                data-id="n4-avu-report1"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic-empty"></div>
-                                        <div class="row-desc">I can describe how I would improve the information system I've created.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-report2"></div>
+                                        <div class="row-desc">
+                                            I can describe how I would improve
+                                            the information system I've created.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="avu"
+                                                data-id="n4-avu-report2"
+                                            />
+                                        </div>
                                     </div>
                                     <div class="checklist-row">
                                         <div class="row-topic-empty"></div>
-                                        <div class="row-desc">I can describe any problems or difficulties I had while doing this project and how I resolved them.</div>
-                                        <div class="row-check"><input type="checkbox" class="checklist-checkbox" data-section="avu" data-id="n4-avu-report3"></div>
+                                        <div class="row-desc">
+                                            I can describe any problems or
+                                            difficulties I had while doing this
+                                            project and how I resolved them.
+                                        </div>
+                                        <div class="row-check">
+                                            <input
+                                                type="checkbox"
+                                                class="checklist-checkbox"
+                                                data-section="avu"
+                                                data-id="n4-avu-report3"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-
-                        </div><!-- end .n4-checklist -->
+                        </div>
+                        <!-- end .n4-checklist -->
                     </div>
                 </div>
             </div>
@@ -539,11 +1001,16 @@
 
         <script>
             (function () {
-                var STORAGE_KEY = 'n4-checklist';
+                var STORAGE_KEY = "n4-checklist";
 
                 function loadChecks() {
-                    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
-                    catch (e) { return {}; }
+                    try {
+                        return (
+                            JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}
+                        );
+                    } catch (e) {
+                        return {};
+                    }
                 }
 
                 function saveChecks(checks) {
@@ -552,65 +1019,72 @@
 
                 function updateProgress(sectionId) {
                     var rows = document.querySelectorAll(
-                        '[data-section="' + sectionId + '"] .checklist-row'
+                        '[data-section="' + sectionId + '"] .checklist-row',
                     );
                     var total = rows.length;
                     var checked = 0;
                     rows.forEach(function (row) {
-                        var cb = row.querySelector('.checklist-checkbox');
+                        var cb = row.querySelector(".checklist-checkbox");
                         if (cb && cb.checked) checked++;
                     });
-                    var pct = total > 0 ? (checked / total * 100) : 0;
-                    document.getElementById(sectionId + '-fill').style.width = pct + '%';
-                    document.getElementById(sectionId + '-text').textContent =
-                        checked + ' / ' + total;
+                    var pct = total > 0 ? (checked / total) * 100 : 0;
+                    document.getElementById(sectionId + "-fill").style.width =
+                        pct + "%";
+                    document.getElementById(sectionId + "-text").textContent =
+                        checked + " / " + total;
                 }
 
                 function handleCheck(e) {
                     var cb = e.target;
-                    if (!cb.classList.contains('checklist-checkbox')) return;
+                    if (!cb.classList.contains("checklist-checkbox")) return;
                     var sectionId = cb.dataset.section;
                     var id = cb.dataset.id;
-                    var row = cb.closest('.checklist-row');
+                    var row = cb.closest(".checklist-row");
 
                     var checks = loadChecks();
                     checks[id] = cb.checked;
                     saveChecks(checks);
 
                     if (cb.checked) {
-                        row.classList.add('is-checked');
+                        row.classList.add("is-checked");
                     } else {
-                        row.classList.remove('is-checked');
+                        row.classList.remove("is-checked");
                     }
                     updateProgress(sectionId);
                 }
 
                 window.toggleSection = function (sectionId) {
                     var section = document.querySelector(
-                        '.checklist-section[data-section="' + sectionId + '"]'
+                        '.checklist-section[data-section="' + sectionId + '"]',
                     );
-                    var body = document.getElementById(sectionId + '-body');
-                    var collapsed = section.classList.contains('collapsed');
+                    var body = document.getElementById(sectionId + "-body");
+                    var collapsed = section.classList.contains("collapsed");
                     if (collapsed) {
-                        section.classList.remove('collapsed');
-                        body.classList.remove('hidden');
+                        section.classList.remove("collapsed");
+                        body.classList.remove("hidden");
                     } else {
-                        section.classList.add('collapsed');
-                        body.classList.add('hidden');
+                        section.classList.add("collapsed");
+                        body.classList.add("hidden");
                     }
                 };
 
-                document.addEventListener('DOMContentLoaded', function () {
+                document.addEventListener("DOMContentLoaded", function () {
                     var checks = loadChecks();
-                    document.querySelectorAll('.checklist-checkbox').forEach(function (cb) {
-                        if (checks[cb.dataset.id]) {
-                            cb.checked = true;
-                            cb.closest('.checklist-row').classList.add('is-checked');
-                        }
-                    });
-                    ['sdd', 'isdd', 'avu'].forEach(updateProgress);
+                    document
+                        .querySelectorAll(".checklist-checkbox")
+                        .forEach(function (cb) {
+                            if (checks[cb.dataset.id]) {
+                                cb.checked = true;
+                                cb.closest(".checklist-row").classList.add(
+                                    "is-checked",
+                                );
+                            }
+                        });
+                    ["sdd", "isdd", "avu"].forEach(updateProgress);
 
-                    document.querySelector('.n4-checklist').addEventListener('change', handleCheck);
+                    document
+                        .querySelector(".n4-checklist")
+                        .addEventListener("change", handleCheck);
                 });
             })();
         </script>
