@@ -90,16 +90,15 @@
 
     function applyFontSize() {
         var scale = settings.fontSize / 100;
-        document.documentElement.style.setProperty('--a11y-font-scale', scale);
-        /* Apply zoom to #content so hardcoded px sizes in styles.css also scale */
-        var contentEl = document.getElementById('content');
-        if (contentEl) {
+        /* Zoom each .contentContainer so hardcoded px sizes scale too.
+           Header, sidebar and h1 headings sit outside contentContainer and are unaffected. */
+        document.querySelectorAll('.contentContainer').forEach(function (el) {
             if (scale === 1) {
-                contentEl.style.removeProperty('zoom');
+                el.style.removeProperty('zoom');
             } else {
-                contentEl.style.zoom = scale;
+                el.style.zoom = scale;
             }
-        }
+        });
     }
 
     function applyLineSpacing() {

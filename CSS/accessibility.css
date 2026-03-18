@@ -15,15 +15,12 @@
     font-display: swap;
 }
 
-/* Line spacing — applied on body so it inherits everywhere */
-body {
+/* Line spacing — scoped to content containers only; header, sidebar and h1 unaffected */
+.contentContainer *:not(h1) {
     line-height: calc(1.5 * var(--a11y-line-scale, 1));
 }
 
-/* Font size — applied via JS zoom on #content; body rule kept for sidebar inheritance */
-body {
-    font-size: calc(1rem * var(--a11y-font-scale, 1));
-}
+/* Font size — applied via JS zoom on .contentContainer elements only */
 
 /* High contrast — scoped to #content only; header, footer and sidebar unchanged */
 html.high-contrast #content,
