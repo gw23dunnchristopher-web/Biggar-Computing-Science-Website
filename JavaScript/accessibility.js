@@ -15,14 +15,12 @@
             style.textContent = [
                 "@font-face {",
                 "  font-family: 'OpenDyslexic';",
-                "  src: url('/Fonts/OpenDyslexic-Regular.woff2') format('woff2'),",
-                "       url('/Fonts/OpenDyslexic-Regular.otf') format('opentype');",
+                "  src: url('/Fonts/OpenDyslexic-Regular.woff2') format('woff2');",
                 "  font-weight: normal; font-style: normal; font-display: swap;",
                 "}",
                 "@font-face {",
                 "  font-family: 'OpenDyslexic';",
-                "  src: url('/Fonts/OpenDyslexic-Bold.woff2') format('woff2'),",
-                "       url('/Fonts/OpenDyslexic-Bold.otf') format('opentype');",
+                "  src: url('/Fonts/OpenDyslexic-Bold.woff2') format('woff2');",
                 "  font-weight: bold; font-style: normal; font-display: swap;",
                 "}",
                 "html.dyslexia-font, html.dyslexia-font * {",
@@ -31,6 +29,32 @@
             ].join('\n');
             document.head.appendChild(style);
         }
+        /* Apply dyslexia class and preload font AS EARLY AS POSSIBLE —
+           before DOMContentLoaded, before init() — so the font is ready
+           by the time the user can interact with the panel.             */
+        try {
+            var _earlySettings = JSON.parse(localStorage.getItem('a11y-settings') || '{}');
+            if (_earlySettings.dyslexiaFont === true) {
+                document.documentElement.classList.add('dyslexia-font');
+            }
+            /* Always preload the font eagerly via FontFace API so it is
+               in document.fonts before the toggle is clicked, making the
+               switch instant rather than relying on font-display:swap.   */
+            if (window.FontFace && !document.getElementById('a11y-fonts-preloaded')) {
+                var _marker = document.createElement('meta');
+                _marker.id = 'a11y-fonts-preloaded';
+                document.head.appendChild(_marker);
+                var _f1 = new FontFace('OpenDyslexic',
+                    "url('/Fonts/OpenDyslexic-Regular.woff2') format('woff2')",
+                    { weight: 'normal', style: 'normal' });
+                var _f2 = new FontFace('OpenDyslexic',
+                    "url('/Fonts/OpenDyslexic-Bold.woff2') format('woff2')",
+                    { weight: 'bold', style: 'normal' });
+                Promise.all([_f1.load(), _f2.load()]).then(function (fonts) {
+                    fonts.forEach(function (f) { document.fonts.add(f); });
+                }).catch(function () {});
+            }
+        } catch (_e) {}
     })();
 
     var STORAGE_KEY = 'a11y-settings';
@@ -112,12 +136,10 @@
         if (!window.FontFace) { if (callback) callback(); return; }
         try {
             var f1 = new FontFace('OpenDyslexic',
-                "url('/Fonts/OpenDyslexic-Regular.woff2') format('woff2')," +
-                "url('/Fonts/OpenDyslexic-Regular.otf') format('opentype')",
+                "url('/Fonts/OpenDyslexic-Regular.woff2') format('woff2')",
                 { weight: 'normal', style: 'normal' });
             var f2 = new FontFace('OpenDyslexic',
-                "url('/Fonts/OpenDyslexic-Bold.woff2') format('woff2')," +
-                "url('/Fonts/OpenDyslexic-Bold.otf') format('opentype')",
+                "url('/Fonts/OpenDyslexic-Bold.woff2') format('woff2')",
                 { weight: 'bold', style: 'normal' });
             Promise.all([f1.load(), f2.load()]).then(function (fonts) {
                 fonts.forEach(function (f) { document.fonts.add(f); });
