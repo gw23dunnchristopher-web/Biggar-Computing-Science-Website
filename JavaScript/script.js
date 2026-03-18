@@ -379,12 +379,15 @@ setTimeout(showMainContent, 5000);
 
 /* Countdown Function */
 function countdown(testDate) {
+    const el = document.getElementById("countdown");
+    if (!el) return;
+
     const countDownDate = new Date(testDate).getTime();
     const now = new Date().getTime();
     const distance = countDownDate - now;
 
     if (distance < 0) {
-        document.getElementById("countdown").innerHTML = "EXPIRED";
+        el.innerHTML = "EXPIRED";
         return;
     }
 
@@ -393,5 +396,5 @@ function countdown(testDate) {
     const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-    document.getElementById("countdown").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+    el.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
 }
