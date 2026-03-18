@@ -135,9 +135,8 @@
 
     function applyDyslexiaFont() {
         if (settings.dyslexiaFont) {
-            loadOpenDyslexicFonts(function () {
-                document.documentElement.classList.add('dyslexia-font');
-            });
+            document.documentElement.classList.add('dyslexia-font');
+            loadOpenDyslexicFonts();
         } else {
             document.documentElement.classList.remove('dyslexia-font');
         }
