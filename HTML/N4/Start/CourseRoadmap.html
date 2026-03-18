@@ -43,14 +43,26 @@
                 user-select: none;
                 transition: background-color 0.2s;
             }
-            
-            #sdd-header {background-color: #2D5AB3;}
-            #sdd-header:hover {background-color: #1E3E7D;}
-            #isdd-header {background-color: #1B855E;}
-            #isdd-header:hover {background-color: #125C41;}
-            #avu-header {background-color: #D97706;}
-            #avu-header:hover {background-color: #B45309;}
-            
+
+            #sdd-header {
+                background-color: #2d5ab3;
+            }
+            #sdd-header:hover {
+                background-color: #1e3e7d;
+            }
+            #isdd-header {
+                background-color: #1b855e;
+            }
+            #isdd-header:hover {
+                background-color: #125c41;
+            }
+            #avu-header {
+                background-color: #d97706;
+            }
+            #avu-header:hover {
+                background-color: #b45309;
+            }
+
             .section-title {
                 font-weight: bold;
                 font-size: 18px;
@@ -225,84 +237,10 @@
                 <div id="sidebar"></div>
                 <div id="content">
                     <div id="mainHeading"><h1>National 4</h1></div>
-                    <div class="contentHeading"><h1>Course Roadmap and Checklist</h1></div>
+                    <div class="contentHeading">
+                        <h1>N4 Work Roadmap</h1>
+                    </div>
                     <div class="contentContainer">
-                        <h2>N4 Units</h2>
-                        <p>
-                            To earn your full National 4 qualification, you must
-                            complete three distinct parts. Think of these as the
-                            building blocks of the course. There is no final
-                            external exam; instead, you pass by completing
-                            practical tasks and showing you understand the
-                            concepts.
-                        </p>
-                        <h3>1. Software Design and Development (SDD)</h3>
-                        <p>
-                            This unit is all about problem-solving. You will
-                            learn how to think like a programmer and turn your
-                            ideas into working code.
-                        </p>
-                        <ul>
-                            <li>
-                                <b>What you'll learn</b>: How to design programs
-                                using flowcharts, write code (usually in
-                                Python), and test it to make sure it works.
-                            </li>
-                            <li>
-                                <b>How you'll pass</b>: You'll complete a series
-                                of small coding challenges and a final practical
-                                task where you create a program from scratch.
-                            </li>
-                        </ul>
-                        <h3>
-                            2. Information Systems Design and Development (ISDD)
-                        </h3>
-                        <p>
-                            This unit looks at how the digital world is built
-                            and managed. It's split into two main practical
-                            areas: Websites and Databases.
-                        </p>
-                        <ul>
-                            <li>
-                                <b>What you'll learn</b>: How to build webpages
-                                using HTML and CSS, how to organize data in
-                                databases using SQL, and how computers keep our
-                                information secure.
-                            </li>
-                            <li>
-                                <b>How you'll pass</b>: You will create a
-                                functional multi-page website and a working
-                                database, explaining how you kept the data safe
-                                and legal.
-                            </li>
-                        </ul>
-                        <h3>3. The Added Value Unit (AVU)</h3>
-                        <p>
-                            This is your "Grand Finale." It is a large,
-                            independent project that pulls together everything
-                            you've learned in the first two units.
-                        </p>
-                        <ul>
-                            <li>
-                                <b>What you'll do</b>: You will be given a
-                                "Problem Brief" (like creating a digital system
-                                for a sports club or a shop). You will design,
-                                build, and test the entire solution yourself.
-                            </li>
-                            <li>
-                                <b>Why it matters</b>: This is the final
-                                requirement for the National 4 award. It proves
-                                you can apply your skills to a real-world
-                                scenario without a teacher holding your hand.
-                            </li>
-                        </ul>
-                        <p>
-                            Because N4 is "Pass/Fail", your goal isn't to get
-                            100% on a test - it's to provide evidence that you
-                            can do the work. Save every version of your code and
-                            every screenshot of your designs!
-                        </p>
-
                         <h2>N4 Checklist</h2>
                         <p>
                             Below is a checklist of all of the skills that you
@@ -315,8 +253,13 @@
                             below, or to click on the button below to download a
                             spreadsheet version.
                         </p>
-                        <div class="button button2" style="margin:0 auto 0;"><a href="/Files/Resources/N4/N4Checklist.xlsx" 
-                            download="N4 Checklist.xlsx">N4 Checklist Download</a></div>
+                        <div class="button button2" style="margin: 0 auto 0">
+                            <a
+                                href="/Files/Resources/N4/N4Checklist.xlsx"
+                                download="N4 Checklist.xlsx"
+                                >N4 Checklist Download</a
+                            >
+                        </div>
                         <p>
                             If you choose to use the interactive checklist.
                             Click each section to expand it, then tick off each
@@ -328,9 +271,13 @@
 
                         <div class="n4-checklist">
                             <!-- ══ Section 1: SDD ══ -->
-                            <div class="checklist-section collapsed" data-section="sdd">
+                            <div
+                                class="checklist-section collapsed"
+                                data-section="sdd"
+                            >
                                 <div
-                                    class="section-header" id="sdd-header"
+                                    class="section-header"
+                                    id="sdd-header"
                                     onclick="toggleSection('sdd')"
                                 >
                                     <div class="section-title">
@@ -479,9 +426,13 @@
                             </div>
 
                             <!-- ══ Section 2: ISDD ══ -->
-                            <div class="checklist-section collapsed" data-section="isdd">
+                            <div
+                                class="checklist-section collapsed"
+                                data-section="isdd"
+                            >
                                 <div
-                                    class="section-header" id="isdd-header"
+                                    class="section-header"
+                                    id="isdd-header"
                                     onclick="toggleSection('isdd')"
                                 >
                                     <div class="section-title">
@@ -808,9 +759,13 @@
                             </div>
 
                             <!-- ══ Section 3: AVU ══ -->
-                            <div class="checklist-section collapsed" data-section="avu">
+                            <div
+                                class="checklist-section collapsed"
+                                data-section="avu"
+                            >
                                 <div
-                                    class="section-header" id="avu-header"
+                                    class="section-header"
+                                    id="avu-header"
                                     onclick="toggleSection('avu')"
                                 >
                                     <div class="section-title">
@@ -983,6 +938,102 @@
                             </div>
                         </div>
                         <!-- end .n4-checklist -->
+                        <h2>How you are assessed</h2>
+                        <p>
+                            In National 4, you don't have to pass a test - you
+                            have to demonstrate a skill. Your teacher acts as an
+                            assessor who checks your work against SQA standards.
+                        </p>
+                        <h3>The Pass/Fail System</h3>
+                        <p>
+                            National 4 is an 'ungraded' course. This means that:
+                        </p>
+                        <ul>
+                            <li>
+                                There are no exams to sit at the end of the
+                                course.
+                            </li>
+                            <li>
+                                You either get a <b>Pass</b> or a
+                                <b>Fail</b> for the whole course.
+                            </li>
+                            <li>
+                                You must pass every single "Assessment Standard"
+                                (the items on your checklist) to get the full
+                                qualification.
+                            </li>
+                        </ul>
+                        <h2>Units vs the Added Value Unit (AVU)</h2>
+                        <p>
+                            In this course you must complete both units and the
+                            AVU to get the full qualification. The AVU is a
+                            large project at the end of the year that you will
+                            complete independently. You will be given a brief
+                            and you will have to design, implement and test a
+                            solution to the problem.
+                        </p>
+                        <table>
+                            <tr>
+                                <th>Assessment Part</th>
+                                <th>What it is</th>
+                                <th>How you pass</th>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center"><b>Units</b></td>
+                                <td>Software Design and Information Systems</td>
+                                <td>
+                                    You must complete a small "Unit Assessment"
+                                    in class at the end of each of the units.
+                                    The unit assessment will be a practical
+                                    task.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: center"><b>AVU</b></td>
+                                <td>A big project</td>
+                                <td>
+                                    You will work independently to solve a
+                                    complex problem from start to finish. You
+                                    will be expected to go through the following
+                                    stages: Analysis, Design, Implementation,
+                                    Testing and Reporting.
+                                </td>
+                            </tr>
+                        </table>
+                        <h2>What counts as evidence?</h2>
+                        <p>
+                            Because there is no exam, your teacher needs "Proof
+                            of Work" to show the SQA. Every task should be saved
+                            carefully, and you need to keep the evidence for
+                            your unit assessments and your AVU in a folder. This
+                            folder should be kept in a safe place, and you
+                            should be able to show it to your teacher if asked.
+                        </p>
+                        <p>This evidence can take several forms:</p>
+                        <ul>
+                            <li>
+                                <b>Annotated Code</b>: A screenshot of your Python code
+                                with comments explaining what it does.
+                            </li>
+                            <li>
+                                <b>Screenshots</b>: You will need to take screenshots
+                                of your MS Access Design Views, any queries you
+                                perform and their results, as well as output
+                                from code that you run in Python.
+                            </li>
+                            <li>
+                                <b>Written responses</b>: You may be required to answer
+                                some questions (either in pen or on the
+                                computer) and print out your responses.
+                            </li>
+                        </ul>
+                        <p>
+                            The best part about N4 is that if a piece of code
+                            doesn't work or a database query fails the first
+                            time, you can try again! Your teacher can give you
+                            feedback, you fix the error and that
+                            <b>fixed version</b> counts as your pass!
+                        </p>
                     </div>
                 </div>
             </div>
