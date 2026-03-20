@@ -2,9 +2,30 @@
  * BHS Computing Science - Quiz Engine
  *
  * Usage: embed a <div class="quiz-container"> on any lesson page.
- * Configure it via window.QUIZ_CONFIG before this script runs, or via
- * a data-quiz attribute containing JSON.
  *
+ * ── Single quiz (existing behaviour) ──────────────────────────────────────
+ * Configure via window.QUIZ_CONFIG before this script runs:
+ *
+ * window.QUIZ_CONFIG = {
+ *   questions: [
+ *
+ * ── Multiple quizzes on one page ──────────────────────────────────────────
+ * Give each container a data-quiz-id attribute and define window.QUIZ_CONFIGS:
+ *
+ *   <div class="quiz-container" data-quiz-id="past2023"></div>
+ *   <div class="quiz-container" data-quiz-id="past2024"></div>
+ *
+ *   window.QUIZ_CONFIGS = {
+ *     past2023: { questions: [...] },
+ *     past2024: { questions: [...] }
+ *   };
+ *
+ * ── Config lookup order per container ─────────────────────────────────────
+ *   1. data-quiz attribute  (inline JSON on the element)
+ *   2. data-quiz-id         → window.QUIZ_CONFIGS[id]
+ *   3. window.QUIZ_CONFIG   (single-quiz fallback)
+ *
+ * ── Question format ───────────────────────────────────────────────────────
  * window.QUIZ_CONFIG = {
  *   questions: [
  *     {
@@ -50,14 +71,27 @@
 (function () {
     'use strict';
 
+    /* Unique counter so multiple quiz containers on the same page get distinct IDs. */
+    var quizCounter = 0;
+
     function initQuiz() {
         const containers = document.querySelectorAll('.quiz-container');
         containers.forEach(function (container) {
-            var config = window.QUIZ_CONFIG;
+            var config = null;
 
-            // Also support inline JSON via data attribute
-            if (!config && container.dataset.quiz) {
+            // 1. Inline JSON on the element
+            if (container.dataset.quiz) {
                 try { config = JSON.parse(container.dataset.quiz); } catch (e) {}
+            }
+
+            // 2. Named config via data-quiz-id → window.QUIZ_CONFIGS[id]
+            if (!config && container.dataset.quizId && window.QUIZ_CONFIGS) {
+                config = window.QUIZ_CONFIGS[container.dataset.quizId] || null;
+            }
+
+            // 3. Fallback to single global config (existing behaviour)
+            if (!config) {
+                config = window.QUIZ_CONFIG || null;
             }
 
             if (!config || !config.questions || !config.questions.length) {
@@ -65,21 +99,22 @@
                 return;
             }
 
-            renderQuiz(container, config);
+            var prefix = 'qz-' + (++quizCounter);
+            renderQuiz(container, config, prefix);
         });
     }
 
-    function renderQuiz(container, config) {
+    function renderQuiz(container, config, prefix) {
         var questions = config.questions;
 
         var html = '<div class="quiz-section">';
 
         questions.forEach(function (q, i) {
-            html += renderQuestion(q, i);
+            html += renderQuestion(q, i, prefix);
         });
 
-        html += '<button class="quiz-submit-btn" id="quiz-submit-btn">Submit Answers</button>';
-        html += '<div id="quiz-feedback-area"></div>';
+        html += '<button class="quiz-submit-btn">Submit Answers</button>';
+        html += '<div class="quiz-feedback-area"></div>';
         html += '</div>';
 
         container.innerHTML = html;
@@ -100,7 +135,8 @@
         // Toggle question open/closed on header click
         container.querySelectorAll('.quiz-question-toggle').forEach(function (btn) {
             btn.addEventListener('click', function () {
-                var body = document.getElementById(btn.getAttribute('aria-controls'));
+                var bodyId = btn.getAttribute('aria-controls');
+                var body = container.querySelector('#' + bodyId);
                 var isOpen = btn.getAttribute('aria-expanded') === 'true';
                 if (isOpen) {
                     btn.setAttribute('aria-expanded', 'false');
@@ -112,8 +148,8 @@
             });
         });
 
-        document.getElementById('quiz-submit-btn').addEventListener('click', function () {
-            submitQuiz(container, config);
+        container.querySelector('.quiz-submit-btn').addEventListener('click', function () {
+            submitQuiz(container, config, prefix);
         });
     }
 
@@ -187,31 +223,35 @@
         }).join('\n');
     }
 
-    function renderQuestion(q, index) {
+    function renderQuestion(q, index, prefix) {
         var num = index + 1;
         var marksLabel = q.marks === 1 ? '1 mark' : q.marks + ' marks';
-        var html = '<div class="quiz-question" id="quiz-q-' + index + '">';
+        var qId = prefix + '-q-' + index;
+        var bodyId = prefix + '-body-' + index;
+        var ansId = prefix + '-ans-' + index;
+
+        var html = '<div class="quiz-question" id="' + qId + '">';
 
         // Clickable toggle header
-        html += '<button type="button" class="quiz-question-toggle" aria-expanded="false" aria-controls="quiz-body-' + index + '">';
+        html += '<button type="button" class="quiz-question-toggle" aria-expanded="false" aria-controls="' + bodyId + '">';
         html += '<span class="quiz-question-number">Q' + num + '.</span>';
         html += '<span class="quiz-marks">(' + marksLabel + ')</span>';
         html += '<span class="quiz-chevron" aria-hidden="true">&#9656;</span>';
         html += '</button>';
 
         // Collapsible body
-        html += '<div class="quiz-question-body" id="quiz-body-' + index + '" hidden>';
+        html += '<div class="quiz-question-body" id="' + bodyId + '" hidden>';
         html += '<div class="quiz-question-text">' + renderText(getQuestionText(q)) + '</div>';
 
         if (q.type === 'pseudocode') {
             var codePlaceholder = flattenText(getQuestionText(q)).toLowerCase().indexOf('using a programming language of your choice') !== -1
                 ? 'Write your code here...'
                 : 'Write your pseudocode here...';
-            html += '<textarea class="quiz-code-area" id="quiz-ans-' + index + '" placeholder="' + codePlaceholder + '" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>';
+            html += '<textarea class="quiz-code-area" id="' + ansId + '" placeholder="' + codePlaceholder + '" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>';
         } else if (q.type === 'table') {
-            html += renderTableInput(q, index);
+            html += renderTableInput(q, index, prefix);
         } else {
-            html += '<textarea class="quiz-textarea" id="quiz-ans-' + index + '" placeholder="Type your answer here..."></textarea>';
+            html += '<textarea class="quiz-textarea" id="' + ansId + '" placeholder="Type your answer here..."></textarea>';
         }
 
         html += '</div>';
@@ -219,7 +259,7 @@
         return html;
     }
 
-    function renderTableInput(q, index) {
+    function renderTableInput(q, index, prefix) {
         var html = '<div class="quiz-table-wrapper"><table class="quiz-table">';
 
         if (q.columnWidths && q.columnWidths.length) {
@@ -243,7 +283,7 @@
             html += '<tr>';
             row.forEach(function (cell, colIndex) {
                 if (cell === '') {
-                    html += '<td><textarea class="quiz-table-input" data-qindex="' + index + '" data-row="' + rowIndex + '" data-col="' + colIndex + '" placeholder="..." rows="3"></textarea></td>';
+                    html += '<td><textarea class="quiz-table-input" data-prefix="' + prefix + '" data-qindex="' + index + '" data-row="' + rowIndex + '" data-col="' + colIndex + '" placeholder="..." rows="3"></textarea></td>';
                 } else {
                     html += '<td class="given-cell">' + escHtml(cell) + '</td>';
                 }
@@ -255,12 +295,11 @@
         return html;
     }
 
-    function collectAnswers(container, questions) {
+    function collectAnswers(container, questions, prefix) {
         return questions.map(function (q, index) {
             var qText = getQuestionText(q);
             if (q.type === 'table') {
-                // Collect all blank cells for this question
-                var inputs = container.querySelectorAll('.quiz-table-input[data-qindex="' + index + '"]');
+                var inputs = container.querySelectorAll('.quiz-table-input[data-qindex="' + index + '"][data-prefix="' + prefix + '"]');
                 var cells = [];
                 inputs.forEach(function (inp) {
                     cells.push({
@@ -269,11 +308,11 @@
                         value: inp.value.trim()
                     });
                 });
-                // Build a full table for Gemini to see
                 var tableStr = buildTableString(q, cells);
                 return { type: q.type, text: qText, answer: tableStr };
             } else {
-                var ta = document.getElementById('quiz-ans-' + index);
+                var ansId = prefix + '-ans-' + index;
+                var ta = container.querySelector('#' + ansId);
                 return { type: q.type, text: qText, answer: ta ? ta.value.trim() : '' };
             }
         });
@@ -300,12 +339,12 @@
         return header + rows.join('\n');
     }
 
-    function submitQuiz(container, config) {
-        var btn = document.getElementById('quiz-submit-btn');
-        var feedbackArea = document.getElementById('quiz-feedback-area');
+    function submitQuiz(container, config, prefix) {
+        var btn = container.querySelector('.quiz-submit-btn');
+        var feedbackArea = container.querySelector('.quiz-feedback-area');
 
         // Validate — check at least something is filled in
-        var answers = collectAnswers(container, config.questions);
+        var answers = collectAnswers(container, config.questions, prefix);
         var allEmpty = answers.every(function (a) { return !a.answer || a.answer.replace(/[\s|:\[\]]/g, '') === ''; });
         if (allEmpty) {
             feedbackArea.innerHTML = '<div class="quiz-error">Please answer at least one question before submitting.</div>';
@@ -338,7 +377,7 @@
         })
         .then(function (data) {
             btn.disabled = false;
-            renderResults(feedbackArea, data, config.questions);
+            renderResults(feedbackArea, container, data, config.questions);
         })
         .catch(function (err) {
             btn.disabled = false;
@@ -347,7 +386,7 @@
         });
     }
 
-    function renderResults(feedbackArea, data, questions) {
+    function renderResults(feedbackArea, container, data, questions) {
         var results = data.results || [];
         var totalMarks = questions.reduce(function (s, q) { return s + (q.marks || 0); }, 0);
         var awarded = results.reduce(function (s, r) { return s + (r.marksAwarded || 0); }, 0);
@@ -376,20 +415,20 @@
             html += '</div>';
         });
 
-        html += '<button class="quiz-retry-btn" id="quiz-retry-btn">Try Again</button>';
+        html += '<button class="quiz-retry-btn">Try Again</button>';
         html += '</div>';
 
         feedbackArea.innerHTML = html;
 
-        document.getElementById('quiz-retry-btn').addEventListener('click', function () {
+        feedbackArea.querySelector('.quiz-retry-btn').addEventListener('click', function () {
             feedbackArea.innerHTML = '';
-            var btn = document.getElementById('quiz-submit-btn');
+            var btn = container.querySelector('.quiz-submit-btn');
             if (btn) btn.disabled = false;
-            // Clear all answers
-            document.querySelectorAll('.quiz-textarea, .quiz-code-area').forEach(function (ta) {
+            // Clear all answers scoped to this container only
+            container.querySelectorAll('.quiz-textarea, .quiz-code-area').forEach(function (ta) {
                 ta.value = '';
             });
-            document.querySelectorAll('.quiz-table-input').forEach(function (inp) {
+            container.querySelectorAll('.quiz-table-input').forEach(function (inp) {
                 inp.value = '';
             });
             feedbackArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
