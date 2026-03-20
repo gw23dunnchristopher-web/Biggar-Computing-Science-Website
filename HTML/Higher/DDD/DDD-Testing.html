@@ -665,62 +665,7 @@
                         </tr>
                     </table>
 
-                    <table>
-                        <tr>
-                            <th rowspan="2" width="30px">10</th>
-                            <td>
-                                <p>
-                                    The head coach would like to produce a report displaying the slowest and fastest 
-                                    times from any of the squads with a ‘1’ in their name, as shown below.
-                                </p>
-
-                                <table style="max-width:400px;">
-                                    <tr>
-                                        <th>Squad</th>
-                                        <th>Slowest Time</th>
-                                        <th>Fastest Time</th>
-                                    </tr>
-                                    <tr>
-                                        <td>Dolphins1A</td>
-                                        <td>30.25</td>
-                                        <td>25.45</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Dolphins1B</td>
-                                        <td>30.23</td>
-                                        <td>30.23</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Sharks1A</td>
-                                        <td>29.45</td>
-                                        <td>29.35</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Sharks1B</td>
-                                        <td>39.15</td>
-                                        <td>31.45</td>
-                                    </tr>
-                                </table>
-
-                                <p>The following SQL statement is executed.</p>
-                                <div class="codeBox">
-                                    <p>SELECT squad, MIN(time) AS [Slowest Time], MAX(time) AS [Fastest Time]</p>
-                                    <p>FROM Swimmer</p>
-                                    <p>WHERE squad LIKE "1"</p>
-                                </div>
-
-                                <p>When tested, the actual output did not match the expected output.  Identify the three errors in the above SQL statement.</p>
-                            </td>
-                            
-                            <th rowspan="2"  width="30px">3</th>
-                        </tr>
-                        
-                        <tr>
-                            <td>
-                                
-                            </td>
-                        </tr>
-                    </table>
+                    
                     <div class="quiz-container"></div>
 
                     
