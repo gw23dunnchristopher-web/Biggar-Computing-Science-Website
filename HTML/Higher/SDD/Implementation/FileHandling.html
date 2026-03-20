@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -116,33 +117,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <div class="codeBox">
-                                            <p>total = 0</p>
-                                            <p>password = input("Enter your password: ")</p>
-                                            <br>
-                                            <p>for x in range(len(password)):</p>
-                                            <p style="padding-left:40px;">total += ord(password[x])</p>
-                                            <p>remainder = total % 11</p>
-                                            <p>password += str(remainder)</p>
-                                            <br>
-                                            <p>with open("passwords.txt", "w") as file:</p>
-                                            <p style="padding-left:40px;">file.write(password + "\n")</p>
-                                        </div>
-                                        <hr>
-                                        <p>One mark each for:</p>
-                                        <ul>
-                                            <li>Initialise and update total.</li>
-                                            <li>Loop for length of password and get ASCII value of current character.</li>
-                                            <li>Use of mod 11 (% 11 in the case of Python) to get the remainder</li>
-                                            <li>Concatenate remainder to original password.</li>
-                                            <li>Open/write to/close file.</li>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                        <div class="answerButton" onClick="answerButtonSwitch(this); 
-                                toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                        
                 </div>
             </div>
         </div>
@@ -158,5 +139,33 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "pseudocode",
+                  "question": [
+                        "A program adds a check digit to a user's password. The password is input, the program totals ASCII values of all characters, divides by 11, and calculates the remainder. This remainder is appended to the original password.",
+                        "Example: \"Fox\" → F=70, o=111, x=120, Total=301. 301 ÷ 11 = 27 remainder 4. Updated password = \"Fox4\".",
+                        "Using a recognised design technique, design an algorithm that would create the updated password and store it in a file."
+                  ],
+                  "marks": 5,
+                  "markingScheme": {
+                        "text": "One mark each for:",
+                        "points": [
+                              "Input password from user",
+                              "Loop through each character and accumulate ASCII values (ord() or equivalent)",
+                              "Calculate remainder: total MOD 11",
+                              "Concatenate remainder to create updated password",
+                              "Write updated password to file (open, write, close)"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

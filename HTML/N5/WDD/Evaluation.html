@@ -57,24 +57,16 @@
                             <th rowspan="2"  width="30px">2</th>
                         </tr>
                         <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
-                                    <p>Any two from:</p>
-                                    <ul>
-                                        <li>name missing</li>
-                                        <li>buy button missing</li>
-                                        <li>price missing</li>
-                                    </ul>
-                                </div>
-                            </td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -86,5 +78,19 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "paragraph",
+                        "text": "Look at the web page shown above for the Armin Fair website. State two reasons why the above web page is not fit for purpose.",
+                        "marks": 2,
+                        "markingScheme": "Award 1 mark each for any two from: name is missing; buy button is missing; price is missing."
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

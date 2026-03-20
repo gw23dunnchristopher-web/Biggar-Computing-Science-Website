@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -181,29 +182,13 @@
                             </tr>
                                 <tr>
                                     <td>
-                                        <div class="hiddenElement answer1">
-                                            <div class="codeBox">
-                                                <p>searchBranch = input("Enter the name of the branch:")</p>
-                                                <p>count = 0</p>
-                                                <p>for x in range(len(branch)):</p>
-                                                <p style="padding-left:20px;">if branch[x] == searchBranch and noOfVisits[x] > 5:</p>
-                                                <p style="padding-left:40px;">count += 1</p>
-                                                <p>print(f"There are {count} dogs that have made more than 5 visits to {searchBranch}.")</p>
-                                            </div>
-                                            <hr>
-                                            Award <b>1 mark</b> for each bullet:
-                                            <ul>
-                                                <li>Initialise and increment counter.</li>
-                                                <li>Useof fixed loop, branch input (and counter output).</li>
-                                                <li>IF condition matching user input of <span class="codeText">branch[]</span> array.</li>
-                                                <li>And condition <span class="codeText">noOfVisits[]</span> > 5</li>
-                                            </ul>
-                                        </div>
+                                        
                                     </td>
                                 </tr>
                             </table>
-                            <div class="answerButton" onClick="answerButtonSwitch(this); 
-                                toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                            
                 </div>
             </div>
         </div>
@@ -219,5 +204,32 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "A dog grooming company stores data using parallel arrays including branch[] (branch name) and noOfVisits[] (number of visits).",
+                        "The area manager wants to know how many dogs have made more than five visits to a particular branch.",
+                        "Using a programming language of your choice, and the arrays branch and noOfVisits, write the code to ask the user for the branch name and to display how many dogs have made more than five visits to this branch."
+                  ],
+                  "marks": 4,
+                  "markingScheme": {
+                        "text": "One mark each for:",
+                        "points": [
+                              "Initialise counter to 0 and increment it when a match is found: count = 0; count += 1",
+                              "Use of fixed loop and branch input with output: searchBranch = input(...); for x in range(len(branch)):; print(f\"There are {count}...\")",
+                              "IF condition matching branch: if branch[x] == searchBranch",
+                              "AND condition for noOfVisits: and noOfVisits[x] > 5"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -113,31 +114,12 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <div class="codeBox">
-                                        <p>from dataclasses import dataclass</p>
-                                        <br>
-                                        <p>@dataclass</p>
-                                        <p>class feature:</p>
-                                        <p style="padding-left:20px;">brand: str = ""</p>
-                                        <p style="padding-left:20px;">refNo: str = ""</p>
-                                        <p style="padding-left:20px;">maxLoad: int = 0</p>
-                                        <p style="padding-left:20px;">spinSpeed: float = 0.0</p>
-                                        <p style="padding-left:20px;">price: float = 0.0</p>
-                                        <p style="padding-left:20px;">numberInStock: int = 0</p>
-                                    </div>
-                                    <hr>
-                                    <p>One mark each for:</p>
-                                    <ul>
-                                        <li>Record structure with name <span class="codeText">feature</span></li>
-                                        <li>Six fields specified.</li>
-                                    </ul>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
                         
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
                     <table>
                         <tr>
@@ -153,22 +135,14 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer2">
-                                    <div class="codeBox">
-                                        <p>machines = [feature() for x in range(80)]</p>
-                                    </div>
-                                    <hr>
-                                    <p>One mark each for:</p>
-                                    <ul>
-                                        <li>Array structure and size (named <span class="codeText">machines</span>)</li>
-                                        <li>Using <span class="codeText">feature</span> data type</li>
-                                    </ul>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
+                    <div class="quiz-container"></div>
 
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+
+                    
                 </div>
             </div>
         </div>
@@ -184,5 +158,39 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": "A shop sells 80 washing machines. Data stored includes: Brand, RefNo, Maximum wash load (kg), Spin speed (rpm), Price (£), Number in Stock. Using a programming language of your choice, define a suitable record data structure for the washing machine data.",
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark each for:",
+                        "points": [
+                              "Valid record/dataclass declaration syntax (e.g. @dataclass / class feature():)",
+                              "All six fields specified with appropriate types: brand: str, refNo: str, maxLoad: int, spinSpeed: int, price: float, stock: int"
+                        ]
+                  }
+            },
+            {
+                  "id": "q2",
+                  "type": "paragraph",
+                  "question": "Using the record data structure created in part (i), declare a variable called machines that stores data for all 80 washing machines as an array of records.",
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark each for:",
+                        "points": [
+                              "Array of 80 records: machines = [feature() for x in range(80)]",
+                              "Correct variable name \"machines\" and 80 elements"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

@@ -83,26 +83,23 @@
                         <tr>
                             <td>
                                 <p style="font-weight:bold;">Language:</p>
-                                <div class="hiddenElement answer1">
-                                    <p>JavaScript</p>
-                                </div>
+                                
                             </td>
                         </tr>
                         <tr>
                             <td>
                                 <p style="font-weight:bold;">Event:</p>
-                                <div class="hiddenElement answer1">
-                                    <p>onmouseover</p>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -114,5 +111,19 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "paragraph",
+                        "text": "When the cursor moves over an image of the fox it changes the picture from one of a fox in a sitting down position to one of the fox lying down. Identify the language and the event used to implement this.",
+                        "marks": 2,
+                        "markingScheme": "Award 1 mark for Language: JavaScript. Award 1 mark for Event: onmouseover."
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

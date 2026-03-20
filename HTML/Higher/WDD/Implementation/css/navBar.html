@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -157,18 +158,11 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <p>One mark for each each bullet:</p>
-                                        <ul>
-                                            <li><span class="codeText">list-style-type:none</span> will remove the bullet points.</li>
-                                            <li><span class="codeText">li a color:grey</span> overwrites the <span class="codeText">li a color:black</span>
-                                            so you won't be able to read the grey text on the grey background (until you hover over the text).</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
                     <table>
                         <tr>
@@ -198,17 +192,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer2">
-                                        <p>One mark for each each bullet:</p>
-                                        <ul>
-                                            <li>CSS Rule 1 changes the colour of the text of anchor/links in a list to white when hovered over.</li>
-                                            <li>CSS Rule 2 changes the colour of the text of every anchor/link to yellow when hovered over.</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                     
                 </div>
             </div>
@@ -225,5 +215,34 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "A navigation bar CSS includes these rules (among others):",
+                        "nav ul { list-style-type: none; }",
+                        "nav ul { background-color: grey; }",
+                        "li a { color: black; }",
+                        "li a:hover { background-color: darkgrey; }",
+                        "li a { color: grey; }",
+                        "During testing, the navigation bar did not display as intended. State two reasons why."
+                  ],
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark for each:",
+                        "points": [
+                              "list-style-type: none removes the bullet points from the nav list items",
+                              "li a { color: grey; } overwrites li a { color: black; } making grey text on a grey background — links are unreadable (until hovered over)"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

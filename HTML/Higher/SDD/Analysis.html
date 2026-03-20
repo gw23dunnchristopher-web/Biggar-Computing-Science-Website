@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -158,21 +159,13 @@
                             </tr>
                                 <tr>
                                     <td>
-                                        <div class="hiddenElement answer1">
-                                            <ul>
-                                                <li>shots (per hol) >= 1 <b>OR</b> shots (per game >=9)</li>
-                                                <li>exactly 9 scores for each player</li>
-                                                <li>number of holes-in-one >= 0 <b>OR</b> <= 9</li>
-                                                <li>number of holes won is >= 0 <b>OR</b> <=9</li>
-                                            </ul>
-                                            <hr>
-                                            <p><b>1 mark</b> for each bullet, maximum 2 marks.</p>
-                                        </div>
+                                        
                                     </td>
                                 </tr>
                             </table>
-                            <div class="answerButton" onClick="answerButtonSwitch(this); 
-                                toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                            
                 </div>
             </div>
         </div>
@@ -188,5 +181,28 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": "A mini-golf app records two players' scores over 9 holes. A player wins a hole if they have fewer shots than their opponent. One boundary of this app is that the app is for games between exactly two players. State two other boundaries for this app.",
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "Award 1 mark for each (max 2):",
+                        "points": [
+                              "shots per hole ≥ 1 OR shots per game ≥ 9",
+                              "exactly 9 scores for each player",
+                              "number of holes-in-one ≥ 0 OR ≤ 9",
+                              "number of holes won is ≥ 0 OR ≤ 9"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

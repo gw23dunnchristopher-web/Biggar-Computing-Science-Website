@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -92,17 +93,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <p>One mark for each of the following points:</p>
-                                        <ul>
-                                            <li>The <span class="codeText">tournamentID</span> is part of a Compound/Primary Key</li>
-                                            <li>It cannot be left blank</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                     
                 </div>
             </div>
@@ -119,5 +116,31 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "The following SQL statement is run:",
+                        "INSERT INTO Score (PlayerID, Score) VALUES (\"P1815\", 550);",
+                        "The tournamentID field is missing from the SQL statement.",
+                        "Explain why this causes the SQL statement to fail."
+                  ],
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark for each:",
+                        "points": [
+                              "tournamentID is part of a Compound/Primary Key (the primary key is made up of both PlayerID and tournamentID)",
+                              "A primary key cannot be left blank/NULL — so the INSERT fails without it"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

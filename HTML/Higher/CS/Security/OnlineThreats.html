@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -151,13 +152,11 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                          <p>System resources such as processor/backing storage/RAM are exhausted/fully utilised</p>     
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
 
                     <table>
@@ -170,20 +169,13 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer2">
-                                    <p>Any one from:</p>
-                                    <ul>
-                                        <li>Loss of revenue</li>
-                                        <li>Repair (of damage due to attack)</li>
-                                        <li>Cost of putting in measures for prevention of future attacks</li>
-                                    </ul>
-                                    <hr>
-                                    <p>Maintenance would be ongoing and not solely as a result of a DOS attack</p>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                 </div>
             </div>
         </div>
@@ -199,5 +191,25 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": "A company has been the target of a Denial of Service (DOS) attack involving resource starvation. Describe what is meant by a resource starvation DOS attack.",
+                  "marks": 1,
+                  "markingScheme": {
+                        "text": "Accept:",
+                        "points": [
+                              "System resources such as processor, backing storage, or RAM are exhausted/fully utilised by the attack — making the system too slow or completely unable to respond to legitimate requests"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

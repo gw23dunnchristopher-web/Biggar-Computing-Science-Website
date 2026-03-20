@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -133,16 +134,13 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <table>
-                                    <tr><th>(i)</th><td>List or newList</td></tr>
-                                    <tr><th>(ii)</th><td>Emails or uniques</td></tr>
-                                    </table>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                 </div>
             </div>
         </div>
@@ -158,5 +156,31 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "Part of a program is shown below:",
+                        "Line 13: removeDuplicates(emails, uniques)",
+                        "Line 70: PROCEDURE removeDuplicates(ARRAY OF STRING list, ARRAY OF STRING newList)",
+                        "Identify from the code shown above: (i) a formal parameter and (ii) an actual parameter."
+                  ],
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark each for:",
+                        "points": [
+                              "(i) Formal parameter: list OR newList (names used in the PROCEDURE definition at Line 70)",
+                              "(ii) Actual parameter: emails OR uniques (variables passed in the call at Line 13)"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

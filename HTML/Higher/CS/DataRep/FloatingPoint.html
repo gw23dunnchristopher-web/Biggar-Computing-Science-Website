@@ -21,7 +21,8 @@
             .tg .tg-40cz{background-color:#FFF2CC;font-weight:bold;text-align:center;vertical-align:bottom; width:30%}
             .tg .tg-8d8j{text-align:center;vertical-align:bottom; background-color:white; height:40px;}
         </style>
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -553,49 +554,12 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <table class="tg"><thead>
-                                              <tr>
-                                                <th class="tg-iuan">Sign Bit</th>
-                                                <th class="tg-r5v8" colspan="15">Matissa</th>
-                                                <th class="tg-40cz" colspan="8">Exponent</th>
-                                              </tr></thead>
-                                            <tbody>
-                                              <tr>
-                                                <td class="tg-8d8j">1</td>
-                                                <td class="tg-8d8j">1</td>
-                                                <td class="tg-8d8j">0</td>
-                                                <td class="tg-8d8j">1</td>
-                                                <td class="tg-8d8j">0</td>
-                                                <td class="tg-8d8j">0</td>
-                                                <td class="tg-8d8j">0</td>
-                                                <td class="tg-8d8j">0</td>
-                                                <td class="tg-8d8j">1</td>
-                                                <td class="tg-8d8j">1</td>
-                                                <td class="tg-8d8j">1</td>
-                                                <td class="tg-8d8j">1</td>
-                                                <td class="tg-8d8j">0</td>
-                                                <td class="tg-8d8j">0</td>
-                                                <td class="tg-8d8j">0</td>
-                                                <td class="tg-8d8j">0</td>
-                                                <td class="tg-8d8j">1</td>
-                                                <td class="tg-8d8j">1</td>
-                                                <td class="tg-8d8j">1</td>
-                                                <td class="tg-8d8j">1</td>
-                                                <td class="tg-8d8j">1</td>
-                                                <td class="tg-8d8j">0</td>
-                                                <td class="tg-8d8j">1</td>
-                                                <td class="tg-8d8j">1</td>
-                                              </tr>
-                                            </tbody>
-                                            </table>
-                                    </div>
+                                    
                                     <p>You will get 1 point each for the correct Sign Bit, Mantissa and Exponent.</p>
                                 </td>
                             </tr>
                         </table>
-                        <div class="answerButton" onClick="answerButtonSwitch(this); 
-                            toggleVisibility('answer1')">Show Answer</div>
+                        
 
                     <table>
                         <tr>
@@ -607,15 +571,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer2">
-                                            <p>Increasing the number of bits used for the mantissa will increase the 
-                                                accuracy (or precision) of the number.</p>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                        <div class="answerButton" onClick="answerButtonSwitch(this); 
-                            toggleVisibility('answer2')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                        
                 </div>
             </div>
         </div>
@@ -649,5 +611,31 @@
                 }, 500); // 500ms delay to ensure everything is stable
             });
         </script>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "Convert the binary number -0.0000 0101 0000 1111 into floating-point representation.",
+                        "There are 16 bits for the mantissa (including the sign bit) and 8 bits for the exponent.",
+                        "State the value of: (i) the Sign Bit, (ii) the 15-bit Mantissa, and (iii) the 8-bit Exponent in your floating-point representation."
+                  ],
+                  "marks": 3,
+                  "markingScheme": {
+                        "text": "One mark each for correct:",
+                        "points": [
+                              "Sign Bit: 1  (the number is negative)",
+                              "Mantissa (15 bits after sign bit): 1 0 1 0 0 0 0 1 1 1 1 0 0 0 0  (normalised so first bit after the binary point is significant)",
+                              "Exponent (8 bits): 1 1 1 1 1 0 1 1  (representing -5 in two's complement, as we shifted the binary point 5 places to the right)"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

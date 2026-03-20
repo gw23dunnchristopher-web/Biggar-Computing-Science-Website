@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -117,45 +118,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <p><b>Efficiency</b> - </p>
-                                            <ul>
-                                                <li>The function can be called more 
-                                                than once/reused (with different 
-                                                parameters)</li>
-                                                <li>Local variables/parameters only
-                                                held in memory while being 
-                                                executed</li>
-                                            </ul>
-
-                                        <p><b>Maintainability</b> -</p>
-                                            <ul>
-                                                <li>
-                                                    If there is an error with that part 
-                                                    of the program then the bug is 
-                                                    easier to find/easier to identify 
-                                                    errors in a section of code
-                                                </li>
-                                                <li>
-                                                    Is increased because modules 
-                                                    with local variables can be edited 
-                                                    without affecting the other 
-                                                    modules in the program
-                                                </li>
-                                                <li>
-                                                    Any new modules or changes to 
-                                                    existing modules can be 
-                                                    edited/tested individually
-                                                </li>
-                                            </ul>
-                                        <hr>
-                                        <p>Award 1 mark for any one bullet about efficiency.</p>
-                                        <p>Award 1 mark for any one bullet about maintainability.</p>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                     
                 </div>
             </div>
@@ -172,5 +141,26 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": "A program uses a function called consecutiveDays to find the highest number of consecutive days a target distance is met. Describe how modular programming increases the efficiency and maintainability of the code.",
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "Award 1 mark for each of Efficiency and Maintainability:",
+                        "points": [
+                              "Efficiency: the function can be called more than once / reused with different parameters; OR local variables/parameters only held in memory while being executed",
+                              "Maintainability: if there is an error it can be identified and fixed in one place; OR code is easier to read/understand as each module has a specific purpose"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -110,28 +111,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <p>Award 1 mark for each bullet. Maximum 1 mark.</p>
-                                        <ul>
-                                            <li>A form to:
-                                                <ul>
-                                                    <li>Add/Read Comments</li>
-                                                    <li>allow users to sign in.</li>
-                                                    <li>allow users to upload videos or edit profiles.</li>
-                                                </ul>
-                                            </li>
-                                            <li>An element to:
-                                                <ul>
-                                                    <li>Upload videos</li>
-                                                    <li>Watch videos</li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                     
                 </div>
             </div>
@@ -148,5 +134,32 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "A new video sharing website allows users to: upload and watch videos, comment on them, and sign in with a username and password. Signed-in users can access a profile page, videos page and settings page. From the profile page they can upload/edit videos and read comments. From the videos page they can view trending videos and recently watched videos.",
+                        "State one functional requirement of this website."
+                  ],
+                  "marks": 1,
+                  "markingScheme": {
+                        "text": "One mark for any one:",
+                        "points": [
+                              "A form to allow users to sign in (username and password)",
+                              "A form/element to allow users to upload videos",
+                              "An element to allow users to watch/view videos",
+                              "A form to allow users to add or read comments",
+                              "A form to allow users to edit their profile or video details"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

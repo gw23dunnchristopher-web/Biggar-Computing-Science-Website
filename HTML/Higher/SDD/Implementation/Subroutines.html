@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -248,23 +249,13 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <div class="codeBox">
-                                        <p>palindrome = checkPalindrome(userWord)</p>
-                                    </div>
-                                    <hr>
-                                    <p>One mark each for the following:</p>
-                                    <ul>
-                                        <li>Function <span class="codeText">checkPalindrome</span>
-                                        called correctly with single 
-                                        parameter <span class="codeText">userWord</span></li>
-                                        <li>Assigning result to <span class="codeText">palindrome</span></li>
-                                    </ul>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                 </div>
             </div>
         </div>
@@ -280,5 +271,32 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "A program uses a function FUNCTION checkPalindrome(STRING word) RETURNS BOOLEAN to check if a word is a palindrome.",
+                        "Line 25: RECEIVE userWord FROM KEYBOARD",
+                        "Line 26: ____________________________________________________",
+                        "Line 27: IF palindrome = TRUE THEN ...",
+                        "Using a programming language of your choice, write the missing code at Line 26 to call the function and store the result in palindrome."
+                  ],
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark each for:",
+                        "points": [
+                              "Correct function call with argument: checkPalindrome(userWord)",
+                              "Return value assigned to palindrome: palindrome = checkPalindrome(userWord)"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -163,21 +164,13 @@
                             </tr>
                                 <tr>
                                     <td>
-                                        <div class="hiddenElement answer1">
-                                            <p>Aware <b>1 mark</b> for each bullet:</p>
-                                            <ul>
-                                                <li>Communication/feedback between client and developer occurs throughout the process.</li>
-                                                <li>Prototypes/Software available (for review)</li>
-                                                <li>Repeated testing/evaluation</li>
-                                                <li>Reduced documentation</li>
-                                                <li>Communication within the development team.</li>
-                                            </ul>
-                                        </div>
+                                        
                                     </td>
                                 </tr>
                             </table>
-                            <div class="answerButton" onClick="answerButtonSwitch(this); 
-                                toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                            
                 </div>
             </div>
         </div>
@@ -193,5 +186,29 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": "A software development project can be progressed using an agile methodology or an iterative development process. Describe two advantages of the agile methodology when compared to iterative development.",
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "Award 1 mark for each bullet (max 2):",
+                        "points": [
+                              "Communication/feedback between client and developer occurs throughout the process",
+                              "Prototypes/Software available (for review) earlier in the process",
+                              "Repeated testing/evaluation throughout development",
+                              "Reduced documentation required",
+                              "Better communication within the development team"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

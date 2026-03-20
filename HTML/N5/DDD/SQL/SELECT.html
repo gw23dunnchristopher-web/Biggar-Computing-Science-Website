@@ -191,40 +191,16 @@
                             <th rowspan="2"  width="30px">3</th>
                         </tr>
                         <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
-                                    <table style="max-width:400px; margin:auto; text-align:center;">
-                                        <tr>
-                                            <th>forename</th>
-                                            <th>surname</th>
-                                        </tr>
-                                        <tr>
-                                            <td>Julie</td>
-                                            <td>White</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Olivia</td>
-                                            <td>Arran</td>
-                                        </tr>
-                                    </table>
-
-                                    <p>One mark each from:</p>
-                                    <ul>
-                                        <li>forename and surname headings in that order.</li>
-                                        <li>Julie White.</li>
-                                        <li>Olivia Arran.</li>
-                                    </ul>
-                                    
-                                </div>
-                            </td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -236,5 +212,37 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "table",
+                        "text": [
+                                  "A database table stores student results (shown in the image above). The following SQL statement is run:",
+                                  "SELECT forename, surname\nFROM Result\nWHERE test1 < 10 OR test2 > 90",
+                                  "Write the expected output from the SQL statement."
+                        ],
+                        "marks": 3,
+                        "markingScheme": "Award 1 mark each for: correct column headings forename and surname; row with Julie White; row with Olivia Arran.",
+                        "tableHeaders": [
+                                  "forename",
+                                  "surname"
+                        ],
+                        "tableRows": [
+                                  [
+                                            "",
+                                            ""
+                                  ],
+                                  [
+                                            "",
+                                            ""
+                                  ]
+                        ]
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

@@ -140,61 +140,35 @@
                                         <th style="width:30%">minutesTaken</th>
                                     </tr>
                                     <tr style="height:40px">
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
+                                        
+                                        
+                                        
                                     </tr>
                                     <tr>
                                         <td style="height:40px"></td>
-                                        <td></td>
-                                        <td></td>
+                                        
+                                        
                                     </tr>
                                     <tr>
                                         <td style="height:40px"></td>
-                                        <td></td>
-                                        <td></td>
+                                        
+                                        
                                     </tr>
                                 </table>
                             </td>
                             <th rowspan="2"  width="30px">3</th>
                         </tr>
                         <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
-                                    <table style="max-width:600px; text-align:center;">
-                                        <tr>
-                                            <th style="width:30%">start</th>
-                                            <th style="width:30%">routeType</th>
-                                            <th style="width:30%">minutesTaken</th>
-                                        </tr>
-                                        <tr>
-                                            <td>Rackwick</td>
-                                            <td>Coastal</td>
-                                            <td>213</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Rackwick</td>
-                                            <td>Coastal</td>
-                                            <td>167</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Pitlochry</td>
-                                            <td>Forest</td>
-                                            <td>180</td>
-                                        </tr>
-                                    </table>
-                                    <p>You get one mark for each correct row of the table.</p>
-                                    <p>The order of the rows is not important, as there is no ORDER BY in the query.</p>
-                                </div>
-                            </td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -206,5 +180,45 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "table",
+                        "text": [
+                                  "A database stores information about a walking club (shown in the image above). Read the SQL statement below:",
+                                  "SELECT start, routeType, minutesTaken\nFROM Route, Walk\nWHERE Route.routeID = Walk.routeID\nAND rating = 2;",
+                                  "Complete the table below to show the expected output from this SQL statement."
+                        ],
+                        "marks": 3,
+                        "markingScheme": "Award 1 mark per correct row. Expected rows (in any order): Rackwick, Coastal, 213 | Rackwick, Coastal, 167 | Pitlochry, Forest, 180.",
+                        "tableHeaders": [
+                                  "start",
+                                  "routeType",
+                                  "minutesTaken"
+                        ],
+                        "tableRows": [
+                                  [
+                                            "",
+                                            "",
+                                            ""
+                                  ],
+                                  [
+                                            "",
+                                            "",
+                                            ""
+                                  ],
+                                  [
+                                            "",
+                                            "",
+                                            ""
+                                  ]
+                        ]
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

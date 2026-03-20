@@ -13,7 +13,8 @@
             img {display:block; margin:auto;}
             .subheader th {background-color:lightgreen;}
         </style>
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -716,19 +717,14 @@
                         
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <p>One mark for each error found:</p>
-                                    <table>
-                                        <tr><th>Error 1</th><td>MIN and MAX functions are the wrong way round OR ALIAS assigned to wrong function.</td></tr>
-                                        <tr><th>Error 2</th><td>No wildcard operator on both sides of 1 (eg WHERE squad LIKE "%1%" or "*1*").</td></tr>
-                                        <tr><th>Error 3</th><td>No GROUP BY squad.</td></tr>
-                                    </table>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
+                    <div class="quiz-container"></div>
+
                     
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                 </div>
             </div>
         </div>
@@ -744,5 +740,32 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "A swimming database has a Swimmer table with columns including squad and time.",
+                        "The following SQL statement is executed:",
+                        "SELECT squad, MIN(time) AS [Slowest Time], MAX(time) AS [Fastest Time]  FROM Swimmer  WHERE squad LIKE \"1\"",
+                        "When tested, the actual output did not match the expected output. Identify the three errors in the above SQL statement."
+                  ],
+                  "marks": 3,
+                  "markingScheme": {
+                        "text": "One mark for each error:",
+                        "points": [
+                              "MIN gives the smallest/fastest time but is aliased as [Slowest Time] — the aliases are swapped (MIN should be [Fastest Time], MAX should be [Slowest Time])",
+                              "LIKE \"1\" should use single quotes: LIKE '1' OR just = 1 (wrong quote style / LIKE unnecessary without wildcards)",
+                              "Missing GROUP BY squad — without this, aggregate functions won't produce one result per squad"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

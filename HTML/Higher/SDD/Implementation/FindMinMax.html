@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -209,38 +210,14 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <div class="codeBox">
-                                        <p>cheapestPrice = 999999999</p>
-                                        <p>found = False</p>
-                                        <br>
-                                        <p>for x in range(len(machines)):</p>
-                                        <p style="padding-left:40px;">if machines[x].maxLoad >= smallestWash and machines[x].spinSpeed >= slowestSpin and machines[x].price 
-                                            &lt; cheapestPrice:</p>
-                                        <p style="padding-left:80px;">cheapest = machines[x].price</p>
-                                        <p style="padding-left:80px;">found = True</p>
-                                    </div>
-                                        
-                                    <hr>
-                                        
-                                    <p>One mark for:</p>
-                                        
-                                    <ul>    
-                                        <li>Suitable initialisation of cheapest price (in the example it has been set to 99999999 but it could equally be set to 
-                                            machines[0].price).</li>
-                                        <li>[].maxLoad >= smallestWash AND [].spinSpeed >= slowestSpin</li>
-                                        <li>[].price &lt; cheapestPrice</li>
-                                        <li>Assign cheapest</li>
-                                        <li>Found set to false, changed to true when all conditions met.</li>
-                                        <li>Use of array of records - <span class="codeText">machines</span>.</li>
-                                        <li>with matching fields from a(i) (dot notation).</li>
-                                    </ul>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
+                    <div class="quiz-container"></div>
+
                             
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                 </div>
             </div>
         </div>
@@ -256,5 +233,35 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "A shop sells 80 washing machines. The record data structure from part (a) is: machines = [feature() for x in range(80)] where feature has fields: brand, refNo, maxLoad, spinSpeed, price, stock.",
+                        "Step 3 finds the price of the cheapest washing machine that meets the entered criteria (minimum wash load and minimum spin speed entered by user). If no machine meets the criteria, found is set to False.",
+                        "Using a programming language of your choice, write the code for step 3."
+                  ],
+                  "marks": 7,
+                  "markingScheme": {
+                        "text": "One mark for each:",
+                        "points": [
+                              "Suitable initialisation of cheapest price (e.g. cheapestPrice = 999999999 or machines[0].price)",
+                              "machines[x].maxLoad >= smallestWash AND machines[x].spinSpeed >= slowestSpin",
+                              "machines[x].price < cheapestPrice",
+                              "Assign cheapest price when conditions met: cheapestPrice = machines[x].price",
+                              "found set to False initially, changed to True when all conditions met",
+                              "Use of array of records variable name: machines",
+                              "Correct dot notation with field names from part (a)"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

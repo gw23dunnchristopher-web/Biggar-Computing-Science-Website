@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -287,18 +288,11 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                     <div class="codeBox">
-                                        <p>&lt;img src="mon.jpg" <span style="color:yellow">onmouseover="displayMon()"</span>&gt;</p>
-                                     </div>
-                                    <hr>
-                                    <p><span class="codeText">displayMon(this)</span> is also acceptable.</p>
-                                    <p>The brackets in the function call must be included.</p>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
                     <table>
                         <tr>
@@ -327,18 +321,13 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer2">
-                                    <p>A: hideAllDays()</p>
-                                    <p>B: block/inline</p>
-                                    <hr>
-                                    <p>You get one mark for A and one mark for B.</p>
-                                    <p>For A, <span class="codeText">hideAllDays(this)</span> is also acceptable.</p>
-                                    <p>You must include the brackets after the function name for the function call.</p>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                 </div>
             </div>
         </div>
@@ -354,5 +343,32 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "A web page has an image \"mon.jpg\". When the mouse moves over this image, the JavaScript function displayMon() should execute to show Monday's school day information.",
+                        "The current HTML for the image is: <img src=\"mon.jpg\">",
+                        "The HTML code shown above is not fit for purpose because the event handler is missing.",
+                        "Re-write the line of code to correct the error."
+                  ],
+                  "marks": 1,
+                  "markingScheme": {
+                        "text": "Accept:",
+                        "points": [
+                              "<img src=\"mon.jpg\" onmouseover=\"displayMon()\">",
+                              "Also acceptable: onmouseover=\"displayMon(this)\"",
+                              "Note: brackets in the function call must be included"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

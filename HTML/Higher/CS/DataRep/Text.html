@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -116,34 +117,13 @@
                             </tr>
                                 <tr>
                                     <td>
-                                        <div class="hiddenElement answer1">
-                                            <p>Unicode can represent more characters. <b>(1 mark)</b></p>
-
-                                            <p><b>(1 mark)</b> - Any one bullet from:</p>
-                                            <ul>
-                                                <li>
-                                                    2<sup>16</sup> when compared to ASCII 2<sup>8</sup> (or 2<sup>7</sup>
-                                                    in the case of standard ASCII).
-                                                </li>
-                                                <li>uses 16 bits compared to 8/7.</li>
-                                            </ul>
-                                            
-                                            <hr>
-
-                                            <p>More languages on its own does not get first mark</p>
-
-                                            <p>
-                                                Allow different types of Unicode -  UTF-8, UTF-16, UTF-32 or UCS-2 (17 × 
-                                                2<sup>16</sup>)
-                                            </p>
-                        
-                                                
-                                        </div>
+                                        
                                     </td>
                                 </tr>
                             </table>
-                            <div class="answerButton" onClick="answerButtonSwitch(this); 
-                                toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                            
                 </div>
             </div>
         </div>
@@ -159,5 +139,26 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": "Character sets can be represented using either ASCII or Unicode. Describe an advantage of using Unicode over ASCII, making reference to the number of bits used to represent a character in each format.",
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark for each:",
+                        "points": [
+                              "Unicode can represent more characters (supports more languages, symbols and special characters than ASCII)",
+                              "Unicode uses 16 bits per character giving 2^16 possible characters, compared to ASCII's 8 bits (7 bits for standard ASCII) giving only 2^8 (or 2^7) characters"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

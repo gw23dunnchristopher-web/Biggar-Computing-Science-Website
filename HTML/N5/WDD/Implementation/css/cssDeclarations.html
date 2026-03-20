@@ -155,15 +155,10 @@
                             <th rowspan="2"  width="30px">1</th>
                         </tr>
                         <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
-                                    <p>White - while the wellbeing heading does not have a rule that changes its colour by itself, it is inside a  &lt;div&gt; that has the 'wellbeing' class.  In the CSS, anything with this
-                                    class has its text coloured white (it's the '.wellbeing' rule).</p>
-                                </div>
-                            </td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
                     <table>
                         <tr>
@@ -177,13 +172,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <div class="htmlCode" style="max-width:400px;">
-                                        <p>div {</p>
-                                        <p>&nbsp;&nbsp;&nbsp;&nbsp;text-align:right;</p>
-                                        <p>&nbsp;&nbsp;&nbsp;&nbsp;font-family:Arial;</p>
-                                        <p>}</p>
-                                    </div>
+                                
                                         <br>
                                         <p>This would apply the rule to all of the divs on the webpage, but because the other div shown in the HTML code has a classm that will override this rule and it will not be applied to that 
                                             div </p>
@@ -195,13 +184,14 @@
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
                 
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -213,5 +203,25 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "paragraph",
+                        "text": "Look at the CSS code shown in the image above from the Dog Day Care Centre website. (i) State the colour of the 'Wellbeing' heading when displayed in a browser.",
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark: white. The Wellbeing heading is inside a div with the 'wellbeing' class. The CSS rule .wellbeing sets the text colour to white."
+              },
+              {
+                        "type": "pseudocode",
+                        "text": "(ii) Additional CSS is required to style '© Dog Day Care Centre' at the bottom of the page. Write a CSS rule to make this text bold and 8 pixels in size.",
+                        "marks": 2,
+                        "markingScheme": "Award 1 mark for a CSS rule using the correct selector (e.g. #footer p or similar). Award 1 mark for correct declarations: font-weight: bold; and font-size: 8px;"
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

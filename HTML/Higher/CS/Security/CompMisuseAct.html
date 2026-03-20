@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -127,20 +128,13 @@
                             </tr>
                                 <tr>
                                     <td>
-                                        <div class="hiddenElement answer1">
-                                            <p>Award <b>1 mark</b> for each bullet. Maximum 2 marks.</p>
-                                            <ul>
-                                                <li>Unauthorised access to computer material.</li>
-                                                <li>Unauthorised access to computer material with intent to commit crime.</li>
-                                                <li>Unauthorised modification of computer material.</li>
-                                            </ul>
-
-                                        </div>
+                                        
                                     </td>
                                 </tr>
                             </table>
-                            <div class="answerButton" onClick="answerButtonSwitch(this); 
-                                toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                            
                 </div>
             </div>
         </div>
@@ -156,5 +150,27 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": "An employee has acquired their manager's login details without permission and uses them to increase their monthly sales bonus. State two ways in which the Computer Misuse Act has been breached.",
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark for each (max 2):",
+                        "points": [
+                              "Unauthorised access to computer material (using the manager's login details without permission)",
+                              "Unauthorised access to computer material with intent to commit a crime (intending to illegally increase their bonus)",
+                              "Unauthorised modification of computer material (changing the bonus amount in the system)"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

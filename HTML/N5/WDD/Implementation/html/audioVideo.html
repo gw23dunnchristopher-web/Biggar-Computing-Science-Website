@@ -85,20 +85,10 @@
                             <th rowspan="2" width="30px">1</th>
                         </tr>
                         <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
-                                    <p>Any two from:</p>
-                                    <ul>
-                                        <li>specifies the width of the video (500) pixels</li>
-                                        <li>specifies the height of the video (250) pixels</li>
-                                        <li>locates/displays the file (called “starFrosFreet.mp4”)</li>
-                                        <li>shows video with control buttons</li>
-                                    </ul>
-                                </div>
-                            </td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
                     <h2>Past Paper Question - 2023 Q19(b) (i)</h2>
                     <p>All the sounds used on the website are stored in a folder called ‘media’ in the following locations.</p>
@@ -120,28 +110,16 @@
                             <th rowspan="2" width="30px">3</th>
                         </tr>
                         <tr>
-                            <td>
-                                <div class="hiddenElement answer2">
-                                    <p class="codeText">&lt;<u>audio</u> controls&gt;</p>
-                                    <p class="codeText">&lt;source src="<u>/media/redFoxCry.mp3</u>"</p> 
-                                    <p class="codeText">type="audio/mpeg"&gt;</p>
-                                    <p class="codeText">&lt;/<u>audio</u>&gt;</p>
-
-                                    <ul>
-                                        <li><b>1 mark</b> - audio opening and closing tags</li>
-                                        <li><b>1 mark</b> - correct path (/media/)</li>
-                                        <li><b>1 mark</b> - correct filename and type (redFoxCry.mp3)</li>
-                                    </ul>
-                                </div>
-                            </td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -153,5 +131,32 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "paragraph",
+                        "text": [
+                                  "The code below is added to a webpage:",
+                                  "<video width=\"500\" height=\"250\" controls>\n<source src=\"starFrostFree.mp4\" type=\"video/mp4\">\n</video>",
+                                  "Describe two purposes of this code."
+                        ],
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark for any two from: specifies the width of the video (500 pixels); specifies the height of the video (250 pixels); locates/displays the file (starFrostFree.mp4); shows the video with control buttons (play, pause, etc.)."
+              },
+              {
+                        "type": "pseudocode",
+                        "text": [
+                                  "All the sounds used on the website are stored in a folder called 'media' as shown in the file structure image above.",
+                                  "Write the HTML code to add an audio player with controls that will play the audio file redFoxCry.mp3."
+                        ],
+                        "marks": 3,
+                        "markingScheme": "Award 1 mark for audio opening and closing tags (<audio controls> ... </audio>). Award 1 mark for correct file path (/media/). Award 1 mark for correct filename and type attribute (redFoxCry.mp3 and type=\"audio/mpeg\")."
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

@@ -192,11 +192,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <div class="codeBox">
-                                        <p>INSERT INTO Task (taskID, description, dateStarted, completed, tradesPerson, name)</p>
-                                        <p>VALUES (9, "construct porch", "19/4/2022", False, "builder", "Porch");</p>
-                                    </div>
+                                
 
                                     <p>You will gain marks for the following:</p>
                                     <ul>
@@ -217,12 +213,13 @@
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -234,5 +231,23 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "pseudocode",
+                        "text": [
+                                  "The relational database stores room and task data (shown in the image above). A porch has already been added to the Room table.",
+                                  "The task 'construct porch' needs to be added to the Task table. This task was started by a builder on 19 April 2022. The work is not completed so hours taken and cost are not yet known.",
+                                  "Write the SQL INSERT INTO statement to add this task."
+                        ],
+                        "marks": 3,
+                        "markingScheme": "Award 1 mark for correct INSERT INTO Task with correct field names (taskID, description, dateStarted, completed, tradesPerson, name). Award 1 mark for correct VALUES clause with 6 matching values. Award 1 mark for correct data values: description 'construct porch', dateStarted '19/4/2022', completed False, tradesPerson 'builder', name 'Porch', NULL/blank for hours and cost."
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

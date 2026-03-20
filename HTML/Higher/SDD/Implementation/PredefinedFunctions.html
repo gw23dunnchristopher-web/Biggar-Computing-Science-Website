@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -115,22 +116,13 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <div class="codeBox">
-                                            <p>n % divisor == 0</p>
-                                        </div>
-                                        <hr>
-                                        <p>One mark each for:</p>
-                                        <ul>
-                                            <li>Use of mod function/operatior (%)</li>
-                                            <li>Arguments (n, divisor) in order with comparison to 0.</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); 
-                                toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                 </div>
             </div>
         </div>
@@ -146,5 +138,30 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "A program checks if a number is prime using a function checkPrime(n). Inside the function, Line 7 checks whether n is divisible by the current divisor.",
+                        "The main program has: SET isPrime TO checkPrime(number)",
+                        "Using a programming language of your choice, write the code for Line 7 to check whether n is exactly divisible by divisor."
+                  ],
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark each for:",
+                        "points": [
+                              "Use of mod operator: n % divisor",
+                              "Complete expression compared to 0: n % divisor == 0"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

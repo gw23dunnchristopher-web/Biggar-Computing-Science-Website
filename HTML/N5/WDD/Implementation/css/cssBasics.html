@@ -147,20 +147,16 @@
                             <th rowspan="2"  width="30px">1</th>
                         </tr>
                         <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
-                                    <p>This line of code links the external CSS file to the webpage.  The CSS file contains the style rules that will be applied to the webpage.  This line of code is included in every page of the 
-                                        website so that the same styles are applied to every page.</p>
-                                </div>
-                            </td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -172,5 +168,22 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "paragraph",
+                        "text": [
+                                  "Explain why the line of code below is included in every page of the website:",
+                                  "<link rel=\"stylesheet\" type=\"text/css\" href=\"ChillStyle.css\">"
+                        ],
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark: this line links the external CSS file to the webpage. It is included on every page so that the same styles (from ChillStyle.css) are applied consistently across the entire website."
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

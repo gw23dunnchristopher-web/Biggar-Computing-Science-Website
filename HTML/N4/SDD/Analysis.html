@@ -79,20 +79,19 @@
                     {
                         type: "table",
                         text: [
-                            "A program is being developed to manage a school library. The program should:",
+                            "A program is created for a school shop. The program should:",
                             [
-                                "Store a list of books, each with a title, author, and availability status",
-                                "Allow a librarian to search for a book by title",
-                                "If found, check whether it is available — if so, mark it as on loan and record the borrowing student's name; if not, display a waiting list message",
-                                "Display a confirmation or an appropriate error message",
+                                "Ask the user to enter the name of an item, its price per unit, and the quantity they want to buy",
+                                "Calculate the total cost",
+                                "If the total is £10 or more, apply a 10% discount",
+                                "Display the item name, the original total, and the final amount to pay"
                             ],
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
+                            "Complete the table to identify the inputs, processes, and outputs of this program."
                         ],
                         marks: 3,
                         tableHeaders: ["Input", "Process", "Output"],
                         tableRows: [["", "", ""]],
-                        markingScheme:
-                            "Award 1 mark per cell. Input: book title to search for and student's name (accept either or both; also accept the stored book list as an input). Process: search the list for the book title, check availability status, update status to on loan and record student name if available (award mark for any two of these processes). Output: confirmation message if loan is successful, or waiting list / unavailable message if not (accept either or both).",
+                        markingScheme: "Award 1 mark per cell. Input: item name, price per unit, and quantity (award mark if at least two of three are mentioned). Process: multiply price by quantity to get total cost, then check if total is £10 or more and apply 10% discount if so (award mark if both steps are mentioned, or award mark for either step alone). Output: item name, original total, and final price after discount (award mark if at least two of three outputs are mentioned)."
                     },
                 ],
             };

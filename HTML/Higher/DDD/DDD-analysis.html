@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -144,20 +145,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <p>One mark for any one bullet:</p>
-                                        <ul>
-                                            <li>(Create a query to) search for the contact details for a particular tutor or student</li>
-                                            <li>(Create a query to) count the number of tutor sessions on a particular date</li>
-                                            <li>(Create a query using SUM to) calculate the total tutor fees that each staff member has been paid</li>
-                                            <li>(Create a query using MIN) to calculate the tutor who charges the lowest hourly rate</li>
-                                            <li>Create/update/delete records to store details of student, staff and tutor sessions</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                     
                 </div>
             </div>
@@ -174,5 +168,28 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": "Cara runs a private tutoring company. She requires a relational database to: store data on students, tutors and sessions; display contact details for a particular tutor or student; display the number of sessions for a particular date; display total fees paid to each tutor; and display the tutor with the lowest hourly rate. State one functional requirement of the relational database.",
+                  "marks": 1,
+                  "markingScheme": {
+                        "text": "One mark for any one:",
+                        "points": [
+                              "Create a query to search for/display the contact details for a particular tutor or student",
+                              "Create a query to display the number of sessions for a particular date",
+                              "Create a query to display the total fees paid to each tutor",
+                              "Create a query to display the tutor who charges the lowest hourly rate"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

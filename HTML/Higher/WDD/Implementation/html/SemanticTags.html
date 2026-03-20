@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -82,17 +83,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <p>One mark for each of the bullet points:</p>
-                                        <ul>
-                                            <li><span class="codeText">&lt;nav&gt;</span> for A</li>
-                                            <li><span class="codeText">&lt;section&gt;</span> for B</li>
-                                        </ul>    
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                 </div>
             </div>
         </div>
@@ -108,5 +105,26 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": "HTML5 semantic elements are used to define different parts of a web page. Part A is a horizontal bar containing navigation links at the top of the page content. Part B is a distinct thematic section of content below the navigation. State which HTML5 semantic elements should be used for parts A and B.",
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark for each:",
+                        "points": [
+                              "A: <nav>  (the HTML5 element for a set of navigation links)",
+                              "B: <section>  (the HTML5 element for a thematic grouping of content)"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

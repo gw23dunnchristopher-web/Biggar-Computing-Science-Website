@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -124,17 +125,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <p>One mark for each of the bullet points:</p>
-                                        <ul>
-                                            <li>All of the text inside the <span class="codeText">&lt;ul&gt;</span> elements will be yellow.</li>
-                                            <li>All of the text inside the <span class="codeText">&lt;ul&gt;</span> elements that are inside the <span class="codeText">&lt;ol&gt;</span> elements will be blue.</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
 
                 </div>
             </div>
@@ -151,5 +148,32 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "A \"Courses\" page has: an h1 heading, an outer ul (with Beginners, Refreshers li items), an h2, and an ol where each li contains a nested ul with course details.",
+                        "CSS rules applied:",
+                        "ul { color: yellow; }",
+                        "ol ul li { color: blue; }",
+                        "Describe the effect of these CSS rules on this page."
+                  ],
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark for each:",
+                        "points": [
+                              "ul { color: yellow; } makes the text in the outer unordered list items (Beginners, Refreshers) appear yellow",
+                              "ol ul li { color: blue; } makes the text in the nested unordered lists inside the ordered list (e.g. Cost, Minimum Lessons items) appear blue — this overrides the yellow for those items"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

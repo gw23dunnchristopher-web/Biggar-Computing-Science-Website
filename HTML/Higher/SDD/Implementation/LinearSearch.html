@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -194,25 +195,8 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <div class="codeBox">
-                                        <p>for x in range(len(playerList)):</p>
-                                        <p style="padding-left:40px;">if playerList[x].playingTime > 500:</p>
-                                        <p style="padding-left:80px;">playerList[x].speed += 3</p>
-                                    </div>
-                                    <hr>
-                                    <p>One mark each for:</p>
-                                    <ul>
-                                        <li>Loop for length of array / 10,000 iterations.</li>
-                                        <li>If current minutes > 500</li>
-                                        <li>Increase speed by 3.</li>
-                                        <li>Correct use of array name and field names.</li>
-                                    </ul>
-                            </td>
-                        </tr>
-                    </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
-                </div>
+                                
+                    <div class="quiz-container"></div>
             </div>
         </div>
         <footer>
@@ -227,5 +211,33 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "An online game uses this record structure: @dataclass class player(): uniqueID: str, totalScore: int, playingTime: float, speed: int, strength: int, agility: int",
+                        "Array: playerList = [player() for x in range(10000)]",
+                        "All players whose playing time is over 500 minutes will have their speed increased by 3.",
+                        "Using a programming language of your choice, write the code to implement this using the record data structure."
+                  ],
+                  "marks": 4,
+                  "markingScheme": {
+                        "text": "One mark each for:",
+                        "points": [
+                              "Loop for length of array / 10000 iterations: for x in range(len(playerList)):",
+                              "IF condition: if playerList[x].playingTime > 500:",
+                              "Increase speed by 3: playerList[x].speed += 3",
+                              "Correct use of array name (playerList) and field names (.playingTime, .speed)"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

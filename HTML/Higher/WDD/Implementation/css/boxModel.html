@@ -12,7 +12,8 @@
         <style>
             .codeBlocks {display:block; margin:auto; margin-top:20px; margin-bottom:20px; padding:10px; border:1px solid black; width:50%}
         </style>
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -185,23 +186,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <p>One mark for each bullet:</p>
-                                        <ul class="codeText">
-                                            <li>margin-top: 30px;</li>
-                                            <li>padding-top: 20px;</li>
-                                        </ul>
-                                        <hr>
-                                        <p>The following is also acceptable:</p>
-                                        <ul class="codeText">
-                                            <li>margin: 30px 0 0 0;</li>
-                                            <li>padding: 20px 0 0 0;</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                     
                 </div>
             </div>
@@ -218,5 +209,29 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "An energy supplier's website is redesigning its home page. The design shows a 30px gap between the page border and the header (external spacing), and a 20px gap between the header border and its content (internal spacing).",
+                        "Complete the CSS rules to implement the appropriate spacing shown in the design (one margin value and one padding value are required)."
+                  ],
+                  "marks": 1,
+                  "markingScheme": {
+                        "text": "Both required for the mark:",
+                        "points": [
+                              "margin-top: 30px;  (or margin: 30px 0 0 0;) — external spacing from page border to header",
+                              "padding-top: 20px;  (or padding: 20px 0 0 0;) — internal spacing from header border to its content"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

@@ -176,17 +176,10 @@
                             <th rowspan="2"  width="30px">2</th>
                         </tr>
                         <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
-                                    <ul>
-                                        <li>It will update all employees with the surname Patel, not just H Patel.</li>
-                                        <li>It will set the pay grade to 3, not 2.</li>
-                                    </ul>
-                                </div>
-                            </td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
                     <table>
                         <tr>
@@ -198,13 +191,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer2">
-                                    
-                                    <div class="codeBox">
-                                        <p>UPDATE Employee</p>
-                                        <p>SET payGrade = 2</p>
-                                        <p>WHERE appRef = 327;</p>
-                                    </div>
+                                
 
                                     <p>One mark each for:</p>
                                     <ul>
@@ -215,12 +202,13 @@
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -232,5 +220,29 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "paragraph",
+                        "text": [
+                                  "The tables show job vacancies and employees (see image above). The SQL statement shown below is written to change H Patel's pay grade from 3 to 2:",
+                                  "UPDATE Employee\nSET payGrade = 3\nWHERE surname = \"Patel\";",
+                                  "(i) Give two reasons why this SQL statement is not fit for purpose."
+                        ],
+                        "marks": 2,
+                        "markingScheme": "Award 1 mark each for: (1) it will update all employees with the surname Patel, not just H Patel; (2) it sets the pay grade to 3 instead of 2."
+              },
+              {
+                        "type": "pseudocode",
+                        "text": "(ii) Re-write the SQL statement to make it fit for purpose.",
+                        "marks": 2,
+                        "markingScheme": "Award 1 mark for correctly setting payGrade to 2 (not 3). Award 1 mark for identifying H Patel uniquely — use appRef = 327, or WHERE initial = 'H' AND surname = 'Patel'."
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

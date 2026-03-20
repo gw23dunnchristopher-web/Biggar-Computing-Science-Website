@@ -12,7 +12,8 @@
         <style>
             .subheader th {background-color:lightgreen;}
         </style>
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -171,22 +172,11 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <div class="codeBox">
-                                            <p>SELECT ROUND(AVG(loyaltyPoints), 1) AS [Average Loyalty Points]</p>
-                                            <p>FROM Customer;</p>
-                                        </div>
-                                        <hr>
-                                        <p>One mark for each bullet:</p>
-                                        <ul>
-                                            <li>aggregate function AVG on loyaltyPoints</li>
-                                            <li>alias and table</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
                     <table>
                         <tr>
@@ -210,26 +200,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <div class="codeBox">
-                                            <p>SELECT forename, surname, loyaltyPoints, opticianName</p>
-                                            <p>FROM Customer, Optician, AvgPointsQuery</p>
-                                            <p>WHERE Customer.opticianID = Optician.opticianID AND loyaltyPoints &gt; [Average Loyalty Points]</p>
-                                            <p>ORDER BY loyaltyPoints DESC;</p>
-                                        </div>
-                                        <hr>
-                                        <p>One mark for each bullet:</p>
-                                        <ul>
-                                            <li>FROM Customer, Optician, AvgPointsQuery</li>
-                                            <li>Equi-join: WHERE Customer.opticianID = Optician.opticianID</li>
-                                            <li>loyaltyPoints &gt; [Average Loyalty Points]</li>
-                                            <li>loyaltyPoints ordered in descending order</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                     
                 </div>
             </div>
@@ -246,5 +223,47 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "Perfect Eyes optician database has a Customer table (customerID, forename, surname, opticianID, loyaltyPoints).",
+                        "Write the SQL statement to display the average loyalty points of customers, rounded to 1 decimal place, with the column heading [Average Loyalty Points]."
+                  ],
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark for each:",
+                        "points": [
+                              "Aggregate function AVG on loyaltyPoints: ROUND(AVG(loyaltyPoints), 1)",
+                              "Alias and FROM: AS [Average Loyalty Points] FROM Customer"
+                        ]
+                  }
+            },
+            {
+                  "id": "q2",
+                  "type": "paragraph",
+                  "question": [
+                        "The previous query is saved as \"AvgPointsQuery\". Using this saved query, write an SQL statement to display the forename, surname, loyaltyPoints and opticianName for customers who have more than the average loyalty points, in order from highest to lowest loyalty points.",
+                        "The Optician table has columns: opticianID, opticianName."
+                  ],
+                  "marks": 4,
+                  "markingScheme": {
+                        "text": "One mark for each:",
+                        "points": [
+                              "SELECT forename, surname, loyaltyPoints, opticianName",
+                              "FROM Customer, Optician, AvgPointsQuery  (all three tables including the saved query)",
+                              "WHERE Customer.opticianID = Optician.opticianID AND loyaltyPoints > [Average Loyalty Points]  (join + condition using alias from saved query)",
+                              "ORDER BY loyaltyPoints DESC"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

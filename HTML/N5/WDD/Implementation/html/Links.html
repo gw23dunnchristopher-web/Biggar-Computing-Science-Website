@@ -88,15 +88,10 @@
                             <th rowspan="2">1</th>
                         </tr>
                         <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
-                                    <p>This hyperlink shown here uses relative addressing rather than absolute addressing.  Absolute addressing is required for an external hyperlink as it uses the full webaddress for the 
-                                        webpage.  The address in the question is just points to a webpage in the same folder as the current webpage.</p>
-                                </div>
-                            </td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
                     <h2>Past Paper Question - 2018 Q18 (f)</h2>
                     <table>
@@ -114,9 +109,7 @@
                         </tr>
                         <tr>
                             <td colspan="2">
-                                <div class="hiddenElement answer2">
-                                    <p>Internal</p>
-                                </div>
+                                
                             </td>
                         </tr>
                         <tr>
@@ -125,18 +118,17 @@
                         </tr>
                         <tr>
                             <td colspan="2">
-                                <div class="hiddenElement answer2">
-                                    <p>Relative</p>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -148,5 +140,29 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "paragraph",
+                        "text": [
+                                  "During testing it was found that the external hyperlink shown below did not navigate to the Scottish Basketball League website:",
+                                  "<a href=\"ScottishBasketballLeague.html\">Scottish Basketball League</a>",
+                                  "Describe the problem with the addressing that has been highlighted by this testing."
+                        ],
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark: the hyperlink uses relative addressing instead of absolute addressing. External hyperlinks require an absolute address (full URL) — the href shown only points to a local file, not the actual website."
+              },
+              {
+                        "type": "paragraph",
+                        "text": "(i) State the type of hyperlink that has been used to return to the Home page from the Junior Club page. (ii) State the type of addressing that has been used in the hyperlink.",
+                        "marks": 2,
+                        "markingScheme": "Award 1 mark for (i): Internal (hyperlink). Award 1 mark for (ii): Relative (addressing)."
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

@@ -152,21 +152,22 @@
                         </tr>
                         <tr>
                             <td>Normal</td>
-                            <td><div class="hiddenElement answer1">Password</div></td>
+                            
                             <td>Program Continues</td>
                         </tr>
                         <tr>
-                            <td><div class="hiddenElement answer1">Exceptional</div></td>
+                            
                             <td>Jaj8up</td>
-                            <td><div class="hiddenElement answer1">Error displayed</div></td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </table>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -178,5 +179,39 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "table",
+                        "text": [
+                                  "A program is being designed that will allow pupils to add money to their lunch money account. The user enters their name, an 8 character password and the amount of money they want to add.",
+                                  "Test data will be used to ensure the validation of the password works correctly. Complete the test table below."
+                        ],
+                        "marks": 3,
+                        "markingScheme": "Award 1 mark each for: (1) a valid 8-character password as the Normal input (e.g. 'Password'); (2) 'Exceptional' as the type for the second row; (3) 'Error displayed' (or similar) as the expected result for the exceptional test.",
+                        "tableHeaders": [
+                                  "Type of Test",
+                                  "Input",
+                                  "Expected Result"
+                        ],
+                        "tableRows": [
+                                  [
+                                            "Normal",
+                                            "",
+                                            "Program Continues"
+                                  ],
+                                  [
+                                            "",
+                                            "Jaj8up",
+                                            ""
+                                  ]
+                        ]
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

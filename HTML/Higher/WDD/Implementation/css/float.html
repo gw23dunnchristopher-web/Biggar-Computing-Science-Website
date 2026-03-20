@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -149,47 +150,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <div class="codeBox">
-                                        <p>header {</p>
-                                        <div style="padding-left:40px;">
-                                            <p><span style="text-decoration:underline">background-color/border-color</span>:lightgrey;</p>
-                                            <p>padding:0px;</p>
-                                        </div>
-                                        <p>}</p>
-                                        <br>
-                                        <p>.imageBanner {</p>
-                                        <div style="padding-left:40px;">
-                                            <span style="text-decoration:underline">margin</span>:20px;</p>
-                                            <p>float:left;</p>
-                                            <p>padding:0px;</p>
-                                            <p>height:90px;</p>
-                                            <p>width:130px</p>
-                                        </div>
-                                        <p>}</p>
-                                        <br>
-                                        <p>h1 {</p>
-                                        <div style="padding-left:40px;">
-                                            <p><span style="text-decoration:underline">float:right</span>;</p>
-                                            <p>margin-right:30px;</p>
-                                            <p>margin-top:30px;</p> 
-                                            <p>color:white;</p>
-                                            <p>display:inline;</p>
-                                        </div>
-                                        <p>}</p>
-                                        </div>
-                                        <hr>
-                                        <p>One mark for each bullet point:</p>
-                                        <ul>
-                                            <li><span class="codeText">background-color</span> in <span class="codeText">header</span> selector <b>OR</b> <span class="codeText">border-color</span></li>
-                                            <li><span class="codeText">margin</span> in <span class="codeText">imageBanner</span> class</li>
-                                            <li><span class="codeText">float:right</span> in <span class="codeText">h1</span> selector</li>
-                                        </ul>
-                                    </div> 
+                                     
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                     
                 </div>
             </div>
@@ -206,5 +173,33 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "Bailey's Dog Kennels website has a header element containing an image (.imageBanner) on the left and an h1 heading on the right, on a lightgrey background.",
+                        "Complete the CSS below to style the header. Three blank properties need filling in:",
+                        "1. A colour property in the header selector (background appears lightgrey)",
+                        "2. A spacing property in the .imageBanner class (image has space around it)",
+                        "3. A float property in the h1 selector (heading appears on the right)"
+                  ],
+                  "marks": 3,
+                  "markingScheme": {
+                        "text": "One mark for each:",
+                        "points": [
+                              "background-color: lightgrey; in header selector (OR border-color: lightgrey;)",
+                              "margin: 20px; in .imageBanner class selector",
+                              "float: right; in h1 selector"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

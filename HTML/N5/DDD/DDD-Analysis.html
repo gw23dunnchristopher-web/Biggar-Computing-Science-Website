@@ -122,26 +122,16 @@
                             <th rowspan="2"  width="30px">2</th>
                         </tr>
                         <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
-                                    <p>Any two from:</p>
-                                    <p>The database should be able to...</p>
-                                    <ul>
-                                        <li>insert new activities</li>
-                                        <li>search/list members registered for a particular activity</li>
-                                        <li>search/list details of leaders with first aid qualifications</li>
-                                        <li>sort/list members alphabetically by town</li>
-                                    </ul>
-                                </div>
-                            </td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -153,5 +143,22 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "paragraph",
+                        "text": [
+                                  "A youth club plans to create a database to store details of club members. The club leaders have been discussing requirements (shown in the image above).",
+                                  "Use the information above to identify two functional requirements."
+                        ],
+                        "marks": 2,
+                        "markingScheme": "Award 1 mark each for any two from: the database should be able to insert new activities; search/list members registered for a particular activity; search/list details of leaders with first aid qualifications; sort/list members alphabetically by town."
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

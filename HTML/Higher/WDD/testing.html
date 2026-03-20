@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -101,17 +102,13 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <p>One mark for each bullet:</p>
-                                    <ul>
-                                        <li>Test that the website functions on different browsers.</li>
-                                        <li>Test that the website functions on different devices.</li>
-                                    </ul>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
 
                 </div>
             </div>
@@ -128,5 +125,29 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": "A developer wants to add a tutorial page with videos and audio clips. State two different compatibility tests that should be carried out on this page.",
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark for each (max 2):",
+                        "points": [
+                              "Test on different browsers (e.g. Chrome, Firefox, Safari, Edge)",
+                              "Test on different operating systems (e.g. Windows, macOS, iOS, Android)",
+                              "Test on different devices (e.g. desktop, tablet, mobile phone)",
+                              "Test on different screen sizes/resolutions",
+                              "Test with different internet connection speeds"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

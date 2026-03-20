@@ -15,6 +15,7 @@
         table {max-width:800px !important;}
         .subheading {background-color:lightgreen !important;}
     </style>
+  <link rel="stylesheet" href="/CSS/quiz.css">
 </head>
 
 <body>
@@ -597,52 +598,13 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <table style="text-align:left;">
-                                        <tr>
-                                            <th>Field(s) and Calculation(s)</th>
-                                            <td style="width:66%">type, MAX(sellingPrice-buyingPrice) as Profit</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Table(s) and Query</th>
-                                            <td>Item</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Search Criteria</th>
-                                            <td></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Grouping</th>
-                                            <td>type</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Sorting</th>
-                                            <td>MAX(sellingPrice-buyingPrice) OR Profit DESC</td>
-                                        </tr>
-                                    </table>
-                                    <hr>
-                                    <p>One mark for each bullet:</p>
-                                    <ul>
-                                        <li>Type field and calculation with 
-                                        alias</li>
-                                        <li>MAX function</li>
-                                        <li>Table and grouping</li>
-                                        <li>Sort using calculation with 
-                                        function/alias DESC</li>
-                                    </ul>
-                                    <hr>
-                                    <p>Do not award bullet 1 if additional 
-                                    fields in Fields & Calculations</p>
-                                    <p>Do not double penalise in bullet 4 if 
-                                    incorrect calculation (from bullet 1) 
-                                    is repeated</p>
-                                    <p>Ignore fruit or veg in search criteria</p>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show
-                        Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                 </div>
             </div>
         </div>
@@ -658,6 +620,61 @@
             </div>
         </footer>
     </div>
+
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "table",
+                  "question": [
+                        "A fruit and vegetable shop database has an Item table: itemID, itemName, type, buyingPrice, sellingPrice, quantity, supplierRef.",
+                        "Profit = sellingPrice - buyingPrice.",
+                        "The shop wants the largest profit for each type (Fruit and Veg), listed with the largest profit first.",
+                        "Expected output: type | Profit, showing Veg: 0.08, Fruit: 0.07.",
+                        "Design the SQL query using the query design grid."
+                  ],
+                  "marks": 4,
+                  "tableHeaders": [
+                        "Field",
+                        "Value"
+                  ],
+                  "tableRows": [
+                        [
+                              "Field(s) and Calculation(s)",
+                              ""
+                        ],
+                        [
+                              "Table(s)",
+                              ""
+                        ],
+                        [
+                              "Search Criteria",
+                              ""
+                        ],
+                        [
+                              "Grouping",
+                              ""
+                        ],
+                        [
+                              "Sorting",
+                              ""
+                        ]
+                  ],
+                  "markingScheme": {
+                        "text": "One mark for each (max 4):",
+                        "points": [
+                              "Fields and calculation: type, MAX(sellingPrice - buyingPrice) AS [Profit] (or similar with alias)",
+                              "Table: Item",
+                              "Grouping: GROUP BY type",
+                              "Sorting: ORDER BY MAX(sellingPrice - buyingPrice) DESC (or profit alias DESC)"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
 </body>
 
 </html>

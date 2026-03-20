@@ -128,12 +128,7 @@
                         <tr>
                             <td>
                                 <p style="font-weight:bold;">CSS Rule:</p>
-                                <div class="hiddenElement answer1">
-                                    <div class="htmlCode" style="width:500px;">
-                                        <p>.lunge {</p>
-                                        <p>&nbsp;&nbsp;&nbsp;&nbsp;color:red;</p>
-                                        <p>}</p>
-                                    </div>
+                                
                                     <p>
                                         <ul>
                                             <li><b>1 mark</b> - a CSS rule using a class with an appropriate name (in this case I have used 'lunge' but the name could be anything appropriate, and it needs a '.' in front
@@ -147,21 +142,17 @@
                         <tr>
                             <td>
                                 <p style="font-weight:bold;">Edited HTML:</p>
-                                <div class="hiddenElement answer1">
-                                     <p class="codeText" style="text-align:center;">&lt;h3 class="lunge"&gt;Lunge punch&lt;/h3&gt;</p>
-                                    <ul>
-                                        <li><b>1 mark</b> - The code should be edited to add the class used in the CSS rule part to the Lunch Punch &lt;h3&gt; tag.</li>
-                                    </ul>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -173,5 +164,23 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "pseudocode",
+                        "text": [
+                                  "The club have decided to make the lunge punch their training focus. To show this they want the heading below to be red:",
+                                  "<h3>Lunge punch</h3>",
+                                  "Write an external CSS class to style the text red, and edit the HTML above to apply the class."
+                        ],
+                        "marks": 3,
+                        "markingScheme": "Award 1 mark for a CSS class rule with an appropriate name (e.g. .lunge { ... }) — must use a dot prefix. Award 1 mark for the correct declaration color: red; inside the rule. Award 1 mark for editing the HTML tag to add the class (e.g. <h3 class=\"lunge\">Lunge punch</h3>)."
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

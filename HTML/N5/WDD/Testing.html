@@ -79,25 +79,16 @@
                             <th rowspan="2"  width="30px">1</th>
                         </tr>
                         <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
-                                    <p>Any one from:</p>
-                                    <ul>
-                                        <li>text size or font is consistent (across similar elements)</li>
-                                        <li>graphics are the same size</li>
-                                        <li>position of content/navigation bar is consistent across different pages/objects aligned</li>
-                                        <li>colour scheme consistent throughout.</li>
-                                    </ul>
-                                </div>
-                            </td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -109,5 +100,19 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "paragraph",
+                        "text": "Describe one aspect of consistency that should be considered when testing a website.",
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark for any one from: text size or font is consistent across similar elements; graphics are the same size; position of content/navigation bar is consistent across different pages; colour scheme is consistent throughout."
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

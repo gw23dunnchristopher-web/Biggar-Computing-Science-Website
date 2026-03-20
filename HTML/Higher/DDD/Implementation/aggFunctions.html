@@ -13,7 +13,8 @@
             .subheader th {background-color:lightgreen;}
             .sideBySide {justify-content:center;}
         </style>
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -323,49 +324,11 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <table style="text-align:left;">
-                                            <tr>
-                                                <th>Field(s) and Calculation(s)</th>
-                                                <td style="width:66%">
-                                                    pilotID, forename, surname, 150*COUNT(*) AS Winnings
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>Table(s) and Query</th>
-                                                <td>
-                                                    Pilot, Entry
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>Search Criteria</th>
-                                                <td>
-                                                    position = 1
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>Grouping</th>
-                                                <td>
-                                                    pilotID, forename, surname
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>Sorting</th>
-                                                <td></td>
-                                            </tr>
-                                        </table>
-                                            <hr>
-                                            <p>One mark for each bullet:</p>
-                                            <ul>
-                                                <li>Fields and calculation (with alias)</li>
-                                                <li>Pilot and entry tables, where position = 1</li>
-                                                <li>Group by pilotID and/or forename, surname</li>
-                                            </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
                     <table>
                         <tr>
@@ -387,25 +350,11 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer2">
-                                        <div class="codeBox">
-                                            <p>SELECT title, AVG(raceTime) AS [Average Time]</p>
-                                            <p>FROM Race, Entry</p>
-                                            <p>WHERE Race.raceID = Entry.raceID</p>
-                                            <p>GROUP BY title;</p>
-                                        </div>
-                                        <hr>
-                                        <p>One mark for each bullet:</p>
-                                        <ul>
-                                            <li>SELECT with title and AVG(raceTime)</li>
-                                            <li>ALIAS and join for Entry and Race tables</li>
-                                            <li>GROUP BY title or raceID</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    
 
                     <table>
                         <tr>
@@ -431,24 +380,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer3">
-                                        <div class="codeBox">
-                                            <p>SELECT forename, surname</p>
-                                            <p>FROM Pilot, Entry, Fastest</p>
-                                            <p>WHERE Pilot.pilotID = Entry.pilotID AND raceTime = [FastestTime];</p>
-                                        </div>
-                                        <hr>
-                                        <p>One mark for each bullet:</p>
-                                        <ul>
-                                            <li>FROM includes Pilot, Entry with Pilot.pilotID = Entry.pilotID in WHERE</li>
-                                            <li>FROM clause includes ‘Fastest’</li>
-                                            <li>WHERE raceTime =[FastestTime]</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer3')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                 </div>
             </div>
         </div>
@@ -464,5 +402,89 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "table",
+                  "question": [
+                        "The Caledonian Drone Racing League database has tables: Pilot (pilotID, forename, surname), Race (raceID, title, city), Entry (raceID, pilotID, position, raceTime).",
+                        "Pilots win £150 for first place. The league wants a list of pilot names and total winnings for those who came first place.",
+                        "Design a query to display: pilotID, forename, surname, and Winnings (150 × number of first places)."
+                  ],
+                  "marks": 3,
+                  "tableHeaders": [
+                        "Field",
+                        "Value"
+                  ],
+                  "tableRows": [
+                        [
+                              "Field(s) and Calculation(s)",
+                              ""
+                        ],
+                        [
+                              "Table(s)",
+                              ""
+                        ],
+                        [
+                              "Search Criteria",
+                              ""
+                        ],
+                        [
+                              "Grouping",
+                              ""
+                        ],
+                        [
+                              "Sorting",
+                              ""
+                        ]
+                  ],
+                  "markingScheme": {
+                        "text": "One mark for each:",
+                        "points": [
+                              "Fields and calculation: pilotID, forename, surname, 150*COUNT(*) AS Winnings",
+                              "Tables and join: Pilot, Entry WHERE Pilot.pilotID = Entry.pilotID AND position = 1",
+                              "Grouping: GROUP BY pilotID (and/or forename, surname)"
+                        ]
+                  }
+            },
+            {
+                  "id": "q2",
+                  "type": "paragraph",
+                  "question": "Using the drone racing database (Race: raceID, title, city; Entry: raceID, pilotID, position, raceTime), write an SQL statement to display the title of each race and the average time for that race.",
+                  "marks": 3,
+                  "markingScheme": {
+                        "text": "One mark for each:",
+                        "points": [
+                              "SELECT with title and AVG(raceTime) with alias: SELECT title, AVG(raceTime) AS [Average Time]",
+                              "Tables with JOIN: FROM Race, Entry WHERE Race.raceID = Entry.raceID",
+                              "GROUP BY title (or raceID)"
+                        ]
+                  }
+            },
+            {
+                  "id": "q3",
+                  "type": "paragraph",
+                  "question": [
+                        "A query was created to display the fastest time in any race. This query was saved as \"Fastest\" and its output shows a column [Fastest Time].",
+                        "Using the \"Fastest\" saved query, complete the SQL statement below to display the forename and surname of the pilot(s) who achieved this time.",
+                        "The partial SQL starts: SELECT forename, surname"
+                  ],
+                  "marks": 3,
+                  "markingScheme": {
+                        "text": "One mark for each:",
+                        "points": [
+                              "FROM correct tables: FROM Pilot, Entry, Fastest (including the saved query)",
+                              "JOIN conditions: WHERE Pilot.pilotID = Entry.pilotID",
+                              "Link to Fastest query result: AND Entry.raceTime = [Fastest Time] (using the alias from the Fastest query)"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

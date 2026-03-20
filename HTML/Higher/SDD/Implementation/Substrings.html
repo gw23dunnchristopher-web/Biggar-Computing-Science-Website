@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -132,30 +133,13 @@
                             </tr>
                                 <tr>
                                     <td>
-                                        <div class="hiddenElement answer1">
-                                            <div class="codeBox">
-                                                <p>shortDate = month[0:3] + year[2:4]</p>
-                                            </div>
-                                            <p style="text-align:center;">OR</p>
-                                            <div class="codeBox">
-                                                <p>shortDate = month[:3] + year[2:]</p>
-                                            </div>
-                                            <p style="text-align:center;">OR</p>
-                                            <div class="codeBox">
-                                                <p>shortDate = month[0:3] + year[-2:0]</p>
-                                            </div>
-                                            <hr>
-                                            <p>One mark each for:</p>
-                                            <ul>
-                                                <li>Both substrings</li>
-                                                <li>Assignment and concatenation</li>
-                                            </ul>
-                                        </div>
+                                        
                                     </td>
                                 </tr>
                             </table>
-                            <div class="answerButton" onClick="answerButtonSwitch(this); 
-                                toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                            
                 </div>
             </div>
         </div>
@@ -171,5 +155,32 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "DECLARE month INITIALLY \"April\"",
+                        "DECLARE year INITIALLY \"2019\"",
+                        "Line 3: ___________________________________",
+                        "The variable shortDate is to be assigned the value \"Apr19\" using substring operations.",
+                        "Using a programming language of your choice, write Line 3."
+                  ],
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark each for:",
+                        "points": [
+                              "Both correct substrings: month[0:3] (gives \"Apr\") and year[2:4] (gives \"19\") — also accept month[:3] and year[2:]",
+                              "Assignment and concatenation: shortDate = month[0:3] + year[2:4]"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

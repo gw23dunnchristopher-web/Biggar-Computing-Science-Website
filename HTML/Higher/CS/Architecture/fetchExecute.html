@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -80,23 +81,13 @@
                             </tr>
                                 <tr>
                                     <td>
-                                        <div class="hiddenElement answer1">
-                                            <p>Aware <b>1 mark</b> for each bullet:</p>
-                                            <ul>
-                                                <li>The address bus is set up with the 
-                                                address (by the processor)</li>
-                                                <li>The instruction is transferred on 
-                                                the data bus from memory/to 
-                                                processor</li>
-                                            </ul
-                                            <hr>
-                                                <p>Must be an indication of direction of travel</p>
-                                        </div>
+                                        
                                     </td>
                                 </tr>
                             </table>
-                            <div class="answerButton" onClick="answerButtonSwitch(this); 
-                                toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                            
                 </div>
             </div>
         </div>
@@ -112,5 +103,53 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "table",
+                  "question": [
+                        "Complete the missing steps of the fetch-execute cycle.",
+                        "Step 2 (given): The processor activates the read line on the control bus.",
+                        "Step 4 (given): The instruction in the instruction register is then interpreted by the decoder and carried out.",
+                        "Fill in Step 1 (what happens before Step 2) and Step 3 (what happens between Steps 2 and 4)."
+                  ],
+                  "marks": 2,
+                  "tableHeaders": [
+                        "Step",
+                        "Description"
+                  ],
+                  "tableRows": [
+                        [
+                              "Step 1",
+                              ""
+                        ],
+                        [
+                              "Step 2",
+                              "The processor activates the read line on the control bus."
+                        ],
+                        [
+                              "Step 3",
+                              ""
+                        ],
+                        [
+                              "Step 4",
+                              "The instruction in the instruction register is then interpreted by the decoder and carried out."
+                        ]
+                  ],
+                  "markingScheme": {
+                        "text": "One mark for each (must indicate direction of travel):",
+                        "points": [
+                              "Step 1: The address bus is set up with the address (by the processor) — the memory address of the next instruction is placed on the address bus",
+                              "Step 3: The instruction is transferred on the data bus from memory to the processor — data travels from RAM to the CPU via the data bus"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

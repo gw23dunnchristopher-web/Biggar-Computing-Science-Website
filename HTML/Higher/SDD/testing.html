@@ -15,7 +15,8 @@
             .law-content {border:1px solid black;}
             img {padding-right:20px;}
         </style>
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -162,29 +163,11 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <table style="width:600px; text-align:center">
-                                            <tr><th width="33%">Breakpoint</th><th width="33%">Variable</th><th width="33%">Value</th></tr>
-                                            <tr><td rowspan="3">1st Iteration</td><td class="codeText">Index</td><td>0</td></tr>
-                                            <tr><td class="codeText">winningNos</td><td>10</td></tr>
-                                            <tr><td class="codeText">numMatches</td><td>1</td></tr>
-                                            <tr><td rowspan="3">2nd Iteration</td><td class="codeText">Index</td><td>1</td></tr>
-                                            <tr><td class="codeText">winningNos</td><td>14</td></tr>
-                                            <tr><td class="codeText">numMatches</td><td>2</td></tr>
-                                        </table>
-
-                                        <hr>
-
-                                        <p>One mark each for:</p>
-                                        <ul>
-                                            <li>correct values in winningNos[index] - 10 and 14</li>
-                                            <li>Correct value of numMatches - 1 and 2</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
                     <table>
                         <tr>
@@ -199,17 +182,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer2">
-                                        <p>
-                                            The code always increments the number of matches by 1, regardless of whether the number entered by the player matches any of the
-                                            winning numbers.  This is because the final ELSE statement on line 24 always executes, as the IF statements above it are only
-                                            true if the player's number matches the winning number.
-                                        </p>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                     
                 </div>
             </div>
@@ -226,5 +205,41 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "A number matching game stores four winning numbers [10, 14, 21, 33] and compares them to a player's input (no1=5, no2=10, no3=15, no4=21). 250 points are awarded for each match.",
+                        "A breakpoint is set at Line 26 (END IF) and the program runs. Complete the trace table: state the value of winningNos[index] and numMatches at the breakpoint for the first two iterations of the loop."
+                  ],
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "1 mark each for:",
+                        "points": [
+                              "Correct values in winningNos[index]: 10 on iteration 1, and 14 on iteration 2",
+                              "Correct value of numMatches: 1 after iteration 1 (no1=5 does not match 10, but no2=10 matches), and 2 after iteration 2 (because ELSE always fires — see part b)"
+                        ]
+                  }
+            },
+            {
+                  "id": "q2",
+                  "type": "paragraph",
+                  "question": "Looking at the same code: the player is always awarded 1000 points (all 4 matches always found). Explain, with reference to the code, why the number of matches always results in 4.",
+                  "marks": 1,
+                  "markingScheme": {
+                        "text": "Accept:",
+                        "points": [
+                              "The final ELSE statement (Line 24–25) always executes — it runs when the IF/ELSE IF chains above it all fail (i.e. no1, no2, no3 don't match). But since Line 25 still increments numMatches by 1, every iteration adds 1 regardless of whether no4 matches. So all 4 iterations increment numMatches, giving 4 every time."
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

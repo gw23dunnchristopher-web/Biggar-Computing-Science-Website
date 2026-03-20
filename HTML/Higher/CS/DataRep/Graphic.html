@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -99,35 +100,13 @@
                             </tr>
                                 <tr>
                                     <td>
-                                        <div class="hiddenElement answer1">
-                                                <p><i><b>Vector</b></i></p>
-                                                <ul>
-                                                    <li>individual objects/attributes can 
-                                                    be edited/moved independently</li>
-                                                    <li>Objects can be layered.</li>
-                                                </ul>
-
-                                                <p><i><b>Bitmap</b></i></p>
-                                                <ul>
-                                                    <li>Individual pixels are edited.</li>
-                                                </ul>
-                                                <hr>
-                        
-                                                <ul>
-                                                    <li>1 mark from Vector</li>
-                                                    <li>1 mark from Bitmap</li>
-                                                    <li>Maximum 2 marks</li>
-                                                </ul>
-                                                <p>Reference to moving shapes/
-                                                rectangles is in the stem. Must 
-                                                reference objects, attributes or 
-                                                layers.</p>
-                                        </div>
+                                        
                                     </td>
                                 </tr>
                             </table>
-                            <div class="answerButton" onClick="answerButtonSwitch(this); 
-                                toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                            
                 </div>
             </div>
         </div>
@@ -143,5 +122,29 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "LottoScot has a logo made of overlapping shapes (diagram 1). They want to move a rectangle to the front (diagram 2).",
+                        "Explain the advantage of making this change using a vector graphic application compared to a bit-mapped (bitmap) graphic application."
+                  ],
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark from each:",
+                        "points": [
+                              "Vector: individual objects/attributes can be edited/moved independently (e.g. the rectangle can be selected and moved without affecting other objects); OR objects can be layered/reordered",
+                              "Bitmap: individual pixels are edited — to move a shape you would need to erase and redraw pixels, which is more difficult and destructive"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

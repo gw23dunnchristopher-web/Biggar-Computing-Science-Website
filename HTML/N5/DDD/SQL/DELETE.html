@@ -338,15 +338,10 @@
                             <th rowspan="2"  width="30px">1</th>
                         </tr>
                         <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
-                                    <p>The SQL statement does not specify the day of the week or the block that the class is taking place in.</p>
-                                    <p>This means that it will delete all records where the leaderName is Claire and the className is 3-4 Years, regardless of the day of the week or the block.</p>
-                                </div>
-                            </td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
                     <table>
                         <tr>
@@ -359,11 +354,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer2">
-                                    <div class="codeBox">
-                                        <p>DELETE FROM Class</p>
-                                        <p>WHERE location = "Gorebridge";</p>
-                                    </div>
+                                
 
                                     <p>You will gain marks for the following:</p>
                                     <ul>
@@ -374,12 +365,13 @@
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -391,5 +383,28 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "paragraph",
+                        "text": [
+                                  "Some data needs to be removed from the Class table (shown above). The following SQL statement is written to delete a specific class:",
+                                  "(i) Explain why the SQL DELETE statement shown above is not fit for purpose."
+                        ],
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark: the SQL statement does not specify the day of the week or block, so it will delete ALL records where leaderName is Claire and className is 3-4 Years, not just the specific one intended."
+              },
+              {
+                        "type": "pseudocode",
+                        "text": "The Gorebridge classes are no longer running. (ii) Write the SQL statement to remove all the Gorebridge classes.",
+                        "marks": 2,
+                        "markingScheme": "Award 1 mark for DELETE FROM Class. Award 1 mark for WHERE location = \"Gorebridge\";"
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

@@ -12,7 +12,8 @@
         <style>
             .subheader th {background-color:lightgreen;}
         </style>
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -143,32 +144,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <div class="codeBox">
-                                            <p>UPDATE Customer</p>
-                                            <p>SET address = '27 Drummer Street', postcode = 'AB33 7QR'</p>
-                                            <p>WHERE forename = 'Simon' AND surname = 'Wegner';</p>
-                                        </div>
-
-                                        <b><p style="text-align:center">OR</p></b>
-
-                                        <div class="codeBox">
-                                            <p>UPDATE Customer</p>
-                                            <p>SET address = '27 Drummer Street', postcode = 'AB33 7QR'</p>
-                                            <p>WHERE customerID = 2;</p>
-                                        </div>
-                                        <hr>
-                                        <p>One mark for each of the following points:</p>
-                                        <ul>
-                                            <li>UPDATE Customer table</li>
-                                            <li>SET new address and postcode values</li>
-                                            <li>WHERE criteria based on forename and surname <b>OR</b> customer ID</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                     
                 </div>
             </div>
@@ -185,5 +167,31 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "A driving lessons company database has a Customer table with columns including forename, surname, address, postcode.",
+                        "The customer Simon Wenger has moved home. His new address and postcode is 27 Drummer Street, AB33 7QR.",
+                        "Write the SQL statement to make these changes."
+                  ],
+                  "marks": 3,
+                  "markingScheme": {
+                        "text": "One mark each for:",
+                        "points": [
+                              "UPDATE Customer",
+                              "SET address = '27 Drummer Street', postcode = 'AB33 7QR'  (both fields updated in one SET clause)",
+                              "WHERE forename = 'Simon' AND surname = 'Wenger'  (correct WHERE clause to identify the right customer)"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

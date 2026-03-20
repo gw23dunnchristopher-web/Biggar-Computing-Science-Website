@@ -188,29 +188,16 @@
                             <th rowspan="2"  width="30px">2</th>
                         </tr>
                         <tr>
-                            <td>
-                                <div class="hiddenElement answer1">
-                                    <p>Any two from...</p>
-                                    <ul>
-                                        <li>the information must be processed lawfully</li>
-                                        <li>the club must declare the purpose for which the data will be used (used for declared purpose only)</li>
-                                        <li>they must collect only the data required for the declared purpose</li>
-                                        <li>the collected data data must be accurate</li>
-                                        <li>the club must delete personal data if members leave the club (not keep data longer than necessary)</li>
-                                        <li>the data must be stored securely by the club</li>
-                                        <li>the club couldn't share data without the members' permission</li>
-                                        <li>if the members request access to thier data, the club must provide it.</li>
-                                    </ul>
-                                </div>
-                            </td>
+                            
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
                 </div>
             </div>
         </div>   
-        <footer>
+                <div class="quiz-container"></div>
+<footer>
             <div id="left">
                 <p>Biggar High School</p>
                 <p>Market Rd, Biggar</p>
@@ -222,5 +209,19 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        questions: [
+              {
+                        "type": "paragraph",
+                        "text": "State two implications of the General Data Protection Regulation (GDPR) for the youth club.",
+                        "marks": 2,
+                        "markingScheme": "Award 1 mark each for any two from: information must be processed lawfully; must declare the purpose for which data will be used; must collect only data required for the declared purpose; data must be accurate; must delete personal data when members leave; data must be stored securely; cannot share data without members' permission; must provide data if members request access."
+              }
+    ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>

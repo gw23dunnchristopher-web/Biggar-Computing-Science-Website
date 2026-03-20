@@ -12,7 +12,8 @@
         <style>
             .subheader th {background-color:lightgreen;}
         </style>
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -152,25 +153,11 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <table style="max-width: 400px;">
-                                            <tr><th>town</th><th>Number Per Town</th></tr>
-                                            <tr><td>Greenock</td><td>3</td></tr>
-                                            <tr><td>Falkirk</td><td>2</td></tr>
-                                            <tr><td>Kilmarnock</td><td>2</td></tr>
-                                            <tr><td>Aidrie</td><td>1</td></tr>
-                                        </table>
-                                        <hr>
-                                        <p>One mark for each bullet:</p>
-                                        <ul>
-                                            <li>Totals</li>
-                                            <li>Doubly sorted output</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
 
                     <table>    
@@ -187,18 +174,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                       One mark for any one bullet:
-                                        <ul>
-                                            <li>Produces a single output for each town.</li>
-                                            <li>Without a GROuP BY it would produce a single output for only one town.
-                                            <li>In hte SELECT clause the two field is a non-aggregate function.</li>
-                                        </ul>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                     
                 </div>
             </div>
@@ -215,5 +197,45 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "paragraph",
+                  "question": [
+                        "A driving school Pupil table has columns including town.",
+                        "SQL: SELECT town, COUNT(*) AS [Number Per Town] FROM Pupil GROUP BY town ORDER BY COUNT(*) DESC, town ASC",
+                        "Sample data has pupils from Aberdeen (3 pupils), Edinburgh (2 pupils), Inverness (1 pupil).",
+                        "Using the sample data provided, write the expected output from the SQL statement above (show town and number per town)."
+                  ],
+                  "marks": 2,
+                  "markingScheme": {
+                        "text": "One mark for each:",
+                        "points": [
+                              "Correct totals per town matching the sample data (e.g. Aberdeen: 3, Edinburgh: 2, Inverness: 1)",
+                              "Correct double sort: by COUNT(*) descending first, then town name ascending for ties"
+                        ]
+                  }
+            },
+            {
+                  "id": "q2",
+                  "type": "paragraph",
+                  "question": "Explain why the GROUP BY clause is needed in the SQL statement: SELECT town, COUNT(*) AS [Number Per Town] FROM Pupil GROUP BY town ORDER BY COUNT(*) DESC, town ASC",
+                  "marks": 1,
+                  "markingScheme": {
+                        "text": "Accept any one:",
+                        "points": [
+                              "Produces a single output row for each town (groups rows with the same town value together for the COUNT)",
+                              "Without GROUP BY it would only produce a single total row for the whole table, not one per town",
+                              "In the SELECT clause, town is a non-aggregate field — GROUP BY is required when mixing aggregate (COUNT) and non-aggregate fields"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

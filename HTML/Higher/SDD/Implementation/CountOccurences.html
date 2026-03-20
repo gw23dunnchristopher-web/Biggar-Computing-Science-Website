@@ -9,7 +9,8 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
-    </head>
+      <link rel="stylesheet" href="/CSS/quiz.css">
+</head>
     <body>
         <div id="loading"></div>
         <div id="mainContent" class="content-hidden">
@@ -95,32 +96,13 @@
                         </tr>
                             <tr>
                                 <td>
-                                    <div class="hiddenElement answer1">
-                                        <table class = "pseudocode borderless">
-                                            <tr><th>Line 1</th><td>SET totalDistance TO 0</td></tr>
-                                            <tr><th>Line 2</th><td>SET journeys TO 0</td></tr>
-                                            <tr><th>Line 3</th><td>FOR index FROM 0 TO end of distance[] array DO</td></tr>
-                                            <tr><th>Line 4</th><td style="padding-left:40px;">IF drivingTime[index] &gt; 1 THEN</td></tr>
-                                            <tr><th>Line 5</th><td style="padding-left:80px;">SET totalDistance TO totalDistance + distance[index]</td></tr>
-                                            <tr><th>Line 6</th><td style="padding-left:80px;">SET journeys TO journeys + 1</td></tr>
-                                            <tr><th>Line 7</th><td style="padding-left:40px;">END IF</td></tr>
-                                            <tr><th>Line 8</th><td>END FOR</td></tr>
-                                            <tr><th>Line 9</th><td>SET averageDistance TO totalDistance / journeys</td></tr>
-                                        </table>
-
-                                        <hr>
-
-                                        <p>One mark each for:</p>
-                                        <ul>
-                                            <li>Initialisation of totalDistance and journeys, increment number of journeys.</li>
-                                            <li>Loop and update total distance.</li>
-                                            <li>If statement with correct condition (drivingTime[index] &gt; 1)</li>
-                                            <li>Correct calculation of average.</li>
-                                    </div>
+                                    
                                 </td>
                             </tr>
                         </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    <div class="quiz-container"></div>
+
+                    
                     
                 </div>
             </div>
@@ -137,5 +119,32 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <script>
+      window.QUIZ_CONFIG = {
+      "questions": [
+            {
+                  "id": "q1",
+                  "type": "pseudocode",
+                  "question": [
+                        "An insurance company's black box records journey data: date, distance (miles), driving time (hours) — stored in parallel 1D arrays.",
+                        "Step 3 of the program calculates the average distance for journeys longer than one hour.",
+                        "Using a design technique of your choice, design an algorithm for Step 3."
+                  ],
+                  "marks": 4,
+                  "markingScheme": {
+                        "text": "One mark each for:",
+                        "points": [
+                              "Initialisation of totalDistance and journeys counter (both set to 0)",
+                              "Loop through all elements of the arrays",
+                              "IF condition: drivingTime[index] > 1",
+                              "Accumulate total distance and increment journeys counter; calculate averageDistance = totalDistance / journeys"
+                        ]
+                  }
+            }
+      ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>
