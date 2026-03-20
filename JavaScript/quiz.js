@@ -36,6 +36,7 @@
  *       marks: 4,
  *       markingScheme: "1 mark per correct row.",
  *       tableHeaders: ["Term", "Definition"],
+ *       columnWidths: ["30%", "70%"],    // optional — omit for equal columns
  *       tableRows: [
  *         ["Variable", ""],           // "" = blank cell student fills in
  *         ["Constant", ""],
@@ -154,6 +155,14 @@
 
     function renderTableInput(q, index) {
         var html = '<div class="quiz-table-wrapper"><table class="quiz-table">';
+
+        if (q.columnWidths && q.columnWidths.length) {
+            html += '<colgroup>';
+            q.columnWidths.forEach(function (w) {
+                html += '<col style="width:' + escHtml(String(w)) + '">';
+            });
+            html += '</colgroup>';
+        }
 
         if (q.tableHeaders && q.tableHeaders.length) {
             html += '<thead><tr>';
