@@ -134,8 +134,24 @@
         return result;
     }
 
-    /* Render a text value that may be a string or an array of
-       paragraphs/bullet-lists into HTML. */
+    /* Render a {type:"table", headers:[...], rows:[[...]]} object as HTML. */
+    function renderTextTable(obj) {
+        var html = '<table class="quiz-question-table">';
+        if (obj.headers && obj.headers.length) {
+            html += '<thead><tr>' + obj.headers.map(function (h) {
+                return '<th>' + escHtml(String(h)) + '</th>';
+            }).join('') + '</tr></thead>';
+        }
+        html += '<tbody>';
+        (obj.rows || []).forEach(function (row) {
+            html += '<tr>' + row.map(function (cell) {
+                return '<td>' + escHtml(String(cell)) + '</td>';
+            }).join('') + '</tr>';
+        });
+        html += '</tbody></table>';
+        return html;
+    }
+
     function renderText(text) {
         if (!Array.isArray(text)) {
             return '<p>' + escHtml(String(text)) + '</p>';
@@ -147,6 +163,9 @@
                 }).join('');
                 return '<ul class="quiz-question-bullets">' + bullets + '</ul>';
             }
+            if (item && typeof item === 'object' && item.type === 'table') {
+                return renderTextTable(item);
+            }
             return '<p>' + escHtml(String(item)) + '</p>';
         }).join('');
     }
@@ -157,6 +176,12 @@
         return text.map(function (item) {
             if (Array.isArray(item)) {
                 return item.map(function (b) { return '- ' + b; }).join('\n');
+            }
+            if (item && typeof item === 'object' && item.type === 'table') {
+                var rows = [];
+                if (item.headers && item.headers.length) rows.push(item.headers.join(' | '));
+                (item.rows || []).forEach(function (row) { rows.push(row.join(' | ')); });
+                return rows.join('\n');
             }
             return String(item);
         }).join('\n');

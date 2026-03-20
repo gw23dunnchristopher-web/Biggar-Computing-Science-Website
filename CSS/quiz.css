@@ -99,6 +99,51 @@
     margin-bottom: 4px;
 }
 
+/* Inline table inside question text (e.g. pseudocode steps) */
+.quiz-question-table {
+    border-collapse: collapse;
+    margin: 6px 0 8px;
+    font-size: 14px;
+}
+
+.quiz-question-table th {
+    background: #eef2ff;
+    font-weight: bold;
+    padding: 6px 14px;
+    border: 1px solid #cdd8f0;
+    text-align: left;
+}
+
+.quiz-question-table td {
+    padding: 5px 14px;
+    border: 1px solid #cdd8f0;
+    text-align: left;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre;
+}
+
+html.high-contrast #content .quiz-question-table th {
+    background: #fff !important;
+    color: #000 !important;
+    border-color: #fff !important;
+}
+
+html.high-contrast #content .quiz-question-table td {
+    background: #111 !important;
+    color: #fff !important;
+    border-color: #fff !important;
+}
+
+html[data-custom-bg] .quiz-question-table th {
+    background: var(--quiz-results-bg, #eef2ff) !important;
+    border-color: rgba(0,0,0,0.15) !important;
+}
+
+html[data-custom-bg] .quiz-question-table td {
+    background: var(--quiz-input-bg, #fff) !important;
+    border-color: rgba(0,0,0,0.15) !important;
+}
+
 /* Paragraph / written answer */
 .quiz-textarea {
     width: 100%;
