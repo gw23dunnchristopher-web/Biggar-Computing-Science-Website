@@ -376,58 +376,113 @@ textarea.quiz-table-input {
     text-align: center;
 }
 
-/* High contrast overrides */
+/* High contrast overrides
+   All text colours use !important to beat accessibility.css's blanket
+   "html.high-contrast #content span { color:#000 !important }" rule. */
 html.high-contrast .quiz-question {
-    background: #000;
-    border-color: #fff;
-    color: #fff;
+    background: #000 !important;
+    border-color: #fff !important;
+    color: #fff !important;
+}
+
+html.high-contrast .quiz-question span,
+html.high-contrast .quiz-question p,
+html.high-contrast .quiz-question li,
+html.high-contrast .quiz-question button {
+    color: #fff !important;
 }
 
 html.high-contrast .quiz-question-toggle {
-    color: #fff;
+    color: #fff !important;
+    background: none !important;
 }
 
 html.high-contrast .quiz-question-toggle:hover {
-    background: #222;
+    background: #222 !important;
 }
 
 html.high-contrast .quiz-question-body {
-    border-color: #fff;
+    border-color: #fff !important;
 }
 
 html.high-contrast .quiz-textarea,
 html.high-contrast textarea.quiz-table-input {
-    background: #111;
-    color: #fff;
-    border-color: #fff;
+    background: #111 !important;
+    color: #fff !important;
+    border-color: #fff !important;
 }
 
 html.high-contrast .quiz-table th {
-    background: #fff;
-    color: #000;
-    border-color: #fff;
+    background: #fff !important;
+    color: #000 !important;
+    border-color: #fff !important;
 }
 
 html.high-contrast .quiz-table tr:nth-child(odd) td,
 html.high-contrast .quiz-table tr:nth-child(even) td {
-    background: #111;
-    color: #fff;
-    border-color: #fff;
+    background: #111 !important;
+    color: #fff !important;
+    border-color: #fff !important;
 }
 
 html.high-contrast .quiz-table td.given-cell {
-    color: #fff;
+    color: #fff !important;
+}
+
+html.high-contrast .quiz-table td textarea {
+    color: #fff !important;
+    background: transparent !important;
 }
 
 html.high-contrast .quiz-results {
-    background: #000;
-    border-color: #fff;
-    color: #fff;
+    background: #000 !important;
+    border-color: #fff !important;
+    color: #fff !important;
+}
+
+html.high-contrast .quiz-results span,
+html.high-contrast .quiz-results p,
+html.high-contrast .quiz-results li {
+    color: #fff !important;
 }
 
 html.high-contrast .quiz-question-result {
-    background: #111;
-    border-color: #fff;
+    background: #111 !important;
+    border-color: #fff !important;
+    color: #fff !important;
+}
+
+html.high-contrast .quiz-question-result span,
+html.high-contrast .quiz-question-result p,
+html.high-contrast .quiz-result-feedback {
+    color: #fff !important;
+}
+
+html.high-contrast .quiz-submit-btn {
+    background: #000 !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+}
+
+html.high-contrast .quiz-submit-btn:hover {
+    background: #222 !important;
+    filter: none !important;
+}
+
+html.high-contrast .quiz-submit-btn:disabled {
+    background: #333 !important;
+    color: #888 !important;
+    border-color: #555 !important;
+}
+
+html.high-contrast .quiz-retry-btn {
+    background: #000 !important;
+    color: #fff !important;
+    border-color: #fff !important;
+}
+
+html.high-contrast .quiz-retry-btn:hover {
+    background: #222 !important;
 }
 
 /* ── Accessibility background colour integration ───────────────────────────
