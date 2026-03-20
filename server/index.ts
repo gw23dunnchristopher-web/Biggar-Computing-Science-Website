@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { db, pool, hasDatabase } from './db';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -16,7 +17,7 @@ app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://texttospeech.googleapis.com; frame-src https://trinket.io; media-src 'self' blob:");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://texttospeech.googleapis.com https://generativelanguage.googleapis.com; frame-src https://trinket.io; media-src 'self' blob:");
   res.setHeader('Cache-Control', 'no-cache');
   next();
 });
@@ -74,6 +75,103 @@ app.post('/api/tts', async (req, res) => {
     }
   }
 });
+
+// ---------------------------------------------------------------------------
+// Quiz marking endpoint — uses Gemini to mark student answers
+// ---------------------------------------------------------------------------
+app.post('/api/quiz/mark', async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'Quiz marking service not configured' });
+  }
+
+  const { questions } = req.body as {
+    questions: Array<{
+      text: string;
+      type: string;
+      marks: number;
+      markingScheme: string;
+      answer: string;
+    }>;
+  };
+
+  if (!questions || !Array.isArray(questions) || questions.length === 0) {
+    return res.status(400).json({ error: 'No questions provided' });
+  }
+
+  // Cap at 20 questions and 500 chars per answer for safety
+  const MAX_QUESTIONS = 20;
+  const MAX_ANSWER_LEN = 1000;
+  const safeQuestions = questions.slice(0, MAX_QUESTIONS).map(q => ({
+    ...q,
+    answer: (q.answer || '').substring(0, MAX_ANSWER_LEN),
+    marks: Math.min(Math.max(parseInt(String(q.marks)) || 1, 1), 20),
+  }));
+
+  const prompt = buildMarkingPrompt(safeQuestions);
+
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+
+    const parsed = parseGeminiResponse(text, safeQuestions);
+    return res.json({ results: parsed });
+  } catch (err) {
+    console.error('Gemini marking error:', err);
+    return res.status(502).json({ error: 'Marking service temporarily unavailable' });
+  }
+});
+
+function buildMarkingPrompt(questions: Array<{text: string; type: string; marks: number; markingScheme: string; answer: string}>): string {
+  let prompt = `You are a Scottish secondary school Computing Science teacher marking student quiz answers.
+Mark each answer strictly according to the marking scheme provided.
+Be concise, fair, and encouraging. Do not give more marks than the maximum.
+If an answer is blank or clearly irrelevant, award 0 marks.
+
+For each question, respond with EXACTLY this format (no extra text before or after):
+QUESTION_1_START
+MARKS: <number awarded>/<maximum>
+FEEDBACK: <2-4 sentences of constructive feedback>
+QUESTION_1_END
+
+Use QUESTION_2_START/END for question 2, etc.
+
+`;
+
+  questions.forEach((q, i) => {
+    const n = i + 1;
+    prompt += `--- Question ${n} ---\n`;
+    prompt += `Type: ${q.type}\n`;
+    prompt += `Question: ${q.text}\n`;
+    prompt += `Maximum marks: ${q.marks}\n`;
+    prompt += `Marking scheme: ${q.markingScheme}\n`;
+    prompt += `Student answer:\n${q.answer || '(no answer provided)'}\n\n`;
+  });
+
+  return prompt;
+}
+
+function parseGeminiResponse(text: string, questions: Array<{marks: number}>): Array<{marksAwarded: number; feedback: string}> {
+  return questions.map((q, i) => {
+    const n = i + 1;
+    const blockRe = new RegExp(`QUESTION_${n}_START([\\s\\S]*?)QUESTION_${n}_END`, 'i');
+    const block = text.match(blockRe);
+    if (!block) {
+      return { marksAwarded: 0, feedback: 'Unable to retrieve feedback for this question.' };
+    }
+    const content = block[1];
+
+    const marksMatch = content.match(/MARKS:\s*(\d+)\s*\/\s*\d+/i);
+    const feedbackMatch = content.match(/FEEDBACK:\s*([\s\S]+)/i);
+
+    const marksAwarded = marksMatch ? Math.min(parseInt(marksMatch[1]), q.marks) : 0;
+    const feedback = feedbackMatch ? feedbackMatch[1].trim() : 'No feedback available.';
+
+    return { marksAwarded, feedback };
+  });
+}
 
 const publicRoot = path.resolve('.');
 app.use(express.static(publicRoot, {

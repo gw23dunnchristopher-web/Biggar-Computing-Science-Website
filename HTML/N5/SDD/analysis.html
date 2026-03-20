@@ -88,6 +88,10 @@
                 </div>
             </div>
         </div>   
+                <!-- QUIZ SECTION -->
+                <div class="quiz-container"></div>
+            </div>
+        </div>
         <footer>
             <div id="left">
                 <p>Biggar High School</p>
@@ -100,5 +104,38 @@
             </div>
         </footer>
             </div>
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        title: "Analysis — Check Your Understanding",
+        questions: [
+            {
+                type: "paragraph",
+                text: "What is meant by the term 'functional requirements' in the analysis stage of software development?",
+                marks: 2,
+                markingScheme: "Award 1 mark for stating that functional requirements describe what the software must DO (its features/functions). Award 1 mark for an example or elaboration, e.g. specifying inputs, processes, and outputs, or stating user requirements for how the software should behave."
+            },
+            {
+                type: "table",
+                text: "Complete the table by identifying the inputs, processes, and outputs for a program that asks a user to enter their age, then displays whether they are old enough to vote (must be 18 or over).",
+                marks: 3,
+                markingScheme: "Award 1 mark per correct row. Input: age (entered by user). Process: check if age >= 18. Output: message stating whether the user can vote.",
+                tableHeaders: ["Category", "Description"],
+                tableRows: [
+                    ["Input", ""],
+                    ["Process", ""],
+                    ["Output", ""]
+                ]
+            },
+            {
+                type: "paragraph",
+                text: "Explain the difference between a functional requirement and a non-functional requirement. Give one example of each.",
+                marks: 4,
+                markingScheme: "Award 1 mark for defining functional requirements as what the system does (features/behaviour). Award 1 mark for a valid example (e.g. the system shall allow a user to log in). Award 1 mark for defining non-functional requirements as how the system performs (quality attributes). Award 1 mark for a valid example (e.g. the system shall load within 2 seconds, or it must be accessible on mobile devices)."
+            }
+        ]
+    };
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
     </body>
 </html>
