@@ -6,12 +6,6 @@
         <title>N4 Computing Science - Digital Toolkit</title>
         <script src="/JavaScript/N4Script.js"></script>
         <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                setInterval(function () {
-                    countdown("2026-04-24");
-                }, 1000);
-            });
-
             function toggleCard(cardID) {
                 const card = document.getElementById(cardID);
 
@@ -25,89 +19,7 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
-        <style>
-            .toolkitCard {
-                border: 1px solid black;
-                max-width: 1000px;
-                background-color: #f0f0f0;
-                border-radius: 0px 0px 10px 10px;
-                padding: 20px;
-                margin-bottom: 20px;
-                margin-left: auto;
-                margin-right: auto;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }
-
-            .toolkitCard h3 {
-                margin-left: 10px;
-                margin-right: 10px;
-            }
-
-            #sdd,
-            #webDev,
-            #databaseDev {
-                display: flex;
-                justify-content: space-between;
-                border: 1px solid black;
-                border-radius: 10px 10px 0px 0px;
-                max-width: 1000px;
-                margin-left: auto;
-                margin-right: auto;
-                border-bottom: 0px;
-                padding: 20px;
-                padding-top: 10px;
-                padding-bottom: 10px;
-                color: white;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            }
-
-            #sdd p,
-            #webDev p,
-            #databaseDev p {
-                font-size: 20px;
-                font-weight: bold;
-            }
-
-            #sdd,
-            #sddButton {
-                background-image: linear-gradient(lightblue -80%, blue);
-                margin-top: 20px;
-            }
-            #webDev,
-            #webButton {
-                background-image: linear-gradient(lightgreen -80%, green);
-            }
-            #databaseDev,
-            #dbButton {
-                background-image: linear-gradient(red -80%, darkred);
-            }
-
-            #sddButton,
-            #webButton,
-            #dbButton {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100px;
-                width: 250px;
-                margin: 10px;
-                margin-bottom: 20px;
-                color: white;
-            }
-
-            #sddButton,
-            #webButton,
-            #dbButton {
-                transition-timing-function: ease-in-out;
-                transition-duration: 0.2s;
-            }
-
-            #sddButton:hover,
-            #webButton:hover,
-            #dbButton:hover {
-                filter: brightness(120%);
-            }
-        </style>
+         
     </head>
 
     <body>

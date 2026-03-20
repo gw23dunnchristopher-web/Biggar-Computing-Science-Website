@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>N4 Computing Science - Analysis</title>
+        <script src="/JavaScript/N4Script.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <style>
+            .noun {
+                background-color: lightpink;
+            }
+
+            .aVerb {
+                background-color: lightgreen;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+            <header>
+                <h1>BHS Computing Science</h1>
+                <img src="/Images/Header/banner.png" />
+            </header>
+            <div id="pageContainer">
+                <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+                <div id="sidebar"></div>
+                <div id="content">
+                    <div id="mainHeading"><h1>National 4</h1></div>
+                    <div class="contentHeading">
+                        <h1>Analysis</h1>
+                    </div>
+                    <div class="contentContainer">
+                        <p>
+                            The first stage of software development is analysis.
+                            This is where we look at the problem we are trying
+                            to solve and figure out what we need to do to solve
+                            it. Here, we need to define the
+                            <b>Functional Requirements</b> of the program - what
+                            data needs to be entered into it, what it will do
+                            with that data, and what it will output.
+                        </p>
+
+                        <h2>Functional Requirements</h2>
+                        <p>
+                            These describe what the program needs to be able to
+                            do in order to fulfill its purpose. At this level,
+                            you should be able to look at a problem, and define
+                            the inputs, processes and outputs for the program.
+                        </p>
+                        <table>
+                            <tr>
+                                <th>Input(s)</th>
+                                <td>
+                                    The data that needs to be entered into the
+                                    program, for example, in a program adds two
+                                    numbers together, the inputs would be the
+                                    two numbers that you want to add.
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Process(es)</th>
+                                <td>
+                                    The steps that the program needs to take to
+                                    achieve its goal. For example, in a program
+                                    that adds two numbers together, the process
+                                    would be to add the two numbers together.
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Output(s)</th>
+                                <td>
+                                    The data that the program will produce as a
+                                    result of its processes. For example, in a
+                                    program that adds two numbers together, the
+                                    output would be the sum of the two numbers.
+                                </td>
+                            </tr>
+                        </table>
+                        <p>
+                            The functional requirements are the foundation of
+                            the program. They define what the program needs to
+                            do, and without them, you won't be able to design or
+                            build the program.
+                        </p>
+
+                        <h3>A worked example</h3>
+                        <p>
+                            A good way of determinine the functional
+                            requirements are to look at the action verbs in the
+                            question, which indicate the actions that need to be
+                            taken by the program, and the nouns, which indicate
+                            different variables that will need to be stored.
+                        </p>
+                        <p>
+                            In the example program below, I have highlighted the
+                            action verbs in green, and the nouns in pink.
+                        </p>
+
+                        <div class="example">
+                            <h2>Calorie Counter</h2>
+                            <p>Write a Calorie Counter program which...</p>
+                            <ul>
+                                <li>
+                                    <span class="aVerb">Will ask</span> for the
+                                    number of calories in
+                                    <span class="noun">porridge</span>,
+                                    <span class="noun">toast</span>,
+                                    <span class="noun">jam</span> and
+                                    <span class="noun">coffee</span>.
+                                </li>
+                                <li>
+                                    <span class="aVerb">Calculates</span> the
+                                    <span class="noun">total</span> number of
+                                    calories in the breakfast.
+                                </li>
+                                <li>
+                                    <span class="aVerb">Displays</span> the
+                                    <span class="noun">total</span> number of
+                                    calories.
+                                </li>
+                            </ul>
+                        </div>
+                        <p>
+                            With this, we can identify the inputs, processes and
+                            outputs for this program.
+                        </p>
+                        <table>
+                            <tr>
+                                <th>Input(s)</th>
+                                <th>Process(es)</th>
+                                <th>Output(s)</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    The number of calories in porridge, toast,
+                                    jam and coffee.
+                                </td>
+                                <td>Calculate the total number of calories.</td>
+                                <td>The total number of calories.</td>
+                            </tr>
+                        </table>
+                        <h2>Try it yourself</h2>
+                        <p>
+                            Below, I have listed five different program
+                            concepts, I would like you to look at each one and
+                            determine the inputs, processes and outputs for the
+                            listed programs, type them into the appropriate
+                            boxes. Click submit to see if you were right!
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div id="left">
+                    <p>Biggar High School</p>
+                    <p>Market Rd, Biggar</p>
+                    <p>ML12 6AG</p>
+                </div>
+                <div id="center"></div>
+                <div id="right">
+                    <p>&copy;C Dunn, 2025</p>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>

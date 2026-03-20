@@ -826,3 +826,10 @@ ul li ul li ul li {
 .page-nav-btn:hover .page-nav-title {
     color: #eee;
 }
+
+.example {
+    background-color: #f4fea9;
+    margin-top: 10px;
+    padding: 10px;
+    border: 2px dashed black;
+}
