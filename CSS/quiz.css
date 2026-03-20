@@ -149,7 +149,7 @@
     color: #333;
 }
 
-.quiz-table td input[type="text"] {
+textarea.quiz-table-input {
     width: 100%;
     border: none;
     outline: none;
@@ -159,6 +159,8 @@
     padding: 0;
     box-sizing: border-box;
     min-width: 80px;
+    resize: vertical;
+    display: block;
 }
 
 .quiz-table tr:nth-child(odd) td {
@@ -356,7 +358,7 @@ html.high-contrast .quiz-question {
 }
 
 html.high-contrast .quiz-textarea,
-html.high-contrast .quiz-table td input[type="text"] {
+html.high-contrast textarea.quiz-table-input {
     background: #111;
     color: #fff;
     border-color: #fff;

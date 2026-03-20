@@ -177,7 +177,7 @@
             html += '<tr>';
             row.forEach(function (cell, colIndex) {
                 if (cell === '') {
-                    html += '<td><input type="text" class="quiz-table-input" data-qindex="' + index + '" data-row="' + rowIndex + '" data-col="' + colIndex + '" placeholder="..."></td>';
+                    html += '<td><textarea class="quiz-table-input" data-qindex="' + index + '" data-row="' + rowIndex + '" data-col="' + colIndex + '" placeholder="..." rows="3"></textarea></td>';
                 } else {
                     html += '<td class="given-cell">' + escHtml(cell) + '</td>';
                 }
