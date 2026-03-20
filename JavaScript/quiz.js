@@ -97,6 +97,21 @@
             });
         });
 
+        // Toggle question open/closed on header click
+        container.querySelectorAll('.quiz-question-toggle').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var body = document.getElementById(btn.getAttribute('aria-controls'));
+                var isOpen = btn.getAttribute('aria-expanded') === 'true';
+                if (isOpen) {
+                    btn.setAttribute('aria-expanded', 'false');
+                    body.hidden = true;
+                } else {
+                    btn.setAttribute('aria-expanded', 'true');
+                    body.hidden = false;
+                }
+            });
+        });
+
         document.getElementById('quiz-submit-btn').addEventListener('click', function () {
             submitQuiz(container, config);
         });
@@ -134,21 +149,27 @@
         var num = index + 1;
         var marksLabel = q.marks === 1 ? '1 mark' : q.marks + ' marks';
         var html = '<div class="quiz-question" id="quiz-q-' + index + '">';
-        html += '<div class="quiz-question-header">';
+
+        // Clickable toggle header
+        html += '<button type="button" class="quiz-question-toggle" aria-expanded="false" aria-controls="quiz-body-' + index + '">';
         html += '<span class="quiz-question-number">Q' + num + '.</span>';
-        html += '<div class="quiz-question-text">' + renderText(q.text) + '</div>';
         html += '<span class="quiz-marks">(' + marksLabel + ')</span>';
-        html += '</div>';
+        html += '<span class="quiz-chevron" aria-hidden="true">&#9656;</span>';
+        html += '</button>';
+
+        // Collapsible body
+        html += '<div class="quiz-question-body" id="quiz-body-' + index + '" hidden>';
+        html += '<div class="quiz-question-text">' + renderText(q.text) + '</div>';
 
         if (q.type === 'pseudocode') {
             html += '<textarea class="quiz-code-area" id="quiz-ans-' + index + '" placeholder="Write your pseudocode here..." spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>';
         } else if (q.type === 'table') {
             html += renderTableInput(q, index);
         } else {
-            // default: paragraph
             html += '<textarea class="quiz-textarea" id="quiz-ans-' + index + '" placeholder="Type your answer here..."></textarea>';
         }
 
+        html += '</div>';
         html += '</div>';
         return html;
     }
