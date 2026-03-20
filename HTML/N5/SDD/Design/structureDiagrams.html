@@ -128,11 +128,17 @@
                         "type": "paragraph",
                         "text": [
                                 "The design is tested with the following inputs:",
-                                [
-                                        "Number of trees: 2",
-                                        "Tree 1: Type = cherry, Size = small",
-                                        "Tree 2: Type = Pear, Size = medium"
-                                ],
+                                {
+                                        "type": "table",
+                                        "headers": ["Input", "Value"],
+                                        "rows": [
+                                                ["Number of trees", "2"],
+                                                ["Tree 1 type", "cherry"],
+                                                ["Tree 1 size", "small"],
+                                                ["Tree 2 type", "Pear"],
+                                                ["Tree 2 size", "medium"]
+                                        ]
+                                },
                                 "State the total displayed by the program."
                         ],
                         "marks": 1,

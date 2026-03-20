@@ -252,13 +252,17 @@
                         "type": "pseudocode",
                         "text": [
                                 "The following pseudocode shows how an available seat is allocated:",
-                                [
-                                        "1. Generate a random seat number",
-                                        "2. Loop while the generated seat is unavailable",
-                                        "3.     Generate another random seat number",
-                                        "4. End loop",
-                                        "5. Change seat to unavailable"
-                                ],
+                                {
+                                        "type": "table",
+                                        "headers": ["Step", "Description"],
+                                        "rows": [
+                                                ["1", "Generate a random seat number"],
+                                                ["2", "Loop while the generated seat is unavailable"],
+                                                ["3", "    Generate another random seat number"],
+                                                ["4", "End loop"],
+                                                ["5", "Change seat to unavailable"]
+                                        ]
+                                },
                                 "Using a programming language of your choice, write the code to implement the above design. (There are 60 seats, indexed 1 to 60.)"
                         ],
                         "marks": 4,

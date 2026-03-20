@@ -135,11 +135,15 @@
                         "type": "pseudocode",
                         "text": [
                                 "The design below shows how a customer's average monthly data usage is calculated and displayed:",
-                                [
-                                        "1. Store each month's data usage",
-                                        "2. Calculate the average monthly data usage",
-                                        "3. Display the average monthly data usage"
-                                ],
+                                {
+                                        "type": "table",
+                                        "headers": ["Step", "Description"],
+                                        "rows": [
+                                                ["1", "Store each month's data usage"],
+                                                ["2", "Calculate the average monthly data usage"],
+                                                ["3", "Display the average monthly data usage"]
+                                        ]
+                                },
                                 "The data structure 'month' stores usage for each of the 12 months. The variable 'aveData' stores the customer's average monthly data usage.",
                                 "Using a design technique of your choice, refine step 2."
                         ],
