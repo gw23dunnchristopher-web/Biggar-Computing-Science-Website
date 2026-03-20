@@ -186,13 +186,35 @@
         }
     }
 
+    function lightenHex(hex, whiteFraction) {
+        var r = parseInt(hex.slice(1, 3), 16);
+        var g = parseInt(hex.slice(3, 5), 16);
+        var b = parseInt(hex.slice(5, 7), 16);
+        r = Math.round(r + (255 - r) * whiteFraction);
+        g = Math.round(g + (255 - g) * whiteFraction);
+        b = Math.round(b + (255 - b) * whiteFraction);
+        return 'rgb(' + r + ',' + g + ',' + b + ')';
+    }
+
     function applyCustomBgColour() {
+        var root = document.documentElement;
         if (settings.customBgColour) {
-            document.documentElement.setAttribute('data-custom-bg', '1');
-            document.documentElement.style.setProperty('--a11y-bg-colour', settings.customBgColour);
+            root.setAttribute('data-custom-bg', '1');
+            root.style.setProperty('--a11y-bg-colour', settings.customBgColour);
+            var hex = settings.customBgColour;
+            if (/^#[0-9a-fA-F]{6}$/.test(hex)) {
+                root.style.setProperty('--quiz-card-bg',    lightenHex(hex, 0.30));
+                root.style.setProperty('--quiz-card-alt-bg', lightenHex(hex, 0.42));
+                root.style.setProperty('--quiz-results-bg', lightenHex(hex, 0.37));
+                root.style.setProperty('--quiz-input-bg',   lightenHex(hex, 0.45));
+            }
         } else {
-            document.documentElement.removeAttribute('data-custom-bg');
-            document.documentElement.style.removeProperty('--a11y-bg-colour');
+            root.removeAttribute('data-custom-bg');
+            root.style.removeProperty('--a11y-bg-colour');
+            root.style.removeProperty('--quiz-card-bg');
+            root.style.removeProperty('--quiz-card-alt-bg');
+            root.style.removeProperty('--quiz-results-bg');
+            root.style.removeProperty('--quiz-input-bg');
         }
     }
 
