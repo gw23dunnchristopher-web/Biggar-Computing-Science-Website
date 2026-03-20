@@ -125,29 +125,28 @@
 
 .quiz-table {
     width: 100%;
+    border: 1px solid black;
     border-collapse: collapse;
     font-size: 14px;
 }
 
 .quiz-table th {
-    background: #17479b;
-    color: #fff;
-    padding: 10px 12px;
-    text-align: left;
-    border: 1px solid #1055c0;
-    font-weight: normal;
+    background-color: lightblue;
+    color: #000;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid black;
+    font-weight: bold;
 }
 
 .quiz-table td {
-    border: 1px solid #cdd8f0;
-    padding: 6px 8px;
+    border: 1px solid black;
+    padding: 10px;
     vertical-align: middle;
 }
 
 .quiz-table td.given-cell {
-    background: #f0f4ff;
     color: #333;
-    padding: 8px 12px;
 }
 
 .quiz-table td input[type="text"] {
@@ -156,14 +155,18 @@
     outline: none;
     background: transparent;
     font-size: 14px;
-    font-family: Arial, sans-serif;
-    padding: 4px 4px;
+    font-family: inherit;
+    padding: 0;
     box-sizing: border-box;
     min-width: 80px;
 }
 
-.quiz-table tr:nth-child(even) {
-    background: #f8f9ff;
+.quiz-table tr:nth-child(odd) td {
+    background-color: #fff;
+}
+
+.quiz-table tr:nth-child(even) td {
+    background-color: #eaf4fb;
 }
 
 /* Submit button */
@@ -362,10 +365,17 @@ html.high-contrast .quiz-table td input[type="text"] {
 html.high-contrast .quiz-table th {
     background: #fff;
     color: #000;
+    border-color: #fff;
+}
+
+html.high-contrast .quiz-table tr:nth-child(odd) td,
+html.high-contrast .quiz-table tr:nth-child(even) td {
+    background: #111;
+    color: #fff;
+    border-color: #fff;
 }
 
 html.high-contrast .quiz-table td.given-cell {
-    background: #222;
     color: #fff;
 }
 
