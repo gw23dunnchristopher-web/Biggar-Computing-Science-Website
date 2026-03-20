@@ -8,6 +8,37 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/quiz.css">
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: "Explain what a loop is.",
+                        marks: 2,
+                        markingScheme: "Award 1 mark for... Award 1 mark for..."
+                    },
+                    {
+                        type: "pseudocode",
+                        text: "Write pseudocode for a FOR loop that counts to 10.",
+                        marks: 3,
+                        markingScheme: "Award marks for correct syntax..."
+                    },
+                    {
+                        type: "table",
+                        text: "Complete the table:",
+                        marks: 2,
+                        markingScheme: "1 mark per correct row.",
+                        tableHeaders: ["Term", "Meaning"],
+                        tableRows: [
+                            ["Variable", ""],   // "" = blank for student to fill
+                            ["Constant", ""]
+                        ]
+                    }
+                ]
+            };
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
         <style>
             .noun {
                 background-color: lightpink;
@@ -129,11 +160,11 @@
                             With this, we can identify the inputs, processes and
                             outputs for this program.
                         </p>
-                        <table>
+                        <table style="width:800px;">
                             <tr>
-                                <th>Input(s)</th>
-                                <th>Process(es)</th>
-                                <th>Output(s)</th>
+                                <th style="width:33%;">Input(s)</th>
+                                <th style="width:33%;">Process(es)</th>
+                                <th style="width:33%;">Output(s)</th>
                             </tr>
                             <tr>
                                 <td>
@@ -152,6 +183,7 @@
                             listed programs, type them into the appropriate
                             boxes. Click submit to see if you were right!
                         </p>
+                        <div class="quiz-container"></div>
                     </div>
                 </div>
             </div>

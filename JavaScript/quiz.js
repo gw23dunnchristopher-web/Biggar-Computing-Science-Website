@@ -6,7 +6,6 @@
  * a data-quiz attribute containing JSON.
  *
  * window.QUIZ_CONFIG = {
- *   title: "Check Your Understanding",   // optional, default shown
  *   questions: [
  *     {
  *       type: "paragraph",               // "paragraph" | "pseudocode" | "table"
@@ -59,11 +58,9 @@
     }
 
     function renderQuiz(container, config) {
-        var title = config.title || 'Check Your Understanding';
         var questions = config.questions;
 
         var html = '<div class="quiz-section">';
-        html += '<h2>' + escHtml(title) + '</h2>';
 
         questions.forEach(function (q, i) {
             html += renderQuestion(q, i);
