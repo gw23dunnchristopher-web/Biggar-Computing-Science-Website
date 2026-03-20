@@ -478,3 +478,13 @@ html[data-custom-bg] textarea.quiz-table-input {
     background: var(--quiz-input-bg, #fff) !important;
     color: inherit !important;
 }
+
+html[data-custom-bg] .quiz-submit-btn {
+    background: var(--quiz-submit-bg, linear-gradient(to bottom, #2d6be4, #1a50c0)) !important;
+}
+
+html[data-custom-bg] .quiz-retry-btn {
+    background: var(--quiz-retry-bg, #fff) !important;
+    color: inherit !important;
+    border-color: rgba(0,0,0,0.3) !important;
+}

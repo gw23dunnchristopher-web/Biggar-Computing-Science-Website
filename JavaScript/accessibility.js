@@ -207,6 +207,14 @@
                 root.style.setProperty('--quiz-card-alt-bg', lightenHex(hex, 0.42));
                 root.style.setProperty('--quiz-results-bg', lightenHex(hex, 0.37));
                 root.style.setProperty('--quiz-input-bg',   lightenHex(hex, 0.45));
+                root.style.setProperty('--quiz-retry-bg',   lightenHex(hex, 0.30));
+                var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+                var luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+                if (luminance < 128) {
+                    root.style.setProperty('--quiz-submit-bg', lightenHex(hex, 0.20));
+                } else {
+                    root.style.removeProperty('--quiz-submit-bg');
+                }
             }
         } else {
             root.removeAttribute('data-custom-bg');
@@ -215,6 +223,8 @@
             root.style.removeProperty('--quiz-card-alt-bg');
             root.style.removeProperty('--quiz-results-bg');
             root.style.removeProperty('--quiz-input-bg');
+            root.style.removeProperty('--quiz-retry-bg');
+            root.style.removeProperty('--quiz-submit-bg');
         }
     }
 
