@@ -116,7 +116,13 @@
             },
             {
                 type: "table",
-                text: "Complete the table by identifying the inputs, processes, and outputs for a program that asks a user to enter their age, then displays whether they are old enough to vote (must be 18 or over).",
+                text: [
+                    "A programmer is creating a program for a school library. The program should:",
+                    ["Allow a student to enter their name and the book title they want to borrow",
+                     "Check whether the book is available",
+                     "Display a message confirming the loan, or an error if the book is unavailable"],
+                    "Complete the table by identifying the inputs, processes, and outputs of this program."
+                ],
                 marks: 3,
                 markingScheme: "Award 1 mark per correct row. Input: age (entered by user). Process: check if age >= 18. Output: message stating whether the user can vote.",
                 tableHeaders: ["Category", "Description"],

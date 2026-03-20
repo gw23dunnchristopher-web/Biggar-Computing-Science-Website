@@ -9,7 +9,18 @@
  *   questions: [
  *     {
  *       type: "paragraph",               // "paragraph" | "pseudocode" | "table"
- *       text: "Question text here",
+ *
+ *       // text can be a plain string:
+ *       text: "Question text here.",
+ *
+ *       // OR an array for multiple paragraphs and/or bullet points:
+ *       // text: [
+ *       //   "First paragraph of the question.",
+ *       //   "Second paragraph.",
+ *       //   ["Bullet point one", "Bullet point two", "Bullet point three"]
+ *       // ],
+ *       // Each string item = paragraph. Each array item = a bullet list.
+ *
  *       marks: 2,
  *       markingScheme: "Award 1 mark for X. Award 1 mark for Y."
  *     },
@@ -90,15 +101,43 @@
         });
     }
 
+    /* Render a text value that may be a string or an array of
+       paragraphs/bullet-lists into HTML. */
+    function renderText(text) {
+        if (!Array.isArray(text)) {
+            return '<p>' + escHtml(String(text)) + '</p>';
+        }
+        return text.map(function (item) {
+            if (Array.isArray(item)) {
+                var bullets = item.map(function (b) {
+                    return '<li>' + escHtml(String(b)) + '</li>';
+                }).join('');
+                return '<ul class="quiz-question-bullets">' + bullets + '</ul>';
+            }
+            return '<p>' + escHtml(String(item)) + '</p>';
+        }).join('');
+    }
+
+    /* Flatten a text value to plain text for sending to the server. */
+    function flattenText(text) {
+        if (!Array.isArray(text)) return String(text);
+        return text.map(function (item) {
+            if (Array.isArray(item)) {
+                return item.map(function (b) { return '- ' + b; }).join('\n');
+            }
+            return String(item);
+        }).join('\n');
+    }
+
     function renderQuestion(q, index) {
         var num = index + 1;
         var marksLabel = q.marks === 1 ? '1 mark' : q.marks + ' marks';
         var html = '<div class="quiz-question" id="quiz-q-' + index + '">';
         html += '<div class="quiz-question-header">';
         html += '<span class="quiz-question-number">Q' + num + '.</span>';
-        html += '<span class="quiz-question-text">' + escHtml(q.text) + '</span>';
         html += '<span class="quiz-marks">(' + marksLabel + ')</span>';
         html += '</div>';
+        html += '<div class="quiz-question-text">' + renderText(q.text) + '</div>';
 
         if (q.type === 'pseudocode') {
             html += '<textarea class="quiz-code-area" id="quiz-ans-' + index + '" placeholder="Write your pseudocode here..." spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>';
@@ -203,7 +242,7 @@
         var payload = {
             questions: config.questions.map(function (q, i) {
                 return {
-                    text: q.text,
+                    text: flattenText(q.text),
                     type: q.type,
                     marks: q.marks,
                     markingScheme: q.markingScheme,

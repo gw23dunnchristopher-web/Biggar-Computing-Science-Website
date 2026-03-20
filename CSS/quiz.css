@@ -23,9 +23,10 @@
 
 .quiz-question-header {
     display: flex;
-    align-items: baseline;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
     gap: 10px;
-    margin-bottom: 12px;
 }
 
 .quiz-question-number {
@@ -35,19 +36,38 @@
     white-space: nowrap;
 }
 
-.quiz-question-text {
-    font-size: 15px;
-    color: #1a1a1a;
-    line-height: 1.5;
-    flex: 1;
-}
-
 .quiz-marks {
     font-size: 13px;
     color: #666;
     white-space: nowrap;
-    margin-left: auto;
     flex-shrink: 0;
+}
+
+.quiz-question-text {
+    margin-bottom: 12px;
+}
+
+.quiz-question-text p {
+    font-size: 15px;
+    color: inherit;
+    line-height: 1.6;
+    margin: 0 0 8px;
+}
+
+.quiz-question-text p:last-child {
+    margin-bottom: 0;
+}
+
+.quiz-question-bullets {
+    margin: 4px 0 8px 18px;
+    padding: 0;
+}
+
+.quiz-question-bullets li {
+    font-size: 15px;
+    color: inherit;
+    line-height: 1.6;
+    margin-bottom: 4px;
 }
 
 /* Paragraph / written answer */
