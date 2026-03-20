@@ -48,7 +48,7 @@
     flex: 1;
 }
 
-.quiz-question-text p {
+.quiz-container .quiz-question-text p {
     font-size: 15px;
     color: inherit;
     line-height: 1.6;
@@ -56,7 +56,7 @@
     padding: 0;
 }
 
-.quiz-question-text p:last-child {
+.quiz-container .quiz-question-text p:last-child {
     margin-bottom: 0;
 }
 
