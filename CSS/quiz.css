@@ -32,6 +32,7 @@
     font-weight: bold;
     color: #17479b;
     font-size: 15px;
+    line-height: 1.6;
     white-space: nowrap;
     flex-shrink: 0;
 }
