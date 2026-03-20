@@ -179,7 +179,7 @@
         html += '<div class="quiz-question-text">' + renderText(getQuestionText(q)) + '</div>';
 
         if (q.type === 'pseudocode') {
-            var codePlaceholder = getQuestionText(q).toLowerCase().indexOf('using a programming language of your choice') !== -1
+            var codePlaceholder = flattenText(getQuestionText(q)).toLowerCase().indexOf('using a programming language of your choice') !== -1
                 ? 'Write your code here...'
                 : 'Write your pseudocode here...';
             html += '<textarea class="quiz-code-area" id="quiz-ans-' + index + '" placeholder="' + codePlaceholder + '" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>';
