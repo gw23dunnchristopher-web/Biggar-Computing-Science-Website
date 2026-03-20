@@ -117,6 +117,23 @@
         });
     }
 
+    /* Get question text — supports both q.text (N5 format) and q.question (Higher format). */
+    function getQuestionText(q) {
+        return q.text !== undefined ? q.text : (q.question !== undefined ? q.question : '');
+    }
+
+    /* Flatten markingScheme to a plain string for sending to the server.
+       Handles both string format and object format {text, points}. */
+    function flattenMarkingScheme(ms) {
+        if (!ms) return '';
+        if (typeof ms === 'string') return ms;
+        var result = ms.text ? String(ms.text) : '';
+        if (ms.points && Array.isArray(ms.points)) {
+            result += '\n' + ms.points.map(function (p) { return '- ' + p; }).join('\n');
+        }
+        return result;
+    }
+
     /* Render a text value that may be a string or an array of
        paragraphs/bullet-lists into HTML. */
     function renderText(text) {
@@ -159,7 +176,7 @@
 
         // Collapsible body
         html += '<div class="quiz-question-body" id="quiz-body-' + index + '" hidden>';
-        html += '<div class="quiz-question-text">' + renderText(q.text) + '</div>';
+        html += '<div class="quiz-question-text">' + renderText(getQuestionText(q)) + '</div>';
 
         if (q.type === 'pseudocode') {
             html += '<textarea class="quiz-code-area" id="quiz-ans-' + index + '" placeholder="Write your pseudocode here..." spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>';
@@ -212,6 +229,7 @@
 
     function collectAnswers(container, questions) {
         return questions.map(function (q, index) {
+            var qText = getQuestionText(q);
             if (q.type === 'table') {
                 // Collect all blank cells for this question
                 var inputs = container.querySelectorAll('.quiz-table-input[data-qindex="' + index + '"]');
@@ -225,10 +243,10 @@
                 });
                 // Build a full table for Gemini to see
                 var tableStr = buildTableString(q, cells);
-                return { type: q.type, text: q.text, answer: tableStr };
+                return { type: q.type, text: qText, answer: tableStr };
             } else {
                 var ta = document.getElementById('quiz-ans-' + index);
-                return { type: q.type, text: q.text, answer: ta ? ta.value.trim() : '' };
+                return { type: q.type, text: qText, answer: ta ? ta.value.trim() : '' };
             }
         });
     }
@@ -272,10 +290,10 @@
         var payload = {
             questions: config.questions.map(function (q, i) {
                 return {
-                    text: flattenText(q.text),
+                    text: flattenText(getQuestionText(q)),
                     type: q.type,
                     marks: q.marks,
-                    markingScheme: q.markingScheme,
+                    markingScheme: flattenMarkingScheme(q.markingScheme),
                     answer: answers[i].answer
                 };
             })
