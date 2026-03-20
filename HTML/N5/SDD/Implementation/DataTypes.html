@@ -194,16 +194,16 @@
                         <tr>
                             <td><p>yearsOfMembership</p></td>
                             <td><p>6</p></td>
-                            <td><p class="hiddenElement answer1">Integer</p></td>
+                            <td></td>
                         </tr>
                         <tr>
                             <td><p>memberName</p></td>
                             <td><p>Jones</p></td>
-                            <td><p class="hiddenElement answer1">String</p></td>
+                            <td></td>
                         </tr>
                     </table>
-                     <div class="answerButton" onClick="answerButtonSwitch(this);
-                         toggleVisibility('answer1')">Show Answer</div>
+        <div class="quiz-container"></div>
+                     
                 </div>
             </div>
         </div>   
@@ -219,5 +219,42 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "table",
+                        "text": "A club program calculates membership fees. Complete the table below to state which data type should be used for each variable.",
+                        "marks": 2,
+                        "tableHeaders": [
+                                "Variable",
+                                "Sample Data",
+                                "Data Type"
+                        ],
+                        "tableRows": [
+                                [
+                                        "membershipFee",
+                                        "37.50",
+                                        "Real"
+                                ],
+                                [
+                                        "yearsOfMembership",
+                                        "6",
+                                        ""
+                                ],
+                                [
+                                        "memberName",
+                                        "Jones",
+                                        ""
+                                ]
+                        ],
+                        "markingScheme": "Award 1 mark for yearsOfMembership: Integer (whole number, no decimal places). Award 1 mark for memberName: String (text/characters)."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

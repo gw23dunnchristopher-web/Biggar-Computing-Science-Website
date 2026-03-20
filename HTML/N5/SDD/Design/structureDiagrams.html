@@ -95,11 +95,10 @@
                                 <td width="30px" style="text-align:right;">1</td>
                             </tr>
                             <tr>
-                                <td colspan="2" ><p class = "hiddenElement answer1">This is a fixed loop, 
-                                    as it loops for the number of trees that there are.</p></td>
+                                <td colspan="2" ></td>
                             </tr>
                         </table>
-                       <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                       
                     <br>
                     <table>
                         <tr>
@@ -120,13 +119,13 @@
                                             <p>Type of tree - Pear</p>
                                             <p>Size of tree - medium</p>
                                         </td>
-                                        <td><div class = "hiddenElement answer2"><p>50</p></div></td>
+                                        <td></td>
                                     </tr>
                                 </table></td>
                             <td width="30px" style="text-align:right;">1</td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    
                     <br>
                     <table>
                             <tr>
@@ -135,11 +134,11 @@
                                 <td width="30px" style="text-align:right;">1</td>
                             </tr>
                             <tr>
-                                <td colspan="2" ><p class = "hiddenElement answer3">As orange tree is not an apple or 
-                                pear tree it would still be set to £23.</p></td>
+                                <td colspan="2" ></td>
                             </tr>
                         </table>
-                       <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer3')">Show Answer</div>
+        <div class="quiz-container"></div>
+                       
                 </div>
             </div>
         </div>   
@@ -155,5 +154,40 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "paragraph",
+                        "text": "A garden centre program calculates the price of apple, pear and cherry trees. The structure diagram is shown on the page. State the type of loop shown in the design.",
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark for fixed loop (also accept: for loop, count-controlled loop). The loop runs a fixed number of times equal to the number of trees."
+                },
+                {
+                        "type": "paragraph",
+                        "text": [
+                                "The design is tested with the following inputs:",
+                                [
+                                        "Number of trees: 2",
+                                        "Tree 1: Type = cherry, Size = small",
+                                        "Tree 2: Type = Pear, Size = medium"
+                                ],
+                                "State the total displayed by the program."
+                        ],
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark for the answer 50 (or £50). Cherry small tree costs £14, Pear medium tree costs £36, giving a total of £50."
+                },
+                {
+                        "type": "paragraph",
+                        "text": "The garden centre is considering selling orange trees for £23.00. Explain why the structure diagram design does not need to be changed to accommodate this.",
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark for explaining that as an orange tree is not an apple or pear tree, the design would set its price to £23 by default (the else/default value), so no change to the design is needed."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

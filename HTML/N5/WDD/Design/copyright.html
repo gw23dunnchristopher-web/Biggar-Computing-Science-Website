@@ -106,15 +106,13 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <p>As Eduardo took the photos himself, he owns the copyright to them and therefore does not need to consider the Copyright, Designs and Patents Act.</p>
-                                    </ul>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
+        <div class="quiz-container"></div>
                 </div>
             </div>
         </div>   
@@ -130,5 +128,20 @@
             </div>
         </footer>
             </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "paragraph",
+                        "text": "Eduardo designs a website about his new business and takes his own photographs to use on the site. Explain why Eduardo does not need to consider the Copyright, Designs and Patents Act when using these photographs on his website.",
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark for explaining that because Eduardo took the photos himself, he owns the copyright to them. Therefore he does not need to seek permission to use them and the Copyright, Designs and Patents Act does not apply."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

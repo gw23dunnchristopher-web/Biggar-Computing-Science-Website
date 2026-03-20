@@ -86,21 +86,9 @@
                     asked if they want to add a bag. The cost is an additional £7 for each 
                     passenger who decides to take a bag.</p>
                     <p>Using a design technique of your choice, <b>refine step 4</b>.</p>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
-                    <div class="hiddenElement answer1">
-                        <table class="pseudocode">
-                            <tr><td>3.1</td><td>Loop for the number of passengers</td></tr>
-                            <tr><td>3.2</td><td style="padding-left:40px;">Ask if passenger wants a bag</td></tr>
-                            <tr><td>3.3</td><td style="padding-left:40px;">If answer = "Yes" then:</td>
-                            <tr><td>3.4</td><td style="padding-left:80px;">Add £7 to bag total</td></tr>
-                            <tr><td>3.5</td><td style="padding-left:40px;">End If</td></tr>
-                            <tr><td>3.6</td><td>End Loop</td></tr>
-                            <tr><td>3.7</td><td>total = total + bag total</td></tr>
-                        </table>
-                    </div>
-                    <div class="hiddenElement answer1">
-                        <p>The program will loop a number of times equal to the number of passengers there are.  For each passenger, it will ask if they want a bag. If they do, it will add 7 onto the total cost of the bags.  Then the if statement and the loop will end. Finally, the amount required for the bags will be added onto the total amount for the booking.  There are actually a couple of other ways to complete this problem.  You could add up the number of bags and multiply that number by 7 at the end, for example.</p>
-                    </div>
+                    
+                    
+                    
                     <h2>Past Paper Question 2 - 2023 10(b)</h2>
                     <p>The design below shows how a customer’s average monthly data usage is 
                     calculated and displayed.</p>
@@ -116,18 +104,10 @@
                     <p>The variable aveData is used to store a customer’s average monthly data 
                     usage.</p>
                     <p>Using a design technique of your choice, <b>refine step 2</b>.</p>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
-                    <div class="hiddenElement answer2">
-                        <table class="pseudocode">
-                            <tr><td>2.1</td><td>Loop 12 times</td></tr>
-                            <tr><td>2.2</td><td style="padding-left:40px;">Set total to total month [index]</td></tr>
-                            <tr><td>2.3</td><td>End loop</td>
-                            <tr><td>2.4</td><td>Set aveData to total/12</td></tr>
-                        </table>
-                    </div>
-                    <div class="hiddenElement answer2">
-                    <p>The program loops 12 times, because there are 12 months.  For each month, the prgoram adds the total amount that month to that overall total.  After that, the loop ends and the overall total is divided by 12 to get the monthly average amount.</p>
-                </div>
+        <div class="quiz-container"></div>
+                    
+                    
+                    
             </div>
         </div>   
         <footer>
@@ -142,5 +122,39 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "pseudocode",
+                        "text": [
+                                "An airline booking app calculates the total cost of a flight. The algorithm includes steps for getting the number of passengers and their type (adult/child). Step 4 adds the bag cost.",
+                                "Each passenger is asked if they want a bag. The cost is an additional £7 for each passenger who decides to take a bag.",
+                                "Using a design technique of your choice, refine step 4 of the algorithm."
+                        ],
+                        "marks": 3,
+                        "markingScheme": "Award 1 mark for looping for the number of passengers. Award 1 mark for asking each passenger inside the loop whether they want a bag. Award 1 mark for adding £7 to a bag total if the answer is Yes, then adding the bag total to the overall total after the loop."
+                },
+                {
+                        "type": "pseudocode",
+                        "text": [
+                                "The design below shows how a customer's average monthly data usage is calculated and displayed:",
+                                [
+                                        "1. Store each month's data usage",
+                                        "2. Calculate the average monthly data usage",
+                                        "3. Display the average monthly data usage"
+                                ],
+                                "The data structure 'month' stores usage for each of the 12 months. The variable 'aveData' stores the customer's average monthly data usage.",
+                                "Using a design technique of your choice, refine step 2."
+                        ],
+                        "marks": 3,
+                        "markingScheme": "Award 1 mark for looping 12 times (once for each month). Award 1 mark for adding each month's data to a running total inside the loop. Award 1 mark for dividing the total by 12 and assigning to aveData after the loop."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

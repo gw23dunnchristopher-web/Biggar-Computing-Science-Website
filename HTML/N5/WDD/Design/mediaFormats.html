@@ -106,20 +106,13 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <p><b>One mark for any one from:</b></p>
-                                    <p>The website must...</p>
-                                    <ul>
-                                        <li>display the charity logo.</li>
-                                        <li>play sounds of foxes.</li>
-                                        <li>display pictures of foxes.</li>
-                                    </ul>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
+        <div class="quiz-container"></div>
                 </div>
             </div>
         </div>   
@@ -135,5 +128,20 @@
             </div>
         </footer>
             </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "paragraph",
+                        "text": "The Vulpes fox charity would like a website to increase public knowledge of foxes. The website will have pages about different types of foxes where users can view pictures and listen to sounds made by each fox. The charity logo must be visible at the top of every page. Identify a functional requirement of this website.",
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark for any valid functional requirement, such as: the website must display the charity logo on each page; the website must display pictures of foxes; or the website must play sounds of foxes."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

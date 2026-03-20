@@ -225,13 +225,11 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <p>JPG</p>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
 
                     <table>
                         <tr>
@@ -243,14 +241,13 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer2">
-                                    <p>The image has a very large resolution (4000x2500 pixels).  With a large number of pixels the quality of the image will be high, but the file size will be much larger.</p>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    
                     </div>
+        <div class="quiz-container"></div>
                 </div>
             </div>
         </div>   
@@ -266,5 +263,26 @@
             </div>
         </footer>
             </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "paragraph",
+                        "text": "A dog care centre uploads an image of their dog of the week to their website. The image has a 24-bit colour depth and does not support transparency. State a suitable file type for this image.",
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark for JPG (also accept JPEG). JPG supports 24-bit colour depth, is suitable for photographs, and does not support transparency."
+                },
+                {
+                        "type": "paragraph",
+                        "text": "The dog of the week image causes the webpage to load slowly because the file size is very large. Other than the colour depth, state one reason why this image has a large file size.",
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark for stating that the image has a very large resolution (e.g. 4000x2500 pixels). A high resolution means a large number of pixels, which results in a much larger file size."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

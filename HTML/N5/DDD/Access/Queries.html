@@ -210,26 +210,13 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <table>
-                                        <tr><th>Field(s)</th><td style="width:75%">parentName, email</td></tr>
-                                        <tr><th>Tables(s)</th><td style="width:75%">Class, Booking</td></tr>
-                                        <tr><th>Search Criteria</th><td style="width:75%">sessionBlock=Spring, classAge=Babies</td></tr>
-                                    </table>
-
-                                    <p>One mark each for:</p>
-                                    <ul>
-                                        <li>parentName, email with no other fields</li>
-                                        <li>Class, Booking</li>
-                                        <li>sessionBlock = Spring</li>
-                                        <li>classAge = Babies</li>
-                                    </ul>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
+        <div class="quiz-container"></div>
                 </div>
             </div>
         </div>   
@@ -245,5 +232,45 @@
             </div>
         </footer>
             </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "table",
+                        "text": [
+                                "Spring classes for babies are ending soon. An email needs to be sent to all parents to offer them a place in the Summer classes.",
+                                "Design a query that could be used to generate a list of names and email addresses of parents with a child who attends a Spring class for babies."
+                        ],
+                        "marks": 4,
+                        "tableHeaders": [
+                                "Query Element",
+                                "Your Answer"
+                        ],
+                        "tableRows": [
+                                [
+                                        "Field(s)",
+                                        ""
+                                ],
+                                [
+                                        "Table(s)",
+                                        ""
+                                ],
+                                [
+                                        "Search Criteria (1)",
+                                        ""
+                                ],
+                                [
+                                        "Search Criteria (2)",
+                                        ""
+                                ]
+                        ],
+                        "markingScheme": "Award 1 mark each for: Field(s): parentName, email (no other fields). Table(s): Class, Booking. Search Criteria: sessionBlock = Spring. Search Criteria: classAge = Babies."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

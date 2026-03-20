@@ -100,11 +100,10 @@
                                 <td width="30px" style="text-align:right;">1</td>
                             </tr>
                             <tr>
-                                <td colspan="2" ><p class = "hiddenElement answer1">This is a conditional loop, as it continues 
-                                    to loop until the passenger is satisfied with the outcome.</p></td>
+                                <td colspan="2" ></td>
                             </tr>
                         </table>
-                       <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                       
                     <br>
                     <table>
                         <tr>
@@ -115,16 +114,12 @@
                             <td width="30px" style="text-align:right;">2</td>
                         </tr>
                         <tr>
-                            <td colspan="2" ><div class = "hiddenElement answer2"><p>&lt;pseudocode&gt; Set refund to ticketCost x 0.25</p>
-                            <ul>
-                                <li>1 mark for an appropriate variable/descriptor for ticket cost.</li>
-                                <li>1 mark for the refund being correctly calculated as 25% of the ticket cost.</li>
-                            </ul>
-                            </div>
+                            <td colspan="2" >
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+        <div class="quiz-container"></div>
+                    
                 </div>
             </div>
         </div>   
@@ -140,5 +135,32 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "paragraph",
+                        "text": "A train company is designing a program to handle passenger complaints. Part of the design is shown as a flowchart on this page. State which type of loop is used in this design.",
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark for conditional loop (also accept while loop or repeat-until loop). The loop continues until the passenger is satisfied with the outcome."
+                },
+                {
+                        "type": "pseudocode",
+                        "text": "When a train is delayed, passengers are entitled to a 25% refund on the cost of their ticket. Using a design technique of your choice, show how the refund would be calculated.",
+                        "marks": 2,
+                        "markingScheme": "Award 1 mark for using an appropriate variable or descriptor for ticket cost. Award 1 mark for the refund being correctly calculated as 25% (0.25) of the ticket cost. Example: SET refund TO ticketCost * 0.25"
+                },
+                {
+                        "type": "paragraph",
+                        "text": "A garden centre is considering selling orange trees for £23.00. Using the flowchart design shown on the page, explain why the design does not need to be changed to accommodate this.",
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark for explaining that as an orange tree is not an apple or pear tree, it would still be set to £23 (the default else price), so the design already handles this case correctly without any modification."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

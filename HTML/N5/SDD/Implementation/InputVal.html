@@ -112,34 +112,16 @@
                         </tr>
                         <tr>
                             <td>
-                                <table class="borderless hiddenElement answer1">
-                                    <tr><td>1.</td><td>Get the user to enter the property price.</td></tr>
-                                    <tr><td>2.</td><td>WHILE the price is less than £50,000 or greater than £600,000:</td></tr>
-                                    <tr><td>3.</td><td style="padding-left:40px">Display an error message that says "The price must be between £50,000 and £600,000".</td></tr>
-                                    <tr><td>4.</td><td style="padding-left:40px">Ask the user to enter the price of the property again.</td></tr>
-                                    <tr><td>5.</td><td>End WHILE Loop</td></tr>
-                                </table>
-                                <ul class="hiddenElement answer1">
-                                    <li><b>1 mark</b> - use of a conditional loop</li>
-                                    <li><b>1 mark</b> - correct loop condition for valid data (data cannot be greater than 600,000 or less than 50,000)</li>
-                                    <li><b>1 mark</b> - user asked to input price inside loop</li>
-                                    <li><b>1 mark</b> - error message shown inside loop</li>
-                                </ul>
+                                
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     <br>
-                    <p class="hiddenElement answer1">This is how the answer would look in Python if you were required to write using a programming language:</p>
-                    <div class="codeBox hiddenElement answer1">
-                        <p>print("Enter the price of the property (Between 50000 and 60000):")</p>
-                        <p>propertyPrice = int(input())</p>
-                        <br>
-                        <p>while propertyPrice < 50000 or propertyPrice > 600000:</p>
-                        <p style="padding-left:40px">print("The prince must be between 50000 and 600000.")</p>
-                        <p style="padding-left:40px">print("Enter the price of the property (Between 50000 and 60000):")</p>
-                        <p style="padding-left:40px">propertyPrice = int(input())</p>
-                    </div>
+        <div class="quiz-container"></div>
+                    
+                    
                 </div>
             </div>
         </div>   
@@ -155,5 +137,20 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "pseudocode",
+                        "text": "A property search website allows users to search for properties priced from £50,000 to £600,000. Using a design technique of your choice, design an efficient solution to check that the price entered by the user is valid.",
+                        "marks": 4,
+                        "markingScheme": "Award 1 mark for using a conditional (while) loop. Award 1 mark for the correct loop condition (price < 50000 OR price > 600000). Award 1 mark for asking the user to input the property price inside the loop. Award 1 mark for displaying a suitable error message inside the loop."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

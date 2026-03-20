@@ -138,24 +138,14 @@
                         </tr>
                         <tr>
                             <td>
-                               <div class="codeBox hiddenElement answer1">
-                                   <p>subTotal = (smallWindows * 299.99) + (largeWindows * 499.99)</p>
-                                   <p>totalCost += subTotal</p>
-                               </div>
-                                <ul class="hiddenElement answer1">
-                                    <li><b>1 mark</b> - calculation of small windows cost</li>
-                                    <li><b>1 mark</b> - calculation of large windows cost</li>
-                                    <li><b>1 mark</b> - running total updated </li>
-                                    <li><b>1 mark</b> - assignment to totalCost</li>
-                                </ul>
-                                <p class="hiddenElement answer1">There are several ways that you could code this, adding the cost of the windows directly
-                                    onto the total cost (<span class="codeText">totalCost+=(smallWindows*299.99) + (largeWindows*299.99)</span>) or using
-                                    two different variables to get the cost of the large windows and the small windows (<span class="codeText">totalCost =
-                                        totalCost + largeWindowsCost + smallWindowsCost</span>).  Any of those answers would also get you the 4 marks.</p>
+                               
+                                
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+        <div class="quiz-container"></div>
+                    
                 </div>
             </div>
         </div>   
@@ -171,5 +161,34 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "pseudocode",
+                        "text": [
+                                "A window replacement company's program calculates the cost of fitting triple glazed windows. Small windows cost £299.99 and large windows cost £499.99.",
+                                "The algorithm is:",
+                                [
+                                        "1. Set totalCost to 0",
+                                        "2. Ask for number of rooms",
+                                        "3. Loop through number of rooms",
+                                        "4.     Ask for number of small windows",
+                                        "5.     Ask for number of large windows",
+                                        "6.     Calculate and update totalCost",
+                                        "7. End loop",
+                                        "8. Display totalCost"
+                                ],
+                                "Step 6 calculates and updates the total cost. Using a programming language of your choice, write the code for step 6."
+                        ],
+                        "marks": 4,
+                        "markingScheme": "Award 1 mark for calculating the cost of small windows (smallWindows * 299.99). Award 1 mark for calculating the cost of large windows (largeWindows * 499.99). Award 1 mark for updating a running total (adding the cost to totalCost). Award 1 mark for correct assignment to totalCost (e.g. totalCost += subTotal, or totalCost = totalCost + subTotal)."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

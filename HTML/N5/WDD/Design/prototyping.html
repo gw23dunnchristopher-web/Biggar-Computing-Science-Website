@@ -99,13 +99,11 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <p>(Low-Fidelity) Prototype</p>  
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     
                     <table>
                         <tr>
@@ -117,20 +115,14 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer2">
-                                    <p>One mark each for any two from...</p>
-                                    <ul>
-                                        <li>show the contents of the website to the end-user</li>
-                                        <li>show the client the user interface (look and feel)</li>
-                                        <li>test navigation</li>
-                                    </ul>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
+                    
                     
                 </div>
+        <div class="quiz-container"></div>
                 </div>
             </div>
         </div>   
@@ -146,5 +138,26 @@
             </div>
         </footer>
             </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "paragraph",
+                        "text": "A web designer creates a basic hand-drawn or rough sketch of their planned website layout before starting development. State the type of design that has been used.",
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark for (Low-Fidelity) Prototype. Also accept wireframe or mockup."
+                },
+                {
+                        "type": "paragraph",
+                        "text": "State two reasons why a low-fidelity prototype is used as part of the design stage of web development.",
+                        "marks": 2,
+                        "markingScheme": "Award 1 mark each for any two of: to show the contents/layout of the website to the end-user; to show the client the user interface (look and feel of the site); to test the navigation between pages."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

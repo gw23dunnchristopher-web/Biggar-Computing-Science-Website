@@ -97,24 +97,14 @@
                         </tr>
                         <tr>
                             <td>
-                               <div class="codeBox hiddenElement answer1">
-                                   <p>total=0</p>
-                                   <br>
-                                   <p>for x in range(365):</p>
-                                   <p style="padding-left: 40px;">total = total + guests[x]</p>
-                               </div>
-                                <ul class="hiddenElement answer1">
-                                    <li><b>1 mark</b> - set running total to 0</li>
-                                    <li><b>1 mark</b> - loop 365 times (or use <span class="codeText">len(guests)</span>)</li>
-                                    <li><b>1 mark</b> - running total adding <span class="codeText">guests[x]</span> to total in loop</li>
-                                    <li><b>1 mark</b> - use of incrementing array index (use of incrementing array index (<span class="codeText">[x]
-                                    </span>) in running total</li>
-                                </ul>
+                               
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
+        <div class="quiz-container"></div>
                 </div>
             </div>
         </div>   
@@ -130,5 +120,20 @@
             </div>
         </footer>
             </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "pseudocode",
+                        "text": "A 1D array called guests stores the number of guests who stayed at a campsite for each day of 2023 (365 values, one per day). Using a programming language of your choice, write the code to calculate the total number of guests who stayed at the campsite in 2023.",
+                        "marks": 4,
+                        "markingScheme": "Award 1 mark for setting a running total variable to 0. Award 1 mark for looping 365 times (or using len(guests) for the loop range). Award 1 mark for adding guests[index] to the running total inside the loop. Award 1 mark for using an incrementing array index (e.g. guests[x]) within the running total calculation."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

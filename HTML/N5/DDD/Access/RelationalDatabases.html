@@ -138,16 +138,13 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="hiddenElement answer1">
-                                    <p>The data that the that the user is trying to enter into the staffID field is not in the 
-                                        <span class="codeText">Staff</span> table, which will cause a referential integrity error since the two tables are
-                                        linked with staffID as a foreign key in the <span class="codeText">House</span> table.</p>
-                                </div>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
+                    
                     </div>
+        <div class="quiz-container"></div>
                 </div>
             </div>
         </div>   
@@ -163,5 +160,20 @@
             </div>
         </footer>
             </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "paragraph",
+                        "text": "When new data is added to the House table (shown on the page), an error message is displayed. Explain the reason for this error.",
+                        "marks": 1,
+                        "markingScheme": "Award 1 mark for explaining that the staffID value being entered into the House table does not exist in the Staff table, causing a referential integrity error. This is because staffID is a foreign key in the House table that links to the Staff table."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

@@ -207,15 +207,14 @@
                             <td rowspan="3" style="width:30px;"><b>2</b></td>
                         <tr>
                             <td><p>Data Structure</p></td>
-                            <td style="width:400px"><p class="hiddenElement answer1">1D Array</p></td>
+                            <td style="width:400px"></td>
                         </tr>
                         <tr>
                             <td><p>Data Type</p></td>
-                            <td style="width:400px"><p class="hiddenElement answer1">Boolean</p></td>
+                            <td style="width:400px"></td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this);
-                         toggleVisibility('answer1')">Show Answer</div>
+                    
                     <br>
                     <table>
                         <tr>
@@ -253,29 +252,12 @@
                         </tr>
                         <tr>
                             <td>
-                                <div class="codeBox hiddenElement answer2">
-                                    <p>import randint from random</p>
-                                    <p>randomSeat = randint(1,60)</p>
-                                    <br>
-                                    <p>while seats[randomSeat] = False:</p>
-                                    <p>&emsp;&emsp;randomSeat = randint(1,60)</p>
-                                    <p>seats[randomSeat] = False</p>
-                                </div>
-                                <ul class="hiddenElement answer2">
-                                    <li><b>1 mark</b> - Before loop, store a random number within
-                                        appropriate range (60 seats)</li>
-                                    <li><b>1 mark</b> - Use a while loop with correct condition: data 
-                                        structure 'seats' with random number index = false</li>
-                                    <li><b>1 mark</b> - Store a random number (60 seats) again inside the 
-                                        loop</li>
-                                    <li><b>1 mark</b> - After the loop set the randomly generated index
-                                        number of the seats array to False.</li>
-                                </ul>
+                                
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this);
-                         toggleVisibility('answer2')">Show Answer</div>
+                    
                     <br>
                     <table>
                         <tr>
@@ -286,17 +268,12 @@
                         </tr>
                         <tr>
                             <td>
-                                <ul class="hiddenElement answer3">
-                                    <li><b>1 mark</b> - a number/seat generated is more likely to be
-                                        allocated already </li>
-                                    <li><b>1 mark</b> - demonstrating an understanding 
-                                        that the above will cause the program to repeat/loop again</li>
-                                </ul>
+                                
                             </td>
                         </tr>
                     </table>
-                    <div class="answerButton" onClick="answerButtonSwitch(this);
-                         toggleVisibility('answer3')">Show Answer</div>
+        <div class="quiz-container"></div>
+                    
                 </div>
             </div>
         </div>   
@@ -312,5 +289,56 @@
             </div>
         </footer>
         </div>
-    </body>
+    
+    <link rel="stylesheet" href="/CSS/quiz.css">
+    <script>
+    window.QUIZ_CONFIG = {
+        "questions": [
+                {
+                        "type": "table",
+                        "text": "A cinema booking program stores the availability of 60 seats (True = available, False = unavailable). State the most suitable data structure and data type for storing the seat availability.",
+                        "marks": 2,
+                        "tableHeaders": [
+                                "Element",
+                                "Your Answer"
+                        ],
+                        "tableRows": [
+                                [
+                                        "Data Structure",
+                                        ""
+                                ],
+                                [
+                                        "Data Type",
+                                        ""
+                                ]
+                        ],
+                        "markingScheme": "Award 1 mark for Data Structure: 1D Array. Award 1 mark for Data Type: Boolean."
+                },
+                {
+                        "type": "pseudocode",
+                        "text": [
+                                "The following pseudocode shows how an available seat is allocated:",
+                                [
+                                        "1. Generate a random seat number",
+                                        "2. Loop while the generated seat is unavailable",
+                                        "3.     Generate another random seat number",
+                                        "4. End loop",
+                                        "5. Change seat to unavailable"
+                                ],
+                                "Using a programming language of your choice, write the code to implement the above design. (There are 60 seats, indexed 1 to 60.)"
+                        ],
+                        "marks": 4,
+                        "markingScheme": "Award 1 mark for generating a random number in the range 1-60 before the loop. Award 1 mark for using a while loop with the correct condition (seats[randomSeat] == False, i.e. seat is unavailable). Award 1 mark for generating another random seat number inside the loop. Award 1 mark for setting seats[randomSeat] to False (unavailable) after the loop ends."
+                },
+                {
+                        "type": "paragraph",
+                        "text": "Explain why the above random seat allocation design becomes less efficient as more passengers are allocated seats.",
+                        "marks": 2,
+                        "markingScheme": "Award 1 mark for stating that as more seats are taken, a randomly generated number is more likely to already be an allocated seat. Award 1 mark for demonstrating understanding that this causes the program to loop more times before finding an available seat, making it slower."
+                }
+        ]
+};
+    </script>
+    <script src="/JavaScript/quiz.js"></script>
+</body>
 </html>

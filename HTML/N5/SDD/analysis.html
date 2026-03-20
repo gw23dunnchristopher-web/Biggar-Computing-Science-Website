@@ -42,49 +42,16 @@
                     </ul>
                     <h2>Example - Car Speed</h2>
                     <p>You have been asked to create a program that will calculate the speed of a moving car using the formula 'speed = distance / time'.  The program will take in the distance the car has travelled in meters and the time it took to travel that distance in seconds.  It will then calculate the speed of the car in m/s and display the result. List the inputs, processes and outputs for this program.</p>
-                    <table>
-                        <tr>
-                            <th>Input</th>
-                            <td><p>Distance in meters</p><p>Time in seconds</p></td>
-                        </tr>
-                        <tr>
-                            <th>Processes</th>
-                            <td><p>Calculate the speed using (speed = distance / time)</p></td>
-                        </tr>
-                            <th>Output</th>
-                            <td><p>Speed in m/s</p></td>
-                    </table>
+                    
                     <h2>Example 2 - Pupil Usernames</h2>
                     <p>A program is being created for the school to create a list of usernames for pupils.  The program should ask the user to enter the number of pupils, the first name and last name of each pupil and their age.  The program needs to make sure that each age entered is between 14 and 18, will then create and display the usernames in the following format (first name + last name + age).  List the inputs, processes and outputs for this progam.</p>
 
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
-                    <table>
-                        <tr>
-                            <th width="200px">Input</th>
-                            <td><div class = "hiddenElement answer1"><p>Number of pupils</p><p>first name of each pupil</p><p> last name of each pupil</p><p>age of each pupil</p></div></td>
-                        </tr>
-                        <tr>
-                            <th>Processes</th>
-                            <td><div  class = "hiddenElement answer1"><p>Check to make sure the age entered is between 14 and 18</p><p>display an error message if it is not</p><p>create a username for each pupil (first name + last name + age)</p><p>add the username to a list</p</div></td>
-                        </tr>
-                            <th>Output</th>
-                            <td><div  class = "hiddenElement answer1"><p>List of usernames</p></div></td>
-                    </table>
+                    
+                    
                     <h2>Example 3 - Book Store Program</h2>
                     <p>You are creating a simple program for an online bookstore that allows a customer to choose books, calculate the total price, and display the order details. The program should let the customer select books, enter the number of books they want to buy, and then calculate the total cost, with each book priced at £10. If the customer buys more than 5 books, a 10% discount is applied. Finally, the program should display the final total cost to the customer. Your task is to identify the inputs, processes, and outputs of this program.</p>
-                    <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer2')">Show Answer</div>
-                    <table>
-                    <tr>
-                        <th width="200px">Input</th>
-                        <td><div class = "hiddenElement answer2"><p>Number of books the customer wants to buy.</p></div></td>
-                    </tr>
-                    <tr>
-                        <th>Processes</th>
-                        <td><div  class = "hiddenElement answer2"><p>Multiply the number of books by £10 to get the total cost.</p><p>If the number of books is more than 5, apply a 10% discount (multiply the total by 0.9)</p></div></td>
-                    </tr>
-                        <th>Output</th>
-                        <td><div  class = "hiddenElement answer2"><p>The total cost of the books after the discount is applied.</p></div></td>
-                    </table>
+                    
+                    
                 </div>
             </div>
         </div>   
@@ -138,8 +105,56 @@
                 marks: 4,
                 markingScheme: "Award 1 mark for defining functional requirements as what the system does (features/behaviour). Award 1 mark for a valid example (e.g. the system shall allow a user to log in). Award 1 mark for defining non-functional requirements as how the system performs (quality attributes). Award 1 mark for a valid example (e.g. the system shall load within 2 seconds, or it must be accessible on mobile devices)."
             }
-        ]
-    };
+        ,
+{
+          "type": "table",
+          "text": "A program is being created to generate usernames for school pupils. It asks for the number of pupils, and each pupil's first name, last name, and age. It checks ages are between 14 and 18 (showing an error if not), then creates usernames in the format (first name + last name + age) and displays the list. Complete the table identifying the inputs, processes and outputs.",
+          "marks": 3,
+          "tableHeaders": [
+                    "Category",
+                    "Description"
+          ],
+          "tableRows": [
+                    [
+                              "Input",
+                              ""
+                    ],
+                    [
+                              "Processes",
+                              ""
+                    ],
+                    [
+                              "Output",
+                              ""
+                    ]
+          ],
+          "markingScheme": "Award 1 mark for Input: number of pupils, first name, last name, age of each pupil (accept any reasonable selection). Award 1 mark for Processes: check age is between 14-18; display error if not; create username (first name + last name + age); add to list. Award 1 mark for Output: list of usernames."
+},
+{
+          "type": "table",
+          "text": "An online bookstore program lets a customer select books to buy. Each book costs £10. If more than 5 books are bought, a 10% discount is applied. The program displays the final total. Complete the table identifying the inputs, processes and outputs.",
+          "marks": 3,
+          "tableHeaders": [
+                    "Category",
+                    "Description"
+          ],
+          "tableRows": [
+                    [
+                              "Input",
+                              ""
+                    ],
+                    [
+                              "Processes",
+                              ""
+                    ],
+                    [
+                              "Output",
+                              ""
+                    ]
+          ],
+          "markingScheme": "Award 1 mark for Input: the number of books the customer wants to buy. Award 1 mark for Processes: multiply number of books by £10; if more than 5 books, apply 10% discount (multiply total by 0.9). Award 1 mark for Output: the total cost of the books (after any discount)."
+}
+    ]};
     </script>
     <script src="/JavaScript/quiz.js"></script>
     </body>
