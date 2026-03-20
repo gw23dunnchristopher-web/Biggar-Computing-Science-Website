@@ -135,9 +135,9 @@
         var html = '<div class="quiz-question" id="quiz-q-' + index + '">';
         html += '<div class="quiz-question-header">';
         html += '<span class="quiz-question-number">Q' + num + '.</span>';
+        html += '<div class="quiz-question-text">' + renderText(q.text) + '</div>';
         html += '<span class="quiz-marks">(' + marksLabel + ')</span>';
         html += '</div>';
-        html += '<div class="quiz-question-text">' + renderText(q.text) + '</div>';
 
         if (q.type === 'pseudocode') {
             html += '<textarea class="quiz-code-area" id="quiz-ans-' + index + '" placeholder="Write your pseudocode here..." spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>';

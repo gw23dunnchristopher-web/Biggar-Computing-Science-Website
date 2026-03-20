@@ -23,10 +23,9 @@
 
 .quiz-question-header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
+    align-items: flex-start;
     gap: 10px;
+    margin-bottom: 12px;
 }
 
 .quiz-question-number {
@@ -34,6 +33,8 @@
     color: #17479b;
     font-size: 15px;
     white-space: nowrap;
+    padding-top: 1px;
+    flex-shrink: 0;
 }
 
 .quiz-marks {
@@ -41,10 +42,11 @@
     color: #666;
     white-space: nowrap;
     flex-shrink: 0;
+    padding-top: 3px;
 }
 
 .quiz-question-text {
-    margin-bottom: 12px;
+    flex: 1;
 }
 
 .quiz-question-text p {
