@@ -53,6 +53,7 @@
     color: inherit;
     line-height: 1.6;
     margin: 0 0 8px;
+    padding: 0;
 }
 
 .quiz-question-text p:last-child {
