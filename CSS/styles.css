@@ -829,11 +829,17 @@ ul li ul li ul li {
 
 .example {
     background-color: #f4fea9;
-    width:800px;
+    width:60%;
     margin:auto;
     margin-bottom: 20px;
     padding: 20px;
     border: 2px dashed black;
+}
+
+@media (max-width: 768px) {
+    .example {
+        width: 90%;
+    }
 }
 
 .example h2 {
