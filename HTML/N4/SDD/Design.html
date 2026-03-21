@@ -16,18 +16,23 @@
                 margin: auto;
                 margin-top: 20px;
                 margin-bottom: 20px;
-                width: fit-content;
             }
             .chartExample img {
+                display: block;
                 width: 100%;
-                display: inline;
-                margin: auto;
+                height: auto;
+            }
+            .flowchart-example {
+                width: 350px;
+            }
+            .structure-example {
+                width: 500px;
             }
 
             table img {
                 display: block;
                 margin: auto;
-                max-width: 150px;
+                width: 120px;
             }
 
             .design-symbols-layout {
@@ -54,18 +59,16 @@
                 .design-symbols-layout table {
                     display: inline-table;
                     width: 90%;
-                    max-width: 90%;
                     text-align: left;
                     margin: 10px 0 20px;
                 }
                 .design-symbols-layout > div {
                     text-align: center;
                 }
-                .design-symbols-layout .chartExample {
+                .flowchart-example,
+                .structure-example {
                     display: inline-block;
-                    width: 90% !important;
-                    max-width: 90%;
-                    height: auto !important;
+                    width: 90%;
                     box-sizing: border-box;
                     margin: 10px 0 20px;
                     text-align: left;
@@ -311,7 +314,7 @@
                                     The calorie counter program could be
                                     designed using the flowchart shown below.
                                 </p>
-                                <div class="chartExample" style="width: 350px; max-width: 100%; height: auto">
+                                <div class="chartExample flowchart-example">
                                     <img
                                         src="/Images/N4/SDD/Design/flowExample.png"
                                         alt="Calorie Counter Flowchart"
@@ -398,7 +401,7 @@
                                     designed using the structure diagram shown
                                     below.
                                 </p>
-                                <div class="chartExample" style="width: 500px; max-width: 100%; height: auto">
+                                <div class="chartExample structure-example">
                                     <img
                                         src="/Images/N4/SDD/Design/structureExample.png"
                                         alt="Calorie Counter Structure Diagram"
