@@ -831,8 +831,19 @@ ul li ul li ul li {
     background-color: #f4fea9;
     width:800px;
     margin:auto;
-    margin-top: 20px;
     margin-bottom: 20px;
     padding: 20px;
     border: 2px dashed black;
+}
+
+.example h2 {
+    margin-top:0px;
+}
+
+.noun {
+    background-color: lightpink;
+}
+
+.aVerb {
+    background-color: lightgreen;
 }

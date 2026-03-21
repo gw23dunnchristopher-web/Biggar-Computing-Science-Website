@@ -3,11 +3,33 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>N4 Computing Science - Course Roadmap</title>
+        <title>N4 Computing Science - SDD Design</title>
         <script src="/JavaScript/N4Script.js"></script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <style>
+            .chartExample {
+                background-color: white;
+                padding: 20px;
+                border: 1px solid black;
+                margin: auto;
+                margin-top: 20px;
+                margin-bottom: 20px;
+                width: fit-content;
+            }
+            .chartExample img {
+                width: 100%;
+                display: inline;
+                margin: auto;
+            }
+
+            table img {
+                display: block;
+                margin: auto;
+                max-width: 150px;
+            }
+        </style>
     </head>
 
     <body>
@@ -26,35 +48,337 @@
                         <h1>SDD - Design</h1>
                     </div>
                     <div class="contentContainer">
-                        <ul>
-                            <li>
-                                <span class="aVerb">Ask for</span> the number of
-                                calories in <span class="noun">porridge</span>.
-                            </li>
-                            <li>
-                                <span class="aVerb">Ask for</span> the number of
-                                calories in <span class="noun">toast</span>.
-                            </li>
-                            <li>
-                                <span class="aVerb">Ask for</span> the number of
-                                calories in <span class="noun">jam</span>.
-                            </li>
-                            <li>
-                                <span class="aVerb">Ask for</span> the number of
-                                calories in <span class="noun">coffee</span>.
-                            </li>
-                            <li>
-                                <span class="aVerb">Calculate</span> the
-                                <span class="noun">total</span> number of
-                                calories.
-                            </li>
-                            <li>
-                                <span class="aVerb">Display</span> the
-                                <span class="noun">total</span> number of
-                                calories.
-                            </li>
-                        </ul>
-                        <p>This is what's known as an <b>algorithm</b>, a step-by-step solution to the problem. </p>
+                        <p>
+                            Now that we have identified the inputs, processes
+                            and outputs, we can start to design the program.
+                            This is where we will write the algorithm for the
+                            program. An algorithm is a step-by-step solution to
+                            a problem. We will look at three different ways of
+                            writing an algorithm: pseudocode, flowcharts and
+                            structure diagrams.
+                        </p>
+
+                        <h2>Pseudocode</h2>
+                        <p>
+                            There are several ways to write an algorithm, but
+                            the most common way is to use pseudocode. Pseudocode
+                            is a way of writing an algorithm in a way that is
+                            easy to understand, but not in a specific
+                            programming language.
+                        </p>
+                        <p>
+                            Let's first look at an example, the Calorie Counter
+                            program from the Analysis section.
+                        </p>
+
+                        <div class="example">
+                            <h2>Calorie Counter</h2>
+                            <p>Write a Calorie Counter program which...</p>
+                            <ul>
+                                <li>
+                                    <span class="aVerb">Will ask</span> for the
+                                    number of calories in
+                                    <span class="noun">porridge</span>,
+                                    <span class="noun">toast</span>,
+                                    <span class="noun">jam</span> and
+                                    <span class="noun">coffee</span>.
+                                </li>
+                                <li>
+                                    <span class="aVerb">Calculates</span> the
+                                    <span class="noun">total</span> number of
+                                    calories in the breakfast.
+                                </li>
+                                <li>
+                                    <span class="aVerb">Displays</span> the
+                                    <span class="noun">total</span> number of
+                                    calories.
+                                </li>
+                            </ul>
+                        </div>
+                        <p>
+                            We can break this program down into simpler steps by
+                            looking at the verbs and nouns.
+                        </p>
+                        <div class="example">
+                            <h2>Calorie Counter Algorithm</h2>
+                            <ul>
+                                <li>
+                                    <span class="aVerb">Ask for</span> the
+                                    number of calories in
+                                    <span class="noun">porridge</span>.
+                                </li>
+                                <li>
+                                    <span class="aVerb">Ask for</span> the
+                                    number of calories in
+                                    <span class="noun">toast</span>.
+                                </li>
+                                <li>
+                                    <span class="aVerb">Ask for</span> the
+                                    number of calories in
+                                    <span class="noun">jam</span>.
+                                </li>
+                                <li>
+                                    <span class="aVerb">Ask for</span> the
+                                    number of calories in
+                                    <span class="noun">coffee</span>.
+                                </li>
+                                <li>
+                                    <span class="aVerb">Calculate</span> the
+                                    <span class="noun">total</span> number of
+                                    calories.
+                                </li>
+                                <li>
+                                    <span class="aVerb">Display</span> the
+                                    <span class="noun">total</span> number of
+                                    calories.
+                                </li>
+                            </ul>
+                            <p>
+                                This is what's known as an <b>algorithm</b>, a
+                                step-by-step solution to the problem. Algorithms
+                                can often be translated directly into code.
+                            </p>
+                        </div>
+                        <p>
+                            When we start looking at Python programs in this
+                            course, you will see the designs of the programes
+                            written in pseudocode, and there are some questions
+                            at the bottom of this page that will ask you to
+                            write pseudocode for a program. You will have to
+                            break down the problem described into smaller steps.
+                        </p>
+                        <p>
+                            Although they won't be used much at the N4 level,
+                            let's briefly look at the other two design notation
+                            techniques.
+                        </p>
+
+                        <h2>Flowcharts</h2>
+                        <p>
+                            A flowchart is a type of grpahical design notation.
+                            It illustrates step-by-step solutions to a problem,
+                            providing a visual approach to understanding code.
+                            Flowcharts are made up of shapes, each of which
+                            represents a different type of action. You can see
+                            the most common symbols used for flowcharts below,
+                            as well as how a flowchart of the Calorie Counter
+                            program could look:
+                        </p>
+                        <div
+                            style="
+                                display: flex;
+                                justify-content: center;
+                                max-width: 1000px;
+                                margin: auto;
+                            "
+                        >
+                            <table style="max-width: 600px">
+                                <tr>
+                                    <th>Shape</th>
+                                    <th>Action</th>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img
+                                            src="/Images/N4/SDD/Design/terminator.png"
+                                            alt="Start and End"
+                                        />
+                                    </td>
+                                    <td>
+                                        This shape shows the start and end of
+                                        the program.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img
+                                            src="/Images/N4/SDD/Design/process.png"
+                                            alt="Process"
+                                        />
+                                    </td>
+                                    <td>
+                                        This shape shows a process, or action,
+                                        that the program will take.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img
+                                            src="/Images/N4/SDD/Design/predefined.png"
+                                            alt="Predefined Process"
+                                        />
+                                    </td>
+                                    <td>
+                                        This shape shows a predefined process,
+                                        or action, that the program will take.
+                                        You won't need to write the code for
+                                        this, it will be provided.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img
+                                            src="/Images/N4/SDD/Design/IO.png"
+                                            alt="Input/Output"
+                                        />
+                                    </td>
+                                    <td>
+                                        This shape shows an input or output.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img
+                                            src="/Images/N4/SDD/Design/decision.png"
+                                            alt="Decision"
+                                        />
+                                    </td>
+                                    <td>
+                                        This shape shows a decision, or a point
+                                        where the program will take one of two
+                                        different paths.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img
+                                            src="/Images/N4/SDD/Design/connector.png"
+                                            alt="Connector"
+                                        />
+                                    </td>
+                                    <td>
+                                        This shape shows a connector, or a point
+                                        where the program will continue on
+                                        another page.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img
+                                            src="/Images/N4/SDD/Design/flowArrow.png"
+                                            alt="Arrow"
+                                        />
+                                    </td>
+                                    <td>
+                                        This shape shows the direction of the
+                                        flow of the program.
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div>
+                                <p style="margin-top: 10px; margin-left: 15px">
+                                    The calorie counter program could be
+                                    designed using the flowchart shown below.
+                                </p>
+                                <div
+                                    class="chartExample"
+                                    style="width: 350px; height: 535px"
+                                >
+                                    <img
+                                        src="/Images/N4/SDD/Design/flowExample.png"
+                                        alt="Calorie Counter Flowchart"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <h2>Structure Diagrams</h2>
+                        <p>
+                            While flowcharts are a good way to design a program,
+                            they can be quite large and complex. Structure
+                            diagrams are a simpler way to design a program. They
+                            are made up of boxes, each of which represents a
+                            different type of action. Below, you can see the
+                            most common symbols used for structure diagrams, and
+                            this technique used to create an algorithm for the
+                            Calorie Counter program:
+                        </p>
+                        <div
+                            style="
+                                display: flex;
+                                justify-content: center;
+                                max-width: 1200px;
+                                margin: auto;
+                            "
+                        >
+                            <table style="max-width: 600px">
+                                <tr>
+                                    <th>Box</th>
+                                    <th>Action</th>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img
+                                            src="/Images/N4/SDD/Design/process.png"
+                                            alt="Process"
+                                        />
+                                    </td>
+                                    <td>
+                                        This is a process, or action, that the
+                                        program will take. In a structure
+                                        diagram this could include input and
+                                        output.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img
+                                            src="/Images/N4/SDD/Design/predefined.png"
+                                            alt="A predefined process"
+                                        />
+                                    </td>
+                                    <td>
+                                        This is a predefined process, or action,
+                                        that the program will take. You won't
+                                        need to write the code for this, it will
+                                        be provided.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img
+                                            src="/Images/N4/SDD/Design/loop.png"
+                                            alt="Loop"
+                                        />
+                                    </td>
+                                    <td>
+                                        This box shows a loop, or a point where
+                                        the program will repeat a set of
+                                        actions.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <img
+                                            src="/Images/N4/SDD/Design/selection.png"
+                                            alt="Selection"
+                                        />
+                                    </td>
+                                    <td>
+                                        This box shows a selection, or a point
+                                        where the program will take one of two
+                                        different paths.
+                                    </td>
+                                </tr>
+                            </table>
+                            <div>
+                                <p style="margin-top: 10px; margin-left: 15px">
+                                    The calorie counter program could be
+                                    designed using the structure diagram shown
+                                    below.
+                                </p>
+                                <div
+                                    class="chartExample"
+                                    style="width: 500px; height: 320px"
+                                >
+                                    <img
+                                        src="/Images/N4/SDD/Design/structureExample.png"
+                                        alt="Calorie Counter Structure Diagram"
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
