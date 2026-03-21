@@ -29,6 +29,40 @@
                 margin: auto;
                 max-width: 150px;
             }
+
+            .design-symbols-layout {
+                display: flex;
+                justify-content: center;
+                max-width: 1200px;
+                margin: auto;
+            }
+
+            .design-symbols-layout table {
+                max-width: 600px;
+            }
+
+            .design-symbols-layout > div > p {
+                margin-top: 10px;
+                margin-left: 15px;
+            }
+
+            @media (max-width: 768px) {
+                .design-symbols-layout {
+                    flex-direction: column;
+                }
+                .design-symbols-layout table {
+                    max-width: 100%;
+                    width: 100%;
+                }
+                .design-symbols-layout .chartExample {
+                    width: 100% !important;
+                    height: auto !important;
+                    box-sizing: border-box;
+                }
+                .design-symbols-layout > div > p {
+                    margin-left: 0;
+                }
+            }
         </style>
     </head>
 
@@ -164,15 +198,8 @@
                             as well as how a flowchart of the Calorie Counter
                             program could look:
                         </p>
-                        <div
-                            style="
-                                display: flex;
-                                justify-content: center;
-                                max-width: 1000px;
-                                margin: auto;
-                            "
-                        >
-                            <table style="max-width: 600px">
+                        <div class="design-symbols-layout">
+                            <table>
                                 <tr>
                                     <th>Shape</th>
                                     <th>Action</th>
@@ -267,14 +294,11 @@
                             </table>
 
                             <div>
-                                <p style="margin-top: 10px; margin-left: 15px">
+                                <p>
                                     The calorie counter program could be
                                     designed using the flowchart shown below.
                                 </p>
-                                <div
-                                    class="chartExample"
-                                    style="width: 350px; height: 535px"
-                                >
+                                <div class="chartExample" style="width: 350px; max-width: 100%; height: auto">
                                     <img
                                         src="/Images/N4/SDD/Design/flowExample.png"
                                         alt="Calorie Counter Flowchart"
@@ -294,15 +318,8 @@
                             this technique used to create an algorithm for the
                             Calorie Counter program:
                         </p>
-                        <div
-                            style="
-                                display: flex;
-                                justify-content: center;
-                                max-width: 1200px;
-                                margin: auto;
-                            "
-                        >
-                            <table style="max-width: 600px">
+                        <div class="design-symbols-layout">
+                            <table>
                                 <tr>
                                     <th>Box</th>
                                     <th>Action</th>
@@ -363,15 +380,12 @@
                                 </tr>
                             </table>
                             <div>
-                                <p style="margin-top: 10px; margin-left: 15px">
+                                <p>
                                     The calorie counter program could be
                                     designed using the structure diagram shown
                                     below.
                                 </p>
-                                <div
-                                    class="chartExample"
-                                    style="width: 500px; height: 320px"
-                                >
+                                <div class="chartExample" style="width: 500px; max-width: 100%; height: auto">
                                     <img
                                         src="/Images/N4/SDD/Design/structureExample.png"
                                         alt="Calorie Counter Structure Diagram"
