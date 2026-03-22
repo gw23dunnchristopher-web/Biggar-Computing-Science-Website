@@ -408,6 +408,7 @@ ol li {
     max-width: 800px;
     border: 1px solid #b0bcd8;
     border-collapse: collapse;
+    line-height: 0;
 }
 
 /* Inner table (when .pseudocode is a wrapping div) */
@@ -417,6 +418,7 @@ table.pseudocode {
     width: 100%;
     border-collapse: collapse;
     overflow-x: auto;
+    margin: 0;
 }
 
 .pseudocode th,
@@ -427,6 +429,7 @@ table.pseudocode th {
     padding: 8px 14px;
     border: 1px solid #8aaad8;
     font-size: 0.95em;
+    line-height: 1.4;
 }
 
 .pseudocode td,
