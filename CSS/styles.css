@@ -405,19 +405,49 @@ ol li {
     margin: 20px auto;
     background-color: white;
     color: black;
-    padding: 5px;
     max-width: 800px;
+    border: 1px solid #b0bcd8;
+    border-collapse: collapse;
 }
 
-.pseudocode th {
-    font-family: arial;
+/* Inner table (when .pseudocode is a wrapping div) */
+.pseudocode table,
+table.pseudocode {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+    overflow-x: auto;
+}
+
+.pseudocode th,
+table.pseudocode th {
+    font-family: Arial, sans-serif;
     text-align: center;
-    background-color: lightblue;
-    padding: 5px 0;
+    background-color: #c8daf5;
+    padding: 8px 14px;
+    border: 1px solid #8aaad8;
+    font-size: 0.95em;
 }
 
-.pseudocode td {
-    padding: 5px 0;
+.pseudocode td,
+table.pseudocode td {
+    padding: 6px 14px;
+    border: 1px solid #d0d8ec;
+    vertical-align: top;
+    line-height: 1.6;
+}
+
+/* Step / line number column — first td in every row */
+.pseudocode td:first-child,
+table.pseudocode td:first-child {
+    text-align: center;
+    width: 72px;
+    min-width: 72px;
+    white-space: nowrap;
+    background-color: #f0f4fb;
+    border-right: 2px solid #8aaad8;
+    color: #3a4a6b;
+    font-weight: bold;
 }
 
 .codeText {
