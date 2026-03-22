@@ -869,6 +869,11 @@ ul li ul li ul li {
     border: 2px dashed black;
 }
 
+#examplePseudocode li {
+    padding: 0;
+    margin-bottom: 0;
+}
+
 @media (max-width: 768px) {
     .example {
         width: 90%;
@@ -904,16 +909,18 @@ ul li ul li ul li {
 .flowchart-example {
     width: 60%;
     max-width:900px;
+    min-width:500px;
 }
 .structure-example {
-    width: 500px;
+    width: 80%;
+    max-width:850px;
+    min-width:550px;
 }
 
 table img {
     display: block;
     margin: auto;
     width: 120px;
-    margin: 10px;
 }
 
 #connector {
@@ -999,11 +1006,13 @@ table img {
     .flowchart-example,
     .structure-example {
         display: inline-block;
-        width: 90%;
         box-sizing: border-box;
+        width:100%;
+        min-width:0px;
         margin: 10px 0 20px;
         text-align: left;
     }
+
     .design-symbols-layout > div > p {
         margin-left: 0;
         text-align: center;

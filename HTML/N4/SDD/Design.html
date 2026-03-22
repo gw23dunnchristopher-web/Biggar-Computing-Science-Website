@@ -57,7 +57,7 @@
                         },
                         {
                             type: "paragraph",
-                            text: "Look at the second column of the flowchart. If a person's 'Total steps' for the whole week was 8,000,                                     follow the arrows from the diamond. Which message will the computer display: 'Goal Achieved!' or 'Keep                                         walking!'?  Explain why you chose that answer.",
+                            text: "Look at the second column of the flowchart. If a person's <b>Total steps</b> for the whole week was <b>8,000</b>, follow the arrows from the diamond. Which message will the computer display: <b>Goal Achieved!</b> or <b>Keep walking!</b>?  Explain why you chose that answer.",
                             marks: 2,
                             markingScheme:
                                 "Award 1 mark for stating 'Keep walking!' and award 1 additional marking for explaining that it is because                                     8000 is less than 10000.",
@@ -68,6 +68,56 @@
                             marks: 3,
                             markingScheme:
                                 "Award 1 mark for stating that the program will ask you to enter your daily steps 7 times (or for a week).                                      Award 1 mark for saying that it will add all of the numbers entered together.  Award 1 mark for explaning                                      that the program will display whether you have reached your goal or not depending on the number of steps                                       entered.",
+                        },
+                    ],
+                },
+                readingStruct: {
+                    questions: [
+                        {
+                            type: "paragraph",
+                            text: "Looking at the very top level (the three boxes directly below the main Program title), what is the                                 final main step the program performs?",
+                            marks: 1,
+                            markingScheme:
+                                "Display total profit for the year.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "The purple oval says 'Repeat 12 times'. Which four specific tasks are performed 12 times?",
+                            marks: 2,
+                            markingScheme:
+                                "The four actions are 'Get this month's total income', 'Get total expenses for this month', 'Calculate profit                                  for this month' and 'Add this month's profit to the total profit for the year.'  Award 1 mark for any two                                      correct answers and award 2 mark for all four correct answers.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "If the answer to the green hexagon ('Is monthly profit more than 0?') is 'Yes', how many actions does the                                 program take?  Which actions does it take?",
+                            marks: 2,
+                            markingScheme:
+                                "Award 1 mark stating that the program will perform 2 additional actions, award an additional mark if they                                     answer describes the two actions - add monthly profit to yearly profit and display 'you made a profit this                                     month'.",
+                        },
+                    ],
+                },
+                writingPseudocode: {
+                    questions: [
+                        {
+                            type: "paragraph",
+                            text: "Looking at the very top level (the three boxes directly below the main Program title), what is the                                 final main step the program performs?",
+                            marks: 1,
+                            markingScheme:
+                                "Display total profit for the year.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "The purple oval says 'Repeat 12 times'. Which four specific tasks are performed 12 times?",
+                            marks: 2,
+                            markingScheme:
+                                "The four actions are 'Get this month's total income', 'Get total expenses for this month', 'Calculate profit                                  for this month' and 'Add this month's profit to the total profit for the year.'  Award 1 mark for any two                                      correct answers and award 2 mark for all four correct answers.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "If the answer to the green hexagon ('Is monthly profit more than 0?') is 'Yes', how many actions does the                                 program take?  Which actions does it take?",
+                            marks: 2,
+                            markingScheme:
+                                "Award 1 mark stating that the program will perform 2 additional actions, award an additional mark if they                                     answer describes the two actions - add monthly profit to yearly profit and display 'you made a profit this                                     month'.",
                         },
                     ],
                 },
@@ -468,6 +518,17 @@
                                     diagrams can be used to break down a program
                                     into smaller, more manageable parts.
                                 </p>
+                                <p>
+                                    In a structure diagram, any box that has
+                                    lines growing out of the bottom of it is a
+                                    parent. All the boxes below it are its
+                                    children. The children only happen because
+                                    the parent box told them to! For example,
+                                    the Enter Calories box is the parent of the
+                                    Enter Porridge Calories, Enter Toast
+                                    Calories, Enter Jam Calories and Enter
+                                    Coffee Calories boxes.
+                                </p>
                             </div>
                         </details>
                         <h2>Try it yourself!</h2>
@@ -641,9 +702,46 @@
                             <summary>
                                 <h2>Reading Structure Diagrams</h2>
                             </summary>
+                            <p>
+                                Look at the structure diagram below, and answer
+                                the questions below it.
+                            </p>
+                            <div class="chartExample structure-example">
+                                <img
+                                    src="/Images/N4/SDD/Design/profitTracker.png"
+                                    alt="Structure Diagram"
+                                />
+                            </div>
+                            <div
+                                class="quiz-container"
+                                data-quiz-id="readingStruct"
+                            ></div>
                         </details>
                         <details class="accordion-section">
                             <summary><h2>Writing Pseudocode</h2></summary>
+                            <p>Look at the example below:</p>
+                            <div class="example">
+                                <p><b>The Problem:</b> Cinema tickets are £5. A cinema gives a £2 discount on the tickets if a customer spends                                 more than £10 on snacks.</p>
+                                <ul>
+                                    <li><b>Input:</b> The total cost of snacks,</li>
+                                    <li><b>Process:</b> Check if the cost is more than £10. If it is, subtract £2 from the ticket cost.</li>
+                                    <li><b>Output:</b> Display the final price.</li>
+                                </ul>
+                                <p>You would have to break this down into further steps, look at this example solution:</p>
+                                <ol id="examplePsuedocode">
+                                    <li>Set ticket cost to 5.</li>
+                                    <li>Get snack cost from keyboard.</li>
+                                    <li>If snack cost is more than 10:</li>
+                                    <li>&nbsp;&nbsp;&nbsp;&nbsp;Subtract 2 from the ticket cost.</li>
+                                    <li>Set total cost to ticket cost + snack cost.</li>
+                                    <li>Display total cost.</li>
+                                </ol>
+                            </div>
+                            <p>Now try writing pseudocode for the programs below:</p>
+                            <div
+                                class="quiz-container"
+                                data-quiz-id="writingPseudocode"
+                            ></div>
                         </details>
                     </div>
                 </div>
