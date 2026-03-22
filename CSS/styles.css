@@ -853,3 +853,127 @@ ul li ul li ul li {
 .aVerb {
     background-color: lightgreen;
 }
+
+.chartExample {
+    background-color: white;
+    padding: 20px;
+    border: 1px solid black;
+    margin: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.chartExample img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+.flowchart-example {
+    width: 350px;
+}
+.structure-example {
+    width: 500px;
+}
+
+table img {
+    display: block;
+    margin: auto;
+    width: 120px;
+    margin: 10px;
+}
+
+#connector {
+    width: 50px;
+    margin: auto;
+}
+
+.design-symbols-layout {
+    display: flex;
+    justify-content: center;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.design-symbols-layout table {
+    max-width: 600px;
+}
+
+.design-symbols-layout > div > p {
+    margin-top: 10px;
+    margin-left: 15px;
+}
+
+.accordion-section {
+    border: 2px solid #c8d8f0;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+.accordion-section summary {
+    cursor: pointer;
+    padding: 12px 16px;
+    background-color: #dce8fb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    list-style: none;
+    user-select: none;
+}
+.accordion-section summary::-webkit-details-marker {
+    display: none;
+}
+.accordion-section summary h2 {
+    margin: 0;
+    border: none;
+    padding: 0;
+    font-size: 1.3em;
+}
+.accordion-section summary::after {
+    content: "▶";
+    font-size: 0.9em;
+    color: #1a3a6b;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+.accordion-section[open] > summary::after {
+    transform: rotate(90deg);
+}
+.accordion-content {
+    padding: 16px;
+}
+
+@media (max-width: 768px) {
+    .design-symbols-layout {
+        display: block;
+        text-align: center;
+    }
+    .design-symbols-layout table {
+        display: inline-table;
+        width: 90%;
+        text-align: left;
+        margin: 10px 0 20px;
+    }
+    .design-symbols-layout > div {
+        text-align: center;
+    }
+    .flowchart-example,
+    .structure-example {
+        display: inline-block;
+        width: 90%;
+        box-sizing: border-box;
+        margin: 10px 0 20px;
+        text-align: left;
+    }
+    .design-symbols-layout > div > p {
+        margin-left: 0;
+        text-align: center;
+    }
+
+    #connector {
+        width: 50px !important;
+        margin: auto !important;
+    }
+
+    .design-symbols-layout table img {
+        width: 100px !important;
+    }
+}

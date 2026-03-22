@@ -144,6 +144,16 @@ html[data-custom-bg] .quiz-question-table td {
     border-color: rgba(0,0,0,0.15) !important;
 }
 
+/* Image inside question text */
+.quiz-question-image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 8px 0;
+    border: 1px solid #cdd8f0;
+    border-radius: 4px;
+}
+
 /* Paragraph / written answer */
 .quiz-textarea {
     width: 100%;

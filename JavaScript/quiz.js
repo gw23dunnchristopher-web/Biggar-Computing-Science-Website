@@ -202,6 +202,9 @@
             if (item && typeof item === 'object' && item.type === 'table') {
                 return renderTextTable(item);
             }
+            if (item && typeof item === 'object' && item.type === 'image') {
+                return '<img class="quiz-question-image" src="' + escHtml(item.src) + '" alt="' + escHtml(item.alt || '') + '">';
+            }
             return '<p>' + escHtml(String(item)) + '</p>';
         }).join('');
     }
@@ -218,6 +221,9 @@
                 if (item.headers && item.headers.length) rows.push(item.headers.join(' | '));
                 (item.rows || []).forEach(function (row) { rows.push(row.join(' | ')); });
                 return rows.join('\n');
+            }
+            if (item && typeof item === 'object' && item.type === 'image') {
+                return '[Image: ' + (item.alt || item.src) + ']';
             }
             return String(item);
         }).join('\n');
