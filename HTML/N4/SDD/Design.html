@@ -17,6 +17,35 @@
                 height:25px;
             }
         </style>
+        <script>
+        window.QUIZ_CONFIGS = {
+            section1: {
+                questions: [
+                    {
+                    type: "paragraph",
+                    text: "Describe one advantage of using a structure diagram over a flowchart.",
+                    marks: 1,
+                    markingScheme: "Award 1 mark for any valid advantage, e.g. easier to read, less complex, shows hierarchy clearly."
+                    },
+                    {
+                    type: "paragraph",
+                    text: "Describe one advantage of using a structure diagram over a flowchart.",
+                    marks: 1,
+                    markingScheme: "Award 1 mark for any valid advantage, e.g. easier to read, less complex, shows hierarchy clearly."
+                    },
+                    {
+                    type: "paragraph",
+                    text: "Describe one advantage of using a structure diagram over a flowchart.",
+                    marks: 1,
+                    markingScheme: "Award 1 mark for any valid advantage, e.g. easier to read, less complex, shows hierarchy clearly."
+                    }
+                ]
+            },
+            section2: {
+                questions: [ /* ... */ ]
+            }
+        };
+        </script>
     </head>
 
     <body>
@@ -537,6 +566,7 @@
                                     </td>
                                 </tr>
                             </table>
+                            <div class="quiz-container" data-quiz-id="section1"></div>
                         </div>
                     </div>
                 </div>
