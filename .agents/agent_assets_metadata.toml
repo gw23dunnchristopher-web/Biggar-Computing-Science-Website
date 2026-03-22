@@ -6,3 +6,9 @@ id = "akR-isxMabDxYPEFDtzME"
 uri = "file://icons.md"
 type = "text"
 title = "Icon Reference — BHS Computing Science Website (Updated)"
+
+[[outputs]]
+id = "W3hULZDBMfPwUMB7TFTt4"
+uri = "file://docs/quiz-system.md"
+type = "text"
+title = "Quiz System Documentation"
