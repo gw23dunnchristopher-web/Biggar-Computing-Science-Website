@@ -188,14 +188,19 @@
         return html;
     }
 
+    /* Strip HTML tags to get plain text (used when sending to the AI marker). */
+    function stripHtml(str) {
+        return String(str).replace(/<[^>]*>/g, '');
+    }
+
     function renderText(text) {
         if (!Array.isArray(text)) {
-            return '<p>' + escHtml(String(text)) + '</p>';
+            return '<p>' + String(text) + '</p>';
         }
         return text.map(function (item) {
             if (Array.isArray(item)) {
                 var bullets = item.map(function (b) {
-                    return '<li>' + escHtml(String(b)) + '</li>';
+                    return '<li>' + String(b) + '</li>';
                 }).join('');
                 return '<ul class="quiz-question-bullets">' + bullets + '</ul>';
             }
@@ -205,16 +210,16 @@
             if (item && typeof item === 'object' && item.type === 'image') {
                 return '<img class="quiz-question-image" src="' + escHtml(item.src) + '" alt="' + escHtml(item.alt || '') + '">';
             }
-            return '<p>' + escHtml(String(item)) + '</p>';
+            return '<p>' + String(item) + '</p>';
         }).join('');
     }
 
     /* Flatten a text value to plain text for sending to the server. */
     function flattenText(text) {
-        if (!Array.isArray(text)) return String(text);
+        if (!Array.isArray(text)) return stripHtml(String(text));
         return text.map(function (item) {
             if (Array.isArray(item)) {
-                return item.map(function (b) { return '- ' + b; }).join('\n');
+                return item.map(function (b) { return '- ' + stripHtml(String(b)); }).join('\n');
             }
             if (item && typeof item === 'object' && item.type === 'table') {
                 var rows = [];
@@ -225,7 +230,7 @@
             if (item && typeof item === 'object' && item.type === 'image') {
                 return '[Image: ' + (item.alt || item.src) + ']';
             }
-            return String(item);
+            return stripHtml(String(item));
         }).join('\n');
     }
 

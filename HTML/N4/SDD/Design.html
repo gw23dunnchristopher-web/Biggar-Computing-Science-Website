@@ -8,43 +8,70 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script src="/JavaScript/quiz.js"></script>
         <style>
             .pseudocode table tr td {
-                padding-left:15px;
+                padding-left: 15px;
             }
 
             .pseudocode table tr {
-                height:25px;
+                height: 25px;
             }
         </style>
         <script>
-        window.QUIZ_CONFIGS = {
-            section1: {
-                questions: [
-                    {
-                    type: "paragraph",
-                    text: "Describe one advantage of using a structure diagram over a flowchart.",
-                    marks: 1,
-                    markingScheme: "Award 1 mark for any valid advantage, e.g. easier to read, less complex, shows hierarchy clearly."
-                    },
-                    {
-                    type: "paragraph",
-                    text: "Describe one advantage of using a structure diagram over a flowchart.",
-                    marks: 1,
-                    markingScheme: "Award 1 mark for any valid advantage, e.g. easier to read, less complex, shows hierarchy clearly."
-                    },
-                    {
-                    type: "paragraph",
-                    text: "Describe one advantage of using a structure diagram over a flowchart.",
-                    marks: 1,
-                    markingScheme: "Award 1 mark for any valid advantage, e.g. easier to read, less complex, shows hierarchy clearly."
-                    }
-                ]
-            },
-            section2: {
-                questions: [ /* ... */ ]
-            }
-        };
+            window.QUIZ_CONFIGS = {
+                readingPseudocode: {
+                    questions: [
+                        {
+                            type: "paragraph",
+                            text: "According to the logic in steps 7 through 10, how much would a ticket cost for a person who is exactly 18                                 years old? Please explain your answer.",
+                            marks: 2,
+                            markingScheme:
+                                "Award 1 mark for stating 15, or £15.00. Award 1 mark for explaining that the age is greater than or equal                       to 18, so the cost is £15.00.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "If a user enters 3 for the number of tickets and provides the age 12, 25 and 17 when asked, what will the                                 final cost be at step 14?",
+                            marks: 1,
+                            markingScheme:
+                                "Award 1 mark for 35, the student may also say £35.00.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "You can see that lines 5 to 12 are indented, and lines 8 and 10 are indented even further.  Why do you                                     think this is?",
+                            marks: 2,
+                            markingScheme:
+                                "Award 1 mark for explaining that the indentation shows that lines 5 to 12 are part of the loop. Award 1                         mark for explaining that the indentation shows that these lines are part of or are outcomes of the decision (or if                             statement).",
+                        },
+                    ],
+                },
+                readingFlowcharts: {
+                    questions: [
+                        {
+                            type: "paragraph",
+                            text: "In the first column, there is a set of steps that repeats several times. Can you count how many times the                                   program will ask the user to 'Enter steps for the day' before it finally moves on to the second column?",
+                            marks: 1,
+                            markingScheme:
+                                "Award 1 mark for stating 7, or 7 times.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "Look at the second column of the flowchart. If a person's 'Total steps' for the whole week was 8,000,                                     follow the arrows from the diamond. Which message will the computer display: 'Goal Achieved!' or 'Keep                                         walking!'?  Explain why you chose that answer.",
+                            marks: 2,
+                            markingScheme:
+                                "Award 1 mark for stating 'Keep walking!' and award 1 additional marking for explaining that it is because                                     8000 is less than 10000.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "Explain, in your own words what this program does.",
+                            marks: 3,
+                            markingScheme:
+                                "Award 1 mark for stating that the program will ask you to enter your daily steps 7 times (or for a week).                                      Award 1 mark for saying that it will add all of the numbers entered together.  Award 1 mark for explaning                                      that the program will display whether you have reached your goal or not depending on the number of steps                                       entered.",
+                        },
+                    ],
+                },
+            };
         </script>
     </head>
 
@@ -211,6 +238,18 @@
                                         <tr>
                                             <td>
                                                 <img
+                                                    src="/Images/N4/SDD/Design/flowArrow.png"
+                                                    alt="Arrow"
+                                                />
+                                            </td>
+                                            <td>
+                                                This shape shows the direction
+                                                of the flow of the program.
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <img
                                                     src="/Images/N4/SDD/Design/terminator.png"
                                                     alt="Start and End"
                                                 />
@@ -218,6 +257,19 @@
                                             <td>
                                                 This shape shows the start and
                                                 end of the program.
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <img
+                                                    src="/Images/N4/SDD/Design/initialisation.png"
+                                                    alt="Initialisation"
+                                                />
+                                            </td>
+                                            <td>
+                                                This shape shows a variable
+                                                being initialised, or set to a
+                                                value.
                                             </td>
                                         </tr>
                                         <tr>
@@ -285,18 +337,6 @@
                                                 This shape shows a connector, or
                                                 a point where the program will
                                                 continue on another page.
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <img
-                                                    src="/Images/N4/SDD/Design/flowArrow.png"
-                                                    alt="Arrow"
-                                                />
-                                            </td>
-                                            <td>
-                                                This shape shows the direction
-                                                of the flow of the program.
                                             </td>
                                         </tr>
                                     </table>
@@ -455,119 +495,156 @@
                             </li>
                         </ol>
                         <p>
-                            Feel free to refer to the notes above to answer the
-                            questions.
+                            Click on the headings below to see the questions,
+                            you can refer to the notes above to help you answer
+                            them.
                         </p>
+                        <details
+                            class="accordion-section"
+                            style="margin-top: 20px"
+                        >
+                            <summary><h2>Reading Pseudocode</h2></summary>
+                            <p style="margin-bottom: 10px">
+                                Try reading through the pseudocode below and
+                                answer the questions.
+                            </p>
+                            <div class="pseudocode" style="margin-top: 0px">
+                                <table>
+                                    <tr>
+                                        <th style="min-width: 50px">Step</th>
+                                        <th>Description</th>
+                                    </tr>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>
+                                            Display the message "How many
+                                            tickets are you buying?"
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>
+                                            Get the number of tickets from the
+                                            user
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>
+                                            Set the total cost of the booking to
+                                            0.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td>
+                                            Start a loop that repeats for each
+                                            ticket.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;Display the
+                                            message "What is your age?"
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>6</td>
+                                        <td>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;Get the age
+                                            from the user.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>7</td>
+                                        <td>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;If the age
+                                            is less than 18:
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>8</td>
+                                        <td>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set
+                                            the cost of the ticket to £10.00.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>9</td>
+                                        <td>&nbsp;&nbsp;&nbsp;&nbsp;Else:</td>
+                                    </tr>
+                                    <tr>
+                                        <td>10</td>
+                                        <td>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set
+                                            the cost of the ticket to £15.00.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>11</td>
+                                        <td>&nbsp;&nbsp;&nbsp;&nbsp;End if.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>12</td>
+                                        <td>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;Add the cost
+                                            of the ticket to the total cost.
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>13</td>
+                                        <td>End the loop.</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>14</td>
+                                        <td>
+                                            Display the message "The total cost
+                                            of the booking is £" followed by the
+                                            total cost.
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div
+                                class="quiz-container"
+                                data-quiz-id="readingPseudocode"
+                            ></div>
+                        </details>
 
-                        <h3>Reading Pseudocode</h3>
-                        <p>
-                            Try reading through the pseudocode below and answer the questions.
-                        </p>
-                        <div class="pseudocode" style="margin-top:0px;">
-                            <table>
-                                <tr>
-                                    <th style="min-width:50px;">Step</th>
-                                    <th>Description</th>
-                                </tr>
-                                <tr>
-                                    <td>1</td>
-                                    <td>
-                                        Display the message "How many tickets
-                                        are you buying?"
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>
-                                        Get the number of tickets from the user
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>
-                                        Set the total cost of the booking to 0.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>4</td>
-                                    <td>
-                                        Start a loop that repeats for each
-                                        ticket.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>5</td>
-                                    <td>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;Display the
-                                        message "What is your age?"
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>6</td>
-                                    <td>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;Get the age from
-                                        the user.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>7</td>
-                                    <td>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;If the age is
-                                        less than 18:
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>8</td>
-                                    <td>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set
-                                        the cost of the ticket to £10.00.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>9</td>
-                                    <td>&nbsp;&nbsp;&nbsp;&nbsp;Else:</td>
-                                </tr>
-                                <tr>
-                                    <td>10</td>
-                                    <td>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set
-                                        the cost of the ticket to £15.00.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>11</td>
-                                    <td>&nbsp;&nbsp;&nbsp;&nbsp;End if.</td>
-                                </tr>
-                                <tr>
-                                    <td>12</td>
-                                    <td>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;Add the cost of
-                                        the ticket to the total cost.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>13</td>
-                                    <td>End the loop.</td>
-                                </tr>
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>14</td>
-                                    <td>
-                                        Display the message "The total cost of
-                                        the booking is £" followed by the total
-                                        cost.
-                                    </td>
-                                </tr>
-                            </table>
-                            <div class="quiz-container" data-quiz-id="section1"></div>
-                        </div>
+                        <details class="accordion-section">
+                            <summary><h2>Reading Flowcharts</h2></summary>
+                            <p>
+                                Look at the flowchart below and read through it.
+                                Remember to follow the arrows.
+                            </p>
+                            <div class="chartExample flowchart-example">
+                                <img
+                                    src="/Images/N4/SDD/Design/fitnessTracker.png"
+                                    alt="Calorie Counter Flowchart"
+                                />
+                            </div>
+                            <div
+                                class="quiz-container"
+                                data-quiz-id="readingFlowcharts"
+                            ></div>
+                        </details>
+                        <details class="accordion-section">
+                            <summary>
+                                <h2>Reading Structure Diagrams</h2>
+                            </summary>
+                        </details>
+                        <details class="accordion-section">
+                            <summary><h2>Writing Pseudocode</h2></summary>
+                        </details>
                     </div>
                 </div>
             </div>
