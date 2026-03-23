@@ -16,22 +16,40 @@
                     questions: [ 
                         {
                             type: "table",
+                            tableClass: "variableNames-table",
                             text: "The table below contains a list of variable names, decide if they are valid or not, and if they are invalid,                                 tell me why.",
                             marks: 7,
                             tableHeaders: ["Variable Name", "Valid?", "Reason"],
                             tableRows: [["player_score", "", ""], ["2nd_place", "", ""], ["userAge", "", ""], ["total-amount", "", ""], ["favourite_colour", "", ""], ["class", "", ""], ["money$", "", ""]],
                             markingScheme:
-                                "Award 1 mark per completed row.  Row 1: Yes. Row 2: No, variable names cannot start with a number. Row 3: Yes. Row 4: No, You can't use hyphens. Row 5: Yes.  Row 6: No, class is a reserved word.  Row 7: No, Special symbols like $ are not allowed.",
+                                "Award 1 mark per completed row.  Row 1: Yes, reason can be left blank. Row 2: No, variable names cannot start with a number. Row 3: Yes, reason can be left blank. Row 4: No, You can't use hyphens. Row 5: Yes, reason can be left blank.  Row 6: No, class is a reserved word.  Row 7: No, Special symbols like $ are not allowed.",
                         },
                     ]
                 },
-                section2: {
-                    questions: [ /* ... */ 
+                dataTypes: {
+                    questions: [ 
+                        {
+                            type: "table",
+                            tableClass: "dataTypes-table",
+                            text: "The table below contains a list of variables and an example value, decide which data type should be used for each one.",
+                            marks: 7,
+                            tableHeaders: ["Variable Name", "Example Value", "Datatype"],
+                            tableRows: [["player_name", "&ldquo;Alex&ldquo;", ""], ["item_price", "12.99", ""], ["level_number", "5", ""], ["is_game_over", "True", ""], ["user_email", "&ldquo;bob@email.com&ldquo;", ""], ["goals_scored", "0", ""], ["average_speed", "15.4", ""]],
+                            markingScheme:
+                                "Award 1 mark per completed row.  Row 1: String. Row 2: Real (or Float). Row 3: Integer. Row 4: ",
+                        },
                     ]
                 }
             };
         </script>
-       
+        <style>
+            .variableNames-table {width: 600px;}
+            .variableNames-table td:nth-child(2) {max-width: 100px;}
+            .variableNames-table td:nth-child(1) {text-align: center;}
+            .dataTypes-table {width: 400px;}
+            .dataTypes-table td:nth-child(1) {text-align: center; max-width: 100px; max-height: 50px;}
+            .dataTypes-table td:nth-child(2) {text-align: center; max-width: 100px;}
+        </style>
     </head>
 
     <body>
@@ -198,8 +216,10 @@
                             program doesn't crash. There are also ways to change
                             one data type to another (for example, changing an
                             integer (5) into a string "5"), but we'll look at
-                            that later."
+                            that later.
                         </p>
+                        <p>Take a look at the question below.</p>
+                        <div class="quiz-container" data-quiz-id="dataTypes"></div>
                     </div>
                 </div>
             </div>
