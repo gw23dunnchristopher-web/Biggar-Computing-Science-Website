@@ -894,6 +894,7 @@ ul li ul li ul li {
 
 .LIandSC td{
     padding:20px;
+    vertical-align: top;
 }
 
 @media (max-width: 768px) {

@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>N4 Computing Science - SDD Analysis</title>
+        <title>N4 Computing Science - SDD Variables and Datatypes</title>
         <script src="/JavaScript/N4Script.js"></script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
         <link rel="stylesheet" href="/CSS/styles.css" />
@@ -84,22 +84,21 @@
                                 "Ask the user to enter the name of an item, its price per unit, and the quantity they want to buy",
                                 "Calculate the total cost",
                                 "If the total is £10 or more, apply a 10% discount",
-                                "Display the item name, the original total, and the final amount to pay"
+                                "Display the item name, the original total, and the final amount to pay",
                             ],
-                            "Complete the table to identify the inputs, processes, and outputs of this program."
+                            "Complete the table to identify the inputs, processes, and outputs of this program.",
                         ],
                         marks: 3,
                         tableHeaders: ["Input", "Process", "Output"],
                         tableRows: [["", "", ""]],
-                        markingScheme: "Award 1 mark per cell. Input: item name, price per unit, and quantity (award mark if at least two of three are mentioned). Process: multiply price by quantity to get total cost, then check if total is £10 or more and apply 10% discount if so (award mark if both steps are mentioned, or award mark for either step alone). Output: item name, original total, and final price after discount (award mark if at least two of three outputs are mentioned)."
+                        markingScheme:
+                            "Award 1 mark per cell. Input: item name, price per unit, and quantity (award mark if at least two of three are mentioned). Process: multiply price by quantity to get total cost, then check if total is £10 or more and apply 10% discount if so (award mark if both steps are mentioned, or award mark for either step alone). Output: item name, original total, and final price after discount (award mark if at least two of three outputs are mentioned).",
                     },
                 ],
             };
         </script>
         <script src="/JavaScript/quiz.js"></script>
-        <style>
-
-        </style>
+        <style></style>
     </head>
 
     <body>
@@ -115,132 +114,61 @@
                 <div id="content">
                     <div id="mainHeading"><h1>National 4</h1></div>
                     <div class="contentHeading">
-                        <h1>Analysis</h1>
+                        <h1>Variables and Datatypes</h1>
                     </div>
                     <div class="contentContainer">
-                        <p>
-                            The first stage of software development is analysis.
-                            This is where we look at the problem we are trying
-                            to solve and figure out what we need to do to solve
-                            it. Here, we need to define the
-                            <b>Functional Requirements</b> of the program - what
-                            data needs to be entered into it, what it will do
-                            with that data, and what it will output.
-                        </p>
-
-                        <h2>Functional Requirements</h2>
-                        <p>
-                            These describe what the program needs to be able to
-                            do in order to fulfill its purpose. At this level,
-                            you should be able to look at a problem, and define
-                            the inputs, processes and outputs for the program.
-                        </p>
-                        <table>
+                        <table class="LIandSC">
                             <tr>
-                                <th>Input(s)</th>
-                                <td>
-                                    The data that needs to be entered into the
-                                    program, for example, in a program adds two
-                                    numbers together, the inputs would be the
-                                    two numbers that you want to add.
-                                </td>
+                                <th>Learning Intentions</th>
+                                <th>Success Criteria</th>
                             </tr>
                             <tr>
-                                <th>Process(es)</th>
                                 <td>
-                                    The steps that the program needs to take to
-                                    achieve its goal. For example, in a program
-                                    that adds two numbers together, the process
-                                    would be to add the two numbers together.
+                                    We are learning about:
+                                    <ul>
+                                        <li>Variables.</li>
+                                        <li>
+                                            The different datatypes used by
+                                            variables.
+                                        </li>
+                                    </ul>
                                 </td>
-                            </tr>
-                            <tr>
-                                <th>Output(s)</th>
                                 <td>
-                                    The data that the program will produce as a
-                                    result of its processes. For example, in a
-                                    program that adds two numbers together, the
-                                    output would be the sum of the two numbers.
+                                    I am looking for you to:
+                                    <ul>
+                                        <li>Explain what a variable is.</li>
+                                        <li>
+                                            List the rules for making a variable
+                                            name.
+                                        </li>
+                                        <li>
+                                            Describe what the 'string' and
+                                            'integer' datatypes are.
+                                        </li>
+                                    </ul>
                                 </td>
                             </tr>
                         </table>
+                        <h2>What is a variable?</h2>
                         <p>
-                            The functional requirements are the foundation of
-                            the program. They define what the program needs to
-                            do, and without them, you won't be able to design or
-                            build the program.
-                        </p>
-
-                        <h3>A worked example</h3>
-                        <p>
-                            A good way of determinine the functional
-                            requirements are to look at the action verbs in the
-                            question, which indicate the actions that need to be
-                            taken by the program, and the nouns, which indicate
-                            different variables that will need to be stored.
+                            Think of a variable as a digital storage box inside
+                            a computer's memory. Instead of just throwing
+                            information everywhere, you give the box a specific
+                            name so you can find it later. Inside that box, you
+                            can keep all sorts of things—like a high score,
+                            someone's name, or a simple "yes/no" answer.
                         </p>
                         <p>
-                            In the example program below, I have highlighted the
-                            action verbs in green, and the nouns in pink.
+                            In the world of coding, variables are a total
+                            game-changer. They allow a programme to remember
+                            things and change them on the fly. Without them,
+                            software would be pretty boring and rigid; it would
+                            only ever be able to do one specific thing. Because
+                            of variables, your favourite games and apps can
+                            react to what you do, keep track of your progress,
+                            and work differently every time you use them.
                         </p>
-
-                        <div class="example">
-                            <h2>Calorie Counter</h2>
-                            <p>Write a Calorie Counter program which...</p>
-                            <ul>
-                                <li>
-                                    <span class="aVerb">Will ask</span> for the
-                                    number of calories in
-                                    <span class="noun">porridge</span>,
-                                    <span class="noun">toast</span>,
-                                    <span class="noun">jam</span> and
-                                    <span class="noun">coffee</span>.
-                                </li>
-                                <li>
-                                    <span class="aVerb">Calculates</span> the
-                                    <span class="noun">total</span> number of
-                                    calories in the breakfast.
-                                </li>
-                                <li>
-                                    <span class="aVerb">Displays</span> the
-                                    <span class="noun">total</span> number of
-                                    calories.
-                                </li>
-                            </ul>
-                        </div>
-                        <p>
-                            With this, we can identify the inputs, processes and
-                            outputs for this program.
-                        </p>
-                        <table style="width: 800px">
-                            <tr>
-                                <th style="width: 33%">Input(s)</th>
-                                <th style="width: 33%">Process(es)</th>
-                                <th style="width: 33%">Output(s)</th>
-                            </tr>
-                            <tr>
-                                <td>
-                                    The number of calories in porridge, toast,
-                                    jam and coffee.
-                                </td>
-                                <td>Calculate the total number of calories.</td>
-                                <td>The total number of calories.</td>
-                            </tr>
-                        </table>
-                        <h2>Try it yourself</h2>
-                        <p>
-                            Below, I have listed five different program
-                            concepts, I would like you to look at each one and
-                            determine the inputs, processes and outputs for the
-                            listed programs, type them into the appropriate
-                            boxes. 
-                        </p>
-                        <p>
-                            Click on each of the questions below to
-                            reveal them, type in your answer and then click
-                            submit to see if you were right!
-                        </p>
-                        <div class="quiz-container"></div>
+                        <img src="/Images/N4/SDD/Implementation/Variables.png" class="cImg" alt="Variables">
                     </div>
                 </div>
             </div>
