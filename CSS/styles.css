@@ -877,7 +877,7 @@ ul li ul li ul li {
 .LIandSC {
     font-family:Arial;
     font-size: 18px;
-    background-color: #d1e1e6;
+    background-color: lightblue;
     border: 1px solid #376cfd;
     margin: 20px auto;
     max-width: 1000px
@@ -892,9 +892,8 @@ ul li ul li ul li {
     font-weight: bold;
 }
 
-.LIandSC td {
-    padding: 20px;
-    vertical-align: top;
+.LIandSC td{
+    padding:20px;
 }
 
 @media (max-width: 768px) {

@@ -278,9 +278,8 @@ body #coursePanels {
 }
 
 body #coursePanels div img {
-    width: 100%;
-    max-height: calc(100vh - 189px);
-    max-width: 550px;
+    max-height: calc(100vh - 130px);
+    max-width: 3cqb;
 }
 
 body #coursePanels {
@@ -289,6 +288,8 @@ body #coursePanels {
     padding: 20px;
     width: 100%;
     box-sizing: border-box;
+    height: 80%;
+    display: block;
 }
 
 body #coursePanels div {
@@ -298,13 +299,6 @@ body #coursePanels div {
     transition-timing-function: ease-out;
     width: 100%;
     max-width: 100%;
-}
-
-body #coursePanels div img {
-    width: 100%;
-    height: auto;
-    max-width: 100%;
-    display: block;
 }
 
 @media (max-width: 768px) {
