@@ -271,7 +271,8 @@
     }
 
     function renderTableInput(q, index, prefix) {
-        var html = '<div class="quiz-table-wrapper"><table class="quiz-table">';
+        var extraClass = q.tableClass ? ' ' + escHtml(q.tableClass) : '';
+        var html = '<div class="quiz-table-wrapper"><table class="quiz-table' + extraClass + '">';
 
         if (q.columnWidths && q.columnWidths.length) {
             html += '<colgroup>';

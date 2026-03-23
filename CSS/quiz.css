@@ -253,6 +253,19 @@ textarea.quiz-table-input {
     background-color: #eaf4fb;
 }
 
+/*
+ * Per-question table customisation
+ * ---------------------------------
+ * Add  tableClass: "my-class"  to any table-type question in QUIZ_CONFIGS.
+ * Then add rules here targeting that class, e.g.:
+ *
+ *   .my-class               { width: 60%; margin: 0 auto; }
+ *   .my-class th            { text-align: left; }
+ *   .my-class th:nth-child(1) { width: 40%; }
+ *   .my-class th:nth-child(2) { width: 30%; }
+ *   .my-class td            { text-align: center; vertical-align: top; }
+ */
+
 /* Submit button */
 .quiz-submit-btn {
     display: block;
