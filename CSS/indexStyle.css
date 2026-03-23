@@ -1,14 +1,20 @@
-* {padding:0; margin:0; box-sizing:border-box;}
-html, body {height:100%}
+/* Reset */
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
 
 body {
     font-family: Arial, sans-serif;
-    display:flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color:black;
+    background-color: black;
 }
 
+/* ── Header ────────────────────────────────────── */
 header {
     position: fixed;
     top: 0;
@@ -19,7 +25,163 @@ header {
     z-index: 10;
 }
 
-/* Mobile Landscape Styles - Reduce header/footer for better content visibility */
+header h1 {
+    position: absolute;
+    top: 10px;
+    left: 30px;
+    color: white;
+    padding: 40px;
+    font-size: 60px;
+    font-family: Arial;
+}
+
+header img {
+    float: right;
+    height: 200px;
+}
+
+/* ── Footer ────────────────────────────────────── */
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background-color: black;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+}
+
+footer > div {
+    width: 33%;
+    font-size: 12px;
+    font-family: Arial;
+    color: white;
+}
+
+#left p {
+    text-align: left;
+    padding-left: 30px;
+    margin-bottom: 8px;
+}
+
+#center {
+    text-align: center;
+}
+
+#right {
+    text-align: right;
+    padding-right: 30px;
+}
+
+/* ── Main content area (fills gap between header and footer) ── */
+main {
+    position: fixed;
+    top: 200px;
+    left: 0;
+    right: 0;
+    bottom: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #03030c;
+    padding: 20px;
+}
+
+/* ── Course panels ─────────────────────────────── */
+#coursePanels {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 1800px;
+    height: 100%;
+}
+
+#coursePanels div {
+    flex: 1;
+    height: 100%;
+    max-height: 500px;
+    filter: brightness(50%) grayscale(100%);
+    transition: filter 0.2s ease-out;
+}
+
+#coursePanels div:hover {
+    filter: brightness(100%) grayscale(0%);
+    transition: filter 0.2s ease;
+}
+
+#coursePanels div img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ── Mobile portrait ───────────────────────────── */
+@media (max-width: 768px) {
+    header {
+        height: 80px;
+    }
+
+    header h1 {
+        font-size: 24px;
+        left: 10px;
+        padding: 10px;
+        top: 5px;
+    }
+
+    header img {
+        height: 80px;
+    }
+
+    footer {
+        height: 80px;
+    }
+
+    footer > div {
+        font-size: 8px;
+    }
+
+    #left p {
+        padding-left: 10px;
+        font-size: 8px;
+    }
+
+    #right {
+        padding-right: 10px;
+        font-size: 8px;
+    }
+
+    main {
+        top: 80px;
+        bottom: 80px;
+        padding: 10px;
+    }
+
+    #coursePanels {
+        flex-direction: column;
+        gap: 10px;
+        height: auto;
+    }
+
+    #coursePanels div {
+        flex: none;
+        width: 100%;
+        height: auto;
+        max-height: none;
+    }
+
+    #coursePanels div img {
+        height: auto;
+        aspect-ratio: 550 / 400;
+    }
+}
+
+/* ── Mobile landscape ──────────────────────────── */
 @media (max-height: 500px) and (orientation: landscape) {
     header {
         height: 50px;
@@ -36,289 +198,16 @@ header {
         height: 50px;
     }
 
-    body main {
-        top: 50px;
-        margin-bottom: 50px;
-    }
-
     footer {
         height: 50px;
     }
 
     footer > div {
         font-size: 8px;
-        padding-top: 10px;
     }
 
-    #left p {
-        padding-left: 10px;
-        margin-bottom: 2px;
+    main {
+        top: 50px;
+        bottom: 50px;
     }
-
-    #right {
-        padding-right: 10px;
-    }
-}
-
-@media (max-width: 768px) {
-    header {
-        height: 80px;
-    }
-    header h1 {
-        font-size: 24px;
-        left: 10px;
-    }
-    header img {
-        height: 80px;
-    }
-}
-
-header h1 {
-    position:absolute;
-    top:10px;
-    left:30px;
-    color:white;
-    padding:40px;
-    font-size:60px;
-    font-family:Arial;
-}
-header img {
-    float:right;
-    height:200px;
-}
-
-#mainHeading, #pageContainer, .contentHeading {
-    position: static; /* Reset to default flow */
-    z-index: auto;
-    top: auto;
-    margin: 0; /* Reset margins */
-}
-
-
-footer {
-    position: fixed; /* Stays at bottom */
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: black;
-    height: 100px;
-    z-index: 10;
-    display: flex;
-    flex-wrap: nowrap;
-}
-
-@media (max-width: 768px) {
-    footer {
-        height: 80px;
-    }
-    footer > div {
-        font-size: 8px;
-    }
-    #left p {
-        padding-left: 10px;
-    }
-    #right {
-        padding-right: 10px;
-    }
-}
-
-
-footer > div {
-    width:33%;
-    font-size:12px;
-    font-family:arial;
-}
-
-#left, #center, #right {
-    padding-top:20px;
-    color:white;
-}
-
-#left p{
-    text-align:left;
-    padding-left:30px;
-    margin-bottom:8px;
-}
-
-#center {
-    text-align:center;
-    margin-bottom:10px;
-}
-
-#right {
-    text-align:right;
-    padding-right:30px;
-    margin-bottom:10px;
-}
-
-@media (max-width: 768px) {
-    #left p {
-        font-size: 8px;
-    }
-    #center {
-        font-size: 8px;
-    }
-    #right {
-        font-size: 8px;
-    }
-}
-
-body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-body main {
-    position: relative;
-    top: 120px;
-    left: 0;
-    right: 0;
-    display: flex;
-    background-color:#03030c;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 0 20px;
-    margin: 0;
-}
-
-@media (max-width: 768px) {
-    body main {
-        position: relative;
-        display: flex;
-        background-color:#03030c;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 0 20px;
-    }
-}
-
-body #coursePanels {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    width: 100%;
-    max-width: 2400px;
-    align-items: center;
-    padding: 20px;
-    flex-wrap: wrap;
-}
-
-@media (max-width: 768px) {
-    body main {
-        top: 0;
-        bottom: 80px;
-    }   
-    body #coursePanels {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        padding: 10px;
-        gap: 10px;
-        margin-top: 0px;
-    }
-    body #coursePanels div {
-        width: 100%;
-        max-width: none;
-        aspect-ratio: 1;
-    }
-    body #coursePanels div img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    body main {
-        height: auto;
-        margin-top: 0px;
-        margin-bottom: 80px;
-        padding: 10px;
-    }
-    header {
-        height: 60px;
-    }
-    header h1 {
-        font-size: 16px;
-        left: 5px;
-        padding: 10px;
-        top: 5px;
-    }
-    header img {
-        height: 60px;
-    }
-}
-
-/* Desktop layout */
-@media (min-width: 769px) {
-    body main {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: calc(100vh - 200px);
-        padding: 20px;
-    }
-    body #coursePanels {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        gap: 20px;
-        padding: 20px;
-    }
-    body #coursePanels div {
-        flex: 1;
-        height: auto;
-        min-height: 400px;
-    }
-    body #coursePanels div img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-}
-
-body #coursePanels div img {
-    max-height: calc(100vh - 130px);
-    max-width: 3cqb;
-}
-
-body #coursePanels {
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: 20px;
-    width: 100%;
-    box-sizing: border-box;
-    height: 80%;
-    display: block;
-}
-
-body #coursePanels div {
-    filter: brightness(50%) grayscale(100%);
-    transition-duration: 0.2s;
-    transition-delay: 0.2s;
-    transition-timing-function: ease-out;
-    width: 100%;
-    max-width: 100%;
-}
-
-@media (max-width: 768px) {
-    body #coursePanels {
-        padding: 10px;
-    }
-}
-
-body #coursePanels div:hover {
-    filter: brightness(100%) grayscale(0%);
-    transition-duration: 0.2s;
-    transition-delay: 0.2s;
-    transition-timing-function: ease;
-}
-
-/* Optional: Fixed footer for index.html */
-body footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    z-index: 10;
 }
