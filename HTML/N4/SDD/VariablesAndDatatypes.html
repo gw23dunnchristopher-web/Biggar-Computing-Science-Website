@@ -5,100 +5,33 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>N4 Computing Science - SDD Variables and Datatypes</title>
         <script src="/JavaScript/N4Script.js"></script>
+        <script src="/JavaScript/quiz.js"></script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/quiz.css" />
         <script>
-            window.QUIZ_CONFIG = {
-                questions: [
-                    {
-                        type: "table",
-                        text: [
-                            "A program asks the user to enter their age and displays whether they are old enough to vote (18 or over).",
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
-                        ],
-                        marks: 3,
-                        tableHeaders: ["Input", "Process", "Output"],
-                        tableRows: [["", "", ""]],
-                        markingScheme:
-                            "Award 1 mark per cell. Input: age entered by the user. Process: check if age is greater than or equal to 18. Output: message stating whether the user can or cannot vote.",
-                    },
-                    {
-                        type: "table",
-                        text: [
-                            "A program is designed for a school canteen. The program should:",
-                            [
-                                "Ask the user to enter the price of an item and the amount of money paid",
-                                "Calculate the change to be given",
-                                "Display the change",
-                            ],
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
-                        ],
-                        marks: 3,
-                        tableHeaders: ["Input", "Process", "Output"],
-                        tableRows: [["", "", ""]],
-                        markingScheme:
-                            "Award 1 mark per cell. Input: price of item and amount paid (accept either or both). Process: subtract price from amount paid to calculate change. Output: the change to be given to the customer.",
-                    },
-                    {
-                        type: "table",
-                        text: [
-                            "A program is created for a leisure centre. The program should:",
-                            [
-                                "Ask the user to enter their name, age, and whether they are a member (yes/no)",
-                                "Apply a 20% discount if the user is a member, or charge full price if not",
-                                "The standard entry fee is £12.00",
-                                "Display the user's name and the amount they must pay",
-                            ],
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
-                        ],
-                        marks: 3,
-                        tableHeaders: ["Input", "Process", "Output"],
-                        tableRows: [["", "", ""]],
-                        markingScheme:
-                            "Award 1 mark per cell. Input: name, age, and membership status (accept any two or all three). Process: check membership status and calculate price — £12.00 full price or £9.60 with 20% discount (accept 'apply discount if member' or similar). Output: user's name and the amount to pay.",
-                    },
-                    {
-                        type: "table",
-                        text: [
-                            "A weather app is being developed. The program should:",
-                            [
-                                "Read in temperature readings for each day of the week (7 values)",
-                                "Calculate the average temperature, and identify the highest and lowest temperatures recorded",
-                                "Display all three results with appropriate labels",
-                            ],
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
-                        ],
-                        marks: 3,
-                        tableHeaders: ["Input", "Process", "Output"],
-                        tableRows: [["", "", ""]],
-                        markingScheme:
-                            "Award 1 mark per cell. Input: 7 temperature readings (accept 'daily temperatures' or 'temperature for each day'). Process: calculate the average (sum divided by 7), find the maximum value, and find the minimum value (award mark if at least two of three processes are mentioned). Output: average temperature, highest temperature, and lowest temperature (award mark if at least two of three outputs are mentioned).",
-                    },
-                    {
-                        type: "table",
-                        text: [
-                            "A program is created for a school shop. The program should:",
-                            [
-                                "Ask the user to enter the name of an item, its price per unit, and the quantity they want to buy",
-                                "Calculate the total cost",
-                                "If the total is £10 or more, apply a 10% discount",
-                                "Display the item name, the original total, and the final amount to pay",
-                            ],
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
-                        ],
-                        marks: 3,
-                        tableHeaders: ["Input", "Process", "Output"],
-                        tableRows: [["", "", ""]],
-                        markingScheme:
-                            "Award 1 mark per cell. Input: item name, price per unit, and quantity (award mark if at least two of three are mentioned). Process: multiply price by quantity to get total cost, then check if total is £10 or more and apply 10% discount if so (award mark if both steps are mentioned, or award mark for either step alone). Output: item name, original total, and final price after discount (award mark if at least two of three outputs are mentioned).",
-                    },
-                ],
+            window.QUIZ_CONFIGS = {
+                variableNames: {
+                    questions: [ 
+                        {
+                            type: "table",
+                            text: "The table below contains a list of variable names, decide if they are valid or not, and if they are invalid,                                 tell me why.",
+                            marks: 7,
+                            tableHeaders: ["Variable Name", "Valid?", "Reason"],
+                            tableRows: [["player_score", "", ""], ["2nd_place", "", ""], ["userAge", "", ""], ["total-amount", "", ""], ["favourite_colour", "", ""], ["class", "", ""], ["money$", "", ""]],
+                            markingScheme:
+                                "Award 1 mark per completed row.  Row 1: Yes. Row 2: No, variable names cannot start with a number. Row 3: Yes. Row 4: No, You can't use hyphens. Row 5: Yes.  Row 6: No, class is a reserved word.  Row 7: No, Special symbols like $ are not allowed.",
+                        },
+                    ]
+                },
+                section2: {
+                    questions: [ /* ... */ 
+                    ]
+                }
             };
         </script>
-        <script src="/JavaScript/quiz.js"></script>
-        <style></style>
+       
     </head>
 
     <body>
@@ -168,7 +101,105 @@
                             react to what you do, keep track of your progress,
                             and work differently every time you use them.
                         </p>
-                        <img src="/Images/N4/SDD/Implementation/Variables.png" class="cImg" alt="Variables">
+                        <img
+                            src="/Images/N4/SDD/Implementation/variables.png"
+                            class="cImg"
+                            alt="Variables"
+                        />
+                        <h2>Rules for Variable Names</h2>
+                        <p>
+                            When you create a variable, you need to give it a
+                            name that follows certain rules. These rules help
+                            the computer understand what you're trying to do.
+                        </p>
+                        <p>The rules for variable names are:</p>
+                        <ul>
+                            <li>
+                                They must start with a letter or an underscore.
+                            </li>
+                            <li>
+                                They can only contain letters, numbers and
+                                underscores.
+                            </li>
+                            <li>
+                                They cannot be the same as a keyword in the
+                                programming language. So words such as class,
+                                def, if, else, for, while, etc. are not allowed.
+                            </li>
+                            <li>They are case sensitive.</li>
+                            <li>They should be descriptive.</li>
+                        </ul>
+
+                        <p>
+                            Look at the table below, try to decide if the
+                            variables listed are valid or not, and why.
+                        </p>
+                        <div class="quiz-container" data-quiz-id="variableNames"></div>
+
+                        <h2>Datatypes</h2>
+                        <p>
+                            Think of data types as a way if telling the computer
+                            what kind of data you're putting inside the variable
+                            boxes. Just like you wouldn't try to store water
+                            inside a cardboard box or try to put a pair of shoes
+                            in a glass jar, computers need to know what kind of
+                            data they're dealing with so that they don't get
+                            confused.
+                        </p>
+                        <p>
+                            There are five main data types used by computers,
+                            you can see them in the table below.
+                        </p>
+                        <table>
+                            <tr>
+                                <th>Datatype</th>
+                                <th>Description</th>
+                                <th>Example</th>
+                            </tr>
+                            <tr>
+                                <td>Integer</td>
+                                <td>Whole numbers, positive or negative.</td>
+                                <td>1, 2, 3, 4, 5, -1, -2, -3, -4, -5</td>
+                            </tr>
+                            <tr>
+                                <td>Real</td>
+                                <td>Decimal numbers, positive or negative.</td>
+                                <td>
+                                    1.5, 2.5, 3.5, 4.5, 5.5, -1.5, -2.5, -3.5,
+                                    -4.5, -5.5
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>String</td>
+                                <td>Text, enclosed in quotes.</td>
+                                <td>"Hello", "World", "123", "True"</td>
+                            </tr>
+                            <tr>
+                                <td>Boolean</td>
+                                <td>True or False.</td>
+                                <td>True, False</td>
+                            </tr>
+                            <tr>
+                                <td>Character</td>
+                                <td>A single character, enclosed in quotes.</td>
+                                <td>"a", "b", "c", "1", "2", "3"</td>
+                            </tr>
+                        </table>
+                        <p>
+                            Of these types, for the N4 level, you have to be
+                            aware of <b>Strings</b> and <b>Integers</b>. So you
+                            need to know how to store text and whole numbers.
+                        </p>
+                        <p>
+                            Computers can be a bit fussy - they can't easily
+                            'add' a word to a number (like trying to calculate
+                            <span class="codeText">5 + "apple"</span>), so
+                            picking the right data type makes sure that your
+                            program doesn't crash. There are also ways to change
+                            one data type to another (for example, changing an
+                            integer (5) into a string "5"), but we'll look at
+                            that later."
+                        </p>
                     </div>
                 </div>
             </div>
