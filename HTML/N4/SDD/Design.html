@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>N4 Computing Science - SDD Design</title>
+        <title>N4 Computing Science - SDD Variables and Datatypes</title>
         <script src="/JavaScript/N4Script.js"></script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
         <link rel="stylesheet" href="/CSS/styles.css" />
@@ -77,8 +77,7 @@
                             type: "paragraph",
                             text: "Looking at the very top level (the three boxes directly below the main Program title), what is the                                 final main step the program performs?",
                             marks: 1,
-                            markingScheme:
-                                "Display total profit for the year.",
+                            markingScheme: "Display total profit for the year.",
                         },
                         {
                             type: "paragraph",
@@ -100,27 +99,51 @@
                     questions: [
                         {
                             type: "pseudocode",
-                            text: ["<b>Program 1: The Temperature Warning</b>", "A greenhouse needs a warning system for its plants.", ["<b>Input:</b> The current temperature.", "<b>Process:</b> Check if the temperature is less than 5 degrees.", "<b>Output:</b> If the temperature is less than 5, display the warning 'Too cold!'. Otherwise, display 'Temperature is OK'."]],
+                            text: [
+                                "<b>Program 1: The Temperature Warning</b>",
+                                "A greenhouse needs a warning system for its plants.",
+                                [
+                                    "<b>Input:</b> The current temperature.",
+                                    "<b>Process:</b> Check if the temperature is less than 5 degrees.",
+                                    "<b>Output:</b> If the temperature is less than 5, display the warning 'Too cold!'. Otherwise, display                                         'Temperature is OK'.",
+                                ],
+                            ],
                             marks: 2,
                             markingScheme:
                                 "Award 1 mark for the correct input and output (receiving the temperature and displaying a message).  Award 1                                  mark for the correct selection logic (using an If with 'tempreature less than 5' and Otherwise/Else)",
                         },
                         {
                             type: "pseudocode",
-                            text: "The purple oval says 'Repeat 12 times'. Which four specific tasks are performed 12 times?",
-                            marks: 2,
+                            text: [
+                                "<b>Program 2: The 10-Question Quiz Score</b>",
+                                "A teacher wants a program to calculate a total score for a 10-question True or False' quiz.",
+                                [
+                                    " <b>Input:</b> For each of the 10 questions, ask the user if the answer was 'Correct' or 'Incorrect'.",
+                                    "<b>Process:</b> Start a loop that repeats 10 times. Every time the user enters 'Correct', add 1 to the                                         total score.",
+                                    " <b>Output:</b> IAfter the loop, display 'Your final score is: ' followed by the total score.",
+                                ],
+                            ],
+                            marks: 4,
                             markingScheme:
-                                "The four actions are 'Get this month's total income', 'Get total expenses for this month', 'Calculate profit                                  for this month' and 'Add this month's profit to the total profit for the year.'  Award 1 mark for any two                                      correct answers and award 2 mark for all four correct answers.",
+                                "Award 1 mark for initialising the total (setting total to 0) before the loop, award 1 mark for the correct                                     loop logic (a loop that repeats 10 times). Award 1 mark for the selection logic inside the loop (only adding                                   a point if the answer is correct). Award 1 mark for the correct output (displaying the total score) after the                                  loop has finished.",
                         },
                         {
                             type: "pseudocode",
-                            text: "If the answer to the green hexagon ('Is monthly profit more than 0?') is 'Yes', how many actions does the                                 program take?  Which actions does it take?",
-                            marks: 2,
+                            text: [
+                                "<b>Program 3: The 12-Moth Rainfall Tracker</b>",
+                                "A weather station tracks how much rain falls over a full year to get a monthly average",
+                                [
+                                    "<b>Input:</b> The amount of rain (in mm) for each of the 12 months.",
+                                    "<b>Process:</b> Start a loop for 12 months. In each loop, get the rainfall amount and add it to a yearly                                      total. Divide the total by 12 to get the average.",
+                                    "<b>Output:</b> Display the average rainfall for the year.",
+                                ],
+                            ],
+                            marks: 4,
                             markingScheme:
-                                "Award 1 mark stating that the program will perform 2 additional actions, award an additional mark if they                                     answer describes the two actions - add monthly profit to yearly profit and display 'you made a profit this                                     month'.",
+                                "Award 1 mark for setting the yearly total to 0 before the loop starts.  Award 1 mark for correctly using a                                     loop that repeats exactly 12 times. Award 1 mark for adding the new input to the running total inside the                                      loop. Award 1 mark for getting the average rainfall by dividing the yearly total by 12 after the loop has                                      finished.",
                         },
                     ],
-                }
+                },
             };
         </script>
     </head>
@@ -138,611 +161,10 @@
                 <div id="content">
                     <div id="mainHeading"><h1>National 4</h1></div>
                     <div class="contentHeading">
-                        <h1>SDD - Design</h1>
+                        <h1>SDD - Variables and Datatypes</h1>
                     </div>
                     <div class="contentContainer">
-                        <p>
-                            Now that we have identified the inputs, processes
-                            and outputs, we can start to design the program.
-                            This is where we will write the algorithm for the
-                            program. An algorithm is a step-by-step solution to
-                            a problem. We will look at three different ways of
-                            writing an algorithm: pseudocode, flowcharts and
-                            structure diagrams. Click on the headings below to
-                            read about each of these.
-                        </p>
-
-                        <details
-                            class="accordion-section"
-                            style="margin-top: 20px"
-                        >
-                            <summary><h2>Pseudocode</h2></summary>
-                            <div class="accordion-content">
-                                <p>
-                                    There are several ways to write an
-                                    algorithm, but the most common way is to use
-                                    pseudocode. Pseudocode is a way of writing
-                                    an algorithm in a way that is easy to
-                                    understand, but not in a specific
-                                    programming language.
-                                </p>
-                                <p>
-                                    Let's first look at an example, the Calorie
-                                    Counter program from the Analysis section.
-                                </p>
-
-                                <div class="example">
-                                    <h2>Calorie Counter</h2>
-                                    <p>
-                                        Write a Calorie Counter program which...
-                                    </p>
-                                    <ul>
-                                        <li>
-                                            <span class="aVerb">Will ask</span>
-                                            for the number of calories in
-                                            <span class="noun">porridge</span>,
-                                            <span class="noun">toast</span>,
-                                            <span class="noun">jam</span> and
-                                            <span class="noun">coffee</span>.
-                                        </li>
-                                        <li>
-                                            <span class="aVerb"
-                                                >Calculates</span
-                                            >
-                                            the
-                                            <span class="noun">total</span>
-                                            number of calories in the breakfast.
-                                        </li>
-                                        <li>
-                                            <span class="aVerb">Displays</span>
-                                            the
-                                            <span class="noun">total</span>
-                                            number of calories.
-                                        </li>
-                                    </ul>
-                                </div>
-                                <p>
-                                    We can break this program down into simpler
-                                    steps by looking at the verbs and nouns.
-                                </p>
-                                <div class="example">
-                                    <h2>Calorie Counter Algorithm</h2>
-                                    <ul>
-                                        <li>
-                                            <span class="aVerb">Ask for</span>
-                                            the number of calories in
-                                            <span class="noun">porridge</span>.
-                                        </li>
-                                        <li>
-                                            <span class="aVerb">Ask for</span>
-                                            the number of calories in
-                                            <span class="noun">toast</span>.
-                                        </li>
-                                        <li>
-                                            <span class="aVerb">Ask for</span>
-                                            the number of calories in
-                                            <span class="noun">jam</span>.
-                                        </li>
-                                        <li>
-                                            <span class="aVerb">Ask for</span>
-                                            the number of calories in
-                                            <span class="noun">coffee</span>.
-                                        </li>
-                                        <li>
-                                            <span class="aVerb">Calculate</span>
-                                            the
-                                            <span class="noun">total</span>
-                                            number of calories.
-                                        </li>
-                                        <li>
-                                            <span class="aVerb">Display</span>
-                                            the
-                                            <span class="noun">total</span>
-                                            number of calories.
-                                        </li>
-                                    </ul>
-                                    <p>
-                                        This is what's known as an
-                                        <b>algorithm</b>, a step-by-step
-                                        solution to the problem. Algorithms can
-                                        often be translated directly into code.
-                                    </p>
-                                </div>
-                                <p>
-                                    When we start looking at Python programs in
-                                    this course, you will see the designs of the
-                                    programes written in pseudocode, and there
-                                    are some questions at the bottom of this
-                                    page that will ask you to write pseudocode
-                                    for a program. You will have to break down
-                                    the problem described into smaller steps.
-                                </p>
-                                <p>
-                                    Although they won't be used much at the N4
-                                    level, let's briefly look at the other two
-                                    design notation techniques.
-                                </p>
-                            </div>
-                        </details>
-
-                        <details class="accordion-section">
-                            <summary><h2>Flowcharts</h2></summary>
-                            <div class="accordion-content">
-                                <p>
-                                    A flowchart is a type of grpahical design
-                                    notation. It illustrates step-by-step
-                                    solutions to a problem, providing a visual
-                                    approach to understanding code. Flowcharts
-                                    are made up of shapes, each of which
-                                    represents a different type of action. You
-                                    can see the most common symbols used for
-                                    flowcharts below, as well as how a flowchart
-                                    of the Calorie Counter program could look:
-                                </p>
-                                <div class="design-symbols-layout">
-                                    <table>
-                                        <tr>
-                                            <th>Shape</th>
-                                            <th>Action</th>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <img
-                                                    src="/Images/N4/SDD/Design/flowArrow.png"
-                                                    alt="Arrow"
-                                                />
-                                            </td>
-                                            <td>
-                                                This shape shows the direction
-                                                of the flow of the program.
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <img
-                                                    src="/Images/N4/SDD/Design/terminator.png"
-                                                    alt="Start and End"
-                                                />
-                                            </td>
-                                            <td>
-                                                This shape shows the start and
-                                                end of the program.
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <img
-                                                    src="/Images/N4/SDD/Design/initialisation.png"
-                                                    alt="Initialisation"
-                                                />
-                                            </td>
-                                            <td>
-                                                This shape shows a variable
-                                                being initialised, or set to a
-                                                value.
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <img
-                                                    src="/Images/N4/SDD/Design/process.png"
-                                                    alt="Process"
-                                                />
-                                            </td>
-                                            <td>
-                                                This shape shows a process, or
-                                                action, that the program will
-                                                take.
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <img
-                                                    src="/Images/N4/SDD/Design/predefined.png"
-                                                    alt="Predefined Process"
-                                                />
-                                            </td>
-                                            <td>
-                                                This shape shows a predefined
-                                                process, or action, that the
-                                                program will take. You won't
-                                                need to write the code for this,
-                                                it will be provided.
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <img
-                                                    src="/Images/N4/SDD/Design/IO.png"
-                                                    alt="Input/Output"
-                                                />
-                                            </td>
-                                            <td>
-                                                This shape shows an input or
-                                                output.
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <img
-                                                    src="/Images/N4/SDD/Design/decision.png"
-                                                    alt="Decision"
-                                                />
-                                            </td>
-                                            <td>
-                                                This shape shows a decision, or
-                                                a point where the program will
-                                                take one of two different paths.
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <img
-                                                    id="connector"
-                                                    src="/Images/N4/SDD/Design/connector.png"
-                                                    alt="Connector"
-                                                />
-                                            </td>
-                                            <td>
-                                                This shape shows a connector, or
-                                                a point where the program will
-                                                continue on another page.
-                                            </td>
-                                        </tr>
-                                    </table>
-
-                                    <div>
-                                        <p>
-                                            The calorie counter program could be
-                                            designed using the flowchart shown
-                                            below.
-                                        </p>
-                                        <div
-                                            class="chartExample flowchart-example"
-                                        >
-                                            <img
-                                                src="/Images/N4/SDD/Design/flowExample.png"
-                                                alt="Calorie Counter Flowchart"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </details>
-
-                        <details class="accordion-section">
-                            <summary><h2>Structure Diagrams</h2></summary>
-                            <div class="accordion-content">
-                                <p>
-                                    While flowcharts are a good way to design a
-                                    program, they can be quite large and
-                                    complex. Structure diagrams are a simpler
-                                    way to design a program. They are made up of
-                                    boxes, each of which represents a different
-                                    type of action. Below, you can see the most
-                                    common symbols used for structure diagrams,
-                                    and this technique used to create an
-                                    algorithm for the Calorie Counter program:
-                                </p>
-                                <div class="design-symbols-layout">
-                                    <table>
-                                        <tr>
-                                            <th>Box</th>
-                                            <th>Action</th>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <img
-                                                    src="/Images/N4/SDD/Design/process.png"
-                                                    alt="Process"
-                                                />
-                                            </td>
-                                            <td>
-                                                This is a process, or action,
-                                                that the program will take. In a
-                                                structure diagram this could
-                                                include input and output.
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <img
-                                                    src="/Images/N4/SDD/Design/predefined.png"
-                                                    alt="A predefined process"
-                                                />
-                                            </td>
-                                            <td>
-                                                This is a predefined process, or
-                                                action, that the program will
-                                                take. You won't need to write
-                                                the code for this, it will be
-                                                provided.
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <img
-                                                    src="/Images/N4/SDD/Design/loop.png"
-                                                    alt="Loop"
-                                                />
-                                            </td>
-                                            <td>
-                                                This box shows a loop, or a
-                                                point where the program will
-                                                repeat a set of actions.
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <img
-                                                    src="/Images/N4/SDD/Design/selection.png"
-                                                    alt="Selection"
-                                                />
-                                            </td>
-                                            <td>
-                                                This box shows a selection, or a
-                                                point where the program will
-                                                take one of two different paths.
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <div>
-                                        <p>
-                                            The calorie counter program could be
-                                            designed using the structure diagram
-                                            shown below.
-                                        </p>
-                                        <div
-                                            class="chartExample structure-example"
-                                        >
-                                            <img
-                                                src="/Images/N4/SDD/Design/structureExample.png"
-                                                alt="Calorie Counter Structure Diagram"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                <p>
-                                    Look at the example structure diagram for
-                                    the Calorie Counter program. It starts with
-                                    the whole program at the top, then breaks
-                                    the program down into three steps - enter
-                                    calories, calculate the total and then
-                                    display the total. Then it further breaks
-                                    down the 'enter calories' step into four
-                                    steps - enter the calories for porridge,
-                                    toast, jam and coffee.
-                                </p>
-                                <p>
-                                    This is a good example of how structure
-                                    diagrams can be used to break down a program
-                                    into smaller, more manageable parts.
-                                </p>
-                                <p>
-                                    In a structure diagram, any box that has
-                                    lines growing out of the bottom of it is a
-                                    parent. All the boxes below it are its
-                                    children. The children only happen because
-                                    the parent box told them to! For example,
-                                    the Enter Calories box is the parent of the
-                                    Enter Porridge Calories, Enter Toast
-                                    Calories, Enter Jam Calories and Enter
-                                    Coffee Calories boxes.
-                                </p>
-                            </div>
-                        </details>
-                        <h2>Try it yourself!</h2>
-                        <p>The quiz for this section will have four parts:</p>
-                        <ol>
-                            <li>
-                                <b>Reading Pseudocode</b> - you will be expected
-                                to read a set of pseudocode and answer
-                                questions.
-                            </li>
-                            <li>
-                                <b>Reading Flowcharts</b> - you have to look at
-                                a flowchart and answer questions on it.
-                            </li>
-                            <li>
-                                <b>Reading Structure Diagrams</b> - you have to
-                                read a structure diagram and answer questions on
-                                it.
-                            </li>
-                            <li>
-                                <b>Writing Pseudocode</b> - you will be given an
-                                analysis of several programs that you will have
-                                to write pseudocode for (you will be given an
-                                example).
-                            </li>
-                        </ol>
-                        <p>
-                            Click on the headings below to see the questions,
-                            you can refer to the notes above to help you answer
-                            them.
-                        </p>
-                        <details
-                            class="accordion-section"
-                            style="margin-top: 20px"
-                        >
-                            <summary><h2>Reading Pseudocode</h2></summary>
-                            <p style="margin-bottom: 10px">
-                                Try reading through the pseudocode below and
-                                answer the questions.
-                            </p>
-                            <div class="pseudocode" style="margin-top: 0px">
-                                <table>
-                                    <tr>
-                                        <th style="min-width: 50px">Step</th>
-                                        <th>Description</th>
-                                    </tr>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>
-                                            Display the message "How many
-                                            tickets are you buying?"
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>
-                                            Get the number of tickets from the
-                                            user
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>
-                                            Set the total cost of the booking to
-                                            0.
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                    <tr>
-                                        <td>4</td>
-                                        <td>
-                                            Start a loop that repeats for each
-                                            ticket.
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>5</td>
-                                        <td>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;Display the
-                                            message "What is your age?"
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>6</td>
-                                        <td>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;Get the age
-                                            from the user.
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>7</td>
-                                        <td>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;If the age
-                                            is less than 18:
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>8</td>
-                                        <td>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set
-                                            the cost of the ticket to £10.00.
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>9</td>
-                                        <td>&nbsp;&nbsp;&nbsp;&nbsp;Else:</td>
-                                    </tr>
-                                    <tr>
-                                        <td>10</td>
-                                        <td>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set
-                                            the cost of the ticket to £15.00.
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>11</td>
-                                        <td>&nbsp;&nbsp;&nbsp;&nbsp;End if.</td>
-                                    </tr>
-                                    <tr>
-                                        <td>12</td>
-                                        <td>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;Add the cost
-                                            of the ticket to the total cost.
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>13</td>
-                                        <td>End the loop.</td>
-                                    </tr>
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                    <tr>
-                                        <td>14</td>
-                                        <td>
-                                            Display the message "The total cost
-                                            of the booking is £" followed by the
-                                            total cost.
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                            <div
-                                class="quiz-container"
-                                data-quiz-id="readingPseudocode"
-                            ></div>
-                        </details>
-
-                        <details class="accordion-section">
-                            <summary><h2>Reading Flowcharts</h2></summary>
-                            <p>
-                                Look at the flowchart below and read through it.
-                                Remember to follow the arrows.
-                            </p>
-                            <div class="chartExample flowchart-example">
-                                <img
-                                    src="/Images/N4/SDD/Design/fitnessTracker.png"
-                                    alt="Calorie Counter Flowchart"
-                                />
-                            </div>
-                            <div
-                                class="quiz-container"
-                                data-quiz-id="readingFlowcharts"
-                            ></div>
-                        </details>
-                        <details class="accordion-section">
-                            <summary>
-                                <h2>Reading Structure Diagrams</h2>
-                            </summary>
-                            <p>
-                                Look at the structure diagram below, and answer
-                                the questions below it.
-                            </p>
-                            <div class="chartExample structure-example">
-                                <img
-                                    src="/Images/N4/SDD/Design/profitTracker.png"
-                                    alt="Structure Diagram"
-                                />
-                            </div>
-                            <div
-                                class="quiz-container"
-                                data-quiz-id="readingStruct"
-                            ></div>
-                        </details>
-                        <details class="accordion-section">
-                            <summary><h2>Writing Pseudocode</h2></summary>
-                            <p>Look at the example below:</p>
-                            <div class="example">
-                                <p><b>The Problem:</b> Cinema tickets are £5. A cinema gives a £2 discount on the tickets if a customer spends                                 more than £10 on snacks.</p>
-                                <ul>
-                                    <li><b>Input:</b> The total cost of snacks,</li>
-                                    <li><b>Process:</b> Check if the cost is more than £10. If it is, subtract £2 from the ticket cost.</li>
-                                    <li><b>Output:</b> Display the final price.</li>
-                                </ul>
-                                <p>You would have to break this down into further steps, look at this example solution:</p>
-                                <ol id="examplePsuedocode">
-                                    <li>Set ticket cost to 5.</li>
-                                    <li>Get snack cost from keyboard.</li>
-                                    <li>If snack cost is more than 10:</li>
-                                    <li>&nbsp;&nbsp;&nbsp;&nbsp;Subtract 2 from the ticket cost.</li>
-                                    <li>Set total cost to ticket cost + snack cost.</li>
-                                    <li>Display total cost.</li>
-                                </ol>
-                            </div>
-                            <p>Now try writing pseudocode for the programs below:</p>
-                            <div
-                                class="quiz-container"
-                                data-quiz-id="writingPseudocode"
-                            ></div>
-                        </details>
+                        
                     </div>
                 </div>
             </div>
