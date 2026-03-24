@@ -53,7 +53,7 @@
                         <source src="/Files/Audio/sampleMP3.mp3" type="audio/mpeg">
                     </audio>
                     <p>The code window below shows the audio tag playing a file stored on the server using its absolute path:</p>
-                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+                    <div class="html-runner" data-server-files="/Files/Audio/mp3Example.mp3"><textarea class="cr-code" style="display:none">
 <!DOCTYPE html>
 <html>
 <head>
@@ -63,7 +63,7 @@
     <h1>Audio Tag Example</h1>
     <p>This audio player plays a file stored on the server:</p>
     <audio controls>
-        <source src="/Files/Audio/mp3Example.mp3" type="audio/mpeg">
+        <source src="mp3Example.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
 </body>
@@ -82,7 +82,7 @@
                         Your browser does not support the video tag.
                     </video>
                     <p>The code window below shows the video tag playing a file stored on the server using its absolute path:</p>
-                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+                    <div class="html-runner" data-server-files="/Files/Video/sampleVideo.mp4"><textarea class="cr-code" style="display:none">
 <!DOCTYPE html>
 <html>
 <head>
@@ -92,7 +92,7 @@
     <h1>Video Tag Example</h1>
     <p>This video player plays a file stored on the server:</p>
     <video width="400" height="225" controls>
-        <source src="/Files/Video/sampleVideo.mp4" type="video/mp4">
+        <source src="sampleVideo.mp4" type="video/mp4">
         Your browser does not support the video element.
     </video>
 </body>

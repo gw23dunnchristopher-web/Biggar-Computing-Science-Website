@@ -511,8 +511,18 @@
 
     /* ── build an HTML runner (multi-file with virtual filesystem) ── */
     function initHtmlRunner(container) {
-        var sandbox   = (container.getAttribute('data-sandbox') || '').trim();
-        var dataFiles = (container.getAttribute('data-files')   || '').trim();
+        var sandbox         = (container.getAttribute('data-sandbox')      || '').trim();
+        var dataFiles       = (container.getAttribute('data-files')        || '').trim();
+        var dataServerFiles = (container.getAttribute('data-server-files') || '').trim();
+
+        /* build serverFiles map: filename → server path (e.g. "mp3Example.mp3" → "/Files/Audio/mp3Example.mp3") */
+        var serverFileMap = {};
+        if (dataServerFiles) {
+            dataServerFiles.split(',').map(function (s) { return s.trim(); }).filter(Boolean).forEach(function (path) {
+                var name = path.split('/').pop();
+                serverFileMap[name] = path;
+            });
+        }
 
         function showLoading() {
             container.classList.add('code-runner');
@@ -533,7 +543,7 @@
                 .then(function (data) {
                     container.innerHTML = '';
                     container.classList.remove('code-runner');
-                    buildHtmlRunner(container, data.files || {});
+                    buildHtmlRunner(container, data.files || {}, serverFileMap);
                 })
                 .catch(function (err) { showError(err.message); });
             return;
@@ -553,7 +563,7 @@
                 loaded.forEach(function (f) { originals[f.name] = f.content; });
                 container.innerHTML = '';
                 container.classList.remove('code-runner');
-                buildHtmlRunner(container, originals);
+                buildHtmlRunner(container, originals, serverFileMap);
             }).catch(function (err) { showError(err.message); });
             return;
         }
@@ -566,10 +576,11 @@
             var name = (ta.dataset.filename || 'index.html').trim();
             originals[name] = ta.value.replace(/^\n/, '').replace(/\n$/, '');
         });
-        buildHtmlRunner(container, originals);
+        buildHtmlRunner(container, originals, serverFileMap);
     }
 
-    function buildHtmlRunner(container, originals) {
+    function buildHtmlRunner(container, originals, serverFiles) {
+        serverFiles = serverFiles || {};
         container.classList.add('code-runner');
         container.innerHTML =
             '<div class="cr-toolbar">' +
@@ -739,9 +750,10 @@
 
         /* ── file tree ── */
         function fileIcon(name) {
-            if (uploadedImages[name] && /\.(mp3|wav|ogg|aac|m4a|flac)$/i.test(name)) return '&#x1F3B5;'; /* 🎵 audio */
-            if (uploadedImages[name] && /\.(mp4|webm|mov|avi|mkv)$/i.test(name))     return '&#x1F3AC;'; /* 🎬 video */
-            if (uploadedImages[name])    return '&#x1F5BC;';   /* 🖼 image */
+            var isBinary = !!uploadedImages[name] || !!serverFiles[name];
+            if (isBinary && /\.(mp3|wav|ogg|aac|m4a|flac)$/i.test(name)) return '&#x1F3B5;'; /* 🎵 audio */
+            if (isBinary && /\.(mp4|webm|mov|avi|mkv)$/i.test(name))     return '&#x1F3AC;'; /* 🎬 video */
+            if (isBinary)    return '&#x1F5BC;';   /* 🖼 image */
             if (name.endsWith('.css'))   return '&#x1F3A8;';
             if (name.endsWith('.js'))    return '&#x2699;&#xFE0F;';
             if (name.endsWith('.csv'))   return '&#x1F4CA;';
@@ -750,17 +762,18 @@
         }
 
         function renderFileTree() {
-            var textNames  = Object.keys(vfs);
-            var imageNames = Object.keys(uploadedImages);
-            var allNames   = textNames.concat(imageNames);
+            var textNames   = Object.keys(vfs);
+            var imageNames  = Object.keys(uploadedImages);
+            var serverNames = Object.keys(serverFiles);
+            var allNames    = textNames.concat(imageNames).concat(serverNames);
             var tree = buildFolderTree(allNames, openFolders);
             fileList.innerHTML = renderTreeItems(tree.children, 0, {
                 activeFile: activeFile,
                 mainFile:   null,
                 canDel: function (name) {
-                    return !!uploadedImages[name] || textNames.length > 1;
+                    return !serverFiles[name] && (!!uploadedImages[name] || textNames.length > 1);
                 },
-                isReadonly: function (name) { return !!uploadedImages[name]; },
+                isReadonly: function (name) { return !!uploadedImages[name] || !!serverFiles[name]; },
                 iconFn: fileIcon
             });
             fileList.querySelectorAll('.cr-folder-item').forEach(function (li) {
@@ -919,11 +932,18 @@
                 }
             );
 
-            /* substitute uploaded images */
+            /* substitute uploaded images/audio/video with their data URIs */
             Object.keys(uploadedImages).forEach(function (name) {
                 var esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 var re = new RegExp('(src=["\'])(?:[^"\']*[\\/])?' + esc + '(["\'])', 'gi');
                 html = html.replace(re, '$1' + uploadedImages[name] + '$2');
+            });
+
+            /* substitute server-hosted files (name → absolute server path) */
+            Object.keys(serverFiles).forEach(function (name) {
+                var esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                var re = new RegExp('(src=["\'])(?:[^"\']*[\\/])?' + esc + '(["\'])', 'gi');
+                html = html.replace(re, '$1' + serverFiles[name] + '$2');
             });
 
             /* inject page-navigation interceptor so <a href="page2.html"> works
