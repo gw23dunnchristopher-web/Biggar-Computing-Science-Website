@@ -113,7 +113,7 @@
     background: #1a1a2a;
 }
 
-/* ── output section (Python) ── */
+/* ── output / terminal section (Python) ── */
 .cr-output-area {
     border-top: 2px solid #313244;
 }
@@ -129,17 +129,27 @@
     padding: 4px 14px;
 }
 
-.cr-output {
-    margin: 0;
-    padding: 12px 14px;
+.cr-terminal {
+    display: flex;
+    flex-direction: column;
     background: #11111b;
+    min-height: 80px;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.cr-output {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 12px 14px 6px;
+    background: transparent;
     color: #a6e3a1;
     font-family: 'Courier New', Courier, monospace;
     font-size: 14px;
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
-    min-height: 60px;
+    min-height: 48px;
 }
 
 .cr-output.cr-error {
@@ -148,6 +158,76 @@
 
 .cr-output.cr-success {
     color: #a6e3a1;
+}
+
+.cr-output.cr-loading {
+    color: #89b4fa;
+}
+
+.cr-output.cr-running {
+    color: #a6e3a1;
+}
+
+/* ── inline input row ── */
+.cr-input-row {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 14px 10px;
+    background: transparent;
+}
+
+.cr-cursor {
+    color: #a6e3a1;
+    font-size: 14px;
+    line-height: 1;
+    animation: cr-blink 1s step-start infinite;
+    flex-shrink: 0;
+}
+
+@keyframes cr-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+}
+
+.cr-terminal-input {
+    flex: 1 1 auto;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #585b70;
+    color: #cdd6f4;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.4;
+    padding: 2px 4px;
+    outline: none;
+    caret-color: #a6e3a1;
+    min-width: 0;
+}
+
+.cr-terminal-input::placeholder {
+    color: #45475a;
+    font-style: italic;
+}
+
+.cr-terminal-input:focus {
+    border-bottom-color: #a6e3a1;
+}
+
+.cr-enter-btn {
+    flex-shrink: 0;
+    background: #313244;
+    color: #cdd6f4;
+    border: none;
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+}
+
+.cr-enter-btn:hover {
+    background: #45475a;
 }
 
 /* ── HTML runner split layout ── */
@@ -168,11 +248,6 @@
     min-height: 380px;
     border: none;
     background: #fff;
-}
-
-/* ── loading spinner state ── */
-.cr-output.cr-loading {
-    color: #89b4fa;
 }
 
 /* ── responsive ── */
