@@ -501,12 +501,16 @@
                 html = html.replace(re, '$1' + uploadedImages[name] + '$2');
             });
 
-            /* inject page-navigation interceptor so <a href="page2.html"> works */
+            /* inject page-navigation interceptor so <a href="page2.html"> works
+               and external https:// links open in a new tab via the parent     */
             var interceptor = '<script>(function(){' +
                 'document.addEventListener("click",function(e){' +
                 '  var a=e.target.closest("a[href]");if(!a)return;' +
-                '  var h=a.getAttribute("href");' +
-                '  if(h&&!/^(https?:|mailto:|javascript:|#)/i.test(h)){' +
+                '  var h=a.getAttribute("href");if(!h)return;' +
+                '  if(/^https?:/i.test(h)){' +
+                '    e.preventDefault();' +
+                '    window.parent.postMessage({crExternal:h},"*");' +
+                '  } else if(!/^(mailto:|javascript:|#)/i.test(h)){' +
                 '    e.preventDefault();' +
                 '    window.parent.postMessage({crNav:h},"*");' +
                 '  }' +
@@ -528,10 +532,15 @@
             resolveAndRender(vfs[entry] || '');
         }
 
-        /* handle in-preview navigation (links between pages) */
+        /* handle in-preview navigation (links between pages) and external links */
         window.addEventListener('message', function (e) {
-            if (!e.data || !e.data.crNav) return;
+            if (!e.data) return;
             if (e.source !== preview.contentWindow) return;  /* only our iframe */
+            if (e.data.crExternal) {
+                window.open(e.data.crExternal, '_blank', 'noopener,noreferrer');
+                return;
+            }
+            if (!e.data.crNav) return;
             var fname = e.data.crNav.split('?')[0].split('#')[0].split('/').pop();
             if (vfs[fname] !== undefined) {
                 vfs[activeFile] = editor.value;

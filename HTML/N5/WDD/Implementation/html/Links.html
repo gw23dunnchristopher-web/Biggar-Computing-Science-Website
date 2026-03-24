@@ -61,22 +61,39 @@
 
                     <p>The code window below has two HTML pages, they are linked together using a hyperlink created by an anchor tag.  There is also an extrenal hyperlink on the page that uses an external address.</p>
 
-                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+                    <div class="html-runner">
+<textarea class="cr-code" data-filename="index.html" style="display:none">
 <!DOCTYPE html>
 <html>
 <head>
     <title>Links Example</title>
 </head>
 <body>
-    <h1>Links Example</h1>
-    <p>This is an external hyperlink:</p>
+    <h1>Home Page</h1>
+    <p>This is an <b>external hyperlink</b> — it opens a different website in a new tab:</p>
     <a href="https://www.bbc.co.uk" target="_blank">Visit the BBC</a>
     <br><br>
-    <p>This is an internal hyperlink (links to another page on the same site):</p>
-    <a href="BasicTags.html">Go to Basic Tags page</a>
+    <p>This is an <b>internal hyperlink</b> — it links to another page on the same site:</p>
+    <a href="about.html">Go to the About page</a>
 </body>
 </html>
-</textarea></div>
+</textarea>
+<textarea class="cr-code" data-filename="about.html" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>About Page</title>
+</head>
+<body>
+    <h1>About Page</h1>
+    <p>You navigated here using an internal hyperlink with <b>relative addressing</b>.</p>
+    <p>The href only needed to say <code>about.html</code> — not the full URL — because both pages are on the same site.</p>
+    <br>
+    <a href="index.html">Back to Home</a>
+</body>
+</html>
+</textarea>
+</div>
 
                     <h2>IDs and Anchor Tags</h2>
                     <p>Anchor tags can also be used to create jump links.  These are links that take you to a specific section of a webpage.  This is done by giving the section you want to link to an ID, and then using that ID in

@@ -230,9 +230,16 @@ Before rendering, the runner scans `index.html` for:
 
 Only the filename is matched — path prefixes like `css/style.css` are stripped automatically.
 
-### Page navigation
+### Page navigation and links
 
-Links between HTML pages work inside the preview. `<a href="about.html">` sends a message to the runner, which loads `about.html` from the virtual filesystem and re-renders the preview. Anchor links (`#section`) and external `https://` URLs pass through normally.
+| Link type | Example | Behaviour in the preview |
+|---|---|---|
+| **Internal page link** | `<a href="about.html">` | Loads `about.html` from the virtual filesystem and re-renders the preview. Both files must exist in the runner. |
+| **Jump / anchor link** | `<a href="#section2">` | Scrolls within the current preview page normally. |
+| **External link** | `<a href="https://bbc.co.uk">` | Opens the URL in a new browser tab. The preview itself does not navigate away. |
+| **Mailto link** | `<a href="mailto:a@b.com">` | Passes through to the browser's default mail handler. |
+
+External links always open in a new tab regardless of whether `target="_blank"` is present — the preview iframe cannot navigate to external sites directly.
 
 ### Student additions
 
