@@ -52,7 +52,7 @@
                     <audio class="cImg" controls>
                         <source src="/Files/Audio/sampleMP3.mp3" type="audio/mpeg">
                     </audio>
-                    <p>The code window below shows the use of the audio tag to play a file on a different website.  Note the URL in the source:</p>
+                    <p>The code window below shows the audio tag playing a file stored on the server using its absolute path:</p>
                     <div class="html-runner"><textarea class="cr-code" style="display:none">
 <!DOCTYPE html>
 <html>
@@ -61,9 +61,9 @@
 </head>
 <body>
     <h1>Audio Tag Example</h1>
-    <p>This audio player uses a file hosted on another website:</p>
+    <p>This audio player plays a file stored on the server:</p>
     <audio controls>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        <source src="/Files/Audio/mp3Example.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
 </body>
@@ -78,10 +78,10 @@
 
                     <p>This will display the video player below:</p>
                     <video class="cImg" height="480" width="640" controls>
-                        <source src="sampleVideo.mp4" type="video/mp4">
+                        <source src="/Files/Video/sampleVideo.mp4" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
-                    <p>The code window below uses an online source on a different website to play the video:</p>
+                    <p>The code window below shows the video tag playing a file stored on the server using its absolute path:</p>
                     <div class="html-runner"><textarea class="cr-code" style="display:none">
 <!DOCTYPE html>
 <html>
@@ -90,9 +90,9 @@
 </head>
 <body>
     <h1>Video Tag Example</h1>
-    <p>This video player uses a file hosted on another website:</p>
+    <p>This video player plays a file stored on the server:</p>
     <video width="400" height="225" controls>
-        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+        <source src="/Files/Video/sampleVideo.mp4" type="video/mp4">
         Your browser does not support the video element.
     </video>
 </body>

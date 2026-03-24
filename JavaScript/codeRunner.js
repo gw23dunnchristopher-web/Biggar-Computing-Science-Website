@@ -589,7 +589,7 @@
             '    <button class="cr-new-file-btn">+ New file</button>' +
             '    <label class="cr-filetree-upload" title="Upload images, CSS, JS, or data files">' +
             '      &#x1F4C2; Upload' +
-            '      <input type="file" class="cr-html-file-input" accept="image/*,.css,.js,.csv,.txt,.html,.json" multiple style="display:none">' +
+            '      <input type="file" class="cr-html-file-input" accept="image/*,audio/*,video/*,.css,.js,.csv,.txt,.html,.json" multiple style="display:none">' +
             '    </label>' +
             '  </div>' +
             '  <div class="cr-hl-wrap">' +
@@ -734,11 +734,13 @@
         var activeFile = originals['index.html'] !== undefined
             ? 'index.html'
             : Object.keys(originals)[0];
-        var uploadedImages = {};   /* path → dataURL for image files */
+        var uploadedImages = {};   /* path → dataURL for image, audio and video files */
         var openFolders = defaultOpenFolders(Object.keys(originals));  /* all folders open by default */
 
         /* ── file tree ── */
         function fileIcon(name) {
+            if (uploadedImages[name] && /\.(mp3|wav|ogg|aac|m4a|flac)$/i.test(name)) return '&#x1F3B5;'; /* 🎵 audio */
+            if (uploadedImages[name] && /\.(mp4|webm|mov|avi|mkv)$/i.test(name))     return '&#x1F3AC;'; /* 🎬 video */
             if (uploadedImages[name])    return '&#x1F5BC;';   /* 🖼 image */
             if (name.endsWith('.css'))   return '&#x1F3A8;';
             if (name.endsWith('.js'))    return '&#x2699;&#xFE0F;';
@@ -806,7 +808,7 @@
             prefix = prefix || '';
             Array.from(files).forEach(function (file) {
                 var dest = prefix + file.name;
-                if (/\.(png|jpe?g|gif|svg|webp|bmp|ico)$/i.test(file.name)) {
+                if (/\.(png|jpe?g|gif|svg|webp|bmp|ico|mp3|wav|ogg|aac|m4a|flac|mp4|webm|mov|avi|mkv)$/i.test(file.name)) {
                     var r = new FileReader();
                     r.onload = function (ev) {
                         uploadedImages[dest] = ev.target.result;
@@ -879,6 +881,17 @@
 
         /* ── preview rendering ── */
         function resolveAndRender(html) {
+            /* inject <base href> so that absolute paths like /Files/Audio/... resolve
+               against the server origin inside the srcdoc iframe */
+            if (!/<base\b/i.test(html)) {
+                var baseTag = '<base href="' + window.location.origin + '/">';
+                if (/<head>/i.test(html)) {
+                    html = html.replace(/<head>/i, '<head>' + baseTag);
+                } else {
+                    html = baseTag + html;
+                }
+            }
+
             /* inline CSS: <link rel="stylesheet" href="css/style.css"> or href="style.css"
                Try exact VFS path first, then fall back to matching by filename only */
             html = html.replace(
