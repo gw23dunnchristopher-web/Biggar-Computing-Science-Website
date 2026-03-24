@@ -148,43 +148,7 @@ for i in range(numStudents):
     print(f"{firstName[i]:<12} {lastName[i]:<12} {score[i]:<8}")
 </textarea></div>
                     
-                    <h2>Past Paper Question - 2023 Q9(e)</h2>
-                        <p>
-                            A software developer is creating a program for a dog grooming company that has branches in Dundee, Edinburgh, Glasgow and Stirling. The following 
-                            data is stored about each dog:
-                        </p>
-                        <ul>
-                            <li>dog ID</li>
-                            <li>name of the dog</li>
-                            <li>branch the dog attends</li>
-                            <li>number of visits to the branch</li>
-                        </ul>
-                        <p>One feature of the program is to offer a discount to customers that have visited the Dundee or the Stirling branch more than four times.</p>
-                    
-                        <p>The data shown below is stored in four parallel 1D arrays to test this feature.</p>
-
-                        <img class="cImg" src="/Images/Higher/SDD/Implementation/2023Q9.jpg" alt="2023 Q9">
-
-                        <p>The code below was created to display the dogID for those customers that are to be offered a discount.</p>
-                        <div class="pseudocode">
-                            <table>
-                                <tr><td>Line 1</td><td>PROCEDURE customerSearch (ARRAY OF STRING petNo,
-                                ARRAY OF STRING city, ARRAY OF INTEGER visits)</td></tr>
-                                <tr><td>Line 2</td><td style="padding-left:40px;">FOR i FROM 0 TO length(petNo)-1 DO</td></tr>
-                                <tr><td>Line 3</td><td style="padding-left:80px;">IF city[i]= "Stirling" OR
-                                 (city[i]= "Dundee" AND visits[i] > 4) THEN</td></tr>
-                                <tr><td>Line 4</td><td style="padding-left:120px;">SEND petNo[i] TO DISPLAY</td></tr>
-                                <tr><td>Line 5</td><td style="padding-left:80px;">END IF</td></tr>
-                                <tr><td>Line 6</td><td style="padding-left:40px;">END FOR</td></tr>
-                                <tr><td>Line 7</td><td>END PROCEDURE</td></tr>
-                                <tr><td>...</td><td></td></tr>
-                                <tr><td>Line 20</td><td>DECLARE dogID INITIALLY ["G123", "A872","D321","G876","A423","D872"]</td></tr>
-                                <tr><td>Line 21</td><td>DECLARE dogName INITIALLY ["Rover","Roman","Keeva","Bailey","Jack","Ozzy"]</td></tr>
-                                <tr><td>Line 22</td><td>DECLARE branch INITIALLY ["Glasgow","Stirling", "Dundee","Edinburgh","Stirling","Dundee"]</td></tr>
-                                <tr><td>Line 23</td><td >DECLARE noOfVisits INITIALLY [7,2,6,6,5,2]</td></tr>
-                                <tr><td>Line 24</td><td>customerSearch(dogID, branch, noOfVisits)</td></tr>
-                            </table>
-                        </div>
+                    </div>
                         
                     <div class="quiz-container"></div>
 
@@ -212,6 +176,13 @@ for i in range(numStudents):
                   "id": "q1",
                   "type": "paragraph",
                   "question": [
+                        "<strong>2023 Past Paper, Q9(e)</strong>",
+                        "A software developer is creating a program for a dog grooming company that has branches in Dundee, Edinburgh, Glasgow and Stirling. The following \n                            data is stored about each dog:\n                        \n                        \n                            dog ID\n                            name of the dog\n                            branch the dog attends\n                            number of visits to the branch",
+                        "One feature of the program is to offer a discount to customers that have visited the Dundee or the Stirling branch more than four times.",
+                        "The data shown below is stored in four parallel 1D arrays to test this feature.",
+                        "<img class=\"cImg\" src=\"/Images/Higher/SDD/Implementation/2023Q9.jpg\" alt=\"2023 Q9\">",
+                        "The code below was created to display the dogID for those customers that are to be offered a discount.",
+                        "<table> <tr><td>Line 1</td><td>PROCEDURE customerSearch (ARRAY OF STRING petNo, ARRAY OF STRING city, ARRAY OF INTEGER visits)</td></tr> <tr><td>Line 2</td><td style=\"padding-left:40px;\">FOR i FROM 0 TO length(petNo)-1 DO</td></tr> <tr><td>Line 3</td><td style=\"padding-left:80px;\">IF city[i]= \"Stirling\" OR (city[i]= \"Dundee\" AND visits[i] > 4) THEN</td></tr> <tr><td>Line 4</td><td style=\"padding-left:120px;\">SEND petNo[i] TO DISPLAY</td></tr> <tr><td>Line 5</td><td style=\"padding-left:80px;\">END IF</td></tr> <tr><td>Line 6</td><td style=\"padding-left:40px;\">END FOR</td></tr> <tr><td>Line 7</td><td>END PROCEDURE</td></tr> <tr><td>...</td><td></td></tr> <tr><td>Line 20</td><td>DECLARE dogID INITIALLY [\"G123\", \"A872\",\"D321\",\"G876\",\"A423\",\"D872\"]</td></tr> <tr><td>Line 21</td><td>DECLARE dogName INITIALLY [\"Rover\",\"Roman\",\"Keeva\",\"Bailey\",\"Jack\",\"Ozzy\"]</td></tr> <tr><td>Line 22</td><td>DECLARE branch INITIALLY [\"Glasgow\",\"Stirling\", \"Dundee\",\"Edinburgh\",\"Stirling\",\"Dundee\"]</td></tr> <tr><td>Line 23</td><td >DECLARE noOfVisits INITIALLY [7,2,6,6,5,2]</td></tr> <tr><td>Line 24</td><td>customerSearch(dogID, branch, noOfVisits)</td></tr> </table>",
                         "A dog grooming company stores data using parallel arrays including branch[] (branch name) and noOfVisits[] (number of visits).",
                         "The area manager wants to know how many dogs have made more than five visits to a particular branch.",
                         "Using a programming language of your choice, and the arrays branch and noOfVisits, write the code to ask the user for the branch name and to display how many dogs have made more than five visits to this branch."

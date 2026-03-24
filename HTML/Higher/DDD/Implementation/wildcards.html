@@ -152,48 +152,6 @@
                         <p>ORDER BY surname ASC, startDate ASC;</p>
                     </div>
 
-                    <h2>Past Paper Question - 2023 Q14</h2>
-                    <p>
-                        A takeaway restaurant is implementing an online ordering system and is using a 
-                        relational database to store details about the dishes, customers and orders.
-                    </p>
-                    <p>
-                        The restaurant can view order details. Customers are able to place and edit orders. 
-                        The four tables used in the database are shown below.
-                    </p>
-
-                    <table>
-                        <tr><th colspan="6">Customer</th></tr>
-                        <tr class="subheader"><th>custID</th><th>forename</th><th>surname</th><th>address</th><th>telephone</th><th>postcode</th></tr>
-                        <tr><td>41</td><td>Henry</td><td>Taylor</td><td>95 Whitehouse St</td><td>01224 931167</td><td>AB25 1SL</td></tr>
-                        <tr><td>42</td><td>Anna</td><td>Smith</td><td>84 Fraser Ave</td><td>01224 474845</td><td>AB16 5LL</td></tr>
-                        <tr><td>43</td><td>Jane</td><td>Robin</td><td>80 Maxwell St</td><td>01224 325715</td><td>AB12 5XN</td></tr>
-                        <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr>
-                    </table>
-
-                    <div class="sideBySide vertAlign">
-                        <table style="max-height:400px; max-width:400px; margin:0;">
-                            <tr><th colspan="3">CustOrder</th></tr>
-                            <tr class="subheader"><th>orderID</th><th>custID</th><th>orderDate</th></tr>
-                            <tr><td>ORD1</td><td>41</td><td>15/05/2023</td></tr>
-                            <tr><td>ORD2</td><td>42</td><td>15/05/2023</td></tr>
-                            <tr><td>ORD3</td><td>41</td><td>16/05/2023</td></tr>
-                            <tr><td>...</td><td>...</td><td>...</td></tr>
-                        </table>
-
-                        <table  style="max-width:400px; margin:0; margin-left:20px;">
-                            <tr><th colspan="3">OrderItem</th></tr>
-                            <tr class="subheader"><th>orderID</th><th>dishID</th><th>quantity</th></tr>
-                            <tr><td>ORD1</td><td>DISH01</td><td>2</td></tr>
-                            <tr><td>ORD1</td><td>DISH05</td><td>3</td></tr>
-                            <tr><td>ORD1</td><td>DISH04</td><td>3</td></tr>
-                            <tr><td>ORD1</td><td>DISH06</td><td>1</td></tr>
-                            <tr><td>ORD2</td><td>DISH02</td><td>2</td></tr>
-                            <tr><td>ORD2</td><td>DISH04</td><td>2</td></tr>
-                            <tr><td>ORD3</td><td>DISH03</td><td>7</td></tr>
-                            <tr><td>ORD3</td><td>DISH04</td><td>6</td></tr>
-                            <tr><td>...</td><td>...</td><td>...</td></tr>
-                        </table>
                     </div>
                     <table>
                         <tr><th colspan="4">Dish</th></tr>
@@ -236,6 +194,12 @@
                   "id": "q1",
                   "type": "paragraph",
                   "question": [
+                        "<strong>2023 Past Paper, Q14</strong>",
+                        "A takeaway restaurant is implementing an online ordering system and is using a \n                        relational database to store details about the dishes, customers and orders.",
+                        "The restaurant can view order details. Customers are able to place and edit orders. \n                        The four tables used in the database are shown below.",
+                        "<table> <tr><th colspan=\"6\">Customer</th></tr> <tr class=\"subheader\"><th>custID</th><th>forename</th><th>surname</th><th>address</th><th>telephone</th><th>postcode</th></tr> <tr><td>41</td><td>Henry</td><td>Taylor</td><td>95 Whitehouse St</td><td>01224 931167</td><td>AB25 1SL</td></tr> <tr><td>42</td><td>Anna</td><td>Smith</td><td>84 Fraser Ave</td><td>01224 474845</td><td>AB16 5LL</td></tr> <tr><td>43</td><td>Jane</td><td>Robin</td><td>80 Maxwell St</td><td>01224 325715</td><td>AB12 5XN</td></tr> <tr><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td><td>...</td></tr> </table>",
+                        "<table style=\"max-height:400px; max-width:400px; margin:0;\"> <tr><th colspan=\"3\">CustOrder</th></tr> <tr class=\"subheader\"><th>orderID</th><th>custID</th><th>orderDate</th></tr> <tr><td>ORD1</td><td>41</td><td>15/05/2023</td></tr> <tr><td>ORD2</td><td>42</td><td>15/05/2023</td></tr> <tr><td>ORD3</td><td>41</td><td>16/05/2023</td></tr> <tr><td>...</td><td>...</td><td>...</td></tr> </table>",
+                        "<table style=\"max-width:400px; margin:0; margin-left:20px;\"> <tr><th colspan=\"3\">OrderItem</th></tr> <tr class=\"subheader\"><th>orderID</th><th>dishID</th><th>quantity</th></tr> <tr><td>ORD1</td><td>DISH01</td><td>2</td></tr> <tr><td>ORD1</td><td>DISH05</td><td>3</td></tr> <tr><td>ORD1</td><td>DISH04</td><td>3</td></tr> <tr><td>ORD1</td><td>DISH06</td><td>1</td></tr> <tr><td>ORD2</td><td>DISH02</td><td>2</td></tr> <tr><td>ORD2</td><td>DISH04</td><td>2</td></tr> <tr><td>ORD3</td><td>DISH03</td><td>7</td></tr> <tr><td>ORD3</td><td>DISH04</td><td>6</td></tr> <tr><td>...</td><td>...</td><td>...</td></tr> </table>",
                         "A takeaway restaurant database has a Dish table: dishID, description, course, price.",
                         "The manager wants to increase the price of main dishes that contain chicken by £2.00.",
                         "Write the SQL statement that would implement this."

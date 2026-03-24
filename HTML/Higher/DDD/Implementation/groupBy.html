@@ -104,38 +104,6 @@
                         <b>Note the sequencing of the <span class="codeText">GROUP BY</span> and <span class="codeText">ORDER BY</span> clauses.</b>
                     </p>
                     
-                    <h2>Past Paper Question - 2024 Q14</h2>
-                    <p>
-                        A driving school uses a relational database to store details of driving instructors, 
-                        pupils and bookings in three linked tables.
-                    </p>
-                    <p>The relational database uses the following three tables.</p>
-                    <img src="/Images/Higher/DDD/Implementation/2024Q14.jpg" class="cImg" alt="Tables for 2024 Q14" width="40%"/>
-
-                    <p>Sample data from the pupil table is shown below:</p>
-                    <table>
-                        <tr><th colspan="4">Pupils</th></tr>
-                        <tr class="subheader"><th>pupilRef</th><th>name</th><th>address</th><th>town</th></tr>
-                        <tr><td>PU1</td><td>P Clifford</td><td>21 Clark Street</td><td>Kilmarnock</td></tr>
-                        <tr><td>PU2</td><td>N Price</td><td>76 Burnside Ave</td><td>Greenock</td></tr>
-                        <tr><td>PU3</td><td>M Flood</td><td>41 Sinclair Street</td><td>Greenock</td></tr>
-                        <tr><td>PU4</td><td>A Singh</td><td>92 Rugby Road</td><td>Kilmarnock</td></tr>
-                        <tr><td>PU5</td><td>J Wilson</td><td>8 Stadium Way</td><td>Falkirk</td></tr>
-                        <tr><td>PU6</td><td>M Ali</td><td>56 Lime Road</td><td>Falkirk</td></tr>
-                        <tr><td>PU7</td><td>S McGuire</td><td>118 Craigneuk Ave</td><td>Aidrie</td></tr>
-                        <tr><td>PU8</td><td>D McGregor</td><td>120 Wallace Place</td><td>Greenocj</td></tr>
-                    </table>
-                    
-                    <p>
-                        The driving school use the following SQL statement to display the number of 
-                        pupils in each town.
-                    </p>
-
-                    <div class="codeBox">
-                        <p>SELECT town, COUNT(*) AS [Number Per Town]</p>
-                        <p>FROM Pupil</p>
-                        <p>GROUP BY town</p>
-                        <p>ORDER BY COUNT(*) DESC, town ASC</p>
                     </div>
                              
                     
@@ -170,6 +138,17 @@
                   "id": "q1",
                   "type": "paragraph",
                   "question": [
+                        "<strong>2024 Past Paper, Q14</strong>",
+                        "A driving school uses a relational database to store details of driving instructors, \n                        pupils and bookings in three linked tables.",
+                        "The relational database uses the following three tables.",
+                        "<img src=\"/Images/Higher/DDD/Implementation/2024Q14.jpg\" class=\"cImg\" alt=\"Tables for 2024 Q14\" width=\"40%\"/>",
+                        "Sample data from the pupil table is shown below:",
+                        "<table> <tr><th colspan=\"4\">Pupils</th></tr> <tr class=\"subheader\"><th>pupilRef</th><th>name</th><th>address</th><th>town</th></tr> <tr><td>PU1</td><td>P Clifford</td><td>21 Clark Street</td><td>Kilmarnock</td></tr> <tr><td>PU2</td><td>N Price</td><td>76 Burnside Ave</td><td>Greenock</td></tr> <tr><td>PU3</td><td>M Flood</td><td>41 Sinclair Street</td><td>Greenock</td></tr> <tr><td>PU4</td><td>A Singh</td><td>92 Rugby Road</td><td>Kilmarnock</td></tr> <tr><td>PU5</td><td>J Wilson</td><td>8 Stadium Way</td><td>Falkirk</td></tr> <tr><td>PU6</td><td>M Ali</td><td>56 Lime Road</td><td>Falkirk</td></tr> <tr><td>PU7</td><td>S McGuire</td><td>118 Craigneuk Ave</td><td>Aidrie</td></tr> <tr><td>PU8</td><td>D McGregor</td><td>120 Wallace Place</td><td>Greenocj</td></tr> </table>",
+                        "The driving school use the following SQL statement to display the number of \n                        pupils in each town.",
+                        "SELECT town, COUNT(*) AS [Number Per Town]",
+                        "FROM Pupil",
+                        "GROUP BY town",
+                        "ORDER BY COUNT(*) DESC, town ASC",
                         "A driving school Pupil table has columns including town.",
                         "SQL: SELECT town, COUNT(*) AS [Number Per Town] FROM Pupil GROUP BY town ORDER BY COUNT(*) DESC, town ASC",
                         "Sample data has pupils from Aberdeen (3 pupils), Edinburgh (2 pupils), Inverness (1 pupil).",

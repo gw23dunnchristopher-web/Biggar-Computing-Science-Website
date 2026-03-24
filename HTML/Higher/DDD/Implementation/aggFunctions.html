@@ -221,37 +221,6 @@
                         answer table, due to the use of aliases in the second query.
                     </p>
                     
-                    <h2>Past Paper Question - 2023 Q15</h2>
-                    <p>
-                        The Caledonian Drone Racing League stores the results of their first season’s 
-                        competitions in a relational database. Pilots’ times for each race are recorded in 
-                        seconds.
-                    </p>
-                    <img src="/Images/Higher/DDD/Implementation/droneRacing.jpg" class="cImg" alt="Drone Racing Image" width="30%"/>
-                    <p>
-                        The relational database uses the following three tables.
-                    </p>
-                    <img src="/Images/Higher/DDD/Implementation/2023Q15.jpg" class="cImg" alt="Tables for 2023 Q15" width="40%"/>
-                    <p>
-                        Sample data from the three tables is shown below.
-                    </p>
-                    <div class="sideBySide vertAlign">
-                        <table style="max-width:400px;margin-right:0px;">
-                            <tr><th colspan="3">Pilot</th></tr>
-                            <tr class="subheader"><th>pilotID</th><th>forename</th><th>surname</th></tr>
-                            <tr><td>P001</td><td>Matthew</td><td>Thomas</td></tr>
-                            <tr><td>P002</td><td>Ann</td><td>Wilson</td></tr>
-                            <tr><td>P003</td><td>Joseph</td><td>Dow</td></tr>
-                            <tr><td>P004</td><td>Sam</td><td>Friar</td></tr>
-                            <tr><td>...</td><td>...</td><td>...</td></tr>
-                        </table>
-                        <table style="max-width:400px;margin-left:20px;">
-                            <tr><th colspan="3">Race</th></tr>
-                            <tr class="subheader"><th>raceID</th><th>title</th><th>city</th></tr>
-                            <tr><td>1</td><td>Granite Range</td><td>Aberdeen</td></tr>
-                            <tr><td>2</td><td>Clyde Maze</td><td>Glasgow</td></tr>
-                            <tr><td>3</td><td>Factory Frenzy</td><td>Ayr</td></tr>
-                        </table>
                     </div>
 
                     <table style="max-width:600px;"> 
@@ -323,6 +292,14 @@
                   "id": "q1",
                   "type": "table",
                   "question": [
+                        "<strong>2023 Past Paper, Q15</strong>",
+                        "The Caledonian Drone Racing League stores the results of their first season’s \n                        competitions in a relational database. Pilots’ times for each race are recorded in \n                        seconds.",
+                        "<img src=\"/Images/Higher/DDD/Implementation/droneRacing.jpg\" class=\"cImg\" alt=\"Drone Racing Image\" width=\"30%\"/>",
+                        "The relational database uses the following three tables.",
+                        "<img src=\"/Images/Higher/DDD/Implementation/2023Q15.jpg\" class=\"cImg\" alt=\"Tables for 2023 Q15\" width=\"40%\"/>",
+                        "Sample data from the three tables is shown below.",
+                        "<table style=\"max-width:400px;margin-right:0px;\"> <tr><th colspan=\"3\">Pilot</th></tr> <tr class=\"subheader\"><th>pilotID</th><th>forename</th><th>surname</th></tr> <tr><td>P001</td><td>Matthew</td><td>Thomas</td></tr> <tr><td>P002</td><td>Ann</td><td>Wilson</td></tr> <tr><td>P003</td><td>Joseph</td><td>Dow</td></tr> <tr><td>P004</td><td>Sam</td><td>Friar</td></tr> <tr><td>...</td><td>...</td><td>...</td></tr> </table>",
+                        "<table style=\"max-width:400px;margin-left:20px;\"> <tr><th colspan=\"3\">Race</th></tr> <tr class=\"subheader\"><th>raceID</th><th>title</th><th>city</th></tr> <tr><td>1</td><td>Granite Range</td><td>Aberdeen</td></tr> <tr><td>2</td><td>Clyde Maze</td><td>Glasgow</td></tr> <tr><td>3</td><td>Factory Frenzy</td><td>Ayr</td></tr> </table>",
                         "The Caledonian Drone Racing League database has tables: Pilot (pilotID, forename, surname), Race (raceID, title, city), Entry (raceID, pilotID, position, raceTime).",
                         "Pilots win £150 for first place. The league wants a list of pilot names and total winnings for those who came first place.",
                         "Design a query to display: pilotID, forename, surname, and Winnings (150 × number of first places)."
