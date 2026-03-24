@@ -586,7 +586,7 @@
             '<div class="cr-toolbar">' +
             '  <span class="cr-lang">&#x1F310; HTML</span>' +
             '  <div class="cr-btns">' +
-            '    <button class="cr-wrap-btn" title="Word wrap: off">&#8644; Wrap</button>' +
+            '    <button class="cr-wrap-btn cr-btn-active" title="Word wrap: on">&#8644; Wrap</button>' +
             '    <div class="cr-view-group">' +
             '      <button class="cr-code-btn cr-btn-active" title="Show code editor">&lt;/&gt; Code</button>' +
             '      <button class="cr-preview-btn cr-btn-active" title="Show preview">&#9654; Preview</button>' +
@@ -629,6 +629,9 @@
         var ftToggleBtn     = container.querySelector('.cr-ft-toggle');
         var filetreeDiv     = container.querySelector('.cr-filetree');
         var workspace       = container.querySelector('.cr-workspace');
+
+        /* ── wrap on by default ── */
+        hlWrap.classList.add('cr-wrap-on');
 
         /* ── syntax highlighting ── */
         function escHl(s) {
