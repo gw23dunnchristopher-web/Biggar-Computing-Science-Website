@@ -75,6 +75,21 @@
     var quizCounter = 0;
 
     function initQuiz() {
+        /* ── Ensure every quiz-container is inside #content ──────────────────
+           Some pages place the quiz-container outside #content (e.g. after the
+           closing </div> of the content column). If that happens, nav buttons
+           appended to #content appear before the quiz visually, and the quiz
+           doesn't align with the content column.  Moving the containers in
+           fixes both ordering and centering without touching every HTML page. */
+        var contentEl = document.getElementById('content');
+        if (contentEl) {
+            document.querySelectorAll('.quiz-container').forEach(function (c) {
+                if (!contentEl.contains(c)) {
+                    contentEl.appendChild(c);
+                }
+            });
+        }
+
         const containers = document.querySelectorAll('.quiz-container');
         containers.forEach(function (container) {
             var config = null;

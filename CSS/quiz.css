@@ -87,6 +87,17 @@
     margin-bottom: 0;
 }
 
+.quiz-container .quiz-question-text code {
+    font-family: 'Courier New', Courier, monospace;
+    background: #f0f4f8;
+    border: 1px solid #d0dae8;
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 14px;
+    color: #1a3a6e;
+    word-break: break-all;
+}
+
 .quiz-question-bullets {
     margin: 4px 0 8px 18px;
     padding: 0;
