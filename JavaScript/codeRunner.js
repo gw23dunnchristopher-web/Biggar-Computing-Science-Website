@@ -180,9 +180,14 @@
               '</div>'
             : '';
 
+        var editorBlock = '<div class="cr-editor-wrap">' +
+            '<div class="cr-line-numbers" aria-hidden="true"></div>' +
+            '<textarea class="cr-editor" spellcheck="false"></textarea>' +
+            '</div>';
+
         var workspaceWrap = multiFile
-            ? '<div class="cr-workspace">' + ftHtml + '<textarea class="cr-editor" spellcheck="false"></textarea></div>'
-            : '<textarea class="cr-editor" spellcheck="false"></textarea>';
+            ? '<div class="cr-workspace">' + ftHtml + editorBlock + '</div>'
+            : editorBlock;
 
         container.innerHTML =
             '<div class="cr-toolbar">' +
@@ -199,9 +204,22 @@
             '</div>';
 
         var editor   = container.querySelector('.cr-editor');
+        var lineNums = container.querySelector('.cr-line-numbers');
         var terminal = container.querySelector('.cr-terminal');
         var runBtn   = container.querySelector('.cr-run-btn');
         var resetBtn = container.querySelector('.cr-reset-btn');
+
+        /* ── line number sync ── */
+        function updateLineNumbers() {
+            var count = editor.value.split('\n').length;
+            var text  = '';
+            for (var i = 1; i <= count; i++) text += i + '\n';
+            lineNums.textContent = text;
+            lineNums.scrollTop   = editor.scrollTop;
+        }
+        editor.addEventListener('input',  updateLineNumbers);
+        editor.addEventListener('keydown', function () { setTimeout(updateLineNumbers, 0); });
+        editor.addEventListener('scroll',  function () { lineNums.scrollTop = editor.scrollTop; });
 
         /* ── virtual filesystem ── */
         var vfs        = Object.assign({}, originals);
@@ -209,6 +227,7 @@
         var openFolders = defaultOpenFolders(Object.keys(originals));  /* all folders open by default */
 
         editor.value = vfs[activeFile] || '';
+        updateLineNumbers();
 
         /* ── file tree (multi-file only) ── */
         function pyFileIcon(name) {
@@ -241,6 +260,7 @@
                     vfs[activeFile] = editor.value;
                     activeFile = li.dataset.name;
                     editor.value = vfs[activeFile] || '';
+                    updateLineNumbers();
                     renderPyFileTree();
                 });
             });
@@ -387,6 +407,7 @@
             vfs = Object.assign({}, originals);
             activeFile = mainFile;
             editor.value = vfs[activeFile] || '';
+            updateLineNumbers();
             if (multiFile) renderPyFileTree();
             terminal.readOnly = true;
             terminal.value = 'Click Run to execute the code\u2026';
@@ -466,6 +487,8 @@
             '      &#x1F4F7; Image' +
             '      <input type="file" class="cr-file-input" accept="image/*" multiple style="display:none">' +
             '    </label>' +
+            '    <button class="cr-wrap-btn" title="Word wrap: off">&#8644; Wrap</button>' +
+            '    <button class="cr-toggle-preview-btn" title="Hide preview">&#9707; Preview</button>' +
             '    <button class="cr-run-btn">&#9654; Preview</button>' +
             '    <button class="cr-reset-btn">&#8635; Reset</button>' +
             '  </div>' +
@@ -481,14 +504,33 @@
             '  <iframe class="cr-preview" sandbox="allow-scripts allow-same-origin"></iframe>' +
             '</div>';
 
-        var editor      = container.querySelector('.cr-editor');
-        var preview     = container.querySelector('.cr-preview');
-        var runBtn      = container.querySelector('.cr-run-btn');
-        var resetBtn    = container.querySelector('.cr-reset-btn');
-        var fileInput   = container.querySelector('.cr-file-input');
-        var imgStrip    = container.querySelector('.cr-img-strip');
-        var fileList    = container.querySelector('.cr-file-list');
-        var newFileBtn  = container.querySelector('.cr-new-file-btn');
+        var editor          = container.querySelector('.cr-editor');
+        var preview         = container.querySelector('.cr-preview');
+        var runBtn          = container.querySelector('.cr-run-btn');
+        var resetBtn        = container.querySelector('.cr-reset-btn');
+        var fileInput       = container.querySelector('.cr-file-input');
+        var imgStrip        = container.querySelector('.cr-img-strip');
+        var fileList        = container.querySelector('.cr-file-list');
+        var newFileBtn      = container.querySelector('.cr-new-file-btn');
+        var wrapBtn         = container.querySelector('.cr-wrap-btn');
+        var togglePrevBtn   = container.querySelector('.cr-toggle-preview-btn');
+
+        /* ── word wrap toggle ── */
+        wrapBtn.addEventListener('click', function () {
+            var on = editor.classList.toggle('cr-wrap-on');
+            wrapBtn.classList.toggle('cr-btn-active', on);
+            wrapBtn.title = on ? 'Word wrap: on' : 'Word wrap: off';
+        });
+
+        /* ── preview show/hide toggle ── */
+        var previewVisible = true;
+        togglePrevBtn.addEventListener('click', function () {
+            previewVisible = !previewVisible;
+            preview.style.display = previewVisible ? '' : 'none';
+            togglePrevBtn.classList.toggle('cr-btn-active', !previewVisible);
+            togglePrevBtn.title     = previewVisible ? 'Hide preview' : 'Show preview';
+            togglePrevBtn.innerHTML = previewVisible ? '&#9707; Preview' : '&#9635; Preview';
+        });
 
         /* virtual filesystem seeded from all starter textareas */
         var vfs = Object.assign({}, originals);

@@ -95,6 +95,63 @@
     background: #1a1a2a;
 }
 
+/* ── line-number gutter wrapper (Python editor) ── */
+.cr-editor-wrap {
+    display: flex;
+    min-height: 180px;
+    resize: vertical;
+    overflow: hidden;
+    background: #1e1e2e;
+}
+
+.cr-line-numbers {
+    background: #181825;
+    color: #585b70;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.55;
+    padding: 14px 10px 14px 4px;
+    text-align: right;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    white-space: pre;
+    min-width: 36px;
+    flex-shrink: 0;
+    border-right: 1px solid #313244;
+}
+
+/* editor inside the line-number wrapper */
+.cr-editor-wrap .cr-editor {
+    flex: 1 1 auto;
+    resize: none;
+    min-height: 0;
+    height: 100%;
+    width: auto;
+    padding-left: 10px;
+}
+
+/* when inside .cr-workspace (Python multi-file), wrapper fills flex slot */
+.cr-workspace .cr-editor-wrap {
+    flex: 1 1 auto;
+    resize: none;
+    min-height: 0;
+    border-right: 2px solid #313244;
+}
+
+/* ── word wrap toggle (HTML editor) ── */
+.cr-editor.cr-wrap-on {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    overflow-x: hidden;
+}
+
+/* ── active state for toolbar toggle buttons ── */
+.cr-btn-active {
+    background: #45475a !important;
+    color: #cdd6f4 !important;
+}
+
 /* ── output / terminal section (Python) ── */
 .cr-output-area {
     border-top: 2px solid #313244;
@@ -456,6 +513,13 @@
     }
 
     .cr-workspace .cr-editor {
+        width: 100%;
+        min-height: 260px;
+        border-right: none;
+        border-bottom: 2px solid #313244;
+    }
+
+    .cr-workspace .cr-editor-wrap {
         width: 100%;
         min-height: 260px;
         border-right: none;
