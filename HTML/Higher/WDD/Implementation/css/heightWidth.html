@@ -6,6 +6,7 @@
         <title>Higher Computing Science - Height and Width</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -49,7 +50,59 @@
                         You can see in the example below how the height and width of the elements are set in the CSS code and how padding effects the size of the elements.
                     </p>
 
-                    <iframe src="https://trinket.io/embed/html/cbb127027a96" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Height and Width Demo</title>
+    <style>
+        body { font-family: Arial; background: #f5f5f5; padding: 10px; }
+        .container {
+            width: 500px;
+            background: #ecf0f1;
+            border: 2px solid #bdc3c7;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .box-fixed {
+            width: 200px;
+            height: 80px;
+            background: #3498db;
+            color: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .box-percent {
+            width: 60%;
+            height: 80px;
+            background: #e74c3c;
+            color: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .box-padding {
+            width: 200px;
+            height: 80px;
+            background: #2ecc71;
+            color: white;
+            padding: 20px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Height and Width Examples</h2>
+    <div class="container">
+        <div class="box-fixed"><b>Fixed: width:200px; height:80px</b></div>
+        <div class="box-percent"><b>Percentage: width:60%; height:80px</b></div>
+        <div class="box-padding"><b>Fixed width + padding:20px — note content is pushed inward</b></div>
+    </div>
+    <p>Try changing the width and height values to see how they affect the boxes!</p>
+</body>
+</html>
+</textarea></div>
                     
                 </div>
             </div>
@@ -66,5 +119,6 @@
             </div>
         </footer>
         </div>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

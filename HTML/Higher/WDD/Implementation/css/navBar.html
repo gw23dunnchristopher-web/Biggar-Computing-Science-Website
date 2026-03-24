@@ -6,6 +6,7 @@
         <title>Higher Computing Science - Horizontal Navigation Bar</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -122,7 +123,53 @@
                     <img class="cImg" width="66%" src="/Images/Higher/WDD/Implementation/css/noUnderline.jpg">
 
                     <h2>Working Example</h2>
-                    <iframe src="https://trinket.io/embed/html/1bbd03b9a79c" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nav Bar Example</title>
+    <style>
+        body { margin: 0; font-family: Arial; }
+        nav {
+            background: #2c3e50;
+        }
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        nav ul li {
+            float: left;
+        }
+        nav ul li a {
+            display: block;
+            padding: 14px 20px;
+            text-decoration: none;
+            color: white;
+        }
+        nav ul li a:hover {
+            background: #3498db;
+        }
+        .content { padding: 20px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Courses</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </nav>
+    <div class="content">
+        <h2>Navigation Bar Demo</h2>
+        <p>Hover over the links above to see the hover effect. The nav bar uses <b>float:left</b> on each list item to make them horizontal.</p>
+    </div>
+</body>
+</html>
+</textarea></div>
                     
                     <h2>Past Paper Question - 2023 Q19</h2>
                     <p>
@@ -200,5 +247,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

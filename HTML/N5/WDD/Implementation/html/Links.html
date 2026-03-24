@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -60,7 +61,22 @@
 
                     <p>The code window below has two HTML pages, they are linked together using a hyperlink created by an anchor tag.  There is also an extrenal hyperlink on the page that uses an external address.</p>
 
-                    <iframe src="https://trinket.io/embed/html/06c6adfaeaab" class="trinket" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Links Example</title>
+</head>
+<body>
+    <h1>Links Example</h1>
+    <p>This is an external hyperlink:</p>
+    <a href="https://www.bbc.co.uk" target="_blank">Visit the BBC</a>
+    <br><br>
+    <p>This is an internal hyperlink (links to another page on the same site):</p>
+    <a href="BasicTags.html">Go to Basic Tags page</a>
+</body>
+</html>
+</textarea></div>
 
                     <h2>IDs and Anchor Tags</h2>
                     <p>Anchor tags can also be used to create jump links.  These are links that take you to a specific section of a webpage.  This is done by giving the section you want to link to an ID, and then using that ID in
@@ -69,7 +85,37 @@
 
                     <p><i>Note: I have used &lt;div&gt; tags in the code below.  These tags are used to divide the website into sections.  It is common to use IDs on this kind of tag.</i></p>
 
-                    <iframe src="https://trinket.io/embed/html/7bea6366bcaf" class="trinket" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jump Links Example</title>
+</head>
+<body>
+    <h1>Jump Links Example</h1>
+    <nav>
+        <a href="#section1">Go to Section 1</a> |
+        <a href="#section2">Go to Section 2</a> |
+        <a href="#section3">Go to Section 3</a>
+    </nav>
+
+    <div id="section1" style="margin-top:200px; background:#ddf; padding:20px; border-radius:8px;">
+        <h2>Section 1</h2>
+        <p>This is the first section. Click the links above to jump between sections.</p>
+    </div>
+
+    <div id="section2" style="margin-top:200px; background:#dfd; padding:20px; border-radius:8px;">
+        <h2>Section 2</h2>
+        <p>This is the second section. The ID attribute was used to create these jump targets.</p>
+    </div>
+
+    <div id="section3" style="margin-top:200px; background:#fdd; padding:20px; border-radius:8px;">
+        <h2>Section 3</h2>
+        <p>This is the third section. The href="#sectionID" syntax creates the jump link.</p>
+    </div>
+</body>
+</html>
+</textarea></div>
                     
                     <h2>Past Paper Question - 2019  Q18(c)</h2>
                     
@@ -120,5 +166,6 @@
     };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

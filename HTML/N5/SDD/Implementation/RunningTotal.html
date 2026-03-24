@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -84,7 +85,15 @@
 
                     <p>You can try this program below:</p>
 
-                    <iframe src="https://trinket.io/embed/python/23b9c0f30b3a"class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+total = 0
+
+for x in range(5):
+    number = int(input("Enter a number: "))
+    total = total + number
+
+print("The total is " + str(total))
+</textarea></div>
 
                     <h3>Example 2 - Keeping count in a while loop</h3>
                     <p>The following example will add 1 to a counter over and over until you type "Yes" when asked if you want to stop.  This time, the
@@ -107,7 +116,19 @@
 
                     <p>You can try this program below:</p>
                             
-                    <iframe src="https://trinket.io/embed/python/7b69b6153969" class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+counter = 0
+stop = False
+
+while stop == False:
+    counter += 1
+    print("The current count is " + str(counter))
+    answer = input("Do you want to stop? (Yes/No): ")
+    if answer == "Yes" or answer == "yes" or answer == "y":
+        stop = True
+
+print("The counter is " + str(counter))
+</textarea></div>
 
                     <h2>Past Paper Question - 2023 Q8 (a)</h2>
 
@@ -165,5 +186,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

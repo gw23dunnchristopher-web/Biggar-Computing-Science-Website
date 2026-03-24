@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -209,8 +210,14 @@
                     <p>You can try out the program in the code window below.  Feel free to copy and paste
                         the code above to try it or try your own commands.</p>
 
-                    <iframe src="https://trinket.io/embed/python/a1c106135147" 
-                        class = "trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+print("Enter your age:")
+age = int(input())
+print("You are " + str(age) + " years old.")
+
+name = input("Enter your name: ")
+print("Hello,", name + "! You are", age, "years old.")
+</textarea></div>
                     
                 </div>
             </div>
@@ -227,5 +234,6 @@
             </div>
         </footer>
      </div>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

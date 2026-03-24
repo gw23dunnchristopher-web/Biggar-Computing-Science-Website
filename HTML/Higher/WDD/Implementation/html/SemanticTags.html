@@ -6,6 +6,7 @@
         <title>Higher Computing Science - Semantic Tags</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -67,7 +68,53 @@
 
                     <p>A version of the website that you can try and test is included below:</p>
 
-                    <iframe src="https://trinket.io/embed/html/b6a464ca3c0e" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lawn Care</title>
+    <style>
+        body { font-family: Arial; margin: 0; color: #333; }
+        header { background: #4caf50; color: white; padding: 20px; text-align: center; }
+        nav { background: #388e3c; padding: 10px; text-align: center; }
+        nav a { color: white; margin: 0 15px; text-decoration: none; font-weight: bold; }
+        nav a:hover { text-decoration: underline; }
+        main { padding: 20px; }
+        section { background: #f9f9f9; border: 1px solid #ddd; margin: 15px 0; padding: 15px; border-radius: 6px; }
+        footer { background: #333; color: white; padding: 15px; text-align: center; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Lawn Care Services</h1>
+        <p>Professional garden maintenance</p>
+    </header>
+    <nav>
+        <a href="#">Home</a>
+        <a href="#">Services</a>
+        <a href="#">Gallery</a>
+        <a href="#">Contact</a>
+    </nav>
+    <main>
+        <section>
+            <h2>Mowing</h2>
+            <p>We provide regular mowing services to keep your lawn looking its best.</p>
+        </section>
+        <section>
+            <h2>Edging</h2>
+            <p>Clean, sharp edges give your lawn a professional finish.</p>
+        </section>
+        <section>
+            <h2>Fertilising</h2>
+            <p>We use the right products to keep your grass healthy and green.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Lawn Care Services</p>
+    </footer>
+</body>
+</html>
+</textarea></div>
                     
                     <h2>Past Paper Question - 2022 Q13</h2>
                     <p>HTML 5 elements have been used to define different parts of a web page shown below.</p>
@@ -113,5 +160,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

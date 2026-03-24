@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -86,7 +87,45 @@
                         </tr>
                     </table>
                     <p>Below is a code window showing the code for ordered and unordered lists:</p>
-                    <iframe src="https://trinket.io/embed/html/27df44e7a6dc" class="trinket" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTML Lists Example</title>
+</head>
+<body>
+    <h2>Unordered List (bullet points)</h2>
+    <ul>
+        <li>Red</li>
+        <li>Green</li>
+        <li>Blue</li>
+    </ul>
+
+    <h2>Ordered List (numbered)</h2>
+    <ol>
+        <li>First</li>
+        <li>Second</li>
+        <li>Third</li>
+    </ol>
+
+    <h2>Nested List</h2>
+    <ul>
+        <li>Fruit
+            <ul>
+                <li>Apple</li>
+                <li>Banana</li>
+            </ul>
+        </li>
+        <li>Vegetables
+            <ul>
+                <li>Carrot</li>
+                <li>Potato</li>
+            </ul>
+        </li>
+    </ul>
+</body>
+</html>
+</textarea></div>
                     
                     <h2>Past Paper Question - 2019 Q9</h2>
                     <p>The HTML code below is used to create a web page.</p>
@@ -154,5 +193,6 @@
             </div>
         </footer>
             </div>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

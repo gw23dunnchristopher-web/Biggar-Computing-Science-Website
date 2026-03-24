@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -101,7 +102,21 @@
                     <img class="cImg" style="max-width:1200px" src="/Images/N5/WDD/webpageLayout.jpg" alt="Basic Layout of a webpage">
                     <p>The code window below shows a webpage with this layout.  Try adding more text to the body using the &lt;h1&gt; and &lt;p&gt; tags to see how the webpage changes when you run it.</p>
 
-                    <iframe src="https://trinket.io/embed/html/26ce8c2d72ea" class="trinket" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My First Webpage</title>
+</head>
+<body>
+    <h1>Welcome to My Website</h1>
+    <h2>About Me</h2>
+    <p>My name is Alex and I am a student at Biggar High School.</p>
+    <h2>My Hobbies</h2>
+    <p>I enjoy reading, playing football, and learning about computers.</p>
+</body>
+</html>
+</textarea></div>
                     </div>
                 </div>
             </div>
@@ -118,5 +133,6 @@
             </div>
         </footer>
             </div>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

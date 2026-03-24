@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -67,7 +68,38 @@
                     
                     <p>The code window below shows an example of a JavaScript function changing the color of a &lt;div&gt;.</p>
 
-                    <iframe src="https://trinket.io/embed/html/45af85d72389" class="trinket" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JavaScript Colour Change</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+        #colourBox {
+            width: 200px; height: 200px; background: darkgreen;
+            border-radius: 12px; display: flex; align-items: center;
+            justify-content: center; color: white; font-size: 20px;
+            cursor: pointer; margin: 20px auto; border: 3px solid #333;
+        }
+    </style>
+    <script>
+        function brighten() {
+            document.getElementById('colourBox').style.filter = 'brightness(200%)';
+        }
+        function darken() {
+            document.getElementById('colourBox').style.filter = 'brightness(100%)';
+        }
+    </script>
+</head>
+<body>
+    <h2>Hover over the box!</h2>
+    <div id="colourBox" onmouseover="brighten()" onmouseout="darken()">
+        Hover Me
+    </div>
+    <p>The <b>onmouseover</b> event calls <b>brighten()</b> and <b>onmouseout</b> calls <b>darken()</b>.</p>
+</body>
+</html>
+</textarea></div>
                     
                     <h2>Past Paper Question - 2023 Q19(c)</h2>
                     
@@ -103,5 +135,6 @@
     };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

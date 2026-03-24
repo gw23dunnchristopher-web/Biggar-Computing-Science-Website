@@ -6,6 +6,7 @@
         <title>Higher Computing Science - Count Occurences</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -56,7 +57,18 @@
                     </table>
 
                     <h3>Working Example</h3>
-                    <iframe src="https://trinket.io/embed/python3/50dff470dc72" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+array = ["Alice", "Bob", "Charlie", "Alice", "Eve", "Frank", "Alice", "Henry", "Iris", "Jack"]
+
+total = 0
+target = input("Enter the name you are searching for: ")
+
+for index in range(len(array)):
+    if array[index] == target:
+        total += 1
+
+print(target, "found", total, "times.")
+</textarea></div>
 
                     <h2>Past Paper Question - 2024 9(c)</h2>
                     <p>An insurance company requires that a black box is installed in an insured car to 
@@ -132,5 +144,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

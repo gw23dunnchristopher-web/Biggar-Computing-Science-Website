@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -66,7 +67,23 @@
                     </div>
 
                     <p>You can try changing the image in the code window below - try changing the height and width.  Please note that to use local images, you would have to upload the image to the Trinket library.</p>
-                    <iframe src="https://trinket.io/embed/html/03565fbb66d3" class="trinket" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Tag Example</title>
+</head>
+<body>
+    <h1>Image Tag Example</h1>
+    <p>An image loaded from a web address:</p>
+    <img src="https://thumbs.dreamstime.com/b/cute-cat-portrait-square-photo-beautiful-white-closeup-105311158.jpg"
+         alt="Image of a Cat"
+         height="200px"
+         width="200px"/>
+    <p>Try changing the height and width values above and click Preview!</p>
+</body>
+</html>
+</textarea></div>
                     
                     <h2>Past Paper Question - 2022 Q18(c)</h2>
 
@@ -107,5 +124,6 @@
     };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

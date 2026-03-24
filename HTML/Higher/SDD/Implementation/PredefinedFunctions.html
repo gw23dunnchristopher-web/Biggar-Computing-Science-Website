@@ -6,6 +6,7 @@
         <title>Higher Computing Science - Predefined Functions</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -74,7 +75,27 @@
                     </table>
 
                     <h2>Working Example</h2>
-                    <iframe src="https://trinket.io/embed/python3/485160056b1e" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+# Rounding
+print("=== round() ===")
+print(round(3.14525, 2))   # 3.15
+print(round(9.876, 1))     # 9.9
+
+# int() conversion
+print("\n=== int() Conversion ===")
+print(int(1.9999))         # 1
+print(int(-1.2345))        # -1
+
+# Modulus
+print("\n=== Modulus (%) ===")
+print(10 % 3)              # 1 (remainder of 10 / 3)
+print(10 % 2)              # 0 (remainder of 10 / 2)
+
+# Try your own
+number = int(input("\nEnter a number: "))
+divisor = int(input("Enter a divisor: "))
+print(number, "divided by", divisor, "leaves a remainder of", number % divisor)
+</textarea></div>
                     
                     <h2>Past Paper Question - 2024 Q6(a)</h2>
                     <p>A prime number is only divisible by one and itself. The first five prime numbers are 
@@ -150,5 +171,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@
         <title>Higher Computing Science - Selectors</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -70,7 +71,48 @@
                     </p>
 
                     <h2>Working Example</h2>
-                    <iframe src="https://trinket.io/embed/html/59967ef6b966?runMode=autorun" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Descendant Selector Demo</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        /* Applies to ALL paragraphs on the page */
+        p { font-size: 18px; font-family: Arial; color: black; }
+
+        /* Descendant selector: overrides colour ONLY inside .blackbox */
+        .blackbox p { color: white; }
+
+        .blackbox {
+            background: #1a1a2e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .whitebox {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h2>Descendant Selectors</h2>
+
+    <div class="whitebox">
+        <p>This paragraph is <b>outside</b> .blackbox — it uses the normal p rule (black text, size 18px).</p>
+    </div>
+
+    <div class="blackbox">
+        <p>This paragraph is <b>inside</b> .blackbox — the .blackbox p rule overrides the colour to white.</p>
+        <p>It still inherits font-size: 18px and font-family: Arial from the p rule.</p>
+    </div>
+</body>
+</html>
+</textarea></div>
                     
                     <h2>Past Paper Question - 2022 Q15</h2>
                     <p>Kelly runs a company offering driving lessons.</p>
@@ -128,5 +170,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

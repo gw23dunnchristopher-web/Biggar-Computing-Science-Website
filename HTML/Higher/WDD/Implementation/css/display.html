@@ -6,6 +6,7 @@
         <title>Higher Computing Science - The Display Property</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -74,7 +75,43 @@
                         the page with the click of a button.
                     </p>
 
-                    <iframe src="https://trinket.io/embed/html/fac50d36a1b0" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Display None Example</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .event { display: none; background: #eaf4e8; border: 1px solid #4caf50;
+                 padding: 15px; margin-top: 10px; border-radius: 6px; }
+        .btn-group { display: grid; grid-template-columns: auto auto auto; gap: 8px; max-width: 400px; }
+        button { padding: 10px; background: #3498db; color: white; border: none;
+                 border-radius: 6px; cursor: pointer; font-size: 14px; }
+        button:hover { background: #2980b9; }
+    </style>
+    <script>
+        function showEvent(id) {
+            document.getElementById('event1').style.display = 'none';
+            document.getElementById('event2').style.display = 'none';
+            document.getElementById('event3').style.display = 'none';
+            document.getElementById(id).style.display = 'block';
+        }
+    </script>
+</head>
+<body>
+    <h2>School Events</h2>
+    <div class="btn-group">
+        <button onclick="showEvent('event1')">Sports Day</button>
+        <button onclick="showEvent('event2')">School Play</button>
+        <button onclick="showEvent('event3')">Science Fair</button>
+    </div>
+    <div id="event1" class="event"><h3>Sports Day</h3><p>Friday 23rd May — All school sports day on the playing fields. Starts at 10am.</p></div>
+    <div id="event2" class="event"><h3>School Play</h3><p>Thursday 5th June — This year's production of "Grease". Tickets available at reception.</p></div>
+    <div id="event3" class="event"><h3>Science Fair</h3><p>Wednesday 11th June — Pupils present their science projects. Open to parents from 2pm.</p></div>
+    <p>All three event divs use <b>display:none</b> in CSS. JavaScript sets them to <b>display:block</b> when a button is clicked.</p>
+</body>
+</html>
+</textarea></div>
 
                     <h2>Grid</h2>
 
@@ -107,7 +144,44 @@
                         below:
                     </p>
 
-                    <iframe src="https://trinket.io/embed/html/600c2f64de31" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Display Grid Example</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .grid {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            gap: 10px;
+            max-width: 500px;
+        }
+        .grid-item {
+            background: #3498db;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .grid-item:nth-child(odd) { background: #2ecc71; }
+    </style>
+</head>
+<body>
+    <h2>Display: Grid — 3 equal columns</h2>
+    <div class="grid">
+        <div class="grid-item">Item 1</div>
+        <div class="grid-item">Item 2</div>
+        <div class="grid-item">Item 3</div>
+        <div class="grid-item">Item 4</div>
+        <div class="grid-item">Item 5</div>
+        <div class="grid-item">Item 6</div>
+    </div>
+    <p>The <b>grid-template-columns: auto auto auto</b> property creates 3 evenly-spaced columns. Items automatically fill each column left to right.</p>
+</body>
+</html>
+</textarea></div>
                     
                     <h2>Past Paper Question - 2022 Q16</h2>
                     <p>
@@ -159,5 +233,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

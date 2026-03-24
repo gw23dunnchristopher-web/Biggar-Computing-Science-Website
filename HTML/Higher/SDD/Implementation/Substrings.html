@@ -6,6 +6,7 @@
         <title>Higher Computing Science - Substrings</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -108,7 +109,28 @@
                     <p>Both of these would assign the value ". Dunn" to the variable <span class="codeText">substring</span>.</p>
 
                     <h2>Working Example</h2>
-                    <iframe src="https://trinket.io/embed/python3/b59352d17e11" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+name = "Mr. Dunn"
+print("Full name:", name)
+print("Length:", len(name))
+print()
+
+# Accessing individual characters
+print("First character (name[0]):", name[0])
+print("Character at index 4 (name[4]):", name[4])
+print()
+
+# Substrings using slicing
+print("First 3 chars (name[0:3]):", name[0:3])
+print("From index 4  (name[4:]) :", name[4:])
+print()
+
+# Try your own
+word = input("Enter a word: ")
+print("First 3 characters:", word[0:3])
+if len(word) >= 3:
+    print("Last 3 characters:", word[len(word)-3:])
+</textarea></div>
                     
                     <h2>Past Paper Question - 2019 Q2</h2>
                         
@@ -157,5 +179,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

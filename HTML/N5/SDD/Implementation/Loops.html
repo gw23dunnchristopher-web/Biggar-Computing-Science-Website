@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -83,7 +84,12 @@
                         code is indented beneath it.  The purpose of this program is to display all the number in a times table entered by 
                         the user.</p>
 
-                    <iframe src="https://trinket.io/embed/python/5c190df1bab9" class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+number = int(input("Enter a number for the times table: "))
+
+for x in range(1, 13):
+    print(str(x) + " x " + str(number) + " = " + str(x * number))
+</textarea></div>
                     
                     <h2>Conditional Loops</h2>
                     <p>In Python a Conditional Loop is known as a WHILE loop.  In a WHILE loop, the loop will continue to repeat the cod
@@ -131,7 +137,15 @@
                         </ul>
 
                         <p>The code window below shows an example of a conditional (WHILE) loop in Python:</p>
-                        <iframe src="https://trinket.io/embed/python/0fb2bb0523c1" class="trinket" allowfullscreen></iframe>
+                        <div class="py-runner"><textarea class="cr-code" style="display:none">
+password = input("Enter the password: ")
+
+while password != "button20":
+    print("Password Incorrect!")
+    password = input("Please enter password: ")
+
+print("Access granted!")
+</textarea></div>
                 </div>
             </div>
         </div>   
@@ -147,5 +161,6 @@
             </div>
         </footer>
         </div>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

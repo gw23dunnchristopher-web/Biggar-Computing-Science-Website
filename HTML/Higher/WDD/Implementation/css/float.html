@@ -6,6 +6,7 @@
         <title>Higher Computing Science - Float</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -70,7 +71,47 @@
                         so that it doesn't take up the full width of the container and the image can appear beside it.
                     </p>
 
-                    <iframe src="https://trinket.io/embed/html/6c354d6d40e7" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Float - Header Logo</title>
+    <style>
+        body { font-family: Arial; margin: 0; }
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            overflow: hidden;
+        }
+        header h1 {
+            font-family: Arial;
+            font-size: 40px;
+            display: inline;
+        }
+        .imageBanner {
+            width: 80px;
+            height: 80px;
+            float: right;
+            border-radius: 50%;
+            background: #3498db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>My School</h1>
+        <div class="imageBanner">🎓</div>
+    </header>
+    <p style="padding:20px;">The logo uses <b>float:right</b> to push it to the right of the header while the h1 text sits beside it. The h1 uses <b>display:inline</b> so it doesn't take up the full width.</p>
+</body>
+</html>
+</textarea></div>
 
                     <h3>Example 2</h3>
                     <p>
@@ -114,7 +155,44 @@
                             </td>
                         </tr>
                     </table>
-                    <iframe src="https://trinket.io/embed/html/b7686f8e2a92" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Float - Text Wrapping</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        section.club { padding: 10px; }
+        #footballImg {
+            width: 120px;
+            height: 120px;
+            float: right;
+            margin: 10px;
+            background: #27ae60;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+        }
+    </style>
+</head>
+<body>
+    <section class="club">
+        <h2>School Football Club</h2>
+        <div id="footballImg">⚽</div>
+        <p>Are you passionate about football? Do you dream of scoring the winning goal or making that game saving tackle? Whether you're a seasoned player or just starting out, the School Football Club is the perfect place for you!</p>
+        <p>Our club offers:</p>
+        <ul>
+            <li><b>Weekly Training Sessions</b>: Improve your skills with professional coaching.</li>
+            <li><b>Friendly Matches</b>: Compete against other schools and local teams.</li>
+            <li><b>Team Spirit</b>: Build lasting friendships and learn the value of teamwork.</li>
+        </ul>
+        <p>Come and be a part of our soccer family! Lace up your boots, bring your enthusiasm, and let's hit the field together!</p>
+    </section>
+</body>
+</html>
+</textarea></div>
                     <h2>Clear</h2>
                     <p>
                         The effect of floating elements can be removed using the <span class="codeText">clear</span> property.  This is useful if you want to stop text
@@ -185,5 +263,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

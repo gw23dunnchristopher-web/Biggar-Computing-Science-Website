@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -95,7 +96,16 @@
 
                     <p>You can try the second example in the code window below:</p>
 
-                    <iframe src="https://trinket.io/embed/python/5834cc7243e7" class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+print("Enter Y or N:")
+answer = input()
+
+while answer != "Y" and answer != "N":
+    print("Error, please enter Y or N")
+    answer = input()
+
+print("Thank you, you entered " + answer)
+</textarea></div>
 
                     <h2>Past Paper Question - 2022 Q9 (b) (i)</h2>                  
                     
@@ -133,5 +143,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

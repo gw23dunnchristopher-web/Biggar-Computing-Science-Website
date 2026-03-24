@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -116,8 +117,13 @@
                         speed of a moving object, given the time and distance.  Try it to see how it
                         works.</p>
 
-                    <iframe src="https://trinket.io/embed/python/c55232e5f586" class="trinket" 
-                        allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+print("=== Speed Calculator ===")
+distance = float(input("Enter distance (km): "))
+time = float(input("Enter time (hours): "))
+speed = distance / time
+print("Speed =", speed, "km/h")
+</textarea></div>
                     
                     <h2>BODMAS</h2>
                     <p>BODMAS stands for Brackets, Orders, Division, Multiplication, Addition.</p>
@@ -137,8 +143,20 @@
 
                     <p>The code window below shows a program used to calculate a vehicle's 
                         acceleration.  Try removing the brackets to see how the answer changes.</p>
-                    <iframe src="https://trinket.io/embed/python/c4363ea14c35" class="trinket"  
-                        allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+print("=== Acceleration Calculator ===")
+initialVelocity = float(input("Enter initial velocity (m/s): "))
+finalVelocity = float(input("Enter final velocity (m/s): "))
+time = float(input("Enter time taken (seconds): "))
+
+# With brackets - correct BODMAS
+acceleration = (finalVelocity - initialVelocity) / time
+print("Acceleration with brackets:", acceleration, "m/s²")
+
+# Without brackets - BODMAS changes order
+incorrectResult = finalVelocity - initialVelocity / time
+print("Without brackets (wrong):", incorrectResult, "m/s²")
+</textarea></div>
                 </div>
             </div>
         </div>   
@@ -154,5 +172,6 @@
             </div>
         </footer>
         </div>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

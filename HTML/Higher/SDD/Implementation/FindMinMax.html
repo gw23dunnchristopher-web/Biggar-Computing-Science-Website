@@ -6,6 +6,7 @@
         <title>Higher Computing Science - Find Minimum and Maximum</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -62,7 +63,19 @@
                     </table>
 
                     <h3>Working Example</h3>
-                    <iframe src="https://trinket.io/embed/python3/06bf53bfd780" class="trinket" frameborder="0"marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+array = [45, 78, 23, 91, 56, 34, 67, 12, 89, 43]
+
+minimum = array[0]
+position = 0
+
+for index in range(1, len(array)):
+    if array[index] < minimum:
+        minimum = array[index]
+        position = index
+
+print("The minimum value is", minimum, "at position", position)
+</textarea></div>
 
                     <h2>Find Maximum</h2>
                     <p>This standard algorithm finds the largest value in an array.  If follows these steps:</p>
@@ -102,7 +115,19 @@
                     </table>
 
                     <h3>Working Example</h3>
-                    <iframe src="https://trinket.io/embed/python3/3555478e6d02" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+array = [45, 78, 23, 91, 56, 34, 67, 12, 89, 43]
+
+maximum = array[0]
+position = 0
+
+for index in range(1, len(array)):
+    if array[index] > maximum:
+        maximum = array[index]
+        position = index
+
+print("The maximum value is", maximum, "at position", position)
+</textarea></div>
                     
                     <h2>Past Paper Question - 2023 Q11(c)</h2>
                     <p>A shop sells a range of 80 different washing machines. Sample data about the 
@@ -225,5 +250,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

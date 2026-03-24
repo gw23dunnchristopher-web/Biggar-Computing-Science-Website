@@ -9,6 +9,7 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
     </head>
     <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
         <div id="loading"></div>
@@ -102,8 +103,15 @@
                         from the edge).  You can try the example yourself in the code
                         window below.</p>
 
-                    <iframe src="https://trinket.io/embed/python/5a0b74c4bede"
-                        class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+print("Enter the cost of the meal:")
+mealCost = float(input())
+
+if mealCost > 80:
+    print("You receive a 10% discount on your next meal!")
+
+print("The cost of your meal is £" + str(mealCost))
+</textarea></div>
                     
                     <h3>Else Statement</h3>
                     
@@ -129,8 +137,17 @@
 
                     <p>You can try this yourself in the code window below:</p>
 
-                    <iframe src="https://trinket.io/embed/python/f4897ed5f35d"
-                        class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+print("Enter the cost of the meal:")
+mealCost = float(input())
+
+if mealCost > 80:
+    print("You receive a 10% discount on your next meal!")
+else:
+    print("Sorry, you will not receive a discount this time.")
+
+print("The cost of your meal is £" + str(mealCost))
+</textarea></div>
                     
                     <h3>Elif Statement</h3>
                     <p>It is also possible to add additional conditions.  In our
@@ -165,8 +182,19 @@
                     statement once if finds a criteria that is met, rather than                             always having to check all of them.</p>
                     
                     <p>You can try this code in the window below:</p>
-                    <iframe src="https://trinket.io/embed/python/13cf4f3daf00"
-                        class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+print("Enter the cost of the meal:")
+mealCost = float(input())
+
+if mealCost > 80:
+    print("You receive a 10% discount on your next meal!")
+elif mealCost > 50:
+    print("You receive a 5% discount on your next meal!")
+else:
+    print("Sorry, you will not receive a discount this time.")
+
+print("The cost of your meal is £" + str(mealCost))
+</textarea></div>
                     
                     <h2>Complex Selection and Logical Operators</h2>
                     <p>A complex conditional statment has more than one condition. For
@@ -208,8 +236,21 @@
                     </table>
                     <p>The code window below shows an example of a program that uses
                         the AND logical operator.</p>
-                    <iframe src="https://trinket.io/embed/python/13cf4f3daf00"
-                        class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+age = int(input("Enter your age: "))
+town = input("Enter your town: ")
+
+if age >= 16 and town == "Biggar":
+    print("You are eligible!")
+else:
+    print("Sorry, you are not eligible.")
+
+score = int(input("Enter a score (0-100): "))
+if score < 0 or score > 100:
+    print("Invalid score!")
+else:
+    print("Valid score:", score)
+</textarea></div>
                 </div>
             </div>
         </div>   
@@ -225,5 +266,6 @@
             </div>
         </footer>
             </div>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

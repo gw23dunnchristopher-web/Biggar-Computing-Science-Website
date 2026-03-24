@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -41,7 +42,33 @@
                     <img class="cImg" src="/Images/N5/SDD/Implementation/combined.jpg" alt="Combined Algorithms" />
                     
                     <p>You can test this program in the window below to see the output:</p>
-                    <iframe src="https://trinket.io/embed/python/7ddd668c1beb"class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+scores = [45, 78, 23, 91, 56, 78, 34, 78, 62, 15]
+
+# Find minimum
+minimum = scores[0]
+for score in scores:
+    if score < minimum:
+        minimum = score
+
+# Find maximum
+maximum = scores[0]
+for score in scores:
+    if score > maximum:
+        maximum = score
+
+# Count occurrences
+target = int(input("Enter a score to count: "))
+count = 0
+for score in scores:
+    if score == target:
+        count += 1
+
+print("Scores:", scores)
+print("Minimum score:", minimum)
+print("Maximum score:", maximum)
+print(str(target) + " appears " + str(count) + " times")
+</textarea></div>
                 </div>
             </div>
         </div>   
@@ -57,5 +84,6 @@
             </div>
         </footer>
         </div>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

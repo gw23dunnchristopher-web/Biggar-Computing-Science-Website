@@ -6,6 +6,7 @@
         <title>Higher Computing Science - Blank</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -98,7 +99,23 @@
                     </table>
                    
                     <h3>Working Example</h3>
-                    <iframe src="https://trinket.io/embed/python3/0ed63d3e89c4" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+array = ["Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry", "Iris", "Jack"]
+
+found = False
+index = 0
+target = input("Enter the name you are searching for: ")
+
+while found == False and index < 10:
+    if array[index] == target:
+        found = True
+        print(target, "found at position", index)
+    else:
+        index += 1
+
+if found == False:
+    print(target, "not found.")
+</textarea></div>
                     
                     <h2>Linear Search - Version 2</h2>
                     <p>This algorithm searches through the entire array and displays a message each time the target is found (used when the target may appear more than once 
@@ -156,7 +173,20 @@
                     </table>                   
 
                     <h3>Working Example</h3>
-                    <iframe src="https://trinket.io/embed/python3/1200d4831b01" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+array = ["Alice", "Bob", "Charlie", "Alice", "Eve", "Frank", "Alice", "Henry", "Iris", "Jack"]
+
+found = False
+target = input("Enter the name you are searching for: ")
+
+for index in range(len(array)):
+    if array[index] == target:
+        found = True
+        print(target, "found at position", index)
+
+if found == False:
+    print(target, "not found.")
+</textarea></div>
                     <h2>Past Paper Question - 2022 Q6(c)</h2>
                     <p>An online game stores a player’s unique ID, their total score and the number of 
                     minutes they have played the game. The game also stores three attributes for the 
@@ -209,5 +239,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@
         <title>Higher Computing Science - Subroutines</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -160,7 +161,31 @@
 
 
                     <h2>Working Example</h2>
-                    <iframe src="https://trinket.io/embed/python3/ae9d3246c79b" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+# Function — returns a value
+def addNumbers(num1, num2):
+    return num1 + num2
+
+# Procedure — performs a task, returns nothing
+def displayList(scores):
+    for score in scores:
+        print(score)
+
+def greet(name):
+    print("Hello,", name + "!")
+
+# --- Main program ---
+first = 14
+result = addNumbers(first, 10)
+print("addNumbers(14, 10) =", result)
+
+testScore = [78, 92, 65, 88, 71]
+print("\nTest scores:")
+displayList(testScore)
+
+studentName = input("\nEnter your name: ")
+greet(studentName)
+</textarea></div>
                     
                     <h2>Past Paper Question - 2023 Q7(b)</h2>
                 
@@ -285,5 +310,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

@@ -1,0 +1,201 @@
+/* ============================================================
+   Code Runner — self-hosted replacement for Trinket embeds
+   Supports Python (Pyodide) and HTML live-preview runners.
+
+   Usage:
+     Python:  <div class="py-runner">
+                <textarea class="cr-code" style="display:none">
+   ...python code...
+                </textarea>
+              </div>
+
+     HTML:    <div class="html-runner">
+                <textarea class="cr-code" style="display:none">
+   <!DOCTYPE html>...
+                </textarea>
+              </div>
+
+   Include in <head>:
+     <link rel="stylesheet" href="/CSS/codeRunner.css">
+   Include before </body>:
+     <script src="/JavaScript/codeRunner.js"></script>
+   ============================================================ */
+
+.code-runner {
+    width: 90%;
+    margin: 20px auto;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    background: #1e1e2e;
+}
+
+/* ── toolbar ── */
+.cr-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #181825;
+    padding: 8px 12px;
+    border-bottom: 2px solid #313244;
+}
+
+.cr-lang {
+    color: #cdd6f4;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.cr-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.cr-run-btn,
+.cr-reset-btn {
+    padding: 5px 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    transition: opacity 0.15s, background 0.15s;
+}
+
+.cr-run-btn {
+    background: #a6e3a1;
+    color: #1e1e2e;
+}
+
+.cr-run-btn:hover:not(:disabled) {
+    background: #94e2d5;
+}
+
+.cr-run-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.cr-reset-btn {
+    background: #45475a;
+    color: #cdd6f4;
+}
+
+.cr-reset-btn:hover {
+    background: #585b70;
+}
+
+/* ── code editor textarea ── */
+.cr-editor {
+    width: 100%;
+    box-sizing: border-box;
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border: none;
+    padding: 14px;
+    resize: vertical;
+    min-height: 180px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.55;
+    outline: none;
+    tab-size: 4;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+}
+
+.cr-editor:focus {
+    background: #1a1a2a;
+}
+
+/* ── output section (Python) ── */
+.cr-output-area {
+    border-top: 2px solid #313244;
+}
+
+.cr-output-label {
+    background: #181825;
+    color: #6c7086;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 14px;
+}
+
+.cr-output {
+    margin: 0;
+    padding: 12px 14px;
+    background: #11111b;
+    color: #a6e3a1;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 60px;
+}
+
+.cr-output.cr-error {
+    color: #f38ba8;
+}
+
+.cr-output.cr-success {
+    color: #a6e3a1;
+}
+
+/* ── HTML runner split layout ── */
+.cr-split {
+    display: flex;
+    min-height: 380px;
+}
+
+.cr-split .cr-editor {
+    width: 50%;
+    min-height: 380px;
+    border-right: 2px solid #313244;
+    resize: none;
+}
+
+.cr-preview {
+    width: 50%;
+    min-height: 380px;
+    border: none;
+    background: #fff;
+}
+
+/* ── loading spinner state ── */
+.cr-output.cr-loading {
+    color: #89b4fa;
+}
+
+/* ── responsive ── */
+@media (max-width: 768px) {
+    .code-runner {
+        width: 100%;
+        border-radius: 0;
+    }
+
+    .cr-split {
+        flex-direction: column;
+        min-height: 600px;
+    }
+
+    .cr-split .cr-editor {
+        width: 100%;
+        min-height: 280px;
+        border-right: none;
+        border-bottom: 2px solid #313244;
+    }
+
+    .cr-preview {
+        width: 100%;
+        min-height: 320px;
+    }
+}

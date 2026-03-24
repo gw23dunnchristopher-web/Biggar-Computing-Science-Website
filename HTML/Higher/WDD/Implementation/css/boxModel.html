@@ -6,6 +6,7 @@
         <title>Higher Computing Science - The Box Model, Margins and Padding</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -162,7 +163,59 @@
                     <p>This is useful as it removes the default margin and padding that browsers apply to elements.</p>
 
                     <h2>Margins and Padding Working Example</h2>
-                    <iframe src="https://trinket.io/embed/html/2c398cf5daf0" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Box Model Demo</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: Arial; background: #f5f5f5; padding: 20px; }
+        .outer {
+            background: #2c3e50;
+            margin: 20px;
+            padding: 0;
+            display: inline-block;
+        }
+        .border-layer {
+            background: #e74c3c;
+            border: 12px solid #e74c3c;
+        }
+        .padding-layer {
+            background: #f39c12;
+            padding: 20px;
+        }
+        .content {
+            background: #3498db;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            width: 220px;
+        }
+        .legend { margin-top: 15px; }
+        .legend div { display: inline-block; width: 18px; height: 18px; margin-right: 6px; vertical-align: middle; }
+    </style>
+</head>
+<body>
+    <h2>Box Model - Margin, Border, Padding, Content</h2>
+    <div class="outer">
+        <div class="border-layer">
+            <div class="padding-layer">
+                <div class="content">Content</div>
+            </div>
+        </div>
+    </div>
+    <div class="legend">
+        <div style="background:#2c3e50;"></div> Margin &nbsp;&nbsp;
+        <div style="background:#e74c3c;"></div> Border &nbsp;&nbsp;
+        <div style="background:#f39c12;"></div> Padding &nbsp;&nbsp;
+        <div style="background:#3498db;"></div> Content
+    </div>
+    <p>Try editing the margin, padding, and border values in the CSS above!</p>
+</body>
+</html>
+</textarea></div>
                     
                     <h2>Past Paper Question - 2022 Q16</h2>
                     <p>An energy supplier’s website allows customers to log in and manage their account 
@@ -211,5 +264,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

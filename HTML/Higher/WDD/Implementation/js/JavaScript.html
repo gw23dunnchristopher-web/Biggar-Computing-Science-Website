@@ -6,6 +6,7 @@
         <title>Higher Computing Science - JavaScript</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -76,7 +77,27 @@
                         </ul>
 
                         <p>Here is the example webpage containing the JavaScript shown above:</p>
-                        <iframe src="https://trinket.io/embed/html/fdcbd21554e9" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                        <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resize on Hover</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+        img { transition: all 0.3s; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h2>Hover over the image to resize it!</h2>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Camponotus_flavomarginatus_ant.jpg/320px-Camponotus_flavomarginatus_ant.jpg"
+         alt="Ant"
+         width="150" height="150"
+         onmouseover="this.style.width='200px'; this.style.height='200px';"
+         onmouseout="this.style.width='150px'; this.style.height='150px';">
+    <p>The <b>onmouseover</b> and <b>onmouseout</b> events change the size of the image.</p>
+</body>
+</html>
+</textarea></div>
 
                         <h3>Example 2</h3>
                         <p>
@@ -180,7 +201,35 @@
                         </p>
                         <p>The example below shows how this works, try hovering your mouse cursor over the images:</p>
 
-                        <iframe src="https://trinket.io/embed/html/8e0847809ddc" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                        <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rollover Images</title>
+    <script>
+        function changeImage(element, image) {
+            element.src = image;
+        }
+    </script>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        img { margin: 10px; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Hover over the images!</h2>
+    <img src="https://via.placeholder.com/150/3498db/ffffff?text=Image+1"
+         onmouseover="changeImage(this, 'https://via.placeholder.com/150/e74c3c/ffffff?text=Hovering!')"
+         onmouseout="changeImage(this, 'https://via.placeholder.com/150/3498db/ffffff?text=Image+1')"
+         width="150" height="150" alt="Image 1">
+    <img src="https://via.placeholder.com/150/2ecc71/ffffff?text=Image+2"
+         onmouseover="changeImage(this, 'https://via.placeholder.com/150/e67e22/ffffff?text=Hovering!')"
+         onmouseout="changeImage(this, 'https://via.placeholder.com/150/2ecc71/ffffff?text=Image+2')"
+         width="150" height="150" alt="Image 2">
+    <p>The <b>changeImage</b> function swaps the <b>src</b> attribute on hover.</p>
+</body>
+</html>
+</textarea></div>
                     </div>
 
                     <p class="laws" onclick="toggleLaw(this)"><b>Dynamically Highlighting Text</b><span class="arrow">&#9654;</span></p>
@@ -196,7 +245,27 @@
                         </div>
 
                         <p>You can see this in action using the Trinket below:</p>
-                        <iframe src="https://trinket.io/embed/html/d91a76940b51" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                        <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Highlight Text</title>
+    <style>
+        body { background: #1a1a2e; color: white; font-family: Arial; padding: 20px; }
+        img { cursor: pointer; border-radius: 50%; border: 3px solid #3498db; }
+    </style>
+</head>
+<body>
+    <h2>Hover over the image to highlight the text!</h2>
+    <img src="https://via.placeholder.com/80/3498db/ffffff?text=Hover"
+         onmouseover="document.getElementById('highlight1').style.color='yellow';"
+         onmouseout="document.getElementById('highlight1').style.color='white';"
+         width="80" height="80" alt="Hover me">
+    <p id="highlight1">This text will be highlighted when you hover over the image above!</p>
+    <p>Uses <b>document.getElementById('highlight1')</b> to find and change the text colour.</p>
+</body>
+</html>
+</textarea></div>
                     </div>
 
                     <p class="laws" onclick="toggleLaw(this)"><b>Hiding and Revealing Elements</b><span class="arrow">&#9654;</span></p>
@@ -252,7 +321,52 @@
 
                         <p>A working example of the above code can be seen in the Trinket below:</p>
 
-                        <iframe src="https://trinket.io/embed/html/741da4d4cc9d" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                        <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Show/Hide Sections</title>
+    <script>
+        function showText(showTextID, hidden1, hidden2) {
+            document.getElementById(showTextID).style.display = 'block';
+            document.getElementById(hidden1).style.display = 'none';
+            document.getElementById(hidden2).style.display = 'none';
+        }
+    </script>
+    <style>
+        body { font-family: Arial; padding: 10px; }
+        .grass-section { display: none; background: #e8f5e9; border: 1px solid #4caf50; padding: 15px; margin-top: 10px; border-radius: 5px; }
+        img { cursor: pointer; margin: 5px; border: 3px solid #ddd; border-radius: 5px; padding: 5px; }
+        img:hover { border-color: #4caf50; }
+    </style>
+</head>
+<body>
+    <h2>Click an image to reveal information:</h2>
+    <img src="https://via.placeholder.com/100/4caf50/ffffff?text=Bluegrass"
+         onclick="showText('Kentucky', 'Fescue', 'Bermuda')"
+         alt="Bluegrass" width="100" height="100">
+    <img src="https://via.placeholder.com/100/8bc34a/ffffff?text=Fescue"
+         onclick="showText('Fescue', 'Kentucky', 'Bermuda')"
+         alt="Fescue" width="100" height="100">
+    <img src="https://via.placeholder.com/100/cddc39/000000?text=Bermuda"
+         onclick="showText('Bermuda', 'Kentucky', 'Fescue')"
+         alt="Bermuda" width="100" height="100">
+
+    <section id="Kentucky" class="grass-section">
+        <h3>Kentucky Bluegrass</h3>
+        <p>Known for its lush, dense, dark green turf. Thrives in cooler climates and full sun.</p>
+    </section>
+    <section id="Fescue" class="grass-section">
+        <h3>Fescue</h3>
+        <p>Drought-tolerant grass that grows well in shaded areas and cooler climates.</p>
+    </section>
+    <section id="Bermuda" class="grass-section">
+        <h3>Bermuda Grass</h3>
+        <p>Thrives in warm climates and is very durable — popular for sports fields.</p>
+    </section>
+</body>
+</html>
+</textarea></div>
                     </div>
                     
                     <h2>Past Paper Question - 2024 Q17(b)</h2>
@@ -326,5 +440,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -108,7 +109,48 @@
                     <p>The code window below has a single HTML page and an external CSS file that has been linked to it.  The CSS file contains a rule for a Class and a rule for an ID.  The HTML page contains three divs
                     One of them uses and ID and the other two use the same Class.</p>
 
-                    <iframe src="https://trinket.io/embed/html/4e593f47e4e0" class="trinket" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IDs and Classes Example</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        /* ID selector — applies to one element only */
+        #header-div {
+            background-color: darkblue;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        /* Class selector — can be reused on multiple elements */
+        .content-div {
+            background-color: lightblue;
+            color: darkblue;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="header-div">
+        <h2>This div uses an ID (#header-div)</h2>
+        <p>IDs can only be used once per page.</p>
+    </div>
+
+    <div class="content-div">
+        <p>This div uses a class (.content-div) — first use.</p>
+    </div>
+
+    <div class="content-div">
+        <p>This div uses the same class (.content-div) — second use.</p>
+    </div>
+</body>
+</html>
+</textarea></div>
                     
                     <h2>Past Paper Question - 2023 Q20(c)</h2>
                     <p>Part of the code from the ‘Punches’ page is shown below.</p>
@@ -152,5 +194,6 @@
     };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

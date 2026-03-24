@@ -6,6 +6,7 @@
         <title>Higher Computing Science - File Handling</title>
         <script src="/JavaScript/higherScript.js"></script>
         <script src="/JavaScript/pageNavigation.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
@@ -67,7 +68,24 @@
 
                     <p>The following example will read the file "sample.txt" into parallel arrays, splitting up each line at the commas.</p>
 
-                    <iframe src="https://trinket.io/embed/python3/25d738e4665d" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+# Create a sample file with some data
+with open("sample.txt", "w") as f:
+    f.write("Alice,18\nBob,16\nCharlie,19\nDiana,17\nEva,20\n")
+
+# Now read the file into parallel arrays
+names = []
+ages = []
+
+with open("sample.txt", "r") as file:
+    for line in file:
+        data = line.strip().split(",")
+        names.append(data[0])
+        ages.append(int(data[1]))
+
+print("Names:", names)
+print("Ages:", ages)
+</textarea></div>
 
                     <h2>Writing to a File</h2>
                     <p>To do this, a file must first be opened in <b>write mode</b>.  Then the <span class="codeText">fileName.write()</span> function can be used to write 
@@ -76,7 +94,22 @@
                     <p>If you want to append new text to a file without erasing the text already present in it, then you would use <b>append mode ("a")</b>.</p>
                     <p>The example below will demonstrate using write mode to write to a file:</p>
 
-                    <iframe src="https://trinket.io/embed/python3/d06372155818" class="trinket" frameborder="0" marginwidth="0" marginheight="0" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+name = input("Enter your name: ")
+score = int(input("Enter your score: "))
+
+# Write to a file
+with open("results.txt", "w") as file:
+    file.write(name + "," + str(score) + "\n")
+
+print("Data written to results.txt")
+
+# Read it back to verify
+with open("results.txt", "r") as file:
+    contents = file.read()
+
+print("File contents:", contents)
+</textarea></div>
 
 
                     <h2>TXT Files vs CSV Files</h2>
@@ -153,5 +186,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>

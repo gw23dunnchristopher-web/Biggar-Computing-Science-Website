@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -67,7 +68,17 @@
                     </div>
                     <p>You can try this program in the window below, try changing the 2 to change the number of decimal points shown.</p>
 
-                    <iframe src="https://trinket.io/embed/python/330960478ed9" class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+print("Enter your English mark:")
+english = int(input())
+print("Enter your Maths mark:")
+maths = int(input())
+print("Enter your Computing mark:")
+computing = int(input())
+
+average = (english + maths + computing) / 3
+print("Your average mark is " + str(round(average, 2)))
+</textarea></div>
 
                     <h2>Random</h2>
                     <p>There are several different functions that generate a random number in Python.  To use any of them you will need to import the 'random' library, a module containing code for the random number generating
@@ -97,7 +108,16 @@
                     </div>
                      <p>You can try this program in the code window below, try changing the numbers passed into randint to change the range of the random number.</p>
 
-                    <iframe src="https://trinket.io/embed/python/1b7944d7855c" class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+from random import randint
+
+dice1 = randint(1, 6)
+dice2 = randint(1, 6)
+
+total = dice1 + dice2
+
+print("You rolled a " + str(dice1) + " and a " + str(dice2) + " for a total of " + str(total))
+</textarea></div>
 
                     <h2>Length</h2>
                     <p>The length function returns the number of characters in a string or the number of elements in an array.  This is useful for checking the length of a password, or using a fixed loop to repeat a block of code
@@ -122,7 +142,17 @@
                     
                     <p>You can try this program in the code window below:</p>
 
-                    <iframe src="https://trinket.io/embed/python/9cd7df42908b" class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+password = input("Enter a password: ")
+passLength = len(password)
+
+while len(password) < 8:
+    print("Your password must be at least 8 characters.")
+    print("Please try again:")
+    password = input()
+
+print("Your password is " + str(passLength) + " characters long.")
+</textarea></div>
 
                     <p>As the len() function can also count the number of elements in an array, we will also look at an example of that.  The code below contains an array of names, a fixed loop is used to display the names.  The 
                         loop will run a number of times equal to the number of elements in the array.</p>
@@ -135,7 +165,12 @@
                     </div>
 
                     <p>This is more useful when you don't know the exact number of elements in the array.  However, you can try adding more names to the program below to see how robust it is:</p>
-                    <iframe src="https://trinket.io/embed/python/b092b8b71308" class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+names = ["Bob", "Frank", "Emily", "Kate", "Ben", "Sam"]
+
+for x in range(len(names)):
+    print(names[x])
+</textarea></div>
                     
                 </div>
             </div>
@@ -152,5 +187,6 @@
             </div>
         </footer>
         </div>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

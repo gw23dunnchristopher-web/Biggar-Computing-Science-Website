@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -52,7 +53,22 @@
                         <source src="/Files/Audio/sampleMP3.mp3" type="audio/mpeg">
                     </audio>
                     <p>The code window below shows the use of the audio tag to play a file on a different website.  Note the URL in the source:</p>
-                    <iframe src="https://trinket.io/embed/html/76fb26ba5031" class="trinket" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Tag Example</title>
+</head>
+<body>
+    <h1>Audio Tag Example</h1>
+    <p>This audio player uses a file hosted on another website:</p>
+    <audio controls>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+</body>
+</html>
+</textarea></div>
 
                     <h2>The Video Tag</h2>
                     <p>The &lt;video&gt; tag is very similar to the &lt;audio&gt; tag.  It has an opening and closing tag, with a &lt;source&gt; tag in between the two.  The main difference is that with a video tag, you can 
@@ -66,7 +82,22 @@
                         Your browser does not support the video tag.
                     </video>
                     <p>The code window below uses an online source on a different website to play the video:</p>
-                    <iframe src="https://trinket.io/embed/html/75918f0cd719" class="trinket" allowfullscreen></iframe>
+                    <div class="html-runner"><textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Video Tag Example</title>
+</head>
+<body>
+    <h1>Video Tag Example</h1>
+    <p>This video player uses a file hosted on another website:</p>
+    <video width="400" height="225" controls>
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+        Your browser does not support the video element.
+    </video>
+</body>
+</html>
+</textarea></div>
                     
                     <h2>Past Paper Question - 2019 Q15(c)(ii)</h2>
 
@@ -122,5 +153,6 @@
     };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

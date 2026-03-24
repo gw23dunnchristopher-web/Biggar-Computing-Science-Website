@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <script src="/JavaScript/script.js"></script>
+        <link rel="stylesheet" href="/CSS/codeRunner.css">
         <script src="/JavaScript/pageNavigation.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -57,7 +58,15 @@
                         </div>
                     
                     <p>You can find the program below and try it yourself:</p>
-                    <iframe src="https://trinket.io/embed/python/da586500919f" class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+marks = [0] * 6
+
+for x in range(6):
+    marks[x] = int(input("Enter mark for test " + str(x + 1) + ": "))
+
+for x in range(6):
+    print("Test " + str(x + 1) + " = " + str(marks[x]))
+</textarea></div>
 
                     <h3>Example 2 - Which Scores are 50 or more?</h3>
                     <p>This example looks at an array containing scores, as it moves through the array it will count all the scores that are over 50.</p>
@@ -74,7 +83,16 @@
                     </div>
 
                     <p>You can try this program in the window below:</p>
-                    <iframe src="https://trinket.io/embed/python/da586500919f" class="trinket" allowfullscreen></iframe>
+                    <div class="py-runner"><textarea class="cr-code" style="display:none">
+scores = [18, 56, 32, 65, 77, 14, 23, 78, 81]
+counter = 0
+
+for x in range(len(scores)):
+    if scores[x] > 50:
+        counter = counter + 1
+
+print("The number of scores over 50 was " + str(counter))
+</textarea></div>
 
                     <h2>Past Paper Question - 2024 Q9(d)</h2>
                     
@@ -111,5 +129,6 @@
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>
+    <script src="/JavaScript/codeRunner.js"></script>
 </body>
 </html>
