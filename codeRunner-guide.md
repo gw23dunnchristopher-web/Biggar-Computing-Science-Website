@@ -119,9 +119,27 @@ print("Average:", total / 5)
 
 The HTML runner has three panels: a **file tree** on the left, a **code editor** in the middle, and a **live preview** on the right. The starter code in the `<textarea>` becomes `index.html` in the virtual filesystem.
 
+**Single file** (starter code becomes `index.html`):
+
 ```html
 <div class="html-runner">
     <textarea class="cr-code" style="display:none">
+<!DOCTYPE html>
+<html>
+<head><title>My Page</title></head>
+<body>
+    <h1>Hello!</h1>
+</body>
+</html>
+    </textarea>
+</div>
+```
+
+**Multiple starter files** — add one `<textarea>` per file, each with a `data-filename` attribute:
+
+```html
+<div class="html-runner">
+    <textarea class="cr-code" data-filename="index.html" style="display:none">
 <!DOCTYPE html>
 <html>
 <head>
@@ -130,12 +148,25 @@ The HTML runner has three panels: a **file tree** on the left, a **code editor**
 </head>
 <body>
     <h1>Hello, World!</h1>
-    <p>This is a live HTML preview.</p>
+    <p>This page uses an external stylesheet.</p>
 </body>
 </html>
     </textarea>
+    <textarea class="cr-code" data-filename="style.css" style="display:none">
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+}
+h1 {
+    color: navy;
+}
+    </textarea>
 </div>
 ```
+
+Each `<textarea>` becomes a separate file in the file tree. Students can see and edit all files, add more, and delete any they don't need. The `data-filename` attribute determines both the filename shown in the tree and the name used when resolving `<link href="...">` and `<script src="...">` references.
+
+If no `data-filename` is given, the file defaults to `index.html`.
 
 The same `codeRunner.css` and `codeRunner.js` files cover both runner types. You can have multiple runners of either type on the same page.
 

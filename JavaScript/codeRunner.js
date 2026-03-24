@@ -228,9 +228,15 @@
 
     /* ── build an HTML runner (multi-file with virtual filesystem) ── */
     function initHtmlRunner(container) {
-        var stored = container.querySelector('textarea.cr-code');
-        if (!stored) return;
-        var original = stored.value.replace(/^\n/, '').replace(/\n$/, '');
+        var storedAll = container.querySelectorAll('textarea.cr-code');
+        if (!storedAll.length) return;
+
+        /* build originals map from all textarea[data-filename] elements */
+        var originals = {};
+        storedAll.forEach(function (ta) {
+            var name = (ta.dataset.filename || 'index.html').trim();
+            originals[name] = ta.value.replace(/^\n/, '').replace(/\n$/, '');
+        });
 
         container.classList.add('code-runner');
         container.innerHTML =
@@ -265,9 +271,11 @@
         var fileList    = container.querySelector('.cr-file-list');
         var newFileBtn  = container.querySelector('.cr-new-file-btn');
 
-        /* virtual filesystem: filename → content */
-        var vfs = { 'index.html': original };
-        var activeFile = 'index.html';
+        /* virtual filesystem seeded from all starter textareas */
+        var vfs = Object.assign({}, originals);
+        var activeFile = originals['index.html'] !== undefined
+            ? 'index.html'
+            : Object.keys(originals)[0];
         var uploadedImages = {};
 
         /* ── file tree ── */
@@ -449,9 +457,11 @@
 
         runBtn.addEventListener('click', updatePreview);
         resetBtn.addEventListener('click', function () {
-            vfs = { 'index.html': original };
-            activeFile = 'index.html';
-            editor.value = original;
+            vfs = Object.assign({}, originals);
+            activeFile = originals['index.html'] !== undefined
+                ? 'index.html'
+                : Object.keys(originals)[0];
+            editor.value = vfs[activeFile];
             uploadedImages = {};
             renderStrip();
             renderFileTree();
