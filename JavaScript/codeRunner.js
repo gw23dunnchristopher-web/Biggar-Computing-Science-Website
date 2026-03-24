@@ -237,25 +237,89 @@
             '<div class="cr-toolbar">' +
             '  <span class="cr-lang">&#x1F310; HTML</span>' +
             '  <div class="cr-btns">' +
+            '    <label class="cr-upload-btn" title="Upload images to use in your HTML">' +
+            '      &#x1F4F7; Upload Image' +
+            '      <input type="file" class="cr-file-input" accept="image/*" multiple style="display:none">' +
+            '    </label>' +
             '    <button class="cr-run-btn">&#9654; Preview</button>' +
             '    <button class="cr-reset-btn">&#8635; Reset</button>' +
             '  </div>' +
             '</div>' +
+            '<div class="cr-img-strip" style="display:none"></div>' +
             '<div class="cr-split">' +
             '  <textarea class="cr-editor" spellcheck="false"></textarea>' +
             '  <iframe class="cr-preview" sandbox="allow-scripts allow-same-origin"></iframe>' +
             '</div>';
 
-        var editor   = container.querySelector('.cr-editor');
-        var preview  = container.querySelector('.cr-preview');
-        var runBtn   = container.querySelector('.cr-run-btn');
-        var resetBtn = container.querySelector('.cr-reset-btn');
+        var editor    = container.querySelector('.cr-editor');
+        var preview   = container.querySelector('.cr-preview');
+        var runBtn    = container.querySelector('.cr-run-btn');
+        var resetBtn  = container.querySelector('.cr-reset-btn');
+        var fileInput = container.querySelector('.cr-file-input');
+        var imgStrip  = container.querySelector('.cr-img-strip');
 
         editor.value = original;
 
-        function updatePreview() { preview.srcdoc = editor.value; }
-        updatePreview();
+        /* uploaded images: filename -> dataURL */
+        var uploadedImages = {};
 
+        function updatePreview() {
+            var html = editor.value;
+            /* replace src="filename" with the corresponding data URL */
+            Object.keys(uploadedImages).forEach(function (name) {
+                var esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                /* match src="..." or src='...' with any leading path stripped */
+                var re = new RegExp('(src=["\'])(?:[^"\']*[\\/])?' + esc + '(["\'])', 'gi');
+                html = html.replace(re, '$1' + uploadedImages[name] + '$2');
+            });
+            preview.srcdoc = html;
+        }
+
+        function renderStrip() {
+            var names = Object.keys(uploadedImages);
+            if (names.length === 0) {
+                imgStrip.style.display = 'none';
+                imgStrip.innerHTML = '';
+                return;
+            }
+            imgStrip.style.display = 'flex';
+            imgStrip.innerHTML = '<span class="cr-strip-label">Uploaded:</span>' +
+                names.map(function (name) {
+                    return '<div class="cr-img-chip">' +
+                        '<img src="' + uploadedImages[name] + '" class="cr-img-thumb" alt="">' +
+                        '<span class="cr-img-name">' + name + '</span>' +
+                        '<button class="cr-img-remove" data-name="' + name + '" title="Remove">\u00D7</button>' +
+                        '</div>';
+                }).join('');
+            imgStrip.querySelectorAll('.cr-img-remove').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    delete uploadedImages[btn.dataset.name];
+                    renderStrip();
+                    updatePreview();
+                });
+            });
+        }
+
+        fileInput.addEventListener('change', function () {
+            var files = Array.from(fileInput.files);
+            var pending = files.length;
+            if (pending === 0) return;
+            files.forEach(function (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    uploadedImages[file.name] = e.target.result;
+                    pending--;
+                    if (pending === 0) {
+                        renderStrip();
+                        updatePreview();
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+            fileInput.value = '';
+        });
+
+        updatePreview();
         runBtn.addEventListener('click', updatePreview);
         resetBtn.addEventListener('click', function () {
             editor.value = original;

@@ -159,6 +159,88 @@
     cursor: default;
 }
 
+/* ── upload button (HTML runner) ── */
+.cr-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 14px;
+    background: #313244;
+    color: #cdd6f4;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+}
+
+.cr-upload-btn:hover {
+    background: #45475a;
+}
+
+/* ── uploaded images strip ── */
+.cr-img-strip {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #181825;
+    border-bottom: 1px solid #313244;
+}
+
+.cr-strip-label {
+    color: #6c7086;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.cr-img-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #313244;
+    border-radius: 4px;
+    padding: 3px 6px 3px 4px;
+}
+
+.cr-img-thumb {
+    width: 28px;
+    height: 28px;
+    object-fit: cover;
+    border-radius: 3px;
+    display: block;
+}
+
+.cr-img-name {
+    color: #cdd6f4;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cr-img-remove {
+    background: none;
+    border: none;
+    color: #6c7086;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 2px;
+    flex-shrink: 0;
+}
+
+.cr-img-remove:hover {
+    color: #f38ba8;
+}
+
 /* ── HTML runner split layout ── */
 .cr-split {
     display: flex;
