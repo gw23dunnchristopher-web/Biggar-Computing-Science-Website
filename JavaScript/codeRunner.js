@@ -587,21 +587,25 @@
             '  <span class="cr-lang">&#x1F310; HTML</span>' +
             '  <div class="cr-btns">' +
             '    <button class="cr-wrap-btn" title="Word wrap: off">&#8644; Wrap</button>' +
-            '    <button class="cr-toggle-preview-btn" title="Hide preview">&#9707; Preview</button>' +
-            '    <button class="cr-expand-btn" title="Expand preview to full width">&#x26F6; Expand</button>' +
-            '    <button class="cr-run-btn">&#9654; Preview</button>' +
+            '    <div class="cr-view-group">' +
+            '      <button class="cr-code-btn cr-btn-active" title="Show code editor">&lt;/&gt; Code</button>' +
+            '      <button class="cr-preview-btn cr-btn-active" title="Show preview">&#9654; Preview</button>' +
+            '    </div>' +
+            '    <button class="cr-run-btn">&#9654; Run</button>' +
             '    <button class="cr-reset-btn">&#8635; Reset</button>' +
             '  </div>' +
             '</div>' +
             '<div class="cr-workspace">' +
             '  <div class="cr-filetree">' +
-            '    <div class="cr-filetree-hdr">Files</div>' +
-            '    <ul class="cr-file-list"></ul>' +
-            '    <button class="cr-new-file-btn">+ New file</button>' +
-            '    <label class="cr-filetree-upload" title="Upload images, CSS, JS, or data files">' +
-            '      &#x1F4C2; Upload' +
-            '      <input type="file" class="cr-html-file-input" accept="image/*,audio/*,video/*,.css,.js,.csv,.txt,.html,.json" multiple style="display:none">' +
-            '    </label>' +
+            '    <button class="cr-ft-toggle" title="Collapse file panel">&#9664; Files</button>' +
+            '    <div class="cr-ft-body">' +
+            '      <ul class="cr-file-list"></ul>' +
+            '      <button class="cr-new-file-btn">+ New file</button>' +
+            '      <label class="cr-filetree-upload" title="Upload images, CSS, JS, or data files">' +
+            '        &#x1F4C2; Upload' +
+            '        <input type="file" class="cr-html-file-input" accept="image/*,audio/*,video/*,.css,.js,.csv,.txt,.html,.json" multiple style="display:none">' +
+            '      </label>' +
+            '    </div>' +
             '  </div>' +
             '  <div class="cr-hl-wrap">' +
             '    <pre class="cr-hl-bg" aria-hidden="true"><code class="cr-hl-code"></code></pre>' +
@@ -620,8 +624,9 @@
         var hlWrap          = container.querySelector('.cr-hl-wrap');
         var hlCode          = container.querySelector('.cr-hl-code');
         var wrapBtn         = container.querySelector('.cr-wrap-btn');
-        var togglePrevBtn   = container.querySelector('.cr-toggle-preview-btn');
-        var expandBtn       = container.querySelector('.cr-expand-btn');
+        var codeBtn         = container.querySelector('.cr-code-btn');
+        var previewBtn      = container.querySelector('.cr-preview-btn');
+        var ftToggleBtn     = container.querySelector('.cr-ft-toggle');
         var filetreeDiv     = container.querySelector('.cr-filetree');
         var workspace       = container.querySelector('.cr-workspace');
 
@@ -712,32 +717,37 @@
             wrapBtn.title = on ? 'Word wrap: on' : 'Word wrap: off';
         });
 
-        /* ── preview show/hide toggle ── */
+        /* ── Code / Preview view toggles ── */
+        var codeVisible    = true;
         var previewVisible = true;
-        togglePrevBtn.addEventListener('click', function () {
-            previewVisible = !previewVisible;
-            preview.style.display = previewVisible ? '' : 'none';
-            togglePrevBtn.classList.toggle('cr-btn-active', !previewVisible);
-            togglePrevBtn.title     = previewVisible ? 'Hide preview' : 'Show preview';
-            togglePrevBtn.innerHTML = previewVisible ? '&#9707; Preview' : '&#9635; Preview';
+
+        function applyViewState() {
+            workspace.classList.toggle('cr-code-hidden',    !codeVisible);
+            workspace.classList.toggle('cr-preview-hidden', !previewVisible);
+            codeBtn.classList.toggle('cr-btn-active',    codeVisible);
+            previewBtn.classList.toggle('cr-btn-active', previewVisible);
+        }
+
+        codeBtn.addEventListener('click', function () {
+            /* must keep at least one panel visible */
+            if (codeVisible && !previewVisible) return;
+            codeVisible = !codeVisible;
+            applyViewState();
         });
 
-        /* ── expand preview to full width ── */
-        var previewExpanded = false;
-        expandBtn.addEventListener('click', function () {
-            previewExpanded = !previewExpanded;
-            workspace.classList.toggle('cr-preview-expanded', previewExpanded);
-            expandBtn.classList.toggle('cr-btn-active', previewExpanded);
-            expandBtn.title     = previewExpanded ? 'Show code editor' : 'Expand preview to full width';
-            expandBtn.innerHTML = previewExpanded ? '&#x26F6; Code' : '&#x26F6; Expand';
-            /* if preview was hidden, make it visible when expanding */
-            if (previewExpanded && !previewVisible) {
-                previewVisible = true;
-                preview.style.display = '';
-                togglePrevBtn.classList.remove('cr-btn-active');
-                togglePrevBtn.title     = 'Hide preview';
-                togglePrevBtn.innerHTML = '&#9707; Preview';
-            }
+        previewBtn.addEventListener('click', function () {
+            if (previewVisible && !codeVisible) return;
+            previewVisible = !previewVisible;
+            applyViewState();
+        });
+
+        /* ── file tree collapse ── */
+        var ftCollapsed = false;
+        ftToggleBtn.addEventListener('click', function () {
+            ftCollapsed = !ftCollapsed;
+            filetreeDiv.classList.toggle('cr-ft-collapsed', ftCollapsed);
+            ftToggleBtn.innerHTML = ftCollapsed ? '&#9654;' : '&#9664; Files';
+            ftToggleBtn.title     = ftCollapsed ? 'Expand file panel' : 'Collapse file panel';
         });
 
         /* virtual filesystem seeded from all starter textareas */

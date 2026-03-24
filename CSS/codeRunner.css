@@ -146,7 +146,45 @@
     overflow-x: hidden;
 }
 
-/* ── active state for toolbar toggle buttons ── */
+/* ── Code / Preview segmented button group ── */
+.cr-view-group {
+    display: flex;
+}
+
+.cr-view-group button {
+    padding: 4px 11px;
+    border: 1px solid #45475a;
+    background: #1e1e2e;
+    color: #6c7086;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.cr-view-group button:first-child {
+    border-radius: 5px 0 0 5px;
+}
+
+.cr-view-group button:last-child {
+    border-radius: 0 5px 5px 0;
+    border-left: none;
+}
+
+.cr-view-group button.cr-btn-active {
+    background: #313244;
+    color: #cdd6f4;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.45);
+}
+
+.cr-view-group button:not(.cr-btn-active):hover {
+    background: #252535;
+    color: #a6adc8;
+}
+
+/* ── active state for other toolbar toggle buttons (wrap) ── */
 .cr-btn-active {
     background: #45475a !important;
     color: #cdd6f4 !important;
@@ -342,18 +380,60 @@
     border-right: 2px solid #313244;
     display: flex;
     flex-direction: column;
+    transition: width 0.2s ease;
+    overflow: hidden;
 }
 
-.cr-filetree-hdr {
+/* ── file tree header toggle button ── */
+.cr-ft-toggle {
     background: #181825;
+    border: none;
+    border-bottom: 1px solid #313244;
     color: #6c7086;
     font-family: Arial, sans-serif;
     font-size: 10px;
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
-    padding: 6px 10px;
-    border-bottom: 1px solid #313244;
+    padding: 6px 8px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: color 0.1s, background 0.1s;
+}
+
+.cr-ft-toggle:hover {
+    background: #1e1e2e;
+    color: #a6adc8;
+}
+
+/* ── file tree body (collapsible) ── */
+.cr-ft-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* ── collapsed state ── */
+.cr-filetree.cr-ft-collapsed {
+    width: 32px;
+}
+
+.cr-filetree.cr-ft-collapsed .cr-ft-body {
+    display: none;
+}
+
+.cr-filetree.cr-ft-collapsed .cr-ft-toggle {
+    text-align: center;
+    padding: 8px 0;
+    border-bottom: none;
+    width: 32px;
+    font-size: 12px;
+    letter-spacing: 0;
 }
 
 .cr-file-list {
@@ -560,13 +640,22 @@
     background: #fff;
 }
 
-/* ── expanded preview: hide tree + editor wrapper, preview fills workspace ── */
-.cr-workspace.cr-preview-expanded .cr-filetree,
-.cr-workspace.cr-preview-expanded .cr-hl-wrap {
+/* ── Code-only view: hide preview panel ── */
+.cr-workspace.cr-preview-hidden .cr-preview {
     display: none;
 }
 
-.cr-workspace.cr-preview-expanded .cr-preview {
+.cr-workspace.cr-preview-hidden .cr-hl-wrap {
+    flex: 1 1 auto;
+}
+
+/* ── Preview-only view: hide filetree + editor, preview fills workspace ── */
+.cr-workspace.cr-code-hidden .cr-filetree,
+.cr-workspace.cr-code-hidden .cr-hl-wrap {
+    display: none;
+}
+
+.cr-workspace.cr-code-hidden .cr-preview {
     width: 100%;
     flex: 1 1 auto;
 }
@@ -584,15 +673,25 @@
     }
 
     .cr-filetree {
-        width: 100%;
-        flex-direction: row;
-        flex-wrap: wrap;
+        width: 100% !important;
+        flex-direction: column;
         border-right: none;
         border-bottom: 2px solid #313244;
+        transition: none;
     }
 
-    .cr-filetree-hdr {
+    .cr-ft-toggle {
         display: none;
+    }
+
+    .cr-ft-body {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .cr-filetree.cr-ft-collapsed .cr-ft-body {
+        display: flex;
     }
 
     .cr-file-list {
