@@ -66,51 +66,18 @@
                             These parts are then stored in an array.</li>
                     </ul>
 
-                    <p>The following example will read the file "sample.txt" into parallel arrays, splitting up each line at the commas.</p>
+                    <p>The following example reads the file <span class="codeText">sample.txt</span> into parallel arrays, splitting each line at the comma. Click on <b>sample.txt</b> in the file tree on the left to see the data before you run the code.</p>
 
-                    <div class="py-runner"><textarea class="cr-code" style="display:none">
-# Create a sample file with some data
-with open("sample.txt", "w") as f:
-    f.write("Alice,18\nBob,16\nCharlie,19\nDiana,17\nEva,20\n")
-
-# Now read the file into parallel arrays
-names = []
-ages = []
-
-with open("sample.txt", "r") as file:
-    for line in file:
-        data = line.strip().split(",")
-        names.append(data[0])
-        ages.append(int(data[1]))
-
-print("Names:", names)
-print("Ages:", ages)
-</textarea></div>
+                    <div class="py-runner" data-sandbox="higher-filehandling-read"></div>
 
                     <h2>Writing to a File</h2>
                     <p>To do this, a file must first be opened in <b>write mode</b>.  Then the <span class="codeText">fileName.write()</span> function can be used to write 
                         data to the file.</p>
-                    <p>Remember that in write mode, and <b>data that is currently in the file will be overwritten.</b></p>
+                    <p>Remember that in write mode, any <b>data that is currently in the file will be overwritten.</b></p>
                     <p>If you want to append new text to a file without erasing the text already present in it, then you would use <b>append mode ("a")</b>.</p>
-                    <p>The example below will demonstrate using write mode to write to a file:</p>
+                    <p>The example below will ask for your name and score, write them to a file, then read the file back to confirm the data was saved:</p>
 
-                    <div class="py-runner"><textarea class="cr-code" style="display:none">
-name = input("Enter your name: ")
-score = int(input("Enter your score: "))
-
-# Write to a file
-with open("results.txt", "w") as file:
-    file.write(name + "," + str(score) + "\n")
-
-print("Data written to results.txt")
-
-# Read it back to verify
-with open("results.txt", "r") as file:
-    contents = file.read()
-
-print("File contents:", contents)
-</textarea></div>
-
+                    <div class="py-runner" data-sandbox="higher-filehandling-write"></div>
 
                     <h2>TXT Files vs CSV Files</h2>
                     <p>There are two main types of file that you will be expected to work with at Higher level - TXT files and CSV files.</p>
@@ -118,8 +85,13 @@ print("File contents:", contents)
                         You can open and edit them with a text editor.</p>
                     <p><b>Comma Separated Value (.csv)</b> files store data in a tabular format, with rows and columns separated by commas.  They are commonly used for 
                         spreadsheets and databases.</p>
-                    <p>For your purposes, working on these two files will feel the same.  At Higher Level, the data found in a text file is usually seperated by commas 
-                        anyway.  You just have to remember use the correct file type when you open the file for reading or writing.</p>
+                    <p>For your purposes, working on these two files will feel the same.  At Higher Level, the data found in a text file is usually separated by commas 
+                        anyway.  You just have to remember to use the correct file extension when you open the file for reading or writing.</p>
+                    <p>One difference you will encounter with CSV files is that they often have a <b>header row</b> — the first line contains the column names rather than data.
+                        You can skip it using <span class="codeText">next(file)</span>.</p>
+                    <p>The example below reads from <span class="codeText">marks.csv</span>, skips the header, then stores each column in a parallel array and calculates the class average. Click the file in the tree to inspect the data first.</p>
+
+                    <div class="py-runner" data-sandbox="higher-filehandling-csv"></div>
                     
                     <h2>Past Paper Question - 2023 Q10(b)</h2>
                     <p>A check digit is the number at the end of a series of characters that can confirm 

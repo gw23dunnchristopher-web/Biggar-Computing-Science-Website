@@ -1,0 +1,7 @@
+{
+  "type": "python",
+  "title": "File Handling — Writing to a TXT file",
+  "files": {
+    "main.py": "name = input(\"Enter your name: \")\nscore = int(input(\"Enter your score: \"))\n\n# Write to a file\nwith open(\"results.txt\", \"w\") as file:\n    file.write(name + \",\" + str(score) + \"\\n\")\n\nprint(\"Data written to results.txt\")\n\n# Read it back to verify\nwith open(\"results.txt\", \"r\") as file:\n    contents = file.read()\n\nprint(\"File contents:\", contents)\n"
+  }
+}

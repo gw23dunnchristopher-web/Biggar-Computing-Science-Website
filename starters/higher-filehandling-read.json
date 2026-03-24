@@ -1,0 +1,8 @@
+{
+  "type": "python",
+  "title": "File Handling — Reading from a TXT file",
+  "files": {
+    "main.py": "names = []\nages = []\n\nwith open(\"sample.txt\", \"r\") as file:\n    for line in file:\n        data = line.strip().split(\",\")\n        names.append(data[0])\n        ages.append(int(data[1]))\n\nprint(\"Names:\", names)\nprint(\"Ages: \", ages)\n\n# Find the oldest person\noldest_index = 0\nfor i in range(1, len(ages)):\n    if ages[i] > ages[oldest_index]:\n        oldest_index = i\n\nprint()\nprint(\"Oldest:\", names[oldest_index], \"—\", ages[oldest_index], \"years old\")\n",
+    "sample.txt": "Alice,18\nBob,16\nCharlie,19\nDiana,17\nEva,20\nFraser,15\nGrace,17\nHamish,18\n"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "type": "python",
+  "title": "File Handling — Reading from a CSV file",
+  "files": {
+    "main.py": "firstNames = []\nsurnames = []\nscores = []\ngrades = []\n\nwith open(\"marks.csv\", \"r\") as file:\n    next(file)  # Skip the header row\n    for line in file:\n        data = line.strip().split(\",\")\n        firstNames.append(data[0])\n        surnames.append(data[1])\n        scores.append(int(data[2]))\n        grades.append(data[3])\n\nprint(\"Student Results\")\nprint(\"-\" * 40)\nfor i in range(len(firstNames)):\n    print(firstNames[i], surnames[i], \"-\", scores[i], \"(\", grades[i], \")\")\n\n# Calculate class average\ntotal = 0\nfor score in scores:\n    total += score\naverage = total / len(scores)\n\nprint(\"-\" * 40)\nprint(\"Class average:\", round(average, 1))\n",
+    "marks.csv": "FirstName,Surname,Score,Grade\nAlice,Campbell,78,A\nBob,MacDonald,65,B\nCharlie,Robertson,82,A\nDiana,Stewart,55,C\nEva,Murray,91,A\nFraser,Anderson,43,D\nGrace,Wilson,70,B\nHamish,Mackenzie,88,A\n"
+  }
+}
