@@ -1,127 +1,78 @@
-# BHS Code Runner — Developer Guide
-
-## What is it?
-
-The code runner is built on **Pyodide** — a full Python interpreter compiled to **WebAssembly** and run entirely inside the browser. There is no server involved when a student clicks Run. The Python code executes locally on the student's own device, inside the browser's sandboxed JavaScript environment.
-
-For HTML/CSS examples, the runner uses a **sandboxed `<iframe>`** with the `srcdoc` attribute, which renders the student's HTML directly in the browser without any server round-trip.
+# BHS Code Runner — Teacher Guide
 
 ---
 
-## Is Python sandboxed?
+## Overview
 
-Yes — in two layers:
+The site has two types of interactive code runner:
 
-1. **Browser sandbox** — WebAssembly runs inside the browser's security model. It cannot access the operating system, the network, other tabs, or any server files.
-2. **Pyodide virtual filesystem** — Pyodide has its own in-memory virtual filesystem. Any file I/O (reading and writing files) happens in memory only and is wiped when the page is refreshed. No real files are ever created on the student's machine.
+- **Python runner** (`py-runner`) — runs Python entirely in the browser using Pyodide (WebAssembly). No server involved. Supports `input()`, file I/O, and most of the standard library.
+- **HTML runner** (`html-runner`) — renders HTML/CSS/JS live inside a sandboxed iframe. Supports multiple files, page navigation between HTML pages, image uploads, and inlined external CSS/JS.
 
-Students cannot use the runner to do anything harmful. It is equivalent in safety to any other JavaScript running on a web page.
-
----
-
-## Available Python libraries
-
-Because Pyodide includes CPython's full standard library, the following all work out of the box:
-
-- `random`, `math`, `datetime`, `json`, `csv`, `os`, `sys`
-- `dataclasses` (including `@dataclass`, `field`)
-- `collections`, `itertools`, `functools`, `re`
-- File I/O via Pyodide's virtual filesystem (`open`, `read`, `write`)
-
-Third-party packages that Pyodide bundles (loaded automatically when imported):
-
-- `numpy`, `pandas`, `matplotlib`, `scipy`
-- `requests` (limited — no real network access)
-
-The runner calls `pyodide.loadPackagesFromImports()` before every execution, so packages are downloaded and cached automatically the first time they are needed.
+Both runners show a **file tree** on the left when there is more than one file, letting students switch between and edit each file independently.
 
 ---
 
-## How `input()` works
+## Recommended workflow — the Sandbox Builder
 
-Python's built-in `input()` is synchronous (it blocks until the user types). Browsers cannot block JavaScript. To work around this, the runner uses a **replay approach**:
+For anything beyond a single short code snippet, the recommended approach is to **build and save a sandbox** using the teacher tool, then embed it in the lesson page with one line.
 
-1. Code runs with a queue of previously-collected inputs.
-2. When `input("Enter name: ")` is called:
-   - The prompt is printed to the terminal.
-   - If there is a queued answer, it is returned immediately.
-   - If the queue is empty, a special error (`__INPUT_REQUIRED__`) is thrown.
-3. The terminal catches the error, shows all output so far, and makes itself **editable** — the cursor appears at the end of the output text.
-4. The student types their answer and presses Enter.
-5. The answer is added to the queue and the **entire program re-runs from the beginning**, now with one more queued input available.
-6. This repeats until the program completes.
+### Step 1 — Open the builder
 
-The result is a seamless terminal experience where output and input appear interleaved in a single window, identical to how a real Python terminal looks.
+Go to `/tools/sandbox-builder.html` and log in with the teacher password (default: `bhs-computing`; can be changed via the `TEACHER_PASSWORD` environment variable).
 
----
+### Step 2 — Create a sandbox
 
-## How to add a Python runner to an HTML page
+Click **+ New** in the left panel. Fill in:
 
-### 1. Add the stylesheet in `<head>`
+| Field | Purpose |
+|---|---|
+| **ID** | URL-safe name used in the embed code, e.g. `higher-filehandling-read`. Only letters, numbers, hyphens and underscores. |
+| **Title** | Human-readable label shown in the sandbox list. |
+| **Type** | `HTML / CSS / JS` or `Python + data files`. |
+
+### Step 3 — Add your files
+
+Use the file tree panel to build the sandbox:
+
+- **+ file** — creates a new file. Name it with the correct extension (`.py`, `.html`, `.css`, `.js`, `.csv`, `.txt`). The builder provides a sensible starter template for each type.
+- **⬆ Upload file** — imports a file from your computer directly. Ideal for CSV/TXT data files or images you have already prepared. The file content is stored verbatim.
+- Click any filename to switch to it and edit it in the code editor.
+- Hover over a filename to reveal the delete button.
+
+**For Python sandboxes:** the file named `main.py` (or the first `.py` file if there is no `main.py`) is the one that runs when the student clicks Run. All other files (CSV, TXT, etc.) are written to Pyodide's virtual filesystem automatically before execution, so `open("data.csv", "r")` works exactly as expected.
+
+**For HTML sandboxes:** `index.html` is loaded first in the preview. Any `<link rel="stylesheet" href="style.css">` or `<script src="script.js">` tags are resolved automatically against the other files in the sandbox.
+
+### Step 4 — Save
+
+Click **💾 Save**. The sandbox is stored on the server in the `starters/` folder as a JSON file.
+
+### Step 5 — Copy the embed code
+
+After saving, the embed code appears at the bottom of the builder:
 
 ```html
-<link rel="stylesheet" href="/CSS/codeRunner.css">
+<div class="py-runner" data-sandbox="your-sandbox-id"></div>
 ```
 
-### 2. Add the script before `</body>`
+or
 
 ```html
-<script src="/JavaScript/codeRunner.js"></script>
+<div class="html-runner" data-sandbox="your-sandbox-id"></div>
 ```
 
-### 3. Add the runner div anywhere in the page body
+Paste this single line into your lesson page wherever you want the runner to appear. The runner fetches all the files from the server when the page loads — the lesson page itself stays clean.
 
-```html
-<div class="py-runner">
-    <textarea class="cr-code" style="display:none">
-# Your Python code goes here
-name = input("Enter your name: ")
-print("Hello", name)
-    </textarea>
-</div>
-```
+### Managing existing sandboxes
 
-The `<textarea>` holds the starter code. It is hidden from the user — `codeRunner.js` reads it on page load and builds the editor and terminal automatically.
-
-**Full minimal page example:**
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Python Example</title>
-    <link rel="stylesheet" href="/CSS/codeRunner.css">
-</head>
-<body>
-
-    <h2>Try it out</h2>
-
-    <div class="py-runner">
-        <textarea class="cr-code" style="display:none">
-total = 0
-for i in range(1, 6):
-    num = int(input("Enter number " + str(i) + ": "))
-    total += num
-print("Total:", total)
-print("Average:", total / 5)
-        </textarea>
-    </div>
-
-    <script src="/JavaScript/codeRunner.js"></script>
-</body>
-</html>
-```
+The left panel lists every saved sandbox. Click one to open and edit it. Hover over it and click the bin icon to delete it. Changes are only saved when you click **💾 Save**.
 
 ---
 
-## How to add an HTML runner to a page
+## Embedding a sandbox in a lesson page
 
-The HTML runner has three panels: a **file tree** on the left, a **code editor** in the middle, and a **live preview** on the right.
-
-Each file in the runner is defined by a `<textarea class="cr-code">` element inside the runner div. The `data-filename` attribute sets the filename. The runner reads all of them on page load — nothing is packed together.
-
-### Required includes
+### Required includes (already in every lesson page)
 
 In `<head>`:
 ```html
@@ -133,11 +84,36 @@ Before `</body>`:
 <script src="/JavaScript/codeRunner.js"></script>
 ```
 
+### The embed line
+
+```html
+<!-- Python sandbox -->
+<div class="py-runner" data-sandbox="sandbox-id-here"></div>
+
+<!-- HTML/CSS/JS sandbox -->
+<div class="html-runner" data-sandbox="sandbox-id-here"></div>
+```
+
+That is the entire lesson-page change needed. You can embed as many sandboxes as you like on the same page — each is fully independent.
+
 ---
 
-### Example 1 — Single HTML file
+## Alternative — inline starter code (simple cases)
 
-The simplest case. One textarea, no `data-filename` needed (defaults to `index.html`).
+For short, single-file examples with no supporting data files, you can embed the starter code directly in the lesson page without using the sandbox builder. This avoids a network request and keeps everything in one file.
+
+### Simple Python example
+
+```html
+<div class="py-runner">
+    <textarea class="cr-code" style="display:none">
+name = input("Enter your name: ")
+print("Hello,", name)
+    </textarea>
+</div>
+```
+
+### Simple HTML example
 
 ```html
 <div class="html-runner">
@@ -149,18 +125,16 @@ The simplest case. One textarea, no `data-filename` needed (defaults to `index.h
 </head>
 <body>
     <h1>Hello, World!</h1>
-    <p>This is my first web page.</p>
+    <p>Edit me and click Preview.</p>
 </body>
 </html>
     </textarea>
 </div>
 ```
 
----
+### Multiple inline files
 
-### Example 2 — HTML + external CSS file
-
-Two textareas, each with `data-filename`. The HTML references the CSS file by name with a `<link>` tag — the runner automatically inlines `style.css` into the preview before rendering.
+Add one `<textarea>` per file, each with a `data-filename` attribute:
 
 ```html
 <div class="html-runner">
@@ -173,159 +147,27 @@ Two textareas, each with `data-filename`. The HTML references the CSS file by na
 </head>
 <body>
     <h1>Welcome</h1>
-    <p class="intro">This paragraph is styled using an external CSS file.</p>
 </body>
 </html>
     </textarea>
     <textarea class="cr-code" data-filename="style.css" style="display:none">
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f4f8;
-    margin: 40px;
-}
-
-h1 {
-    color: #003366;
-}
-
-p.intro {
-    color: #555;
-    font-size: 1.1em;
-}
+body { font-family: Arial, sans-serif; background: #f0f4f8; }
+h1   { color: #003366; }
     </textarea>
 </div>
 ```
 
-The file tree will show both `index.html` and `style.css`. Students click between them to edit each one.
+Each textarea becomes a separate file in the file tree. If `data-filename` is omitted, the file defaults to `index.html` (HTML runner) or `main.py` (Python runner).
+
+**Use this approach for:** short demos, single-file examples, and cases where the code is simple enough to read comfortably in the HTML source.
+
+**Use the sandbox builder for:** multi-file projects, examples that need data files (CSV, TXT), exercises you want to reuse across multiple pages, or anything where embedding the content inline would make the lesson page hard to read.
 
 ---
 
-### Example 3 — HTML + CSS + JavaScript
+## Alternative — reference external files directly
 
-Three files. The HTML links to both a stylesheet and a script file. Both are inlined automatically before previewing.
-
-```html
-<div class="html-runner">
-    <textarea class="cr-code" data-filename="index.html" style="display:none">
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Interactive Page</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h1>Click Counter</h1>
-    <p>You have clicked <span id="count">0</span> times.</p>
-    <button onclick="increment()">Click me</button>
-    <script src="script.js"></script>
-</body>
-</html>
-    </textarea>
-    <textarea class="cr-code" data-filename="style.css" style="display:none">
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin-top: 60px;
-}
-
-button {
-    padding: 10px 24px;
-    font-size: 1em;
-    cursor: pointer;
-}
-    </textarea>
-    <textarea class="cr-code" data-filename="script.js" style="display:none">
-var clicks = 0;
-
-function increment() {
-    clicks++;
-    document.getElementById("count").textContent = clicks;
-}
-    </textarea>
-</div>
-```
-
----
-
-### Example 4 — Multi-page website (HTML + CSS + second page)
-
-Four files: a home page, an about page, a shared stylesheet, and a nav that links between pages. Clicking links inside the preview navigates between pages — the runner intercepts the click and loads the correct file.
-
-```html
-<div class="html-runner">
-    <textarea class="cr-code" data-filename="index.html" style="display:none">
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Home</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="about.html">About</a>
-    </nav>
-    <main>
-        <h1>Home Page</h1>
-        <p>Welcome to my website. Click About to learn more.</p>
-    </main>
-</body>
-</html>
-    </textarea>
-    <textarea class="cr-code" data-filename="about.html" style="display:none">
-<!DOCTYPE html>
-<html>
-<head>
-    <title>About</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="about.html">About</a>
-    </nav>
-    <main>
-        <h1>About Page</h1>
-        <p>This is the about page. Click Home to go back.</p>
-    </main>
-</body>
-</html>
-    </textarea>
-    <textarea class="cr-code" data-filename="style.css" style="display:none">
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-}
-
-nav {
-    background: #003366;
-    padding: 12px 20px;
-    display: flex;
-    gap: 20px;
-}
-
-nav a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-nav a:hover {
-    text-decoration: underline;
-}
-
-main {
-    padding: 40px;
-}
-    </textarea>
-</div>
-```
-
----
-
-### Alternative — reference external files with `data-files`
-
-If you already have your HTML, CSS and JS written in a separate editor, you can upload the files to the server and point the runner at them directly. The lesson page then stays tiny:
+If you have built a set of HTML/CSS/JS files locally and uploaded them to the server, you can reference them by path without going through the sandbox builder:
 
 ```html
 <div class="html-runner"
@@ -335,40 +177,80 @@ If you already have your HTML, CSS and JS written in a separate editor, you can 
 </div>
 ```
 
-The runner fetches each file when the page loads, builds the virtual filesystem from them, and renders exactly as if the content had been written inline. The file order in `data-files` controls the order in the file tree (and which `.html` file becomes the entry point — the first one wins).
-
-**Workflow:**
-
-1. Build your pages in VS Code, Notepad++, or any editor and test them locally.
-2. Upload the finished files to a folder inside the project, e.g. `starters/my-lesson/`.
-3. Add the `<div class="html-runner" data-files="...">` line to your lesson page — no other content needed inside the div.
-
-**Use the builder tool** at `/tools/runner-builder.html` — it reads your files and can generate either the inline textarea block *or* just the `data-files` reference line, depending on which approach you prefer.
+The runner fetches each URL in order, builds the virtual filesystem from their contents, and starts with the first `.html` file. This is useful when you already have a folder of static files on the server and just want to point at them directly.
 
 ---
 
-### Rules and notes
+## How the Python runner works
 
-| Rule | Detail |
-|---|---|
-| **Entry point** | The preview always renders `index.html` first. If there is no `index.html`, the first `.html` file in the list is used. |
-| **No `data-filename`** | A textarea without `data-filename` is treated as `index.html`. |
-| **File naming** | Use `.html`, `.css`, or `.js` extensions. The file tree icon changes automatically based on extension. |
-| **CSS inlining** | `<link rel="stylesheet" href="name.css">` is replaced by an inline `<style>` block before rendering. Only filename is matched — path prefixes like `css/style.css` are stripped. |
-| **JS inlining** | `<script src="name.js"></script>` is replaced by an inline `<script>` block before rendering. Same path-stripping rule applies. |
-| **Page navigation** | `<a href="page2.html">` clicks inside the preview are intercepted and load the matching file. Anchor links (`#section`) and external URLs work normally. |
-| **Reset button** | Returns all files to their original starter content and removes any uploaded images. |
-| **Student additions** | Students can add extra files with **+ New file** and delete files by hovering and clicking ×. The last file cannot be deleted. |
+### `input()`
+
+Python's `input()` is synchronous but browsers cannot block. The runner works around this with a **replay approach**:
+
+1. The program runs. When `input()` is called and the queue is empty, execution stops and the terminal becomes editable.
+2. The student types an answer and presses Enter.
+3. The answer is queued and the **entire program re-runs from scratch**, this time with the answer available.
+4. This repeats until the program finishes.
+
+The student sees output and input interleaved naturally, exactly like a real terminal. Programs that rely on side-effects persisting between `input()` calls (very rare at this level) may behave unexpectedly.
+
+### File I/O
+
+Pyodide has an in-memory virtual filesystem. `open("data.csv", "r")` works exactly as in normal Python, but the file only exists in memory for the duration of the page session. When using a sandbox with data files, those files are written to the virtual filesystem before each run, so they are always available.
+
+Files written during execution (e.g. `open("results.txt", "w")`) also work and can be read back in the same session.
+
+### Available libraries
+
+Standard library — everything works including:
+`random`, `math`, `datetime`, `json`, `csv`, `os`, `sys`, `re`, `collections`, `itertools`, `dataclasses`
+
+Third-party (auto-loaded on first import):
+`numpy`, `pandas`, `matplotlib`, `scipy`
+
+### File tree
+
+The file tree is shown automatically whenever a sandbox (or inline runner) has more than one file. The file marked **(runs)** is the main Python script. All other files can be clicked and edited — they are written to the virtual filesystem before each run.
+
+---
+
+## How the HTML runner works
+
+### Layout
+
+Three panels: **file tree** (left) · **code editor** (middle) · **live preview** (right).
+
+Click **▶ Preview** to re-render. Click **⟳ Reset** to restore all files to their original starter content.
+
+### CSS and JavaScript inlining
+
+Before rendering, the runner scans `index.html` for:
+- `<link rel="stylesheet" href="style.css">` → replaced by an inline `<style>` block using the contents of `style.css` from the virtual filesystem.
+- `<script src="script.js"></script>` → replaced by an inline `<script>` block using the contents of `script.js`.
+
+Only the filename is matched — path prefixes like `css/style.css` are stripped automatically.
+
+### Page navigation
+
+Links between HTML pages work inside the preview. `<a href="about.html">` sends a message to the runner, which loads `about.html` from the virtual filesystem and re-renders the preview. Anchor links (`#section`) and external `https://` URLs pass through normally.
+
+### Student additions
+
+Students can add extra files using **+ New file** in the file tree and delete existing ones by hovering and clicking ×. The last remaining file cannot be deleted. The **⟳ Reset** button restores the sandbox to its original files.
 
 ### Image uploads
 
-Students click **📷 Image** in the toolbar to select one or more image files from their device. Uploaded images appear as thumbnails in a strip below the toolbar. Any `<img src="filename.jpg">` in the HTML that matches an uploaded filename is automatically substituted with a data URL before rendering — no server upload required. Path prefixes (`images/cat.jpg`) are stripped, so only the filename needs to match.
+The **📷 Image** button in the toolbar lets students upload image files from their device. Any `<img src="photo.jpg">` in the HTML that matches an uploaded filename is automatically substituted with a data URL — no server upload required. Path prefixes are stripped, so only the filename needs to match.
 
 ---
 
-## Multiple runners on one page
+## Existing sandboxes on this site
 
-You can place as many `py-runner` and `html-runner` divs on a page as you like. Each one is independent — it has its own editor, its own terminal/preview, and its own input history. Pyodide itself is loaded only once (on the first Run click anywhere on the page) and then shared between all runners.
+| Sandbox ID | Type | Used on |
+|---|---|---|
+| `higher-filehandling-read` | Python | Higher SDD / File Handling — reads `sample.txt` into parallel arrays |
+| `higher-filehandling-write` | Python | Higher SDD / File Handling — writes user input to `results.txt`, reads it back |
+| `higher-filehandling-csv` | Python | Higher SDD / File Handling — reads `marks.csv` with header row, calculates average |
 
 ---
 
@@ -378,17 +260,19 @@ You can place as many `py-runner` and `html-runner` divs on a page as you like. 
 |---|---|
 | **No real networking** | `import requests` loads, but actual HTTP calls are blocked by the browser's security model |
 | **No GUI libraries** | `tkinter`, `pygame` etc. do not work — there is no display |
-| **Input replay** | Programs re-run from the beginning each time a new `input()` answer is given. Code with persistent side-effects between runs may behave unexpectedly, though this is rare in student-level code |
-| **First load time** | Pyodide (~10 MB WebAssembly) loads from a CDN on the first Run click. Subsequent runs on the same page are instant. The CDN is cached by the browser after the first visit |
-| **One active input at a time** | Only one runner can accept keyboard input at a time — this is handled automatically |
+| **Input replay** | Programs re-run from scratch each time a new `input()` answer is given |
+| **First load time** | Pyodide (~10 MB) loads from a CDN on the first Run click. Subsequent runs on the same page are instant. The browser caches it after the first visit |
+| **Virtual filesystem is temporary** | Files written during a session are lost on page refresh. Sandbox data files are re-written before each run |
 
 ---
 
-## Files
+## Key files
 
 | File | Purpose |
 |---|---|
-| `JavaScript/codeRunner.js` | All runner logic — Pyodide loading, input system, terminal behaviour, HTML iframe runner |
+| `JavaScript/codeRunner.js` | All runner logic — Pyodide loading, input system, file tree, HTML runner, sandbox loading |
 | `CSS/codeRunner.css` | Styling for both runner types |
-
-Both files are self-contained. They have no dependencies other than Pyodide itself (loaded from CDN).
+| `tools/sandbox-builder.html` | Teacher tool for creating and managing sandboxes |
+| `tools/runner-builder.html` | Utility to generate inline textarea code from uploaded files |
+| `starters/*.json` | Saved sandbox files (one JSON per sandbox) |
+| `server/index.ts` | Sandbox API routes (`GET/POST/DELETE /api/sandboxes/:name`) |
