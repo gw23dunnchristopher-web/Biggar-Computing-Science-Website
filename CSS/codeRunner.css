@@ -146,6 +146,32 @@
     overflow-x: hidden;
 }
 
+/* ── Wrap toggle button (matches view group style) ── */
+.cr-wrap-btn {
+    padding: 4px 11px;
+    border: 1px solid #45475a;
+    border-radius: 5px;
+    background: #1e1e2e;
+    color: #6c7086;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.cr-wrap-btn:hover:not(.cr-btn-active) {
+    background: #252535;
+    color: #a6adc8;
+}
+
+.cr-wrap-btn.cr-btn-active {
+    background: #313244 !important;
+    color: #cdd6f4 !important;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.45);
+}
+
 /* ── Code / Preview segmented button group ── */
 .cr-view-group {
     display: flex;
