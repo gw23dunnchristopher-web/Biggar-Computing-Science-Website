@@ -115,27 +115,52 @@ print("Average:", total / 5)
 
 ---
 
-## How to add an HTML/CSS runner to a page
+## How to add an HTML runner to a page
 
-The HTML runner has three panels: a **file tree** on the left, a **code editor** in the middle, and a **live preview** on the right. The starter code in the `<textarea>` becomes `index.html` in the virtual filesystem.
+The HTML runner has three panels: a **file tree** on the left, a **code editor** in the middle, and a **live preview** on the right.
 
-**Single file** (starter code becomes `index.html`):
+Each file in the runner is defined by a `<textarea class="cr-code">` element inside the runner div. The `data-filename` attribute sets the filename. The runner reads all of them on page load — nothing is packed together.
+
+### Required includes
+
+In `<head>`:
+```html
+<link rel="stylesheet" href="/CSS/codeRunner.css">
+```
+
+Before `</body>`:
+```html
+<script src="/JavaScript/codeRunner.js"></script>
+```
+
+---
+
+### Example 1 — Single HTML file
+
+The simplest case. One textarea, no `data-filename` needed (defaults to `index.html`).
 
 ```html
 <div class="html-runner">
     <textarea class="cr-code" style="display:none">
 <!DOCTYPE html>
 <html>
-<head><title>My Page</title></head>
+<head>
+    <title>My Page</title>
+</head>
 <body>
-    <h1>Hello!</h1>
+    <h1>Hello, World!</h1>
+    <p>This is my first web page.</p>
 </body>
 </html>
     </textarea>
 </div>
 ```
 
-**Multiple starter files** — add one `<textarea>` per file, each with a `data-filename` attribute:
+---
+
+### Example 2 — HTML + external CSS file
+
+Two textareas, each with `data-filename`. The HTML references the CSS file by name with a `<link>` tag — the runner automatically inlines `style.css` into the preview before rendering.
 
 ```html
 <div class="html-runner">
@@ -143,46 +168,177 @@ The HTML runner has three panels: a **file tree** on the left, a **code editor**
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Page</title>
+    <title>Styled Page</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Hello, World!</h1>
-    <p>This page uses an external stylesheet.</p>
+    <h1>Welcome</h1>
+    <p class="intro">This paragraph is styled using an external CSS file.</p>
 </body>
 </html>
     </textarea>
     <textarea class="cr-code" data-filename="style.css" style="display:none">
 body {
     font-family: Arial, sans-serif;
-    background: #f0f0f0;
+    background-color: #f0f4f8;
+    margin: 40px;
 }
+
 h1 {
-    color: navy;
+    color: #003366;
+}
+
+p.intro {
+    color: #555;
+    font-size: 1.1em;
 }
     </textarea>
 </div>
 ```
 
-Each `<textarea>` becomes a separate file in the file tree. Students can see and edit all files, add more, and delete any they don't need. The `data-filename` attribute determines both the filename shown in the tree and the name used when resolving `<link href="...">` and `<script src="...">` references.
+The file tree will show both `index.html` and `style.css`. Students click between them to edit each one.
 
-If no `data-filename` is given, the file defaults to `index.html`.
+---
 
-The same `codeRunner.css` and `codeRunner.js` files cover both runner types. You can have multiple runners of either type on the same page.
+### Example 3 — HTML + CSS + JavaScript
 
-### Multi-file features
+Three files. The HTML links to both a stylesheet and a script file. Both are inlined automatically before previewing.
 
-Students can create additional files using the **+ New file** button in the file tree panel:
+```html
+<div class="html-runner">
+    <textarea class="cr-code" data-filename="index.html" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Page</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Click Counter</h1>
+    <p>You have clicked <span id="count">0</span> times.</p>
+    <button onclick="increment()">Click me</button>
+    <script src="script.js"></script>
+</body>
+</html>
+    </textarea>
+    <textarea class="cr-code" data-filename="style.css" style="display:none">
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 60px;
+}
 
-- Typing `style.css` creates a CSS file — any `<link rel="stylesheet" href="style.css">` in the HTML is automatically inlined into the preview
-- Typing `script.js` creates a JS file — any `<script src="script.js">` is automatically inlined
-- Typing `page2.html` creates a second HTML page — `<a href="page2.html">` links inside the preview navigate to it
+button {
+    padding: 10px 24px;
+    font-size: 1em;
+    cursor: pointer;
+}
+    </textarea>
+    <textarea class="cr-code" data-filename="script.js" style="display:none">
+var clicks = 0;
 
-Files can be deleted by hovering over them in the file tree and clicking the × button (the last remaining file cannot be deleted).
+function increment() {
+    clicks++;
+    document.getElementById("count").textContent = clicks;
+}
+    </textarea>
+</div>
+```
+
+---
+
+### Example 4 — Multi-page website (HTML + CSS + second page)
+
+Four files: a home page, an about page, a shared stylesheet, and a nav that links between pages. Clicking links inside the preview navigates between pages — the runner intercepts the click and loads the correct file.
+
+```html
+<div class="html-runner">
+    <textarea class="cr-code" data-filename="index.html" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+    </nav>
+    <main>
+        <h1>Home Page</h1>
+        <p>Welcome to my website. Click About to learn more.</p>
+    </main>
+</body>
+</html>
+    </textarea>
+    <textarea class="cr-code" data-filename="about.html" style="display:none">
+<!DOCTYPE html>
+<html>
+<head>
+    <title>About</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+    </nav>
+    <main>
+        <h1>About Page</h1>
+        <p>This is the about page. Click Home to go back.</p>
+    </main>
+</body>
+</html>
+    </textarea>
+    <textarea class="cr-code" data-filename="style.css" style="display:none">
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+
+nav {
+    background: #003366;
+    padding: 12px 20px;
+    display: flex;
+    gap: 20px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 40px;
+}
+    </textarea>
+</div>
+```
+
+---
+
+### Rules and notes
+
+| Rule | Detail |
+|---|---|
+| **Entry point** | The preview always renders `index.html` first. If there is no `index.html`, the first `.html` file in the list is used. |
+| **No `data-filename`** | A textarea without `data-filename` is treated as `index.html`. |
+| **File naming** | Use `.html`, `.css`, or `.js` extensions. The file tree icon changes automatically based on extension. |
+| **CSS inlining** | `<link rel="stylesheet" href="name.css">` is replaced by an inline `<style>` block before rendering. Only filename is matched — path prefixes like `css/style.css` are stripped. |
+| **JS inlining** | `<script src="name.js"></script>` is replaced by an inline `<script>` block before rendering. Same path-stripping rule applies. |
+| **Page navigation** | `<a href="page2.html">` clicks inside the preview are intercepted and load the matching file. Anchor links (`#section`) and external URLs work normally. |
+| **Reset button** | Returns all files to their original starter content and removes any uploaded images. |
+| **Student additions** | Students can add extra files with **+ New file** and delete files by hovering and clicking ×. The last file cannot be deleted. |
 
 ### Image uploads
 
-Students click **📷 Image** in the toolbar to upload image files from their device. Uploaded images appear as thumbnails in a strip below the toolbar. Writing `<img src="cat.jpg">` in the HTML will automatically use the uploaded `cat.jpg` — path prefixes like `images/cat.jpg` are also matched by filename alone.
+Students click **📷 Image** in the toolbar to select one or more image files from their device. Uploaded images appear as thumbnails in a strip below the toolbar. Any `<img src="filename.jpg">` in the HTML that matches an uploaded filename is automatically substituted with a data URL before rendering — no server upload required. Path prefixes (`images/cat.jpg`) are stripped, so only the filename needs to match.
 
 ---
 
