@@ -112,3 +112,4 @@ Preferred communication style: Simple, everyday language.
 
 **Environment Variables Optional**
 - `GOOGLE_TTS_KEY`: Google Cloud Text-to-Speech API key. If set, TTS uses Google's Neural2 voice (en-GB-Neural2-A). If not set, TTS falls back to browser's Web Speech API.
+- `TEACHER_PASSWORD`: Password for the sandbox builder teacher tool at `/tools/sandbox-builder.html`. Defaults to `bhs-computing` if not set.

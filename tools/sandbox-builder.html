@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandbox Builder — BHS Computing Science</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { font-family: Arial, sans-serif; background: #0d1117; color: #e6edf3; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* ── header ── */
+        header { background: #002060; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 16px; }
+        header h1 { font-size: 1.1rem; color: white; }
+        header p  { font-size: 0.8rem; color: rgba(255,255,255,0.65); }
+        .hdr-right { display: flex; align-items: center; gap: 12px; }
+        .auth-status { font-size: 0.8rem; padding: 4px 10px; border-radius: 12px; }
+        .auth-status.ok  { background: #1a4a1a; color: #7ee787; }
+        .auth-status.bad { background: #4a1a1a; color: #f87171; }
+
+        /* ── auth overlay ── */
+        #authOverlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            display: flex; align-items: center; justify-content: center; z-index: 100;
+        }
+        .auth-box {
+            background: #161b22; border: 1px solid #30363d; border-radius: 12px;
+            padding: 36px; width: 340px; text-align: center;
+        }
+        .auth-box h2 { margin-bottom: 8px; font-size: 1.2rem; }
+        .auth-box p  { font-size: 0.85rem; color: #8b949e; margin-bottom: 20px; }
+        .auth-box input {
+            width: 100%; padding: 10px 14px; background: #0d1117; border: 1px solid #30363d;
+            border-radius: 6px; color: #e6edf3; font-size: 0.95rem; margin-bottom: 12px;
+        }
+        .auth-box input:focus { outline: none; border-color: #58a6ff; }
+        .auth-box .err { color: #f87171; font-size: 0.8rem; margin-bottom: 10px; }
+        .btn-primary {
+            background: #1f6feb; color: white; border: none; border-radius: 6px;
+            padding: 10px 24px; font-size: 0.9rem; font-weight: bold; cursor: pointer; width: 100%;
+        }
+        .btn-primary:hover { background: #388bfd; }
+
+        /* ── main layout ── */
+        .app { display: flex; flex: 1; overflow: hidden; }
+
+        /* ── sidebar: sandbox list ── */
+        .sidebar {
+            width: 220px; background: #161b22; border-right: 1px solid #30363d;
+            display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden;
+        }
+        .sidebar-hdr {
+            padding: 12px 14px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase;
+            letter-spacing: 0.06em; color: #8b949e; border-bottom: 1px solid #30363d;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .btn-new-sb {
+            background: #1f6feb; color: white; border: none; border-radius: 4px;
+            padding: 2px 8px; font-size: 0.75rem; cursor: pointer;
+        }
+        .btn-new-sb:hover { background: #388bfd; }
+        .sb-list { flex: 1; overflow-y: auto; }
+        .sb-item {
+            padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #21262d;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .sb-item:hover { background: #1c2128; }
+        .sb-item.active { background: #1c2128; border-left: 3px solid #1f6feb; }
+        .sb-item .sb-icon { font-size: 1rem; flex-shrink: 0; }
+        .sb-item .sb-info { flex: 1; overflow: hidden; }
+        .sb-item .sb-title { font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sb-item .sb-name  { font-size: 0.7rem; color: #8b949e; }
+        .sb-item .sb-del { background: none; border: none; color: #8b949e; cursor: pointer; font-size: 0.8rem; padding: 2px 4px; border-radius: 3px; opacity: 0; }
+        .sb-item:hover .sb-del { opacity: 1; }
+        .sb-item .sb-del:hover { color: #f87171; background: #3d1a1a; }
+
+        /* ── editor pane ── */
+        .editor-pane { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* ── meta bar (name, title, type) ── */
+        .meta-bar {
+            background: #161b22; border-bottom: 1px solid #30363d;
+            padding: 10px 16px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; flex-wrap: wrap;
+        }
+        .meta-bar label { font-size: 0.75rem; color: #8b949e; margin-right: 4px; }
+        .meta-input {
+            background: #0d1117; border: 1px solid #30363d; border-radius: 6px;
+            color: #e6edf3; padding: 5px 10px; font-size: 0.85rem;
+        }
+        .meta-input:focus { outline: none; border-color: #58a6ff; }
+        #sbId   { width: 160px; }
+        #sbTitle { width: 220px; }
+        select.meta-input { cursor: pointer; }
+        .meta-spacer { flex: 1; }
+        .btn-save {
+            background: #238636; color: white; border: none; border-radius: 6px;
+            padding: 6px 18px; font-size: 0.85rem; font-weight: bold; cursor: pointer;
+        }
+        .btn-save:hover { background: #2ea043; }
+        .save-msg { font-size: 0.8rem; }
+        .save-msg.ok  { color: #7ee787; }
+        .save-msg.err { color: #f87171; }
+
+        /* ── file workspace ── */
+        .workspace { flex: 1; display: flex; overflow: hidden; }
+
+        /* ── file tree ── */
+        .filetree {
+            width: 160px; background: #0d1117; border-right: 1px solid #30363d;
+            display: flex; flex-direction: column; flex-shrink: 0;
+        }
+        .ft-hdr {
+            padding: 8px 10px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase;
+            letter-spacing: 0.06em; color: #8b949e; border-bottom: 1px solid #21262d;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .ft-add-btn {
+            background: none; border: none; color: #58a6ff; cursor: pointer; font-size: 0.75rem;
+            padding: 0; line-height: 1;
+        }
+        .ft-add-btn:hover { color: #79c0ff; }
+        .ft-list { flex: 1; overflow-y: auto; list-style: none; padding: 4px 0; }
+        .ft-item {
+            display: flex; align-items: center; gap: 6px; padding: 6px 10px;
+            cursor: pointer; border-radius: 4px; margin: 1px 4px; position: relative;
+        }
+        .ft-item:hover { background: #1c2128; }
+        .ft-item.active { background: #1c2128; border-left: 2px solid #58a6ff; padding-left: 8px; }
+        .ft-icon { font-size: 0.9rem; flex-shrink: 0; }
+        .ft-name { font-size: 0.8rem; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ft-del { background: none; border: none; color: #8b949e; cursor: pointer; font-size: 0.7rem;
+                  opacity: 0; padding: 1px 3px; border-radius: 2px; }
+        .ft-item:hover .ft-del { opacity: 1; }
+        .ft-del:hover { color: #f87171; }
+        .ft-upload { border-top: 1px solid #21262d; padding: 8px; }
+        .ft-upload-btn {
+            width: 100%; background: #1c2128; border: 1px dashed #30363d; border-radius: 4px;
+            color: #8b949e; font-size: 0.75rem; padding: 6px; cursor: pointer; text-align: center;
+        }
+        .ft-upload-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+        #uploadInput { display: none; }
+
+        /* ── code editor ── */
+        .code-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        #codeEditor {
+            flex: 1; background: #0d1117; color: #e6edf3; border: none; resize: none;
+            font-family: 'Courier New', Consolas, monospace; font-size: 0.85rem; line-height: 1.6;
+            padding: 14px 16px; outline: none; tab-size: 4;
+        }
+
+        /* ── bottom bar: embed code ── */
+        .embed-bar {
+            background: #161b22; border-top: 1px solid #30363d; padding: 10px 16px;
+            flex-shrink: 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+        }
+        .embed-bar label { font-size: 0.75rem; color: #8b949e; flex-shrink: 0; }
+        .embed-code {
+            flex: 1; background: #0d1117; border: 1px solid #30363d; border-radius: 6px;
+            color: #79c0ff; font-family: 'Courier New', monospace; font-size: 0.78rem;
+            padding: 6px 10px; white-space: nowrap; overflow-x: auto; min-width: 0;
+        }
+        .btn-copy-embed {
+            background: #21262d; border: 1px solid #30363d; color: #e6edf3; border-radius: 6px;
+            padding: 6px 14px; font-size: 0.8rem; cursor: pointer; flex-shrink: 0;
+        }
+        .btn-copy-embed:hover { background: #30363d; }
+        .btn-copy-embed.copied { background: #1a4a1a; color: #7ee787; border-color: #238636; }
+        .embed-bar-empty { color: #8b949e; font-size: 0.8rem; font-style: italic; }
+
+        /* ── empty state ── */
+        .empty-editor {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #8b949e; gap: 12px; text-align: center; padding: 40px;
+        }
+        .empty-editor .big { font-size: 3rem; }
+        .empty-editor h2 { font-size: 1.1rem; color: #e6edf3; }
+        .btn-create-first {
+            background: #1f6feb; color: white; border: none; border-radius: 6px;
+            padding: 10px 24px; font-size: 0.9rem; font-weight: bold; cursor: pointer; margin-top: 8px;
+        }
+        .btn-create-first:hover { background: #388bfd; }
+    </style>
+</head>
+<body>
+
+<!-- auth overlay -->
+<div id="authOverlay">
+    <div class="auth-box">
+        <h2>Teacher Login</h2>
+        <p>Enter the teacher password to access the sandbox builder.</p>
+        <input type="password" id="pwInput" placeholder="Password" autocomplete="current-password">
+        <div class="err" id="pwErr" style="display:none;">Incorrect password.</div>
+        <button class="btn-primary" id="pwBtn">Continue</button>
+    </div>
+</div>
+
+<header>
+    <div>
+        <h1>Sandbox Builder</h1>
+        <p>BHS Computing Science — Teacher Tool</p>
+    </div>
+    <div class="hdr-right">
+        <span class="auth-status ok" id="authBadge">Authenticated</span>
+    </div>
+</header>
+
+<div class="app">
+
+    <!-- sidebar: sandbox list -->
+    <div class="sidebar">
+        <div class="sidebar-hdr">
+            Sandboxes
+            <button class="btn-new-sb" id="newSbBtn">+ New</button>
+        </div>
+        <div class="sb-list" id="sbList">
+            <div style="padding:16px;color:#8b949e;font-size:0.8rem;">Loading…</div>
+        </div>
+    </div>
+
+    <!-- editor pane -->
+    <div class="editor-pane" id="editorPane">
+
+        <!-- empty state shown when nothing selected -->
+        <div class="empty-editor" id="emptyEditor">
+            <div class="big">📦</div>
+            <h2>No sandbox selected</h2>
+            <p>Choose one from the list, or create a new one.</p>
+            <button class="btn-create-first" id="createFirstBtn">+ Create first sandbox</button>
+        </div>
+
+        <!-- meta bar (hidden until sandbox loaded) -->
+        <div class="meta-bar" id="metaBar" style="display:none;">
+            <div>
+                <label for="sbId">ID (URL-safe)</label>
+                <input type="text" class="meta-input" id="sbId" placeholder="e.g. higher-filehandling">
+            </div>
+            <div>
+                <label for="sbTitle">Title</label>
+                <input type="text" class="meta-input" id="sbTitle" placeholder="Displayed in builder list">
+            </div>
+            <div>
+                <label for="sbType">Type</label>
+                <select class="meta-input" id="sbType">
+                    <option value="html">HTML / CSS / JS</option>
+                    <option value="python">Python + data files</option>
+                </select>
+            </div>
+            <div class="meta-spacer"></div>
+            <span class="save-msg" id="saveMsg"></span>
+            <button class="btn-save" id="saveBtn">💾 Save</button>
+        </div>
+
+        <!-- workspace (hidden until sandbox loaded) -->
+        <div class="workspace" id="workspace" style="display:none;">
+
+            <div class="filetree">
+                <div class="ft-hdr">
+                    Files
+                    <button class="ft-add-btn" id="addFileBtn" title="New file">+ file</button>
+                </div>
+                <ul class="ft-list" id="ftList"></ul>
+                <div class="ft-upload">
+                    <label class="ft-upload-btn" title="Upload data files (CSV, TXT) or images">
+                        ⬆ Upload file
+                        <input type="file" id="uploadInput" multiple accept=".csv,.txt,.json,.png,.jpg,.jpeg,.gif,.svg,.webp">
+                    </label>
+                </div>
+            </div>
+
+            <div class="code-area">
+                <textarea id="codeEditor" spellcheck="false" placeholder="Select a file to edit…"></textarea>
+            </div>
+
+        </div>
+
+        <!-- embed bar (hidden until sandbox saved) -->
+        <div class="embed-bar" id="embedBar" style="display:none;">
+            <label>Embed:</label>
+            <div class="embed-code" id="embedCode"></div>
+            <button class="btn-copy-embed" id="copyEmbedBtn">Copy</button>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    /* ── state ── */
+    var password = sessionStorage.getItem('sbPassword') || '';
+    var sandboxes = [];   /* [{name, type, title}] */
+    var current = null;   /* { name, type, title, files:{} } */
+    var activeFile = null;
+
+    /* ── elements ── */
+    var authOverlay    = document.getElementById('authOverlay');
+    var pwInput        = document.getElementById('pwInput');
+    var pwBtn          = document.getElementById('pwBtn');
+    var pwErr          = document.getElementById('pwErr');
+    var sbList         = document.getElementById('sbList');
+    var emptyEditor    = document.getElementById('emptyEditor');
+    var metaBar        = document.getElementById('metaBar');
+    var workspace      = document.getElementById('workspace');
+    var embedBar       = document.getElementById('embedBar');
+    var sbIdInput      = document.getElementById('sbId');
+    var sbTitleInput   = document.getElementById('sbTitle');
+    var sbTypeSelect   = document.getElementById('sbType');
+    var saveBtn        = document.getElementById('saveBtn');
+    var saveMsg        = document.getElementById('saveMsg');
+    var ftList         = document.getElementById('ftList');
+    var addFileBtn     = document.getElementById('addFileBtn');
+    var codeEditor     = document.getElementById('codeEditor');
+    var uploadInput    = document.getElementById('uploadInput');
+    var embedCode      = document.getElementById('embedCode');
+    var copyEmbedBtn   = document.getElementById('copyEmbedBtn');
+    var newSbBtn       = document.getElementById('newSbBtn');
+    var createFirstBtn = document.getElementById('createFirstBtn');
+
+    /* ── auth ── */
+    function tryAuth(pw) {
+        fetch('/api/sandboxes', { headers: { 'X-Teacher-Password': pw } })
+            .then(function (r) {
+                if (r.status === 401) throw new Error('bad');
+                return r.json();
+            })
+            .then(function (data) {
+                password = pw;
+                sessionStorage.setItem('sbPassword', pw);
+                authOverlay.style.display = 'none';
+                sandboxes = data;
+                renderSbList();
+            })
+            .catch(function () {
+                pwErr.style.display = 'block';
+            });
+    }
+
+    if (password) {
+        tryAuth(password);
+    } else {
+        authOverlay.style.display = 'flex';
+    }
+
+    pwBtn.addEventListener('click', function () { tryAuth(pwInput.value); });
+    pwInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryAuth(pwInput.value); });
+
+    /* ── sandbox list ── */
+    function typeIcon(t) { return t === 'python' ? '🐍' : '🌐'; }
+
+    function renderSbList() {
+        if (sandboxes.length === 0) {
+            sbList.innerHTML = '<div style="padding:16px;color:#8b949e;font-size:0.8rem;">No sandboxes yet.</div>';
+            return;
+        }
+        sbList.innerHTML = sandboxes.map(function (s) {
+            var active = current && current.name === s.name ? ' active' : '';
+            return '<div class="sb-item' + active + '" data-name="' + s.name + '">' +
+                '<span class="sb-icon">' + typeIcon(s.type) + '</span>' +
+                '<div class="sb-info">' +
+                  '<div class="sb-title">' + esc(s.title || s.name) + '</div>' +
+                  '<div class="sb-name">' + esc(s.name) + '</div>' +
+                '</div>' +
+                '<button class="sb-del" data-name="' + s.name + '" title="Delete">🗑</button>' +
+            '</div>';
+        }).join('');
+
+        sbList.querySelectorAll('.sb-item').forEach(function (el) {
+            el.addEventListener('click', function (e) {
+                if (e.target.classList.contains('sb-del')) return;
+                loadSandbox(el.dataset.name);
+            });
+        });
+        sbList.querySelectorAll('.sb-del').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (!confirm('Delete sandbox "' + btn.dataset.name + '"?')) return;
+                deleteSandbox(btn.dataset.name);
+            });
+        });
+    }
+
+    function loadSandbox(name) {
+        fetch('/api/sandboxes/' + name)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                current = { name: name, type: data.type || 'html', title: data.title || name, files: data.files || {} };
+                activeFile = Object.keys(current.files)[0] || null;
+                renderEditor();
+                renderSbList();
+            });
+    }
+
+    function deleteSandbox(name) {
+        fetch('/api/sandboxes/' + name, {
+            method: 'DELETE',
+            headers: { 'X-Teacher-Password': password }
+        }).then(function () {
+            sandboxes = sandboxes.filter(function (s) { return s.name !== name; });
+            if (current && current.name === name) { current = null; activeFile = null; renderEditor(); }
+            renderSbList();
+        });
+    }
+
+    /* ── new sandbox ── */
+    function createNew() {
+        current = { name: '', type: 'html', title: '', files: { 'index.html': '<!DOCTYPE html>\n<html>\n<head>\n    <title>My Page</title>\n</head>\n<body>\n\n</body>\n</html>' } };
+        activeFile = 'index.html';
+        renderEditor();
+        renderSbList();
+        sbIdInput.focus();
+    }
+    newSbBtn.addEventListener('click', createNew);
+    createFirstBtn.addEventListener('click', createNew);
+
+    /* ── render editor ── */
+    function renderEditor() {
+        if (!current) {
+            emptyEditor.style.display = 'flex';
+            metaBar.style.display     = 'none';
+            workspace.style.display   = 'none';
+            embedBar.style.display    = 'none';
+            return;
+        }
+        emptyEditor.style.display = 'none';
+        metaBar.style.display     = 'flex';
+        workspace.style.display   = 'flex';
+
+        sbIdInput.value    = current.name;
+        sbTitleInput.value = current.title;
+        sbTypeSelect.value = current.type;
+
+        renderFileTree();
+        renderEmbed();
+    }
+
+    /* ── file tree ── */
+    function ftIcon(name) {
+        if (name.endsWith('.css'))  return '🎨';
+        if (name.endsWith('.js'))   return '⚙️';
+        if (name.endsWith('.py'))   return '🐍';
+        if (name.endsWith('.csv'))  return '📊';
+        if (name.endsWith('.txt'))  return '📝';
+        if (name.endsWith('.json')) return '📋';
+        if (/\.(png|jpg|jpeg|gif|svg|webp)$/i.test(name)) return '🖼️';
+        return '📄';
+    }
+
+    function renderFileTree() {
+        var names = Object.keys(current.files);
+        ftList.innerHTML = names.map(function (name) {
+            var active = name === activeFile ? ' active' : '';
+            var canDel = names.length > 1 ? '<button class="ft-del" data-name="' + name + '" title="Delete">×</button>' : '';
+            return '<li class="ft-item' + active + '" data-name="' + name + '">' +
+                '<span class="ft-icon">' + ftIcon(name) + '</span>' +
+                '<span class="ft-name">' + esc(name) + '</span>' +
+                canDel + '</li>';
+        }).join('');
+
+        ftList.querySelectorAll('.ft-item').forEach(function (li) {
+            li.addEventListener('click', function (e) {
+                if (e.target.classList.contains('ft-del')) return;
+                switchFile(li.dataset.name);
+            });
+        });
+        ftList.querySelectorAll('.ft-del').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var name = btn.dataset.name;
+                delete current.files[name];
+                if (activeFile === name) activeFile = Object.keys(current.files)[0] || null;
+                renderFileTree();
+                if (activeFile) codeEditor.value = current.files[activeFile] || '';
+            });
+        });
+
+        if (activeFile && current.files[activeFile] !== undefined) {
+            codeEditor.value = current.files[activeFile];
+        }
+        codeEditor.disabled = !activeFile || isBinary(activeFile);
+        codeEditor.placeholder = isBinary(activeFile) ? '(binary file — cannot edit as text)' : 'Select a file to edit…';
+    }
+
+    function isBinary(name) {
+        return name && /\.(png|jpg|jpeg|gif|webp)$/i.test(name);
+    }
+
+    function switchFile(name) {
+        if (activeFile) current.files[activeFile] = codeEditor.value;
+        activeFile = name;
+        renderFileTree();
+    }
+
+    /* ── add file ── */
+    addFileBtn.addEventListener('click', function () {
+        var name = (prompt('New file name (e.g. style.css, data.csv, main.py):') || '').trim();
+        if (!name) return;
+        if (!name.includes('.')) name += current.type === 'python' ? '.py' : '.html';
+        if (current.files[name] !== undefined) { switchFile(name); return; }
+        current.files[name] = defaultContent(name);
+        activeFile = name;
+        renderFileTree();
+    });
+
+    function defaultContent(name) {
+        if (name.endsWith('.py'))   return '# ' + name + '\n';
+        if (name.endsWith('.css'))  return '/* ' + name + ' */\n';
+        if (name.endsWith('.js'))   return '// ' + name + '\n';
+        if (name.endsWith('.csv'))  return 'column1,column2\nvalue1,value2\n';
+        if (name.endsWith('.txt'))  return '';
+        return '<!DOCTYPE html>\n<html>\n<head>\n    <title>' + name + '</title>\n</head>\n<body>\n\n</body>\n</html>';
+    }
+
+    /* ── upload files ── */
+    uploadInput.addEventListener('change', function () {
+        var files = Array.from(uploadInput.files);
+        if (!files.length) return;
+        var pending = files.length;
+        files.forEach(function (f) {
+            var isBin = /\.(png|jpg|jpeg|gif|webp)$/i.test(f.name);
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                current.files[f.name] = e.target.result;
+                if (--pending === 0) {
+                    activeFile = files[files.length - 1].name;
+                    renderFileTree();
+                }
+            };
+            if (isBin) reader.readAsDataURL(f);
+            else reader.readAsText(f);
+        });
+        uploadInput.value = '';
+    });
+
+    /* ── type change → swap default file ── */
+    sbTypeSelect.addEventListener('change', function () {
+        current.type = sbTypeSelect.value;
+        renderEmbed();
+    });
+
+    /* ── save ── */
+    codeEditor.addEventListener('input', function () {
+        if (activeFile) current.files[activeFile] = codeEditor.value;
+    });
+
+    saveBtn.addEventListener('click', function () {
+        if (activeFile) current.files[activeFile] = codeEditor.value;
+
+        var name = sbIdInput.value.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
+        if (!name) { flashMsg('Sandbox ID required', false); return; }
+
+        current.name  = name;
+        current.title = sbTitleInput.value || name;
+        current.type  = sbTypeSelect.value;
+
+        fetch('/api/sandboxes/' + name, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Teacher-Password': password },
+            body: JSON.stringify({ type: current.type, title: current.title, files: current.files })
+        }).then(function (r) { return r.json(); })
+          .then(function (d) {
+              if (d.ok) {
+                  flashMsg('Saved ✓', true);
+                  /* update or add to list */
+                  var existing = sandboxes.find(function (s) { return s.name === name; });
+                  if (existing) { existing.title = current.title; existing.type = current.type; }
+                  else sandboxes.push({ name: name, type: current.type, title: current.title });
+                  renderSbList();
+                  renderEmbed();
+              } else {
+                  flashMsg('Save failed', false);
+              }
+          })
+          .catch(function () { flashMsg('Save failed', false); });
+    });
+
+    function flashMsg(msg, ok) {
+        saveMsg.textContent = msg;
+        saveMsg.className = 'save-msg ' + (ok ? 'ok' : 'err');
+        setTimeout(function () { saveMsg.textContent = ''; }, 3000);
+    }
+
+    /* ── embed code ── */
+    function renderEmbed() {
+        if (!current || !current.name) {
+            embedBar.style.display = 'none';
+            return;
+        }
+        embedBar.style.display = 'flex';
+        var cls = current.type === 'python' ? 'py-runner' : 'html-runner';
+        embedCode.textContent = '<div class="' + cls + '" data-sandbox="' + current.name + '"></div>';
+    }
+
+    copyEmbedBtn.addEventListener('click', function () {
+        navigator.clipboard.writeText(embedCode.textContent).then(function () {
+            copyEmbedBtn.textContent = 'Copied!';
+            copyEmbedBtn.classList.add('copied');
+            setTimeout(function () {
+                copyEmbedBtn.textContent = 'Copy';
+                copyEmbedBtn.classList.remove('copied');
+            }, 2000);
+        });
+    });
+
+    /* ── utils ── */
+    function esc(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+</script>
+
+</body>
+</html>

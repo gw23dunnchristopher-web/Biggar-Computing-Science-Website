@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { db, pool, hasDatabase } from './db';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
@@ -180,6 +181,75 @@ function parseGeminiResponse(text: string, questions: Array<{marks: number}>): A
     return { marksAwarded, feedback };
   });
 }
+
+// ---------------------------------------------------------------------------
+// Sandbox API — named collections of starter files for the code runner
+// ---------------------------------------------------------------------------
+const STARTERS_DIR = path.join(process.cwd(), 'starters');
+if (!fs.existsSync(STARTERS_DIR)) fs.mkdirSync(STARTERS_DIR, { recursive: true });
+
+const TEACHER_PASSWORD = process.env.TEACHER_PASSWORD || 'bhs-computing';
+
+function requireTeacher(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const pw = req.headers['x-teacher-password'] as string | undefined;
+  if (!pw || pw !== TEACHER_PASSWORD) {
+    return res.status(401).json({ error: 'Unauthorised' });
+  }
+  next();
+}
+
+function safeName(raw: string): string {
+  return raw.replace(/[^a-z0-9_-]/gi, '').substring(0, 80);
+}
+
+app.get('/api/sandboxes', (_req, res) => {
+  try {
+    const entries = fs.readdirSync(STARTERS_DIR)
+      .filter(f => f.endsWith('.json'))
+      .map(f => {
+        const name = f.replace('.json', '');
+        try {
+          const data = JSON.parse(fs.readFileSync(path.join(STARTERS_DIR, f), 'utf8'));
+          return { name, type: data.type || 'html', title: data.title || name };
+        } catch { return { name, type: 'html', title: name }; }
+      });
+    res.json(entries);
+  } catch (err) {
+    res.status(500).json({ error: 'Could not list sandboxes' });
+  }
+});
+
+app.get('/api/sandboxes/:name', (req, res) => {
+  const name = safeName(req.params.name);
+  const filePath = path.join(STARTERS_DIR, name + '.json');
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Sandbox not found' });
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    res.type('application/json').send(data);
+  } catch {
+    res.status(500).json({ error: 'Could not read sandbox' });
+  }
+});
+
+app.post('/api/sandboxes/:name', requireTeacher, (req, res) => {
+  const name = safeName(req.params.name);
+  if (!name) return res.status(400).json({ error: 'Invalid sandbox name' });
+  const filePath = path.join(STARTERS_DIR, name + '.json');
+  try {
+    const payload = { type: req.body.type || 'html', title: req.body.title || name, files: req.body.files || {} };
+    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf8');
+    res.json({ ok: true, name });
+  } catch {
+    res.status(500).json({ error: 'Could not save sandbox' });
+  }
+});
+
+app.delete('/api/sandboxes/:name', requireTeacher, (req, res) => {
+  const name = safeName(req.params.name);
+  const filePath = path.join(STARTERS_DIR, name + '.json');
+  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  res.json({ ok: true });
+});
 
 const publicRoot = path.resolve('.');
 app.use(express.static(publicRoot, {

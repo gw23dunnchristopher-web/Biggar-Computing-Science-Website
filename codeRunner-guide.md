@@ -323,6 +323,30 @@ main {
 
 ---
 
+### Alternative — reference external files with `data-files`
+
+If you already have your HTML, CSS and JS written in a separate editor, you can upload the files to the server and point the runner at them directly. The lesson page then stays tiny:
+
+```html
+<div class="html-runner"
+     data-files="starters/my-lesson/index.html,
+                 starters/my-lesson/style.css,
+                 starters/my-lesson/about.html">
+</div>
+```
+
+The runner fetches each file when the page loads, builds the virtual filesystem from them, and renders exactly as if the content had been written inline. The file order in `data-files` controls the order in the file tree (and which `.html` file becomes the entry point — the first one wins).
+
+**Workflow:**
+
+1. Build your pages in VS Code, Notepad++, or any editor and test them locally.
+2. Upload the finished files to a folder inside the project, e.g. `starters/my-lesson/`.
+3. Add the `<div class="html-runner" data-files="...">` line to your lesson page — no other content needed inside the div.
+
+**Use the builder tool** at `/tools/runner-builder.html` — it reads your files and can generate either the inline textarea block *or* just the `data-files` reference line, depending on which approach you prefer.
+
+---
+
 ### Rules and notes
 
 | Rule | Detail |

@@ -51,13 +51,64 @@
         throw new Error('__INPUT_REQUIRED__');
     };
 
-    /* ── build a Python runner ── */
+    /* ── Python runner entry point ── */
     function initPyRunner(container) {
-        var stored = container.querySelector('textarea.cr-code');
-        if (!stored) return;
-        var original = stored.value.replace(/^\n/, '').replace(/\n$/, '');
+        var sandbox = (container.getAttribute('data-sandbox') || '').trim();
 
+        if (sandbox) {
+            /* fetch from saved sandbox */
+            container.classList.add('code-runner');
+            container.innerHTML = '<div style="padding:16px;color:#aaa;font-family:Arial,sans-serif;">Loading\u2026</div>';
+            fetch('/api/sandboxes/' + sandbox)
+                .then(function (r) {
+                    if (!r.ok) throw new Error('Sandbox not found: ' + sandbox);
+                    return r.json();
+                })
+                .then(function (data) {
+                    container.innerHTML = '';
+                    container.classList.remove('code-runner');
+                    buildPyRunner(container, data.files || {});
+                })
+                .catch(function (err) {
+                    container.innerHTML = '<div style="padding:16px;color:#c00;font-family:Arial,sans-serif;">\u26A0 ' + err.message + '</div>';
+                });
+            return;
+        }
+
+        /* textarea-based (single or multi file) */
+        var storedAll = container.querySelectorAll('textarea.cr-code');
+        if (!storedAll.length) return;
+        var originals = {};
+        storedAll.forEach(function (ta) {
+            var name = (ta.dataset.filename || 'main.py').trim();
+            originals[name] = ta.value.replace(/^\n/, '').replace(/\n$/, '');
+        });
+        buildPyRunner(container, originals);
+    }
+
+    function buildPyRunner(container, originals) {
+        /* determine if multi-file layout needed */
+        var fileNames  = Object.keys(originals);
+        var multiFile  = fileNames.length > 1;
+        /* pick the main python file to run */
+        var mainFile   = originals['main.py'] !== undefined ? 'main.py'
+                       : fileNames.find(function (f) { return f.endsWith('.py'); })
+                       || fileNames[0];
+
+        /* ── build HTML ── */
         container.classList.add('code-runner');
+
+        var ftHtml = multiFile
+            ? '<div class="cr-filetree">' +
+              '  <div class="cr-filetree-hdr">Files</div>' +
+              '  <ul class="cr-file-list"></ul>' +
+              '</div>'
+            : '';
+
+        var workspaceWrap = multiFile
+            ? '<div class="cr-workspace">' + ftHtml + '<textarea class="cr-editor" spellcheck="false"></textarea></div>'
+            : '<textarea class="cr-editor" spellcheck="false"></textarea>';
+
         container.innerHTML =
             '<div class="cr-toolbar">' +
             '  <span class="cr-lang">&#x1F40D; Python</span>' +
@@ -66,7 +117,7 @@
             '    <button class="cr-reset-btn">&#8635; Reset</button>' +
             '  </div>' +
             '</div>' +
-            '<textarea class="cr-editor" spellcheck="false"></textarea>' +
+            workspaceWrap +
             '<div class="cr-output-area">' +
             '  <div class="cr-output-label">Output</div>' +
             '  <textarea class="cr-terminal" readonly spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off">Click Run to execute the code\u2026</textarea>' +
@@ -77,14 +128,50 @@
         var runBtn   = container.querySelector('.cr-run-btn');
         var resetBtn = container.querySelector('.cr-reset-btn');
 
-        editor.value = original;
+        /* ── virtual filesystem ── */
+        var vfs        = Object.assign({}, originals);
+        var activeFile = mainFile;
 
-        /* state */
+        editor.value = vfs[activeFile] || '';
+
+        /* ── file tree (multi-file only) ── */
+        function pyFileIcon(name) {
+            if (name.endsWith('.py'))  return '&#x1F40D;';
+            if (name.endsWith('.csv')) return '&#x1F4CA;';
+            if (name.endsWith('.txt')) return '&#x1F4DD;';
+            if (name.endsWith('.json')) return '&#x1F4CB;';
+            return '&#x1F4C4;';
+        }
+
+        function renderPyFileTree() {
+            if (!multiFile) return;
+            var ftList = container.querySelector('.cr-file-list');
+            ftList.innerHTML = Object.keys(vfs).map(function (name) {
+                var active = name === activeFile ? ' cr-file-active' : '';
+                var badge  = name === mainFile ? ' <span style="font-size:0.65rem;color:#888;margin-left:4px;">(runs)</span>' : '';
+                return '<li class="cr-file-item' + active + '" data-name="' + name + '">' +
+                    '<span class="cr-file-icon">' + pyFileIcon(name) + '</span>' +
+                    '<span class="cr-file-name">' + name + badge + '</span>' +
+                    '</li>';
+            }).join('');
+
+            ftList.querySelectorAll('.cr-file-item').forEach(function (li) {
+                li.addEventListener('click', function () {
+                    vfs[activeFile] = editor.value;
+                    activeFile = li.dataset.name;
+                    editor.value = vfs[activeFile] || '';
+                    renderPyFileTree();
+                });
+            });
+        }
+
+        if (multiFile) renderPyFileTree();
+
+        /* ── input state ── */
         var collectedInputs = [];
         var awaitingInput   = false;
         var baselineLen     = 0;
 
-        /* ── protect baseline content when awaiting input ── */
         terminal.addEventListener('input', function () {
             if (!awaitingInput) return;
             if (terminal.value.length < baselineLen) {
@@ -95,7 +182,6 @@
         terminal.addEventListener('keydown', function (e) {
             if (!awaitingInput) { e.preventDefault(); return; }
 
-            /* prevent moving cursor before the baseline */
             if (e.key === 'ArrowLeft' || e.key === 'Home' ||
                 e.key === 'ArrowUp'   || e.key === 'PageUp') {
                 var pos = terminal.selectionStart;
@@ -105,19 +191,15 @@
             if (e.key === 'Enter') {
                 e.preventDefault();
                 var typed = terminal.value.substring(baselineLen);
-                /* append newline to terminal so output continues on next line */
                 terminal.value += '\n';
-                /* lock terminal again */
                 awaitingInput = false;
                 terminal.readOnly = true;
                 terminal.classList.remove('cr-waiting');
-                /* queue input and re-run */
                 collectedInputs.push(typed);
                 executeCode();
             }
         });
 
-        /* keep cursor at/after baseline when clicking */
         terminal.addEventListener('click', function () {
             if (!awaitingInput) return;
             if (terminal.selectionStart < baselineLen) {
@@ -126,6 +208,7 @@
             }
         });
 
+        /* ── execute ── */
         async function executeCode() {
             if (!pyodideReady) {
                 terminal.readOnly = true;
@@ -133,41 +216,40 @@
                 terminal.className = 'cr-terminal cr-loading';
             }
 
-            var pyodide = await getPyodide();
+            /* save current editor content */
+            vfs[activeFile] = editor.value;
 
+            var pyodide = await getPyodide();
             _inputQueue = collectedInputs.slice();
             _inputPos   = 0;
 
-            /* load any packages the code imports (dataclasses, random, numpy, etc.) */
-            try {
-                await pyodide.loadPackagesFromImports(editor.value);
-            } catch (_) {}
+            /* write data files to Pyodide's virtual filesystem */
+            if (multiFile) {
+                Object.keys(vfs).forEach(function (name) {
+                    if (!name.endsWith('.py')) {
+                        try { pyodide.FS.writeFile(name, vfs[name], { encoding: 'utf8' }); } catch (_) {}
+                    }
+                });
+            }
 
-            /* redirect stdout */
+            var codeToRun = vfs[mainFile] || '';
+
+            try { await pyodide.loadPackagesFromImports(codeToRun); } catch (_) {}
+
             pyodide.runPython(
-                'import sys, io\n' +
-                '_cr_buf = io.StringIO()\n' +
-                '_cr_old = sys.stdout\n' +
-                'sys.stdout = _cr_buf'
+                'import sys, io\n_cr_buf = io.StringIO()\n_cr_old = sys.stdout\nsys.stdout = _cr_buf'
             );
 
-            var succeeded  = false;
-            var needsInput = false;
-            var errorText  = '';
-
+            var succeeded = false, needsInput = false, errorText = '';
             try {
-                await pyodide.runPythonAsync(editor.value);
+                await pyodide.runPythonAsync(codeToRun);
                 succeeded = true;
             } catch (err) {
                 var msg = (err && err.message) ? err.message : String(err);
-                if (msg.indexOf('__INPUT_REQUIRED__') !== -1) {
-                    needsInput = true;
-                } else {
-                    errorText = msg;
-                }
+                if (msg.indexOf('__INPUT_REQUIRED__') !== -1) { needsInput = true; }
+                else { errorText = msg; }
             }
 
-            /* restore stdout and grab captured text */
             var captured = '';
             try {
                 captured = pyodide.runPython('sys.stdout = _cr_old\n_cr_buf.getvalue()');
@@ -182,7 +264,6 @@
                 runBtn.disabled = false;
                 runBtn.textContent = '\u25B6 Run';
             } else if (needsInput) {
-                /* show output so far, then open terminal for typing */
                 terminal.value = captured;
                 terminal.className = 'cr-terminal cr-waiting';
                 baselineLen = terminal.value.length;
@@ -191,7 +272,6 @@
                 terminal.focus();
                 terminal.selectionStart = baselineLen;
                 terminal.selectionEnd   = baselineLen;
-                /* scroll to bottom */
                 terminal.scrollTop = terminal.scrollHeight;
             } else {
                 terminal.readOnly = true;
@@ -217,9 +297,12 @@
         resetBtn.addEventListener('click', function () {
             collectedInputs = [];
             awaitingInput   = false;
-            editor.value    = original;
+            vfs = Object.assign({}, originals);
+            activeFile = mainFile;
+            editor.value = vfs[activeFile] || '';
+            if (multiFile) renderPyFileTree();
             terminal.readOnly = true;
-            terminal.value  = 'Click Run to execute the code\u2026';
+            terminal.value = 'Click Run to execute the code\u2026';
             terminal.className = 'cr-terminal';
             runBtn.disabled = false;
             runBtn.textContent = '\u25B6 Run';
@@ -228,16 +311,65 @@
 
     /* ── build an HTML runner (multi-file with virtual filesystem) ── */
     function initHtmlRunner(container) {
+        var sandbox   = (container.getAttribute('data-sandbox') || '').trim();
+        var dataFiles = (container.getAttribute('data-files')   || '').trim();
+
+        function showLoading() {
+            container.classList.add('code-runner');
+            container.innerHTML = '<div style="padding:16px;color:#666;font-family:Arial,sans-serif;">Loading\u2026</div>';
+        }
+        function showError(msg) {
+            container.innerHTML = '<div style="padding:16px;color:#c00;font-family:Arial,sans-serif;">&#x26A0; ' + msg + '</div>';
+        }
+
+        if (sandbox) {
+            /* ── load from saved sandbox via API ── */
+            showLoading();
+            fetch('/api/sandboxes/' + sandbox)
+                .then(function (r) {
+                    if (!r.ok) throw new Error('Sandbox not found: ' + sandbox);
+                    return r.json();
+                })
+                .then(function (data) {
+                    container.innerHTML = '';
+                    container.classList.remove('code-runner');
+                    buildHtmlRunner(container, data.files || {});
+                })
+                .catch(function (err) { showError(err.message); });
+            return;
+        }
+
+        if (dataFiles) {
+            /* ── fetch individual files by URL ── */
+            var urls = dataFiles.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+            showLoading();
+            Promise.all(urls.map(function (url) {
+                return fetch(url).then(function (r) {
+                    if (!r.ok) throw new Error('Could not load ' + url + ' (' + r.status + ')');
+                    return r.text().then(function (text) { return { name: url.split('/').pop(), content: text }; });
+                });
+            })).then(function (loaded) {
+                var originals = {};
+                loaded.forEach(function (f) { originals[f.name] = f.content; });
+                container.innerHTML = '';
+                container.classList.remove('code-runner');
+                buildHtmlRunner(container, originals);
+            }).catch(function (err) { showError(err.message); });
+            return;
+        }
+
+        /* ── textarea-based init (inline starter files) ── */
         var storedAll = container.querySelectorAll('textarea.cr-code');
         if (!storedAll.length) return;
-
-        /* build originals map from all textarea[data-filename] elements */
         var originals = {};
         storedAll.forEach(function (ta) {
             var name = (ta.dataset.filename || 'index.html').trim();
             originals[name] = ta.value.replace(/^\n/, '').replace(/\n$/, '');
         });
+        buildHtmlRunner(container, originals);
+    }
 
+    function buildHtmlRunner(container, originals) {
         container.classList.add('code-runner');
         container.innerHTML =
             '<div class="cr-toolbar">' +
