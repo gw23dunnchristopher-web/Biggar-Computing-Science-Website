@@ -2,6 +2,7 @@
     max-width: 900px;
     margin: 30px auto;
     padding: 0 10px 40px;
+    text-align: left;
 }
 
 .quiz-section h2 {
@@ -73,6 +74,7 @@
 .quiz-question-text {
     padding-top: 16px;
     margin-bottom: 10px;
+    text-align: left;
 }
 
 .quiz-container .quiz-question-text p {
