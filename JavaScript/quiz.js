@@ -270,9 +270,14 @@
         html += '<div class="quiz-question-text">' + renderText(getQuestionText(q)) + '</div>';
 
         if (q.type === 'pseudocode') {
-            var codePlaceholder = flattenText(getQuestionText(q)).toLowerCase().indexOf('using a programming language of your choice') !== -1
-                ? 'Write your code here...'
-                : 'Write your pseudocode here...';
+            var codePlaceholder;
+            if (q.language) {
+                codePlaceholder = 'Write your ' + q.language + ' here...';
+            } else if (flattenText(getQuestionText(q)).toLowerCase().indexOf('using a programming language of your choice') !== -1) {
+                codePlaceholder = 'Write your code here...';
+            } else {
+                codePlaceholder = 'Write your pseudocode here...';
+            }
             html += '<textarea class="quiz-code-area" id="' + ansId + '" placeholder="' + codePlaceholder + '" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>';
         } else if (q.type === 'table') {
             html += renderTableInput(q, index, prefix);
