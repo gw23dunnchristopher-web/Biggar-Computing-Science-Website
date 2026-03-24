@@ -12,3 +12,9 @@ id = "W3hULZDBMfPwUMB7TFTt4"
 uri = "file://docs/quiz-system.md"
 type = "text"
 title = "Quiz System Documentation"
+
+[[outputs]]
+id = "Z5QqGBCbOmQAERnP4ISxj"
+uri = "file://codeRunner-guide.md"
+type = "text"
+title = "Code Runner Developer Guide"
