@@ -42,7 +42,11 @@ Use the file tree panel to build the sandbox:
 
 **For Python sandboxes:** the file named `main.py` (or the first `.py` file if there is no `main.py`) is the one that runs when the student clicks Run. All other files (CSV, TXT, etc.) are written to Pyodide's virtual filesystem automatically before execution, so `open("data.csv", "r")` works exactly as expected.
 
-**For HTML sandboxes:** `index.html` is loaded first in the preview. Any `<link rel="stylesheet" href="style.css">` or `<script src="script.js">` tags are resolved automatically against the other files in the sandbox.
+**Folders are supported.** Name a file `data/scores.csv` and the runner creates the `data/` directory automatically. Students write `open("data/scores.csv", "r")` in their code and learn real file path syntax.
+
+**For HTML sandboxes:** `index.html` is loaded first in the preview. Any `<link rel="stylesheet" href="style.css">` or `<script src="css/style.css">` tags are resolved against the other files in the sandbox — both flat filenames and folder paths work.
+
+Folders are supported here too. Name a file `css/style.css` and the file tree shows a `css/` folder in the runner.
 
 ### Step 4 — Save
 
@@ -197,6 +201,8 @@ The student sees output and input interleaved naturally, exactly like a real ter
 ### File I/O
 
 Pyodide has an in-memory virtual filesystem. `open("data.csv", "r")` works exactly as in normal Python, but the file only exists in memory for the duration of the page session. When using a sandbox with data files, those files are written to the virtual filesystem before each run, so they are always available.
+
+Subdirectories are fully supported. A sandbox file named `data/scores.csv` is created in the `data/` subdirectory automatically, and students access it with `open("data/scores.csv", "r")`. The file tree in the runner shows a collapsible `data/` folder — click it to expand and inspect the file.
 
 Files written during execution (e.g. `open("results.txt", "w")`) also work and can be read back in the same session.
 

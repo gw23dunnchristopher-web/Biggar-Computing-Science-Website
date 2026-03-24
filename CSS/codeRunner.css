@@ -336,6 +336,32 @@
     color: #f38ba8;
 }
 
+.cr-folder-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 8px;
+    cursor: pointer;
+    color: #89b4fa;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background 0.1s;
+    user-select: none;
+}
+
+.cr-folder-item:hover {
+    background: #1e1e2e;
+}
+
+.cr-folder-arrow {
+    flex-shrink: 0;
+    font-size: 8px;
+    width: 10px;
+    text-align: center;
+    color: #6c7086;
+}
+
 .cr-new-file-btn {
     background: none;
     border: none;

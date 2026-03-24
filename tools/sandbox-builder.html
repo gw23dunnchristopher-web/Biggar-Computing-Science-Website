@@ -491,7 +491,7 @@
 
     /* ── add file ── */
     addFileBtn.addEventListener('click', function () {
-        var name = (prompt('New file name (e.g. style.css, data.csv, main.py):') || '').trim();
+        var name = (prompt('New file name — folders allowed (e.g. style.css, data/scores.csv, css/style.css, pages/about.html):') || '').trim();
         if (!name) return;
         if (!name.includes('.')) name += current.type === 'python' ? '.py' : '.html';
         if (current.files[name] !== undefined) { switchFile(name); return; }

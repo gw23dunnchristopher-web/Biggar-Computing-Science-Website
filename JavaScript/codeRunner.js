@@ -51,6 +51,81 @@
         throw new Error('__INPUT_REQUIRED__');
     };
 
+    /* ── shared: folder-tree helpers ── */
+
+    /* Convert a flat list of paths into a nested tree.
+       openSet is a plain object used as a Set: { "data": true, "css": true }
+       Each node: { isDir, name, path, children, _byName, _open }  (dirs)
+                  { isDir:false, name, path }                        (files) */
+    function buildFolderTree(paths, openSet) {
+        var root = { children: [], _byName: {} };
+        paths.forEach(function (fullPath) {
+            var parts = fullPath.split('/');
+            var node  = root;
+            var cumPath = '';
+            parts.forEach(function (part, i) {
+                if (i === parts.length - 1) {
+                    node.children.push({ isDir: false, name: part, path: fullPath });
+                } else {
+                    cumPath = cumPath ? cumPath + '/' + part : part;
+                    if (!node._byName[part]) {
+                        var dir = {
+                            isDir: true, name: part, path: cumPath,
+                            children: [], _byName: {},
+                            _open: !!(openSet && openSet[cumPath])
+                        };
+                        node.children.push(dir);
+                        node._byName[part] = dir;
+                    }
+                    node = node._byName[part];
+                    cumPath = node.path; /* keep in sync for deeper nesting */
+                }
+            });
+        });
+        return root;
+    }
+
+    /* Render tree nodes into HTML <li> strings (depth controls indentation). */
+    function renderTreeItems(nodes, depth, opts) {
+        var pad = depth * 14;
+        return nodes.map(function (node) {
+            if (node.isDir) {
+                var arrow = node._open ? '&#9660;' : '&#9654;';
+                var kids  = node._open ? renderTreeItems(node.children, depth + 1, opts) : '';
+                return '<li class="cr-folder-item" data-folder-path="' + node.path + '" style="padding-left:' + pad + 'px">' +
+                    '<span class="cr-folder-arrow">' + arrow + '</span>' +
+                    '<span class="cr-file-icon">&#x1F4C1;</span>' +
+                    '<span class="cr-file-name">' + node.name + '</span>' +
+                    '</li>' + kids;
+            } else {
+                var active = node.path === opts.activeFile ? ' cr-file-active' : '';
+                var badge  = opts.mainFile && node.path === opts.mainFile
+                    ? '<span style="font-size:0.65rem;color:#888;margin-left:4px;">(runs)</span>' : '';
+                var del    = opts.canDel
+                    ? '<button class="cr-file-del" data-name="' + node.path + '" title="Delete file">\u00D7</button>'
+                    : '';
+                return '<li class="cr-file-item' + active + '" data-name="' + node.path + '" style="padding-left:' + (pad + 4) + 'px">' +
+                    '<span class="cr-file-icon">' + opts.iconFn(node.name) + '</span>' +
+                    '<span class="cr-file-name">' + node.name + badge + '</span>' +
+                    del + '</li>';
+            }
+        }).join('');
+    }
+
+    /* Build an openFolders set with every folder path expanded by default */
+    function defaultOpenFolders(paths) {
+        var set = {};
+        paths.forEach(function (p) {
+            var parts = p.split('/');
+            var cum = '';
+            for (var i = 0; i < parts.length - 1; i++) {
+                cum = cum ? cum + '/' + parts[i] : parts[i];
+                set[cum] = true;
+            }
+        });
+        return set;
+    }
+
     /* ── Python runner entry point ── */
     function initPyRunner(container) {
         var sandbox = (container.getAttribute('data-sandbox') || '').trim();
@@ -131,6 +206,7 @@
         /* ── virtual filesystem ── */
         var vfs        = Object.assign({}, originals);
         var activeFile = mainFile;
+        var openFolders = defaultOpenFolders(Object.keys(originals));  /* all folders open by default */
 
         editor.value = vfs[activeFile] || '';
 
@@ -146,15 +222,20 @@
         function renderPyFileTree() {
             if (!multiFile) return;
             var ftList = container.querySelector('.cr-file-list');
-            ftList.innerHTML = Object.keys(vfs).map(function (name) {
-                var active = name === activeFile ? ' cr-file-active' : '';
-                var badge  = name === mainFile ? ' <span style="font-size:0.65rem;color:#888;margin-left:4px;">(runs)</span>' : '';
-                return '<li class="cr-file-item' + active + '" data-name="' + name + '">' +
-                    '<span class="cr-file-icon">' + pyFileIcon(name) + '</span>' +
-                    '<span class="cr-file-name">' + name + badge + '</span>' +
-                    '</li>';
-            }).join('');
-
+            var tree   = buildFolderTree(Object.keys(vfs), openFolders);
+            ftList.innerHTML = renderTreeItems(tree.children, 0, {
+                activeFile: activeFile,
+                mainFile:   mainFile,
+                canDel:     false,
+                iconFn:     pyFileIcon
+            });
+            ftList.querySelectorAll('.cr-folder-item').forEach(function (li) {
+                li.addEventListener('click', function () {
+                    var fp = li.dataset.folderPath;
+                    openFolders[fp] = !openFolders[fp];
+                    renderPyFileTree();
+                });
+            });
             ftList.querySelectorAll('.cr-file-item').forEach(function (li) {
                 li.addEventListener('click', function () {
                     vfs[activeFile] = editor.value;
@@ -223,10 +304,16 @@
             _inputQueue = collectedInputs.slice();
             _inputPos   = 0;
 
-            /* write data files to Pyodide's virtual filesystem */
+            /* write data files to Pyodide's virtual filesystem,
+               creating any parent directories (e.g. data/scores.csv → mkdir data/) */
             if (multiFile) {
                 Object.keys(vfs).forEach(function (name) {
                     if (!name.endsWith('.py')) {
+                        var parts = name.split('/');
+                        for (var d = 1; d < parts.length; d++) {
+                            var dir = parts.slice(0, d).join('/');
+                            try { pyodide.FS.mkdir(dir); } catch (_) {}
+                        }
                         try { pyodide.FS.writeFile(name, vfs[name], { encoding: 'utf8' }); } catch (_) {}
                     }
                 });
@@ -409,6 +496,7 @@
             ? 'index.html'
             : Object.keys(originals)[0];
         var uploadedImages = {};
+        var openFolders = defaultOpenFolders(Object.keys(originals));  /* all folders open by default */
 
         /* ── file tree ── */
         function fileIcon(name) {
@@ -419,17 +507,20 @@
 
         function renderFileTree() {
             var names = Object.keys(vfs);
-            fileList.innerHTML = names.map(function (name) {
-                var active = name === activeFile ? ' cr-file-active' : '';
-                var del = names.length > 1
-                    ? '<button class="cr-file-del" data-name="' + name + '" title="Delete file">\u00D7</button>'
-                    : '';
-                return '<li class="cr-file-item' + active + '" data-name="' + name + '">' +
-                    '<span class="cr-file-icon">' + fileIcon(name) + '</span>' +
-                    '<span class="cr-file-name">' + name + '</span>' +
-                    del + '</li>';
-            }).join('');
-
+            var tree  = buildFolderTree(names, openFolders);
+            fileList.innerHTML = renderTreeItems(tree.children, 0, {
+                activeFile: activeFile,
+                mainFile:   null,
+                canDel:     names.length > 1,
+                iconFn:     fileIcon
+            });
+            fileList.querySelectorAll('.cr-folder-item').forEach(function (li) {
+                li.addEventListener('click', function () {
+                    var fp = li.dataset.folderPath;
+                    openFolders[fp] = !openFolders[fp];
+                    renderFileTree();
+                });
+            });
             fileList.querySelectorAll('.cr-file-item').forEach(function (li) {
                 li.addEventListener('click', function (e) {
                     if (e.target.classList.contains('cr-file-del')) return;
@@ -459,9 +550,10 @@
         }
 
         newFileBtn.addEventListener('click', function () {
-            var name = (prompt('File name (e.g. style.css or page2.html):') || '').trim();
+            var name = (prompt('File name (e.g. style.css, pages/about.html, js/script.js):') || '').trim();
             if (!name) return;
-            if (!name.includes('.')) name += '.html';
+            var basename = name.split('/').pop();
+            if (!basename.includes('.')) name += '.html';
             if (vfs[name]) { switchTo(name); return; }
             vfs[name] = name.endsWith('.css') ? '/* ' + name + ' */\n' :
                         name.endsWith('.js')  ? '// ' + name + '\n' :
@@ -471,25 +563,29 @@
 
         /* ── preview rendering ── */
         function resolveAndRender(html) {
-            /* inline CSS: <link rel="stylesheet" href="style.css"> */
+            /* inline CSS: <link rel="stylesheet" href="css/style.css"> or href="style.css"
+               Try exact VFS path first, then fall back to matching by filename only */
             html = html.replace(
                 /<link\b([^>]*)href=["']([^"']+)["']([^>]*)>/gi,
                 function (match, pre, href, post) {
                     if (!(/rel=["']stylesheet["']/i.test(pre + post))) return match;
-                    var fname = href.split('/').pop();
-                    return vfs[fname] !== undefined
-                        ? '<style>' + vfs[fname] + '</style>'
+                    var content = vfs[href] !== undefined ? vfs[href]
+                        : vfs[href.split('/').pop()];
+                    return content !== undefined
+                        ? '<style>' + content + '</style>'
                         : match;
                 }
             );
 
-            /* inline JS: <script src="script.js"></script> */
+            /* inline JS: <script src="js/script.js"></script> or src="script.js"
+               Try exact VFS path first, then fall back to matching by filename only */
             html = html.replace(
                 /<script\b([^>]*)src=["']([^"']+)["']([^>]*)><\/script>/gi,
                 function (match, pre, src) {
-                    var fname = src.split('/').pop();
-                    return vfs[fname] !== undefined
-                        ? '<script>' + vfs[fname] + '<\/script>'
+                    var content = vfs[src] !== undefined ? vfs[src]
+                        : vfs[src.split('/').pop()];
+                    return content !== undefined
+                        ? '<script>' + content + '<\/script>'
                         : match;
                 }
             );
@@ -541,13 +637,15 @@
                 return;
             }
             if (!e.data.crNav) return;
-            var fname = e.data.crNav.split('?')[0].split('#')[0].split('/').pop();
-            if (vfs[fname] !== undefined) {
+            var rawPath = e.data.crNav.split('?')[0].split('#')[0];
+            /* try exact VFS path first (supports subfolders), then filename-only fallback */
+            var target = vfs[rawPath] !== undefined ? rawPath : rawPath.split('/').pop();
+            if (vfs[target] !== undefined) {
                 vfs[activeFile] = editor.value;
-                activeFile = fname;
-                editor.value = vfs[fname];
+                activeFile = target;
+                editor.value = vfs[target];
                 renderFileTree();
-                resolveAndRender(vfs[fname]);
+                resolveAndRender(vfs[target]);
             }
         });
 
