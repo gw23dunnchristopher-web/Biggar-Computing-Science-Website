@@ -486,6 +486,17 @@
     background: #fff;
 }
 
+/* ── expanded preview: hide tree + editor, preview fills workspace ── */
+.cr-workspace.cr-preview-expanded .cr-filetree,
+.cr-workspace.cr-preview-expanded .cr-editor {
+    display: none;
+}
+
+.cr-workspace.cr-preview-expanded .cr-preview {
+    width: 100%;
+    flex: 1 1 auto;
+}
+
 /* ── responsive ── */
 @media (max-width: 768px) {
     .code-runner {

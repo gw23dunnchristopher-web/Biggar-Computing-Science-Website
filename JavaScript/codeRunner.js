@@ -577,6 +577,7 @@
             '  <div class="cr-btns">' +
             '    <button class="cr-wrap-btn" title="Word wrap: off">&#8644; Wrap</button>' +
             '    <button class="cr-toggle-preview-btn" title="Hide preview">&#9707; Preview</button>' +
+            '    <button class="cr-expand-btn" title="Expand preview to full width">&#x26F6; Expand</button>' +
             '    <button class="cr-run-btn">&#9654; Preview</button>' +
             '    <button class="cr-reset-btn">&#8635; Reset</button>' +
             '  </div>' +
@@ -604,7 +605,9 @@
         var newFileBtn      = container.querySelector('.cr-new-file-btn');
         var wrapBtn         = container.querySelector('.cr-wrap-btn');
         var togglePrevBtn   = container.querySelector('.cr-toggle-preview-btn');
+        var expandBtn       = container.querySelector('.cr-expand-btn');
         var filetreeDiv     = container.querySelector('.cr-filetree');
+        var workspace       = container.querySelector('.cr-workspace');
 
         /* ── word wrap toggle ── */
         wrapBtn.addEventListener('click', function () {
@@ -621,6 +624,24 @@
             togglePrevBtn.classList.toggle('cr-btn-active', !previewVisible);
             togglePrevBtn.title     = previewVisible ? 'Hide preview' : 'Show preview';
             togglePrevBtn.innerHTML = previewVisible ? '&#9707; Preview' : '&#9635; Preview';
+        });
+
+        /* ── expand preview to full width ── */
+        var previewExpanded = false;
+        expandBtn.addEventListener('click', function () {
+            previewExpanded = !previewExpanded;
+            workspace.classList.toggle('cr-preview-expanded', previewExpanded);
+            expandBtn.classList.toggle('cr-btn-active', previewExpanded);
+            expandBtn.title     = previewExpanded ? 'Show code editor' : 'Expand preview to full width';
+            expandBtn.innerHTML = previewExpanded ? '&#x26F6; Code' : '&#x26F6; Expand';
+            /* if preview was hidden, make it visible when expanding */
+            if (previewExpanded && !previewVisible) {
+                previewVisible = true;
+                preview.style.display = '';
+                togglePrevBtn.classList.remove('cr-btn-active');
+                togglePrevBtn.title     = 'Hide preview';
+                togglePrevBtn.innerHTML = '&#9707; Preview';
+            }
         });
 
         /* virtual filesystem seeded from all starter textareas */
