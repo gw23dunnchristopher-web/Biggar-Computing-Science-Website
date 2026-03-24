@@ -21,23 +21,11 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Server"
+args = "Serve static"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Serve static"
-
-[[workflows.workflow]]
-name = "Server"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5000
+args = "Server"
 
 [[workflows.workflow]]
 name = "Serve static"
@@ -55,6 +43,18 @@ To see changes you make, you can hit the refresh button in the preview, you do n
 Console logs are available in the Preview devtools or your browser devtools.\" && static-web-server -w ./.config/static-web-server.toml"""
 waitForPort = 3000
 
+[[workflows.workflow]]
+name = "Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[ports]]
 localPort = 80
 externalPort = 3000
@@ -62,6 +62,10 @@ externalPort = 3000
 [[ports]]
 localPort = 3000
 externalPort = 3000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
 
 [agent]
 expertMode = true
