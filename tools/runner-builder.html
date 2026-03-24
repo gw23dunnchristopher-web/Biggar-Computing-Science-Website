@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Runner Builder — BHS Computing Science</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            color: #222;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #002060;
+            color: white;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        header h1 { font-size: 1.3rem; }
+        header p  { font-size: 0.85rem; opacity: 0.75; margin-top: 2px; }
+
+        main {
+            max-width: 860px;
+            margin: 40px auto;
+            padding: 0 20px 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        /* ── drop zone ── */
+        .drop-zone {
+            border: 3px dashed #90aad0;
+            border-radius: 12px;
+            background: white;
+            padding: 48px 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .drop-zone.over {
+            border-color: #002060;
+            background: #eaf0fb;
+        }
+        .drop-zone input[type="file"] { display: none; }
+        .drop-zone .dz-icon { font-size: 3rem; margin-bottom: 12px; }
+        .drop-zone h2 { font-size: 1.1rem; color: #002060; margin-bottom: 8px; }
+        .drop-zone p  { font-size: 0.9rem; color: #666; }
+        .drop-zone .browse-link {
+            color: #0055cc;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        /* ── file list ── */
+        .section-label {
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .file-item {
+            background: white;
+            border: 1px solid #dde3ec;
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-item .fi-icon { font-size: 1.3rem; flex-shrink: 0; }
+
+        .file-item .fi-name {
+            flex: 1;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #002060;
+        }
+
+        .file-item .fi-size {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .file-item .fi-badge {
+            font-size: 0.7rem;
+            font-weight: bold;
+            padding: 2px 7px;
+            border-radius: 10px;
+            text-transform: uppercase;
+        }
+        .fi-badge.html { background: #fde8b0; color: #7a4f00; }
+        .fi-badge.css  { background: #d0eaff; color: #004080; }
+        .fi-badge.js   { background: #e6f9e6; color: #1a5c1a; }
+
+        .fi-btns { display: flex; gap: 4px; }
+
+        .fi-btn {
+            background: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            color: #444;
+            transition: background 0.15s;
+        }
+        .fi-btn:hover { background: #f0f0f0; }
+        .fi-btn.remove { border-color: #e88; color: #c00; }
+        .fi-btn.remove:hover { background: #fff0f0; }
+
+        .fi-index-note {
+            font-size: 0.75rem;
+            color: #0055cc;
+            font-style: italic;
+        }
+
+        /* ── options ── */
+        .options-grid {
+            background: white;
+            border: 1px solid #dde3ec;
+            border-radius: 8px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .opt label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #444;
+            margin-bottom: 6px;
+        }
+
+        .opt select, .opt input[type="text"] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* ── generate button ── */
+        .btn-generate {
+            background: #002060;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            align-self: flex-start;
+            transition: background 0.2s;
+        }
+        .btn-generate:hover { background: #0038a0; }
+        .btn-generate:disabled { background: #aaa; cursor: default; }
+
+        /* ── output ── */
+        .output-block {
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .output-block.visible { display: flex; }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-copy {
+            background: #0055cc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 18px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-copy:hover { background: #0038a0; }
+        .btn-copy.copied { background: #1a7a1a; }
+
+        .output-code {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            white-space: pre;
+            overflow-x: auto;
+            max-height: 520px;
+            overflow-y: auto;
+        }
+
+        .empty-state {
+            background: white;
+            border: 1px solid #dde3ec;
+            border-radius: 8px;
+            padding: 32px;
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .tip {
+            background: #eef4ff;
+            border-left: 4px solid #0055cc;
+            border-radius: 0 6px 6px 0;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            color: #333;
+            line-height: 1.6;
+        }
+        .tip strong { color: #002060; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h1>HTML Runner Builder</h1>
+        <p>Upload your HTML, CSS and JS files — get ready-to-paste runner code</p>
+    </div>
+</header>
+
+<main>
+
+    <!-- instructions tip -->
+    <div class="tip">
+        <strong>How it works:</strong> Build your page in any editor (VS Code, Notepad, etc.), then drop the files here.
+        This tool generates the <code>&lt;div class="html-runner"&gt;</code> block you paste into your lesson page.
+        The first <code>.html</code> file in the list becomes <code>index.html</code> — use the ↑ ↓ buttons to reorder.
+    </div>
+
+    <!-- drop zone -->
+    <div>
+        <div class="drop-zone" id="dropZone">
+            <input type="file" id="fileInput" multiple accept=".html,.css,.js">
+            <div class="dz-icon">📂</div>
+            <h2>Drop your files here</h2>
+            <p>or <span class="browse-link" id="browseLink">browse to select files</span></p>
+            <p style="margin-top:8px;">Accepts <strong>.html</strong>, <strong>.css</strong>, and <strong>.js</strong> files</p>
+        </div>
+    </div>
+
+    <!-- file list -->
+    <div id="fileSection" style="display:none;">
+        <div class="section-label">Files to include</div>
+        <div class="file-list" id="fileList"></div>
+    </div>
+
+    <!-- options -->
+    <div id="optionsSection" style="display:none;">
+        <div class="section-label">Options</div>
+        <div class="options-grid">
+            <div class="opt">
+                <label for="indentOpt">Indentation in lesson page</label>
+                <select id="indentOpt">
+                    <option value="4">4 spaces (default)</option>
+                    <option value="2">2 spaces</option>
+                    <option value="8">8 spaces</option>
+                    <option value="tab">Tab</option>
+                </select>
+            </div>
+            <div class="opt">
+                <label for="runnerType">Runner type</label>
+                <select id="runnerType">
+                    <option value="html-runner">html-runner (HTML/CSS/JS)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- generate button -->
+    <button class="btn-generate" id="generateBtn" disabled>Generate runner code</button>
+
+    <!-- output -->
+    <div class="output-block" id="outputBlock">
+        <div class="output-header">
+            <div class="section-label" style="margin:0;">Generated code — paste into your lesson page</div>
+            <button class="btn-copy" id="copyBtn">Copy to clipboard</button>
+        </div>
+        <pre class="output-code" id="outputCode"></pre>
+    </div>
+
+    <!-- empty state (shown before any files) -->
+    <div class="empty-state" id="emptyState">
+        Drop files above to get started.
+    </div>
+
+</main>
+
+<script>
+    var files = []; // { name, ext, content }
+
+    var dropZone   = document.getElementById('dropZone');
+    var fileInput  = document.getElementById('fileInput');
+    var browseLink = document.getElementById('browseLink');
+    var fileList   = document.getElementById('fileList');
+    var fileSection   = document.getElementById('fileSection');
+    var optionsSection = document.getElementById('optionsSection');
+    var generateBtn = document.getElementById('generateBtn');
+    var outputBlock = document.getElementById('outputBlock');
+    var outputCode  = document.getElementById('outputCode');
+    var copyBtn     = document.getElementById('copyBtn');
+    var emptyState  = document.getElementById('emptyState');
+
+    /* ── drag and drop ── */
+    browseLink.addEventListener('click', function () { fileInput.click(); });
+    dropZone.addEventListener('click', function (e) {
+        if (e.target === browseLink || e.target.closest('#browseLink')) return;
+        fileInput.click();
+    });
+
+    dropZone.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        dropZone.classList.add('over');
+    });
+    dropZone.addEventListener('dragleave', function () {
+        dropZone.classList.remove('over');
+    });
+    dropZone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        dropZone.classList.remove('over');
+        handleFileList(e.dataTransfer.files);
+    });
+    fileInput.addEventListener('change', function () {
+        handleFileList(fileInput.files);
+        fileInput.value = '';
+    });
+
+    function handleFileList(fileObjects) {
+        var allowed = ['html', 'css', 'js'];
+        Array.from(fileObjects).forEach(function (f) {
+            var ext = f.name.split('.').pop().toLowerCase();
+            if (!allowed.includes(ext)) return;
+            /* avoid duplicates by name */
+            if (files.find(function (x) { return x.name === f.name; })) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                files.push({ name: f.name, ext: ext, content: e.target.result });
+                sortFiles();
+                render();
+            };
+            reader.readAsText(f);
+        });
+    }
+
+    /* put html first, then css, then js — stable otherwise */
+    function sortFiles() {
+        var order = { html: 0, css: 1, js: 2 };
+        files.sort(function (a, b) { return (order[a.ext] || 9) - (order[b.ext] || 9); });
+    }
+
+    function fileIcon(ext) {
+        if (ext === 'css') return '🎨';
+        if (ext === 'js')  return '⚙️';
+        return '📄';
+    }
+
+    function formatSize(str) {
+        var bytes = new Blob([str]).size;
+        if (bytes < 1024) return bytes + ' B';
+        return (bytes / 1024).toFixed(1) + ' KB';
+    }
+
+    function render() {
+        fileList.innerHTML = '';
+        if (files.length === 0) {
+            fileSection.style.display    = 'none';
+            optionsSection.style.display = 'none';
+            generateBtn.disabled         = true;
+            emptyState.style.display     = 'block';
+            outputBlock.classList.remove('visible');
+            return;
+        }
+
+        emptyState.style.display     = 'none';
+        fileSection.style.display    = 'block';
+        optionsSection.style.display = 'block';
+        generateBtn.disabled         = false;
+
+        files.forEach(function (f, i) {
+            var isFirst = (i === 0 && f.ext === 'html');
+            var item = document.createElement('div');
+            item.className = 'file-item';
+            item.innerHTML =
+                '<span class="fi-icon">' + fileIcon(f.ext) + '</span>' +
+                '<span class="fi-name">' + escHtml(f.name) + '</span>' +
+                (isFirst ? '<span class="fi-index-note">→ index.html</span>' : '') +
+                '<span class="fi-size">' + formatSize(f.content) + '</span>' +
+                '<span class="fi-badge ' + f.ext + '">' + f.ext + '</span>' +
+                '<div class="fi-btns">' +
+                    (i > 0 ? '<button class="fi-btn up" data-i="' + i + '">↑</button>' : '') +
+                    (i < files.length - 1 ? '<button class="fi-btn dn" data-i="' + i + '">↓</button>' : '') +
+                    '<button class="fi-btn remove" data-i="' + i + '">Remove</button>' +
+                '</div>';
+            fileList.appendChild(item);
+        });
+
+        /* button events */
+        fileList.querySelectorAll('.fi-btn.up').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var i = parseInt(btn.dataset.i);
+                var tmp = files[i]; files[i] = files[i-1]; files[i-1] = tmp;
+                render();
+            });
+        });
+        fileList.querySelectorAll('.fi-btn.dn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var i = parseInt(btn.dataset.i);
+                var tmp = files[i]; files[i] = files[i+1]; files[i+1] = tmp;
+                render();
+            });
+        });
+        fileList.querySelectorAll('.fi-btn.remove').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                files.splice(parseInt(btn.dataset.i), 1);
+                render();
+                outputBlock.classList.remove('visible');
+            });
+        });
+    }
+
+    /* ── generate ── */
+    generateBtn.addEventListener('click', function () {
+        var indentVal = document.getElementById('indentOpt').value;
+        var indent = indentVal === 'tab' ? '\t' : ' '.repeat(parseInt(indentVal));
+
+        var lines = [];
+        lines.push('<div class="html-runner">');
+
+        files.forEach(function (f, i) {
+            /* determine filename attribute */
+            var firstHtml = (f.ext === 'html' && files.filter(function(x){ return x.ext==='html'; }).indexOf(f) === 0);
+            var attrPart = firstHtml && files.filter(function(x){ return x.ext==='html'; }).length === 1
+                ? ''  /* single html file: no data-filename needed */
+                : ' data-filename="' + escAttr(f.name) + '"';
+
+            lines.push(indent + '<textarea class="cr-code"' + attrPart + ' style="display:none">');
+
+            /* escape </textarea so it doesn't prematurely close the element.
+               textarea is an "escapable raw text element" — &lt; IS decoded. */
+            var safe = f.content.replace(/<\/textarea/gi, '&lt;/textarea');
+            /* trim leading/trailing blank lines */
+            safe = safe.replace(/^\n+/, '').replace(/\n+$/, '');
+            lines.push(safe);
+
+            lines.push(indent + '</textarea>');
+            if (i < files.length - 1) lines.push('');
+        });
+
+        lines.push('</div>');
+
+        var code = lines.join('\n');
+        outputCode.textContent = code;
+        outputBlock.classList.add('visible');
+        outputBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    /* ── copy ── */
+    copyBtn.addEventListener('click', function () {
+        navigator.clipboard.writeText(outputCode.textContent).then(function () {
+            copyBtn.textContent = 'Copied!';
+            copyBtn.classList.add('copied');
+            setTimeout(function () {
+                copyBtn.textContent = 'Copy to clipboard';
+                copyBtn.classList.remove('copied');
+            }, 2000);
+        });
+    });
+
+    function escHtml(s) {
+        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+    function escAttr(s) {
+        return s.replace(/"/g, '&quot;');
+    }
+
+    render();
+</script>
+
+</body>
+</html>
