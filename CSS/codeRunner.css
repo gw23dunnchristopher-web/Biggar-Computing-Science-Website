@@ -1,24 +1,6 @@
 /* ============================================================
    Code Runner — self-hosted replacement for Trinket embeds
    Supports Python (Pyodide) and HTML live-preview runners.
-
-   Usage:
-     Python:  <div class="py-runner">
-                <textarea class="cr-code" style="display:none">
-   ...python code...
-                </textarea>
-              </div>
-
-     HTML:    <div class="html-runner">
-                <textarea class="cr-code" style="display:none">
-   <!DOCTYPE html>...
-                </textarea>
-              </div>
-
-   Include in <head>:
-     <link rel="stylesheet" href="/CSS/codeRunner.css">
-   Include before </body>:
-     <script src="/JavaScript/codeRunner.js"></script>
    ============================================================ */
 
 .code-runner {
@@ -129,105 +111,52 @@
     padding: 4px 14px;
 }
 
+/*
+ * The terminal is a single <textarea> that handles both output display
+ * and inline typed input — just like Trinket's output panel.
+ * It is readonly by default; when input() is called it becomes editable.
+ */
 .cr-terminal {
-    display: flex;
-    flex-direction: column;
-    background: #11111b;
-    min-height: 80px;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 120px;
     max-height: 360px;
-    overflow-y: auto;
-}
-
-.cr-output {
-    flex: 1 1 auto;
     margin: 0;
-    padding: 12px 14px 6px;
-    background: transparent;
+    padding: 12px 14px;
+    background: #11111b;
     color: #a6e3a1;
+    border: none;
+    resize: vertical;
     font-family: 'Courier New', Courier, monospace;
     font-size: 14px;
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
-    min-height: 48px;
+    outline: none;
+    cursor: default;
+    /* hide the system caret while readonly */
+    caret-color: transparent;
 }
 
-.cr-output.cr-error {
+/* When awaiting input: show the caret and a subtle active glow */
+.cr-terminal.cr-waiting {
+    cursor: text;
+    caret-color: #a6e3a1;
+    background: #0d0d18;
+}
+
+.cr-terminal.cr-error {
     color: #f38ba8;
 }
 
-.cr-output.cr-success {
+.cr-terminal.cr-success {
     color: #a6e3a1;
 }
 
-.cr-output.cr-loading {
+.cr-terminal.cr-loading {
     color: #89b4fa;
-}
-
-.cr-output.cr-running {
-    color: #a6e3a1;
-}
-
-/* ── inline input row ── */
-.cr-input-row {
-    display: none;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 14px 10px;
-    background: transparent;
-}
-
-.cr-cursor {
-    color: #a6e3a1;
-    font-size: 14px;
-    line-height: 1;
-    animation: cr-blink 1s step-start infinite;
-    flex-shrink: 0;
-}
-
-@keyframes cr-blink {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0; }
-}
-
-.cr-terminal-input {
-    flex: 1 1 auto;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid #585b70;
-    color: #cdd6f4;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 14px;
-    line-height: 1.4;
-    padding: 2px 4px;
-    outline: none;
-    caret-color: #a6e3a1;
-    min-width: 0;
-}
-
-.cr-terminal-input::placeholder {
-    color: #45475a;
-    font-style: italic;
-}
-
-.cr-terminal-input:focus {
-    border-bottom-color: #a6e3a1;
-}
-
-.cr-enter-btn {
-    flex-shrink: 0;
-    background: #313244;
-    color: #cdd6f4;
-    border: none;
-    border-radius: 4px;
-    padding: 3px 10px;
-    font-size: 12px;
-    cursor: pointer;
-    font-family: Arial, sans-serif;
-}
-
-.cr-enter-btn:hover {
-    background: #45475a;
+    cursor: default;
 }
 
 /* ── HTML runner split layout ── */

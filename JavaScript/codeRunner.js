@@ -51,14 +51,6 @@
         throw new Error('__INPUT_REQUIRED__');
     };
 
-    /* ── helpers ── */
-    function escHtml(s) {
-        return String(s)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-    }
-
     /* ── build a Python runner ── */
     function initPyRunner(container) {
         var stored = container.querySelector('textarea.cr-code');
@@ -77,38 +69,72 @@
             '<textarea class="cr-editor" spellcheck="false"></textarea>' +
             '<div class="cr-output-area">' +
             '  <div class="cr-output-label">Output</div>' +
-            '  <div class="cr-terminal">' +
-            '    <pre class="cr-output">Click Run to execute the code\u2026</pre>' +
-            '    <div class="cr-input-row" style="display:none;">' +
-            '      <span class="cr-cursor">&#9608;</span>' +
-            '      <input type="text" class="cr-terminal-input" autocomplete="off" spellcheck="false" placeholder="type and press Enter\u2026">' +
-            '      <button class="cr-enter-btn">Enter &#x23CE;</button>' +
-            '    </div>' +
-            '  </div>' +
+            '  <textarea class="cr-terminal" readonly spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off">Click Run to execute the code\u2026</textarea>' +
             '</div>';
 
         var editor   = container.querySelector('.cr-editor');
-        var output   = container.querySelector('.cr-output');
         var terminal = container.querySelector('.cr-terminal');
-        var inputRow = container.querySelector('.cr-input-row');
-        var termIn   = container.querySelector('.cr-terminal-input');
         var runBtn   = container.querySelector('.cr-run-btn');
         var resetBtn = container.querySelector('.cr-reset-btn');
 
         editor.value = original;
 
-        var collectedInputs = [];  // all answers provided this session
+        /* state */
+        var collectedInputs = [];
+        var awaitingInput   = false;
+        var baselineLen     = 0;
+
+        /* ── protect baseline content when awaiting input ── */
+        terminal.addEventListener('input', function () {
+            if (!awaitingInput) return;
+            if (terminal.value.length < baselineLen) {
+                terminal.value = terminal.value.substring(0, baselineLen);
+            }
+        });
+
+        terminal.addEventListener('keydown', function (e) {
+            if (!awaitingInput) { e.preventDefault(); return; }
+
+            /* prevent moving cursor before the baseline */
+            if (e.key === 'ArrowLeft' || e.key === 'Home' ||
+                e.key === 'ArrowUp'   || e.key === 'PageUp') {
+                var pos = terminal.selectionStart;
+                if (pos <= baselineLen) { e.preventDefault(); }
+            }
+
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                var typed = terminal.value.substring(baselineLen);
+                /* append newline to terminal so output continues on next line */
+                terminal.value += '\n';
+                /* lock terminal again */
+                awaitingInput = false;
+                terminal.readOnly = true;
+                terminal.classList.remove('cr-waiting');
+                /* queue input and re-run */
+                collectedInputs.push(typed);
+                executeCode();
+            }
+        });
+
+        /* keep cursor at/after baseline when clicking */
+        terminal.addEventListener('click', function () {
+            if (!awaitingInput) return;
+            if (terminal.selectionStart < baselineLen) {
+                terminal.selectionStart = baselineLen;
+                terminal.selectionEnd   = baselineLen;
+            }
+        });
 
         async function executeCode() {
-            /* load pyodide if first time */
             if (!pyodideReady) {
-                output.className = 'cr-output cr-loading';
-                output.textContent = 'Loading Python\u2026 (first run may take a moment)';
+                terminal.readOnly = true;
+                terminal.value = 'Loading Python\u2026 (first run may take a moment)';
+                terminal.className = 'cr-terminal cr-loading';
             }
 
             var pyodide = await getPyodide();
 
-            /* point global queue at this run's inputs */
             _inputQueue = collectedInputs.slice();
             _inputPos   = 0;
 
@@ -120,9 +146,9 @@
                 'sys.stdout = _cr_buf'
             );
 
-            var succeeded   = false;
-            var needsInput  = false;
-            var errorText   = '';
+            var succeeded  = false;
+            var needsInput = false;
+            var errorText  = '';
 
             try {
                 await pyodide.runPythonAsync(editor.value);
@@ -136,7 +162,7 @@
                 }
             }
 
-            /* restore stdout and grab output */
+            /* restore stdout and grab captured text */
             var captured = '';
             try {
                 captured = pyodide.runPython('sys.stdout = _cr_old\n_cr_buf.getvalue()');
@@ -144,61 +170,52 @@
                 try { pyodide.runPython('sys.stdout = _cr_old'); } catch (_) {}
             }
 
-            /* render */
-            output.textContent = captured;
-
             if (succeeded) {
-                output.className = 'cr-output cr-success';
-                if (!captured.trim()) output.textContent = '(no output)';
-                inputRow.style.display = 'none';
+                terminal.readOnly = true;
+                terminal.value = captured || '(no output)';
+                terminal.className = 'cr-terminal cr-success';
                 runBtn.disabled = false;
                 runBtn.textContent = '\u25B6 Run';
             } else if (needsInput) {
-                output.className = 'cr-output cr-running';
-                inputRow.style.display = 'flex';
-                termIn.value = '';
-                termIn.focus();
+                /* show output so far, then open terminal for typing */
+                terminal.value = captured;
+                terminal.className = 'cr-terminal cr-waiting';
+                baselineLen = terminal.value.length;
+                awaitingInput = true;
+                terminal.readOnly = false;
+                terminal.focus();
+                terminal.selectionStart = baselineLen;
+                terminal.selectionEnd   = baselineLen;
+                /* scroll to bottom */
                 terminal.scrollTop = terminal.scrollHeight;
             } else {
-                /* real error */
-                output.textContent = (captured || '') + '\n\u274C ' + errorText;
-                output.className = 'cr-output cr-error';
-                inputRow.style.display = 'none';
+                terminal.readOnly = true;
+                var prefix = captured ? captured + '\n' : '';
+                terminal.value = prefix + '\u274C ' + errorText;
+                terminal.className = 'cr-terminal cr-error';
                 runBtn.disabled = false;
                 runBtn.textContent = '\u25B6 Run';
             }
         }
 
-        function submitInput() {
-            var val = termIn.value;
-            termIn.value = '';
-            inputRow.style.display = 'none';
-            collectedInputs.push(val);
-            output.className = 'cr-output cr-running';
-            executeCode();
-        }
-
-        termIn.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') { e.preventDefault(); submitInput(); }
-        });
-        container.querySelector('.cr-enter-btn').addEventListener('click', submitInput);
-
-        runBtn.addEventListener('click', async function () {
+        runBtn.addEventListener('click', function () {
             collectedInputs = [];
+            awaitingInput   = false;
             runBtn.disabled = true;
             runBtn.textContent = 'Loading\u2026';
-            output.className = 'cr-output cr-loading';
-            output.textContent = 'Loading Python\u2026 (first run may take a moment)';
-            inputRow.style.display = 'none';
+            terminal.readOnly = true;
+            terminal.value = 'Loading Python\u2026 (first run may take a moment)';
+            terminal.className = 'cr-terminal cr-loading';
             executeCode();
         });
 
         resetBtn.addEventListener('click', function () {
             collectedInputs = [];
-            editor.value = original;
-            output.textContent = 'Click Run to execute the code\u2026';
-            output.className = 'cr-output';
-            inputRow.style.display = 'none';
+            awaitingInput   = false;
+            editor.value    = original;
+            terminal.readOnly = true;
+            terminal.value  = 'Click Run to execute the code\u2026';
+            terminal.className = 'cr-terminal';
             runBtn.disabled = false;
             runBtn.textContent = '\u25B6 Run';
         });
@@ -224,9 +241,9 @@
             '  <iframe class="cr-preview" sandbox="allow-scripts allow-same-origin"></iframe>' +
             '</div>';
 
-        var editor  = container.querySelector('.cr-editor');
-        var preview = container.querySelector('.cr-preview');
-        var runBtn  = container.querySelector('.cr-run-btn');
+        var editor   = container.querySelector('.cr-editor');
+        var preview  = container.querySelector('.cr-preview');
+        var runBtn   = container.querySelector('.cr-run-btn');
         var resetBtn = container.querySelector('.cr-reset-btn');
 
         editor.value = original;
