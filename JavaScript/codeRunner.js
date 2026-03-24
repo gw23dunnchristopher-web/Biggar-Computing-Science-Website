@@ -592,7 +592,10 @@
             '      <input type="file" class="cr-html-file-input" accept="image/*,.css,.js,.csv,.txt,.html,.json" multiple style="display:none">' +
             '    </label>' +
             '  </div>' +
-            '  <textarea class="cr-editor" spellcheck="false"></textarea>' +
+            '  <div class="cr-hl-wrap">' +
+            '    <pre class="cr-hl-bg" aria-hidden="true"><code class="cr-hl-code"></code></pre>' +
+            '    <textarea class="cr-editor" spellcheck="false"></textarea>' +
+            '  </div>' +
             '  <iframe class="cr-preview" sandbox="allow-scripts allow-same-origin"></iframe>' +
             '</div>';
 
@@ -603,15 +606,97 @@
         var htmlFileInput   = container.querySelector('.cr-html-file-input');
         var fileList        = container.querySelector('.cr-file-list');
         var newFileBtn      = container.querySelector('.cr-new-file-btn');
+        var hlWrap          = container.querySelector('.cr-hl-wrap');
+        var hlCode          = container.querySelector('.cr-hl-code');
         var wrapBtn         = container.querySelector('.cr-wrap-btn');
         var togglePrevBtn   = container.querySelector('.cr-toggle-preview-btn');
         var expandBtn       = container.querySelector('.cr-expand-btn');
         var filetreeDiv     = container.querySelector('.cr-filetree');
         var workspace       = container.querySelector('.cr-workspace');
 
-        /* ── word wrap toggle ── */
+        /* ── syntax highlighting ── */
+        function escHl(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+        function colorAttrs(str) {
+            var out = '', i = 0, len = str.length;
+            while (i < len) {
+                var c = str[i];
+                if (/\s/.test(c)) { out += c; i++; continue; }
+                var nm = str.slice(i).match(/^[\w:-]+/);
+                if (!nm) { out += escHl(c); i++; continue; }
+                out += '<span class="cr-hl-at">' + escHl(nm[0]) + '</span>';
+                i += nm[0].length;
+                if (str[i] === '=') {
+                    out += '<span class="cr-hl-eq">=</span>';
+                    i++;
+                    if (str[i] === '"' || str[i] === "'") {
+                        var q = str[i];
+                        var end = str.indexOf(q, i + 1);
+                        end = end === -1 ? len - 1 : end;
+                        out += '<span class="cr-hl-vl">' + escHl(str.slice(i, end + 1)) + '</span>';
+                        i = end + 1;
+                    } else {
+                        var vm = str.slice(i).match(/^[^\s>]*/);
+                        if (vm) { out += '<span class="cr-hl-vl">' + escHl(vm[0]) + '</span>'; i += vm[0].length; }
+                    }
+                }
+            }
+            return out;
+        }
+        function colorTag(tag) {
+            if (/^<!DOCTYPE/i.test(tag)) return '<span class="cr-hl-dt">' + escHl(tag) + '</span>';
+            var inner = tag.slice(1, -1);
+            var isClose = inner.charAt(0) === '/';
+            if (isClose) inner = inner.slice(1);
+            var isSelf = inner.charAt(inner.length - 1) === '/';
+            if (isSelf) inner = inner.slice(0, -1);
+            var nm = inner.match(/^([\w-]+)([\s\S]*)$/);
+            if (!nm) return '<span class="cr-hl-br">&lt;' + (isClose ? '/' : '') + escHl(inner) + '&gt;</span>';
+            return '<span class="cr-hl-br">&lt;' + (isClose ? '/' : '') + '</span>' +
+                   '<span class="cr-hl-tn">' + escHl(nm[1]) + '</span>' +
+                   colorAttrs(nm[2]) +
+                   (isSelf ? '<span class="cr-hl-br">/&gt;</span>' : '<span class="cr-hl-br">&gt;</span>');
+        }
+        function syntaxHighlightHTML(code) {
+            var out = '', i = 0, len = code.length;
+            while (i < len) {
+                if (code.slice(i, i + 4) === '<!--') {
+                    var end = code.indexOf('-->', i + 4);
+                    end = end === -1 ? len : end + 3;
+                    out += '<span class="cr-hl-cm">' + escHl(code.slice(i, end)) + '</span>';
+                    i = end; continue;
+                }
+                if (code[i] === '<') {
+                    var j = i + 1, inQ = null;
+                    while (j < len) {
+                        var ch = code[j];
+                        if (inQ) { if (ch === inQ) inQ = null; }
+                        else if (ch === '"' || ch === "'") { inQ = ch; }
+                        else if (ch === '>') break;
+                        j++;
+                    }
+                    if (j < len) { out += colorTag(code.slice(i, j + 1)); i = j + 1; }
+                    else { out += escHl(code.slice(i)); i = len; }
+                    continue;
+                }
+                out += escHl(code[i]); i++;
+            }
+            return out;
+        }
+        function updateHighlight() {
+            hlCode.innerHTML = syntaxHighlightHTML(editor.value);
+        }
+        editor.addEventListener('input', updateHighlight);
+        editor.addEventListener('scroll', function () {
+            var pre = hlCode.parentElement;
+            pre.scrollTop  = editor.scrollTop;
+            pre.scrollLeft = editor.scrollLeft;
+        });
+
+        /* ── word wrap toggle (targets wrapper so both layers switch together) ── */
         wrapBtn.addEventListener('click', function () {
-            var on = editor.classList.toggle('cr-wrap-on');
+            var on = hlWrap.classList.toggle('cr-wrap-on');
             wrapBtn.classList.toggle('cr-btn-active', on);
             wrapBtn.title = on ? 'Word wrap: on' : 'Word wrap: off';
         });
@@ -699,6 +784,7 @@
                         if (activeFile === name) {
                             activeFile = Object.keys(vfs)[0];
                             editor.value = vfs[activeFile] || '';
+                            updateHighlight();
                         }
                     }
                     renderFileTree();
@@ -711,6 +797,7 @@
             vfs[activeFile] = editor.value;   /* save current */
             activeFile = name;
             editor.value = vfs[name] || '';
+            updateHighlight();
             renderFileTree();
         }
 
@@ -873,6 +960,7 @@
                 vfs[activeFile] = editor.value;
                 activeFile = target;
                 editor.value = vfs[target];
+                updateHighlight();
                 renderFileTree();
                 resolveAndRender(vfs[target]);
             }
@@ -881,6 +969,7 @@
         /* ── init ── */
         renderFileTree();
         editor.value = vfs[activeFile];
+        updateHighlight();
         updatePreview();
 
         runBtn.addEventListener('click', updatePreview);
@@ -890,6 +979,7 @@
                 ? 'index.html'
                 : Object.keys(originals)[0];
             editor.value = vfs[activeFile];
+            updateHighlight();
             uploadedImages = {};
             renderFileTree();
             updatePreview();

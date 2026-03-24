@@ -469,7 +469,81 @@
     color: #cdd6f4;
 }
 
-/* editor in workspace */
+/* ── HTML editor highlight wrapper (flex slot, replaces bare .cr-editor in workspace) ── */
+.cr-workspace .cr-hl-wrap {
+    flex: 1 1 auto;
+    min-height: 380px;
+    border-right: 2px solid #313244;
+}
+
+/* ── highlight overlay container ── */
+.cr-hl-wrap {
+    position: relative;
+    background: #1e1e2e;
+    overflow: hidden;
+}
+
+.cr-hl-wrap:focus-within {
+    background: #1a1a2a;
+}
+
+/* ── pre layer that shows coloured tokens ── */
+.cr-hl-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    margin: 0;
+    padding: 14px;
+    box-sizing: border-box;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.55;
+    -moz-tab-size: 4;
+    tab-size: 4;
+    white-space: pre;
+    overflow: auto;
+    pointer-events: none;
+    border: none;
+    color: #cdd6f4;
+    word-break: normal;
+    overflow-wrap: normal;
+}
+
+/* ── transparent textarea sits on top of the pre ── */
+.cr-hl-wrap .cr-editor {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: transparent !important;
+    color: transparent;
+    caret-color: #cdd6f4;
+    resize: none;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    flex: none;
+    padding: 14px;
+    -moz-tab-size: 4;
+    tab-size: 4;
+}
+
+/* ── wrap mode: toggle both layers together ── */
+.cr-hl-wrap.cr-wrap-on .cr-hl-bg,
+.cr-hl-wrap.cr-wrap-on .cr-editor {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    overflow-x: hidden;
+}
+
+/* ── syntax token colours (Catppuccin Mocha palette) ── */
+.cr-hl-br { color: #89dceb; }                          /* < > / */
+.cr-hl-tn { color: #89b4fa; }                          /* tag names */
+.cr-hl-at { color: #a6e3a1; }                          /* attribute names */
+.cr-hl-eq { color: #cdd6f4; }                          /* = */
+.cr-hl-vl { color: #fab387; }                          /* attribute values */
+.cr-hl-cm { color: #6c7086; font-style: italic; }      /* <!-- comments --> */
+.cr-hl-dt { color: #cba6f7; }                          /* <!DOCTYPE ...> */
+
+/* editor in workspace (kept for Python single-file runners) */
 .cr-workspace .cr-editor {
     flex: 1 1 auto;
     min-height: 380px;
@@ -486,9 +560,9 @@
     background: #fff;
 }
 
-/* ── expanded preview: hide tree + editor, preview fills workspace ── */
+/* ── expanded preview: hide tree + editor wrapper, preview fills workspace ── */
 .cr-workspace.cr-preview-expanded .cr-filetree,
-.cr-workspace.cr-preview-expanded .cr-editor {
+.cr-workspace.cr-preview-expanded .cr-hl-wrap {
     display: none;
 }
 
@@ -553,7 +627,8 @@
         padding: 4px 10px;
     }
 
-    .cr-workspace .cr-editor {
+    .cr-workspace .cr-editor,
+    .cr-workspace .cr-hl-wrap {
         width: 100%;
         min-height: 260px;
         border-right: none;
