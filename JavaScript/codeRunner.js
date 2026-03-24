@@ -138,6 +138,11 @@
             _inputQueue = collectedInputs.slice();
             _inputPos   = 0;
 
+            /* load any packages the code imports (dataclasses, random, numpy, etc.) */
+            try {
+                await pyodide.loadPackagesFromImports(editor.value);
+            } catch (_) {}
+
             /* redirect stdout */
             pyodide.runPython(
                 'import sys, io\n' +
