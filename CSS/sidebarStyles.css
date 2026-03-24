@@ -144,21 +144,25 @@
 .sidebar-menu li:nth-child(5).active .submenu li a { background-color: #a23854; }
 .sidebar-menu li:nth-child(6).active .submenu li a { background-color: #36834f; }
 .sidebar-menu li:nth-child(7).active .submenu li a { background-color: #9d7521; }
+.sidebar-menu li:nth-child(8).active .submenu li a { background-color: #c11aa2; }
 
 .sidebar-menu li:nth-child(4) .submenu li.active .submenu li a { background-color: #193755; }
 .sidebar-menu li:nth-child(5) .submenu li.active .submenu li a { background-color: #571b2b; }
 .sidebar-menu li:nth-child(6) .submenu li.active .submenu li a { background-color: #184226; }
 .sidebar-menu li:nth-child(7) .submenu li.active .submenu li a { background-color: #6c5117; }
+.sidebar-menu li:nth-child(8) .submenu li.active .submenu li a { background-color: #8c2179; }
 
 .sidebar-menu li:nth-child(4) .submenu li.active .submenu li.active .submenu li a { background-color: #0c243c; }
 .sidebar-menu li:nth-child(5) .submenu li.active .submenu li.active .submenu li a { background-color: #330f19; }
 .sidebar-menu li:nth-child(6) .submenu li.active .submenu li.active .submenu li a { background-color: #06140a; }
 .sidebar-menu li:nth-child(7) .submenu li.active .submenu li.active .submenu li a { background-color: #3f300e; }
+.sidebar-menu li:nth-child(8) .submenu li.active .submenu li.active .submenu li a { background-color: #4b1b43; }
 
 .sidebar-menu li:nth-child(4) .submenu li.active .submenu li.active .submenu li.active .submenu li a { background-color: #050d15; }
 .sidebar-menu li:nth-child(5) .submenu li.active .submenu li.active .submenu li.active .submenu li a { background-color: #080304; }
 .sidebar-menu li:nth-child(6) .submenu li.active .submenu li.active .submenu li.active .submenu li a { background-color: #000000; }
 .sidebar-menu li:nth-child(7) .submenu li.active .submenu li.active .submenu li.active .submenu li a { background-color: #151005; }
+.sidebar-menu li:nth-child(8) .submenu li.active .submenu li.active .submenu li.active .submenu li a { background-color: #110810; }
 
 /* Hover effects */
 .sidebar-menu li a:hover,

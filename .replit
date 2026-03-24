@@ -15,19 +15,6 @@ run = ["npx", "tsx", "server/index.ts"]
 runButton = "Project"
 
 [[workflows.workflow]]
-name = "Serve static"
-mode = "parallel"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = """
-echo \"Serving HTML, open the Preview to see your output.
-To see changes you make, you can hit the refresh button in the preview, you do \u001B[1mnot\u001B[0m have to stop and run again.
-Console logs are available in the Preview devtools or your browser devtools.\" && static-web-server -w ./.config/static-web-server.toml
-"""
-waitForPort = 80
-
-[[workflows.workflow]]
 name = "Project"
 mode = "parallel"
 author = "agent"
@@ -35,6 +22,10 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "Server"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Serve static"
 
 [[workflows.workflow]]
 name = "Server"
@@ -48,13 +39,29 @@ task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "Serve static"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = """
+echo \"Serving HTML, open the Preview to see your output.
+To see changes you make, you can hit the refresh button in the preview, you do not have to stop and run again.
+Console logs are available in the Preview devtools or your browser devtools.\" && static-web-server -w ./.config/static-web-server.toml"""
+waitForPort = 3000
+
+[workflows.workflow.metadata]
+outputType = "console"
+isCanvasWorkflow = true
+
 [[ports]]
 localPort = 80
 externalPort = 3000
 
 [[ports]]
-localPort = 5000
-externalPort = 80
+localPort = 3000
+externalPort = 3000
 
 [agent]
 expertMode = true
