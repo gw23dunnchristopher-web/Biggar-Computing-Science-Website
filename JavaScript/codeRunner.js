@@ -611,6 +611,7 @@
             '    <pre class="cr-hl-bg" aria-hidden="true"><code class="cr-hl-code"></code></pre>' +
             '    <textarea class="cr-editor" spellcheck="false"></textarea>' +
             '  </div>' +
+            '  <div class="cr-splitter" title="Drag to resize"></div>' +
             '  <iframe class="cr-preview" sandbox="allow-scripts allow-same-origin"></iframe>' +
             '</div>';
 
@@ -629,6 +630,7 @@
         var ftToggleBtn     = container.querySelector('.cr-ft-toggle');
         var filetreeDiv     = container.querySelector('.cr-filetree');
         var workspace       = container.querySelector('.cr-workspace');
+        var splitterEl      = container.querySelector('.cr-splitter');
 
         /* ── wrap on by default ── */
         hlWrap.classList.add('cr-wrap-on');
@@ -721,14 +723,26 @@
         });
 
         /* ── Code / Preview view toggles ── */
-        var codeVisible    = true;
-        var previewVisible = true;
+        var codeVisible     = true;
+        var previewVisible  = true;
+        var savedPreviewW   = null;   /* user-set px width from splitter drag */
 
         function applyViewState() {
+            var splitMode = codeVisible && previewVisible;
             workspace.classList.toggle('cr-code-hidden',    !codeVisible);
             workspace.classList.toggle('cr-preview-hidden', !previewVisible);
             codeBtn.classList.toggle('cr-btn-active',    codeVisible);
             previewBtn.classList.toggle('cr-btn-active', previewVisible);
+            /* restore / clear the inline width so CSS rules can take over */
+            if (splitMode && savedPreviewW !== null) {
+                preview.style.width      = savedPreviewW + 'px';
+                preview.style.flexShrink = '0';
+                preview.style.flex       = '';
+            } else if (!splitMode) {
+                preview.style.width      = '';
+                preview.style.flexShrink = '';
+                preview.style.flex       = '';
+            }
         }
 
         codeBtn.addEventListener('click', function () {
@@ -743,6 +757,60 @@
             previewVisible = !previewVisible;
             applyViewState();
         });
+
+        /* ── Drag-to-resize splitter ── */
+        function startSplitterDrag(startX, startW) {
+            splitterEl.classList.add('cr-dragging');
+            document.body.style.cursor     = 'col-resize';
+            document.body.style.userSelect = 'none';
+
+            function onMove(x) {
+                var dx    = startX - x;   /* drag left → bigger preview */
+                var total = workspace.getBoundingClientRect().width;
+                var minW  = 150;
+                var maxW  = total - 250;
+                var newW  = Math.max(minW, Math.min(maxW, startW + dx));
+                savedPreviewW        = newW;
+                preview.style.width      = newW + 'px';
+                preview.style.flexShrink = '0';
+                preview.style.flex       = '';
+            }
+
+            function finish() {
+                splitterEl.classList.remove('cr-dragging');
+                document.body.style.cursor     = '';
+                document.body.style.userSelect = '';
+            }
+
+            /* mouse */
+            function onMouseMove(e) { onMove(e.clientX); }
+            function onMouseUp()    {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup',   onMouseUp);
+                finish();
+            }
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup',   onMouseUp);
+
+            /* touch */
+            function onTouchMove(e) { e.preventDefault(); onMove(e.touches[0].clientX); }
+            function onTouchEnd()   {
+                splitterEl.removeEventListener('touchmove', onTouchMove);
+                splitterEl.removeEventListener('touchend',  onTouchEnd);
+                finish();
+            }
+            splitterEl.addEventListener('touchmove', onTouchMove, { passive: false });
+            splitterEl.addEventListener('touchend',  onTouchEnd);
+        }
+
+        splitterEl.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+            startSplitterDrag(e.clientX, preview.getBoundingClientRect().width);
+        });
+
+        splitterEl.addEventListener('touchstart', function (e) {
+            startSplitterDrag(e.touches[0].clientX, preview.getBoundingClientRect().width);
+        }, { passive: true });
 
         /* ── file tree collapse ── */
         var ftCollapsed = false;

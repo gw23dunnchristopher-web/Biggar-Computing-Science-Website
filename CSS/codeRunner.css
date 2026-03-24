@@ -398,6 +398,45 @@
     min-height: 380px;
 }
 
+/* ── Drag-to-resize splitter between code and preview ── */
+.cr-splitter {
+    width: 6px;
+    flex-shrink: 0;
+    background: #313244;
+    cursor: col-resize;
+    position: relative;
+    transition: background 0.15s;
+    z-index: 2;
+}
+
+.cr-splitter::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 2px;
+    height: 32px;
+    border-radius: 2px;
+    background: #585b70;
+    transition: background 0.15s;
+}
+
+.cr-splitter:hover,
+.cr-splitter.cr-dragging {
+    background: #45475a;
+}
+
+.cr-splitter:hover::after,
+.cr-splitter.cr-dragging::after {
+    background: #89b4fa;
+}
+
+.cr-workspace.cr-preview-hidden .cr-splitter,
+.cr-workspace.cr-code-hidden .cr-splitter {
+    display: none;
+}
+
 /* file tree panel */
 .cr-filetree {
     width: 140px;
@@ -767,8 +806,12 @@
         border-bottom: 2px solid #313244;
     }
 
+    .cr-splitter {
+        display: none;
+    }
+
     .cr-preview {
-        width: 100%;
+        width: 100% !important;
         min-height: 300px;
     }
 }
