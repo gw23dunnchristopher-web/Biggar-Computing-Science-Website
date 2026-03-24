@@ -117,7 +117,7 @@ print("Average:", total / 5)
 
 ## How to add an HTML/CSS runner to a page
 
-The HTML runner shows a split view: the student's code on the left, a live rendered preview on the right. Clicking **Preview** re-renders the iframe.
+The HTML runner has three panels: a **file tree** on the left, a **code editor** in the middle, and a **live preview** on the right. The starter code in the `<textarea>` becomes `index.html` in the virtual filesystem.
 
 ```html
 <div class="html-runner">
@@ -125,10 +125,8 @@ The HTML runner shows a split view: the student's code on the left, a live rende
 <!DOCTYPE html>
 <html>
 <head>
-    <style>
-        body { font-family: Arial; background: #f0f0f0; }
-        h1   { color: navy; }
-    </style>
+    <title>My Page</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Hello, World!</h1>
@@ -140,6 +138,20 @@ The HTML runner shows a split view: the student's code on the left, a live rende
 ```
 
 The same `codeRunner.css` and `codeRunner.js` files cover both runner types. You can have multiple runners of either type on the same page.
+
+### Multi-file features
+
+Students can create additional files using the **+ New file** button in the file tree panel:
+
+- Typing `style.css` creates a CSS file — any `<link rel="stylesheet" href="style.css">` in the HTML is automatically inlined into the preview
+- Typing `script.js` creates a JS file — any `<script src="script.js">` is automatically inlined
+- Typing `page2.html` creates a second HTML page — `<a href="page2.html">` links inside the preview navigate to it
+
+Files can be deleted by hovering over them in the file tree and clicking the × button (the last remaining file cannot be deleted).
+
+### Image uploads
+
+Students click **📷 Image** in the toolbar to upload image files from their device. Uploaded images appear as thumbnails in a strip below the toolbar. Writing `<img src="cat.jpg">` in the HTML will automatically use the uploaded `cat.jpg` — path prefixes like `images/cat.jpg` are also matched by filename alone.
 
 ---
 

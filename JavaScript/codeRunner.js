@@ -226,7 +226,7 @@
         });
     }
 
-    /* ── build an HTML runner ── */
+    /* ── build an HTML runner (multi-file with virtual filesystem) ── */
     function initHtmlRunner(container) {
         var stored = container.querySelector('textarea.cr-code');
         if (!stored) return;
@@ -238,7 +238,7 @@
             '  <span class="cr-lang">&#x1F310; HTML</span>' +
             '  <div class="cr-btns">' +
             '    <label class="cr-upload-btn" title="Upload images to use in your HTML">' +
-            '      &#x1F4F7; Upload Image' +
+            '      &#x1F4F7; Image' +
             '      <input type="file" class="cr-file-input" accept="image/*" multiple style="display:none">' +
             '    </label>' +
             '    <button class="cr-run-btn">&#9654; Preview</button>' +
@@ -246,35 +246,163 @@
             '  </div>' +
             '</div>' +
             '<div class="cr-img-strip" style="display:none"></div>' +
-            '<div class="cr-split">' +
+            '<div class="cr-workspace">' +
+            '  <div class="cr-filetree">' +
+            '    <div class="cr-filetree-hdr">Files</div>' +
+            '    <ul class="cr-file-list"></ul>' +
+            '    <button class="cr-new-file-btn">+ New file</button>' +
+            '  </div>' +
             '  <textarea class="cr-editor" spellcheck="false"></textarea>' +
             '  <iframe class="cr-preview" sandbox="allow-scripts allow-same-origin"></iframe>' +
             '</div>';
 
-        var editor    = container.querySelector('.cr-editor');
-        var preview   = container.querySelector('.cr-preview');
-        var runBtn    = container.querySelector('.cr-run-btn');
-        var resetBtn  = container.querySelector('.cr-reset-btn');
-        var fileInput = container.querySelector('.cr-file-input');
-        var imgStrip  = container.querySelector('.cr-img-strip');
+        var editor      = container.querySelector('.cr-editor');
+        var preview     = container.querySelector('.cr-preview');
+        var runBtn      = container.querySelector('.cr-run-btn');
+        var resetBtn    = container.querySelector('.cr-reset-btn');
+        var fileInput   = container.querySelector('.cr-file-input');
+        var imgStrip    = container.querySelector('.cr-img-strip');
+        var fileList    = container.querySelector('.cr-file-list');
+        var newFileBtn  = container.querySelector('.cr-new-file-btn');
 
-        editor.value = original;
-
-        /* uploaded images: filename -> dataURL */
+        /* virtual filesystem: filename → content */
+        var vfs = { 'index.html': original };
+        var activeFile = 'index.html';
         var uploadedImages = {};
 
-        function updatePreview() {
-            var html = editor.value;
-            /* replace src="filename" with the corresponding data URL */
+        /* ── file tree ── */
+        function fileIcon(name) {
+            if (name.endsWith('.css')) return '&#x1F3A8;';
+            if (name.endsWith('.js'))  return '&#x2699;&#xFE0F;';
+            return '&#x1F4C4;';
+        }
+
+        function renderFileTree() {
+            var names = Object.keys(vfs);
+            fileList.innerHTML = names.map(function (name) {
+                var active = name === activeFile ? ' cr-file-active' : '';
+                var del = names.length > 1
+                    ? '<button class="cr-file-del" data-name="' + name + '" title="Delete file">\u00D7</button>'
+                    : '';
+                return '<li class="cr-file-item' + active + '" data-name="' + name + '">' +
+                    '<span class="cr-file-icon">' + fileIcon(name) + '</span>' +
+                    '<span class="cr-file-name">' + name + '</span>' +
+                    del + '</li>';
+            }).join('');
+
+            fileList.querySelectorAll('.cr-file-item').forEach(function (li) {
+                li.addEventListener('click', function (e) {
+                    if (e.target.classList.contains('cr-file-del')) return;
+                    switchTo(li.dataset.name);
+                });
+            });
+            fileList.querySelectorAll('.cr-file-del').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var name = btn.dataset.name;
+                    delete vfs[name];
+                    if (activeFile === name) {
+                        activeFile = Object.keys(vfs)[0];
+                        editor.value = vfs[activeFile];
+                    }
+                    renderFileTree();
+                    updatePreview();
+                });
+            });
+        }
+
+        function switchTo(name) {
+            vfs[activeFile] = editor.value;   /* save current */
+            activeFile = name;
+            editor.value = vfs[name] || '';
+            renderFileTree();
+        }
+
+        newFileBtn.addEventListener('click', function () {
+            var name = (prompt('File name (e.g. style.css or page2.html):') || '').trim();
+            if (!name) return;
+            if (!name.includes('.')) name += '.html';
+            if (vfs[name]) { switchTo(name); return; }
+            vfs[name] = name.endsWith('.css') ? '/* ' + name + ' */\n' :
+                        name.endsWith('.js')  ? '// ' + name + '\n' :
+                        '<!DOCTYPE html>\n<html>\n<head>\n  <title>' + name + '</title>\n</head>\n<body>\n\n</body>\n</html>';
+            switchTo(name);
+        });
+
+        /* ── preview rendering ── */
+        function resolveAndRender(html) {
+            /* inline CSS: <link rel="stylesheet" href="style.css"> */
+            html = html.replace(
+                /<link\b([^>]*)href=["']([^"']+)["']([^>]*)>/gi,
+                function (match, pre, href, post) {
+                    if (!(/rel=["']stylesheet["']/i.test(pre + post))) return match;
+                    var fname = href.split('/').pop();
+                    return vfs[fname] !== undefined
+                        ? '<style>' + vfs[fname] + '</style>'
+                        : match;
+                }
+            );
+
+            /* inline JS: <script src="script.js"></script> */
+            html = html.replace(
+                /<script\b([^>]*)src=["']([^"']+)["']([^>]*)><\/script>/gi,
+                function (match, pre, src) {
+                    var fname = src.split('/').pop();
+                    return vfs[fname] !== undefined
+                        ? '<script>' + vfs[fname] + '<\/script>'
+                        : match;
+                }
+            );
+
+            /* substitute uploaded images */
             Object.keys(uploadedImages).forEach(function (name) {
                 var esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                /* match src="..." or src='...' with any leading path stripped */
                 var re = new RegExp('(src=["\'])(?:[^"\']*[\\/])?' + esc + '(["\'])', 'gi');
                 html = html.replace(re, '$1' + uploadedImages[name] + '$2');
             });
+
+            /* inject page-navigation interceptor so <a href="page2.html"> works */
+            var interceptor = '<script>(function(){' +
+                'document.addEventListener("click",function(e){' +
+                '  var a=e.target.closest("a[href]");if(!a)return;' +
+                '  var h=a.getAttribute("href");' +
+                '  if(h&&!/^(https?:|mailto:|javascript:|#)/i.test(h)){' +
+                '    e.preventDefault();' +
+                '    window.parent.postMessage({crNav:h},"*");' +
+                '  }' +
+                '});' +
+                '}());<\/script>';
+            html = /<\/body>/i.test(html)
+                ? html.replace(/<\/body>/i, interceptor + '</body>')
+                : html + interceptor;
+
             preview.srcdoc = html;
         }
 
+        function updatePreview() {
+            vfs[activeFile] = editor.value;   /* save current before rendering */
+            /* find the entry-point HTML file */
+            var entry = vfs['index.html'] !== undefined ? 'index.html'
+                : Object.keys(vfs).find(function (f) { return f.endsWith('.html'); })
+                || Object.keys(vfs)[0];
+            resolveAndRender(vfs[entry] || '');
+        }
+
+        /* handle in-preview navigation (links between pages) */
+        window.addEventListener('message', function (e) {
+            if (!e.data || !e.data.crNav) return;
+            if (e.source !== preview.contentWindow) return;  /* only our iframe */
+            var fname = e.data.crNav.split('?')[0].split('#')[0].split('/').pop();
+            if (vfs[fname] !== undefined) {
+                vfs[activeFile] = editor.value;
+                activeFile = fname;
+                editor.value = vfs[fname];
+                renderFileTree();
+                resolveAndRender(vfs[fname]);
+            }
+        });
+
+        /* ── image upload ── */
         function renderStrip() {
             var names = Object.keys(uploadedImages);
             if (names.length === 0) {
@@ -283,7 +411,7 @@
                 return;
             }
             imgStrip.style.display = 'flex';
-            imgStrip.innerHTML = '<span class="cr-strip-label">Uploaded:</span>' +
+            imgStrip.innerHTML = '<span class="cr-strip-label">Images:</span>' +
                 names.map(function (name) {
                     return '<div class="cr-img-chip">' +
                         '<img src="' + uploadedImages[name] + '" class="cr-img-thumb" alt="">' +
@@ -301,28 +429,32 @@
         }
 
         fileInput.addEventListener('change', function () {
-            var files = Array.from(fileInput.files);
-            var pending = files.length;
-            if (pending === 0) return;
-            files.forEach(function (file) {
+            var pending = fileInput.files.length;
+            if (!pending) return;
+            Array.from(fileInput.files).forEach(function (file) {
                 var reader = new FileReader();
                 reader.onload = function (e) {
                     uploadedImages[file.name] = e.target.result;
-                    pending--;
-                    if (pending === 0) {
-                        renderStrip();
-                        updatePreview();
-                    }
+                    if (--pending === 0) { renderStrip(); updatePreview(); }
                 };
                 reader.readAsDataURL(file);
             });
             fileInput.value = '';
         });
 
+        /* ── init ── */
+        renderFileTree();
+        editor.value = vfs[activeFile];
         updatePreview();
+
         runBtn.addEventListener('click', updatePreview);
         resetBtn.addEventListener('click', function () {
+            vfs = { 'index.html': original };
+            activeFile = 'index.html';
             editor.value = original;
+            uploadedImages = {};
+            renderStrip();
+            renderFileTree();
             updatePreview();
         });
     }
