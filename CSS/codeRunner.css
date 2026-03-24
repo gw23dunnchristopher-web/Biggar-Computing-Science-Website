@@ -216,8 +216,8 @@
     cursor: default;
 }
 
-/* ── upload button (HTML runner) ── */
-.cr-upload-btn {
+/* ── toolbar upload label (Python) ── */
+.cr-toolbar-upload {
     display: inline-flex;
     align-items: center;
     padding: 5px 14px;
@@ -231,22 +231,22 @@
     user-select: none;
 }
 
-.cr-upload-btn:hover {
+.cr-toolbar-upload:hover {
     background: #45475a;
 }
 
-/* ── uploaded images strip ── */
-.cr-img-strip {
+/* ── Python data-file strip (single-file uploaded CSV/TXT) ── */
+.cr-data-strip {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
-    padding: 8px 12px;
+    padding: 6px 12px;
     background: #181825;
     border-bottom: 1px solid #313244;
 }
 
-.cr-strip-label {
+.cr-data-strip-label {
     color: #6c7086;
     font-family: Arial, sans-serif;
     font-size: 11px;
@@ -256,46 +256,76 @@
     white-space: nowrap;
 }
 
-.cr-img-chip {
+.cr-data-chip {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     background: #313244;
     border-radius: 4px;
-    padding: 3px 6px 3px 4px;
-}
-
-.cr-img-thumb {
-    width: 28px;
-    height: 28px;
-    object-fit: cover;
-    border-radius: 3px;
-    display: block;
-}
-
-.cr-img-name {
+    padding: 2px 4px 2px 8px;
     color: #cdd6f4;
     font-family: 'Courier New', Courier, monospace;
     font-size: 12px;
-    max-width: 140px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
-.cr-img-remove {
+.cr-data-chip-remove {
     background: none;
     border: none;
     color: #6c7086;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1;
     cursor: pointer;
     padding: 0 2px;
     flex-shrink: 0;
 }
 
-.cr-img-remove:hover {
+.cr-data-chip-remove:hover {
     color: #f38ba8;
+}
+
+/* ── file-tree footer upload button (HTML runner) ── */
+.cr-filetree-upload {
+    background: none;
+    border: none;
+    border-top: 1px solid #313244;
+    color: #6c7086;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    padding: 8px 10px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: background 0.1s, color 0.1s;
+    flex-shrink: 0;
+    display: block;
+    user-select: none;
+}
+
+.cr-filetree-upload:hover {
+    background: #1e1e2e;
+    color: #cdd6f4;
+}
+
+/* ── drag-over highlights ── */
+.cr-filetree.cr-drop-active {
+    background: #1a1a35;
+    outline: 2px dashed #89b4fa;
+    outline-offset: -3px;
+}
+
+.cr-folder-item.cr-drag-over {
+    background: #252545;
+    color: #89b4fa;
+}
+
+/* ── read-only (image) file items in tree ── */
+.cr-file-item.cr-readonly {
+    opacity: 0.75;
+    cursor: default;
+}
+
+.cr-file-item.cr-readonly:hover {
+    background: transparent;
 }
 
 /* ── HTML runner workspace (file tree + editor + preview) ── */

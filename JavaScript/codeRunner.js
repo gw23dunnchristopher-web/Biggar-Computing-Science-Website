@@ -85,7 +85,9 @@
         return root;
     }
 
-    /* Render tree nodes into HTML <li> strings (depth controls indentation). */
+    /* Render tree nodes into HTML <li> strings (depth controls indentation).
+       opts.canDel may be a boolean OR a function(filePath) → boolean.
+       opts.isReadonly may be a function(filePath) → boolean (adds cr-readonly class). */
     function renderTreeItems(nodes, depth, opts) {
         var pad = depth * 14;
         return nodes.map(function (node) {
@@ -98,14 +100,17 @@
                     '<span class="cr-file-name">' + node.name + '</span>' +
                     '</li>' + kids;
             } else {
-                var active = node.path === opts.activeFile ? ' cr-file-active' : '';
-                var badge  = opts.mainFile && node.path === opts.mainFile
+                var canDel   = typeof opts.canDel === 'function' ? opts.canDel(node.path) : opts.canDel;
+                var readOnly = typeof opts.isReadonly === 'function' ? opts.isReadonly(node.path) : false;
+                var active   = node.path === opts.activeFile ? ' cr-file-active' : '';
+                var roClass  = readOnly ? ' cr-readonly' : '';
+                var badge    = opts.mainFile && node.path === opts.mainFile
                     ? '<span style="font-size:0.65rem;color:#888;margin-left:4px;">(runs)</span>' : '';
-                var del    = opts.canDel
+                var del      = canDel
                     ? '<button class="cr-file-del" data-name="' + node.path + '" title="Delete file">\u00D7</button>'
                     : '';
-                return '<li class="cr-file-item' + active + '" data-name="' + node.path + '" style="padding-left:' + (pad + 4) + 'px">' +
-                    '<span class="cr-file-icon">' + opts.iconFn(node.name) + '</span>' +
+                return '<li class="cr-file-item' + active + roClass + '" data-name="' + node.path + '" style="padding-left:' + (pad + 4) + 'px">' +
+                    '<span class="cr-file-icon">' + opts.iconFn(node.path) + '</span>' +
                     '<span class="cr-file-name">' + node.name + badge + '</span>' +
                     del + '</li>';
             }
@@ -193,21 +198,28 @@
             '<div class="cr-toolbar">' +
             '  <span class="cr-lang">&#x1F40D; Python</span>' +
             '  <div class="cr-btns">' +
+            '    <label class="cr-toolbar-upload" title="Upload a CSV or TXT data file to use in your code">' +
+            '      &#x1F4C2; Upload' +
+            '      <input type="file" class="cr-py-file-input" accept=".csv,.txt,.json" multiple style="display:none">' +
+            '    </label>' +
             '    <button class="cr-run-btn">&#9654; Run</button>' +
             '    <button class="cr-reset-btn">&#8635; Reset</button>' +
             '  </div>' +
             '</div>' +
+            '<div class="cr-data-strip" style="display:none"></div>' +
             workspaceWrap +
             '<div class="cr-output-area">' +
             '  <div class="cr-output-label">Output</div>' +
             '  <textarea class="cr-terminal" readonly spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off">Click Run to execute the code\u2026</textarea>' +
             '</div>';
 
-        var editor   = container.querySelector('.cr-editor');
-        var lineNums = container.querySelector('.cr-line-numbers');
-        var terminal = container.querySelector('.cr-terminal');
-        var runBtn   = container.querySelector('.cr-run-btn');
-        var resetBtn = container.querySelector('.cr-reset-btn');
+        var editor      = container.querySelector('.cr-editor');
+        var lineNums    = container.querySelector('.cr-line-numbers');
+        var terminal    = container.querySelector('.cr-terminal');
+        var runBtn      = container.querySelector('.cr-run-btn');
+        var resetBtn    = container.querySelector('.cr-reset-btn');
+        var dataStrip   = container.querySelector('.cr-data-strip');
+        var pyFileInput = container.querySelector('.cr-py-file-input');
 
         /* ── line number sync ── */
         function updateLineNumbers() {
@@ -229,6 +241,71 @@
         editor.value = vfs[activeFile] || '';
         updateLineNumbers();
 
+        /* ── data-file strip: shown for single-file runners when CSV/TXT are uploaded ── */
+        function renderDataStrip() {
+            var uploads = Object.keys(vfs).filter(function (k) { return !originals[k]; });
+            if (multiFile || !uploads.length) { dataStrip.style.display = 'none'; return; }
+            dataStrip.style.display = 'flex';
+            dataStrip.innerHTML = '<span class="cr-data-strip-label">Data files:</span>' +
+                uploads.map(function (name) {
+                    return '<div class="cr-data-chip">' +
+                        '<span>&#x1F4C2; ' + name + '</span>' +
+                        '<button class="cr-data-chip-remove" data-name="' + name + '" title="Remove">\u00D7</button>' +
+                        '</div>';
+                }).join('');
+            dataStrip.querySelectorAll('.cr-data-chip-remove').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    delete vfs[btn.dataset.name];
+                    renderDataStrip();
+                });
+            });
+        }
+
+        /* ── Python file upload handler ── */
+        function handlePyUpload(files) {
+            var accepted = Array.from(files).filter(function (f) {
+                return /\.(csv|txt|json)$/i.test(f.name);
+            });
+            var pending = accepted.length;
+            if (!pending) return;
+            accepted.forEach(function (file) {
+                var reader = new FileReader();
+                reader.onload = function (ev) {
+                    vfs[file.name] = ev.target.result;
+                    openFolders = Object.assign(openFolders, defaultOpenFolders([file.name]));
+                    if (multiFile) renderPyFileTree();
+                    else renderDataStrip();
+                };
+                reader.readAsText(file);
+            });
+        }
+
+        pyFileInput.addEventListener('change', function () {
+            handlePyUpload(pyFileInput.files);
+            pyFileInput.value = '';
+        });
+
+        /* drag-and-drop CSV/TXT onto the whole Python runner */
+        container.addEventListener('dragover', function (e) {
+            var hasFile = e.dataTransfer && Array.from(e.dataTransfer.items || []).some(function (i) { return i.kind === 'file'; });
+            if (!hasFile) return;
+            e.preventDefault();
+            container.style.outline = '2px dashed #89b4fa';
+            container.style.outlineOffset = '-3px';
+        });
+        container.addEventListener('dragleave', function (e) {
+            if (!container.contains(e.relatedTarget)) {
+                container.style.outline = '';
+                container.style.outlineOffset = '';
+            }
+        });
+        container.addEventListener('drop', function (e) {
+            e.preventDefault();
+            container.style.outline = '';
+            container.style.outlineOffset = '';
+            handlePyUpload(e.dataTransfer.files);
+        });
+
         /* ── file tree (multi-file only) ── */
         function pyFileIcon(name) {
             if (name.endsWith('.py'))  return '&#x1F40D;';
@@ -245,7 +322,7 @@
             ftList.innerHTML = renderTreeItems(tree.children, 0, {
                 activeFile: activeFile,
                 mainFile:   mainFile,
-                canDel:     false,
+                canDel:     function (name) { return !originals[name]; },
                 iconFn:     pyFileIcon
             });
             ftList.querySelectorAll('.cr-folder-item').forEach(function (li) {
@@ -256,11 +333,25 @@
                 });
             });
             ftList.querySelectorAll('.cr-file-item').forEach(function (li) {
-                li.addEventListener('click', function () {
+                li.addEventListener('click', function (e) {
+                    if (e.target.classList.contains('cr-file-del')) return;
                     vfs[activeFile] = editor.value;
                     activeFile = li.dataset.name;
                     editor.value = vfs[activeFile] || '';
                     updateLineNumbers();
+                    renderPyFileTree();
+                });
+            });
+            ftList.querySelectorAll('.cr-file-del').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var name = btn.dataset.name;
+                    delete vfs[name];
+                    if (activeFile === name) {
+                        activeFile = mainFile;
+                        editor.value = vfs[mainFile] || '';
+                        updateLineNumbers();
+                    }
                     renderPyFileTree();
                 });
             });
@@ -409,6 +500,7 @@
             editor.value = vfs[activeFile] || '';
             updateLineNumbers();
             if (multiFile) renderPyFileTree();
+            renderDataStrip();
             terminal.readOnly = true;
             terminal.value = 'Click Run to execute the code\u2026';
             terminal.className = 'cr-terminal';
@@ -483,22 +575,21 @@
             '<div class="cr-toolbar">' +
             '  <span class="cr-lang">&#x1F310; HTML</span>' +
             '  <div class="cr-btns">' +
-            '    <label class="cr-upload-btn" title="Upload images to use in your HTML">' +
-            '      &#x1F4F7; Image' +
-            '      <input type="file" class="cr-file-input" accept="image/*" multiple style="display:none">' +
-            '    </label>' +
             '    <button class="cr-wrap-btn" title="Word wrap: off">&#8644; Wrap</button>' +
             '    <button class="cr-toggle-preview-btn" title="Hide preview">&#9707; Preview</button>' +
             '    <button class="cr-run-btn">&#9654; Preview</button>' +
             '    <button class="cr-reset-btn">&#8635; Reset</button>' +
             '  </div>' +
             '</div>' +
-            '<div class="cr-img-strip" style="display:none"></div>' +
             '<div class="cr-workspace">' +
             '  <div class="cr-filetree">' +
             '    <div class="cr-filetree-hdr">Files</div>' +
             '    <ul class="cr-file-list"></ul>' +
             '    <button class="cr-new-file-btn">+ New file</button>' +
+            '    <label class="cr-filetree-upload" title="Upload images, CSS, JS, or data files">' +
+            '      &#x1F4C2; Upload' +
+            '      <input type="file" class="cr-html-file-input" accept="image/*,.css,.js,.csv,.txt,.html,.json" multiple style="display:none">' +
+            '    </label>' +
             '  </div>' +
             '  <textarea class="cr-editor" spellcheck="false"></textarea>' +
             '  <iframe class="cr-preview" sandbox="allow-scripts allow-same-origin"></iframe>' +
@@ -508,12 +599,12 @@
         var preview         = container.querySelector('.cr-preview');
         var runBtn          = container.querySelector('.cr-run-btn');
         var resetBtn        = container.querySelector('.cr-reset-btn');
-        var fileInput       = container.querySelector('.cr-file-input');
-        var imgStrip        = container.querySelector('.cr-img-strip');
+        var htmlFileInput   = container.querySelector('.cr-html-file-input');
         var fileList        = container.querySelector('.cr-file-list');
         var newFileBtn      = container.querySelector('.cr-new-file-btn');
         var wrapBtn         = container.querySelector('.cr-wrap-btn');
         var togglePrevBtn   = container.querySelector('.cr-toggle-preview-btn');
+        var filetreeDiv     = container.querySelector('.cr-filetree');
 
         /* ── word wrap toggle ── */
         wrapBtn.addEventListener('click', function () {
@@ -537,33 +628,40 @@
         var activeFile = originals['index.html'] !== undefined
             ? 'index.html'
             : Object.keys(originals)[0];
-        var uploadedImages = {};
+        var uploadedImages = {};   /* path → dataURL for image files */
         var openFolders = defaultOpenFolders(Object.keys(originals));  /* all folders open by default */
 
         /* ── file tree ── */
         function fileIcon(name) {
-            if (name.endsWith('.css')) return '&#x1F3A8;';
-            if (name.endsWith('.js'))  return '&#x2699;&#xFE0F;';
+            if (uploadedImages[name])    return '&#x1F5BC;';   /* 🖼 image */
+            if (name.endsWith('.css'))   return '&#x1F3A8;';
+            if (name.endsWith('.js'))    return '&#x2699;&#xFE0F;';
+            if (name.endsWith('.csv'))   return '&#x1F4CA;';
+            if (name.endsWith('.txt'))   return '&#x1F4DD;';
             return '&#x1F4C4;';
         }
 
         function renderFileTree() {
-            var names = Object.keys(vfs);
-            var tree  = buildFolderTree(names, openFolders);
+            var textNames  = Object.keys(vfs);
+            var imageNames = Object.keys(uploadedImages);
+            var allNames   = textNames.concat(imageNames);
+            var tree = buildFolderTree(allNames, openFolders);
             fileList.innerHTML = renderTreeItems(tree.children, 0, {
                 activeFile: activeFile,
                 mainFile:   null,
-                canDel:     names.length > 1,
-                iconFn:     fileIcon
+                canDel: function (name) {
+                    return !!uploadedImages[name] || textNames.length > 1;
+                },
+                isReadonly: function (name) { return !!uploadedImages[name]; },
+                iconFn: fileIcon
             });
             fileList.querySelectorAll('.cr-folder-item').forEach(function (li) {
                 li.addEventListener('click', function () {
-                    var fp = li.dataset.folderPath;
-                    openFolders[fp] = !openFolders[fp];
+                    openFolders[li.dataset.folderPath] = !openFolders[li.dataset.folderPath];
                     renderFileTree();
                 });
             });
-            fileList.querySelectorAll('.cr-file-item').forEach(function (li) {
+            fileList.querySelectorAll('.cr-file-item:not(.cr-readonly)').forEach(function (li) {
                 li.addEventListener('click', function (e) {
                     if (e.target.classList.contains('cr-file-del')) return;
                     switchTo(li.dataset.name);
@@ -573,10 +671,14 @@
                 btn.addEventListener('click', function (e) {
                     e.stopPropagation();
                     var name = btn.dataset.name;
-                    delete vfs[name];
-                    if (activeFile === name) {
-                        activeFile = Object.keys(vfs)[0];
-                        editor.value = vfs[activeFile];
+                    if (uploadedImages[name]) {
+                        delete uploadedImages[name];
+                    } else if (textNames.length > 1) {
+                        delete vfs[name];
+                        if (activeFile === name) {
+                            activeFile = Object.keys(vfs)[0];
+                            editor.value = vfs[activeFile] || '';
+                        }
                     }
                     renderFileTree();
                     updatePreview();
@@ -590,6 +692,70 @@
             editor.value = vfs[name] || '';
             renderFileTree();
         }
+
+        /* ── HTML file upload handler (images → uploadedImages, text → vfs) ── */
+        function handleHtmlUpload(files, prefix) {
+            prefix = prefix || '';
+            Array.from(files).forEach(function (file) {
+                var dest = prefix + file.name;
+                if (/\.(png|jpe?g|gif|svg|webp|bmp|ico)$/i.test(file.name)) {
+                    var r = new FileReader();
+                    r.onload = function (ev) {
+                        uploadedImages[dest] = ev.target.result;
+                        openFolders = Object.assign(openFolders, defaultOpenFolders([dest]));
+                        renderFileTree();
+                        updatePreview();
+                    };
+                    r.readAsDataURL(file);
+                } else if (/\.(html?|css|js|csv|txt|json|xml|md)$/i.test(file.name)) {
+                    var r2 = new FileReader();
+                    r2.onload = function (ev) {
+                        vfs[dest] = ev.target.result;
+                        openFolders = Object.assign(openFolders, defaultOpenFolders([dest]));
+                        renderFileTree();
+                        updatePreview();
+                    };
+                    r2.readAsText(file);
+                }
+            });
+        }
+
+        /* file-input click upload */
+        htmlFileInput.addEventListener('change', function () {
+            handleHtmlUpload(htmlFileInput.files, '');
+            htmlFileInput.value = '';
+        });
+
+        /* drag-and-drop onto the file tree (drop-to-root or drop-to-folder) */
+        filetreeDiv.addEventListener('dragover', function (e) {
+            var hasFile = e.dataTransfer && Array.from(e.dataTransfer.items || []).some(function (i) { return i.kind === 'file'; });
+            if (!hasFile) return;
+            e.preventDefault();
+            e.stopPropagation();
+            var folderItem = e.target.closest('.cr-folder-item');
+            filetreeDiv.querySelectorAll('.cr-folder-item.cr-drag-over').forEach(function (el) { el.classList.remove('cr-drag-over'); });
+            if (folderItem) {
+                folderItem.classList.add('cr-drag-over');
+                filetreeDiv.classList.remove('cr-drop-active');
+            } else {
+                filetreeDiv.classList.add('cr-drop-active');
+            }
+        });
+        filetreeDiv.addEventListener('dragleave', function (e) {
+            if (!filetreeDiv.contains(e.relatedTarget)) {
+                filetreeDiv.classList.remove('cr-drop-active');
+                filetreeDiv.querySelectorAll('.cr-folder-item.cr-drag-over').forEach(function (el) { el.classList.remove('cr-drag-over'); });
+            }
+        });
+        filetreeDiv.addEventListener('drop', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            filetreeDiv.classList.remove('cr-drop-active');
+            var folderItem = e.target.closest('.cr-folder-item');
+            var prefix = folderItem ? (folderItem.dataset.folderPath + '/') : '';
+            filetreeDiv.querySelectorAll('.cr-folder-item.cr-drag-over').forEach(function (el) { el.classList.remove('cr-drag-over'); });
+            handleHtmlUpload(e.dataTransfer.files, prefix);
+        });
 
         newFileBtn.addEventListener('click', function () {
             var name = (prompt('File name (e.g. style.css, pages/about.html, js/script.js):') || '').trim();
@@ -691,46 +857,6 @@
             }
         });
 
-        /* ── image upload ── */
-        function renderStrip() {
-            var names = Object.keys(uploadedImages);
-            if (names.length === 0) {
-                imgStrip.style.display = 'none';
-                imgStrip.innerHTML = '';
-                return;
-            }
-            imgStrip.style.display = 'flex';
-            imgStrip.innerHTML = '<span class="cr-strip-label">Images:</span>' +
-                names.map(function (name) {
-                    return '<div class="cr-img-chip">' +
-                        '<img src="' + uploadedImages[name] + '" class="cr-img-thumb" alt="">' +
-                        '<span class="cr-img-name">' + name + '</span>' +
-                        '<button class="cr-img-remove" data-name="' + name + '" title="Remove">\u00D7</button>' +
-                        '</div>';
-                }).join('');
-            imgStrip.querySelectorAll('.cr-img-remove').forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    delete uploadedImages[btn.dataset.name];
-                    renderStrip();
-                    updatePreview();
-                });
-            });
-        }
-
-        fileInput.addEventListener('change', function () {
-            var pending = fileInput.files.length;
-            if (!pending) return;
-            Array.from(fileInput.files).forEach(function (file) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    uploadedImages[file.name] = e.target.result;
-                    if (--pending === 0) { renderStrip(); updatePreview(); }
-                };
-                reader.readAsDataURL(file);
-            });
-            fileInput.value = '';
-        });
-
         /* ── init ── */
         renderFileTree();
         editor.value = vfs[activeFile];
@@ -744,7 +870,6 @@
                 : Object.keys(originals)[0];
             editor.value = vfs[activeFile];
             uploadedImages = {};
-            renderStrip();
             renderFileTree();
             updatePreview();
         });
