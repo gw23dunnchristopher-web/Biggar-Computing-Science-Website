@@ -65,5 +65,74 @@
         </li>
 
     </ul>
-    <br>
+    <div class="teacher-bar" id="teacherBar">
+        <button class="teacher-bar-btn" id="teacherBarBtn" onclick="bhsTeacherLogin()">&#x1F512; Teacher Tools</button>
+        <div class="teacher-tools-panel" id="teacherToolsPanel" style="display:none;">
+            <a href="/tools/sandbox-builder.html" target="_blank">&#x1F4DD; Sandbox Builder</a>
+        </div>
+    </div>
+    <script>
+    (function() {
+        var LS_KEY = 'bhscs-teacher-auth';
+        function isAuthed() { return localStorage.getItem(LS_KEY) === 'yes'; }
+        function showAuthed() {
+            var btn = document.getElementById('teacherBarBtn');
+            if (btn) { btn.innerHTML = '&#x1F513; Teacher Tools'; btn.classList.add('teacher-authed'); }
+        }
+        if (isAuthed()) showAuthed();
+        window.bhsTeacherLogin = function() {
+            if (isAuthed()) {
+                var panel = document.getElementById('teacherToolsPanel');
+                if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+                return;
+            }
+            var overlay = document.createElement('div');
+            overlay.className = 'teacher-modal-overlay';
+            overlay.innerHTML =
+                '<div class="teacher-modal">' +
+                '<h3>&#x1F510; Teacher Login</h3>' +
+                '<input type="password" id="tmPw" placeholder="Password" autocomplete="current-password">' +
+                '<div class="teacher-modal-err" id="tmErr">Incorrect password. Try again.</div>' +
+                '<div class="teacher-modal-btns">' +
+                '<button class="teacher-modal-cancel" id="tmCancel">Cancel</button>' +
+                '<button class="teacher-modal-submit" id="tmSubmit">Login</button>' +
+                '</div></div>';
+            document.body.appendChild(overlay);
+            var pw = overlay.querySelector('#tmPw');
+            pw.focus();
+            function tryLogin() {
+                fetch('/api/teacher-auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pw.value })
+                }).then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.ok) {
+                        localStorage.setItem(LS_KEY, 'yes');
+                        document.body.removeChild(overlay);
+                        showAuthed();
+                        var panel = document.getElementById('teacherToolsPanel');
+                        if (panel) panel.style.display = 'block';
+                    } else {
+                        overlay.querySelector('#tmErr').style.display = 'block';
+                        pw.value = ''; pw.focus();
+                    }
+                }).catch(function() {
+                    overlay.querySelector('#tmErr').style.display = 'block';
+                });
+            }
+            overlay.querySelector('#tmSubmit').addEventListener('click', tryLogin);
+            overlay.querySelector('#tmCancel').addEventListener('click', function() {
+                document.body.removeChild(overlay);
+            });
+            pw.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') tryLogin();
+                if (e.key === 'Escape') document.body.removeChild(overlay);
+            });
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) document.body.removeChild(overlay);
+            });
+        };
+    })();
+    </script>
 </div>

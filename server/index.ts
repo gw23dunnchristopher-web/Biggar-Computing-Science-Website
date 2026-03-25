@@ -302,6 +302,15 @@ app.get('/api/sandboxes/:name', (req, res) => {
   }
 });
 
+app.post('/api/teacher-auth', (req, res) => {
+  const { password } = req.body;
+  if (password && password === TEACHER_PASSWORD) {
+    res.json({ ok: true });
+  } else {
+    res.json({ ok: false });
+  }
+});
+
 app.post('/api/sandboxes/:name', requireTeacher, (req, res) => {
   const name = safeName(req.params.name);
   if (!name) return res.status(400).json({ error: 'Invalid sandbox name' });
