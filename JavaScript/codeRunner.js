@@ -267,6 +267,35 @@
         });
     }
 
+    /* Show an in-page confirmation dialog over the quiz container */
+    function showResetConfirm(container, onConfirm) {
+        var overlay = document.createElement('div');
+        overlay.className = 'pq-reset-overlay';
+        overlay.innerHTML =
+            '<div class="pq-reset-dialog">' +
+            '  <p>Reset this question?<br><strong>Your code and feedback will be cleared.</strong></p>' +
+            '  <div class="pq-reset-dialog-btns">' +
+            '    <button class="pq-reset-cancel-btn" type="button">Cancel</button>' +
+            '    <button class="pq-reset-confirm-btn" type="button">Reset</button>' +
+            '  </div>' +
+            '</div>';
+        container.appendChild(overlay);
+
+        function close() {
+            overlay.remove();
+            document.removeEventListener('keydown', onKey);
+        }
+        function onKey(e) {
+            if (e.key === 'Escape') close();
+        }
+        overlay.querySelector('.pq-reset-cancel-btn').addEventListener('click', close);
+        overlay.querySelector('.pq-reset-confirm-btn').addEventListener('click', function () {
+            close();
+            onConfirm();
+        });
+        document.addEventListener('keydown', onKey);
+    }
+
     /* Update only the body content (called when switching questions) */
     function setPromptText(promptBar, text) {
         var body = promptBar.querySelector('.pq-prompt-body');
@@ -1561,30 +1590,31 @@
 
         /* ── reset current question ── */
         resetBtn.addEventListener('click', function () {
-            if (!confirm('Reset this question? Your code and feedback will be cleared.')) return;
-            var q = questions[activeIdx];
-            qStates[activeIdx] = { code: q.starter || '', feedback: '', fbClass: '', done: false };
-            clearQState(activeIdx);
+            showResetConfirm(container, function () {
+                var q = questions[activeIdx];
+                qStates[activeIdx] = { code: q.starter || '', feedback: '', fbClass: '', done: false };
+                clearQState(activeIdx);
 
-            editor.value = qStates[activeIdx].code;
-            updateLineNums();
-            terminal.readOnly = true;
-            terminal.value = 'Click Run to execute the code\u2026';
-            terminal.className = 'cr-terminal';
-            runBtn.disabled = false;
-            runBtn.textContent = '\u25B6 Run';
-            collectedInputs = [];
-            awaitingInput   = false;
+                editor.value = qStates[activeIdx].code;
+                updateLineNums();
+                terminal.readOnly = true;
+                terminal.value = 'Click Run to execute the code\u2026';
+                terminal.className = 'cr-terminal';
+                runBtn.disabled = false;
+                runBtn.textContent = '\u25B6 Run';
+                collectedInputs = [];
+                awaitingInput   = false;
 
-            feedbackArea.style.display = 'none';
-            feedbackText.textContent   = '';
-            feedbackText.className     = 'pq-feedback-text';
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('pq-submitted');
-            submitBtn.innerHTML = '\uD83D\uDCE4 Submit for Feedback';
+                feedbackArea.style.display = 'none';
+                feedbackText.textContent   = '';
+                feedbackText.className     = 'pq-feedback-text';
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('pq-submitted');
+                submitBtn.innerHTML = '\uD83D\uDCE4 Submit for Feedback';
 
-            tabsDiv.innerHTML = renderTabsHtml();
-            wireTabBtns();
+                tabsDiv.innerHTML = renderTabsHtml();
+                wireTabBtns();
+            });
         });
 
         /* ── switch question ── */
@@ -1974,23 +2004,24 @@
 
         /* ── reset current question ── */
         resetBtn.addEventListener('click', function () {
-            if (!confirm('Reset this question? Your code and feedback will be cleared.')) return;
-            var q = questions[activeIdx];
-            qStates[activeIdx] = { code: q.starter || '', feedback: '', fbClass: '', done: false };
-            clearQState(activeIdx);
+            showResetConfirm(container, function () {
+                var q = questions[activeIdx];
+                qStates[activeIdx] = { code: q.starter || '', feedback: '', fbClass: '', done: false };
+                clearQState(activeIdx);
 
-            editor.value = qStates[activeIdx].code;
-            updateHighlight();
-            updatePreview();
-            feedbackArea.style.display = 'none';
-            feedbackText.textContent   = '';
-            feedbackText.className     = 'pq-feedback-text';
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('pq-submitted');
-            submitBtn.innerHTML = '\uD83D\uDCE4 Submit for Feedback';
+                editor.value = qStates[activeIdx].code;
+                updateHighlight();
+                updatePreview();
+                feedbackArea.style.display = 'none';
+                feedbackText.textContent   = '';
+                feedbackText.className     = 'pq-feedback-text';
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('pq-submitted');
+                submitBtn.innerHTML = '\uD83D\uDCE4 Submit for Feedback';
 
-            tabsDiv.innerHTML = renderTabsHtml();
-            wireTabBtns();
+                tabsDiv.innerHTML = renderTabsHtml();
+                wireTabBtns();
+            });
         });
 
         /* ── switch question ── */

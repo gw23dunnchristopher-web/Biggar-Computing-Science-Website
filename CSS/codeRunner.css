@@ -12,6 +12,7 @@
     font-family: 'Courier New', Courier, monospace;
     font-size: 14px;
     background: #1e1e2e;
+    position: relative;
 }
 
 /* ── toolbar ── */
@@ -990,6 +991,72 @@
     background: #3d1a1a;
     color: #f38ba8;
     border-color: #5a2525;
+}
+
+/* ── in-page reset confirmation modal ── */
+.pq-reset-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(17, 17, 27, 0.82);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+}
+.pq-reset-dialog {
+    background: #1e1e2e;
+    border: 1px solid #45475a;
+    border-radius: 10px;
+    padding: 24px 28px;
+    max-width: 320px;
+    width: 85%;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+.pq-reset-dialog p {
+    color: #cdd6f4;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0 0 20px;
+}
+.pq-reset-dialog p strong {
+    color: #f38ba8;
+}
+.pq-reset-dialog-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.pq-reset-cancel-btn {
+    padding: 8px 22px;
+    border: 1px solid #45475a;
+    border-radius: 6px;
+    background: #313244;
+    color: #cdd6f4;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.pq-reset-cancel-btn:hover {
+    background: #45475a;
+}
+.pq-reset-confirm-btn {
+    padding: 8px 22px;
+    border: 1px solid #8b3a3a;
+    border-radius: 6px;
+    background: #3d1a1a;
+    color: #f38ba8;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+.pq-reset-confirm-btn:hover {
+    background: #5a2222;
+    border-color: #a84040;
 }
 
 /* feedback area */
