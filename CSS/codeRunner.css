@@ -867,6 +867,28 @@
     border-color: #3a6a3a;
 }
 
+.pq-tab-btn.pq-tab-partial {
+    color: #e5c07b;
+    border-color: #5a4a10;
+}
+
+.pq-tab-btn.pq-tab-partial.pq-tab-active {
+    background: #2a2200;
+    color: #e5c07b;
+    border-color: #7a6000;
+}
+
+.pq-tab-btn.pq-tab-zero {
+    color: #f38ba8;
+    border-color: #5a2525;
+}
+
+.pq-tab-btn.pq-tab-zero.pq-tab-active {
+    background: #2a1a1a;
+    color: #f38ba8;
+    border-color: #8b3a3a;
+}
+
 /* question prompt bar */
 .pq-prompt-bar {
     background: #181825;

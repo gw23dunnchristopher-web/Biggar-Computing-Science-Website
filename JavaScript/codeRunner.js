@@ -1355,9 +1355,21 @@
         function renderTabsHtml() {
             return questions.map(function (q, i) {
                 var active = i === activeIdx ? ' pq-tab-active' : '';
-                var done   = qStates[i].done  ? ' pq-tab-done'   : '';
-                var label  = eH(q.label || ('Q' + (i + 1)));
-                var tick   = qStates[i].done  ? ' \u2713' : '';
+                var st = qStates[i];
+                var done = '';
+                var tick = '';
+                if (st.done) {
+                    var fc = st.fbClass || '';
+                    if (fc === 'pq-fb-zero') {
+                        done = ' pq-tab-done pq-tab-zero';
+                    } else if (fc === 'pq-fb-partial') {
+                        done = ' pq-tab-done pq-tab-partial';
+                    } else {
+                        done = ' pq-tab-done';
+                    }
+                    tick = ' \u2713';
+                }
+                var label = eH(q.label || ('Q' + (i + 1)));
                 return '<button class="pq-tab-btn' + active + done + '" data-qi="' + i + '">' + label + tick + '</button>';
             }).join('');
         }
@@ -1805,9 +1817,21 @@
         function renderTabsHtml() {
             return questions.map(function (q, i) {
                 var active = i === activeIdx ? ' pq-tab-active' : '';
-                var done   = qStates[i].done  ? ' pq-tab-done'   : '';
-                var label  = eH(q.label || ('Q' + (i + 1)));
-                var tick   = qStates[i].done  ? ' \u2713' : '';
+                var st = qStates[i];
+                var done = '';
+                var tick = '';
+                if (st.done) {
+                    var fc = st.fbClass || '';
+                    if (fc === 'pq-fb-zero') {
+                        done = ' pq-tab-done pq-tab-zero';
+                    } else if (fc === 'pq-fb-partial') {
+                        done = ' pq-tab-done pq-tab-partial';
+                    } else {
+                        done = ' pq-tab-done';
+                    }
+                    tick = ' \u2713';
+                }
+                var label = eH(q.label || ('Q' + (i + 1)));
                 return '<button class="pq-tab-btn' + active + done + '" data-qi="' + i + '">' + label + tick + '</button>';
             }).join('');
         }
