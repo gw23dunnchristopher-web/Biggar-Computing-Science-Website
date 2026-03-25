@@ -297,6 +297,7 @@
                     <option value="html">HTML / CSS / JS</option>
                     <option value="python">Python + data files</option>
                     <option value="python-quiz">Python Quiz Exercise</option>
+                    <option value="html-quiz">HTML / CSS Quiz Exercise</option>
                 </select>
             </div>
             <div class="meta-spacer"></div>
@@ -410,7 +411,12 @@
     pwInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryAuth(pwInput.value); });
 
     /* ── sandbox list ── */
-    function typeIcon(t) { return t === 'python' ? '🐍' : t === 'python-quiz' ? '📝' : '🌐'; }
+    function typeIcon(t) {
+        if (t === 'python')      return '🐍';
+        if (t === 'python-quiz') return '📝';
+        if (t === 'html-quiz')   return '📋';
+        return '🌐';
+    }
 
     function renderSbList() {
         if (sandboxes.length === 0) {
@@ -450,7 +456,7 @@
             .then(function (data) {
                 var t = data.type || 'html';
                 current = { name: name, type: t, title: data.title || name, files: data.files || {}, questions: data.questions || [] };
-                if (t === 'python-quiz') {
+                if (t === 'python-quiz' || t === 'html-quiz') {
                     activeFile = null;
                 } else {
                     activeFile = Object.keys(current.files)[0] || null;
@@ -492,7 +498,7 @@
             embedBar.style.display     = 'none';
             return;
         }
-        var isQuiz = current.type === 'python-quiz';
+        var isQuiz = current.type === 'python-quiz' || current.type === 'html-quiz';
         emptyEditor.style.display  = 'none';
         metaBar.style.display      = 'flex';
         workspace.style.display    = isQuiz ? 'none' : 'flex';
@@ -630,9 +636,14 @@
             '</div>';
     }
 
+    var HTML_STARTER = '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <title>My Page</title>\n</head>\n<body>\n\n</body>\n</html>';
+
     function renderQuizEditor() {
         if (!current.questions) current.questions = [];
-        if (current.questions.length === 0) current.questions.push({ label: 'Part 1', prompt: '', starter: '', scheme: '', marks: 1 });
+        if (current.questions.length === 0) {
+            var defaultStarter = current.type === 'html-quiz' ? HTML_STARTER : '';
+            current.questions.push({ label: 'Part 1', prompt: '', starter: defaultStarter, scheme: '', marks: 1 });
+        }
         qcList.innerHTML = current.questions.map(qCardHtml).join('');
         wireQuizCards();
     }
@@ -663,9 +674,11 @@
     }
 
     addQBtn.addEventListener('click', function () {
-        if (!current || current.type !== 'python-quiz') return;
+        var isQuiz = current && (current.type === 'python-quiz' || current.type === 'html-quiz');
+        if (!isQuiz) return;
         collectQuizData();
-        current.questions.push({ label: 'Part ' + (current.questions.length + 1), prompt: '', starter: '', scheme: '', marks: 1 });
+        var defaultStarter = current.type === 'html-quiz' ? HTML_STARTER : '';
+        current.questions.push({ label: 'Part ' + (current.questions.length + 1), prompt: '', starter: defaultStarter, scheme: '', marks: 1 });
         renderQuizEditor();
         qcList.lastElementChild && qcList.lastElementChild.scrollIntoView({ behavior: 'smooth' });
     });
@@ -673,7 +686,7 @@
     /* ── type change → swap UI ── */
     sbTypeSelect.addEventListener('change', function () {
         current.type = sbTypeSelect.value;
-        var isQuiz = current.type === 'python-quiz';
+        var isQuiz = current.type === 'python-quiz' || current.type === 'html-quiz';
         workspace.style.display  = isQuiz ? 'none' : 'flex';
         quizEditor.style.display = isQuiz ? 'flex' : 'none';
         if (isQuiz) {
@@ -704,7 +717,7 @@
         current.type  = sbTypeSelect.value;
 
         var body = { type: current.type, title: current.title };
-        if (current.type === 'python-quiz') {
+        if (current.type === 'python-quiz' || current.type === 'html-quiz') {
             body.questions = current.questions || [];
         } else {
             body.files = current.files;
@@ -744,10 +757,9 @@
             return;
         }
         embedBar.style.display = 'flex';
-        var cls = current.type === 'python'
-            ? 'py-runner'
-            : current.type === 'python-quiz'
-                ? 'py-quiz'
+        var cls = current.type === 'python'      ? 'py-runner'
+                : current.type === 'python-quiz' ? 'py-quiz'
+                : current.type === 'html-quiz'   ? 'html-quiz'
                 : 'html-runner';
         embedCode.textContent = '<div class="' + cls + '" data-sandbox="' + current.name + '"></div>';
     }

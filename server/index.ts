@@ -232,11 +232,12 @@ Use QUESTION_2_START/END for question 2, etc.
 
   safe.forEach((q, i) => {
     const n = i + 1;
+    const lang = (q as any).codeType === 'html' ? 'html' : 'python';
     prompt += `--- Question ${n} ---\n`;
     prompt += `Task: ${q.text}\n`;
     prompt += `Maximum marks: ${q.marks}\n`;
     prompt += `Marking scheme: ${q.markingScheme}\n`;
-    prompt += `Student's Python code:\n\`\`\`python\n${q.answer || '(no code written)'}\n\`\`\`\n\n`;
+    prompt += `Student's ${lang.toUpperCase()} code:\n\`\`\`${lang}\n${q.answer || '(no code written)'}\n\`\`\`\n\n`;
   });
 
   try {
@@ -308,7 +309,7 @@ app.post('/api/sandboxes/:name', requireTeacher, (req, res) => {
   try {
     const sbType = req.body.type || 'html';
     const payload: Record<string, unknown> = { type: sbType, title: req.body.title || name };
-    if (sbType === 'python-quiz') {
+    if (sbType === 'python-quiz' || sbType === 'html-quiz') {
       payload.questions = Array.isArray(req.body.questions) ? req.body.questions : [];
     } else {
       payload.files = req.body.files || {};

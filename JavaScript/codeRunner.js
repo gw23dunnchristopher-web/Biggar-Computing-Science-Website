@@ -1471,11 +1471,406 @@
         }
     }
 
+    /* ═══════════════════════════════════════════════════════════════
+       HTML Quiz (coding exercise) runner
+       Usage: <div class="html-quiz" data-sandbox="sandbox-name"></div>
+       ═══════════════════════════════════════════════════════════════ */
+
+    function initHtmlQuizRunner(container) {
+        var sandbox = (container.getAttribute('data-sandbox') || '').trim();
+        if (!sandbox) return;
+        container.classList.add('code-runner');
+        container.innerHTML = '<div style="padding:16px;color:#6c7086;font-family:Arial,sans-serif;">Loading exercise\u2026</div>';
+        fetch('/api/sandboxes/' + encodeURIComponent(sandbox))
+            .then(function (r) {
+                if (!r.ok) throw new Error('Exercise not found: ' + sandbox);
+                return r.json();
+            })
+            .then(function (data) {
+                container.innerHTML = '';
+                container.classList.remove('code-runner');
+                buildHtmlQuizRunner(container, data, sandbox);
+            })
+            .catch(function (err) {
+                container.innerHTML = '<div style="padding:16px;color:#f38ba8;font-family:Arial,sans-serif;">\u26A0 ' + err.message + '</div>';
+            });
+    }
+
+    function buildHtmlQuizRunner(container, data, sandboxName) {
+        var questions = data.questions || [];
+        if (!questions.length) {
+            container.innerHTML = '<div style="padding:16px;color:#6c7086;font-family:Arial,sans-serif;">No questions defined for this exercise.</div>';
+            return;
+        }
+        var title    = data.title || 'HTML Exercise';
+        var activeIdx = 0;
+
+        /* ── per-question localStorage state ── */
+        function lsKey(i) { return 'bhscs-hq-' + sandboxName + '-q' + i; }
+        function loadQState(i) {
+            try { return JSON.parse(localStorage.getItem(lsKey(i)) || 'null'); } catch (e) { return null; }
+        }
+        function saveQState(i, st) { localStorage.setItem(lsKey(i), JSON.stringify(st)); }
+        function clearQState(i) { localStorage.removeItem(lsKey(i)); }
+
+        var qStates = questions.map(function (q, i) {
+            var saved = loadQState(i);
+            return {
+                code:     saved ? saved.code     : (q.starter || ''),
+                feedback: saved ? saved.feedback  : '',
+                done:     saved ? (saved.done === true) : false
+            };
+        });
+
+        /* ── HTML-escape ── */
+        function eH(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        /* ── Syntax highlighting (mirrors buildHtmlRunner) ── */
+        function escHl(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+        function colorAttrs(str) {
+            var out = '', i = 0, len = str.length;
+            while (i < len) {
+                var c = str[i];
+                if (/\s/.test(c)) { out += c; i++; continue; }
+                var nm = str.slice(i).match(/^[\w:-]+/);
+                if (!nm) { out += escHl(c); i++; continue; }
+                out += '<span class="cr-hl-at">' + escHl(nm[0]) + '</span>';
+                i += nm[0].length;
+                if (str[i] === '=') {
+                    out += '<span class="cr-hl-eq">=</span>'; i++;
+                    if (str[i] === '"' || str[i] === "'") {
+                        var q2 = str[i], end2 = str.indexOf(q2, i + 1);
+                        end2 = end2 === -1 ? len - 1 : end2;
+                        out += '<span class="cr-hl-vl">' + escHl(str.slice(i, end2 + 1)) + '</span>'; i = end2 + 1;
+                    } else {
+                        var vm = str.slice(i).match(/^[^\s>]*/);
+                        if (vm) { out += '<span class="cr-hl-vl">' + escHl(vm[0]) + '</span>'; i += vm[0].length; }
+                    }
+                }
+            }
+            return out;
+        }
+        function colorTag(tag) {
+            if (/^<!DOCTYPE/i.test(tag)) return '<span class="cr-hl-dt">' + escHl(tag) + '</span>';
+            var inner = tag.slice(1, -1), isClose = inner.charAt(0) === '/', isSelf;
+            if (isClose) inner = inner.slice(1);
+            isSelf = inner.charAt(inner.length - 1) === '/';
+            if (isSelf) inner = inner.slice(0, -1);
+            var nm = inner.match(/^([\w-]+)([\s\S]*)$/);
+            if (!nm) return '<span class="cr-hl-br">&lt;' + (isClose ? '/' : '') + escHl(inner) + '&gt;</span>';
+            return '<span class="cr-hl-br">&lt;' + (isClose ? '/' : '') + '</span>' +
+                   '<span class="cr-hl-tn">' + escHl(nm[1]) + '</span>' +
+                   colorAttrs(nm[2]) +
+                   (isSelf ? '<span class="cr-hl-br">/&gt;</span>' : '<span class="cr-hl-br">&gt;</span>');
+        }
+        function hlHtml(code) {
+            var out = '', i = 0, len = code.length;
+            while (i < len) {
+                if (code.slice(i, i + 4) === '<!--') {
+                    var end = code.indexOf('-->', i + 4);
+                    end = end === -1 ? len : end + 3;
+                    out += '<span class="cr-hl-cm">' + escHl(code.slice(i, end)) + '</span>';
+                    i = end; continue;
+                }
+                if (code[i] === '<') {
+                    var j = i + 1, inQ = null;
+                    while (j < len) {
+                        var ch = code[j];
+                        if (inQ) { if (ch === inQ) inQ = null; }
+                        else if (ch === '"' || ch === "'") { inQ = ch; }
+                        else if (ch === '>') { break; }
+                        j++;
+                    }
+                    if (j < len) { out += colorTag(code.slice(i, j + 1)); i = j + 1; }
+                    else { out += escHl(code.slice(i)); i = len; }
+                    continue;
+                }
+                out += escHl(code[i]); i++;
+            }
+            return out;
+        }
+
+        /* ── tab rendering ── */
+        function renderTabsHtml() {
+            return questions.map(function (q, i) {
+                var active = i === activeIdx ? ' pq-tab-active' : '';
+                var done   = qStates[i].done  ? ' pq-tab-done'   : '';
+                var label  = eH(q.label || ('Q' + (i + 1)));
+                var tick   = qStates[i].done  ? ' \u2713' : '';
+                return '<button class="pq-tab-btn' + active + done + '" data-qi="' + i + '">' + label + tick + '</button>';
+            }).join('');
+        }
+
+        container.classList.add('code-runner', 'hq-quiz');
+        container.innerHTML =
+            '<div class="cr-toolbar">' +
+            '  <span class="cr-lang">&#x1F310; ' + eH(title) + '</span>' +
+            '  <div class="pq-tabs">' + renderTabsHtml() + '</div>' +
+            '  <div class="cr-btns">' +
+            '    <button class="cr-wrap-btn cr-btn-active" title="Word wrap: on">&#8644; Wrap</button>' +
+            '    <div class="cr-view-group">' +
+            '      <button class="cr-code-btn cr-btn-active" title="Show code editor">&lt;/&gt; Code</button>' +
+            '      <button class="cr-preview-btn cr-btn-active" title="Show preview">&#9654; Preview</button>' +
+            '    </div>' +
+            '    <button class="cr-run-btn">&#9654; Run</button>' +
+            '  </div>' +
+            '</div>' +
+            '<div class="pq-prompt-bar"></div>' +
+            '<div class="cr-workspace">' +
+            '  <div class="cr-hl-wrap">' +
+            '    <pre class="cr-hl-bg" aria-hidden="true"><code class="cr-hl-code"></code></pre>' +
+            '    <textarea class="cr-editor" spellcheck="false"></textarea>' +
+            '  </div>' +
+            '  <div class="cr-splitter" title="Drag to resize"></div>' +
+            '  <iframe class="cr-preview" sandbox="allow-scripts allow-same-origin"></iframe>' +
+            '</div>' +
+            '<div class="pq-action-bar">' +
+            '  <button class="pq-submit-btn">&#x1F4E4; Submit for Feedback</button>' +
+            '  <button class="pq-reset-btn">&#8635; Reset question</button>' +
+            '</div>' +
+            '<div class="pq-feedback-area" style="display:none;">' +
+            '  <div class="pq-feedback-text"></div>' +
+            '</div>';
+
+        var tabsDiv      = container.querySelector('.pq-tabs');
+        var promptBar    = container.querySelector('.pq-prompt-bar');
+        var hlWrap       = container.querySelector('.cr-hl-wrap');
+        var hlCode       = container.querySelector('.cr-hl-code');
+        var editor       = container.querySelector('.cr-editor');
+        var preview      = container.querySelector('.cr-preview');
+        var workspace    = container.querySelector('.cr-workspace');
+        var splitterEl   = container.querySelector('.cr-splitter');
+        var runBtn       = container.querySelector('.cr-run-btn');
+        var wrapBtn      = container.querySelector('.cr-wrap-btn');
+        var codeBtn      = container.querySelector('.cr-code-btn');
+        var previewBtn   = container.querySelector('.cr-preview-btn');
+        var submitBtn    = container.querySelector('.pq-submit-btn');
+        var resetBtn     = container.querySelector('.pq-reset-btn');
+        var feedbackArea = container.querySelector('.pq-feedback-area');
+        var feedbackText = container.querySelector('.pq-feedback-text');
+
+        /* ── word wrap ── */
+        hlWrap.classList.add('cr-wrap-on');
+        wrapBtn.addEventListener('click', function () {
+            var on = hlWrap.classList.toggle('cr-wrap-on');
+            wrapBtn.classList.toggle('cr-btn-active', on);
+            wrapBtn.title = on ? 'Word wrap: on' : 'Word wrap: off';
+        });
+
+        /* ── syntax highlighting + scroll sync ── */
+        function updateHighlight() { hlCode.innerHTML = hlHtml(editor.value); }
+        editor.addEventListener('input', updateHighlight);
+        editor.addEventListener('scroll', function () {
+            var pre = hlCode.parentElement;
+            pre.scrollTop  = editor.scrollTop;
+            pre.scrollLeft = editor.scrollLeft;
+        });
+
+        /* ── Code / Preview view toggles ── */
+        var codeVisible = true, previewVisible = true, savedPreviewW = null;
+        function applyViewState() {
+            var splitMode = codeVisible && previewVisible;
+            workspace.classList.toggle('cr-code-hidden',    !codeVisible);
+            workspace.classList.toggle('cr-preview-hidden', !previewVisible);
+            codeBtn.classList.toggle('cr-btn-active',    codeVisible);
+            previewBtn.classList.toggle('cr-btn-active', previewVisible);
+            if (splitMode && savedPreviewW !== null) {
+                preview.style.width = savedPreviewW + 'px'; preview.style.flexShrink = '0'; preview.style.flex = '';
+            } else if (!splitMode) {
+                preview.style.width = ''; preview.style.flexShrink = ''; preview.style.flex = '';
+            }
+        }
+        codeBtn.addEventListener('click', function () {
+            if (codeVisible && !previewVisible) return;
+            codeVisible = !codeVisible; applyViewState();
+        });
+        previewBtn.addEventListener('click', function () {
+            if (previewVisible && !codeVisible) return;
+            previewVisible = !previewVisible; applyViewState();
+        });
+
+        /* ── Drag-to-resize splitter ── */
+        function startSplitterDrag(startX, startW) {
+            splitterEl.classList.add('cr-dragging');
+            var dragOverlay = document.createElement('div');
+            dragOverlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;cursor:col-resize;';
+            document.body.appendChild(dragOverlay);
+            document.body.style.userSelect = 'none';
+            function onMove(x) {
+                var dx = startX - x, total = workspace.getBoundingClientRect().width;
+                var newW = Math.max(150, Math.min(total - 250, startW + dx));
+                savedPreviewW = newW; preview.style.width = newW + 'px'; preview.style.flexShrink = '0'; preview.style.flex = '';
+            }
+            function finish() {
+                splitterEl.classList.remove('cr-dragging');
+                document.body.removeChild(dragOverlay);
+                document.body.style.userSelect = '';
+            }
+            function onMouseMove(e) { if (!(e.buttons & 1)) { onMouseUp(); return; } onMove(e.clientX); }
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup',   onMouseUp);
+                finish();
+            }
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup',   onMouseUp);
+            function onTouchMove(e) { e.preventDefault(); onMove(e.touches[0].clientX); }
+            function onTouchEnd() {
+                dragOverlay.removeEventListener('touchmove', onTouchMove);
+                dragOverlay.removeEventListener('touchend',  onTouchEnd);
+                finish();
+            }
+            dragOverlay.addEventListener('touchmove', onTouchMove, { passive: false });
+            dragOverlay.addEventListener('touchend',  onTouchEnd);
+        }
+        splitterEl.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+            startSplitterDrag(e.clientX, preview.getBoundingClientRect().width);
+        });
+        splitterEl.addEventListener('touchstart', function (e) {
+            startSplitterDrag(e.touches[0].clientX, preview.getBoundingClientRect().width);
+        }, { passive: true });
+
+        /* ── run → update preview ── */
+        function updatePreview() { preview.srcdoc = editor.value; }
+        runBtn.addEventListener('click', updatePreview);
+
+        /* ── submit for AI feedback ── */
+        submitBtn.addEventListener('click', function () {
+            var q    = questions[activeIdx];
+            var code = editor.value;
+            submitBtn.disabled = true;
+            feedbackArea.style.display = 'block';
+            feedbackText.textContent   = '\u23F3 Marking your code\u2026';
+            feedbackText.className     = 'pq-feedback-text pq-fb-loading';
+
+            fetch('/api/quiz/mark-code', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({
+                    questions: [{
+                        text:          q.prompt  || '',
+                        marks:         q.marks   || 1,
+                        markingScheme: q.scheme  || '',
+                        answer:        code,
+                        codeType:      'html'
+                    }]
+                })
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                var result   = d.results && d.results[0];
+                var fb       = result ? result.feedback : (d.error || 'No feedback received.');
+                var marks    = result ? ('\u2714 Marks: ' + result.marksAwarded + '/' + (q.marks || 1) + '\n\n') : '';
+                var fullText = marks + fb;
+
+                qStates[activeIdx].code     = editor.value;
+                qStates[activeIdx].feedback = fullText;
+                qStates[activeIdx].done     = true;
+                saveQState(activeIdx, qStates[activeIdx]);
+
+                feedbackText.textContent = fullText;
+                feedbackText.className   = 'pq-feedback-text';
+                submitBtn.classList.add('pq-submitted');
+                submitBtn.textContent = '\u2714 Submitted';
+
+                tabsDiv.innerHTML = renderTabsHtml();
+                wireTabBtns();
+            })
+            .catch(function (err) {
+                feedbackText.textContent = 'Could not get feedback: ' + err.message;
+                feedbackText.className   = 'pq-feedback-text pq-fb-error';
+                submitBtn.disabled = false;
+            });
+        });
+
+        /* ── reset current question ── */
+        resetBtn.addEventListener('click', function () {
+            if (!confirm('Reset this question? Your code and feedback will be cleared.')) return;
+            var q = questions[activeIdx];
+            qStates[activeIdx] = { code: q.starter || '', feedback: '', done: false };
+            clearQState(activeIdx);
+
+            editor.value = qStates[activeIdx].code;
+            updateHighlight();
+            updatePreview();
+            feedbackArea.style.display = 'none';
+            feedbackText.textContent   = '';
+            feedbackText.className     = 'pq-feedback-text';
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('pq-submitted');
+            submitBtn.innerHTML = '\uD83D\uDCE4 Submit for Feedback';
+
+            tabsDiv.innerHTML = renderTabsHtml();
+            wireTabBtns();
+        });
+
+        /* ── switch question ── */
+        function switchQuestion(newIdx) {
+            qStates[activeIdx].code = editor.value;
+            saveQState(activeIdx, qStates[activeIdx]);
+            activeIdx = newIdx;
+
+            var q  = questions[activeIdx];
+            var st = qStates[activeIdx];
+
+            tabsDiv.innerHTML = renderTabsHtml();
+            wireTabBtns();
+            promptBar.textContent = q.prompt || '';
+            editor.value          = st.code;
+            updateHighlight();
+            updatePreview();
+
+            if (st.done) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('pq-submitted');
+                submitBtn.textContent      = '\u2714 Submitted';
+                feedbackArea.style.display = 'block';
+                feedbackText.textContent   = st.feedback;
+                feedbackText.className     = 'pq-feedback-text';
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('pq-submitted');
+                submitBtn.innerHTML        = '\uD83D\uDCE4 Submit for Feedback';
+                feedbackArea.style.display = 'none';
+                feedbackText.textContent   = '';
+            }
+        }
+
+        function wireTabBtns() {
+            tabsDiv.querySelectorAll('.pq-tab-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var qi = parseInt(btn.getAttribute('data-qi'), 10);
+                    if (qi !== activeIdx) switchQuestion(qi);
+                });
+            });
+        }
+
+        /* ── initialise ── */
+        promptBar.textContent = questions[0].prompt || '';
+        editor.value          = qStates[0].code;
+        updateHighlight();
+        updatePreview();
+        applyViewState();
+        wireTabBtns();
+
+        if (qStates[0].done) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('pq-submitted');
+            submitBtn.textContent      = '\u2714 Submitted';
+            feedbackArea.style.display = 'block';
+            feedbackText.textContent   = qStates[0].feedback;
+        }
+    }
+
     /* ── initialise all runners on the page ── */
     function init() {
         document.querySelectorAll('.py-runner').forEach(initPyRunner);
         document.querySelectorAll('.html-runner').forEach(initHtmlRunner);
         document.querySelectorAll('.py-quiz').forEach(initPyQuizRunner);
+        document.querySelectorAll('.html-quiz').forEach(initHtmlQuizRunner);
     }
 
     if (document.readyState === 'loading') {
