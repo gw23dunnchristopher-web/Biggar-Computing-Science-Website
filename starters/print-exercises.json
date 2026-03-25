@@ -1,0 +1,46 @@
+{
+  "type": "python-quiz",
+  "title": "Print() Exercises",
+  "questions": [
+    {
+      "label": "Exercise 1",
+      "prompt": "Write a program that displays the message \"Hello world!\" using the print() function.",
+      "marks": 1,
+      "starter": "",
+      "scheme": "Award 1 mark if the program displays the message \"Hello world!\" using the print function.",
+      "example": "print(\"Hello world!\")"
+    },
+    {
+      "label": "Exercise 2",
+      "prompt": "Write a program that will assign a name to a variable called 'name'. \nThe program should then display a message greeting the person who's name you assigned.",
+      "marks": 2,
+      "starter": "",
+      "scheme": "Award 1 mark if a name (any name) is assigned to a variable called 'name' - the value assigned should be a string.\nAward 1 mark for correctly displaying a message with the name variable used in it.",
+      "example": "name = \"Bob\"\nprint(\"Hello \" + name)"
+    },
+    {
+      "label": "Exercise 3",
+      "prompt": "Create a program that assigns your favourite class to a variable.  You can choose  the name of the variable.\nThe program should output the following message \"My favourite class is \"  following by your favourite class.",
+      "marks": 2,
+      "starter": "",
+      "scheme": "Award 1 mark for assigning a class (Computing, English, Maths, etc) to a variable - the value assigned should be a string, the name of the variable does not matter.  Keep in mind that the code has to run, so students shouldn't be using a variable name like 'class' as that is a keyword.\nAward 1 mark for displaying the message \"My favourite class is (favClass)\" - favClass should be replaced by the class stored in the variable.",
+      "example": "favClass = \"Computing\"\nprint(\"My favourite class is \" + favClass)"
+    },
+    {
+      "label": "Exercise 4",
+      "prompt": "Write a program that assigns your age to a variable called 'myAge'.   The value assigned should be an integer - no speech marks.\nThe program should then output a message telling the user how old you are.",
+      "marks": 3,
+      "starter": "#Hint: You will need to use the str() function.",
+      "scheme": "Award 1 mark for correctly assigning an integer to a variable called 'myAge'.\nAward 1 mark for using a print function to display a message containing this variable.\nAward 1 mark for correct use of + and str(myAge) to concatenate and display the message.,",
+      "example": "myAge=14\nprint(\"I am \" + str(myAge) + \" years old.\")"
+    },
+    {
+      "label": "Exercise 5",
+      "prompt": "Write a program that stores and displays the number of students in the class.\nIt should output the following message - \"There are ... students in this class.\"",
+      "marks": 3,
+      "starter": "#Hint: Remember to use + in between any strings (or variables that use str()) that you want to join together.",
+      "scheme": "Award 1 mark for correctly assigning an integer to a variable.\nAward 1 mark for outputting the correct message (\"There are ... students in this class\")\nAward 1 mark for correct use of str() and concatenation.",
+      "example": "students = 20\nprint(\"There are \" + str(students) + \" students in this class.\")"
+    }
+  ]
+}

@@ -214,7 +214,68 @@
         return out;
     }
 
-    /* ── Python runner entry point ── */
+    /* ── Shared quiz prompt helpers ── */
+    function escHtml(s) {
+        return String(s)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    /* Convert plain-text prompt (with newlines and "- bullet" lines) to HTML */
+    function formatPromptHTML(text) {
+        if (!text || !text.trim()) return '';
+        var lines = text.split('\n');
+        var html = '', inList = false;
+        lines.forEach(function (line) {
+            var bullet = /^[-•*]\s+/.exec(line.trim());
+            if (bullet) {
+                if (!inList) { html += '<ul class="pq-prompt-list">'; inList = true; }
+                html += '<li>' + escHtml(line.trim().slice(bullet[0].length)) + '</li>';
+            } else {
+                if (inList) { html += '</ul>'; inList = false; }
+                if (line.trim() === '') {
+                    html += '<div class="pq-prompt-gap"></div>';
+                } else {
+                    html += '<p>' + escHtml(line.trim()) + '</p>';
+                }
+            }
+        });
+        if (inList) html += '</ul>';
+        return html;
+    }
+
+    /* Build the collapsible header inside promptBar and wire the toggle */
+    function initPromptBar(promptBar, sandboxName) {
+        var lsKey = 'bhscs-qi-' + sandboxName;
+        var collapsed = localStorage.getItem(lsKey) === '1';
+        promptBar.innerHTML =
+            '<div class="pq-prompt-header">' +
+            '  <span class="pq-prompt-label">&#x1F4CB; Instructions</span>' +
+            '  <button class="pq-prompt-toggle" type="button"></button>' +
+            '</div>' +
+            '<div class="pq-prompt-body"></div>';
+        var toggleBtn = promptBar.querySelector('.pq-prompt-toggle');
+        function applyCollapsed(c) {
+            promptBar.classList.toggle('pq-collapsed', c);
+            toggleBtn.textContent = c ? '\u25B6 Show' : '\u25BC Hide';
+        }
+        applyCollapsed(collapsed);
+        toggleBtn.addEventListener('click', function () {
+            var nowCollapsed = !promptBar.classList.contains('pq-collapsed');
+            applyCollapsed(nowCollapsed);
+            localStorage.setItem(lsKey, nowCollapsed ? '1' : '0');
+        });
+    }
+
+    /* Update only the body content (called when switching questions) */
+    function setPromptText(promptBar, text) {
+        var body = promptBar.querySelector('.pq-prompt-body');
+        if (!body) { promptBar.textContent = text; return; }
+        var html = formatPromptHTML(text);
+        body.innerHTML = html;
+        promptBar.style.display = html ? '' : 'none';
+    }
+
     function initPyRunner(container) {
         var sandbox = (container.getAttribute('data-sandbox') || '').trim();
 
@@ -1315,6 +1376,8 @@
         var feedbackArea = container.querySelector('.pq-feedback-area');
         var feedbackText = container.querySelector('.pq-feedback-text');
 
+        initPromptBar(promptBar, sandboxName);
+
         /* ── syntax highlight + line numbers ── */
         function updateHighlight() {
             hlCode.innerHTML = syntaxHighlightPython(editor.value);
@@ -1531,7 +1594,7 @@
 
             tabsDiv.innerHTML = renderTabsHtml();
             wireTabBtns();
-            promptBar.textContent = q.prompt || '';
+            setPromptText(promptBar, q.prompt || '');
             editor.value          = st.code;
             updateLineNums();
             terminal.readOnly = true;
@@ -1568,7 +1631,7 @@
         }
 
         /* ── initialise ── */
-        promptBar.textContent = questions[0].prompt || '';
+        setPromptText(promptBar, questions[0].prompt || '');
         editor.value          = qStates[0].code;
         updateLineNums();
         wireTabBtns();
@@ -1762,6 +1825,8 @@
         var feedbackArea = container.querySelector('.pq-feedback-area');
         var feedbackText = container.querySelector('.pq-feedback-text');
 
+        initPromptBar(promptBar, sandboxName);
+
         /* ── word wrap ── */
         hlWrap.classList.add('cr-wrap-on');
         wrapBtn.addEventListener('click', function () {
@@ -1930,7 +1995,7 @@
 
             tabsDiv.innerHTML = renderTabsHtml();
             wireTabBtns();
-            promptBar.textContent = q.prompt || '';
+            setPromptText(promptBar, q.prompt || '');
             editor.value          = st.code;
             updateHighlight();
             updatePreview();
@@ -1961,7 +2026,7 @@
         }
 
         /* ── initialise ── */
-        promptBar.textContent = questions[0].prompt || '';
+        setPromptText(promptBar, questions[0].prompt || '');
         editor.value          = qStates[0].code;
         updateHighlight();
         updatePreview();
