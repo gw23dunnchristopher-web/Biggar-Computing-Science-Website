@@ -216,15 +216,16 @@
             font-size: 0.68rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em;
             margin-bottom: 2px;
         }
-        .qc-prompt-inp, .qc-starter-inp, .qc-scheme-inp {
+        .qc-prompt-inp, .qc-starter-inp, .qc-scheme-inp, .qc-example-inp {
             background: #0d1117; border: 1px solid #30363d; border-radius: 4px;
             color: #e6edf3; padding: 7px 10px; font-size: 0.83rem; line-height: 1.5;
             resize: vertical; width: 100%;
         }
-        .qc-prompt-inp:focus, .qc-starter-inp:focus, .qc-scheme-inp:focus { outline: none; border-color: #58a6ff; }
-        .qc-prompt-inp { min-height: 56px; font-family: Arial, sans-serif; }
+        .qc-prompt-inp:focus, .qc-starter-inp:focus, .qc-scheme-inp:focus, .qc-example-inp:focus { outline: none; border-color: #58a6ff; }
+        .qc-prompt-inp  { min-height: 56px; font-family: Arial, sans-serif; }
         .qc-starter-inp { min-height: 80px; font-family: 'Courier New', Consolas, monospace; font-size: 0.8rem; }
         .qc-scheme-inp  { min-height: 56px; font-family: Arial, sans-serif; }
+        .qc-example-inp { min-height: 80px; font-family: 'Courier New', Consolas, monospace; font-size: 0.8rem; }
         .qc-marks-row { display: flex; align-items: center; gap: 8px; }
         .qc-marks-inp {
             background: #0d1117; border: 1px solid #30363d; border-radius: 4px;
@@ -633,6 +634,8 @@
             '<textarea class="qc-starter-inp" placeholder="# Starter code here&#10;# Leave blank if none">' + esc(q.starter || '') + '</textarea>' +
             '<div class="qc-field-lbl">Marking scheme (for AI — not shown to student)</div>' +
             '<textarea class="qc-scheme-inp" placeholder="e.g. Award the mark if print() is used to display a greeting.">' + esc(q.scheme || '') + '</textarea>' +
+            '<div class="qc-field-lbl">Example answer (for AI — not shown to student)</div>' +
+            '<textarea class="qc-example-inp" placeholder="# Optional: paste an ideal answer here so the AI can calibrate its marking">' + esc(q.example || '') + '</textarea>' +
             '</div>';
     }
 
@@ -642,7 +645,7 @@
         if (!current.questions) current.questions = [];
         if (current.questions.length === 0) {
             var defaultStarter = current.type === 'html-quiz' ? HTML_STARTER : '';
-            current.questions.push({ label: 'Part 1', prompt: '', starter: defaultStarter, scheme: '', marks: 1 });
+            current.questions.push({ label: 'Part 1', prompt: '', starter: defaultStarter, scheme: '', example: '', marks: 1 });
         }
         qcList.innerHTML = current.questions.map(qCardHtml).join('');
         wireQuizCards();
@@ -668,7 +671,8 @@
                 prompt:  card.querySelector('.qc-prompt-inp').value.trim(),
                 marks:   parseInt(card.querySelector('.qc-marks-inp').value, 10) || 1,
                 starter: card.querySelector('.qc-starter-inp').value,
-                scheme:  card.querySelector('.qc-scheme-inp').value.trim()
+                scheme:  card.querySelector('.qc-scheme-inp').value.trim(),
+                example: card.querySelector('.qc-example-inp').value.trim()
             };
         });
     }
@@ -678,7 +682,7 @@
         if (!isQuiz) return;
         collectQuizData();
         var defaultStarter = current.type === 'html-quiz' ? HTML_STARTER : '';
-        current.questions.push({ label: 'Part ' + (current.questions.length + 1), prompt: '', starter: defaultStarter, scheme: '', marks: 1 });
+        current.questions.push({ label: 'Part ' + (current.questions.length + 1), prompt: '', starter: defaultStarter, scheme: '', example: '', marks: 1 });
         renderQuizEditor();
         qcList.lastElementChild && qcList.lastElementChild.scrollIntoView({ behavior: 'smooth' });
     });

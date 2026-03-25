@@ -192,7 +192,7 @@ app.post('/api/quiz/mark-code', async (req, res) => {
   }
 
   const { questions } = req.body as {
-    questions: Array<{ text: string; marks: number; markingScheme: string; answer: string }>;
+    questions: Array<{ text: string; marks: number; markingScheme: string; answer: string; codeType?: string; example?: string }>;
   };
 
   if (!questions || !Array.isArray(questions) || questions.length === 0) {
@@ -206,6 +206,8 @@ app.post('/api/quiz/mark-code', async (req, res) => {
     marks:         Math.min(Math.max(parseInt(String(q.marks)) || 1, 1), 20),
     markingScheme: (q.markingScheme || '').substring(0, 500),
     answer:        (q.answer        || '').substring(0, MAX_CODE_LEN),
+    codeType:      (q.codeType      || 'python'),
+    example:       (q.example       || '').substring(0, 1000),
   }));
 
   let prompt = `You are a Scottish secondary school Computing Science teacher assessing N4/N5 student Python programs.
@@ -232,11 +234,14 @@ Use QUESTION_2_START/END for question 2, etc.
 
   safe.forEach((q, i) => {
     const n = i + 1;
-    const lang = (q as any).codeType === 'html' ? 'html' : 'python';
+    const lang = q.codeType === 'html' ? 'html' : 'python';
     prompt += `--- Question ${n} ---\n`;
     prompt += `Task: ${q.text}\n`;
     prompt += `Maximum marks: ${q.marks}\n`;
     prompt += `Marking scheme: ${q.markingScheme}\n`;
+    if (q.example) {
+      prompt += `Example answer (for reference — use this to calibrate your marking):\n\`\`\`${lang}\n${q.example}\n\`\`\`\n`;
+    }
     prompt += `Student's ${lang.toUpperCase()} code:\n\`\`\`${lang}\n${q.answer || '(no code written)'}\n\`\`\`\n\n`;
   });
 

@@ -1350,7 +1350,8 @@
                         text:          q.prompt  || '',
                         marks:         q.marks   || 1,
                         markingScheme: q.scheme  || '',
-                        answer:        code
+                        answer:        code,
+                        example:       q.example || ''
                     }]
                 })
             })
@@ -1755,7 +1756,8 @@
                         marks:         q.marks   || 1,
                         markingScheme: q.scheme  || '',
                         answer:        code,
-                        codeType:      'html'
+                        codeType:      'html',
+                        example:       q.example || ''
                     }]
                 })
             })
