@@ -302,13 +302,28 @@ app.get('/api/sandboxes/:name', (req, res) => {
   }
 });
 
-app.post('/api/teacher-auth', (req, res) => {
-  const { password } = req.body;
-  if (password && password === TEACHER_PASSWORD) {
-    res.json({ ok: true });
-  } else {
-    res.json({ ok: false });
+app.post('/api/teacher-auth', async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.json({ ok: false });
+
+  if (hasDatabase) {
+    try {
+      const { teachers } = require('../shared/schema');
+      const { eq } = require('drizzle-orm');
+      const bcrypt = require('bcrypt');
+      const rows = await db.select().from(teachers)
+        .where(eq(teachers.email, String(email).toLowerCase().trim()))
+        .limit(1);
+      if (!rows.length) return res.json({ ok: false });
+      const match = await bcrypt.compare(String(password), rows[0].passwordHash);
+      return res.json({ ok: match });
+    } catch (err) {
+      console.error('Teacher auth error:', err);
+      return res.json({ ok: false });
+    }
   }
+
+  res.json({ ok: false });
 });
 
 app.post('/api/sandboxes/:name', requireTeacher, (req, res) => {
@@ -839,6 +854,25 @@ app.get('/api/users/students', async (req, res) => {
 });
 
 } // end if (hasDatabase) for API routes
+
+/* ── Seed default teacher account on first run ── */
+if (hasDatabase) {
+  (async () => {
+    try {
+      const { teachers } = require('../shared/schema');
+      const bcrypt = require('bcrypt');
+      const existing = await db.select({ id: teachers.id }).from(teachers).limit(1);
+      if (existing.length === 0) {
+        const email = (process.env.TEACHER_EMAIL || 'teacher@bhs.sch.uk').toLowerCase();
+        const hash  = await bcrypt.hash(TEACHER_PASSWORD, 12);
+        await db.insert(teachers).values({ email, passwordHash: hash });
+        console.log(`Default teacher account created — email: ${email}`);
+      }
+    } catch (err) {
+      console.error('Teacher account seeding failed:', err);
+    }
+  })();
+}
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);

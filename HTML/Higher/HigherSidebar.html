@@ -208,20 +208,22 @@
             overlay.innerHTML =
                 '<div class="teacher-modal">' +
                 '<h3>&#x1F510; Teacher Login</h3>' +
+                '<input type="email" id="tmEmail" placeholder="Email address" autocomplete="email">' +
                 '<input type="password" id="tmPw" placeholder="Password" autocomplete="current-password">' +
-                '<div class="teacher-modal-err" id="tmErr">Incorrect password. Try again.</div>' +
+                '<div class="teacher-modal-err" id="tmErr">Incorrect email or password.</div>' +
                 '<div class="teacher-modal-btns">' +
                 '<button class="teacher-modal-cancel" id="tmCancel">Cancel</button>' +
                 '<button class="teacher-modal-submit" id="tmSubmit">Login</button>' +
                 '</div></div>';
             document.body.appendChild(overlay);
+            var emailEl = overlay.querySelector('#tmEmail');
             var pw = overlay.querySelector('#tmPw');
-            pw.focus();
+            emailEl.focus();
             function tryLogin() {
                 fetch('/api/teacher-auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: pw.value })
+                    body: JSON.stringify({ email: emailEl.value, password: pw.value })
                 }).then(function(r) { return r.json(); })
                 .then(function(d) {
                     if (d.ok) {
@@ -232,7 +234,7 @@
                         if (panel) panel.style.display = 'block';
                     } else {
                         overlay.querySelector('#tmErr').style.display = 'block';
-                        pw.value = ''; pw.focus();
+                        pw.value = ''; emailEl.focus();
                     }
                 }).catch(function() {
                     overlay.querySelector('#tmErr').style.display = 'block';
@@ -241,6 +243,10 @@
             overlay.querySelector('#tmSubmit').addEventListener('click', tryLogin);
             overlay.querySelector('#tmCancel').addEventListener('click', function() {
                 document.body.removeChild(overlay);
+            });
+            emailEl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') pw.focus();
+                if (e.key === 'Escape') document.body.removeChild(overlay);
             });
             pw.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') tryLogin();
