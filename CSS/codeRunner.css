@@ -121,7 +121,7 @@
     border-right: 1px solid #313244;
 }
 
-/* editor inside the line-number wrapper */
+/* editor inside the line-number wrapper (legacy fallback) */
 .cr-editor-wrap .cr-editor {
     flex: 1 1 auto;
     resize: none;
@@ -131,6 +131,97 @@
     width: auto;
     padding-left: 10px;
 }
+
+/* ── Python syntax-highlight overlay wrapper ── */
+.cr-py-hl-wrap {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 180px;
+    background: #1e1e2e;
+}
+
+.cr-py-hl-wrap:focus-within {
+    background: #1a1a2a;
+}
+
+/* pre is in normal flow — its natural height drives the wrapper */
+.cr-py-hl-wrap .cr-hl-bg {
+    display: block;
+    margin: 0;
+    padding: 14px 14px 14px 10px;
+    box-sizing: border-box;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.55;
+    -moz-tab-size: 4;
+    tab-size: 4;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    overflow: hidden;
+    background: transparent;
+    pointer-events: none;
+    min-height: 180px;
+    width: 100%;
+    color: #cdd6f4;
+    border: none;
+}
+
+/* transparent textarea sits on top, lets user type normally */
+.cr-py-hl-wrap .cr-editor {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0;
+    padding: 14px 14px 14px 10px !important;
+    box-sizing: border-box;
+    background: transparent !important;
+    color: transparent !important;
+    caret-color: #cdd6f4;
+    resize: none !important;
+    border: none;
+    outline: none;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 1.55;
+    -moz-tab-size: 4;
+    tab-size: 4;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    overflow: hidden;
+    min-height: 0 !important;
+    flex: none !important;
+    z-index: 1;
+}
+
+/* py-quiz: taller minimum */
+.pq-quiz .cr-py-hl-wrap,
+.pq-quiz .cr-py-hl-wrap .cr-hl-bg {
+    min-height: 260px;
+}
+
+/* reset <code> inside the highlight pre */
+.cr-py-hl-wrap .cr-hl-bg code {
+    font-family: inherit;
+    font-size: inherit;
+    background: none;
+    padding: 0;
+    border: none;
+    display: inline;
+    color: inherit;
+}
+
+/* ── Python syntax token colours (Catppuccin Mocha) ── */
+.py-kw { color: #cba6f7; font-weight: bold; }
+.py-bi { color: #89b4fa; }
+.py-fn { color: #89b4fa; }
+.py-st { color: #a6e3a1; }
+.py-cm { color: #6c7086; font-style: italic; }
+.py-nu { color: #fab387; }
+.py-op { color: #89dceb; }
+.py-dc { color: #f38ba8; }
+.py-br { color: #cdd6f4; opacity: 0.6; }
 
 /* when inside .cr-workspace (Python multi-file), wrapper fills flex slot */
 .cr-workspace .cr-editor-wrap {

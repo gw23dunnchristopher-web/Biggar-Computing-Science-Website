@@ -1,0 +1,7 @@
+{
+  "type": "python",
+  "title": "Using str()",
+  "files": {
+    "main.py": "\"\"\"\nUsing str()\n\n1. Try changing the number assigned to the age variable, you will see that it changes the age in the output.\n2. If you remove the str() but leave the age part, you will see that running the code now gives \n   you the error 'can only concatenate str (not \"int\") to str'.\n\"\"\"\n\nage = 12\nprint(\"I am \" + str(age) + \" years old.\")\n\n"
+  }
+}

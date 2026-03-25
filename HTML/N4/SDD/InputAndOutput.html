@@ -145,11 +145,76 @@
                             This way, it would still display "Hello John", but
                             if you changed the value of the 'name' variable, it
                             would display whatever name you changed the value
-                            to.  Note that the space after "Hello " is important, 
+                            to. Note that the space after "Hello " is important,
                             otherwise it would display "HelloJohn".
                         </p>
                         <p>You can try this below:</p>
                         <div class="py-runner" data-sandbox="using-print"></div>
+
+                        <h3>Type Casting</h3>
+                        <p>
+                            As mentioned in the previous lesson, computers are
+                            fussy about display two different datatypes using
+                            the same print function. Concatenation is the
+                            process of joining two <b>strings</b> together. You
+                            can't join a string and an integer together. So what
+                            do you do?
+                        </p>
+                        <p>
+                            This is where type casting comes in! Python contains
+                            functions that change one type of data into another.
+                            Since we are using strings and integers, we will be
+                            using the type casting functions
+                            <span class="codeText">str()</span> and
+                            <span class="codeText">int()</span>.
+                        </p>
+                        <table>
+                            <tr>
+                                <th>Function</th>
+                                <th>Description</th>
+                                <th>Example</th>
+                            </tr>
+                            <tr>
+                                <td><span class="codeText">str()</span></td>
+                                <td>
+                                    Converts a value to a string. This is useful
+                                    when you want to display a number as text.
+                                </td>
+                                <td>
+                                    <span class="codeText">str(123)</span>
+                                    would convert the integer 123 to the string
+                                    "123".
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="codeText">int()</span>
+                                </td>
+                                <td>
+                                    Converts a value to an integer. This is
+                                    useful when you want to perform arithmetic
+                                    on a string that contains a number.
+                                </td>
+                                <td>
+                                    <span class="codeText">int("123")</span>
+                                    would convert the string "123" to the
+                                    integer 123.
+                                </td>
+                            </tr>
+                        </table>
+                        <p>
+                            123 and "123" are not the same thing. 123 is an
+                            integer, and "123" is a string. You can't add them
+                            together, but you can convert one to the other.
+                        </p>
+                        <p>
+                            In the code editor below, you can see how the
+                            <span class="codeText">str()</span> function is
+                            used to convert the integer 12 to the string "12".
+                            This allows the print function to display the message
+                            "I am 12 years old".
+                        </p>
+                        <div class="py-runner" data-sandbox="using-str"></div>
                     </div>
                 </div>
             </div>
@@ -165,6 +230,6 @@
                 </div>
             </footer>
         </div>
-    <script src="/JavaScript/codeRunner.js"></script>
+        <script src="/JavaScript/codeRunner.js"></script>
     </body>
 </html>

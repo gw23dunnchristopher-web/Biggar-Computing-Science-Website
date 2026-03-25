@@ -131,6 +131,89 @@
         return set;
     }
 
+    /* ── Python syntax highlighter ── */
+    var _PY_KW = new Set(['False','None','True','and','as','assert','async','await',
+        'break','class','continue','def','del','elif','else','except','finally',
+        'for','from','global','if','import','in','is','lambda','nonlocal','not',
+        'or','pass','raise','return','try','while','with','yield']);
+    var _PY_BI = new Set(['abs','all','any','bin','bool','breakpoint','bytearray',
+        'bytes','callable','chr','classmethod','compile','complex','delattr','dict',
+        'dir','divmod','enumerate','eval','exec','filter','float','format',
+        'frozenset','getattr','globals','hasattr','hash','help','hex','id','input',
+        'int','isinstance','issubclass','iter','len','list','locals','map','max',
+        'memoryview','min','next','object','oct','open','ord','pow','print',
+        'property','range','repr','reversed','round','set','setattr','slice',
+        'sorted','staticmethod','str','sum','super','tuple','type','vars','zip']);
+
+    function syntaxHighlightPython(code) {
+        function esc(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+        var out = '', i = 0, n = code.length;
+        while (i < n) {
+            var ch = code[i];
+            /* comments */
+            if (ch === '#') {
+                var ec = code.indexOf('\n', i);
+                if (ec === -1) ec = n;
+                out += '<span class="py-cm">' + esc(code.slice(i, ec)) + '</span>';
+                i = ec; continue;
+            }
+            /* triple-quoted strings */
+            var tri = code.slice(i, i + 3);
+            if (tri === '"""' || tri === "'''") {
+                var e3 = code.indexOf(tri, i + 3);
+                if (e3 === -1) e3 = n - 3;
+                out += '<span class="py-st">' + esc(code.slice(i, e3 + 3)) + '</span>';
+                i = e3 + 3; continue;
+            }
+            /* single/double-quoted strings */
+            if (ch === '"' || ch === "'") {
+                var j = i + 1;
+                while (j < n && code[j] !== ch && code[j] !== '\n') {
+                    if (code[j] === '\\') j++;
+                    j++;
+                }
+                out += '<span class="py-st">' + esc(code.slice(i, Math.min(j + 1, n))) + '</span>';
+                i = j + 1; continue;
+            }
+            /* numbers */
+            if (/[0-9]/.test(ch) || (ch === '.' && /[0-9]/.test(code[i + 1] || ''))) {
+                var nm = code.slice(i).match(/^(?:0[xXbBoO][\da-fA-F_]+|[0-9][\d_]*\.?[\d_]*(?:[eEjJ][-+]?[\d_]*)?|\.[\d_]+)/);
+                if (nm) { out += '<span class="py-nu">' + esc(nm[0]) + '</span>'; i += nm[0].length; continue; }
+            }
+            /* identifiers: keywords, builtins, function calls, names */
+            if (/[a-zA-Z_]/.test(ch)) {
+                var id = code.slice(i).match(/^[a-zA-Z_]\w*/)[0];
+                var nx = code[i + id.length] || '';
+                if (_PY_KW.has(id)) {
+                    out += '<span class="py-kw">' + esc(id) + '</span>';
+                } else if (_PY_BI.has(id) && nx !== '.') {
+                    out += '<span class="py-bi">' + esc(id) + '</span>';
+                } else if (nx === '(') {
+                    out += '<span class="py-fn">' + esc(id) + '</span>';
+                } else {
+                    out += esc(id);
+                }
+                i += id.length; continue;
+            }
+            /* decorators */
+            if (ch === '@') {
+                var dm = code.slice(i).match(/^@[\w.]+/);
+                if (dm) { out += '<span class="py-dc">' + esc(dm[0]) + '</span>'; i += dm[0].length; continue; }
+            }
+            /* operators */
+            if (/[+\-*/%=<>!&|^~]/.test(ch)) {
+                var op = code.slice(i).match(/^(?:\*\*=?|\/\/=?|<<=?|>>=?|[+\-*/%=<>!&|^~]=?|~)/);
+                if (op) { out += '<span class="py-op">' + esc(op[0]) + '</span>'; i += op[0].length; continue; }
+            }
+            /* brackets */
+            if (/[()[\]{}]/.test(ch)) { out += '<span class="py-br">' + esc(ch) + '</span>'; i++; continue; }
+            out += esc(ch); i++;
+        }
+        return out;
+    }
+
     /* ── Python runner entry point ── */
     function initPyRunner(container) {
         var sandbox = (container.getAttribute('data-sandbox') || '').trim();
@@ -187,7 +270,10 @@
 
         var editorBlock = '<div class="cr-editor-wrap">' +
             '<div class="cr-line-numbers" aria-hidden="true"></div>' +
-            '<textarea class="cr-editor" spellcheck="false"></textarea>' +
+            '<div class="cr-py-hl-wrap">' +
+            '  <pre class="cr-hl-bg" aria-hidden="true"><code class="cr-hl-code"></code></pre>' +
+            '  <textarea class="cr-editor" spellcheck="false"></textarea>' +
+            '</div>' +
             '</div>';
 
         var workspaceWrap = multiFile
@@ -215,26 +301,34 @@
 
         var editor      = container.querySelector('.cr-editor');
         var lineNums    = container.querySelector('.cr-line-numbers');
+        var hlWrap      = container.querySelector('.cr-py-hl-wrap');
+        var hlPre       = container.querySelector('.cr-hl-bg');
+        var hlCode      = container.querySelector('.cr-hl-code');
         var terminal    = container.querySelector('.cr-terminal');
         var runBtn      = container.querySelector('.cr-run-btn');
         var resetBtn    = container.querySelector('.cr-reset-btn');
         var dataStrip   = container.querySelector('.cr-data-strip');
         var pyFileInput = container.querySelector('.cr-py-file-input');
 
-        /* ── line number sync + auto-resize ── */
+        /* ── syntax highlight + line number sync ── */
+        function updateHighlight() {
+            hlCode.innerHTML = syntaxHighlightPython(editor.value);
+        }
         function updateLineNumbers() {
             var count = editor.value.split('\n').length;
             var text  = '';
             for (var i = 1; i <= count; i++) text += i + '\n';
             lineNums.textContent = text;
-            /* auto-grow: reset height so scrollHeight recalculates, then apply it */
-            editor.style.height = 'auto';
-            editor.style.height = editor.scrollHeight + 'px';
-            /* keep line-numbers gutter the same height */
-            lineNums.style.height = editor.style.height;
+            updateHighlight();
+            /* sync line-numbers height to match the highlight wrapper after reflow */
+            requestAnimationFrame(function () {
+                var h = hlWrap.offsetHeight;
+                if (h > 0) lineNums.style.height = h + 'px';
+            });
         }
         editor.addEventListener('input',  updateLineNumbers);
         editor.addEventListener('keydown', function () { setTimeout(updateLineNumbers, 0); });
+        editor.addEventListener('scroll', function () { hlPre.scrollLeft = editor.scrollLeft; });
 
         /* ── virtual filesystem ── */
         var vfs        = Object.assign({}, originals);
@@ -1190,7 +1284,10 @@
             '<div class="pq-prompt-bar"></div>' +
             '<div class="cr-editor-wrap">' +
             '  <div class="cr-line-numbers" aria-hidden="true"></div>' +
-            '  <textarea class="cr-editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>' +
+            '  <div class="cr-py-hl-wrap">' +
+            '    <pre class="cr-hl-bg" aria-hidden="true"><code class="cr-hl-code"></code></pre>' +
+            '    <textarea class="cr-editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>' +
+            '  </div>' +
             '</div>' +
             '<div class="cr-output-area">' +
             '  <div class="cr-output-label">Output</div>' +
@@ -1208,6 +1305,9 @@
         var promptBar    = container.querySelector('.pq-prompt-bar');
         var editor       = container.querySelector('.cr-editor');
         var lineNums     = container.querySelector('.cr-line-numbers');
+        var hlWrap       = container.querySelector('.cr-py-hl-wrap');
+        var hlPre        = container.querySelector('.cr-hl-bg');
+        var hlCode       = container.querySelector('.cr-hl-code');
         var terminal     = container.querySelector('.cr-terminal');
         var runBtn       = container.querySelector('.cr-run-btn');
         var submitBtn    = container.querySelector('.pq-submit-btn');
@@ -1215,16 +1315,23 @@
         var feedbackArea = container.querySelector('.pq-feedback-area');
         var feedbackText = container.querySelector('.pq-feedback-text');
 
-        /* ── line numbers ── */
+        /* ── syntax highlight + line numbers ── */
+        function updateHighlight() {
+            hlCode.innerHTML = syntaxHighlightPython(editor.value);
+        }
         function updateLineNums() {
             var count = editor.value.split('\n').length;
             var out = '';
             for (var n = 1; n <= count; n++) out += n + '\n';
             lineNums.textContent = out;
-            lineNums.scrollTop = editor.scrollTop;
+            updateHighlight();
+            requestAnimationFrame(function () {
+                var h = hlWrap.offsetHeight;
+                if (h > 0) lineNums.style.height = h + 'px';
+            });
         }
         editor.addEventListener('input', updateLineNums);
-        editor.addEventListener('scroll', function () { lineNums.scrollTop = editor.scrollTop; });
+        editor.addEventListener('scroll', function () { hlPre.scrollLeft = editor.scrollLeft; });
 
         editor.addEventListener('keydown', function (e) {
             if (e.key === 'Tab') {
