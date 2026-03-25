@@ -408,7 +408,7 @@
 
 <script>
     /* ── state ── */
-    var password = sessionStorage.getItem('sbPassword') || '';
+    var password = localStorage.getItem('bhscs-sb-key') || sessionStorage.getItem('sbPassword') || '';
     var sandboxes = [];   /* [{name, type, title}] */
     var current = null;   /* { name, type, title, files:{} } */
     var activeFile = null;
@@ -458,16 +458,23 @@
             .then(function (data) {
                 password = pw;
                 sessionStorage.setItem('sbPassword', pw);
+                localStorage.setItem('bhscs-sb-key', pw);
                 authOverlay.style.display = 'none';
                 sandboxes = data;
                 renderSbList();
             })
             .catch(function () {
+                /* Clear stale stored key so the dialog appears */
+                localStorage.removeItem('bhscs-sb-key');
+                sessionStorage.removeItem('sbPassword');
+                password = '';
+                authOverlay.style.display = 'flex';
                 pwErr.style.display = 'block';
             });
     }
 
     if (password) {
+        authOverlay.style.display = 'none'; /* hide while auto-authenticating */
         tryAuth(password);
     } else {
         authOverlay.style.display = 'flex';

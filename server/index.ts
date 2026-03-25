@@ -278,7 +278,7 @@ function safeName(raw: string): string {
   return raw.replace(/[^a-z0-9_-]/gi, '').substring(0, 80);
 }
 
-app.get('/api/sandboxes', (_req, res) => {
+app.get('/api/sandboxes', requireTeacher, (_req, res) => {
   try {
     const entries = fs.readdirSync(STARTERS_DIR)
       .filter(f => f.endsWith('.json'))
@@ -321,7 +321,7 @@ app.post('/api/teacher-auth', async (req, res) => {
         .limit(1);
       if (!rows.length) return res.json({ ok: false });
       const match = await bcrypt.compare(String(password), rows[0].passwordHash);
-      return res.json({ ok: match });
+      return res.json({ ok: match, ...(match ? { sandboxKey: TEACHER_PASSWORD } : {}) });
     } catch (err) {
       console.error('Teacher auth error:', err);
       return res.json({ ok: false });
