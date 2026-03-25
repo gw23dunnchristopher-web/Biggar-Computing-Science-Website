@@ -1338,12 +1338,24 @@
         function saveQState(i, st) { localStorage.setItem(lsKey(i), JSON.stringify(st)); }
         function clearQState(i) { localStorage.removeItem(lsKey(i)); }
 
+        function recoverFbClass(feedback, maxMarks) {
+            if (!feedback) return '';
+            var m = feedback.match(/Marks:\s*(\d+)\s*\/\s*(\d+)/);
+            if (!m) return '';
+            var awarded = parseInt(m[1], 10);
+            var max     = parseInt(m[2], 10) || maxMarks || 1;
+            if (awarded === 0) return 'pq-fb-zero';
+            if (awarded < max) return 'pq-fb-partial';
+            return '';
+        }
+
         var qStates = questions.map(function (q, i) {
             var saved = loadQState(i);
+            var storedClass = saved ? (saved.fbClass || recoverFbClass(saved.feedback, q.marks || 1)) : '';
             return {
                 code:     saved ? saved.code              : (q.starter || ''),
                 feedback: saved ? (saved.feedback  || '') : '',
-                fbClass:  saved ? (saved.fbClass   || '') : '',
+                fbClass:  storedClass,
                 done:     saved ? (saved.done === true)   : false
             };
         });
@@ -1735,12 +1747,24 @@
         function saveQState(i, st) { localStorage.setItem(lsKey(i), JSON.stringify(st)); }
         function clearQState(i) { localStorage.removeItem(lsKey(i)); }
 
+        function recoverFbClass(feedback, maxMarks) {
+            if (!feedback) return '';
+            var m = feedback.match(/Marks:\s*(\d+)\s*\/\s*(\d+)/);
+            if (!m) return '';
+            var awarded = parseInt(m[1], 10);
+            var max     = parseInt(m[2], 10) || maxMarks || 1;
+            if (awarded === 0) return 'pq-fb-zero';
+            if (awarded < max) return 'pq-fb-partial';
+            return '';
+        }
+
         var qStates = questions.map(function (q, i) {
             var saved = loadQState(i);
+            var storedClass = saved ? (saved.fbClass || recoverFbClass(saved.feedback, q.marks || 1)) : '';
             return {
                 code:     saved ? saved.code              : (q.starter || ''),
                 feedback: saved ? (saved.feedback  || '') : '',
-                fbClass:  saved ? (saved.fbClass   || '') : '',
+                fbClass:  storedClass,
                 done:     saved ? (saved.done === true)   : false
             };
         });
