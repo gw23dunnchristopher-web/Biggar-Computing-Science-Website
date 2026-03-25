@@ -1341,9 +1341,10 @@
         var qStates = questions.map(function (q, i) {
             var saved = loadQState(i);
             return {
-                code:     saved ? saved.code     : (q.starter || ''),
-                feedback: saved ? saved.feedback  : '',
-                done:     saved ? (saved.done === true) : false
+                code:     saved ? saved.code              : (q.starter || ''),
+                feedback: saved ? (saved.feedback  || '') : '',
+                fbClass:  saved ? (saved.fbClass   || '') : '',
+                done:     saved ? (saved.done === true)   : false
             };
         });
 
@@ -1737,9 +1738,10 @@
         var qStates = questions.map(function (q, i) {
             var saved = loadQState(i);
             return {
-                code:     saved ? saved.code     : (q.starter || ''),
-                feedback: saved ? saved.feedback  : '',
-                done:     saved ? (saved.done === true) : false
+                code:     saved ? saved.code              : (q.starter || ''),
+                feedback: saved ? (saved.feedback  || '') : '',
+                fbClass:  saved ? (saved.fbClass   || '') : '',
+                done:     saved ? (saved.done === true)   : false
             };
         });
 
