@@ -862,10 +862,29 @@
         qcList.lastElementChild && qcList.lastElementChild.scrollIntoView({ behavior: 'smooth' });
     });
 
-    /* ── type change → swap UI ── */
+    /* ── type change → swap UI + reset starter files ── */
     sbTypeSelect.addEventListener('change', function () {
-        current.type = sbTypeSelect.value;
-        var isQuiz = current.type === 'python-quiz' || current.type === 'html-quiz';
+        var newType = sbTypeSelect.value;
+        var oldType = current.type;
+        current.type = newType;
+
+        /* Reset files when moving between file-based types */
+        if (newType !== oldType && newType !== 'python-quiz' && newType !== 'html-quiz') {
+            if (newType === 'python') {
+                current.files = {
+                    'main.py': '"""\n' + (current.title || 'Sandbox') + '\n\nInstructions for students go here.\n"""\n\n\n'
+                };
+                activeFile = 'main.py';
+            } else if (newType === 'html') {
+                current.files = {
+                    'index.html': '<!DOCTYPE html>\n<html>\n<head>\n    <title>My Page</title>\n</head>\n<body>\n\n</body>\n</html>'
+                };
+                activeFile = 'index.html';
+            }
+            closePanels();
+        }
+
+        var isQuiz = newType === 'python-quiz' || newType === 'html-quiz';
         workspace.style.display  = isQuiz ? 'none' : 'flex';
         quizEditor.style.display = isQuiz ? 'flex' : 'none';
         if (isQuiz) {
