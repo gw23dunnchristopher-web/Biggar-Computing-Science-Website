@@ -211,17 +211,20 @@ app.post('/api/quiz/mark-code', async (req, res) => {
     example:       (q.example       || '').substring(0, 1000),
   }));
 
-  let prompt = `You are a Scottish secondary school Computing Science teacher assessing N4/N5 student Python programs.
-For each coding task you will receive: the task description, the student's Python code, and a marking scheme.
+  let prompt = `You are a Scottish secondary school Computing Science teacher assessing student code.
+For each task you receive: the task description, the student's code, a marking scheme, and optionally an example answer.
 
-Assess the code by considering:
-- Whether the code is syntactically correct and would run without errors
-- Whether it correctly performs the required task
-- Whether it uses appropriate Python constructs
+MARKING RULES — follow these exactly:
+1. The marking scheme lists individual criteria, each worth one mark. Go through each criterion one at a time.
+2. Award a mark for EACH criterion the student's code satisfies, regardless of whether other criteria are met.
+3. PARTIAL MARKS must be awarded when only some criteria are met — do not round up or down to 0 or full marks unless genuinely warranted.
+4. Award 0 only if the code is blank, completely wrong, or meets none of the criteria.
+5. Award the maximum only if every criterion is fully met.
+6. Do not award more marks than the maximum.
+7. Ignore minor stylistic issues (variable names, spacing) unless the marking scheme explicitly penalises them.
 
-Give brief (2-3 sentences), encouraging, age-appropriate feedback for 14-16 year old students.
-Reward working programs even if the style is basic. Point out any errors constructively.
-Do not give more marks than the maximum.
+After working out the mark, write 2-3 sentences of encouraging, age-appropriate feedback for a 14-16 year old.
+Mention specifically what was done well and, if marks were lost, what needs to be fixed.
 
 For each question respond with EXACTLY this format (no extra text before or after):
 QUESTION_1_START
