@@ -134,6 +134,7 @@ function loadSidebar(menuLoc, menuID) {
 
 function executeScripts(container) {
     Array.from(container.querySelectorAll('script')).forEach(function(oldScript) {
+        if (oldScript.src) return;
         var newScript = document.createElement('script');
         Array.from(oldScript.attributes).forEach(function(attr) {
             newScript.setAttribute(attr.name, attr.value);
