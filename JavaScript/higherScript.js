@@ -132,6 +132,17 @@ function loadSidebar(menuLoc, menuID) {
     }
 }
 
+function executeScripts(container) {
+    Array.from(container.querySelectorAll('script')).forEach(function(oldScript) {
+        var newScript = document.createElement('script');
+        Array.from(oldScript.attributes).forEach(function(attr) {
+            newScript.setAttribute(attr.name, attr.value);
+        });
+        newScript.textContent = oldScript.textContent;
+        oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+}
+
 function loadSidebarContent(sidebarFile, targetElement) {
     var targetEl = document.getElementById(targetElement);
     if (!targetEl) {
@@ -145,6 +156,7 @@ function loadSidebarContent(sidebarFile, targetElement) {
     window.scrollTo(0, 0);
     if (sidebarCache) {
         targetEl.innerHTML = sidebarCache;
+        executeScripts(targetEl);
         attachMenuListeners();
         showMainContent();
         return;
@@ -153,6 +165,7 @@ function loadSidebarContent(sidebarFile, targetElement) {
     if (sidebarPromise) {
         sidebarPromise.then(data => {
             targetEl.innerHTML = data;
+            executeScripts(targetEl);
             attachMenuListeners();
             showMainContent();
         });
@@ -161,6 +174,7 @@ function loadSidebarContent(sidebarFile, targetElement) {
 
     preloadSidebar(sidebarFile).then(data => {
         targetEl.innerHTML = data;
+        executeScripts(targetEl);
         attachMenuListeners();
         showMainContent();
     });
