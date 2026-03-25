@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { db, pool, hasDatabase } from './db';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
@@ -266,12 +267,13 @@ if (!fs.existsSync(STARTERS_DIR)) fs.mkdirSync(STARTERS_DIR, { recursive: true }
 
 const TEACHER_PASSWORD = process.env.TEACHER_PASSWORD || 'bhs-computing';
 
+/* In-memory session tokens — cleared on server restart */
+const teacherTokens = new Set<string>();
+
 function requireTeacher(req: express.Request, res: express.Response, next: express.NextFunction) {
   const pw = req.headers['x-teacher-password'] as string | undefined;
-  if (!pw || pw !== TEACHER_PASSWORD) {
-    return res.status(401).json({ error: 'Unauthorised' });
-  }
-  next();
+  if (pw && (pw === TEACHER_PASSWORD || teacherTokens.has(pw))) return next();
+  return res.status(401).json({ error: 'Unauthorised' });
 }
 
 function safeName(raw: string): string {
@@ -321,7 +323,12 @@ app.post('/api/teacher-auth', async (req, res) => {
         .limit(1);
       if (!rows.length) return res.json({ ok: false });
       const match = await bcrypt.compare(String(password), rows[0].passwordHash);
-      return res.json({ ok: match, ...(match ? { sandboxKey: TEACHER_PASSWORD } : {}) });
+      if (match) {
+        const token = crypto.randomUUID();
+        teacherTokens.add(token);
+        return res.json({ ok: true, token });
+      }
+      return res.json({ ok: false });
     } catch (err) {
       console.error('Teacher auth error:', err);
       return res.json({ ok: false });

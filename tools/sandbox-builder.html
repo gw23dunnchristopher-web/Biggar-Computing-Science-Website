@@ -283,10 +283,11 @@
 <div id="authOverlay">
     <div class="auth-box">
         <h2>Teacher Login</h2>
-        <p>Enter the teacher password to access the sandbox builder.</p>
-        <input type="password" id="pwInput" placeholder="Password" autocomplete="current-password">
-        <div class="err" id="pwErr" style="display:none;">Incorrect password.</div>
-        <button class="btn-primary" id="pwBtn">Continue</button>
+        <p>Sign in with your Teacher Tools credentials.</p>
+        <input type="email" id="pwEmail" placeholder="Email address" autocomplete="email">
+        <input type="password" id="pwPw" placeholder="Password" autocomplete="current-password">
+        <div class="err" id="pwErr" style="display:none;">Incorrect email or password.</div>
+        <button class="btn-primary" id="pwBtn">Sign In</button>
     </div>
 </div>
 
@@ -408,14 +409,13 @@
 
 <script>
     /* ── state ── */
-    var password = localStorage.getItem('bhscs-sb-key') || sessionStorage.getItem('sbPassword') || '';
+    var password = localStorage.getItem('bhscs-teacher-token') || '';
     var sandboxes = [];   /* [{name, type, title}] */
     var current = null;   /* { name, type, title, files:{} } */
     var activeFile = null;
 
     /* ── elements ── */
     var authOverlay    = document.getElementById('authOverlay');
-    var pwInput        = document.getElementById('pwInput');
     var pwBtn          = document.getElementById('pwBtn');
     var pwErr          = document.getElementById('pwErr');
     var sbList         = document.getElementById('sbList');
@@ -449,28 +449,57 @@
     var sbPreviewIframe= document.getElementById('sbPreviewIframe');
 
     /* ── auth ── */
-    function tryAuth(pw) {
-        fetch('/api/sandboxes', { headers: { 'X-Teacher-Password': pw } })
+    var pwEmail = document.getElementById('pwEmail');
+    var pwPw    = document.getElementById('pwPw');
+
+    /* Verify a session token against the sandbox list endpoint */
+    function tryAuth(tok) {
+        fetch('/api/sandboxes', { headers: { 'X-Teacher-Password': tok } })
             .then(function (r) {
                 if (r.status === 401) throw new Error('bad');
                 return r.json();
             })
             .then(function (data) {
-                password = pw;
-                sessionStorage.setItem('sbPassword', pw);
-                localStorage.setItem('bhscs-sb-key', pw);
+                password = tok;
                 authOverlay.style.display = 'none';
                 sandboxes = data;
                 renderSbList();
             })
             .catch(function () {
-                /* Clear stale stored key so the dialog appears */
-                localStorage.removeItem('bhscs-sb-key');
-                sessionStorage.removeItem('sbPassword');
+                localStorage.removeItem('bhscs-teacher-token');
                 password = '';
                 authOverlay.style.display = 'flex';
-                pwErr.style.display = 'block';
             });
+    }
+
+    /* Log in with Teacher Tools credentials → get a session token */
+    function loginWithCredentials() {
+        var email = pwEmail.value.trim();
+        var pw    = pwPw.value;
+        if (!email || !pw) return;
+        pwBtn.disabled = true;
+        pwErr.style.display = 'none';
+        fetch('/api/teacher-auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, password: pw })
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+            pwBtn.disabled = false;
+            if (d.ok && d.token) {
+                localStorage.setItem('bhscs-teacher-token', d.token);
+                tryAuth(d.token);
+            } else {
+                pwErr.style.display = 'block';
+                pwPw.value = '';
+                pwEmail.focus();
+            }
+        })
+        .catch(function () {
+            pwBtn.disabled = false;
+            pwErr.style.display = 'block';
+        });
     }
 
     if (password) {
@@ -480,8 +509,9 @@
         authOverlay.style.display = 'flex';
     }
 
-    pwBtn.addEventListener('click', function () { tryAuth(pwInput.value); });
-    pwInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryAuth(pwInput.value); });
+    pwBtn.addEventListener('click', loginWithCredentials);
+    pwEmail.addEventListener('keydown', function (e) { if (e.key === 'Enter') pwPw.focus(); });
+    pwPw.addEventListener('keydown',   function (e) { if (e.key === 'Enter') loginWithCredentials(); });
 
     /* ── sandbox list ── */
     function typeIcon(t) {

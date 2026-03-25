@@ -250,7 +250,7 @@
                     if (d.ok) {
                         localStorage.setItem(LS_KEY, 'yes');
                         localStorage.setItem(LS_KEY + '-email', emailEl.value.toLowerCase().trim());
-                        if (d.sandboxKey) localStorage.setItem('bhscs-sb-key', d.sandboxKey);
+                        if (d.token) localStorage.setItem('bhscs-teacher-token', d.token);
                         document.body.removeChild(overlay);
                         showAuthed();
                         var panel = document.getElementById('teacherToolsPanel');
