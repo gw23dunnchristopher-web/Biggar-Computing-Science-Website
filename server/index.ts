@@ -326,6 +326,45 @@ app.post('/api/teacher-auth', async (req, res) => {
   res.json({ ok: false });
 });
 
+app.post('/api/teacher-update', async (req, res) => {
+  const { currentEmail, currentPassword, newEmail, newPassword } = req.body;
+  if (!currentEmail || !currentPassword) {
+    return res.json({ ok: false, error: 'Current email and password are required.' });
+  }
+  if (!hasDatabase) return res.json({ ok: false, error: 'Database not available.' });
+
+  try {
+    const { teachers } = require('../shared/schema');
+    const { eq } = require('drizzle-orm');
+    const bcrypt = require('bcrypt');
+
+    const rows = await db.select().from(teachers)
+      .where(eq(teachers.email, String(currentEmail).toLowerCase().trim()))
+      .limit(1);
+    if (!rows.length) return res.json({ ok: false, error: 'Incorrect email or password.' });
+
+    const match = await bcrypt.compare(String(currentPassword), rows[0].passwordHash);
+    if (!match) return res.json({ ok: false, error: 'Incorrect email or password.' });
+
+    const updates: Record<string, string> = {};
+    const cleanNewEmail = newEmail ? String(newEmail).toLowerCase().trim() : '';
+    const cleanNewPw    = newPassword ? String(newPassword) : '';
+
+    if (cleanNewEmail) updates.email = cleanNewEmail;
+    if (cleanNewPw)    updates.passwordHash = await bcrypt.hash(cleanNewPw, 12);
+
+    if (Object.keys(updates).length === 0) {
+      return res.json({ ok: false, error: 'No changes provided.' });
+    }
+
+    await db.update(teachers).set(updates).where(eq(teachers.id, rows[0].id));
+    res.json({ ok: true, newEmail: cleanNewEmail || String(currentEmail).toLowerCase().trim() });
+  } catch (err) {
+    console.error('Teacher update error:', err);
+    res.json({ ok: false, error: 'Update failed. Please try again.' });
+  }
+});
+
 app.post('/api/sandboxes/:name', requireTeacher, (req, res) => {
   const name = safeName(req.params.name);
   if (!name) return res.status(400).json({ error: 'Invalid sandbox name' });

@@ -186,6 +186,7 @@
         <button class="teacher-bar-btn" id="teacherBarBtn" onclick="bhsTeacherLogin()">&#x1F512; Teacher Tools</button>
         <div class="teacher-tools-panel" id="teacherToolsPanel" style="display:none;">
             <a href="/tools/sandbox-builder.html" target="_blank">&#x1F4DD; Sandbox Builder</a>
+            <button class="teacher-settings-btn" onclick="bhsTeacherSettings()">&#x2699;&#xFE0F; Account Settings</button>
         </div>
     </div>
     <script>
@@ -228,6 +229,7 @@
                 .then(function(d) {
                     if (d.ok) {
                         localStorage.setItem(LS_KEY, 'yes');
+                        localStorage.setItem(LS_KEY + '-email', emailEl.value.toLowerCase().trim());
                         document.body.removeChild(overlay);
                         showAuthed();
                         var panel = document.getElementById('teacherToolsPanel');
@@ -254,6 +256,83 @@
             });
             overlay.addEventListener('click', function(e) {
                 if (e.target === overlay) document.body.removeChild(overlay);
+            });
+        };
+        window.bhsTeacherSettings = function() {
+            var storedEmail = localStorage.getItem(LS_KEY + '-email') || '';
+            var overlay = document.createElement('div');
+            overlay.className = 'teacher-modal-overlay';
+            overlay.innerHTML =
+                '<div class="teacher-modal">' +
+                '<h3>&#x2699;&#xFE0F; Account Settings</h3>' +
+                '<p class="teacher-modal-sub">Verify your identity, then update your email or password.</p>' +
+                '<input type="email" id="tsEmail" placeholder="Current email" autocomplete="email">' +
+                '<input type="password" id="tsCurPw" placeholder="Current password" autocomplete="current-password">' +
+                '<div class="teacher-modal-divider"></div>' +
+                '<input type="email" id="tsNewEmail" placeholder="New email (leave blank to keep)" autocomplete="email">' +
+                '<input type="password" id="tsNewPw" placeholder="New password (leave blank to keep)" autocomplete="new-password">' +
+                '<input type="password" id="tsConfPw" placeholder="Confirm new password" autocomplete="new-password">' +
+                '<div class="teacher-modal-err" id="tsErr">Error</div>' +
+                '<div class="teacher-modal-btns">' +
+                '<button class="teacher-modal-cancel" id="tsCancel">Cancel</button>' +
+                '<button class="teacher-modal-submit" id="tsSave">Save Changes</button>' +
+                '</div></div>';
+            document.body.appendChild(overlay);
+            var emailEl  = overlay.querySelector('#tsEmail');
+            var curPwEl  = overlay.querySelector('#tsCurPw');
+            var newEmlEl = overlay.querySelector('#tsNewEmail');
+            var newPwEl  = overlay.querySelector('#tsNewPw');
+            var confPwEl = overlay.querySelector('#tsConfPw');
+            var errEl    = overlay.querySelector('#tsErr');
+            var saveBtn  = overlay.querySelector('#tsSave');
+            if (storedEmail) emailEl.value = storedEmail;
+            curPwEl.focus();
+            function showErr(msg) { errEl.textContent = msg; errEl.style.display = 'block'; }
+            function hideErr() { errEl.style.display = 'none'; }
+            function doSave() {
+                hideErr();
+                var curEmail = emailEl.value.trim();
+                var curPw    = curPwEl.value;
+                var newEmail = newEmlEl.value.trim();
+                var newPw    = newPwEl.value;
+                var confPw   = confPwEl.value;
+                if (!curEmail || !curPw) { showErr('Current email and password are required.'); return; }
+                if (!newEmail && !newPw) { showErr('Enter a new email or new password to update.'); return; }
+                if (newPw && newPw !== confPw) { showErr('New passwords do not match.'); return; }
+                if (newPw && newPw.length < 6) { showErr('New password must be at least 6 characters.'); return; }
+                saveBtn.disabled = true; saveBtn.textContent = 'Saving\u2026';
+                fetch('/api/teacher-update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ currentEmail: curEmail, currentPassword: curPw, newEmail: newEmail || null, newPassword: newPw || null })
+                }).then(function(r) { return r.json(); })
+                .then(function(d) {
+                    if (d.ok) {
+                        localStorage.setItem(LS_KEY + '-email', d.newEmail);
+                        document.body.removeChild(overlay);
+                        var toast = document.createElement('div');
+                        toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#a6e3a1;color:#1e1e2e;padding:10px 20px;border-radius:6px;font-size:14px;z-index:999999;font-family:Arial,sans-serif;font-weight:600;';
+                        toast.textContent = '\u2714 Account updated successfully';
+                        document.body.appendChild(toast);
+                        setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3000);
+                    } else {
+                        showErr(d.error || 'Update failed. Please try again.');
+                        saveBtn.disabled = false; saveBtn.textContent = 'Save Changes';
+                    }
+                }).catch(function() {
+                    showErr('Could not connect to server.');
+                    saveBtn.disabled = false; saveBtn.textContent = 'Save Changes';
+                });
+            }
+            saveBtn.addEventListener('click', doSave);
+            overlay.querySelector('#tsCancel').addEventListener('click', function() { document.body.removeChild(overlay); });
+            overlay.addEventListener('click', function(e) { if (e.target === overlay) document.body.removeChild(overlay); });
+            [emailEl, curPwEl, newEmlEl, newPwEl].forEach(function(el) {
+                el.addEventListener('keydown', function(e) { if (e.key === 'Escape') document.body.removeChild(overlay); });
+            });
+            confPwEl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') doSave();
+                if (e.key === 'Escape') document.body.removeChild(overlay);
             });
         };
     })();
