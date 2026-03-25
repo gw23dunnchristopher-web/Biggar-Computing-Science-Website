@@ -179,6 +179,59 @@
             padding: 10px 24px; font-size: 0.9rem; font-weight: bold; cursor: pointer; margin-top: 8px;
         }
         .btn-create-first:hover { background: #388bfd; }
+
+        /* ── quiz editor (python-quiz type) ── */
+        .quiz-editor {
+            flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px;
+        }
+        .quiz-editor-hdr {
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.75rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .btn-add-q {
+            background: #1f6feb; color: white; border: none; border-radius: 4px;
+            padding: 4px 12px; font-size: 0.78rem; font-weight: bold; cursor: pointer;
+        }
+        .btn-add-q:hover { background: #388bfd; }
+        .qc-list { display: flex; flex-direction: column; gap: 12px; }
+        .qc-card {
+            background: #1c2128; border: 1px solid #30363d; border-radius: 8px;
+            padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .qc-card-hdr {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .qc-card-num { font-size: 0.75rem; font-weight: bold; color: #8b949e; flex-shrink: 0; min-width: 28px; }
+        .qc-label-inp {
+            background: #0d1117; border: 1px solid #30363d; border-radius: 4px;
+            color: #e6edf3; padding: 4px 8px; font-size: 0.82rem; width: 130px;
+        }
+        .qc-label-inp:focus { outline: none; border-color: #58a6ff; }
+        .qc-del-btn {
+            background: none; border: none; color: #8b949e; cursor: pointer;
+            font-size: 0.85rem; margin-left: auto; padding: 2px 5px; border-radius: 3px;
+        }
+        .qc-del-btn:hover { color: #f87171; background: #3d1a1a; }
+        .qc-field-lbl {
+            font-size: 0.68rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.05em;
+            margin-bottom: 2px;
+        }
+        .qc-prompt-inp, .qc-starter-inp, .qc-scheme-inp {
+            background: #0d1117; border: 1px solid #30363d; border-radius: 4px;
+            color: #e6edf3; padding: 7px 10px; font-size: 0.83rem; line-height: 1.5;
+            resize: vertical; width: 100%;
+        }
+        .qc-prompt-inp:focus, .qc-starter-inp:focus, .qc-scheme-inp:focus { outline: none; border-color: #58a6ff; }
+        .qc-prompt-inp { min-height: 56px; font-family: Arial, sans-serif; }
+        .qc-starter-inp { min-height: 80px; font-family: 'Courier New', Consolas, monospace; font-size: 0.8rem; }
+        .qc-scheme-inp  { min-height: 56px; font-family: Arial, sans-serif; }
+        .qc-marks-row { display: flex; align-items: center; gap: 8px; }
+        .qc-marks-inp {
+            background: #0d1117; border: 1px solid #30363d; border-radius: 4px;
+            color: #e6edf3; padding: 4px 8px; font-size: 0.82rem; width: 60px; text-align: center;
+        }
+        .qc-marks-inp:focus { outline: none; border-color: #58a6ff; }
+        .qc-marks-lbl { font-size: 0.75rem; color: #8b949e; }
     </style>
 </head>
 <body>
@@ -243,6 +296,7 @@
                 <select class="meta-input" id="sbType">
                     <option value="html">HTML / CSS / JS</option>
                     <option value="python">Python + data files</option>
+                    <option value="python-quiz">Python Quiz Exercise</option>
                 </select>
             </div>
             <div class="meta-spacer"></div>
@@ -271,6 +325,15 @@
                 <textarea id="codeEditor" spellcheck="false" placeholder="Select a file to edit…"></textarea>
             </div>
 
+        </div>
+
+        <!-- quiz editor (shown only for python-quiz type) -->
+        <div class="quiz-editor" id="quizEditor" style="display:none;">
+            <div class="quiz-editor-hdr">
+                <span>Questions</span>
+                <button class="btn-add-q" id="addQBtn">+ Add Question</button>
+            </div>
+            <div class="qc-list" id="qcList"></div>
         </div>
 
         <!-- embed bar (hidden until sandbox saved) -->
@@ -314,6 +377,9 @@
     var copyEmbedBtn   = document.getElementById('copyEmbedBtn');
     var newSbBtn       = document.getElementById('newSbBtn');
     var createFirstBtn = document.getElementById('createFirstBtn');
+    var quizEditor     = document.getElementById('quizEditor');
+    var addQBtn        = document.getElementById('addQBtn');
+    var qcList         = document.getElementById('qcList');
 
     /* ── auth ── */
     function tryAuth(pw) {
@@ -344,7 +410,7 @@
     pwInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') tryAuth(pwInput.value); });
 
     /* ── sandbox list ── */
-    function typeIcon(t) { return t === 'python' ? '🐍' : '🌐'; }
+    function typeIcon(t) { return t === 'python' ? '🐍' : t === 'python-quiz' ? '📝' : '🌐'; }
 
     function renderSbList() {
         if (sandboxes.length === 0) {
@@ -382,8 +448,13 @@
         fetch('/api/sandboxes/' + name)
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                current = { name: name, type: data.type || 'html', title: data.title || name, files: data.files || {} };
-                activeFile = Object.keys(current.files)[0] || null;
+                var t = data.type || 'html';
+                current = { name: name, type: t, title: data.title || name, files: data.files || {}, questions: data.questions || [] };
+                if (t === 'python-quiz') {
+                    activeFile = null;
+                } else {
+                    activeFile = Object.keys(current.files)[0] || null;
+                }
                 renderEditor();
                 renderSbList();
             });
@@ -402,7 +473,7 @@
 
     /* ── new sandbox ── */
     function createNew() {
-        current = { name: '', type: 'html', title: '', files: { 'index.html': '<!DOCTYPE html>\n<html>\n<head>\n    <title>My Page</title>\n</head>\n<body>\n\n</body>\n</html>' } };
+        current = { name: '', type: 'html', title: '', files: { 'index.html': '<!DOCTYPE html>\n<html>\n<head>\n    <title>My Page</title>\n</head>\n<body>\n\n</body>\n</html>' }, questions: [] };
         activeFile = 'index.html';
         renderEditor();
         renderSbList();
@@ -414,21 +485,28 @@
     /* ── render editor ── */
     function renderEditor() {
         if (!current) {
-            emptyEditor.style.display = 'flex';
-            metaBar.style.display     = 'none';
-            workspace.style.display   = 'none';
-            embedBar.style.display    = 'none';
+            emptyEditor.style.display  = 'flex';
+            metaBar.style.display      = 'none';
+            workspace.style.display    = 'none';
+            quizEditor.style.display   = 'none';
+            embedBar.style.display     = 'none';
             return;
         }
-        emptyEditor.style.display = 'none';
-        metaBar.style.display     = 'flex';
-        workspace.style.display   = 'flex';
+        var isQuiz = current.type === 'python-quiz';
+        emptyEditor.style.display  = 'none';
+        metaBar.style.display      = 'flex';
+        workspace.style.display    = isQuiz ? 'none' : 'flex';
+        quizEditor.style.display   = isQuiz ? 'flex' : 'none';
 
         sbIdInput.value    = current.name;
         sbTitleInput.value = current.title;
         sbTypeSelect.value = current.type;
 
-        renderFileTree();
+        if (isQuiz) {
+            renderQuizEditor();
+        } else {
+            renderFileTree();
+        }
         renderEmbed();
     }
 
@@ -530,9 +608,79 @@
         uploadInput.value = '';
     });
 
-    /* ── type change → swap default file ── */
+    /* ── quiz editor ── */
+    function qCardHtml(q, i) {
+        var n = i + 1;
+        return '<div class="qc-card" data-qi="' + i + '">' +
+            '<div class="qc-card-hdr">' +
+            '  <span class="qc-card-num">Q' + n + '</span>' +
+            '  <input class="qc-label-inp" placeholder="Label (e.g. Part ' + n + ')" value="' + esc(q.label || '') + '" title="Short tab label">' +
+            (i > 0 ? '  <button class="qc-del-btn" title="Remove question">🗑</button>' : '') +
+            '</div>' +
+            '<div class="qc-field-lbl">Question prompt (shown to student)</div>' +
+            '<textarea class="qc-prompt-inp" placeholder="e.g. Write a program that displays Hello on screen.">' + esc(q.prompt || '') + '</textarea>' +
+            '<div class="qc-marks-row">' +
+            '  <span class="qc-marks-lbl">Marks:</span>' +
+            '  <input type="number" class="qc-marks-inp" min="1" max="20" value="' + (q.marks || 1) + '">' +
+            '</div>' +
+            '<div class="qc-field-lbl">Starter code (optional — given to student)</div>' +
+            '<textarea class="qc-starter-inp" placeholder="# Starter code here&#10;# Leave blank if none">' + esc(q.starter || '') + '</textarea>' +
+            '<div class="qc-field-lbl">Marking scheme (for AI — not shown to student)</div>' +
+            '<textarea class="qc-scheme-inp" placeholder="e.g. Award the mark if print() is used to display a greeting.">' + esc(q.scheme || '') + '</textarea>' +
+            '</div>';
+    }
+
+    function renderQuizEditor() {
+        if (!current.questions) current.questions = [];
+        if (current.questions.length === 0) current.questions.push({ label: 'Part 1', prompt: '', starter: '', scheme: '', marks: 1 });
+        qcList.innerHTML = current.questions.map(qCardHtml).join('');
+        wireQuizCards();
+    }
+
+    function wireQuizCards() {
+        qcList.querySelectorAll('.qc-del-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var card = btn.closest('.qc-card');
+                var qi = parseInt(card.getAttribute('data-qi'), 10);
+                if (!confirm('Remove question ' + (qi + 1) + '?')) return;
+                collectQuizData();
+                current.questions.splice(qi, 1);
+                renderQuizEditor();
+            });
+        });
+    }
+
+    function collectQuizData() {
+        current.questions = Array.from(qcList.querySelectorAll('.qc-card')).map(function (card) {
+            return {
+                label:   card.querySelector('.qc-label-inp').value.trim(),
+                prompt:  card.querySelector('.qc-prompt-inp').value.trim(),
+                marks:   parseInt(card.querySelector('.qc-marks-inp').value, 10) || 1,
+                starter: card.querySelector('.qc-starter-inp').value,
+                scheme:  card.querySelector('.qc-scheme-inp').value.trim()
+            };
+        });
+    }
+
+    addQBtn.addEventListener('click', function () {
+        if (!current || current.type !== 'python-quiz') return;
+        collectQuizData();
+        current.questions.push({ label: 'Part ' + (current.questions.length + 1), prompt: '', starter: '', scheme: '', marks: 1 });
+        renderQuizEditor();
+        qcList.lastElementChild && qcList.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    /* ── type change → swap UI ── */
     sbTypeSelect.addEventListener('change', function () {
         current.type = sbTypeSelect.value;
+        var isQuiz = current.type === 'python-quiz';
+        workspace.style.display  = isQuiz ? 'none' : 'flex';
+        quizEditor.style.display = isQuiz ? 'flex' : 'none';
+        if (isQuiz) {
+            renderQuizEditor();
+        } else {
+            renderFileTree();
+        }
         renderEmbed();
     });
 
@@ -542,7 +690,11 @@
     });
 
     saveBtn.addEventListener('click', function () {
-        if (activeFile) current.files[activeFile] = codeEditor.value;
+        if (current.type === 'python-quiz') {
+            collectQuizData();
+        } else {
+            if (activeFile) current.files[activeFile] = codeEditor.value;
+        }
 
         var name = sbIdInput.value.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
         if (!name) { flashMsg('Sandbox ID required', false); return; }
@@ -551,10 +703,17 @@
         current.title = sbTitleInput.value || name;
         current.type  = sbTypeSelect.value;
 
+        var body = { type: current.type, title: current.title };
+        if (current.type === 'python-quiz') {
+            body.questions = current.questions || [];
+        } else {
+            body.files = current.files;
+        }
+
         fetch('/api/sandboxes/' + name, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-Teacher-Password': password },
-            body: JSON.stringify({ type: current.type, title: current.title, files: current.files })
+            body: JSON.stringify(body)
         }).then(function (r) { return r.json(); })
           .then(function (d) {
               if (d.ok) {
@@ -585,7 +744,11 @@
             return;
         }
         embedBar.style.display = 'flex';
-        var cls = current.type === 'python' ? 'py-runner' : 'html-runner';
+        var cls = current.type === 'python'
+            ? 'py-runner'
+            : current.type === 'python-quiz'
+                ? 'py-quiz'
+                : 'html-runner';
         embedCode.textContent = '<div class="' + cls + '" data-sandbox="' + current.name + '"></div>';
     }
 

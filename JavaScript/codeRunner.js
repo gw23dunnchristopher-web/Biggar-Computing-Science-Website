@@ -1109,10 +1109,373 @@
         });
     }
 
+    /* ═══════════════════════════════════════════════════════════════
+       Python Quiz (coding exercise) runner
+       Usage: <div class="py-quiz" data-sandbox="sandbox-name"></div>
+       ═══════════════════════════════════════════════════════════════ */
+
+    function initPyQuizRunner(container) {
+        var sandbox = (container.getAttribute('data-sandbox') || '').trim();
+        if (!sandbox) return;
+        container.classList.add('code-runner');
+        container.innerHTML = '<div style="padding:16px;color:#6c7086;font-family:Arial,sans-serif;">Loading exercise\u2026</div>';
+        fetch('/api/sandboxes/' + encodeURIComponent(sandbox))
+            .then(function (r) {
+                if (!r.ok) throw new Error('Exercise not found: ' + sandbox);
+                return r.json();
+            })
+            .then(function (data) {
+                container.innerHTML = '';
+                container.classList.remove('code-runner');
+                buildPyQuizRunner(container, data, sandbox);
+            })
+            .catch(function (err) {
+                container.innerHTML = '<div style="padding:16px;color:#f38ba8;font-family:Arial,sans-serif;">\u26A0 ' + err.message + '</div>';
+            });
+    }
+
+    function buildPyQuizRunner(container, data, sandboxName) {
+        var questions = data.questions || [];
+        if (!questions.length) {
+            container.innerHTML = '<div style="padding:16px;color:#6c7086;font-family:Arial,sans-serif;">No questions defined for this exercise.</div>';
+            return;
+        }
+        var title = data.title || 'Coding Exercise';
+        var activeIdx = 0;
+
+        /* ── per-question localStorage state ── */
+        function lsKey(i) { return 'bhscs-pyq-' + sandboxName + '-q' + i; }
+        function loadQState(i) {
+            try { return JSON.parse(localStorage.getItem(lsKey(i)) || 'null'); } catch (e) { return null; }
+        }
+        function saveQState(i, st) { localStorage.setItem(lsKey(i), JSON.stringify(st)); }
+        function clearQState(i) { localStorage.removeItem(lsKey(i)); }
+
+        var qStates = questions.map(function (q, i) {
+            var saved = loadQState(i);
+            return {
+                code:     saved ? saved.code     : (q.starter || ''),
+                feedback: saved ? saved.feedback  : '',
+                done:     saved ? (saved.done === true) : false
+            };
+        });
+
+        /* ── HTML helpers ── */
+        function eH(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function renderTabsHtml() {
+            return questions.map(function (q, i) {
+                var active = i === activeIdx ? ' pq-tab-active' : '';
+                var done   = qStates[i].done  ? ' pq-tab-done'   : '';
+                var label  = eH(q.label || ('Q' + (i + 1)));
+                var tick   = qStates[i].done  ? ' \u2713' : '';
+                return '<button class="pq-tab-btn' + active + done + '" data-qi="' + i + '">' + label + tick + '</button>';
+            }).join('');
+        }
+
+        container.classList.add('code-runner', 'pq-quiz');
+        container.innerHTML =
+            '<div class="cr-toolbar">' +
+            '  <span class="cr-lang">\uD83D\uDC0D ' + eH(title) + '</span>' +
+            '  <div class="pq-tabs">' + renderTabsHtml() + '</div>' +
+            '  <div class="cr-btns">' +
+            '    <button class="cr-run-btn">\u25B6 Run</button>' +
+            '  </div>' +
+            '</div>' +
+            '<div class="pq-prompt-bar"></div>' +
+            '<div class="cr-editor-wrap">' +
+            '  <div class="cr-line-numbers" aria-hidden="true"></div>' +
+            '  <textarea class="cr-editor" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>' +
+            '</div>' +
+            '<div class="cr-output-area">' +
+            '  <div class="cr-output-label">Output</div>' +
+            '  <textarea class="cr-terminal" readonly spellcheck="false">Click Run to execute the code\u2026</textarea>' +
+            '</div>' +
+            '<div class="pq-action-bar">' +
+            '  <button class="pq-submit-btn">\uD83D\uDCE4 Submit for Feedback</button>' +
+            '  <button class="pq-reset-btn">\u21BA Reset question</button>' +
+            '</div>' +
+            '<div class="pq-feedback-area" style="display:none;">' +
+            '  <div class="pq-feedback-text"></div>' +
+            '</div>';
+
+        var tabsDiv      = container.querySelector('.pq-tabs');
+        var promptBar    = container.querySelector('.pq-prompt-bar');
+        var editor       = container.querySelector('.cr-editor');
+        var lineNums     = container.querySelector('.cr-line-numbers');
+        var terminal     = container.querySelector('.cr-terminal');
+        var runBtn       = container.querySelector('.cr-run-btn');
+        var submitBtn    = container.querySelector('.pq-submit-btn');
+        var resetBtn     = container.querySelector('.pq-reset-btn');
+        var feedbackArea = container.querySelector('.pq-feedback-area');
+        var feedbackText = container.querySelector('.pq-feedback-text');
+
+        /* ── line numbers ── */
+        function updateLineNums() {
+            var count = editor.value.split('\n').length;
+            var out = '';
+            for (var n = 1; n <= count; n++) out += n + '\n';
+            lineNums.textContent = out;
+            lineNums.scrollTop = editor.scrollTop;
+        }
+        editor.addEventListener('input', updateLineNums);
+        editor.addEventListener('scroll', function () { lineNums.scrollTop = editor.scrollTop; });
+
+        editor.addEventListener('keydown', function (e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                var s = editor.selectionStart, end = editor.selectionEnd;
+                editor.value = editor.value.slice(0, s) + '    ' + editor.value.slice(end);
+                editor.selectionStart = editor.selectionEnd = s + 4;
+                updateLineNums();
+            }
+        });
+
+        /* ── run logic (mirrors buildPyRunner's executeCode) ── */
+        var collectedInputs = [];
+        var awaitingInput   = false;
+        var baselineLen     = 0;
+
+        terminal.addEventListener('input', function () {
+            if (!awaitingInput) return;
+            if (terminal.value.length < baselineLen) terminal.value = terminal.value.substring(0, baselineLen);
+        });
+        terminal.addEventListener('keydown', function (e) {
+            if (!awaitingInput) { e.preventDefault(); return; }
+            if (e.key === 'ArrowLeft' || e.key === 'Home' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+                if (terminal.selectionStart <= baselineLen) e.preventDefault();
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                var typed = terminal.value.substring(baselineLen);
+                terminal.value += '\n';
+                awaitingInput = false;
+                terminal.readOnly = true;
+                terminal.classList.remove('cr-waiting');
+                collectedInputs.push(typed);
+                executeCode();
+            }
+        });
+        terminal.addEventListener('click', function () {
+            if (!awaitingInput) return;
+            if (terminal.selectionStart < baselineLen) {
+                terminal.selectionStart = terminal.selectionEnd = baselineLen;
+            }
+        });
+
+        async function executeCode() {
+            if (!pyodideReady) {
+                terminal.readOnly = true;
+                terminal.value = 'Loading Python\u2026 (first run may take a moment)';
+                terminal.className = 'cr-terminal cr-loading';
+            }
+            var pyodide = await getPyodide();
+            _inputQueue = collectedInputs.slice();
+            _inputPos   = 0;
+
+            var code = editor.value;
+            try { await pyodide.loadPackagesFromImports(code); } catch (_) {}
+
+            pyodide.runPython('import sys, io\n_cr_buf = io.StringIO()\n_cr_old = sys.stdout\nsys.stdout = _cr_buf');
+
+            var succeeded = false, needsInput = false, errorText = '';
+            try {
+                await pyodide.runPythonAsync(code);
+                succeeded = true;
+            } catch (err) {
+                var msg = (err && err.message) ? err.message : String(err);
+                if (msg.indexOf('__INPUT_REQUIRED__') !== -1) { needsInput = true; }
+                else { errorText = msg; }
+            }
+
+            var captured = '';
+            try {
+                captured = pyodide.runPython('sys.stdout = _cr_old\n_cr_buf.getvalue()');
+            } catch (e) {
+                try { pyodide.runPython('sys.stdout = _cr_old'); } catch (_) {}
+            }
+
+            if (succeeded) {
+                terminal.readOnly = true;
+                terminal.value = captured || '(no output)';
+                terminal.className = 'cr-terminal cr-success';
+                runBtn.disabled = false;
+                runBtn.textContent = '\u25B6 Run';
+            } else if (needsInput) {
+                terminal.value = captured;
+                terminal.className = 'cr-terminal cr-waiting';
+                baselineLen = terminal.value.length;
+                awaitingInput = true;
+                terminal.readOnly = false;
+                terminal.focus();
+                terminal.selectionStart = terminal.selectionEnd = baselineLen;
+                terminal.scrollTop = terminal.scrollHeight;
+            } else {
+                terminal.readOnly = true;
+                var prefix = captured ? captured + '\n' : '';
+                terminal.value = prefix + '\u274C ' + errorText;
+                terminal.className = 'cr-terminal cr-error';
+                runBtn.disabled = false;
+                runBtn.textContent = '\u25B6 Run';
+            }
+        }
+
+        runBtn.addEventListener('click', function () {
+            collectedInputs = [];
+            awaitingInput   = false;
+            runBtn.disabled = true;
+            runBtn.textContent = 'Loading\u2026';
+            terminal.readOnly = true;
+            terminal.value = 'Loading Python\u2026 (first run may take a moment)';
+            terminal.className = 'cr-terminal cr-loading';
+            executeCode();
+        });
+
+        /* ── submit for AI feedback ── */
+        submitBtn.addEventListener('click', function () {
+            var q    = questions[activeIdx];
+            var code = editor.value;
+            submitBtn.disabled = true;
+            feedbackArea.style.display = 'block';
+            feedbackText.textContent   = '\u23F3 Marking your code\u2026';
+            feedbackText.className     = 'pq-feedback-text pq-fb-loading';
+
+            fetch('/api/quiz/mark-code', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({
+                    questions: [{
+                        text:          q.prompt  || '',
+                        marks:         q.marks   || 1,
+                        markingScheme: q.scheme  || '',
+                        answer:        code
+                    }]
+                })
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                var result   = d.results && d.results[0];
+                var fb       = result ? result.feedback : (d.error || 'No feedback received.');
+                var marks    = result ? ('\u2714 Marks: ' + result.marksAwarded + '/' + (q.marks || 1) + '\n\n') : '';
+                var fullText = marks + fb;
+
+                qStates[activeIdx].code     = editor.value;
+                qStates[activeIdx].feedback = fullText;
+                qStates[activeIdx].done     = true;
+                saveQState(activeIdx, qStates[activeIdx]);
+
+                feedbackText.textContent = fullText;
+                feedbackText.className   = 'pq-feedback-text';
+                submitBtn.classList.add('pq-submitted');
+                submitBtn.textContent = '\u2714 Submitted';
+
+                tabsDiv.innerHTML = renderTabsHtml();
+                wireTabBtns();
+            })
+            .catch(function (err) {
+                feedbackText.textContent = 'Could not get feedback: ' + err.message;
+                feedbackText.className   = 'pq-feedback-text pq-fb-error';
+                submitBtn.disabled = false;
+            });
+        });
+
+        /* ── reset current question ── */
+        resetBtn.addEventListener('click', function () {
+            if (!confirm('Reset this question? Your code and feedback will be cleared.')) return;
+            var q = questions[activeIdx];
+            qStates[activeIdx] = { code: q.starter || '', feedback: '', done: false };
+            clearQState(activeIdx);
+
+            editor.value = qStates[activeIdx].code;
+            updateLineNums();
+            terminal.readOnly = true;
+            terminal.value = 'Click Run to execute the code\u2026';
+            terminal.className = 'cr-terminal';
+            runBtn.disabled = false;
+            runBtn.textContent = '\u25B6 Run';
+            collectedInputs = [];
+            awaitingInput   = false;
+
+            feedbackArea.style.display = 'none';
+            feedbackText.textContent   = '';
+            feedbackText.className     = 'pq-feedback-text';
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('pq-submitted');
+            submitBtn.innerHTML = '\uD83D\uDCE4 Submit for Feedback';
+
+            tabsDiv.innerHTML = renderTabsHtml();
+            wireTabBtns();
+        });
+
+        /* ── switch question ── */
+        function switchQuestion(newIdx) {
+            qStates[activeIdx].code = editor.value;
+            saveQState(activeIdx, qStates[activeIdx]);
+            activeIdx = newIdx;
+
+            var q  = questions[activeIdx];
+            var st = qStates[activeIdx];
+
+            tabsDiv.innerHTML = renderTabsHtml();
+            wireTabBtns();
+            promptBar.textContent = q.prompt || '';
+            editor.value          = st.code;
+            updateLineNums();
+            terminal.readOnly = true;
+            terminal.value    = 'Click Run to execute the code\u2026';
+            terminal.className = 'cr-terminal';
+            runBtn.disabled   = false;
+            runBtn.textContent = '\u25B6 Run';
+            collectedInputs   = [];
+            awaitingInput     = false;
+
+            if (st.done) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('pq-submitted');
+                submitBtn.textContent  = '\u2714 Submitted';
+                feedbackArea.style.display = 'block';
+                feedbackText.textContent   = st.feedback;
+                feedbackText.className     = 'pq-feedback-text';
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('pq-submitted');
+                submitBtn.innerHTML        = '\uD83D\uDCE4 Submit for Feedback';
+                feedbackArea.style.display = 'none';
+                feedbackText.textContent   = '';
+            }
+        }
+
+        function wireTabBtns() {
+            tabsDiv.querySelectorAll('.pq-tab-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var qi = parseInt(btn.getAttribute('data-qi'), 10);
+                    if (qi !== activeIdx) switchQuestion(qi);
+                });
+            });
+        }
+
+        /* ── initialise ── */
+        promptBar.textContent = questions[0].prompt || '';
+        editor.value          = qStates[0].code;
+        updateLineNums();
+        wireTabBtns();
+
+        if (qStates[0].done) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('pq-submitted');
+            submitBtn.textContent      = '\u2714 Submitted';
+            feedbackArea.style.display = 'block';
+            feedbackText.textContent   = qStates[0].feedback;
+        }
+    }
+
     /* ── initialise all runners on the page ── */
     function init() {
         document.querySelectorAll('.py-runner').forEach(initPyRunner);
         document.querySelectorAll('.html-runner').forEach(initHtmlRunner);
+        document.querySelectorAll('.py-quiz').forEach(initPyQuizRunner);
     }
 
     if (document.readyState === 'loading') {

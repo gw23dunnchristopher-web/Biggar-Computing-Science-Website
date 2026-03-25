@@ -183,6 +183,76 @@ function parseGeminiResponse(text: string, questions: Array<{marks: number}>): A
 }
 
 // ---------------------------------------------------------------------------
+// Code quiz marking endpoint (Python coding exercises with AI feedback)
+// ---------------------------------------------------------------------------
+app.post('/api/quiz/mark-code', async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'Marking service not configured' });
+  }
+
+  const { questions } = req.body as {
+    questions: Array<{ text: string; marks: number; markingScheme: string; answer: string }>;
+  };
+
+  if (!questions || !Array.isArray(questions) || questions.length === 0) {
+    return res.status(400).json({ error: 'No questions provided' });
+  }
+
+  const MAX_QUESTIONS = 10;
+  const MAX_CODE_LEN  = 2000;
+  const safe = questions.slice(0, MAX_QUESTIONS).map(q => ({
+    text:          (q.text          || '').substring(0, 500),
+    marks:         Math.min(Math.max(parseInt(String(q.marks)) || 1, 1), 20),
+    markingScheme: (q.markingScheme || '').substring(0, 500),
+    answer:        (q.answer        || '').substring(0, MAX_CODE_LEN),
+  }));
+
+  let prompt = `You are a Scottish secondary school Computing Science teacher assessing N4/N5 student Python programs.
+For each coding task you will receive: the task description, the student's Python code, and a marking scheme.
+
+Assess the code by considering:
+- Whether the code is syntactically correct and would run without errors
+- Whether it correctly performs the required task
+- Whether it uses appropriate Python constructs
+
+Give brief (2-3 sentences), encouraging, age-appropriate feedback for 14-16 year old students.
+Reward working programs even if the style is basic. Point out any errors constructively.
+Do not give more marks than the maximum.
+
+For each question respond with EXACTLY this format (no extra text before or after):
+QUESTION_1_START
+MARKS: <number>/<maximum>
+FEEDBACK: <2-3 sentences>
+QUESTION_1_END
+
+Use QUESTION_2_START/END for question 2, etc.
+
+`;
+
+  safe.forEach((q, i) => {
+    const n = i + 1;
+    prompt += `--- Question ${n} ---\n`;
+    prompt += `Task: ${q.text}\n`;
+    prompt += `Maximum marks: ${q.marks}\n`;
+    prompt += `Marking scheme: ${q.markingScheme}\n`;
+    prompt += `Student's Python code:\n\`\`\`python\n${q.answer || '(no code written)'}\n\`\`\`\n\n`;
+  });
+
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model  = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const result = await model.generateContent(prompt);
+    const text   = result.response.text();
+    const parsed = parseGeminiResponse(text, safe);
+    return res.json({ results: parsed });
+  } catch (err) {
+    console.error('Gemini code-marking error:', err);
+    return res.status(502).json({ error: 'Marking service temporarily unavailable' });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Sandbox API — named collections of starter files for the code runner
 // ---------------------------------------------------------------------------
 const STARTERS_DIR = path.join(process.cwd(), 'starters');
@@ -236,7 +306,13 @@ app.post('/api/sandboxes/:name', requireTeacher, (req, res) => {
   if (!name) return res.status(400).json({ error: 'Invalid sandbox name' });
   const filePath = path.join(STARTERS_DIR, name + '.json');
   try {
-    const payload = { type: req.body.type || 'html', title: req.body.title || name, files: req.body.files || {} };
+    const sbType = req.body.type || 'html';
+    const payload: Record<string, unknown> = { type: sbType, title: req.body.title || name };
+    if (sbType === 'python-quiz') {
+      payload.questions = Array.isArray(req.body.questions) ? req.body.questions : [];
+    } else {
+      payload.files = req.body.files || {};
+    }
     fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf8');
     res.json({ ok: true, name });
   } catch {
