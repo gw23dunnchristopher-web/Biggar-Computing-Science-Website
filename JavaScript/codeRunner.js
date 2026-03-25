@@ -761,16 +761,22 @@
         /* ── Drag-to-resize splitter ── */
         function startSplitterDrag(startX, startW) {
             splitterEl.classList.add('cr-dragging');
-            document.body.style.cursor     = 'col-resize';
+
+            /* Overlay blocks the preview iframe from stealing mouse events
+               while dragging — without it the drag breaks the moment the
+               cursor enters the iframe. */
+            var dragOverlay = document.createElement('div');
+            dragOverlay.style.cssText =
+                'position:fixed;top:0;left:0;right:0;bottom:0;' +
+                'z-index:99999;cursor:col-resize;';
+            document.body.appendChild(dragOverlay);
             document.body.style.userSelect = 'none';
 
             function onMove(x) {
                 var dx    = startX - x;   /* drag left → bigger preview */
                 var total = workspace.getBoundingClientRect().width;
-                var minW  = 150;
-                var maxW  = total - 250;
-                var newW  = Math.max(minW, Math.min(maxW, startW + dx));
-                savedPreviewW        = newW;
+                var newW  = Math.max(150, Math.min(total - 250, startW + dx));
+                savedPreviewW            = newW;
                 preview.style.width      = newW + 'px';
                 preview.style.flexShrink = '0';
                 preview.style.flex       = '';
@@ -778,13 +784,16 @@
 
             function finish() {
                 splitterEl.classList.remove('cr-dragging');
-                document.body.style.cursor     = '';
+                document.body.removeChild(dragOverlay);
                 document.body.style.userSelect = '';
             }
 
-            /* mouse */
-            function onMouseMove(e) { onMove(e.clientX); }
-            function onMouseUp()    {
+            /* mouse — check buttons in case release happened outside window */
+            function onMouseMove(e) {
+                if (!(e.buttons & 1)) { onMouseUp(); return; }
+                onMove(e.clientX);
+            }
+            function onMouseUp() {
                 document.removeEventListener('mousemove', onMouseMove);
                 document.removeEventListener('mouseup',   onMouseUp);
                 finish();
@@ -794,13 +803,13 @@
 
             /* touch */
             function onTouchMove(e) { e.preventDefault(); onMove(e.touches[0].clientX); }
-            function onTouchEnd()   {
-                splitterEl.removeEventListener('touchmove', onTouchMove);
-                splitterEl.removeEventListener('touchend',  onTouchEnd);
+            function onTouchEnd() {
+                dragOverlay.removeEventListener('touchmove', onTouchMove);
+                dragOverlay.removeEventListener('touchend',  onTouchEnd);
                 finish();
             }
-            splitterEl.addEventListener('touchmove', onTouchMove, { passive: false });
-            splitterEl.addEventListener('touchend',  onTouchEnd);
+            dragOverlay.addEventListener('touchmove', onTouchMove, { passive: false });
+            dragOverlay.addEventListener('touchend',  onTouchEnd);
         }
 
         splitterEl.addEventListener('mousedown', function (e) {
