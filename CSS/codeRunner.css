@@ -125,8 +125,9 @@
 .cr-editor-wrap .cr-editor {
     flex: 1 1 auto;
     resize: none;
-    min-height: 0;
-    height: 100%;
+    min-height: 180px;
+    height: auto;
+    overflow-y: hidden;
     width: auto;
     padding-left: 10px;
 }

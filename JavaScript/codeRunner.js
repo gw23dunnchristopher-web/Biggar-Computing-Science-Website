@@ -221,17 +221,20 @@
         var dataStrip   = container.querySelector('.cr-data-strip');
         var pyFileInput = container.querySelector('.cr-py-file-input');
 
-        /* ── line number sync ── */
+        /* ── line number sync + auto-resize ── */
         function updateLineNumbers() {
             var count = editor.value.split('\n').length;
             var text  = '';
             for (var i = 1; i <= count; i++) text += i + '\n';
             lineNums.textContent = text;
-            lineNums.scrollTop   = editor.scrollTop;
+            /* auto-grow: reset height so scrollHeight recalculates, then apply it */
+            editor.style.height = 'auto';
+            editor.style.height = editor.scrollHeight + 'px';
+            /* keep line-numbers gutter the same height */
+            lineNums.style.height = editor.style.height;
         }
         editor.addEventListener('input',  updateLineNumbers);
         editor.addEventListener('keydown', function () { setTimeout(updateLineNumbers, 0); });
-        editor.addEventListener('scroll',  function () { lineNums.scrollTop = editor.scrollTop; });
 
         /* ── virtual filesystem ── */
         var vfs        = Object.assign({}, originals);
