@@ -1,0 +1,7 @@
+{
+  "type": "python",
+  "title": "Using print()",
+  "files": {
+    "main.py": "\"\"\"\nUsing print(()\n\n1. Try changing the text in the print() function below.\n2. Try changing the name that is assigned to the variable 'name'.  \n\"\"\"\n\nname = \"Bob\"\nprint(\"Hello everyone!\")\nprint(\"My name is \" + name + \".\")\n\n\n"
+  }
+}
