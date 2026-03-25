@@ -1534,14 +1534,18 @@
                 var fb       = result ? result.feedback : (d.error || 'No feedback received.');
                 var marks    = result ? ('\u2714 Marks: ' + result.marksAwarded + '/' + (q.marks || 1) + '\n\n') : '';
                 var fullText = marks + fb;
+                var fbClass  = result
+                    ? (result.marksAwarded === 0 ? 'pq-fb-zero' : result.marksAwarded < (q.marks || 1) ? 'pq-fb-partial' : '')
+                    : '';
 
                 qStates[activeIdx].code     = editor.value;
                 qStates[activeIdx].feedback = fullText;
+                qStates[activeIdx].fbClass  = fbClass;
                 qStates[activeIdx].done     = true;
                 saveQState(activeIdx, qStates[activeIdx]);
 
                 feedbackText.textContent = fullText;
-                feedbackText.className   = 'pq-feedback-text';
+                feedbackText.className   = 'pq-feedback-text' + (fbClass ? ' ' + fbClass : '');
                 submitBtn.classList.add('pq-submitted');
                 submitBtn.textContent = '\u2714 Submitted';
 
@@ -1559,7 +1563,7 @@
         resetBtn.addEventListener('click', function () {
             if (!confirm('Reset this question? Your code and feedback will be cleared.')) return;
             var q = questions[activeIdx];
-            qStates[activeIdx] = { code: q.starter || '', feedback: '', done: false };
+            qStates[activeIdx] = { code: q.starter || '', feedback: '', fbClass: '', done: false };
             clearQState(activeIdx);
 
             editor.value = qStates[activeIdx].code;
@@ -1611,7 +1615,7 @@
                 submitBtn.textContent  = '\u2714 Submitted';
                 feedbackArea.style.display = 'block';
                 feedbackText.textContent   = st.feedback;
-                feedbackText.className     = 'pq-feedback-text';
+                feedbackText.className     = 'pq-feedback-text' + (st.fbClass ? ' ' + st.fbClass : '');
             } else {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('pq-submitted');
@@ -1642,6 +1646,7 @@
             submitBtn.textContent      = '\u2714 Submitted';
             feedbackArea.style.display = 'block';
             feedbackText.textContent   = qStates[0].feedback;
+            feedbackText.className     = 'pq-feedback-text' + (qStates[0].fbClass ? ' ' + qStates[0].fbClass : '');
         }
     }
 
@@ -1942,14 +1947,18 @@
                 var fb       = result ? result.feedback : (d.error || 'No feedback received.');
                 var marks    = result ? ('\u2714 Marks: ' + result.marksAwarded + '/' + (q.marks || 1) + '\n\n') : '';
                 var fullText = marks + fb;
+                var fbClass  = result
+                    ? (result.marksAwarded === 0 ? 'pq-fb-zero' : result.marksAwarded < (q.marks || 1) ? 'pq-fb-partial' : '')
+                    : '';
 
                 qStates[activeIdx].code     = editor.value;
                 qStates[activeIdx].feedback = fullText;
+                qStates[activeIdx].fbClass  = fbClass;
                 qStates[activeIdx].done     = true;
                 saveQState(activeIdx, qStates[activeIdx]);
 
                 feedbackText.textContent = fullText;
-                feedbackText.className   = 'pq-feedback-text';
+                feedbackText.className   = 'pq-feedback-text' + (fbClass ? ' ' + fbClass : '');
                 submitBtn.classList.add('pq-submitted');
                 submitBtn.textContent = '\u2714 Submitted';
 
@@ -1967,7 +1976,7 @@
         resetBtn.addEventListener('click', function () {
             if (!confirm('Reset this question? Your code and feedback will be cleared.')) return;
             var q = questions[activeIdx];
-            qStates[activeIdx] = { code: q.starter || '', feedback: '', done: false };
+            qStates[activeIdx] = { code: q.starter || '', feedback: '', fbClass: '', done: false };
             clearQState(activeIdx);
 
             editor.value = qStates[activeIdx].code;
@@ -2006,7 +2015,7 @@
                 submitBtn.textContent      = '\u2714 Submitted';
                 feedbackArea.style.display = 'block';
                 feedbackText.textContent   = st.feedback;
-                feedbackText.className     = 'pq-feedback-text';
+                feedbackText.className     = 'pq-feedback-text' + (st.fbClass ? ' ' + st.fbClass : '');
             } else {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('pq-submitted');
@@ -2039,6 +2048,7 @@
             submitBtn.textContent      = '\u2714 Submitted';
             feedbackArea.style.display = 'block';
             feedbackText.textContent   = qStates[0].feedback;
+            feedbackText.className     = 'pq-feedback-text' + (qStates[0].fbClass ? ' ' + qStates[0].fbClass : '');
         }
     }
 

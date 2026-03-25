@@ -1024,6 +1024,18 @@
     color: #f38ba8;
 }
 
+.pq-feedback-text.pq-fb-zero {
+    background: #2a1a1a;
+    border-color: #8b3a3a;
+    color: #cdd6f4;
+}
+
+.pq-feedback-text.pq-fb-partial {
+    background: #2a2200;
+    border-color: #7a6000;
+    color: #cdd6f4;
+}
+
 /* ── responsive ── */
 @media (max-width: 768px) {
     .code-runner {

@@ -23,7 +23,7 @@
       "prompt": "Create a program that assigns your favourite class to a variable.  You can choose  the name of the variable.\nThe program should output the following message \"My favourite class is \"  following by your favourite class.",
       "marks": 2,
       "starter": "",
-      "scheme": "Award 1 mark for assigning a class (Computing, English, Maths, etc) to a variable - the value assigned should be a string, the name of the variable does not matter.  Keep in mind that the code has to run, so students shouldn't be using a variable name like 'class' as that is a keyword.\nAward 1 mark for displaying the message \"My favourite class is (favClass)\" - favClass should be replaced by the class stored in the variable.",
+      "scheme": "Award 1 mark for assigning a class (Computing, English, Maths, etc) to a variable - the value assigned should be a string, the name of the variable does not matter.  Keep in mind that the code has to run, so students shouldn't be using a variable name like 'class' as that is a keyword.  If they do, do not award this mark.\nAward 1 mark for displaying the message \"My favourite class is (favClass)\" - favClass should be replaced by the class stored in the variable. If they have used a bad variable number but concatenated it correctly with +, they should still get 1 mark for this.",
       "example": "favClass = \"Computing\"\nprint(\"My favourite class is \" + favClass)"
     },
     {
