@@ -233,6 +233,48 @@
         }
         .qc-marks-inp:focus { outline: none; border-color: #58a6ff; }
         .qc-marks-lbl { font-size: 0.75rem; color: #8b949e; }
+
+        /* ── code toolbar (Run / Preview) ── */
+        .code-toolbar {
+            background: #161b22; border-bottom: 1px solid #30363d;
+            padding: 5px 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+        }
+        .ct-label {
+            font-size: 0.78rem; color: #8b949e; font-family: 'Courier New', monospace;
+            flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .ct-run-btn {
+            background: #238636; color: white; border: none; border-radius: 4px;
+            padding: 4px 14px; font-size: 0.8rem; cursor: pointer; font-family: inherit; flex-shrink: 0;
+        }
+        .ct-run-btn:hover:not(:disabled) { background: #2ea043; }
+        .ct-run-btn:disabled { opacity: 0.5; cursor: default; }
+        .ct-close-btn {
+            background: #21262d; color: #8b949e; border: 1px solid #30363d; border-radius: 4px;
+            padding: 4px 10px; font-size: 0.8rem; cursor: pointer; font-family: inherit; flex-shrink: 0;
+        }
+        .ct-close-btn:hover { background: #30363d; color: #e6edf3; }
+        /* ── split: editor + panel ── */
+        .code-main { flex: 1; display: flex; overflow: hidden; }
+        /* ── shared panel styles ── */
+        .sb-preview-panel, .sb-output-panel {
+            flex: 1; display: flex; flex-direction: column;
+            border-left: 3px solid #30363d; overflow: hidden; min-width: 0;
+        }
+        .sb-panel-hdr {
+            background: #161b22; border-bottom: 1px solid #30363d; padding: 5px 10px;
+            font-size: 0.72rem; color: #8b949e; flex-shrink: 0;
+            font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .sb-preview-iframe { flex: 1; border: none; background: white; }
+        .sb-output-content {
+            flex: 1; background: #0d1117; color: #e6edf3;
+            font-family: 'Courier New', Consolas, monospace; font-size: 0.82rem;
+            line-height: 1.5; padding: 10px 14px; overflow-y: auto;
+            white-space: pre-wrap; word-break: break-word; margin: 0;
+        }
+        .sb-out-err  { color: #f87171; }
+        .sb-out-info { color: #8b949e; font-style: italic; }
     </style>
 </head>
 <body>
@@ -324,7 +366,22 @@
             </div>
 
             <div class="code-area">
-                <textarea id="codeEditor" spellcheck="false" placeholder="Select a file to edit…"></textarea>
+                <div class="code-toolbar" id="codeToolbar" style="display:none;">
+                    <span class="ct-label" id="ctLabel"></span>
+                    <button class="ct-run-btn" id="runPreviewBtn">▶ Run</button>
+                    <button class="ct-close-btn" id="closeOutputBtn" style="display:none;">✕ Close</button>
+                </div>
+                <div class="code-main">
+                    <textarea id="codeEditor" spellcheck="false" placeholder="Select a file to edit…"></textarea>
+                    <div class="sb-output-panel" id="sbOutputPanel" style="display:none;">
+                        <div class="sb-panel-hdr">Python Output</div>
+                        <pre class="sb-output-content" id="sbOutputContent"></pre>
+                    </div>
+                    <div class="sb-preview-panel" id="sbPreviewPanel" style="display:none;">
+                        <div class="sb-panel-hdr">HTML Preview</div>
+                        <iframe class="sb-preview-iframe" id="sbPreviewIframe" sandbox="allow-scripts"></iframe>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -382,6 +439,14 @@
     var quizEditor     = document.getElementById('quizEditor');
     var addQBtn        = document.getElementById('addQBtn');
     var qcList         = document.getElementById('qcList');
+    var codeToolbar    = document.getElementById('codeToolbar');
+    var ctLabel        = document.getElementById('ctLabel');
+    var runPreviewBtn  = document.getElementById('runPreviewBtn');
+    var closeOutputBtn = document.getElementById('closeOutputBtn');
+    var sbOutputPanel  = document.getElementById('sbOutputPanel');
+    var sbOutputContent= document.getElementById('sbOutputContent');
+    var sbPreviewPanel = document.getElementById('sbPreviewPanel');
+    var sbPreviewIframe= document.getElementById('sbPreviewIframe');
 
     /* ── auth ── */
     function tryAuth(pw) {
@@ -489,6 +554,114 @@
     newSbBtn.addEventListener('click', createNew);
     createFirstBtn.addEventListener('click', createNew);
 
+    /* ── run / preview panel ── */
+    function closePanels() {
+        sbOutputPanel.style.display  = 'none';
+        sbPreviewPanel.style.display = 'none';
+        closeOutputBtn.style.display = 'none';
+    }
+
+    function updateCodeToolbar() {
+        if (!activeFile || isBinary(activeFile)) {
+            codeToolbar.style.display = 'none';
+            closePanels();
+            return;
+        }
+        if (activeFile.endsWith('.html')) {
+            ctLabel.textContent       = activeFile;
+            runPreviewBtn.textContent = '\uD83D\uDC41 Preview';
+            codeToolbar.style.display = 'flex';
+        } else if (activeFile.endsWith('.py')) {
+            ctLabel.textContent       = activeFile;
+            runPreviewBtn.textContent = '\u25B6 Run';
+            codeToolbar.style.display = 'flex';
+        } else {
+            codeToolbar.style.display = 'none';
+            closePanels();
+        }
+    }
+
+    /* Bundle CSS/JS into the HTML so the iframe preview works */
+    function buildPreviewHtml() {
+        var html = codeEditor.value;
+        html = html.replace(/<link([^>]*)href=["']([^"']+)["']([^>]*)>/gi, function(match, pre, href, post) {
+            if ((pre + post).toLowerCase().indexOf('stylesheet') !== -1 || href.endsWith('.css')) {
+                var css = current.files[href] || current.files[href.replace(/^\.\//, '')];
+                if (css) return '<style>\n' + css + '\n</style>';
+            }
+            return match;
+        });
+        html = html.replace(/<script([^>]+)src=["']([^"']+)["'][^>]*><\/script>/gi, function(match, attrs, src) {
+            var js = current.files[src] || current.files[src.replace(/^\.\//, '')];
+            if (js) return '<script' + attrs.replace(/src=["'][^"']+["']/, '') + '>\n' + js + '\n<\/script>';
+            return match;
+        });
+        return html;
+    }
+
+    /* Lazy Pyodide loader */
+    var _pyodideInstance = null;
+    var _pyodideLoading  = null;
+
+    function getPyodide() {
+        if (_pyodideInstance) return Promise.resolve(_pyodideInstance);
+        if (_pyodideLoading)  return _pyodideLoading;
+        _pyodideLoading = new Promise(function(resolve, reject) {
+            var script  = document.createElement('script');
+            script.src  = 'https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.js';
+            script.onload = function() {
+                window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.27.0/full/' })
+                    .then(function(py) { _pyodideInstance = py; resolve(py); })
+                    .catch(reject);
+            };
+            script.onerror = function() { reject(new Error('Failed to load Pyodide')); };
+            document.head.appendChild(script);
+        });
+        return _pyodideLoading;
+    }
+
+    function runPython(code) {
+        sbOutputContent.innerHTML = '<span class="sb-out-info">\u23F3 Loading Python\u2026</span>';
+        getPyodide().then(function(py) {
+            sbOutputContent.innerHTML = '<span class="sb-out-info">\u25B6 Running\u2026</span>';
+            var lines = [];
+            py.setStdout({ batched: function(line) { lines.push(line); } });
+            py.setStderr({ batched: function(line) { lines.push('\u26A0 ' + line); } });
+            py.setStdin({ stdin: function() { return window.prompt('Python input():') || ''; } });
+            return py.runPythonAsync(code).then(function() {
+                sbOutputContent.textContent = lines.length ? lines.join('\n') : '(no output)';
+            }).catch(function(err) {
+                sbOutputContent.innerHTML = '';
+                var errSpan = document.createElement('span');
+                errSpan.className   = 'sb-out-err';
+                errSpan.textContent = String(err);
+                sbOutputContent.appendChild(errSpan);
+            });
+        }).catch(function(err) {
+            sbOutputContent.innerHTML = '<span class="sb-out-err">Failed to load Python: ' + esc(String(err)) + '</span>';
+        });
+    }
+
+    runPreviewBtn.addEventListener('click', function() {
+        if (!activeFile) return;
+        current.files[activeFile] = codeEditor.value;
+        if (activeFile.endsWith('.html')) {
+            sbOutputPanel.style.display  = 'none';
+            sbPreviewPanel.style.display = 'flex';
+            closeOutputBtn.style.display = '';
+            sbPreviewIframe.srcdoc       = buildPreviewHtml();
+        } else if (activeFile.endsWith('.py')) {
+            sbPreviewPanel.style.display = 'none';
+            sbOutputPanel.style.display  = 'flex';
+            closeOutputBtn.style.display = '';
+            runPython(codeEditor.value);
+        }
+    });
+
+    closeOutputBtn.addEventListener('click', function() {
+        closePanels();
+    });
+
     /* ── render editor ── */
     function renderEditor() {
         if (!current) {
@@ -562,6 +735,7 @@
         }
         codeEditor.disabled = !activeFile || isBinary(activeFile);
         codeEditor.placeholder = isBinary(activeFile) ? '(binary file — cannot edit as text)' : 'Select a file to edit…';
+        updateCodeToolbar();
     }
 
     function isBinary(name) {
@@ -571,6 +745,7 @@
     function switchFile(name) {
         if (activeFile) current.files[activeFile] = codeEditor.value;
         activeFile = name;
+        closePanels();
         renderFileTree();
     }
 
