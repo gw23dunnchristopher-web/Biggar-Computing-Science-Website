@@ -223,7 +223,8 @@
                 return renderTextTable(item);
             }
             if (item && typeof item === 'object' && item.type === 'image') {
-                return '<img class="quiz-question-image" src="' + escHtml(item.src) + '" alt="' + escHtml(item.alt || '') + '">';
+                var wAttr = item.width ? ' style="max-width:' + escHtml(String(item.width)) + '"' : '';
+                return '<img class="quiz-question-image" src="' + escHtml(item.src) + '" alt="' + escHtml(item.alt || '') + '"' + wAttr + '>';
             }
             return '<p>' + String(item) + '</p>';
         }).join('');

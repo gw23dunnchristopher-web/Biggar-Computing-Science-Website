@@ -254,6 +254,7 @@
         promptBar.innerHTML =
             '<div class="pq-prompt-header">' +
             '  <span class="pq-prompt-label">&#x1F4CB; Instructions</span>' +
+            '  <span class="pq-marks-badge"></span>' +
             '  <button class="pq-prompt-toggle" type="button"></button>' +
             '</div>' +
             '<div class="pq-prompt-body"></div>';
@@ -1414,7 +1415,6 @@
             '<div class="pq-action-bar">' +
             '  <button class="pq-submit-btn">\uD83D\uDCE4 Submit for Feedback</button>' +
             '  <button class="pq-reset-btn">\u21BA Reset question</button>' +
-            '  <span class="pq-marks-badge"></span>' +
             '</div>' +
             '<div class="pq-feedback-area" style="display:none;">' +
             '  <div class="pq-feedback-text"></div>' +
@@ -1422,12 +1422,11 @@
 
         var tabsDiv      = container.querySelector('.pq-tabs');
         var promptBar    = container.querySelector('.pq-prompt-bar');
-        var editor       = container.querySelector('.cr-editor');
-        var lineNums     = container.querySelector('.cr-line-numbers');
-        var marksBadge   = container.querySelector('.pq-marks-badge');
         var hlWrap       = container.querySelector('.cr-py-hl-wrap');
         var hlPre        = container.querySelector('.cr-hl-bg');
         var hlCode       = container.querySelector('.cr-hl-code');
+        var editor       = container.querySelector('.cr-editor');
+        var lineNums     = container.querySelector('.cr-line-numbers');
         var terminal     = container.querySelector('.cr-terminal');
         var runBtn       = container.querySelector('.cr-run-btn');
         var submitBtn    = container.querySelector('.pq-submit-btn');
@@ -1436,6 +1435,7 @@
         var feedbackText = container.querySelector('.pq-feedback-text');
 
         initPromptBar(promptBar, sandboxName);
+        var marksBadge = promptBar.querySelector('.pq-marks-badge');
 
         /* ── syntax highlight + line numbers ── */
         function updateHighlight() {
@@ -1899,7 +1899,6 @@
             '<div class="pq-action-bar">' +
             '  <button class="pq-submit-btn">&#x1F4E4; Submit for Feedback</button>' +
             '  <button class="pq-reset-btn">&#8635; Reset question</button>' +
-            '  <span class="pq-marks-badge"></span>' +
             '</div>' +
             '<div class="pq-feedback-area" style="display:none;">' +
             '  <div class="pq-feedback-text"></div>' +
@@ -1907,7 +1906,6 @@
 
         var tabsDiv      = container.querySelector('.pq-tabs');
         var promptBar    = container.querySelector('.pq-prompt-bar');
-        var marksBadge   = container.querySelector('.pq-marks-badge');
         var hlWrap       = container.querySelector('.cr-hl-wrap');
         var hlCode       = container.querySelector('.cr-hl-code');
         var editor       = container.querySelector('.cr-editor');
@@ -1924,6 +1922,7 @@
         var feedbackText = container.querySelector('.pq-feedback-text');
 
         initPromptBar(promptBar, sandboxName);
+        var marksBadge = promptBar.querySelector('.pq-marks-badge');
 
         /* ── word wrap ── */
         hlWrap.classList.add('cr-wrap-on');

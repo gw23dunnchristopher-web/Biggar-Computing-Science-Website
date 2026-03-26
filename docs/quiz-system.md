@@ -197,6 +197,20 @@ text: [
 
 The image scales to fit on any screen size. Its `alt` text is sent to Gemini so the AI understands what the image represents when marking the answer.
 
+#### Changing the image size
+
+By default the image fills the full width of the question area. To make it smaller, add a `width` property using any valid CSS size:
+
+```javascript
+// Half width
+{ type: "image", src: "/Images/N5/SDD/example.png", alt: "Example diagram", width: "50%" }
+
+// Fixed pixel width
+{ type: "image", src: "/Images/N5/SDD/example.png", alt: "Example diagram", width: "300px" }
+```
+
+The `width` value becomes a `max-width` on the image, so it will never exceed that size but will still shrink on smaller screens.
+
 ---
 
 ## Marking scheme format

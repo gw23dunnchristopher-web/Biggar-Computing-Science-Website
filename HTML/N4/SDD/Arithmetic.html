@@ -3,11 +3,28 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>N4 Computing Science - SDD Input and Output</title>
+        <title>N4 Computing Science - SDD Arithmetic</title>
         <script src="/JavaScript/N4Script.js"></script>
+        <script src="/JavaScript/quiz.js"></script>
+        <script src="/JavaScript/codeRunner.js"></script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/quiz.css" />
+        <link rel="stylesheet" href="/CSS/codeRunner.css" />
+
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {   
+                        type: "paragraph",
+                        text: ["Assuming that the entered number 3 and then number 5, what would the output of this program be?",                         { type: "image", src: "/Images/N4/SDD/Implementation/ArithQuest/Q1.png", alt: "Arithmetic Question 1", width:"60%"}],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for 8",
+                    },
+                ],
+            };
+        </script>
     </head>
 
     <body>
@@ -23,10 +40,134 @@
                 <div id="content">
                     <div id="mainHeading"><h1>National 4</h1></div>
                     <div class="contentHeading">
-                        <h1>SDD - Input and Output</h1>
+                        <h1>SDD - Arithmetic</h1>
                     </div>
                     <div class="contentContainer">
-                        
+                        <table class="LIandSC">
+                            <tr>
+                                <th>Learning Intentions</th>
+                                <th>Success Criteria</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    We are learning about:
+                                    <ul>
+                                        <li>
+                                            How to use a high level programming
+                                            language to perform arithmetic.
+                                        </li>
+                                        <li>
+                                            The different mathematical operators
+                                            used in programming.
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    I am looking for you to:
+                                    <ul>
+                                        <li>
+                                            Identify the arithmetic expressions
+                                            used in Python to add, subtract,
+                                            divide and multiply.
+                                        </li>
+                                        <li>
+                                            Read and write code that makes use
+                                            of these expressions.
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <h2>Arithmetic Expressions</h2>
+                        <p>
+                            Now that you are able to have the user enter data
+                            using the
+                            <span class="codeText">input()</span> function, and
+                            can display messages using the
+                            <span class="codeText">output()</span>. The next
+                            step is to have your program perform calculations.
+                            We do this using <b>Arithmetic Operators</b>, for
+                            example, look at the program below and see if you
+                            can guess what it does.
+                        </p>
+                        <div class="codeBox">
+                            <p>speed = int(input("Enter the speed:"))</p>
+                            <p>time = int(input("Enter the time:"))</p>
+                            <p>distance = speed * time</p>
+                            <p>
+                                print("The distance travelled is " +
+                                str(distance))
+                            </p>
+                        </div>
+                        <p>
+                            This program asks the user to enter the speed of a
+                            moving object and the amount of time it has
+                            travelled, then works out the distance it has
+                            travelled by multiplying the speed by the time.
+                        </p>
+                        <p>
+                            The symbol used for multiplication on a computer is
+                            a <b>*</b>. Here is a list of the arithmetic
+                            operators that Python uses:
+                        </p>
+                        <table>
+                            <tr>
+                                <th>Operator</th>
+                                <th>Name</th>
+                                <th>Example</th>
+                            </tr>
+                            <tr>
+                                <td><span class="codeText">+</span></td>
+                                <td>Addition</td>
+                                <td>
+                                    <span class="codeText">a + b</span> would
+                                    add the values of a and b together.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="codeText">-</span></td>
+                                <td>Subtraction</td>
+                                <td>
+                                    <span class="codeText">a - b</span> would
+                                    subtract the value of b from a.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="codeText">*</span></td>
+                                <td>Multiplication</td>
+                                <td>
+                                    <span class="codeText">a * b</span> would
+                                    multiply the values of a and b together.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="codeText">/</span></td>
+                                <td>Division</td>
+                                <td>
+                                    <span class="codeText">a / b</span> would
+                                    divide the value of a by b.
+                                </td>
+                            </tr>
+                        </table>
+                        <p>
+                            Once, again, if you perform a calculation then that
+                            calculated value must be stored somewhere, so you
+                            need to assign it to a variable. In the example
+                            above, the calculated value was assigned to the
+                            variable <span class="codeText">distance</span>.
+                        </p>
+                        <p>
+                            This is also where we really need to take in inputs
+                            as integers, because you can't really perform
+                            arithmetic with strings.
+                        </p>
+                        <h2>Predict the Output</h2>
+                        <p>
+                            In the questions below, try to predict the output
+                            for each of the programs.
+                        </p>
+                        <div class="quiz-container"></div>
                     </div>
                 </div>
             </div>
