@@ -37,7 +37,7 @@
                                 <td>
                                     We are learning about:
                                     <ul>
-                                        <li>Assigning variables.</li>
+                                        <li>.</li>
                                         <li>
                                             Using code to display a message.
                                         </li>
@@ -65,154 +65,9 @@
                                 </td>
                             </tr>
                         </table>
-                        <h2>Assigning a Value to a Variable</h2>
-                        <p>
-                            When we store a value in a variable, that is called
-                            assignment. In Python, assigning a value to a
-                            variable is very simple, you just use the '='
-                            symbol. So, for example, typing
-                            <span class="codeText">apples = 4</span> would
-                            assign the value '4' to a variable called 'apples'.
-                        </p>
-                        <p>
-                            You can also assign a value to a variable using the
-                            <span class="codeText">input()</span> function,
-                            which we will look at later in this lesson.
-                        </p>
-                        <p>
-                            It is wise to be mindful of what you assign to
-                            variables. If you want to assign a string of text,
-                            you will have to enclose the text you are assigning
-                            with speechmarks or inverted commas.
-                        </p>
-                        <p>
-                            For example,
-                            <span class="codeText">name = "John"</span> would be
-                            fine, but
-                            <span class="codeText">name = John</span> would not.
-                        </p>
-                        <h2>Functions - print(), str() and int()</h2>
-                        <p>
-                            A function is a block of code that performs a
-                            specific task. In Python, functions are called using
-                            brackets, and can take arguments. For example, the
-                            <span class="codeText">print()</span> function is
-                            used to display a message on the screen. It will
-                            display whatever is inside the parentheses.
-                        </p>
-                        <p>
-                            For example,
-                            <span class="codeText">print("Hello World")</span>
-                            will display the message "Hello World" on the
-                            screen. In this case 'print' is the function and
-                            "Hello World" is the argument.
-                        </p>
-                        <p>
-                            The print function can only display either strings
-                            or integers, but not both. This is why 'Hello World'
-                            is enclosed in speech marks.
-                        </p>
-                        <h3>Concatenation</h3>
-                        <p>
-                            This is where you join two strings together. For
-                            example, if you wanted to display the message "Hello
-                            John", you could use the following code:
-                        </p>
-                        <div class="codeBox">
-                            <p>print("Hello " + "John")</p>
-                        </div>
-                        <p>
-                            What this does is take the "Hello " string and the
-                            "John" string and joins them together using the '+'
-                            symbol to make "Hello John"."
-                        </p>
-                        <p>
-                            This is more useful when the values that you want to
-                            display are stored in variables. For example, if
-                            assigned the name 'John' to a variable called
-                            'name', then you could use it like this:
-                        </p>
-                        <div class="codeBox">
-                            <p>print("Hello " + name)</p>
-                        </div>
-                        <p>
-                            This way, it would still display "Hello John", but
-                            if you changed the value of the 'name' variable, it
-                            would display whatever name you changed the value
-                            to. Note that the space after "Hello " is important,
-                            otherwise it would display "HelloJohn".
-                        </p>
-                        <p>You can try this below:</p>
-                        <div class="py-runner" data-sandbox="using-print"></div>
-
-                        <h3>Type Casting</h3>
-                        <p>
-                            As mentioned in the previous lesson, computers are
-                            fussy about display two different datatypes using
-                            the same print function. Concatenation is the
-                            process of joining two <b>strings</b> together. You
-                            can't join a string and an integer together. So what
-                            do you do?
-                        </p>
-                        <p>
-                            This is where type casting comes in! Python contains
-                            functions that change one type of data into another.
-                            Since we are using strings and integers, we will be
-                            using the type casting functions
-                            <span class="codeText">str()</span> and
-                            <span class="codeText">int()</span>.
-                        </p>
-                        <table>
-                            <tr>
-                                <th>Function</th>
-                                <th>Description</th>
-                                <th>Example</th>
-                            </tr>
-                            <tr>
-                                <td><span class="codeText">str()</span></td>
-                                <td>
-                                    Converts a value to a string. This is useful
-                                    when you want to display a number as text.
-                                </td>
-                                <td>
-                                    <span class="codeText">str(123)</span>
-                                    would convert the integer 123 to the string
-                                    "123".
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <span class="codeText">int()</span>
-                                </td>
-                                <td>
-                                    Converts a value to an integer. This is
-                                    useful when you want to perform arithmetic
-                                    on a string that contains a number.
-                                </td>
-                                <td>
-                                    <span class="codeText">int("123")</span>
-                                    would convert the string "123" to the
-                                    integer 123.
-                                </td>
-                            </tr>
-                        </table>
-                        <p>
-                            123 and "123" are not the same thing. 123 is an
-                            integer, and "123" is a string. You can't add them
-                            together, but you can convert one to the other.
-                        </p>
-                        <p>
-                            In the code editor below, you can see how the
-                            <span class="codeText">str()</span> function is
-                            used to convert the integer 12 to the string "12".
-                            This allows the print function to display the message
-                            "I am 12 years old".
-                        </p>
-                        <div class="py-runner" data-sandbox="using-str"></div>
-
+                       
                         <h2>Python Exercises</h2>
                         <p>The following Python editor contains exercises for you to complete.</p>
-                        <div class="py-quiz" data-sandbox="print-exercises"></div>
                     </div>
                 </div>
             </div>
