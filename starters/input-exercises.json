@@ -1,0 +1,30 @@
+{
+  "type": "python-quiz",
+  "title": "input() exercises",
+  "questions": [
+    {
+      "label": "Exercise 1",
+      "prompt": "Write a program that:\n- Asks for your favourite class.\n- Displays your favourite class on the screen in a message (such as \"Your favourite class is ...\")",
+      "marks": 1,
+      "starter": "",
+      "scheme": "Award 1 mark for using the input() function correctly.  The student can either use a print statement to display a prompt, or use the prompt as an argument for the input() function.\nAward 1 mark for correctly displaying the favourite subject in a message using the print() function and proper concatenation.\nPartial marks can be awarded for this question if, for example, the student has a working input() statement but has not properly concatenated the result, or vice versa.",
+      "example": "favClass = input(\"Enter your favourite class: \")\nprint(\"Your favourite class is \" + favClass)"
+    },
+    {
+      "label": "Exercise 2",
+      "prompt": "Write a program that:\n- Asks for the number of students in the class.\n- Displays the number of students in the class in a message.",
+      "marks": 1,
+      "starter": "# Remember to use int(input()) when entering integers, and str() to convert it back to a string inside the print() function.\n# Normally, you would not need to use int() here, as you are not using the number for a calculation, but this is practise!",
+      "scheme": "Award 1 mark for using the input() function correctly.\nAward 1 mark for using int().\nAward 1 mark for properly using print() to display the output and concatenation the answer with str().",
+      "example": "students = int(input(\"Enter the number of students in the class:\" ))\nprint(There are \" + str(students) + \" students in the class.\")"
+    },
+    {
+      "label": "Exercise 3",
+      "prompt": "Write a program that:\n- Asks for your name, age and exam score in separate questions.\n- Displays your name, age and exam score in one message (For example: \"Good job (name)! You got (exam score) in your exam at only (age) years old!\")",
+      "marks": 1,
+      "starter": "# Again, we will use int(input() for entering numbers in this question, even though it's not strictly necessary it's good practice.",
+      "scheme": "Award 1 mark for using the input() function three times, once to get the users name, once to get their age and then once to get their exam score.\nAward 1 mark properly concatenating their name, age and exam score into a single message.\nAward 1 mark for correct use of int() and str().",
+      "example": "name = input(\"Enter your name: \")\nage = int(input(\"Enter your age: \"))\nexam_mark = int(input(\"Enter your exam mark: \"))\n\nprint(\"Well done, \" + name + \"! You got \" + str(exam_mark) + \" in  your exam at only \" + str(age) + \" years old!\")"
+    }
+  ]
+}

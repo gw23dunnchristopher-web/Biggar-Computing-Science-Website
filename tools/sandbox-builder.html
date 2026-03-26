@@ -894,7 +894,7 @@
         return '<div class="qc-card" data-qi="' + i + '">' +
             '<div class="qc-card-hdr">' +
             '  <span class="qc-card-num">Q' + n + '</span>' +
-            '  <input class="qc-label-inp" placeholder="Label (e.g. Part ' + n + ')" value="' + esc(q.label || '') + '" title="Short tab label">' +
+            '  <input class="qc-label-inp" placeholder="Label (e.g. Exercise ' + n + ')" value="' + esc(q.label || '') + '" title="Short tab label">' +
             (i > 0 ? '  <button class="qc-del-btn" title="Remove question">🗑</button>' : '') +
             '</div>' +
             '<div class="qc-field-lbl">Question prompt (shown to student)</div>' +
@@ -918,7 +918,7 @@
         if (!current.questions) current.questions = [];
         if (current.questions.length === 0) {
             var defaultStarter = current.type === 'html-quiz' ? HTML_STARTER : '';
-            current.questions.push({ label: 'Part 1', prompt: '', starter: defaultStarter, scheme: '', example: '', marks: 1 });
+            current.questions.push({ label: 'Exercise 1', prompt: '', starter: defaultStarter, scheme: '', example: '', marks: 1 });
         }
         qcList.innerHTML = current.questions.map(qCardHtml).join('');
         wireQuizCards();
@@ -955,7 +955,7 @@
         if (!isQuiz) return;
         collectQuizData();
         var defaultStarter = current.type === 'html-quiz' ? HTML_STARTER : '';
-        current.questions.push({ label: 'Part ' + (current.questions.length + 1), prompt: '', starter: defaultStarter, scheme: '', example: '', marks: 1 });
+        current.questions.push({ label: 'Exercise ' + (current.questions.length + 1), prompt: '', starter: defaultStarter, scheme: '', example: '', marks: 1 });
         renderQuizEditor();
         qcList.lastElementChild && qcList.lastElementChild.scrollIntoView({ behavior: 'smooth' });
     });
