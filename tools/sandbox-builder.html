@@ -297,6 +297,7 @@
         <p>BHS Computing Science — Teacher Tool</p>
     </div>
     <div class="hdr-right">
+        <span id="draftBadge" style="display:none; font-size:0.78rem; color:#e3b341; background:#2d2000; border:1px solid #6e4f00; border-radius:10px; padding:3px 10px;">● Draft saved locally</span>
         <span class="auth-status ok" id="authBadge">Authenticated</span>
     </div>
 </header>
@@ -447,6 +448,7 @@
     var sbOutputContent= document.getElementById('sbOutputContent');
     var sbPreviewPanel = document.getElementById('sbPreviewPanel');
     var sbPreviewIframe= document.getElementById('sbPreviewIframe');
+    var draftBadge     = document.getElementById('draftBadge');
 
     /* ── auth ── */
     var pwEmail = document.getElementById('pwEmail');
@@ -463,7 +465,8 @@
                 password = tok;
                 authOverlay.style.display = 'none';
                 sandboxes = data;
-                renderSbList();
+                /* Restore any in-progress draft first; fall back to sidebar render */
+                if (!restoreDraft()) renderSbList();
             })
             .catch(function () {
                 localStorage.removeItem('bhscs-teacher-token');
@@ -500,6 +503,64 @@
             pwBtn.disabled = false;
             pwErr.style.display = 'block';
         });
+    }
+
+    /* ── draft auto-save ── */
+    var DRAFT_KEY  = 'bhscs-sb-draft';
+    var draftTimer = null;
+
+    function showDraftBadge(on) {
+        draftBadge.style.display = on ? '' : 'none';
+    }
+
+    function autoSaveDraft() {
+        if (!current) return;
+        /* Snapshot live form values without permanently mutating current */
+        var snap = JSON.parse(JSON.stringify(current));
+        snap.name  = sbIdInput.value.replace(/[^a-z0-9_-]/gi, '').toLowerCase() || snap.name;
+        snap.title = sbTitleInput.value || snap.title;
+        snap.type  = sbTypeSelect.value || snap.type;
+        if (snap.type === 'python-quiz' || snap.type === 'html-quiz') {
+            snap.questions = Array.from(qcList.querySelectorAll('.qc-card')).map(function (card) {
+                return {
+                    label:   card.querySelector('.qc-label-inp').value.trim(),
+                    prompt:  card.querySelector('.qc-prompt-inp').value.trim(),
+                    marks:   parseInt(card.querySelector('.qc-marks-inp').value, 10) || 1,
+                    starter: card.querySelector('.qc-starter-inp').value,
+                    scheme:  card.querySelector('.qc-scheme-inp').value.trim(),
+                    example: card.querySelector('.qc-example-inp').value.trim()
+                };
+            });
+        } else {
+            if (activeFile) snap.files[activeFile] = codeEditor.value;
+        }
+        try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ snap: snap, activeFile: activeFile })); } catch (e) {}
+        showDraftBadge(true);
+    }
+
+    function scheduleDraftSave() {
+        clearTimeout(draftTimer);
+        draftTimer = setTimeout(autoSaveDraft, 1500);
+    }
+
+    function clearDraft() {
+        localStorage.removeItem(DRAFT_KEY);
+        showDraftBadge(false);
+    }
+
+    function restoreDraft() {
+        var raw = localStorage.getItem(DRAFT_KEY);
+        if (!raw) return false;
+        try {
+            var d = JSON.parse(raw);
+            if (!d.snap) return false;
+            current    = d.snap;
+            activeFile = d.activeFile || null;
+            renderEditor();
+            renderSbList();
+            showDraftBadge(true);
+            return true;
+        } catch (e) { return false; }
     }
 
     if (password) {
@@ -932,10 +993,21 @@
         renderEmbed();
     });
 
-    /* ── save ── */
+    /* ── auto-save draft on any input ── */
     codeEditor.addEventListener('input', function () {
         if (activeFile) current.files[activeFile] = codeEditor.value;
+        scheduleDraftSave();
     });
+
+    /* Quiz card inputs — delegated so it catches dynamically added cards */
+    qcList.addEventListener('input', scheduleDraftSave);
+
+    /* Meta bar changes */
+    sbIdInput.addEventListener('input',    scheduleDraftSave);
+    sbTitleInput.addEventListener('input', scheduleDraftSave);
+    sbTypeSelect.addEventListener('change', scheduleDraftSave);
+
+    /* ── save ── */
 
     saveBtn.addEventListener('click', function () {
         if (current.type === 'python-quiz') {
@@ -962,9 +1034,22 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-Teacher-Password': password },
             body: JSON.stringify(body)
-        }).then(function (r) { return r.json(); })
+        }).then(function (r) {
+              if (r.status === 401) {
+                  /* Session expired — save draft so work isn't lost, then show login */
+                  autoSaveDraft();
+                  password = '';
+                  localStorage.removeItem('bhscs-teacher-token');
+                  authOverlay.style.display = 'flex';
+                  flashMsg('Session expired — log in to save', false);
+                  return null;
+              }
+              return r.json();
+          })
           .then(function (d) {
+              if (!d) return;
               if (d.ok) {
+                  clearDraft();
                   flashMsg('Saved ✓', true);
                   /* update or add to list */
                   var existing = sandboxes.find(function (s) { return s.name === name; });
