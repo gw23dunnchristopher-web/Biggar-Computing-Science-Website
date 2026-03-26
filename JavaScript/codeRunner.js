@@ -1443,12 +1443,16 @@
             lineNums.textContent = out;
             updateHighlight();
             requestAnimationFrame(function () {
-                var h = hlWrap.offsetHeight;
+                var h = hlPre.scrollHeight;
                 if (h > 0) lineNums.style.height = h + 'px';
             });
         }
         editor.addEventListener('input', updateLineNums);
-        editor.addEventListener('scroll', function () { hlPre.scrollLeft = editor.scrollLeft; });
+        editor.addEventListener('scroll', function () {
+            hlPre.scrollLeft = editor.scrollLeft;
+            hlPre.scrollTop  = editor.scrollTop;
+            lineNums.scrollTop = editor.scrollTop;
+        });
 
         editor.addEventListener('keydown', function (e) {
             if (e.key === 'Tab') {

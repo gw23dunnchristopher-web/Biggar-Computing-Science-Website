@@ -1,0 +1,7 @@
+{
+  "type": "python",
+  "title": "int() and input()",
+  "files": {
+    "main.py": "\"\"\"\nUsing int() and input() to enter numbers\n\nRun the program and enter two numbers, you will see that it adds them correctly.\n\"\"\"\n\nnumber1 = int(input(\"Enter the first number: \"))\nnumber2 = int(input(\"Enter the second number: \"))\n\ntotal = number1 + number2\n\nprint(\"The total is \" + str(total))\n\n\n"
+  }
+}

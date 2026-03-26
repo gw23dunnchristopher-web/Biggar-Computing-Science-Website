@@ -195,11 +195,19 @@
     flex: none !important;
     z-index: 1;
 }
+/* py-quiz textarea is the scroll container */
+.pq-quiz .cr-py-hl-wrap .cr-editor {
+    overflow-y: auto;
+}
 
-/* py-quiz: taller minimum */
+/* py-quiz: taller minimum, capped at 15 lines */
 .pq-quiz .cr-py-hl-wrap,
 .pq-quiz .cr-py-hl-wrap .cr-hl-bg {
     min-height: 260px;
+}
+.pq-quiz .cr-py-hl-wrap {
+    max-height: 354px;
+    overflow: hidden;
 }
 
 /* reset <code> inside the highlight pre */
@@ -713,6 +721,21 @@
     min-height: 380px;
     border-right: 2px solid #313244;
 }
+/* html-quiz: cap workspace + editor at 15 lines, textarea is the scroll container */
+.hq-quiz .cr-workspace {
+    max-height: 354px;
+    min-height: 260px;
+}
+.hq-quiz .cr-workspace .cr-hl-wrap {
+    max-height: 354px;
+    min-height: 260px;
+}
+.hq-quiz .cr-workspace .cr-hl-bg {
+    overflow: hidden;
+}
+.hq-quiz .cr-workspace .cr-editor {
+    overflow-y: auto;
+}
 
 /* ── highlight overlay container ── */
 .cr-hl-wrap {
@@ -955,9 +978,11 @@
     display: none;
 }
 
-/* quiz runner gets a taller editor by default */
+/* quiz runner: taller minimum, capped at 15 lines with scroll */
 .pq-quiz .cr-editor-wrap {
     min-height: 260px;
+    max-height: 354px;
+    overflow: hidden;
 }
 
 .pq-quiz .cr-editor {

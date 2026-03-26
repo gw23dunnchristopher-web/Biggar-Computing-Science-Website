@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>N4 Computing Science - SDD Print()</title>
+        <title>N4 Computing Science - SDD input()</title>
         <script src="/JavaScript/N4Script.js"></script>
         <script src="/JavaScript/codeRunner.js"></script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
@@ -25,7 +25,7 @@
                 <div id="content">
                     <div id="mainHeading"><h1>National 4</h1></div>
                     <div class="contentHeading">
-                        <h1>SDD - Input and Output</h1>
+                        <h1>SDD - The input() Function</h1>
                     </div>
                     <div class="contentContainer">
                         <table class="LIandSC">
@@ -37,9 +37,13 @@
                                 <td>
                                     We are learning about:
                                     <ul>
-                                        <li>Writing code that asks the user to .</li>
                                         <li>
-                                            Using code to display a message.
+                                            Writing code that asks the user to
+                                            enter a value.
+                                        </li>
+                                        <li>
+                                            Storing a value entered by the user
+                                            in a variable.
                                         </li>
                                     </ul>
                                 </td>
@@ -47,27 +51,121 @@
                                     I am looking for you to:
                                     <ul>
                                         <li>
-                                            Demonstrate that you can assign a
-                                            value to a variable.
-                                        </li>
-                                        <li>
                                             Use the
                                             <span class="codeText"
-                                                >print()</span
+                                                >input()</span
                                             >
-                                            function to display a message.
+                                            function to ask the user to enter a
+                                            value.
                                         </li>
                                         <li>
-                                            Use concatenation to join two
-                                            strings together.
+                                            Assign the value entered to a
+                                            variable, both as a string and as an
+                                            integer.
+                                        </li>
+                                        <li>
+                                            Write code that displays the value
+                                            entered by the user in a message.
                                         </li>
                                     </ul>
                                 </td>
                             </tr>
                         </table>
-                       
+                        <p>
+                            The <span class="codeText">input()</span> function
+                            pauses the program and waits for the user to enter a
+                            value into the console. It only has one argument,
+                            which is the prompt that will be displayed to the
+                            user. For example, the code below will display the
+                            prompt "Enter your name: " and wait for the user to
+                            enter a value.
+                        </p>
+
+                        <div class="codeBox">
+                            <p>name = input("Enter your name: ")</p>
+                        </div>
+
+                        <p>Important things to note:</p>
+                        <ul>
+                            <li>
+                                The prompt is enclosed in speech marks, so it is
+                                treated as a string.
+                            </li>
+                            <li>
+                                Any value entered using input must be assigned
+                                to a variable so that the value can be used
+                                later. In this instance, the value entered was
+                                assigned to the variable
+                                <span class="codeText">name</span>.
+                            </li>
+                            <li>
+                                The value entered by the user is always treated
+                                as a string, even if it is a number.
+                            </li>
+                        </ul>
+
+                        <p>You can try this below:</p>
+                        <div class="py-runner" data-sandbox="using-input"></div>
+
+                        <h2>Entering Integers</h2>
+                        <p>
+                            You can enter a number using the input function, but
+                            it will still be treated as a string. This means
+                            that you can't use it in arithmetic. Look at the
+                            example code below:
+                        </p>
+
+                        <div class="codeBox">
+                            <p>number1 = input("Enter the first number: ")</p>
+                            <p>number2 = input("Enter the second number: ")</p>
+                            <p>total = number1 + number2</p>
+                            <p>print("The total is " + total)</p>
+                        </div>
+
+                        <p>
+                            If the user entered the numbers "4" and "5" here,
+                            then instead of the output being "The total is 9",
+                            it would be "The total is 45"! This is because the
+                            program would just be joining the two strings
+                            together, rather than adding the numbers.
+                        </p>
+                        <p>
+                            So how can we have a program take in a number from
+                            the user? We have to convert the string to an
+                            integer by enclosing the
+                            <span class="codeText">input()</span> function in an
+                            <span class="codeText">int()</span>. This will take
+                            whatever we entered and convert it into an integer.
+                        </p>
+                        <p>You can see this working below:</p>
+                        <div class="py-runner" data-sandbox="int-input"></div>
+
+                        <p>Things to remember:</p>
+                        <ul>
+                            <li>
+                                You can only convert a string to an integer if
+                                it contains a number.
+                            </li>
+                            <li>
+                                If you try to convert a string that contains a
+                                word to an integer, the program will crash.
+                            </li>
+                            <li>
+                                Make sure that the number of opening brackets
+                                matches the number of closing brackets.
+                            </li>
+                            <li>
+                                When displaying the an integer like the total
+                                here in a print function, make sure you convert
+                                it back to a string with
+                                <span class="codeText">str()</span>.
+                            </li>
+                        </ul>
                         <h2>Python Exercises</h2>
-                        <p>The following Python editor contains exercises for you to complete.</p>
+                        <p>
+                            The following Python editor contains exercises for
+                            you to complete.
+                        </p>
                     </div>
                 </div>
             </div>

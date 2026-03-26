@@ -1,0 +1,7 @@
+{
+  "type": "python",
+  "title": "Using input()",
+  "files": {
+    "main.py": "\"\"\"\nUsing input()\n\nRun the program below to enter your name.\n\"\"\"\n\nname = input(\"Enter your name: \")\nprint(\"Hello, \" + name + \"!\")\n\n\n"
+  }
+}
