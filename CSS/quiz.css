@@ -162,7 +162,7 @@ html[data-custom-bg] .quiz-question-table td {
     display: block;
     max-width: 100%;
     height: auto;
-    margin: 8px 0;
+    margin: 8px auto;
     border: 1px solid #cdd8f0;
     border-radius: 4px;
 }
