@@ -221,6 +221,9 @@
             .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
+    /* Format marks count as "1 mark" or "N marks" */
+    function marksText(n) { return (n === 1 ? '1 mark' : (n || 1) + ' marks'); }
+
     /* Convert plain-text prompt (with newlines and "- bullet" lines) to HTML */
     function formatPromptHTML(text) {
         if (!text || !text.trim()) return '';
@@ -1411,6 +1414,7 @@
             '<div class="pq-action-bar">' +
             '  <button class="pq-submit-btn">\uD83D\uDCE4 Submit for Feedback</button>' +
             '  <button class="pq-reset-btn">\u21BA Reset question</button>' +
+            '  <span class="pq-marks-badge"></span>' +
             '</div>' +
             '<div class="pq-feedback-area" style="display:none;">' +
             '  <div class="pq-feedback-text"></div>' +
@@ -1420,6 +1424,7 @@
         var promptBar    = container.querySelector('.pq-prompt-bar');
         var editor       = container.querySelector('.cr-editor');
         var lineNums     = container.querySelector('.cr-line-numbers');
+        var marksBadge   = container.querySelector('.pq-marks-badge');
         var hlWrap       = container.querySelector('.cr-py-hl-wrap');
         var hlPre        = container.querySelector('.cr-hl-bg');
         var hlCode       = container.querySelector('.cr-hl-code');
@@ -1658,6 +1663,7 @@
             tabsDiv.innerHTML = renderTabsHtml();
             wireTabBtns();
             setPromptText(promptBar, q.prompt || '');
+            marksBadge.textContent = marksText(q.marks || 1);
             editor.value          = st.code;
             updateLineNums();
             terminal.readOnly = true;
@@ -1695,6 +1701,7 @@
 
         /* ── initialise ── */
         setPromptText(promptBar, questions[0].prompt || '');
+        marksBadge.textContent = marksText(questions[0].marks || 1);
         editor.value          = qStates[0].code;
         updateLineNums();
         wireTabBtns();
@@ -1892,6 +1899,7 @@
             '<div class="pq-action-bar">' +
             '  <button class="pq-submit-btn">&#x1F4E4; Submit for Feedback</button>' +
             '  <button class="pq-reset-btn">&#8635; Reset question</button>' +
+            '  <span class="pq-marks-badge"></span>' +
             '</div>' +
             '<div class="pq-feedback-area" style="display:none;">' +
             '  <div class="pq-feedback-text"></div>' +
@@ -1899,6 +1907,7 @@
 
         var tabsDiv      = container.querySelector('.pq-tabs');
         var promptBar    = container.querySelector('.pq-prompt-bar');
+        var marksBadge   = container.querySelector('.pq-marks-badge');
         var hlWrap       = container.querySelector('.cr-hl-wrap');
         var hlCode       = container.querySelector('.cr-hl-code');
         var editor       = container.querySelector('.cr-editor');
@@ -2090,6 +2099,7 @@
             tabsDiv.innerHTML = renderTabsHtml();
             wireTabBtns();
             setPromptText(promptBar, q.prompt || '');
+            marksBadge.textContent = marksText(q.marks || 1);
             editor.value          = st.code;
             updateHighlight();
             updatePreview();
@@ -2121,6 +2131,7 @@
 
         /* ── initialise ── */
         setPromptText(promptBar, questions[0].prompt || '');
+        marksBadge.textContent = marksText(questions[0].marks || 1);
         editor.value          = qStates[0].code;
         updateHighlight();
         updatePreview();
