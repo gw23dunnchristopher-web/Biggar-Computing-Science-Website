@@ -23,7 +23,7 @@
             .replace(/"/g, '&quot;');
     }
 
-    /* ── Python line tokeniser ─────────────────────────────────────────── */
+    /* ── Python single-line tokeniser ─────────────────────────────────── */
     function hlPyLine(line) {
         var out = '', i = 0;
         while (i < line.length) {
@@ -65,6 +65,42 @@
             i++;
         }
         return out;
+    }
+
+    /* ── Python multi-line highlighter (handles ''' triple-quote blocks) ─
+     * Processes all lines with state so that everything between ''' and '''
+     * is rendered as a comment, even when the block spans multiple lines.   */
+    function hlPyLines(lines) {
+        var inTriple = false;
+        return lines.map(function (line) {
+            if (!inTriple) {
+                var idx = line.indexOf("'''");
+                if (idx === -1) { return hlPyLine(line); }
+                /* Opening ''' found — check if it also closes on this line */
+                var closeIdx = line.indexOf("'''", idx + 3);
+                if (closeIdx !== -1) {
+                    /* Opens and closes on the same line */
+                    return (idx > 0 ? hlPyLine(line.slice(0, idx)) : '') +
+                           '<span class="cbh-comment">' + esc(line.slice(idx, closeIdx + 3)) + '</span>' +
+                           (closeIdx + 3 < line.length ? hlPyLine(line.slice(closeIdx + 3)) : '');
+                }
+                /* Opens but does not close on this line */
+                inTriple = true;
+                return (idx > 0 ? hlPyLine(line.slice(0, idx)) : '') +
+                       '<span class="cbh-comment">' + esc(line.slice(idx)) + '</span>';
+            } else {
+                /* Inside a triple-quoted block */
+                var closeIdx = line.indexOf("'''");
+                if (closeIdx === -1) {
+                    /* Block continues — whole line is a comment */
+                    return '<span class="cbh-comment">' + esc(line) + '</span>';
+                }
+                /* Block closes on this line */
+                inTriple = false;
+                return '<span class="cbh-comment">' + esc(line.slice(0, closeIdx + 3)) + '</span>' +
+                       (closeIdx + 3 < line.length ? hlPyLine(line.slice(closeIdx + 3)) : '');
+            }
+        });
     }
 
     /* ── SQL line tokeniser ────────────────────────────────────────────── */
@@ -170,12 +206,11 @@
         });
 
         var lang = box.dataset.language || detectLang(lines.join('\n'));
-        var hlLine = lang === 'python' ? hlPyLine
-                   : lang === 'sql'    ? hlSqlLine
-                   : esc;
 
         var nums = lines.map(function (_, i) { return i + 1; }).join('\n');
-        var code = lines.map(hlLine).join('\n');
+        var code = lang === 'python' ? hlPyLines(lines).join('\n')
+                 : lang === 'sql'    ? lines.map(hlSqlLine).join('\n')
+                 : lines.map(esc).join('\n');
 
         box.innerHTML =
             '<div class="cb-body">' +
