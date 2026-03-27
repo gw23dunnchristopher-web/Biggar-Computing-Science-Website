@@ -138,6 +138,19 @@
         return s;
     }
 
+    /* ── Safely extract one line of code from a <p> element ─────────────
+     * Handles two problems in the source HTML:
+     *   1. Content wrapped across multiple lines for HTML readability
+     *      → split on \n, trim each segment, rejoin with a space
+     *   2. &nbsp; used for indentation (stored as \u00a0 in textContent)
+     *      → replaced with regular spaces so the highlighter sees them      */
+    function extractLineText(el) {
+        var parts = el.textContent.split('\n')
+            .map(function (s) { return s.trim(); })
+            .filter(function (s) { return s.length > 0; });
+        return parts.join(' ').replace(/\u00a0/g, ' ');
+    }
+
     /* ── Transform a single .codeBox div ──────────────────────────────── */
     function transform(box) {
         if (box.querySelector('.cb-body')) return; /* already done */
@@ -147,7 +160,7 @@
         var lines = [];
         Array.from(box.children).forEach(function (el) {
             if (el.tagName === 'P') {
-                lines.push(getIndent(el) + el.textContent);
+                lines.push(getIndent(el) + extractLineText(el));
             } else if (el.tagName === 'BR') {
                 lines.push('');
             }
