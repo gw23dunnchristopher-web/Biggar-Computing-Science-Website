@@ -14,7 +14,8 @@
         <link rel="stylesheet" href="/CSS/codeRunner.css" />
 
         <script>
-            window.QUIZ_CONFIG = {
+            window.QUIZ_CONFIGS = {
+                quiz1: {
                 questions: [
                     {   
                         type: "paragraph",
@@ -22,7 +23,33 @@
                         marks: 1,
                         markingScheme: "Award 1 mark for 8",
                     },
+                    {   
+                        type: "paragraph",
+                        text: ["Assuming that the entered number 5 and then number 10, what would the output of this program be?",                         { type: "image", src: "/Images/N4/SDD/Implementation/ArithQuest/Q2.png", alt: "Arithmetic Question 2", width:"60%"}],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for 50",
+                    },
+                    {   
+                        type: "paragraph",
+                        text: ["Assuming that the entered number 15 and then number 2, what would the output of this program be?",                         { type: "image", src: "/Images/N4/SDD/Implementation/ArithQuest/Q3.png", alt: "Arithmetic Question 3", width:"60%"}],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for 13",
+                    },
+                    {   
+                        type: "paragraph",
+                        text: ["Assuming that the entered number 20 and then number 5, what would the output of this program be?",                         { type: "image", src: "/Images/N4/SDD/Implementation/ArithQuest/Q4.png", alt: "Arithmetic Question 4", width:"60%"}],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for 4.0",
+                    },
                 ],
+                },
+                quiz2: {
+                    questions: [
+                        {
+                            
+                        }
+                    ]
+                }
             };
         </script>
     </head>
@@ -162,12 +189,38 @@
                             as integers, because you can't really perform
                             arithmetic with strings.
                         </p>
+                        <p>
+                            Note that the division operator will always give you
+                            a decimal number, even if the numbers you are dividing 
+                            are whole numbers. So if you divide 10 by 2, you will
+                            get 5.0, not 5.
+                        </p>
                         <h2>Predict the Output</h2>
                         <p>
                             In the questions below, try to predict the output
                             for each of the programs.
                         </p>
                         <div class="quiz-container"></div>
+                        <h2>Order of Operations</h2>
+                        <p>When you have multiple operators in an expression, you have to be aware of the order that the computer will complete these operations in.  For example, look at the following expression:</p>
+                        <p class="codeText">a = 10 + 5 * 2</p>
+                        <p>What do you think the value of a will be?  If you said 20, you are correct, but why
+                            is it 20 and not 30?  The reason is that the computer will always perform multiplication
+                            before addition.  This is known as the order of operations.</p> <p>The order of operations
+                            is as follows:</p>
+                        <ol>
+                            <li>Brackets</li>
+                            <li>Multiplication and Division</li>
+                            <li>Addition and Subtraction</li>
+                        </ol>
+                        <p>So, if you want to perform addition before multiplication, you need to use brackets.  For example:</p>
+                        <p class="codeText">a = (10 + 5) * 2</p>
+                        <p>This will give you a value of 30.</p>
+
+                        <p>Try the questions below:</p>
+                        <div class="py-quiz" data-sandbox="arithmetic-questions"></div>
+                        <h2>Now try coding some programs!</h2>
+                        <div class="py-quiz" data-sandbox="arithmetic-quiz"></div>
                     </div>
                 </div>
             </div>

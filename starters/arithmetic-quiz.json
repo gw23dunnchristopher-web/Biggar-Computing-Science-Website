@@ -1,0 +1,46 @@
+{
+  "type": "python-quiz",
+  "title": "Arithmetic Quiz",
+  "questions": [
+    {
+      "label": "Exercise 1",
+      "prompt": "Modify the code shown here to calculate the volume of a cube (length x width x height) and output the cubic volume in cm (cm^3).",
+      "marks": 3,
+      "starter": "length = int(input(\"Enter length in cm: \"))\nwidth = int(input(\"Enter width in cm:\"))\n\narea = length * width\n\nprint(\"The area of the rectangle is \" + str(area) + \"cm^2\")",
+      "scheme": "Award 1 mark for adding a height variable and correctly using int(input()) to get the height value from the user.\nAward 1 mark for modifying the calculation so that it calculates cubic area (length*width*height).\nAward 1 mark for modifying the print statement so that it displays the cubic volume.",
+      "example": "length = int(input(\"Enter length in cm: \"))\nwidth = int(input(\"Enter width in cm: \"))\nwidth = int(input(\"Enter height in cm: \"))\n\narea = length * width * height\n\nprint(\"The volume of the cube is \" + str(area) + \"cm^3\")"
+    },
+    {
+      "label": "Exercise 2",
+      "prompt": "Create code that:\n- Asks the user to enter the number of bottles  of Cola, Irn Bru and Fanta that the user is going to buy.\n- Calculates the total cost of all the bottles (each bottle costs £2)\n- Displays the total cost.",
+      "marks": 3,
+      "starter": "",
+      "scheme": "Award 1 mark if the code correctly asks the user for Cola, Irn Bru and Fanta.\nAward 1 mark for the correct calculation stored in a variable - for example, Cola+IrnBru+Fanta*2\nAward 1 mark for a print() statement showing the total amount to be paid.",
+      "example": "cola= int(input(\"Enter number of cans of Cola: \"))\nirnBru = int(input(\"Enter number of cans of Irn Bru: \"))\nfanta = int(input(\"Enter number of cans of Fanta: \"))\n\ntotal = (cola + irnBru + fanta) * 2 \n\nprint(\"Total cost: £\" + str(total))"
+    },
+    {
+      "label": "Exercise 3",
+      "prompt": "Write code for a program that will:\n- Ask the user to enter the cost of a meal.\n- Apply a 10% discount to that cost (cost x 0.9)\n- Display the new cost with the discount.",
+      "marks": 3,
+      "starter": "",
+      "scheme": "Award 1 mark if the code correctly asks the user for the cost of a meal and stores it in a variable.\nAward 1 mark for the correct calculation of the discount (cost * 0.9)\nAward 1 mark for a print() statement showing the new total.",
+      "example": "cost = int(input(\"Enter the cost of the meal in £\"))\n\ndiscount = cost * 0.9\n\nprint(\"With the 10% discount, the meal is now £\" + discount)"
+    },
+    {
+      "label": "Exercise 4",
+      "prompt": "Write code for a program that will:\n- Ask the user to enter their current age in years.\n- Add 5 to that age to determine how old they will be in the future.\n- Display the calculated future age.",
+      "marks": 3,
+      "starter": "",
+      "scheme": "Award 1 mark if the code correctly asks the user for their age and stores it in a variable (ensuring it is cast as an integer or float).\nAward 1 mark for the correct calculation of the future age (age + 5).\nAward 1 mark for a print() statement showing the calculated future age.",
+      "example": "age = int(input(\"Please enter your current age: \"))\nfuture_age = age + 5\nprint(\"In five years, you will be\", future_age)"
+    },
+    {
+      "label": "Exercise 5",
+      "prompt": "Write code for a program that will:\n- Ask the user to enter two different test scores (e.g., Score A and Score B).\n- Calculate the average of these two scores by adding them together and then dividing the total by 2.\n- Display the final average score.",
+      "marks": 3,
+      "starter": "#To get this right, remember that computers follow the order of operations. You'll need to use parentheses ( ) around your addition to make sure it happens before the division!",
+      "scheme": "Award 1 mark if the code correctly asks the user for two separate inputs and stores them in distinct variables.\nAward 1 mark for the correct calculation of the average using brackets to prioritize addition over division, e.g., (score1 + score2) / 2.\nAward 1 mark for a print() statement showing the final average.\nWhen marking this question, look closely at the calculation line. If a student writes score1 + score2 / 2 without the brackets, they should not receive the second mark.",
+      "example": "score1 = float(input(\"Enter the first score: \"))\nscore2 = float(input(\"Enter the second score: \"))\naverage = (score1 + score2) / 2\nprint(\"The average score is:\", average)"
+    }
+  ]
+}
