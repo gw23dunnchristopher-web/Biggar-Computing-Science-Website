@@ -226,6 +226,11 @@
                 var wAttr = item.width ? ' style="max-width:' + escHtml(String(item.width)) + '"' : '';
                 return '<img class="quiz-question-image" src="' + escHtml(item.src) + '" alt="' + escHtml(item.alt || '') + '"' + wAttr + '>';
             }
+            if (item && typeof item === 'object' && item.type === 'code') {
+                var lang = item.language ? escHtml(String(item.language)) : '';
+                var langBadge = lang ? '<span class="qqc-lang">' + lang + '</span>' : '';
+                return '<div class="quiz-question-code">' + langBadge + '<pre>' + escHtml(String(item.content || '')) + '</pre></div>';
+            }
             return '<p>' + String(item) + '</p>';
         }).join('');
     }
@@ -245,6 +250,9 @@
             }
             if (item && typeof item === 'object' && item.type === 'image') {
                 return '[Image: ' + (item.alt || item.src) + ']';
+            }
+            if (item && typeof item === 'object' && item.type === 'code') {
+                return '```' + (item.language || '') + '\n' + String(item.content || '') + '\n```';
             }
             return stripHtml(String(item));
         }).join('\n');

@@ -211,6 +211,28 @@ By default the image fills the full width of the question area. To make it small
 
 The `width` value becomes a `max-width` on the image, so it will never exceed that size but will still shrink on smaller screens.
 
+### Code block in question text
+
+Use `{ type: "code", language, content }` to show a styled code box as part of the question. The code is also sent to Gemini as a fenced code block so the AI can reference it when marking.
+
+```javascript
+text: [
+    "Study the Python code below and answer the question that follows.",
+    {
+        type: "code",
+        language: "python",
+        content: "total = 0\nfor i in range(1, 6):\n    total += i\nprint(total)"
+    },
+    "What value will be displayed when this program runs?"
+]
+```
+
+The `language` field adds a small label at the top of the box and is optional. Common values: `python`, `javascript`, `html`, `css`, `sql`. Leave it out for plain/pseudocode:
+
+```javascript
+{ type: "code", content: "SET total TO 0\nFOR i FROM 1 TO 5\n    SET total TO total + i\nEND FOR" }
+```
+
 ---
 
 ## Marking scheme format

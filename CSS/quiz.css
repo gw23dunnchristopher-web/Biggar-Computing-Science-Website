@@ -167,6 +167,36 @@ html[data-custom-bg] .quiz-question-table td {
     border-radius: 4px;
 }
 
+/* Code block inside question text */
+.quiz-question-code {
+    background: #1e1e2e;
+    border: 1px solid #313244;
+    border-radius: 6px;
+    margin: 10px 0;
+    overflow: hidden;
+}
+.qqc-lang {
+    display: block;
+    background: #313244;
+    color: #89b4fa;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 3px 12px;
+    text-transform: lowercase;
+    letter-spacing: 0.04em;
+}
+.quiz-question-code pre {
+    margin: 0;
+    padding: 10px 14px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 13px;
+    color: #cdd6f4;
+    overflow-x: auto;
+    white-space: pre;
+    line-height: 1.5;
+}
+
 /* Paragraph / written answer */
 .quiz-textarea {
     width: 100%;

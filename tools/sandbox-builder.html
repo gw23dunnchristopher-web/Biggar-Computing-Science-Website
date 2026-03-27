@@ -73,6 +73,13 @@
         .sb-item .sb-del { background: none; border: none; color: #8b949e; cursor: pointer; font-size: 0.8rem; padding: 2px 4px; border-radius: 3px; opacity: 0; }
         .sb-item:hover .sb-del { opacity: 1; }
         .sb-item .sb-del:hover { color: #f87171; background: #3d1a1a; }
+        .sb-group-hdr {
+            padding: 8px 14px 4px;
+            font-size: 0.65rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.08em;
+            color: #58a6ff; background: #0d1117; border-bottom: 1px solid #21262d;
+            margin-top: 6px;
+        }
+        .sb-group-hdr:first-child { margin-top: 0; }
 
         /* ── editor pane ── */
         .editor-pane { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -582,22 +589,41 @@
         return '🌐';
     }
 
+    var TYPE_ORDER  = ['python-quiz', 'html-quiz', 'python', 'html'];
+    var TYPE_LABELS = { 'python-quiz': 'Python Quiz', 'html-quiz': 'HTML Quiz', 'python': 'Python Runner', 'html': 'HTML Runner' };
+
     function renderSbList() {
         if (sandboxes.length === 0) {
             sbList.innerHTML = '<div style="padding:16px;color:#8b949e;font-size:0.8rem;">No sandboxes yet.</div>';
             return;
         }
-        sbList.innerHTML = sandboxes.map(function (s) {
-            var active = current && current.name === s.name ? ' active' : '';
-            return '<div class="sb-item' + active + '" data-name="' + s.name + '">' +
-                '<span class="sb-icon">' + typeIcon(s.type) + '</span>' +
-                '<div class="sb-info">' +
-                  '<div class="sb-title">' + esc(s.title || s.name) + '</div>' +
-                  '<div class="sb-name">' + esc(s.name) + '</div>' +
-                '</div>' +
-                '<button class="sb-del" data-name="' + s.name + '" title="Delete">🗑</button>' +
-            '</div>';
-        }).join('');
+
+        /* group sandboxes by type */
+        var grouped = {};
+        sandboxes.forEach(function (s) {
+            var t = s.type || 'html';
+            if (!grouped[t]) grouped[t] = [];
+            grouped[t].push(s);
+        });
+        var types = TYPE_ORDER.filter(function (t) { return grouped[t]; });
+        Object.keys(grouped).forEach(function (t) { if (TYPE_ORDER.indexOf(t) === -1) types.push(t); });
+
+        var html = '';
+        types.forEach(function (t) {
+            var label = TYPE_LABELS[t] || t;
+            html += '<div class="sb-group-hdr">' + typeIcon(t) + ' ' + label + '</div>';
+            html += grouped[t].map(function (s) {
+                var active = current && current.name === s.name ? ' active' : '';
+                return '<div class="sb-item' + active + '" data-name="' + s.name + '">' +
+                    '<div class="sb-info">' +
+                      '<div class="sb-title">' + esc(s.title || s.name) + '</div>' +
+                      '<div class="sb-name">' + esc(s.name) + '</div>' +
+                    '</div>' +
+                    '<button class="sb-del" data-name="' + s.name + '" title="Delete">🗑</button>' +
+                '</div>';
+            }).join('');
+        });
+        sbList.innerHTML = html;
 
         sbList.querySelectorAll('.sb-item').forEach(function (el) {
             el.addEventListener('click', function (e) {
