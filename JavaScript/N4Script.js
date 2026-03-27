@@ -5,6 +5,12 @@
         s.src = '/JavaScript/accessibility.js';
         document.head.appendChild(s);
     }
+    if (!document.getElementById('cbhl-script')) {
+        var s = document.createElement('script');
+        s.id = 'cbhl-script';
+        s.src = '/JavaScript/codeBoxHighlight.js';
+        document.head.appendChild(s);
+    }
 })();
 
 function brighten(event) {

@@ -401,17 +401,56 @@ ol li {
 .codeBox {
     max-width: 800px;
     margin: 20px auto;
-    text-align: left;
-    padding: 20px;
-    border: solid 1px black;
+    border: solid 1px #2a3a22;
     background-color: #1c2112;
     color: white;
-    font-family: "Courier New", Courier, monospace;
+    overflow: hidden;
+    border-radius: 4px;
 }
 
+/* Two-column layout created by codeBoxHighlight.js */
+.cb-body {
+    display: flex;
+    overflow-x: auto;
+}
+.cb-nums {
+    margin: 0;
+    padding: 10px 12px 10px 14px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.9rem;
+    color: #4a6040;
+    line-height: 1.5;
+    text-align: right;
+    user-select: none;
+    border-right: 1px solid #2a3a22;
+    background: #141c0c;
+    flex-shrink: 0;
+}
+.cb-code {
+    margin: 0;
+    padding: 10px 16px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.9rem;
+    color: white;
+    white-space: pre;
+    line-height: 1.5;
+    flex: 1;
+    overflow-x: auto;
+    text-align: left;
+}
+
+/* Syntax highlight colours */
+.cbh-keyword { color: #a8e060; font-weight: bold; }
+.cbh-builtin { color: #79c0ff; }
+.cbh-string  { color: #f0c060; }
+.cbh-number  { color: #f08080; }
+.cbh-comment { color: #4e7845; font-style: italic; }
+
+/* Fallback for non-transformed boxes */
 .codeBox p {
     margin: 0;
     padding: 0;
+    font-family: "Courier New", Courier, monospace;
 }
 
 .codeBox table,

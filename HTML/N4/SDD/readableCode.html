@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>N4 Computing Science - SDD Readable Code</title>
+        <script src="/JavaScript/N4Script.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "table",
+                        text: [
+                            "A program asks the user to enter their age and displays whether they are old enough to vote (18 or over).",
+                            "Complete the table to identify the inputs, processes, and outputs of this program.",
+                        ],
+                        marks: 3,
+                        tableHeaders: ["Input", "Process", "Output"],
+                        tableRows: [["", "", ""]],
+                        markingScheme:
+                            "Award 1 mark per cell. Input: age entered by the user. Process: check if age is greater than or equal to 18. Output: message stating whether the user can or cannot vote.",
+                    },
+                    {
+                        type: "table",
+                        text: [
+                            "A program is designed for a school canteen. The program should:",
+                            [
+                                "Ask the user to enter the price of an item and the amount of money paid",
+                                "Calculate the change to be given",
+                                "Display the change",
+                            ],
+                            "Complete the table to identify the inputs, processes, and outputs of this program.",
+                        ],
+                        marks: 3,
+                        tableHeaders: ["Input", "Process", "Output"],
+                        tableRows: [["", "", ""]],
+                        markingScheme:
+                            "Award 1 mark per cell. Input: price of item and amount paid (accept either or both). Process: subtract price from amount paid to calculate change. Output: the change to be given to the customer.",
+                    },
+                    {
+                        type: "table",
+                        text: [
+                            "A program is created for a leisure centre. The program should:",
+                            [
+                                "Ask the user to enter their name, age, and whether they are a member (yes/no)",
+                                "Apply a 20% discount if the user is a member, or charge full price if not",
+                                "The standard entry fee is £12.00",
+                                "Display the user's name and the amount they must pay",
+                            ],
+                            "Complete the table to identify the inputs, processes, and outputs of this program.",
+                        ],
+                        marks: 3,
+                        tableHeaders: ["Input", "Process", "Output"],
+                        tableRows: [["", "", ""]],
+                        markingScheme:
+                            "Award 1 mark per cell. Input: name, age, and membership status (accept any two or all three). Process: check membership status and calculate price — £12.00 full price or £9.60 with 20% discount (accept 'apply discount if member' or similar). Output: user's name and the amount to pay.",
+                    },
+                    {
+                        type: "table",
+                        text: [
+                            "A weather app is being developed. The program should:",
+                            [
+                                "Read in temperature readings for each day of the week (7 values)",
+                                "Calculate the average temperature, and identify the highest and lowest temperatures recorded",
+                                "Display all three results with appropriate labels",
+                            ],
+                            "Complete the table to identify the inputs, processes, and outputs of this program.",
+                        ],
+                        marks: 3,
+                        tableHeaders: ["Input", "Process", "Output"],
+                        tableRows: [["", "", ""]],
+                        markingScheme:
+                            "Award 1 mark per cell. Input: 7 temperature readings (accept 'daily temperatures' or 'temperature for each day'). Process: calculate the average (sum divided by 7), find the maximum value, and find the minimum value (award mark if at least two of three processes are mentioned). Output: average temperature, highest temperature, and lowest temperature (award mark if at least two of three outputs are mentioned).",
+                    },
+                    {
+                        type: "table",
+                        text: [
+                            "A program is created for a school shop. The program should:",
+                            [
+                                "Ask the user to enter the name of an item, its price per unit, and the quantity they want to buy",
+                                "Calculate the total cost",
+                                "If the total is £10 or more, apply a 10% discount",
+                                "Display the item name, the original total, and the final amount to pay",
+                            ],
+                            "Complete the table to identify the inputs, processes, and outputs of this program.",
+                        ],
+                        marks: 3,
+                        tableHeaders: ["Input", "Process", "Output"],
+                        tableRows: [["", "", ""]],
+                        markingScheme:
+                            "Award 1 mark per cell. Input: item name, price per unit, and quantity (award mark if at least two of three are mentioned). Process: multiply price by quantity to get total cost, then check if total is £10 or more and apply 10% discount if so (award mark if both steps are mentioned, or award mark for either step alone). Output: item name, original total, and final price after discount (award mark if at least two of three outputs are mentioned).",
+                    },
+                ],
+            };
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
+        <style></style>
+    </head>
+
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+            <header>
+                <h1>BHS Computing Science</h1>
+                <img src="/Images/Header/banner.png" />
+            </header>
+            <div id="pageContainer">
+                <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+                <div id="sidebar"></div>
+                <div id="content">
+                    <div id="mainHeading"><h1>National 4</h1></div>
+                    <div class="contentHeading">
+                        <h1>Creating Readable Code</h1>
+                    </div>
+                    <div class="contentContainer">
+                        <table class="LIandSC">
+                            <tr>
+                                <th>Learning Intentions</th>
+                                <th>Success Criteria</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    We are learning about:
+                                    <ul>
+                                        <li>
+                                            Why it is important that your code
+                                            is readable.
+                                        </li>
+                                        <li>
+                                            How you can ensure your code is
+                                            readable.
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    I am looking for you to:
+                                    <ul>
+                                        <li>
+                                            Explain the importance of readable
+                                            code.
+                                        </li>
+                                        <li>
+                                            Describe how a program can be made
+                                            readable using the following
+                                            techniques:
+                                            <ul>
+                                                <li>
+                                                    Meaningful variable names
+                                                </li>
+                                                <li>Internal commentary</li>
+                                                <li>Consistent indentation</li>
+                                                <li>Whitespace.</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                        <h2>Why is readable code important?</h2>
+                        <p>
+                            When you are writing code, it is important that you
+                            make sure that it is readable. This means that you
+                            should make sure that your code is easy to
+                            understand and follow. This is important because it
+                            makes it easier:
+                        </p>
+                        <ul>
+                            <li>to fix your code if there are errors.</li>
+                            <li>
+                                for other people to understand your code
+                                (especially if you are working in a team).
+                            </li>
+                            <li>
+                                for you to understand your code if you come back
+                                to it after a long time.
+                            </li>
+                        </ul>
+
+                        <p>
+                            There are several ways that you can make your code
+                            more readable, including:
+                        </p>
+                        <ul>
+                            <li>Using meaningful variable names</li>
+                            <li>Adding internal commentary</li>
+                            <li>Using consistent indentation</li>
+                            <li>Using whitespace</li>
+                        </ul>
+                        <p>We will now look at each of these.</p>
+
+                        <h2>Meaningful Variable Names</h2>
+                        <p>
+                            When you are writing code, it is important that you
+                            use meaningful variable names. This means that you
+                            should use names that describe what the variable is
+                            used for. For example, if you are storing the user's
+                            age, you should use a variable name like
+                            <span class="codeText">age</span> rather than
+                            <span class="codeText">a</span>.
+                        </p>
+                        <p>
+                            When you read your code later, or if someone else
+                            reads your code, it will be much easier to
+                            understand what each of the variables you have
+                            created are used for.
+                        </p>
+                        <p>For example, look at the following code:</p>
+                        <div class="codeBox">
+                            <p>a = 40</p>
+                            <p>b = 25</p>
+                            <p>c = 0.2</p>
+                            <br />
+                            <p>d = a * b</p>
+                            <p>e = d * c</p>
+                            <p>f = d - e</p>
+                            <br />
+                            <p>print(f)</p>
+                        </div>
+                        <p>
+                            In this version of the code, it is nearly impossible
+                            to tell what the program is actually calculating
+                            without reading every line carefully.
+                        </p>
+                        <p>
+                            Now look at the following version of the same code:
+                        </p>
+                        <div class="codeBox">
+                            <p>hours_worked = 40</p>
+                            <p>hourly_rate = 25</p>
+                            <p>tax_rate = 0.2</p>
+                            <br />
+                            <p>gross_pay = hours_worked * hourly_rate</p>
+                            <p>tax_amount = gross_pay * tax_rate</p>
+                            <p>net_pay = gross_pay - tax_amount</p>
+                            <br />
+                            <p>print(net_pay)</p>
+                        </div>
+                        <p>
+                            In this version, the code explains itself. You don't
+                            need comments to understand the purpose of the
+                            calculation.
+                        </p>
+
+                        <h3>Tips for naming variables</h3>
+                        <ul>
+                            <li>
+                                You could use 'snake case', this is where
+                                underscores are used so seperate words in the
+                                variable name. For example: tax_code,
+                                height_in_metres, number_of_items.
+                            </li>
+                            <li>
+                                You could also use 'camel case', this is where
+                                the first letter of each new word after the
+                                first is capitalised. For example: taxCode,
+                                heightInMetres, numberOfItems.
+                            </li>
+                            <li>
+                                You should avoid using single letter variable
+                                names, unless they are used for a very short
+                                time, for example, in a loop.
+                            </li>
+                        </ul>
+                        <h2>Internal Commentary</h2>
+                        <p>
+                            Internal commentary is where you add comments to
+                            your code to explain what it does. This is important
+                            important for a couple of reasons - first, it makes
+                            it easier for you to read your code if you come back
+                            to it later. Second, for you in particular, it is
+                            necessary for your evidence because it shows that
+                            you understand what your code is doing.
+                        </p>
+                        <p>There are two ways to write comments in Python:</p>
+                        <ul>
+                            <li>
+                                Single line comments - these are written using
+                                the <span class="codeText">#</span> symbol.
+                                Everything after the
+                                <span class="codeText">#</span> symbol on that
+                                line will be ignored by the computer. These are
+                                usually used to expain what a single line of
+                                code or short block of code is doing.
+                            </li>
+                            <li>
+                                Multi-line comments - these are written using
+                                <span class="codeText">'''</span> or
+                                <span class="codeText">"""</span> at the start
+                                and end of the comment. Everything between the
+                                <span class="codeText">'''</span> symbols will
+                                be ignored. For your purposes you should use
+                                this to show your name, the name of your
+                                program, and the date you wrote it at the top of
+                                the code.
+                            </li>
+                        </ul>
+                        <p>For example, look at the following code:</p>
+                        <div class="codeBox">
+                            <p>'''</p>
+                            <p>Name: C Dunn</p>
+                            <p>Program: Pay Calculator</p>
+                            <p>Date: 27/03/2026</p>
+                            <p>'''</p>
+                            <br />
+                            <p># Get the number of hours worked</p>
+                            <p>
+                                hours_worked = int(input("Enter hours worked:
+                                "))
+                            </p>
+                            <br />
+                            <p># Get the hourly rate</p>
+                            <p>
+                                hourly_rate = float(input("Enter hourly rate:
+                                "))
+                            </p>
+                            <br />
+                            <p># Calculate the gross pay</p>
+                            <p>gross_pay = hours_worked * hourly_rate</p>
+                            <br />
+                            <p># Calculate the tax amount</p>
+                            <p>tax_amount = gross_pay * 0.2</p>
+                            <br />
+                            <p># Calculate the net pay</p>
+                            <p>net_pay = gross_pay - tax_amount</p>
+                            <br />
+                            <p># Display the net pay</p>
+                            <p>print("Net pay: £", net_pay)</p>
+                        </div>
+                        <p>
+                            This way, you can easily tell what all of the code
+                            is doing. Also, you might note that the comments
+                            used here also work as <b>pseudocode</b> for the
+                            program!
+                        </p>
+                        <h2>Indentation</h2>
+                        <p>
+                            Indentation is where you use spaces or tabs to
+                            indent your code. This is important because it makes
+                            it easier to read your code. For example, look at
+                            the following code:
+                        </p>
+                        <div class="codeBox">
+                            <p>if age >= 18:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("You are old
+                                enough to vote")
+                            </p>
+                            <p>else:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("You are not old
+                                enough to vote")
+                            </p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("You can vote in",
+                                18 - age, "years")
+                            </p>
+                        </div>
+                        <p>
+                            This allows you to easily see which parts of the
+                            code are inside the if construct shown here.
+                        </p>
+                        <p>
+                            You can see that if the user is 18 or over, the
+                            program will display that they are old enough to
+                            vote and if they are not, then it will show that
+                            they are not old enough to vote and display the
+                            amount of years it will be until they can vote. You
+                            can see what code will run for each condition easily
+                            thanks to indentation.
+                        </p>
+                        <p>
+                            Using the Python coding language is useful for this,
+                            because it in Python the code will not run without
+                            correct indentation.
+                        </p>
+                        <h2>Whitespace</h2>
+                        <p>
+                            Whitespace is where you use spaces or blank lines to
+                            create spaces in between different sections of code.
+                            It breaks the code down into smaller segments and
+                            makes it easier to read. For example, look at the
+                            following code:
+                        </p>
+                        <div class="codeBox">
+                            <p>is_member = True</p>
+                            <p>purchase_amount = 100</p>
+                            <br />
+                            <p>if is_member:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;discount =
+                                purchase_amount * 0.1
+                            </p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;final_price =
+                                purchase_amount - discount
+                            </p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("Discount
+                                applied!")
+                            </p>
+                            <br />
+                            <p>print("Thank you for shopping.")</p>
+                        </div>
+                        <p>
+                            Empty lines are used to separate different logical
+                            sections of your code. They don't affect how the
+                            program runs, but they make it much easier for a
+                            human to read. Think of them like paragraphs in an
+                            essay.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div id="left">
+                    <p>Biggar High School</p>
+                    <p>Market Rd, Biggar</p>
+                    <p>ML12 6AG</p>
+                </div>
+                <div id="center"></div>
+                <div id="right">
+                    <p>&copy;C Dunn, 2025</p>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>

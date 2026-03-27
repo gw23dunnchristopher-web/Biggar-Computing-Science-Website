@@ -299,8 +299,9 @@ footer #right {
     .codeBox {
         max-width: 100%;
         overflow-x: auto;
+    }
+    .cb-nums, .cb-code {
         font-size: 10px;
-        padding: 10px;
     }
 
     .trinket {
