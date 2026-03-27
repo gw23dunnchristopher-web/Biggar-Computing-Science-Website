@@ -229,7 +229,13 @@
             if (item && typeof item === 'object' && item.type === 'code') {
                 var lang = item.language ? escHtml(String(item.language)) : '';
                 var langBadge = lang ? '<span class="qqc-lang">' + lang + '</span>' : '';
-                return '<div class="quiz-question-code">' + langBadge + '<pre>' + escHtml(String(item.content || '')) + '</pre></div>';
+                var cLines = String(item.content || '').split('\n');
+                var nums = cLines.map(function (_, i) { return i + 1; }).join('\n');
+                return '<div class="quiz-question-code">' + langBadge +
+                    '<div class="qqc-body">' +
+                    '<pre class="qqc-nums" aria-hidden="true">' + nums + '</pre>' +
+                    '<pre class="qqc-code">' + escHtml(cLines.join('\n')) + '</pre>' +
+                    '</div></div>';
             }
             return '<p>' + String(item) + '</p>';
         }).join('');

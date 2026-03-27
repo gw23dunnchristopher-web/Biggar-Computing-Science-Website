@@ -45,11 +45,56 @@
                 },
                 quiz2: {
                     questions: [
-                        {
-                            
-                        }
-                    ]
-                }
+                        {    text: [
+                            "Study the following (remember that there is a division here, so the answer will be a 'real' number):",
+                            {
+                                type: "code",
+                                language: "python",
+                                content: " a = 12\n b = 3\n c = 2\n\n result = a / b * c + 4\n print(result)"
+                            },
+                            "What value will the code output?"
+                        ],
+                        marks: 1,
+                        markingScheme:"Award 1 mark for 10.0"
+                        },
+                        {    text: [
+                            "Study the following (remember that there is a division here, so the answer will be a 'real' number):",
+                            {
+                                type: "code",
+                                language: "python",
+                                content: " a = 12\n b = 3\n c = 2\n\n result = a / b * c + 4\n print(result)"
+                            },
+                            "What value will the code output?"
+                        ],
+                        marks: 1,
+                        markingScheme:"Award 1 mark for 10.0"
+                        },
+                        {    text: [
+                            "Study the following code:",
+                            {
+                                type: "code",
+                                language: "python",
+                                content: " x = 100\n y = 20\n x = 5\n\n result = x - (y - (z + 10)) + 2\n print(result)"
+                            },
+                            "What value will the code output?"
+                        ],
+                        marks: 1,
+                        markingScheme:"Award 1 mark for 97"
+                        },
+                        {    text: [
+                            "Study the following code:",
+                            {
+                                type: "code",
+                                language: "python",
+                                content: "num1 = 25\n num2 = 4\n num3 = 2\n\n result = x - (y - (z + 10)) + 2\n print(result)"
+                            },
+                            "What value will the code output?"
+                        ],
+                        marks: 1,
+                        markingScheme:"Award 1 mark for 97"
+                        },
+                    ],
+                },
             };
         </script>
     </head>
@@ -200,7 +245,7 @@
                             In the questions below, try to predict the output
                             for each of the programs.
                         </p>
-                        <div class="quiz-container"></div>
+                        <div class="quiz-container" data-quiz-id="quiz1"></div>
                         <h2>Order of Operations</h2>
                         <p>When you have multiple operators in an expression, you have to be aware of the order that the computer will complete these operations in.  For example, look at the following expression:</p>
                         <p class="codeText">a = 10 + 5 * 2</p>
@@ -218,7 +263,7 @@
                         <p>This will give you a value of 30.</p>
 
                         <p>Try the questions below:</p>
-                        <div class="py-quiz" data-sandbox="arithmetic-questions"></div>
+                         <div class="quiz-container" data-quiz-id="quiz2"></div>
                         <h2>Now try coding some programs!</h2>
                         <div class="py-quiz" data-sandbox="arithmetic-quiz"></div>
                     </div>

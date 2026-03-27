@@ -186,15 +186,33 @@ html[data-custom-bg] .quiz-question-table td {
     text-transform: lowercase;
     letter-spacing: 0.04em;
 }
-.quiz-question-code pre {
+.qqc-body {
+    display: flex;
+    overflow-x: auto;
+}
+.qqc-nums {
+    margin: 0;
+    padding: 10px 12px 10px 14px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 13px;
+    color: #585b70;
+    line-height: 1.5;
+    text-align: right;
+    user-select: none;
+    border-right: 1px solid #313244;
+    background: #181825;
+    flex-shrink: 0;
+}
+.qqc-code {
     margin: 0;
     padding: 10px 14px;
     font-family: 'Consolas', 'Monaco', monospace;
     font-size: 13px;
     color: #cdd6f4;
-    overflow-x: auto;
     white-space: pre;
     line-height: 1.5;
+    flex: 1;
+    overflow-x: auto;
 }
 
 /* Paragraph / written answer */
