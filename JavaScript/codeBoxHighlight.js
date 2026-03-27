@@ -145,8 +145,12 @@
         if (!paras.length) return;
 
         var lines = [];
-        paras.forEach(function (p) {
-            lines.push(getIndent(p) + p.textContent);
+        Array.from(box.children).forEach(function (el) {
+            if (el.tagName === 'P') {
+                lines.push(getIndent(el) + el.textContent);
+            } else if (el.tagName === 'BR') {
+                lines.push('');
+            }
         });
 
         var lang = box.dataset.language || detectLang(lines.join('\n'));
