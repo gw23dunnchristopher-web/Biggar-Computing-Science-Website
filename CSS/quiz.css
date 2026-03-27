@@ -215,6 +215,13 @@ html[data-custom-bg] .quiz-question-table td {
     overflow-x: auto;
 }
 
+/* Syntax highlight colours */
+.qqh-keyword { color: #cba6f7; font-weight: bold; }
+.qqh-builtin { color: #89b4fa; }
+.qqh-string  { color: #a6e3a1; }
+.qqh-number  { color: #fab387; }
+.qqh-comment { color: #6c7086; font-style: italic; }
+
 /* Paragraph / written answer */
 .quiz-textarea {
     width: 100%;

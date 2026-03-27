@@ -208,6 +208,72 @@
         return String(str).replace(/<[^>]*>/g, '');
     }
 
+    /* ── Lightweight Python syntax highlighter ───────────────────────────────
+     * Character-by-character tokeniser: handles strings, comments, numbers,
+     * keywords and builtins without external dependencies.                   */
+    var PY_KEYWORDS = ['False','None','True','and','as','assert','async','await',
+        'break','class','continue','def','del','elif','else','except','finally',
+        'for','from','global','if','import','in','is','lambda','nonlocal','not',
+        'or','pass','raise','return','try','while','with','yield'];
+    var PY_BUILTINS = ['abs','bool','dict','enumerate','filter','float','format',
+        'getattr','hasattr','input','int','isinstance','issubclass','len','list',
+        'map','max','min','open','print','range','repr','reversed','self','set',
+        'setattr','sorted','str','sum','super','tuple','type','zip'];
+
+    function highlightPyLine(line) {
+        var out = '', i = 0;
+        while (i < line.length) {
+            var ch = line[i];
+            /* comment */
+            if (ch === '#') {
+                out += '<span class="qqh-comment">' + escHtml(line.slice(i)) + '</span>';
+                return out;
+            }
+            /* string */
+            if (ch === '"' || ch === "'") {
+                var q = ch, j = i + 1;
+                while (j < line.length) {
+                    if (line[j] === '\\') { j += 2; continue; }
+                    if (line[j] === q)    { j++; break; }
+                    j++;
+                }
+                out += '<span class="qqh-string">' + escHtml(line.slice(i, j)) + '</span>';
+                i = j; continue;
+            }
+            /* number */
+            if (/[0-9]/.test(ch) && (i === 0 || !/[a-zA-Z0-9_]/.test(line[i - 1]))) {
+                var j = i;
+                while (j < line.length && /[0-9.]/.test(line[j])) j++;
+                out += '<span class="qqh-number">' + escHtml(line.slice(i, j)) + '</span>';
+                i = j; continue;
+            }
+            /* identifier / keyword / builtin */
+            if (/[a-zA-Z_]/.test(ch)) {
+                var j = i;
+                while (j < line.length && /[a-zA-Z0-9_]/.test(line[j])) j++;
+                var word = line.slice(i, j);
+                if (PY_KEYWORDS.indexOf(word) !== -1) {
+                    out += '<span class="qqh-keyword">' + escHtml(word) + '</span>';
+                } else if (PY_BUILTINS.indexOf(word) !== -1) {
+                    out += '<span class="qqh-builtin">' + escHtml(word) + '</span>';
+                } else {
+                    out += escHtml(word);
+                }
+                i = j; continue;
+            }
+            out += escHtml(ch);
+            i++;
+        }
+        return out;
+    }
+
+    function highlightCode(text, language) {
+        if (language === 'python') {
+            return text.split('\n').map(highlightPyLine).join('\n');
+        }
+        return escHtml(text);
+    }
+
     function renderText(text) {
         if (!Array.isArray(text)) {
             return '<p>' + String(text) + '</p>';
@@ -229,12 +295,14 @@
             if (item && typeof item === 'object' && item.type === 'code') {
                 var lang = item.language ? escHtml(String(item.language)) : '';
                 var langBadge = lang ? '<span class="qqc-lang">' + lang + '</span>' : '';
-                var cLines = String(item.content || '').split('\n');
+                var rawContent = String(item.content || '');
+                var cLines = rawContent.split('\n');
                 var nums = cLines.map(function (_, i) { return i + 1; }).join('\n');
+                var highlighted = highlightCode(rawContent, item.language || '');
                 return '<div class="quiz-question-code">' + langBadge +
                     '<div class="qqc-body">' +
                     '<pre class="qqc-nums" aria-hidden="true">' + nums + '</pre>' +
-                    '<pre class="qqc-code">' + escHtml(cLines.join('\n')) + '</pre>' +
+                    '<pre class="qqc-code">' + highlighted + '</pre>' +
                     '</div></div>';
             }
             return '<p>' + String(item) + '</p>';
