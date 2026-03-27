@@ -145,8 +145,11 @@
      *   2. &nbsp; used for indentation (stored as \u00a0 in textContent)
      *      → replaced with regular spaces so the highlighter sees them      */
     function extractLineText(el) {
+        /* trim() also strips \u00a0 (non-breaking space), which is used for
+         * indentation via &nbsp;.  Use a regex that only strips ASCII
+         * whitespace so &nbsp; characters at the start of a line survive.   */
         var parts = el.textContent.split('\n')
-            .map(function (s) { return s.trim(); })
+            .map(function (s) { return s.replace(/^[ \t\r\f\v]+|[ \t\r\f\v]+$/g, ''); })
             .filter(function (s) { return s.length > 0; });
         return parts.join(' ').replace(/\u00a0/g, ' ');
     }
