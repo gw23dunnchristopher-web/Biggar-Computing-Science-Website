@@ -13,86 +13,46 @@
             window.QUIZ_CONFIG = {
                 questions: [
                     {
-                        type: "table",
-                        text: [
-                            "A program asks the user to enter their age and displays whether they are old enough to vote (18 or over).",
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
-                        ],
-                        marks: 3,
-                        tableHeaders: ["Input", "Process", "Output"],
-                        tableRows: [["", "", ""]],
+                        type: "paragraph",
+                        text: "Explain two reasons why it is important for code to be readable.  In your answer, describe how readable code benefits both the original creator of the code, and other developers who might interact with it.",
+                        marks: 2,
                         markingScheme:
-                            "Award 1 mark per cell. Input: age entered by the user. Process: check if age is greater than or equal to 18. Output: message stating whether the user can or cannot vote.",
+                            "Award 1 mark for each of the following:  easier to fix code when there are errors, easier for the original creator and other developers to understand the code",
                     },
                     {
-                        type: "table",
-                        text: [
-                            "A program is designed for a school canteen. The program should:",
-                            [
-                                "Ask the user to enter the price of an item and the amount of money paid",
-                                "Calculate the change to be given",
-                                "Display the change",
-                            ],
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
-                        ],
-                        marks: 3,
-                        tableHeaders: ["Input", "Process", "Output"],
-                        tableRows: [["", "", ""]],
+                        type: "paragraph",
+                        text: "Why is using meaningful variable names important to the readability of your code?",
+                        marks: 2,
                         markingScheme:
-                            "Award 1 mark per cell. Input: price of item and amount paid (accept either or both). Process: subtract price from amount paid to calculate change. Output: the change to be given to the customer.",
+                            "Award 1 mark for each of the following to a maximum of 2 marks:  allows you to easily identify the purpose of the variables, allows the code to be read more easily even without comments, allows other people to quickly understand what the variables do without having to carefully read every line.",
                     },
                     {
-                        type: "table",
-                        text: [
-                            "A program is created for a leisure centre. The program should:",
-                            [
-                                "Ask the user to enter their name, age, and whether they are a member (yes/no)",
-                                "Apply a 20% discount if the user is a member, or charge full price if not",
-                                "The standard entry fee is £12.00",
-                                "Display the user's name and the amount they must pay",
-                            ],
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
-                        ],
-                        marks: 3,
-                        tableHeaders: ["Input", "Process", "Output"],
-                        tableRows: [["", "", ""]],
+                        type: "paragraph",
+                        text: "What is internal commentary?",
+                        marks: 1,
                         markingScheme:
-                            "Award 1 mark per cell. Input: name, age, and membership status (accept any two or all three). Process: check membership status and calculate price — £12.00 full price or £9.60 with 20% discount (accept 'apply discount if member' or similar). Output: user's name and the amount to pay.",
+                            "Award 1 mark if the student mentions that it is adding lines to your code which do not affect the code, but do explain what it does.",
                     },
                     {
-                        type: "table",
-                        text: [
-                            "A weather app is being developed. The program should:",
-                            [
-                                "Read in temperature readings for each day of the week (7 values)",
-                                "Calculate the average temperature, and identify the highest and lowest temperatures recorded",
-                                "Display all three results with appropriate labels",
-                            ],
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
-                        ],
-                        marks: 3,
-                        tableHeaders: ["Input", "Process", "Output"],
-                        tableRows: [["", "", ""]],
+                        type: "paragraph",
+                        text: "What are the two ways that you can create internal comments?",
+                        marks: 2,
                         markingScheme:
-                            "Award 1 mark per cell. Input: 7 temperature readings (accept 'daily temperatures' or 'temperature for each day'). Process: calculate the average (sum divided by 7), find the maximum value, and find the minimum value (award mark if at least two of three processes are mentioned). Output: average temperature, highest temperature, and lowest temperature (award mark if at least two of three outputs are mentioned).",
+                            "Award 1 mark each for, maximum of 2 marks: multiline comments (using ''' or \"\"\"), single line comments using #.",
                     },
                     {
-                        type: "table",
-                        text: [
-                            "A program is created for a school shop. The program should:",
-                            [
-                                "Ask the user to enter the name of an item, its price per unit, and the quantity they want to buy",
-                                "Calculate the total cost",
-                                "If the total is £10 or more, apply a 10% discount",
-                                "Display the item name, the original total, and the final amount to pay",
-                            ],
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
-                        ],
-                        marks: 3,
-                        tableHeaders: ["Input", "Process", "Output"],
-                        tableRows: [["", "", ""]],
+                        type: "paragraph",
+                        text: "What is indentation and how is it different in Python than in other programming languages?",
+                        marks: 2,
                         markingScheme:
-                            "Award 1 mark per cell. Input: item name, price per unit, and quantity (award mark if at least two of three are mentioned). Process: multiply price by quantity to get total cost, then check if total is £10 or more and apply 10% discount if so (award mark if both steps are mentioned, or award mark for either step alone). Output: item name, original total, and final price after discount (award mark if at least two of three outputs are mentioned).",
+                            "Award 1 mark for 'it shows which blocks of code are inside other blocks of code' or something similar.  Award 1 mark for: in Python, indentation is necessary for the code to run.",
+                    },
+                    {
+                        type: "paragraph",
+                        text: "What is whitespace?",
+                        marks: 1,
+                        markingScheme:
+                            "Award 1 mark for, adding spaces between sections of code, breaking the program down into smaller, more easily readable chunks.  The answer may vary, but award the mark so long as the understanding shown in the answer is similar.",
                     },
                 ],
             };
@@ -412,6 +372,9 @@
                             human to read. Think of them like paragraphs in an
                             essay.
                         </p>
+                        <h2>Readability Questions</h2>
+                        <p>Answer the questions below before moving on.</p>
+                        <div class="quiz-container"></div>
                     </div>
                 </div>
             </div>
