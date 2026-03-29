@@ -121,6 +121,11 @@ main {
 
 /* ── Mobile portrait ───────────────────────────── */
 @media (max-width: 768px) {
+    html, body {
+        height: auto;
+        min-height: 100%;
+    }
+
     header {
         height: 80px;
     }
@@ -155,9 +160,10 @@ main {
     }
 
     main {
-        top: 80px;
-        bottom: 80px;
-        padding: 10px;
+        position: static;
+        padding: 80px 10px 80px;
+        overflow-y: auto;
+        display: block;
     }
 
     #coursePanels {
@@ -170,12 +176,15 @@ main {
         flex: none;
         width: 100%;
         height: auto;
-        max-height: none;
+        aspect-ratio: 1 / 1;
+        overflow: hidden;
     }
 
     #coursePanels div img {
         width: 100%;
-        height: auto;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
     }
 }
 
