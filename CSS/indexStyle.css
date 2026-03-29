@@ -174,8 +174,8 @@ main {
     }
 
     #coursePanels div img {
+        width: 100%;
         height: auto;
-        aspect-ratio: 550 / 400;
     }
 }
 
