@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>N4 Computing Science - Fixed Loops</title>
+        <script src="/JavaScript/N4Script.js"></script>
+        <script src="/JavaScript/quiz.js"></script>
+        <link rel="stylesheet" href="/CSS/quiz.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                    questions: [
+                        {
+                            type: "paragraph",
+                            text: "In your own words, explain what a fixed loop is.",
+                            marks: 1,
+                            markingScheme: "Award 1 mark for 'A loop used when you know exactly how many times you want to repeat a section of code', or 'repeats code a set number of times'.  The student wording may vary, so look for a similar meaning.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "In your own words, explain what a fixed loop is.",
+                            marks: 1,
+                            markingScheme: "Award 1 mark for 'A loop used when you know exactly how many times you want to repeat a section of code', or 'repeats code a set number of times'.  The student wording may vary, so look for a similar meaning.",
+                        },
+                    ],
+                },
+            };
+        </script>
+    </head>
+
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+            <header>
+                <h1>BHS Computing Science</h1>
+                <img src="/Images/Header/banner.png" />
+            </header>
+            <div id="pageContainer">
+                <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+                <div id="sidebar"></div>
+                <div id="content">
+                    <div id="mainHeading"><h1>National 4</h1></div>
+                    <div class="contentHeading">
+                        <h1>SDD - Fixed Loops</h1>
+                    </div>
+                    <div class="contentContainer">
+                        <table class="LIandSC">
+                            <tr>
+                                <th>Learning Intentions</th>
+                                <th>Success Criteria</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    We are learning about:
+                                    <ul>
+                                        <li>Repeating code by using loops.</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    I am looking for you to:
+                                    <ul>
+                                        <li>Explain what a fixed loop is.</li>
+                                        <li>
+                                            Write programs that use a fixed
+                                            loop.
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                        <h2>What is a fixed loop?</h2>
+                        <p>
+                            There are two types of loop that are used in
+                            programming - fixed loops and conditional loops. At
+                            the N4 level, we will focus on fixed loops.
+                        </p>
+                        <p>
+                            Code is written in a sequence, meaning that the
+                            computer will read and execute the instructions from
+                            top to bottom, from the first line until the last
+                            line. However, there may be times when you want to
+                            repeat a section of your code over and over. This is
+                            what a fixed loop is for.
+                        </p>
+                        <p>
+                            Fixed loops are used when you know exactly how many
+                            times you want to repeat a section of code. For
+                            example, if you want to ask the user to enter the
+                            marks for 10 students, you would use a fixed loop to
+                            repeat the code 10 times.
+                        </p>
+                        <p>Look at the example below:</p>
+                        <div class="codeBox">
+                            <p>for x in range(10):</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;mark = int(input("Enter
+                                the mark: "))
+                            </p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;print(mark)</p>
+                        </div>
+                        <p>
+                            This code will ask the user to enter a mark 10
+                            times, and then display the mark that was entered.
+                        </p>
+
+                        <h2>Indentation</h2>
+                        <p>
+                            Note that the code below the loop is indented. This
+                            is to show which part of the code is inside the
+                            loop. Normally, if you press enter after typing the
+                            colon (:), Python will indent the code for you, and
+                            you can unindent it pressing backspace. You can
+                            create your own indents by pressing tab on the
+                            keyboard.
+                        </p>
+                        <p>
+                            If you don't indent the code, the program will not
+                            run correctly.
+                        </p>
+                        <p>
+                            Look at the example below, you can see which part of
+                            the code is inside the loop:
+                        </p>
+                        <div class="codeBox">
+                            <p>for x in range(10):</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;mark = int(input("Enter
+                                the mark: "))
+                            </p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;print(mark)</p>
+                            <p>print("The loop has finished")</p>
+                        </div>
+
+                        <h2>Breaking down 'for x in range()'</h2>
+                        <p>
+                            The first line of the loop is the most important
+                            part. It tells the computer how many times to repeat
+                            the code. Let's break that line down so we know what
+                            each part of it does:
+                        </p>
+                        <ul>
+                            <li>
+                                <b>for</b> - this tells the computer that we are
+                                starting a loop.
+                            </li>
+                            <li>
+                                <b>x</b> - this is a variable that will be used
+                                to count the number of times the loop has run.
+                                It is needed for the loop to work. You can use
+                                it if you want to display this number. It starts
+                                at 0. It also doesn't have to be called x, you
+                                can call it anything you want, many people use
+                                'i'.
+                            </li>
+                            <li>
+                                <b>in</b> - this tells the computer that we are
+                                going to use a range.
+                            </li>
+                            <li>
+                                <b>range()</b> -
+                                <span class="codeText">range()</span> is a
+                                function that produces a range of numbers for
+                                the loop to go through, if you place the number
+                                4 in the brackets it will produce the numbers 0,
+                                1, 2, and 3. This will allow the loop to run 4
+                                times, because there are 4 numbers (including
+                                0).
+                            </li>
+                        </ul>
+                        <p>
+                            Here is an example where I have used the x to ask
+                            the user to 'Enter student 1's mark:', 'Enter
+                            student 2's mark:', and so on:
+                        </p>
+                        <div class="codeBox">
+                            <p>for x in range(10):</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;mark = int(input("Enter
+                                student " + str(x+1) + "'s mark: "))
+                            </p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;print(mark)</p>
+                        </div>
+                        <p>
+                            You can see that I have used
+                            <span class="codeText">str(x+1)</span> to convert
+                            the number to a string, and I have added 1 to the
+                            number so that it starts at 1 instead of 0.
+                        </p>
+                        <h2>Fixed Loop Questions</h2>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div id="left">
+                    <p>Biggar High School</p>
+                    <p>Market Rd, Biggar</p>
+                    <p>ML12 6AG</p>
+                </div>
+                <div id="center"></div>
+                <div id="right">
+                    <p>&copy;C Dunn, 2025</p>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>
