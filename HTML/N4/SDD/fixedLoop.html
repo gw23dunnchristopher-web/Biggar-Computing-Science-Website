@@ -15,18 +15,29 @@
                     questions: [
                         {
                             type: "paragraph",
-                            text: "In your own words, explain what a fixed loop is.",
-                            marks: 1,
-                            markingScheme: "Award 1 mark for 'A loop used when you know exactly how many times you want to repeat a section of code', or 'repeats code a set number of times'.  The student wording may vary, so look for a similar meaning.",
+                            text: "In your own words, explain what a fixed loop is. Give an example of when you would use one.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for 'A loop used when you know exactly how many times you want to repeat a section of code', or 'repeats code a set number of times'.  The student wording may vary, so look for a similar meaning. Award 1 mark for a valid example of when they would use a fixed loop.",
                         },
                         {
                             type: "paragraph",
-                            text: "In your own words, explain what a fixed loop is.",
-                            marks: 1,
-                            markingScheme: "Award 1 mark for 'A loop used when you know exactly how many times you want to repeat a section of code', or 'repeats code a set number of times'.  The student wording may vary, so look for a similar meaning.",
+                            text: ["Look at the following code <span class='codeText'>for x in range(6):</span>.",["What does the x represent in this line?", "How many times will the code inside the loop run?"]],
+                            marks: 2,
+                            markingScheme: "Award 1 mark if the student shows an awareness that the x represents the number of times the loop has run.  Award 1 mark if they state that the loop will run 6 times.",
                         },
-                    ],
-                },
+                        {
+                            type: "paragraph",
+                            text: "In Python, why is it essential to indent the code that sits underneath the <span class='codeText'>for</span> statement? What would happen to the program if you forgot to press the Tab key or indent that section?",
+                            marks: 2,
+                            markingScheme: "Award 1 mark if the student shows an awareness that that indentation shows which part of the code is inside the loop.  Award 1 mark if  Award 1 mark if they explain that not indenting the code would cause an error.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "List the three numbers that the computer produces for <span class='codeText'>range(3)</span>. Explain why the number 3 is not included in that list.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark if the student states '0, 1, 2'. Award 1 mark if the student shows that they understand that 3 is not included because when it reaches number 2 the code has already completed 3 times.",
+                    },
+                ],
             };
         </script>
     </head>
@@ -190,6 +201,11 @@
                             number so that it starts at 1 instead of 0.
                         </p>
                         <h2>Fixed Loop Questions</h2>
+                         <p>Answer the questions below before moving on.</p>
+                         <div class="quiz-container"></div>
+                        
+                         <h2>Fixed Loop Exercises</h2>
+                         <p>Complete the exercises below.</p>
                     </div>
                 </div>
             </div>

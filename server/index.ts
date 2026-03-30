@@ -270,12 +270,40 @@ if (!fs.existsSync(STARTERS_DIR)) fs.mkdirSync(STARTERS_DIR, { recursive: true }
 
 const TEACHER_PASSWORD = process.env.TEACHER_PASSWORD || 'bhs-computing';
 
-/* In-memory session tokens — cleared on server restart */
+/* In-memory session tokens — kept for backward-compat but no longer required */
 const teacherTokens = new Set<string>();
+
+/* ── HMAC-signed tokens — survive server restarts ─────────────────────────
+ * Format: base64url(JSON payload) + '.' + base64url(HMAC-SHA256 signature)
+ * Payload: { email, exp }  where exp is a Unix-ms timestamp
+ * Tokens are valid for 7 days and are signed with TEACHER_PASSWORD, so they
+ * are automatically invalidated if the password changes.                    */
+function makeTeacherToken(email: string): string {
+  const payload = Buffer.from(JSON.stringify({
+    email: email.toLowerCase().trim(),
+    exp:   Date.now() + 7 * 24 * 60 * 60 * 1000   // 7 days
+  })).toString('base64url');
+  const sig = crypto.createHmac('sha256', TEACHER_PASSWORD).update(payload).digest('base64url');
+  return payload + '.' + sig;
+}
+
+function verifyTeacherToken(token: string): boolean {
+  try {
+    const dot = token.indexOf('.');
+    if (dot === -1) return false;
+    const payload = token.slice(0, dot);
+    const sig     = token.slice(dot + 1);
+    const expected = crypto.createHmac('sha256', TEACHER_PASSWORD).update(payload).digest('base64url');
+    if (sig.length !== expected.length) return false;
+    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return false;
+    const data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    return typeof data.exp === 'number' && data.exp > Date.now();
+  } catch { return false; }
+}
 
 function requireTeacher(req: express.Request, res: express.Response, next: express.NextFunction) {
   const pw = req.headers['x-teacher-password'] as string | undefined;
-  if (pw && (pw === TEACHER_PASSWORD || teacherTokens.has(pw))) return next();
+  if (pw && (pw === TEACHER_PASSWORD || teacherTokens.has(pw) || verifyTeacherToken(pw))) return next();
   return res.status(401).json({ error: 'Unauthorised' });
 }
 
@@ -327,7 +355,7 @@ app.post('/api/teacher-auth', async (req, res) => {
       if (!rows.length) return res.json({ ok: false });
       const match = await bcrypt.compare(String(password), rows[0].passwordHash);
       if (match) {
-        const token = crypto.randomUUID();
+        const token = makeTeacherToken(String(email).toLowerCase().trim());
         teacherTokens.add(token);
         return res.json({ ok: true, token });
       }

@@ -461,6 +461,10 @@
     var pwEmail = document.getElementById('pwEmail');
     var pwPw    = document.getElementById('pwPw');
 
+    /* Pre-fill email from previous sidebar login if available */
+    var storedEmail = localStorage.getItem('bhscs-teacher-auth-email') || '';
+    if (storedEmail && pwEmail) pwEmail.value = storedEmail;
+
     /* Verify a session token against the sandbox list endpoint */
     function tryAuth(tok) {
         fetch('/api/sandboxes', { headers: { 'X-Teacher-Password': tok } })
@@ -478,7 +482,10 @@
             .catch(function () {
                 localStorage.removeItem('bhscs-teacher-token');
                 password = '';
+                /* Pre-fill email again in case overlay was hidden */
+                if (storedEmail && pwEmail) pwEmail.value = storedEmail;
                 authOverlay.style.display = 'flex';
+                if (pwPw) pwPw.focus();
             });
     }
 
@@ -489,25 +496,32 @@
         if (!email || !pw) return;
         pwBtn.disabled = true;
         pwErr.style.display = 'none';
+        pwErr.style.color = '#f87171';
         fetch('/api/teacher-auth', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: email, password: pw })
         })
-        .then(function (r) { return r.json(); })
+        .then(function (r) {
+            if (!r.ok && r.status !== 200) throw new Error('network');
+            return r.json();
+        })
         .then(function (d) {
             pwBtn.disabled = false;
             if (d.ok && d.token) {
                 localStorage.setItem('bhscs-teacher-token', d.token);
+                localStorage.setItem('bhscs-teacher-auth-email', email.toLowerCase().trim());
                 tryAuth(d.token);
             } else {
+                pwErr.textContent = 'Incorrect email or password.';
                 pwErr.style.display = 'block';
                 pwPw.value = '';
-                pwEmail.focus();
+                pwPw.focus();
             }
         })
         .catch(function () {
             pwBtn.disabled = false;
+            pwErr.textContent = 'Could not reach the server — make sure the Server workflow is running.';
             pwErr.style.display = 'block';
         });
     }
