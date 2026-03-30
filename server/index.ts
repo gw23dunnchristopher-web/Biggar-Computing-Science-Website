@@ -399,8 +399,13 @@ app.post('/api/teacher-update', async (req, res) => {
       .limit(1);
     if (!rows.length) return res.json({ ok: false, error: 'Incorrect email or password.' });
 
-    const match = await bcrypt.compare(String(currentPassword), rows[0].passwordHash);
-    if (!match) return res.json({ ok: false, error: 'Incorrect email or password.' });
+    /* Allow the server master-password to bypass the bcrypt check so the
+       teacher can recover access even when database credentials are stale. */
+    const usingMasterPw = String(currentPassword) === TEACHER_PASSWORD;
+    if (!usingMasterPw) {
+      const match = await bcrypt.compare(String(currentPassword), rows[0].passwordHash);
+      if (!match) return res.json({ ok: false, error: 'Incorrect email or password.' });
+    }
 
     const updates: Record<string, string> = {};
     const cleanNewEmail = newEmail ? String(newEmail).toLowerCase().trim() : '';
