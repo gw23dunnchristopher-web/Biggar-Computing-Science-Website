@@ -344,6 +344,7 @@ app.post('/api/teacher-auth', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.json({ ok: false });
 
+  console.log('[teacher-auth] attempt — email:', String(email), 'hasDatabase:', hasDatabase);
   if (hasDatabase) {
     try {
       const { teachers } = require('../shared/schema');
@@ -352,8 +353,10 @@ app.post('/api/teacher-auth', async (req, res) => {
       const rows = await db.select().from(teachers)
         .where(eq(teachers.email, String(email).toLowerCase().trim()))
         .limit(1);
+      console.log('[teacher-auth] rows found:', rows.length);
       if (!rows.length) return res.json({ ok: false });
       const match = await bcrypt.compare(String(password), rows[0].passwordHash);
+      console.log('[teacher-auth] bcrypt match:', match);
       if (match) {
         const token = makeTeacherToken(String(email).toLowerCase().trim());
         teacherTokens.add(token);
@@ -361,11 +364,12 @@ app.post('/api/teacher-auth', async (req, res) => {
       }
       return res.json({ ok: false });
     } catch (err) {
-      console.error('Teacher auth error:', err);
+      console.error('[teacher-auth] error:', err);
       return res.json({ ok: false });
     }
   }
 
+  console.log('[teacher-auth] no database, returning false');
   res.json({ ok: false });
 });
 
