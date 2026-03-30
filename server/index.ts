@@ -344,21 +344,31 @@ app.post('/api/teacher-auth', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.json({ ok: false });
 
-  console.log('[teacher-auth] attempt — email:', String(email), 'hasDatabase:', hasDatabase);
+  const emailClean = String(email).toLowerCase().trim();
+  const pwClean    = String(password);
+
+  /* ── Master-password shortcut ───────────────────────────────────────────
+   * If the submitted password matches the server's TEACHER_PASSWORD env var
+   * we issue a token immediately, without touching the database.  This acts
+   * as a recovery route when database credentials fall out of sync.        */
+  if (pwClean === TEACHER_PASSWORD) {
+    const token = makeTeacherToken(emailClean);
+    console.log('[teacher-auth] master-password match for', emailClean);
+    return res.json({ ok: true, token });
+  }
+
   if (hasDatabase) {
     try {
       const { teachers } = require('../shared/schema');
       const { eq } = require('drizzle-orm');
       const bcrypt = require('bcrypt');
       const rows = await db.select().from(teachers)
-        .where(eq(teachers.email, String(email).toLowerCase().trim()))
+        .where(eq(teachers.email, emailClean))
         .limit(1);
-      console.log('[teacher-auth] rows found:', rows.length);
       if (!rows.length) return res.json({ ok: false });
-      const match = await bcrypt.compare(String(password), rows[0].passwordHash);
-      console.log('[teacher-auth] bcrypt match:', match);
+      const match = await bcrypt.compare(pwClean, rows[0].passwordHash);
       if (match) {
-        const token = makeTeacherToken(String(email).toLowerCase().trim());
+        const token = makeTeacherToken(emailClean);
         teacherTokens.add(token);
         return res.json({ ok: true, token });
       }
@@ -369,7 +379,6 @@ app.post('/api/teacher-auth', async (req, res) => {
     }
   }
 
-  console.log('[teacher-auth] no database, returning false');
   res.json({ ok: false });
 });
 
