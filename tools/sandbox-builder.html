@@ -113,13 +113,35 @@
         .sb-item .sb-del { background: none; border: none; color: #8b949e; cursor: pointer; font-size: 0.8rem; padding: 2px 4px; border-radius: 3px; opacity: 0; }
         .sb-item:hover .sb-del { opacity: 1; }
         .sb-item .sb-del:hover { color: #f87171; background: #3d1a1a; }
+        /* ── tool nav (activity bar) ── */
+        .tool-nav {
+            width: 72px; background: #010409; border-right: 1px solid #21262d;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 8px 0; flex-shrink: 0; overflow-y: auto;
+        }
+        .tool-nav-item {
+            width: 100%; display: flex; flex-direction: column; align-items: center;
+            gap: 5px; padding: 10px 4px; cursor: pointer; background: none; border: none;
+            border-left: 2px solid transparent; color: #8b949e; font-size: 0.62rem;
+            text-align: center; line-height: 1.2; font-family: inherit;
+            transition: color 0.15s, background 0.15s;
+        }
+        .tool-nav-item .tn-icon { font-size: 1.3rem; display: block; }
+        .tool-nav-item:hover { color: #e6edf3; background: #161b22; }
+        .tool-nav-item.active { color: #e6edf3; border-left-color: #1f6feb; background: #161b22; }
+
+        /* ── collapsible group headers ── */
         .sb-group-hdr {
-            padding: 8px 14px 4px;
+            padding: 8px 10px 4px 14px;
             font-size: 0.65rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.08em;
             color: #58a6ff; background: #0d1117; border-bottom: 1px solid #21262d;
-            margin-top: 6px;
+            margin-top: 6px; cursor: pointer; user-select: none;
+            display: flex; align-items: center; justify-content: space-between;
         }
         .sb-group-hdr:first-child { margin-top: 0; }
+        .sb-group-hdr:hover { background: #161b22; }
+        .sb-group-chevron { font-size: 0.6rem; color: #8b949e; transition: transform 0.15s; display: inline-block; }
+        .sb-group-hdr.collapsed .sb-group-chevron { transform: rotate(-90deg); }
 
         /* ── editor pane ── */
         .editor-pane { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -371,6 +393,14 @@
 </header>
 
 <div class="app">
+
+    <!-- tool navigation (activity bar) -->
+    <nav class="tool-nav">
+        <button class="tool-nav-item active" data-tool="sandbox-builder" title="Sandbox Builder">
+            <span class="tn-icon">&#x1F4E6;</span>
+            Sandbox Builder
+        </button>
+    </nav>
 
     <!-- sidebar: sandbox list -->
     <div class="sidebar">
@@ -667,6 +697,9 @@
     var TYPE_ORDER  = ['python-quiz', 'html-quiz', 'python', 'html'];
     var TYPE_LABELS = { 'python-quiz': 'Python Quiz', 'html-quiz': 'HTML Quiz', 'python': 'Python Runner', 'html': 'HTML Runner' };
 
+    /* track which groups the user has collapsed */
+    var collapsedGroups = {};
+
     function renderSbList() {
         if (sandboxes.length === 0) {
             sbList.innerHTML = '<div style="padding:16px;color:#8b949e;font-size:0.8rem;">No sandboxes yet.</div>';
@@ -685,8 +718,15 @@
 
         var html = '';
         types.forEach(function (t) {
-            var label = TYPE_LABELS[t] || t;
-            html += '<div class="sb-group-hdr">' + typeIcon(t) + ' ' + label + '</div>';
+            var label    = TYPE_LABELS[t] || t;
+            var isCollapsed = !!collapsedGroups[t];
+            var hdrClass = isCollapsed ? ' collapsed' : '';
+            var bodyStyle = isCollapsed ? ' style="display:none"' : '';
+            html += '<div class="sb-group-hdr' + hdrClass + '" data-group="' + t + '">'
+                  +   '<span>' + typeIcon(t) + ' ' + label + '</span>'
+                  +   '<span class="sb-group-chevron">&#x25BC;</span>'
+                  + '</div>';
+            html += '<div class="sb-group-body"' + bodyStyle + '>';
             html += grouped[t].map(function (s) {
                 var active = current && current.name === s.name ? ' active' : '';
                 return '<div class="sb-item' + active + '" data-name="' + s.name + '">' +
@@ -694,11 +734,28 @@
                       '<div class="sb-title">' + esc(s.title || s.name) + '</div>' +
                       '<div class="sb-name">' + esc(s.name) + '</div>' +
                     '</div>' +
-                    '<button class="sb-del" data-name="' + s.name + '" title="Delete">🗑</button>' +
+                    '<button class="sb-del" data-name="' + s.name + '" title="Delete">&#x1F5D1;</button>' +
                 '</div>';
             }).join('');
+            html += '</div>';
         });
         sbList.innerHTML = html;
+
+        /* collapsible group headers */
+        sbList.querySelectorAll('.sb-group-hdr').forEach(function (hdr) {
+            hdr.addEventListener('click', function () {
+                var t    = hdr.dataset.group;
+                var body = hdr.nextElementSibling;
+                collapsedGroups[t] = !collapsedGroups[t];
+                if (collapsedGroups[t]) {
+                    hdr.classList.add('collapsed');
+                    body.style.display = 'none';
+                } else {
+                    hdr.classList.remove('collapsed');
+                    body.style.display = '';
+                }
+            });
+        });
 
         sbList.querySelectorAll('.sb-item').forEach(function (el) {
             el.addEventListener('click', function (e) {
