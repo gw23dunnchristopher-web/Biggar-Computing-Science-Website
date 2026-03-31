@@ -3,11 +3,55 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>N4 Computing Science - Course Roadmap</title>
+        <title>N4 Computing Science - IF...ELSE Statement</title>
         <script src="/JavaScript/N4Script.js"></script>
+        <script src="/JavaScript/quiz.js"></script>
+        <script src="/JavaScript/codeRunner.js"></script>
+        <link rel="stylesheet" href="/CSS/quiz.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/codeRunner.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: "Most simple programs run in a straight line from top to bottom (this is called a sequence). Explain how using a selection statement (like an if statement) changes the \"path\" a program takes.",
+                        marks: 1,
+                        markingScheme:
+                            "Award 1 mark for each of the following points:  When the loop starts the total must be set to 0, when the loop finishes the total will be set to 17.",
+                    },
+                    {
+                        type: "table",
+                        text: ["Imagine you are writing a program for a security gate.", ["To enter, a person must be exactly 1.5 meters tall.", "If they are not 1.5 meters tall, the gate stays closed."],"Identify the two symbols (logic operators) you would use to check these two conditions and explain what each symbol does."],
+                        marks: 2,
+                        markingScheme:
+                            "1 Mark: Correctly identifies == (equal to) and != (not equal to). 1 Mark: Explains that == checks if things are identical, while != checks if they are different.",
+                        tableHeaders: ["Scenario", "Symbol Used", "Explanation"],
+                        columnWidths: ["40%", "20%", "40%"],   // optional — omit for equal columns
+                        tableRows: [
+                            ["If person is exactly 1.5m tall, gate opens.",  "", ""],
+                            ["If person is not exactly 1.5m tall, gate stays closed",  "", ""],
+                        ],
+                    },
+                {
+                    type: "paragraph",
+                    text: ["A teacher is writing a program to check if a student passed a test. The passing mark is 50.", ["In version A, the teacher uses: <span class='codeText'>if score > 50</span>:", "In version B, the teacher uses: <span class='codeText'>if score >= 50:</span>"],"Explain why a student who gets exactly 50 marks would be very unhappy with Version A but happy with Version B."],
+                    marks: 2,
+                    markingScheme:
+                        "1 Mark: Explains that > (Greater than) is exclusive, so 50 is not high enough to pass. 1 Mark: Explains that >= (Greater than or equal to) is inclusive, so 50 counts as a pass."
+                },
+                {
+                    type: "paragraph",
+                    text: "In programming, we often use the word Else. Describe a real-world example of a decision where an \"else\" would be needed if the first condition isn't met.",
+                    marks: 1,
+                    markingScheme:
+                        "1 Mark: For providing any logical \"backup\" plan (e.g., \"If it is raining, take an umbrella, else wear sunglasses\"). The student must show that the else action happens when the if is false."
+                }
+                ],
+            };
+        </script>
     </head>
 
     <body>
@@ -23,10 +67,214 @@
                 <div id="content">
                     <div id="mainHeading"><h1>National 4</h1></div>
                     <div class="contentHeading">
-                        <h1>SDD - Design</h1>
+                        <h1>SDD - IF...ELSE Statement</h1>
                     </div>
                     <div class="contentContainer">
-                        
+                        <table class="LIandSC">
+                            <tr>
+                                <th>Learning Intentions</th>
+                                <th>Success Criteria</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    We are learning about:
+                                    <ul>
+                                        <li>Basic selection in programming.</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    I am looking for you to:
+                                    <ul>
+                                        <li>
+                                            Explain what selection is and give
+                                            an example of when it can be used in
+                                            a program.
+                                        </li>
+                                        <li>
+                                            Code a program which uses a simple
+                                            IF statement.
+                                        </li>
+                                        <li>
+                                            Write code for a program that uses
+                                            IF...ELSE.
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                        <h2>What is Selection?</h2>
+                        <p>
+                            In programming, selection is a fundamental construct
+                            that allows a program to make decisions and follow
+                            different execution paths based on specific
+                            conditions.
+                        </p>
+                        <p>
+                            As you know, a basic programming algorithm runs in a
+                            sequence. It executes the line of code at the top
+                            first, and then the one directly below it, all the
+                            way until it reaches the end of the script.
+                            Selection enables the program to be "intelligent" by
+                            choosing which code block to run next.
+                        </p>
+                        <p>For example:</p>
+                        <div class="codeBox">
+                            <p># Get the user's age</p>
+                            <p>age = int(input("Enter your age: "))</p>
+                            <br />
+                            <p># Check if the user is old enough to vote</p>
+                            <p>if age >= 18:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("You are old
+                                enough to vote")
+                            </p>
+                        </div>
+                        <p>
+                            This program will ask the user to enter their age,
+                            and then display a message depending on whether they
+                            are old enough to vote or not. If the user enters 18
+                            or greater as their age, then the program will
+                            display "You are old enough to vote". Otherwise, it
+                            won't display anything.
+                        </p>
+                        <h2>Boolean Logic</h2>
+                        <p>
+                            At its core, selection is governed by Boolean logic.
+                            In a computational environment, this means every
+                            decision is reduced to a binary outcome: the
+                            condition is either True or False. There is no
+                            middle ground or "maybe" in the CPU's logic gates.
+                        </p>
+                        <p>
+                            To determine which path to take, the computer
+                            performs a <b>comparison</b>. It looks at two pieces
+                            of data and checks the relationship between them
+                            using specific sysmbols. The table below shows a
+                            common list of symbols used by Python to make these
+                            comparisons - these are called Logic Operators:
+                        </p>
+                        <table>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Meaning</th>
+                                <th>Example Logic</th>
+                                <th>Example Code</th>
+                            </tr>
+                            <tr>
+                                <td>==</td>
+                                <td>Equal to</td>
+                                <td>
+                                    Does the entered password match the stored
+                                    one?
+                                </td>
+                                <td>if password == storedPassword:</td>
+                            </tr>
+                            <tr>
+                                <td>!=</td>
+                                <td>Not equal to</td>
+                                <td>Is the user's age <i>not</i> under 13?</td>
+                                <td>if age != 13:</td>
+                            </tr>
+                            <tr>
+                                <td>&gt;</td>
+                                <td>Greater than</td>
+                                <td>
+                                    Determining if a vehicle has exceeded the
+                                    speed limit.
+                                </td>
+                                <td>if speed &gt; speedLimit:</td>
+                            </tr>
+                            <tr>
+                                <td>&lt;</td>
+                                <td>Less than</td>
+                                <td>
+                                    Checking if a battery level is below 10%.
+                                </td>
+                                <td>if batteryLevel &lt; 10:</td>
+                            </tr>
+                            <tr>
+                                <td>&gt;=</td>
+                                <td>Greater than or equal to</td>
+                                <td>
+                                    Granting access if a user is age 18 or
+                                    older.
+                                </td>
+                                <td>if age &gt;= 18:</td>
+                            </tr>
+                            <tr>
+                                <td>&lt;=</td>
+                                <td>Less than or equal to</td>
+                                <td>
+                                    Applying a discount if a customer buys 5
+                                    items or fewer.
+                                </td>
+                                <td>if items &lt;= 5:</td>
+                            </tr>
+                        </table>
+
+                        <h2>Inclusive Boundaries</h2>
+                        <p>
+                            The distinction between "Greater than" (&gt;) or
+                            "Less than" (&lt;) and "Greater than or equal to"
+                            (&gt;=) or "Less than or equal to" (&lt;=) is
+                            important in logic design.
+                        </p>
+                        <ul>
+                            <li>
+                                <b>Exclusive (&gt; and &lt;)</b>: If you use
+                                <span class="codeText">if score > 100</span>,
+                                the number 100 would return False. The logic
+                                only triggers starting at 101. Similarly, if you
+                                used <span class="codeText">if score < 0</span>,
+                                then the number 0 would return false, so it
+                                would have to be a negative number for it to run
+                                the code.
+                            </li>
+                            <li>
+                                <b>Inclusive (&gt;= and &lt;=)</b>: If you use
+                                <span class="codeText">if score >= 100</span>,
+                                then the number 100 would return True. The logic
+                                triggers at 100 and above. You could also use
+                                <span class="codeText">if score <= 0</span>:,
+                                then the number 0 would return true, so it would
+                                run the code.
+                            </li>
+                        </ul>
+                        <p>
+                            Just keep this in mind when creating your
+                            conditions.
+                        </p>
+                        <h2>Using Else</h2>
+                        <p>
+                            You can also use the
+                            <span class="codeText">else</span> keyword to run a
+                            block of code if the condition is not met. For
+                            example:
+                        </p>
+                        <div class="codeBox">
+                            <p># Get the user's age</p>
+                            <p>age = int(input("Enter your age: "))</p>
+                            <br />
+                            <p># Check if the user is old enough to vote</p>
+                            <p>if age >= 18:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("You are old
+                                enough to vote")
+                            </p>
+                            <p>else:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("You are not old
+                                enough to vote")
+                            </p>
+                        </div>
+                        <p>
+                            This program will ask the user to enter their age,
+                            and then display a message depending on whether they
+                            are old enough to vote or not. If the user enters 18
+                            or greater as their age, then the program will
+                            display "You are old enough to vote". Otherwise, it
+                            will display "You are not old enough to vote".
+                        </p>
                     </div>
                 </div>
             </div>

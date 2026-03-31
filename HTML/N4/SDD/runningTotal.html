@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>N4 Computing Science - Running Total</title>
+        <script src="/JavaScript/N4Script.js"></script>
+        <script src="/JavaScript/quiz.js"></script>
+        <script src="/JavaScript/codeRunner.js"></script>
+        <link rel="stylesheet" href="/CSS/quiz.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/codeRunner.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: ["A programmer writes a script to track the number of points a player earns in a game over 3 rounds. The player enters 10, then 5, and finally 2.",["What must the total be set to before the loop starts?","What will the total be after the loop has finished?"]],
+                        marks: 2,
+                        markingScheme:
+                            "Award 1 mark for each of the following points:  When the loop starts the total must be set to 0, when the loop finishes the total will be set to 17.",
+                    },
+                    {
+                        type: "code",
+                        text: "A program is created to calculate the total number of marks a student has achieved in a test. The  total number of marks is stored in a variable called <span class='codeText'>totalMarks</span>. The marks are entered and stored in a variable called <span class='codeText'>mark</span>.  Write the line of code that will update the total marks with the number entered.",
+                        marks: 2,
+                        markingScheme:
+                            "The correct answer is 'totalMarks+=mark' OR 'totalMarks = totalMarks + mark'.  Award 1 mark for having totalMarks and mark in the correct positions.  Award 1 mark for using += or totalMarks + mark.",
+                    },
+                    {
+                        type: "paragraph",
+                        text: "A student writes a program to sum up 10 numbers but forgets to initialize their total variable to 0 before the loop begins. Explain why this mistake would cause the program to fail or crash when it reaches the first calculation.",
+                        marks: 2,
+                        markingScheme:
+                            "1 Mark: Identifying that the computer cannot add a number to a variable that does not exist yet (or has no value). 1 Mark: Explaining that the program needs a 'baseline' or 'starting point' to perform the first addition.",
+                    },
+                ],
+            };
+        </script>
+    </head>
+
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+            <header>
+                <h1>BHS Computing Science</h1>
+                <img src="/Images/Header/banner.png" />
+            </header>
+            <div id="pageContainer">
+                <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+                <div id="sidebar"></div>
+                <div id="content">
+                    <div id="mainHeading"><h1>National 4</h1></div>
+                    <div class="contentHeading">
+                        <h1>SDD - Running Total</h1>
+                    </div>
+                    <div class="contentContainer">
+                        <table class="LIandSC">
+                            <tr>
+                                <th>Learning Intentions</th>
+                                <th>Success Criteria</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    We are learning about:
+                                    <ul>
+                                        <li>
+                                            The 'Running Total' standard
+                                            algorithm
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    I am looking for you to:
+                                    <ul>
+                                        <li>
+                                            Explain what a running total is and
+                                            where you might use it.
+                                        </li>
+                                        <li>
+                                            Write programs that use the running
+                                            total algorithm.
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                        <h2>What is a running total?</h2>
+                        <p>
+                            A running total is a standard algorithm that is
+                            often used in programming. It is used when you want
+                            to add up a series of numbers and keep a running
+                            total of the sum. For example, you might use a
+                            running total to calculate the total cost of items
+                            in a shopping cart, or the total number of votes.
+                        </p>
+                        <p>To create a running total, you need to:</p>
+                        <ol>
+                            <li>
+                                Create a variable to store the running total.
+                                This variable should be initialised to 0 before
+                                the loop starts.
+                            </li>
+                            <li>
+                                Create a loop that will run a set number of
+                                times.
+                            </li>
+                            <li>
+                                Inside the loop, add the value of the current
+                                item to the running total.
+                            </li>
+                            <li>
+                                After the loop has finished, display the running
+                                total.
+                            </li>
+                        </ol>
+
+                        <h2>Example</h2>
+                        <p>
+                            Here is an example of a program that uses a running
+                            total to calculate the total cost of items in a
+                            shopping cart:
+                        </p>
+                        <div class="codeBox">
+                            <p># Initialise the running total</p>
+                            <p>total = 0</p>
+                            <br />
+                            <p># Loop 5 times</p>
+                            <p>for i in range(5):</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;# Get the price of the
+                                item
+                            </p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;price =
+                                float(input("Enter the price of the item: "))
+                            </p>
+                            <br />
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;# Add the price to the
+                                running total
+                            </p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;total = total + price</p>
+                            <br />
+                            <p># Display the total</p>
+                            <p>print("The total cost is: £", total)</p>
+                        </div>
+                        <p>
+                            This program will ask the user to enter the price of
+                            5 items, and then display the total cost of all the
+                            items.
+                        </p>
+                        <p>
+                            You can see that the variable
+                            <span class="codeText">total</span> is initialised
+                            to 0 before the loop starts. This is important,
+                            because if you don't initialise the variable, the
+                            program will crash when it tries to add the first
+                            number to the running total.
+                        </p>
+                        <p>
+                            The variable is then updated inside the loop, using
+                            <span class="codeText">total = total + price</span>.
+                            This might seem odd, but when you reach that point
+                            the first time, the total is 0, so it is setting the
+                            total to the number you entered plus 0. If you typed
+                            in 5, then the next time the loop runs it will set
+                            the new <span class="codeText">total</span> value to
+                            5 plus the new number you type in.
+                        </p>
+                        <p>
+                            Rather than using
+                            <span class="codeText">total = total + price</span>,
+                            you could also use
+                            <span class="codeText">total += price</span>. This
+                            does exactly the same thing. For example:
+                        </p>
+                        <div class="codeBox">
+                            <p># Initialise the running total</p>
+                            <p>total = 0</p>
+                            <br />
+                            <p># Loop 5 times</p>
+                            <p>for i in range(5):</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;# Get the price of the
+                                item
+                            </p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;price =
+                                float(input("Enter the price of the item: "))
+                            </p>
+                            <br />
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;# Add the price to the
+                                running total
+                            </p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;total += price</p>
+                            <br />
+                            <p># Display the total</p>
+                            <p>print("The total cost is: £", total)</p>
+                        </div>
+                        <p>
+                            This is a shorthand way of writing the same thing.
+                            It is often used in programming, because it is
+                            shorter and easier to read.
+                        </p>
+                        <h2>Running Total Questions</h2>
+                        <p>Answer the questions below before moving on.</p>
+                        <div class="quiz-container"></div>
+
+                        <h2>Running Total Exercises</h2>
+                         <p>Complete the exercises below.</p>
+                        <div class="py-quiz" data-sandbox="running-total"></div>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div id="left">
+                    <p>Biggar High School</p>
+                    <p>Market Rd, Biggar</p>
+                    <p>ML12 6AG</p>
+                </div>
+                <div id="center"></div>
+                <div id="right">
+                    <p>&copy;C Dunn, 2025</p>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>

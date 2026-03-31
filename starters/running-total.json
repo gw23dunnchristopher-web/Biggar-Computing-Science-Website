@@ -1,0 +1,38 @@
+{
+  "type": "python-quiz",
+  "title": "Running Total Quiz",
+  "questions": [
+    {
+      "label": "Exercise 1",
+      "prompt": "Write code for a program that:\n- sets a total to 0\n- starts a fixed loop and loops 10 times.\n- adds 1 to the total within the loop\n- displays the total",
+      "marks": 3,
+      "starter": "",
+      "scheme": "Award 1 mark for setting the total to 0.\nAward 1 mark for correctly initiating a loop that repeats 10 times.\nAward 1 mark for correctly updating the total (using either total = total + 1 or total += 1) within the loop and using print() to display the total outside of the loop.",
+      "example": "total = 0\n\nfor x in range(10):\n    total+=1\n\nprint(\"The total is \" + total)"
+    },
+    {
+      "label": "Exercise 2",
+      "prompt": "Write a program that will:\n- Ask the user for 5 numbers.\n- Add the numbers together using a running total.\n- Calculate and display the average (mean) of all the numbers (total/5).",
+      "marks": 3,
+      "starter": "",
+      "scheme": "Award 1 mark for setting the total to 0 and asking the user to input a number inside the loop.\nAward 1 mark for updating the total within the loop.\nAward 1 mark for calculating and displaying the average.",
+      "example": "total 0\n\nfor x in range(5):\n    number = int(input(\"Enter number \" + str(x+1) + \":\"))\n    total += number\n\naverage = total/5\nprint(\"The average is \" + str(average) + \".\")"
+    },
+    {
+      "label": "Exercise 3",
+      "prompt": "Modify the code you created from the previous question so that it will:\n- Ask you for the amount of numbers you want to get the average for\n- Ask you to enter that many numbers.\n- Calculate and display the average for that many numbers.",
+      "marks": 3,
+      "starter": "",
+      "scheme": "Award 1 mark for asking the user for the amount of numbers and then initialising a loop that repeats that many times.\nAward 1 mark for setting the total initially to 0, asking for a number and updating the total within the loop.\nAward 1 mark for calculating and displaying the average of all the numbers.",
+      "example": "total=0\namount = int(input(\"Enter the amount of numbers: ))\n\nfor x in range(amount):\n    number = int(input(\"Enter number \" + str(x+1) + \": \")\n    total += number\n\naverage = total/amount\nprint(\"The average is \" + str(average) + \".\")"
+    },
+    {
+      "label": "Exercise 4",
+      "prompt": "You have been asked to create a program for two companies: AlphaCorp and Beta Systems.  Both companies have a starting stock price of 100.  Your program must:\n- Ask for the price change in stock for each company 7 times, once for each day of the week (The stock price change is a number between -5 and 5).\n- Adjust the stock price for each company based on the number entered.\n- Display the stock price for each company at the end of the week.",
+      "marks": 4,
+      "starter": "",
+      "scheme": "Award 1 mark for setting the stock price of both companies to 100.\nAward 1 mark for initialising a loop that will run 7 times.\nAward 1 mark for asking for the change in stock price for each company within the loop and adjusting the value appropriately.\nAward 1 mark for displaying the final stock price for both companies.",
+      "example": "alphaStock = 100\nbetaStock = 100\n\nfor x in range(7):\n    adjustment = int(input(\"Enter the adjustment in stock price for AlphaCorp for Day \" + str(x+1) + \":\"))\n    alphaStock+=adjustment\n    adjustment = int(input(\"Enter the adjustment in stock price for BetaSystems for Day \" + str(x+1) + \":\"))\n    betaStock+=adjustment\n\nprint(\"The current stock value for AlphaCorp is £\" + str(alphaStock))\nprint(\"The current stock value for Beta Systems is £\" + str(betaStock))"
+    }
+  ]
+}

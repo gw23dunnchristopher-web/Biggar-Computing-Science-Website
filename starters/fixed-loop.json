@@ -1,0 +1,38 @@
+{
+  "type": "python-quiz",
+  "title": "Fixed Loops Quiz",
+  "questions": [
+    {
+      "label": "Exercise 1",
+      "prompt": "Write code that displays \"Programming is Cool!\" 5 times using a loop.",
+      "marks": 2,
+      "starter": "",
+      "scheme": "Award 1 mark for correctly using a loop to repeat the code 5 times.\nAward 1 mark for displaying the correct message - \"Programming is Cool!\" 5 times.",
+      "example": "for x in range(5):\n    print(\"Programming is Cool!\")"
+    },
+    {
+      "label": "Exercise 2",
+      "prompt": "Write code that displays your name 100 times.",
+      "marks": 2,
+      "starter": "",
+      "scheme": "Award 1 mark for using a fixed loop that repeats code 100 times.\nAward 1 mark for displaying a name within a message, 100 times.",
+      "example": "for x in range(100):\n    print(\"My name is Mr Dunn!\")"
+    },
+    {
+      "label": "Exercise 3",
+      "prompt": "Write code that will ask you for your favourite subject, and the number of times that you want to display it.  The program should then display the subject that many times.",
+      "marks": 3,
+      "starter": "",
+      "scheme": "Award 1 mark for code that asks the user for their favourite subject and the number of times they want to display it.\nAward 1 mark for a loop that repeats the number of times entered by the student.\nAward 1 mark for a message that displays the user's favourite subject.",
+      "example": "subject = input(\"Enter your favourite subject: \")\nloop = int(input(\"Enter the number of times you want to display it: \")\n\nfor x in range(loop):\n    print(\"My favourite subject is \" + subject + \".\")"
+    },
+    {
+      "label": "Exercise 4",
+      "prompt": "Write a program that will ask the user to enter a number, it will then display the times table (up to 20) for that number (you can add 1 to the iteration number and then multiply it by the number you entered).",
+      "marks": 3,
+      "starter": "",
+      "scheme": "Award 1 mark for asking the user to enter a number.\nAward 1 mark for using a loop that repeats 20 times.\nAward 1 mark for correctly calculating the times table within the loop using the iteration number.",
+      "example": "number = int(input(\"Enter a number: \"))\n\nfor x in range(20):\n    print(str(x+1) + \"x\" + str(number) + \"=\" + str((x+1)*number))"
+    }
+  ]
+}

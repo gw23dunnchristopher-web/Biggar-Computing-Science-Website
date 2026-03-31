@@ -6,10 +6,12 @@
         <title>N4 Computing Science - Fixed Loops</title>
         <script src="/JavaScript/N4Script.js"></script>
         <script src="/JavaScript/quiz.js"></script>
+        <script src="/JavaScript/codeRunner.js"></script>
         <link rel="stylesheet" href="/CSS/quiz.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/codeRunner.css" />
         <script>
             window.QUIZ_CONFIG = {
                     questions: [
@@ -200,12 +202,44 @@
                             the number to a string, and I have added 1 to the
                             number so that it starts at 1 instead of 0.
                         </p>
+
+                        <h2>Fixed loop using a Variable</h2>
+                        <p>You can also use a variable to set the number of times the loop will run. For example:</p>
+                        <div class="codeBox">
+                            <p>number_of_students = 10</p>
+                            <br>
+                            <p>for x in range(number_of_students):</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;mark = int(input("Enter
+                                student " + str(x+1) + "'s mark: "))
+                            </p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;print(mark)</p>
+                            <p>print("The loop has finished")</p>
+                        </div>
+                        
+                        <p>This uses the variable <span class="codeText">number_of_students</span> to 
+                        determine how many times the loop should repeat.  Note that you can even ask
+                        for the user to input the number of times they want it to repeat in this way. For example:
+                        </p>
+                        
+                        <div class="codeBox">
+                            <p>number_of_students = int(input("How many students are there? "))</p>
+                            <br>
+                            <p>for x in range(number_of_students):</p>
+                            <p>    &nbsp;&nbsp;&nbsp;&nbsp;mark = int(input("Enter
+                                student " + str(x+1) + "'s mark: "))
+                                </p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;print(mark)</p>
+                            <p>print("The loop has finished")</p>
+                        </div>
+                        
                         <h2>Fixed Loop Questions</h2>
                          <p>Answer the questions below before moving on.</p>
                          <div class="quiz-container"></div>
                         
                          <h2>Fixed Loop Exercises</h2>
                          <p>Complete the exercises below.</p>
+                        <div class="py-quiz" data-sandbox="fixed-loop"></div>
                     </div>
                 </div>
             </div>
