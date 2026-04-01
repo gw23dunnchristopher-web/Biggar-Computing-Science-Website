@@ -1,0 +1,5 @@
+
+User-agent: *
+Allow: /
+
+Sitemap: https://your-deployment-url.replit.app/sitemap.xml

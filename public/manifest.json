@@ -1,0 +1,17 @@
+
+{
+  "name": "Higher Computing Science Revision",
+  "short_name": "Higher CS",
+  "description": "Higher Computing Science exam revision with timed exams and practice questions",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#dc2626",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

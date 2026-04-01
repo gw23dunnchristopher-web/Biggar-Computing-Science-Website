@@ -4,6 +4,7 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { db, pool, hasDatabase } from './db';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { registerRoutes as registerRevisionRoutes } from './revision-routes';
 
 process.on('uncaughtException', (err) => {
   console.error('Uncaught exception:', err);
@@ -27,7 +28,7 @@ app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://texttospeech.googleapis.com https://generativelanguage.googleapis.com; frame-src https://trinket.io; media-src 'self' blob:");
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://static.cloudflareinsights.com blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://texttospeech.googleapis.com https://generativelanguage.googleapis.com https://api.groq.com; frame-src https://trinket.io; media-src 'self' blob: data: https:; worker-src 'self' blob:;");
   res.setHeader('Cache-Control', 'no-cache');
   next();
 });
@@ -972,6 +973,30 @@ if (hasDatabase) {
       console.error('Teacher account seeding failed:', err);
     }
   })();
+}
+
+// ---------------------------------------------------------------------------
+// Revision App — register API routes and serve built React SPA from /revision/
+// ---------------------------------------------------------------------------
+const revisionBuildDir = path.join(path.resolve('.'), 'public', 'revision');
+
+// Register revision API routes (auth, questions, assignments, classes, students…)
+// This must happen AFTER the existing BHS API routes so our /api/tts endpoint wins.
+registerRevisionRoutes(app).catch((err: Error) => {
+  console.error('Revision routes registration failed:', err);
+});
+
+// Serve the built revision React app as static files under /revision/
+if (fs.existsSync(revisionBuildDir)) {
+  app.use('/revision', express.static(revisionBuildDir, { dotfiles: 'deny' }));
+  // SPA fallback — any /revision/* URL that isn't a static asset gets index.html
+  app.get('/revision/*splat', (_req, res) => {
+    res.sendFile(path.join(revisionBuildDir, 'index.html'));
+  });
+} else {
+  app.get('/revision/*splat', (_req, res) => {
+    res.status(503).send('Revision app not built yet. Run: npm run build:revision');
+  });
 }
 
 app.listen(PORT, '0.0.0.0', () => {
