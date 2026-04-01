@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>N4 Computing Science - IF...ELIF...ELSE Statement</title>
+        <script src="/JavaScript/N4Script.js"></script>
+        <script src="/JavaScript/quiz.js"></script>
+        <script src="/JavaScript/codeRunner.js"></script>
+        <link rel="stylesheet" href="/CSS/quiz.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/codeRunner.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [],
+            };
+        </script>
+    </head>
+
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+            <header>
+                <h1>BHS Computing Science</h1>
+                <img src="/Images/Header/banner.png" />
+            </header>
+            <div id="pageContainer">
+                <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+                <div id="sidebar"></div>
+                <div id="content">
+                    <div id="mainHeading"><h1>National 4</h1></div>
+                    <div class="contentHeading">
+                        <h1>SDD - IF...ELIF...ELSE Statements</h1>
+                    </div>
+                    <div class="contentContainer">
+                        <table class="LIandSC">
+                            <tr>
+                                <th>Learning Intentions</th>
+                                <th>Success Criteria</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    We are learning about:
+                                    <ul>
+                                        <li>
+                                            Adding additional criteria to
+                                            selection statements.
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    I am looking for you to:
+                                    <ul>
+                                        <li>
+                                            Explain how to use ELIF in Python
+                                            and when you would use it.
+                                        </li>
+                                        <li>
+                                            Code a program which uses ELIF in
+                                            addition to IF and ELSE.
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                        <h2>Selection Recap</h2>
+                        <p>
+                            In the previous lesson, we looked at how to use IF
+                            and ELSE statements to make decisions in our
+                            programs. We saw that we can use IF statements to
+                            check if a condition is true, and if it is, we can
+                            run a block of code. If the condition is not true,
+                            we can use an ELSE statement to run a different
+                            block of code.
+                        </p>
+                        <p>For example:</p>
+                        <div class="codeBox">
+                            <p># Get the user's age</p>
+                            <p>age = int(input("Enter your age: "))</p>
+                            <br />
+                            <p># Check if the user is old enough to vote</p>
+                            <p>if age >= 18:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("You are old
+                                enough to vote")
+                            </p>
+                            <p>else:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("You are not old
+                                enough to vote")
+                            </p>
+                        </div>
+                        <p>
+                            This program will ask the user to enter their age,
+                            and then display a message depending on whether they
+                            are old enough to vote or not.
+                        </p>
+                        <p>
+                            If the user enters 18 or greater as their age, then
+                            the criteria in the if statement will be 'true',
+                            because the value stored in age is greater than or
+                            equal to 18. The program will display "You are old
+                            enough to vote".
+                        </p>
+                        <p>
+                            If the condition is not true, if the value stored in
+                            age is less than 18, then the program will display
+                            "You are not old enough to vote"
+                        </p>
+                        <h2>Using elif</h2>
+                        <p>
+                            However, some decisions have more outcomes than just
+                            being true or false. Sometimes you need to use more
+                            than just one criteria. For example, if you are
+                            grading an exam paper, then if the student gets 40%
+                            or more, they have acheived a D grade, but if they
+                            get 50% or more they have achieved a C grade.
+                            Further, 60% or more would be a B, and 70% or more
+                            would be an A.
+                        </p>
+                        <p>
+                            In this case, you could use an IF statement to check
+                            if the student got 70% or more, and if they did,
+                            then you could display a message saying that they
+                            have achieved an A grade. However, if they didn't
+                            get 70% or more, then you would need to check if
+                            they got 60% or more, and if they did, then you
+                            could display a message saying that they have
+                            achieved a B grade, and so on.
+                        </p>
+                        <p>
+                            To do this, you can use an ELIF statement. This
+                            stands for "else if". It allows you to check multiple
+                            conditions in a single IF statement. For example:
+                        </p>
+                        <div class="codeBox">
+                            <p># Get the student's mark</p>
+                            <p>mark = int(input("Enter your mark: "))</p>
+                            <br />
+                            <p># Check if the student got 70% or more</p>
+                            <p>if mark >= 70:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("You have achieved
+                                an A grade")
+                            </p>
+                            <p># Check if the student got 60% or more</p>
+                            <p>elif mark >= 60:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("You have achieved
+                                a B grade")
+                            </p>
+                            <p># Check if the student got 50% or more</p>
+                            <p>elif mark >= 50:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("You have achieved
+                                a C grade")
+                            </p>
+                            <p># Check if the student got 40% or more</p>
+                            <p>elif mark >= 40:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("You have achieved
+                                a D grade")
+                            </p>
+                            <p># If none of the above conditions are true</p>
+                            <p>else:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;print("You have failed
+                                the exam")
+                            </p>
+                        </div>
+                        <p>
+                            This program will ask the user to enter their mark,
+                            and then display a message depending on what grade
+                            they have achieved.
+                        </p>
+                        <p>
+                            You can see that the program checks each condition
+                            in turn. If the first condition is true, then the
+                            program will display the message for an A grade. If
+                            the first condition is not true, then the program
+                            will check the next condition, and so on. If none of
+                            the conditions are true, then the program will
+                            display the message for a fail.
+                        </p>
+                        <h2>Working Example</h2>
+                        
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div id="left">
+                    <p>Biggar High School</p>
+                    <p>Market Rd, Biggar</p>
+                    <p>ML12 6AG</p>
+                </div>
+                <div id="center"></div>
+                <div id="right">
+                    <p>&copy;C Dunn, 2025</p>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>

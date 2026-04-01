@@ -1,0 +1,38 @@
+{
+  "type": "python-quiz",
+  "title": "IF...ELSE... Quiz",
+  "questions": [
+    {
+      "label": "Exercise 1",
+      "prompt": "Write a program that:\n- Asks the user to enter their marks out of 100.\n- If the receive over 50 marks, the program will display \"You have passed!\"",
+      "marks": 2,
+      "starter": "",
+      "scheme": "1 Mark: Asking for an storing a mark from the user.\n1 Mark: Using an IF statement to check if the mark is over 50, and if it is displaying the appropriate message.",
+      "example": "marks = int(input(\"Enter your mark: \"))\n\nif mark > 50:\n    print(\"You have passed!\")"
+    },
+    {
+      "label": "Exercise 2",
+      "prompt": "Write code that will:\n- Ask for the user to enter their age.\n- If their age is 16 or more, it will display \"You are old enough to drive!\"\n- Otherwise, it will display \"You are not old enough to drive.\"",
+      "marks": 3,
+      "starter": "",
+      "scheme": "1 Mark: Asking for and storing the user's age.\n1 Mark: Using selection to display the appropriate message if the user's age >=16 (or >15).\n1 Mark: Using 'else:' to display a different message if the user's age is less than 16.",
+      "example": "age = int(input(\"Enter your age: \"))\n\nif age >= 16:\n    print(\"You are old enough to drive!\")\nelse:\n    print(\"You are not old enough to drive.\")"
+    },
+    {
+      "label": "Exercise 3",
+      "prompt": "Write a program that will:\n- Use a loop to get the user to enter the price of 3 meals.\n- Keep a running total of the cost.\n- If the cost is over £50, display a message telling the user that they qualify for a 10% discount.",
+      "marks": 4,
+      "starter": "",
+      "scheme": "1 Mark: Uses a fixed loop that repeats 3 times.\n1 Mark: Setting the total to 0, then asking for the cost of a meal and using it to update the total within the loop.\n1 Mark: Using selection with the correct condition (totalCost > 50)\n1 Mark: Displaying the appropriate message inside the selection statement (For example: \"You qualify for a 10% discount!\")",
+      "example": "totalCost = 0\n\nfor x in range(3):\n    meal = int(input(\"Enter the cost of meal \" + str(x+1) + \":\"))\n    totalCost += meal\n\nif totalCost > 50:\n    print(\"You qualify for a 10% discount!\")"
+    },
+    {
+      "label": "Exercise 4",
+      "prompt": "Write code that will:\n- Ask you for the number of possible marks for 3 separate tests.\n- Ask you for the number of marks you received in the 3 tests.\n- Calculate the percentage you received for each test ((marks/maxMarks )* 100)\n- The program will total the percentage marks and calculate the average (total/3)\n- If you have achieved 40% or more on average then the program will display \"OVERALL PASS!\"\n- If not, it will display \"Fail\".\n- If the average is over 40",
+      "marks": 6,
+      "starter": "",
+      "scheme": "1 Mark: Initialise a fixed loop that runs 4 times.\n1 Mark: Ask for the maximum marks and marks achieved inside the loop.\n1 Mark: Calculate the percentage mark inside the loop.\n1 Mark: Set the total to 0 before the loop, and add the percentage mark to it within the loop.\n1 Mark: Calculate the average (total/4)\n1 Mark: If the average >= 40, display \"OVERALL PASS!\", else display \"Fail\"",
+      "example": "total = 0\n\nfor x in range(3):\n    maxMarks = int(input(\"Enter the maximum marks for test \" + str(x+1) + \": \"))\n    marks = int(input(\"Enter the marks you achieved for test \" + str(x+1) + \": \"))\n  \n    percentMark = (marks/maxMarks) * 100\n    total += percentMark\n\naverage = total/4\n\nif average >= 40:\n    print(\"OVERALL PASS!\")\nelse:\n    print(\"Fail.\")"
+    }
+  ]
+}

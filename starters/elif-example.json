@@ -1,0 +1,7 @@
+{
+  "type": "python",
+  "title": "elif Example",
+  "files": {
+    "main.py": "\"\"\"\nWorking example of program using multiple conditions\n\n1. Try running the program and inputting different numbers to see what it does.\n2. Try changing the conditions to see if it changes how the program works.\n3. If you changed the second condition to check for a number higher than the top condition, what happens?\n\"\"\"\n\nmark = int(input(\"Enter your percentage mark: \"))\n\nif mark >= 70: \n    print(\"You got an A!\")\n\n\n\n"
+  }
+}

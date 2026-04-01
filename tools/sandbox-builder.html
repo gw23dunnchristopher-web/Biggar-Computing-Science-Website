@@ -344,7 +344,47 @@
         }
         .sb-out-err  { color: #f87171; }
         .sb-out-info { color: #8b949e; font-style: italic; }
+        /* ── CodeMirror overrides ── */
+        .CodeMirror {
+            flex: 1; min-height: 0; height: 100%;
+            font-family: 'Courier New', Consolas, monospace; font-size: 0.85rem; line-height: 1.6;
+        }
+        .CodeMirror-scroll { height: 100%; }
+
+        /* ── bhsdark theme ── */
+        .cm-s-bhsdark.CodeMirror        { background: #0d1117; color: #e6edf3; }
+        .cm-s-bhsdark .CodeMirror-gutters { background: #0d1117; border-right: 1px solid #21262d; }
+        .cm-s-bhsdark .CodeMirror-linenumber { color: #4d5566; padding: 0 8px 0 4px; }
+        .cm-s-bhsdark .CodeMirror-cursor { border-left: 2px solid #e6edf3; }
+        .cm-s-bhsdark .CodeMirror-selected,
+        .cm-s-bhsdark.CodeMirror-focused .CodeMirror-selected { background: #1f3f5f; }
+        .cm-s-bhsdark .cm-keyword    { color: #ff79c6; font-weight: bold; }
+        .cm-s-bhsdark .cm-def        { color: #50fa7b; }
+        .cm-s-bhsdark .cm-variable   { color: #f8f8f2; }
+        .cm-s-bhsdark .cm-variable-2 { color: #8be9fd; }
+        .cm-s-bhsdark .cm-number     { color: #bd93f9; }
+        .cm-s-bhsdark .cm-string     { color: #f1fa8c; }
+        .cm-s-bhsdark .cm-string-2   { color: #f1fa8c; }
+        .cm-s-bhsdark .cm-comment    { color: #6272a4; font-style: italic; }
+        .cm-s-bhsdark .cm-operator   { color: #ff79c6; }
+        .cm-s-bhsdark .cm-builtin    { color: #8be9fd; }
+        .cm-s-bhsdark .cm-atom       { color: #bd93f9; }
+        .cm-s-bhsdark .cm-tag        { color: #ff79c6; }
+        .cm-s-bhsdark .cm-attribute  { color: #50fa7b; }
+        .cm-s-bhsdark .cm-qualifier  { color: #50fa7b; }
+        .cm-s-bhsdark .cm-property   { color: #66d9ef; }
+        .cm-s-bhsdark .cm-meta       { color: #50fa7b; }
+        .cm-s-bhsdark .cm-error      { color: #ff5555; }
     </style>
+
+    <!-- CodeMirror 5 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/python/python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/xml/xml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/css/css.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
 </head>
 <body>
 
@@ -530,6 +570,31 @@
     var ftList         = document.getElementById('ftList');
     var addFileBtn     = document.getElementById('addFileBtn');
     var codeEditor     = document.getElementById('codeEditor');
+
+    /* ── CodeMirror instance ── */
+    var cmEditor = CodeMirror.fromTextarea(codeEditor, {
+        theme:          'bhsdark',
+        lineNumbers:    true,
+        indentUnit:     4,
+        tabSize:        4,
+        indentWithTabs: false,
+        extraKeys:      { Tab: 'indentMore', 'Shift-Tab': 'indentLess' },
+        lineWrapping:   false,
+        autofocus:      false,
+    });
+    cmEditor.setSize('100%', '100%');
+
+    function setEditorMode(filename) {
+        var mode = null;
+        if (filename) {
+            if      (filename.endsWith('.py'))   mode = 'python';
+            else if (filename.endsWith('.html')) mode = 'htmlmixed';
+            else if (filename.endsWith('.css'))  mode = 'css';
+            else if (filename.endsWith('.js'))   mode = 'javascript';
+        }
+        cmEditor.setOption('mode', mode);
+    }
+
     var uploadInput    = document.getElementById('uploadInput');
     var embedCode      = document.getElementById('embedCode');
     var copyEmbedBtn   = document.getElementById('copyEmbedBtn');
@@ -644,7 +709,7 @@
                 };
             });
         } else {
-            if (activeFile) snap.files[activeFile] = codeEditor.value;
+            if (activeFile) snap.files[activeFile] = cmEditor.getValue();
         }
         try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ snap: snap, activeFile: activeFile })); } catch (e) {}
         showDraftBadge(true);
@@ -839,7 +904,7 @@
 
     /* Bundle CSS/JS into the HTML so the iframe preview works */
     function buildPreviewHtml() {
-        var html = codeEditor.value;
+        var html = cmEditor.getValue();
         html = html.replace(/<link([^>]*)href=["']([^"']+)["']([^>]*)>/gi, function(match, pre, href, post) {
             if ((pre + post).toLowerCase().indexOf('stylesheet') !== -1 || href.endsWith('.css')) {
                 var css = current.files[href] || current.files[href.replace(/^\.\//, '')];
@@ -900,7 +965,7 @@
 
     runPreviewBtn.addEventListener('click', function() {
         if (!activeFile) return;
-        current.files[activeFile] = codeEditor.value;
+        current.files[activeFile] = cmEditor.getValue();
         if (activeFile.endsWith('.html')) {
             sbOutputPanel.style.display  = 'none';
             sbPreviewPanel.style.display = 'flex';
@@ -910,7 +975,7 @@
             sbPreviewPanel.style.display = 'none';
             sbOutputPanel.style.display  = 'flex';
             closeOutputBtn.style.display = '';
-            runPython(codeEditor.value);
+            runPython(cmEditor.getValue());
         }
     });
 
@@ -982,15 +1047,15 @@
                 delete current.files[name];
                 if (activeFile === name) activeFile = Object.keys(current.files)[0] || null;
                 renderFileTree();
-                if (activeFile) codeEditor.value = current.files[activeFile] || '';
+                if (activeFile) { cmEditor.setValue(current.files[activeFile] || ''); setEditorMode(activeFile); }
             });
         });
 
         if (activeFile && current.files[activeFile] !== undefined) {
-            codeEditor.value = current.files[activeFile];
+            cmEditor.setValue(current.files[activeFile]);
+            setEditorMode(activeFile);
         }
-        codeEditor.disabled = !activeFile || isBinary(activeFile);
-        codeEditor.placeholder = isBinary(activeFile) ? '(binary file — cannot edit as text)' : 'Select a file to edit…';
+        cmEditor.setOption('readOnly', (!activeFile || isBinary(activeFile)) ? 'nocursor' : false);
         updateCodeToolbar();
     }
 
@@ -999,7 +1064,7 @@
     }
 
     function switchFile(name) {
-        if (activeFile) current.files[activeFile] = codeEditor.value;
+        if (activeFile) current.files[activeFile] = cmEditor.getValue();
         activeFile = name;
         closePanels();
         renderFileTree();
@@ -1151,9 +1216,9 @@
         renderEmbed();
     });
 
-    /* ── auto-save draft on any input ── */
-    codeEditor.addEventListener('input', function () {
-        if (activeFile) current.files[activeFile] = codeEditor.value;
+    /* ── auto-save draft on any edit in CodeMirror ── */
+    cmEditor.on('change', function () {
+        if (activeFile) current.files[activeFile] = cmEditor.getValue();
         scheduleDraftSave();
     });
 
@@ -1171,7 +1236,7 @@
         if (current.type === 'python-quiz') {
             collectQuizData();
         } else {
-            if (activeFile) current.files[activeFile] = codeEditor.value;
+            if (activeFile) current.files[activeFile] = cmEditor.getValue();
         }
 
         var name = sbIdInput.value.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
