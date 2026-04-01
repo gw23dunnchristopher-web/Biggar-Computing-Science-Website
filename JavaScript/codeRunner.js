@@ -224,26 +224,44 @@
     /* Format marks count as "1 mark" or "N marks" */
     function marksText(n) { return (n === 1 ? '1 mark' : (n || 1) + ' marks'); }
 
-    /* Convert plain-text prompt (with newlines and "- bullet" lines) to HTML */
+    /* Convert plain-text prompt (with newlines and "- bullet" lines) to HTML.
+       Lines with 2+ leading spaces before the bullet marker are treated as
+       sub-bullets (second level). */
     function formatPromptHTML(text) {
         if (!text || !text.trim()) return '';
         var lines = text.split('\n');
-        var html = '', inList = false;
+        var html = '';
+        var depth = 0;  /* 0 = no list open, 1 = top-level <ul>, 2 = nested <ul> */
+
+        function closeTo(targetDepth) {
+            while (depth > targetDepth) {
+                html += '</ul>';
+                depth--;
+            }
+        }
+
         lines.forEach(function (line) {
-            var bullet = /^[-•*]\s+/.exec(line.trim());
+            var indent  = (line.match(/^(\s*)/) || ['',''])[1].length;
+            var trimmed = line.trim();
+            var bullet  = /^[-•*]\s+/.exec(trimmed);
+
             if (bullet) {
-                if (!inList) { html += '<ul class="pq-prompt-list">'; inList = true; }
-                html += '<li>' + escHtml(line.trim().slice(bullet[0].length)) + '</li>';
+                var lineDepth = indent >= 2 ? 2 : 1;
+                if (depth === 0) { html += '<ul class="pq-prompt-list">'; depth = 1; }
+                if (lineDepth === 2 && depth === 1) { html += '<ul class="pq-prompt-list pq-prompt-list--sub">'; depth = 2; }
+                if (lineDepth === 1 && depth === 2) { closeTo(1); }
+                html += '<li>' + escHtml(trimmed.slice(bullet[0].length)) + '</li>';
             } else {
-                if (inList) { html += '</ul>'; inList = false; }
-                if (line.trim() === '') {
+                closeTo(0);
+                if (trimmed === '') {
                     html += '<div class="pq-prompt-gap"></div>';
                 } else {
-                    html += '<p>' + escHtml(line.trim()) + '</p>';
+                    html += '<p>' + escHtml(trimmed) + '</p>';
                 }
             }
         });
-        if (inList) html += '</ul>';
+
+        closeTo(0);
         return html;
     }
 

@@ -1,0 +1,38 @@
+{
+  "type": "python-quiz",
+  "title": "Elif exercises",
+  "questions": [
+    {
+      "label": "Exercise 1",
+      "prompt": "Write a program the functions as a 'temperature advisor'.  The program should:\n- Ask the user to enter the temperature in Celcius.\n- Give the user advice based on the heat:\n   - 30 or more: \"It's a heatwave! Stay hydrated.\"\n   - 20 or more: \"Perfect weather for a park visit.\"\n   - 10 or more: \"A bit chilly, grab a jacket.\"\n   -  Below 10: \"It's freezing! Wear a coat and scarf.\"",
+      "marks": 5,
+      "starter": "#Use an if/elif/else statement to produce the output\n",
+      "scheme": "One mark for each of the following:\n- Correct use of int() or float() with an input() statement.\n- Correct check for temp >= 30.\n- Correct use of elif for 20 and 10 thresholds.\n- Conditions are checked from highest to lowest (30, then 20, then 10).\n- A final else or elif to handle temperatures below 10.",
+      "example": "temp = int(input(\"Enter the temperature in Celsius: \"))\n\nif temp >= 30:\n    print(\"It's a heatwave! Stay hydrated.\")\nelif temp >= 20:\n    print(\"Perfect weather for a park visit.\")\nelif temp >= 10:\n    print(\"A bit chilly, grab a jacket.\")\nelse:\n    print(\"It's freezing! Wear a coat and scarf.\")"
+    },
+    {
+      "label": "Exercise 2",
+      "prompt": "Ask the user to enter their age. The program will tell them the highest-rated movie they are allowed to see alone.\n- 18 or more: \"You can watch 18, 15, and 12 rated movies.\"\n- 15 or more: \"You can watch 15 and 12 rated movies.\"\n- 12 or more: \"You can watch 12 rated movies.\"\n- Under 12: \"You can only watch U or PG movies.\"",
+      "marks": 5,
+      "starter": "",
+      "scheme": "One mark for each of the following:\n- User age is captured as an integer.\n- Correct use of comparison operators (e.g., >= 18)\n- Uses if, elif, and else appropriately.\n- Each branch prints the correct specific message provided in the brief.\n- No redundant if statements (using a single selection block).",
+      "example": "age = int(input(\"Please enter your age: \"))\n\nif age >= 18:\n    print(\"You can watch 18, 15, and 12 rated movies.\")\nelif age >= 15:\n    print(\"You can watch 15 and 12 rated movies.\")\nelif age >= 12:\n    print(\"You can watch 12 rated movies.\")\nelse:\n    print(\"You can only watch U or PG movies.\")"
+    },
+    {
+      "label": "Exercise 3",
+      "prompt": "Create a program that asks the user to guess a secret \"Code Word.\" (For example, the code word is \"Python\").\n- If they guess \"Python\": \"Access Granted!\"\n- If they guess \"Java\": \"Wrong language, but close!\"\n- If they guess \"C++\": \"Too complex for this game!\"\n- Else: \"Access Denied. Unknown code word.\"",
+      "marks": 5,
+      "starter": "",
+      "scheme": "One mark for each of the following:\n- User input is captured as a string (no int() conversion).\n- Correct use of == to check against \"Python\", \"Java\", etc.\n- At least two elif statements used for the specific wrong guesses.\n- An else statement to handle any other unknown word.\n- Correct logic (e.g., acknowledging that \"python\" is different from \"Python\").",
+      "example": "guess = input(\"Enter the secret code word: \")\n\nif guess == \"Python\":\n    print(\"Access Granted!\")\nelif guess == \"Java\":\n    print(\"Wrong language, but close!\")\nelif guess == \"C++\":\n    print(\"Too complex for this game!\")\nelse:\n    print(\"Access Denied. Unknown code word.\")"
+    },
+    {
+      "label": "Exercise 4",
+      "prompt": "Ask the user to enter a number from 1 to 7 representing the day of the week (1 for Monday, 7 for Sunday).\n- 1 to 5: \"It's a school/work day.\"\n- 6 or 7: \"It's the weekend! Time to relax.\"\n- Any other number: \"Invalid input. Please enter a number between 1 and 7.\"",
+      "marks": 4,
+      "starter": "",
+      "scheme": "One mark for each of the following:\n- Number 1-7 captured and converted to an integer.\n- Checks for numbers > 7 first to filter out invalid high inputs.\n- Correctly orders thresholds (e.g., checking > 5 before > 0).\n- Uses a final else to catch numbers 0 or below as invalid.",
+      "example": "day = int(input(\"Enter a number (1-7): \"))\n\nif day > 7:\n    print(\"Invalid input. Too high!\")\nelif day > 5:\n    print(\"It's the weekend! Time to relax.\")\nelif day > 0:\n    print(\"It's a school/work day.\")\nelse:\n    print(\"Invalid input. Too low!\")"
+    }
+  ]
+}

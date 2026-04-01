@@ -14,7 +14,26 @@
         <link rel="stylesheet" href="/CSS/codeRunner.css" />
         <script>
             window.QUIZ_CONFIG = {
-                questions: [],
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: "State what the term <span class='codeText'>elif</span> stands for and explain its purpose within a program.",
+                        marks: 2,
+                        markingScheme: "1 Mark: Correctly stating that elif stands for 'else if', 1 Mark: Explaining that it allows the program to check multiple conditions (or criteria) in a single statement."
+                    },
+                    {
+                        type: "paragraph",
+                        text: "A user enters the number 55 into the grading program provided in the text. Identify which grade will be displayed on the screen.",
+                        marks: 1,
+                        markingScheme: "1 Mark: C grade (or 'You have achieved a C grade')."
+                    },
+                    {
+                        type: "paragraph",
+                        text: "In the grading program, why does the code check mark >= 70 before checking mark >= 60?",
+                        marks: 2,
+                        markingScheme: "1 Mark: For identifying that the program checks conditions in turn (top to bottom). 1 Mark: For explaining that if the lower condition (e.g., 60) was first, a student with 70 would be caught by the 60 condition and given the wrong grade (a B instead of an A) because the program stops checking once it finds a 'true' condition.)."
+                    },
+                ],
             };
         </script>
     </head>
@@ -185,7 +204,15 @@
                             display the message for a fail.
                         </p>
                         <h2>Working Example</h2>
-                        
+                        <p>Here is a working example of elif in action.  You can play around with it to see how it works:</p>
+                        <div class="py-runner" data-sandbox="elif-example"></div>
+
+                        <h2>Elif Questions</h2>
+                        <div class="quiz-container"></div>
+
+                        <h2>Elif Exercises</h2>
+                        <p>Try the following exercises to practice using elif statements:</p>
+                        <div class="py-quiz" data-sandbox="elif-exercise"></div>
                     </div>
                 </div>
             </div>

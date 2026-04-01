@@ -973,6 +973,11 @@
 .pq-prompt-list li {
     margin-bottom: 3px;
 }
+.pq-prompt-list--sub {
+    margin: 2px 0;
+    padding-left: 20px;
+    list-style-type: circle;
+}
 .pq-prompt-gap {
     height: 6px;
 }
