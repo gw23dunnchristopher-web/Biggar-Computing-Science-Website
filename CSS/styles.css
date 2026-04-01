@@ -994,10 +994,25 @@ ul li ul li ul li {
 
     .LIandSC td p,
     .LIandSC td li,
-    .LIandSC td ul {
+    .LIandSC td ul,
+    .LIandSC td ol {
         font-size: 15px !important;
         hyphens: none !important;
         max-width: none !important;
+    }
+
+    .LIandSC td ul,
+    .LIandSC td ol {
+        padding-left: 20px !important;
+        margin: 6px 0 !important;
+        list-style-position: outside !important;
+    }
+
+    .LIandSC td li {
+        padding-left: 0 !important;
+        margin: 4px 0 !important;
+        display: list-item !important;
+        list-style-type: disc !important;
     }
 
     /* Inject column headings as styled labels above each data cell */
