@@ -964,27 +964,41 @@ ul li ul li ul li {
 }
 
 @media (max-width: 600px) {
-    /* Stack the Learning Intentions / Success Criteria table vertically
-       on narrow screens — two 50% columns are too cramped on a phone. */
+    /* Stack the LI/SC table vertically on mobile and undo the aggressive
+       general table rules (max-width:120px, hyphens:auto) that squash it. */
     .LIandSC,
     .LIandSC thead,
     .LIandSC tbody,
     .LIandSC tr,
     .LIandSC th,
     .LIandSC td {
-        display: block;
-        width: 100%;
+        display: block !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
         box-sizing: border-box;
     }
 
     .LIandSC th {
         text-align: left;
-        padding: 10px 12px;
+        padding: 10px 12px !important;
+        font-size: 14px !important;
+        hyphens: none !important;
     }
 
     .LIandSC td {
-        padding: 12px;
+        padding: 12px !important;
         border-top: none;
+        font-size: 14px !important;
+        hyphens: none !important;
+    }
+
+    .LIandSC td p,
+    .LIandSC td li,
+    .LIandSC td ul {
+        font-size: 14px !important;
+        hyphens: none !important;
+        max-width: none !important;
     }
 }
 
