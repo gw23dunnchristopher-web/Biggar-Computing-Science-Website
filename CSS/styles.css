@@ -1003,16 +1003,25 @@ ul li ul li ul li {
 
     .LIandSC td ul,
     .LIandSC td ol {
-        padding-left: 20px !important;
+        padding-left: 0 !important;
         margin: 6px 0 !important;
-        list-style-position: outside !important;
+        list-style: none !important;
+        overflow: visible !important;
     }
 
     .LIandSC td li {
-        padding-left: 0 !important;
+        padding-left: 1.2em !important;
         margin: 4px 0 !important;
         display: list-item !important;
-        list-style-type: disc !important;
+        list-style: none !important;
+        position: relative !important;
+    }
+
+    .LIandSC td li::before {
+        content: "\2022";
+        position: absolute;
+        left: 0.2em;
+        color: inherit;
     }
 
     /* Inject column headings as styled labels above each data cell */
