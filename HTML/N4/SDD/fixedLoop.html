@@ -203,6 +203,31 @@
                             number so that it starts at 1 instead of 0.
                         </p>
 
+                        <h2>Setting a Start and End for range()</h2>
+                        <p>
+                            So far you have used <span class="codeText">range()</span> with a single number,
+                            for example <span class="codeText">range(10)</span>. This always starts counting
+                            from 0. You can also give <span class="codeText">range()</span> two numbers to
+                            control where it starts and where it stops:
+                        </p>
+                        <div class="codeBox">
+                            <p>range(start, stop)</p>
+                        </div>
+                        <p>
+                            The loop will begin at the <b>start</b> number and count up to, but not
+                            including, the <b>stop</b> number. For example,
+                            <span class="codeText">range(1, 11)</span> counts 1, 2, 3 … up to 10.
+                            This is useful when you want your loop counter to begin at 1 rather
+                            than 0, without having to add 1 to it yourself. For example:
+                        </p>
+                        <div class="codeBox">
+                            <p>for x in range(1, 11):</p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;print(x)</p>
+                        </div>
+                        <p>
+                            This will print the numbers 1 through to 10.
+                        </p>
+
                         <h2>Fixed loop using a Variable</h2>
                         <p>You can also use a variable to set the number of times the loop will run. For example:</p>
                         <div class="codeBox">
