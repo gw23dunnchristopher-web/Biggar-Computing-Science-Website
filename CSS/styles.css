@@ -964,16 +964,27 @@ ul li ul li ul li {
 }
 
 @media (max-width: 600px) {
-    .LIandSC {
-        font-size: 14px;
+    /* Stack the Learning Intentions / Success Criteria table vertically
+       on narrow screens — two 50% columns are too cramped on a phone. */
+    .LIandSC,
+    .LIandSC thead,
+    .LIandSC tbody,
+    .LIandSC tr,
+    .LIandSC th,
+    .LIandSC td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .LIandSC th {
-        padding: 8px 6px;
+        text-align: left;
+        padding: 10px 12px;
     }
 
     .LIandSC td {
-        padding: 10px 8px;
+        padding: 12px;
+        border-top: none;
     }
 }
 

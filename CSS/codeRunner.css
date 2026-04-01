@@ -1178,32 +1178,13 @@
 
 /* ── responsive ── */
 @media (max-width: 768px) {
-    /* Fix line-number misalignment on mobile.
-       iOS Safari auto-scales textarea font to 16px to prevent zoom;
-       force all three layers (gutter, textarea, highlight pre) to match. */
+    /* Hide the line-number gutter on mobile.
+       The editor uses white-space:pre-wrap so long lines wrap onto multiple
+       visual rows, but the gutter only counts logical lines — they cannot
+       stay aligned when wrapping is enabled. Hiding the gutter is the
+       cleanest solution; the code remains fully readable and functional. */
     .cr-line-numbers {
-        font-size: 16px;
-        line-height: 1.55;
-    }
-
-    .cr-editor {
-        font-size: 16px !important;
-        line-height: 1.55 !important;
-    }
-
-    .cr-hl-bg {
-        font-size: 16px !important;
-        line-height: 1.55 !important;
-    }
-
-    .cr-py-hl-wrap .cr-editor {
-        font-size: 16px !important;
-        line-height: 1.55 !important;
-    }
-
-    .cr-py-hl-wrap .cr-hl-bg {
-        font-size: 16px !important;
-        line-height: 1.55 !important;
+        display: none;
     }
 
     .code-runner {
