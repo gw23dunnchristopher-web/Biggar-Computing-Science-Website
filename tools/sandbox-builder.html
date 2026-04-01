@@ -378,13 +378,13 @@
     </style>
 
     <!-- CodeMirror 5 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/python/python.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/xml/xml.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/javascript/javascript.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/css/css.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css">
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/python/python.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/xml/xml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/javascript/javascript.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/css/css.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/htmlmixed/htmlmixed.js"></script>
 </head>
 <body>
 
@@ -570,21 +570,10 @@
     var ftList         = document.getElementById('ftList');
     var addFileBtn     = document.getElementById('addFileBtn');
     var codeEditor     = document.getElementById('codeEditor');
-
-    /* ── CodeMirror instance ── */
-    var cmEditor = CodeMirror.fromTextarea(codeEditor, {
-        theme:          'bhsdark',
-        lineNumbers:    true,
-        indentUnit:     4,
-        tabSize:        4,
-        indentWithTabs: false,
-        extraKeys:      { Tab: 'indentMore', 'Shift-Tab': 'indentLess' },
-        lineWrapping:   false,
-        autofocus:      false,
-    });
-    cmEditor.setSize('100%', '100%');
+    var cmEditor;   /* initialised after all other vars — see bottom of script */
 
     function setEditorMode(filename) {
+        if (!cmEditor || !cmEditor.setOption) return;
         var mode = null;
         if (filename) {
             if      (filename.endsWith('.py'))   mode = 'python';
@@ -1216,11 +1205,7 @@
         renderEmbed();
     });
 
-    /* ── auto-save draft on any edit in CodeMirror ── */
-    cmEditor.on('change', function () {
-        if (activeFile) current.files[activeFile] = cmEditor.getValue();
-        scheduleDraftSave();
-    });
+    /* ── auto-save draft: wired up inside initCodeMirror() at end of script ── */
 
     /* Quiz card inputs — delegated so it catches dynamically added cards */
     qcList.addEventListener('input', scheduleDraftSave);
@@ -1406,6 +1391,60 @@
         localStorage.removeItem('bhscs-teacher-auth');
         location.reload();
     });
+
+    /* ── CodeMirror initialisation (last — so login/other handlers always attach first) ── */
+    (function initCodeMirror() {
+        function wireChangeHandler() {
+            cmEditor.on('change', function () {
+                if (activeFile) current.files[activeFile] = cmEditor.getValue();
+                scheduleDraftSave();
+            });
+        }
+
+        /* Textarea-based fallback facade (Tab key + compatible API) */
+        function makeTextareaFallback() {
+            codeEditor.style.display = '';
+            codeEditor.addEventListener('keydown', function (e) {
+                if (e.key !== 'Tab') return;
+                e.preventDefault();
+                var s = codeEditor.selectionStart, end = codeEditor.selectionEnd;
+                codeEditor.value = codeEditor.value.substring(0, s) + '    ' + codeEditor.value.substring(end);
+                codeEditor.selectionStart = codeEditor.selectionEnd = s + 4;
+            });
+            return {
+                getValue:  function ()    { return codeEditor.value; },
+                setValue:  function (v)   { codeEditor.value = v; },
+                setOption: function (k,v) { if (k === 'readOnly') codeEditor.disabled = !!v; },
+                setSize:   function ()    {},
+                on:        function (evt, fn) { codeEditor.addEventListener('input', fn); }
+            };
+        }
+
+        if (typeof CodeMirror === 'undefined' || typeof CodeMirror.fromTextarea !== 'function') {
+            cmEditor = makeTextareaFallback();
+            wireChangeHandler();
+            return;
+        }
+
+        try {
+            cmEditor = CodeMirror.fromTextarea(codeEditor, {
+                theme:          'bhsdark',
+                lineNumbers:    true,
+                indentUnit:     4,
+                tabSize:        4,
+                indentWithTabs: false,
+                extraKeys:      { Tab: 'indentMore', 'Shift-Tab': 'indentLess' },
+                lineWrapping:   false,
+                autofocus:      false,
+            });
+            cmEditor.setSize('100%', '100%');
+            wireChangeHandler();
+        } catch (e) {
+            console.warn('CodeMirror init failed, falling back to plain textarea:', e);
+            cmEditor = makeTextareaFallback();
+            wireChangeHandler();
+        }
+    })();
 </script>
 
 </body>
