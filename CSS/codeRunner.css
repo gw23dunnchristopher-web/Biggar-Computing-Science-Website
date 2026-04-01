@@ -974,9 +974,12 @@
     margin-bottom: 3px;
 }
 .pq-prompt-list--sub {
-    margin: 2px 0;
+    margin: 0;
     padding-left: 20px;
-    list-style-type: circle;
+    list-style-type: square;
+}
+.pq-prompt-list--sub li:last-child {
+    margin-bottom: 0;
 }
 .pq-prompt-gap {
     height: 6px;

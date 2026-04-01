@@ -225,20 +225,15 @@
     function marksText(n) { return (n === 1 ? '1 mark' : (n || 1) + ' marks'); }
 
     /* Convert plain-text prompt (with newlines and "- bullet" lines) to HTML.
-       Lines with 2+ leading spaces before the bullet marker are treated as
-       sub-bullets (second level). */
+       Lines with 2+ leading spaces before the bullet marker are sub-bullets.
+       Sub-lists are nested inside their parent <li> (valid HTML) so there is
+       no gap between a parent bullet and the bullets beneath it. */
     function formatPromptHTML(text) {
         if (!text || !text.trim()) return '';
-        var lines = text.split('\n');
-        var html = '';
-        var depth = 0;  /* 0 = no list open, 1 = top-level <ul>, 2 = nested <ul> */
-
-        function closeTo(targetDepth) {
-            while (depth > targetDepth) {
-                html += '</ul>';
-                depth--;
-            }
-        }
+        var lines  = text.split('\n');
+        var html   = '';
+        var depth  = 0;      /* 0=no list, 1=top-level list, 2=nested list */
+        var liOpen = false;  /* true when depth-1 <li> has not been closed yet */
 
         lines.forEach(function (line) {
             var indent  = (line.match(/^(\s*)/) || ['',''])[1].length;
@@ -246,13 +241,36 @@
             var bullet  = /^[-•*]\s+/.exec(trimmed);
 
             if (bullet) {
+                var content   = trimmed.slice(bullet[0].length);
                 var lineDepth = indent >= 2 ? 2 : 1;
-                if (depth === 0) { html += '<ul class="pq-prompt-list">'; depth = 1; }
-                if (lineDepth === 2 && depth === 1) { html += '<ul class="pq-prompt-list pq-prompt-list--sub">'; depth = 2; }
-                if (lineDepth === 1 && depth === 2) { closeTo(1); }
-                html += '<li>' + escHtml(trimmed.slice(bullet[0].length)) + '</li>';
+
+                if (lineDepth === 1) {
+                    /* Close any open sub-list, then the previous top-level li */
+                    if (depth === 2) { html += '</ul>'; depth = 1; }
+                    if (liOpen)      { html += '</li>'; liOpen = false; }
+                    /* Open the outer list if needed */
+                    if (depth === 0) { html += '<ul class="pq-prompt-list">'; depth = 1; }
+                    /* Open a new li but leave it unclosed — it may receive a sub-list */
+                    html += '<li>' + escHtml(content);
+                    liOpen = true;
+                } else {
+                    /* Sub-bullet: place the sub-<ul> inside the current open <li> */
+                    if (depth === 0) {
+                        html += '<ul class="pq-prompt-list"><li>';
+                        depth = 1; liOpen = true;
+                    }
+                    if (depth === 1) {
+                        html += '<ul class="pq-prompt-list pq-prompt-list--sub">';
+                        depth = 2;
+                    }
+                    html += '<li>' + escHtml(content) + '</li>';
+                }
             } else {
-                closeTo(0);
+                /* Non-bullet: close all open structures */
+                if (depth === 2) { html += '</ul>'; depth = 1; }
+                if (liOpen)      { html += '</li>'; liOpen = false; }
+                if (depth === 1) { html += '</ul>'; depth = 0; }
+
                 if (trimmed === '') {
                     html += '<div class="pq-prompt-gap"></div>';
                 } else {
@@ -261,7 +279,11 @@
             }
         });
 
-        closeTo(0);
+        /* Close any remaining open structures */
+        if (depth === 2) { html += '</ul>'; }
+        if (liOpen)      { html += '</li>'; }
+        if (depth >= 1)  { html += '</ul>'; }
+
         return html;
     }
 
