@@ -1,0 +1,7 @@
+{
+  "type": "python",
+  "title": "Running Total Example",
+  "files": {
+    "main.py": "\"\"\"\nWorking example of a running total\n\n1. Run the program and enter 3 item prices to see the total.\n2. Try changing range(3) to range(5) to add more items.\n3. What would happen if you removed the line 'total = 0' at the start?\n\"\"\"\n\n# Initialise the running total to 0 before the loop\ntotal = 0\n\nfor i in range(3):\n    price = float(input(\"Enter the price of item \" + str(i + 1) + \": \"))\n    total = total + price\n    print(\"Running total so far: \" + str(round(total, 2)))\n\nprint(\"The total cost of all items is: \" + str(round(total, 2)))\n"
+  }
+}

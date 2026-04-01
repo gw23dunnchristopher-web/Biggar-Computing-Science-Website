@@ -1,0 +1,7 @@
+{
+  "type": "python",
+  "title": "IF...ELSE Example",
+  "files": {
+    "main.py": "\"\"\"\nWorking example of an IF...ELSE statement\n\n1. Run the program and enter your age.\n2. Try changing >= 18 to > 18 - what is different?\n3. Try adding an elif to handle a different age group.\n\"\"\"\n\nage = int(input(\"Enter your age: \"))\n\nif age >= 18:\n    print(\"You are old enough to vote.\")\nelse:\n    years_left = 18 - age\n    print(\"You are not old enough to vote yet.\")\n    print(\"You need to wait \" + str(years_left) + \" more year(s).\")\n"
+  }
+}

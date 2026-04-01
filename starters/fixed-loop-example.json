@@ -1,0 +1,7 @@
+{
+  "type": "python",
+  "title": "Fixed Loop Example",
+  "files": {
+    "main.py": "\"\"\"\nWorking example of a fixed loop\n\n1. Run the program and enter a number to see its times table.\n2. Try changing range(1, 11) to range(1, 6) - what changes?\n3. What happens if you remove the str(x+1) and just use x?\n\"\"\"\n\nnumber = int(input(\"Enter a number to see its times table: \"))\n\nfor x in range(1, 11):\n    result = number * x\n    print(str(number) + \" x \" + str(x) + \" = \" + str(result))\n\nprint(\"Times table complete!\")\n"
+  }
+}
