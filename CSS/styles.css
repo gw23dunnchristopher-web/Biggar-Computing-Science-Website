@@ -963,6 +963,20 @@ ul li ul li ul li {
     vertical-align: top;
 }
 
+@media (max-width: 600px) {
+    .LIandSC {
+        font-size: 14px;
+    }
+
+    .LIandSC th {
+        padding: 8px 6px;
+    }
+
+    .LIandSC td {
+        padding: 10px 8px;
+    }
+}
+
 @media (max-width: 768px) {
     .example {
         width: 90%;

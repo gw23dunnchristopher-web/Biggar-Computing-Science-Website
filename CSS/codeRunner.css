@@ -1178,6 +1178,34 @@
 
 /* ── responsive ── */
 @media (max-width: 768px) {
+    /* Fix line-number misalignment on mobile.
+       iOS Safari auto-scales textarea font to 16px to prevent zoom;
+       force all three layers (gutter, textarea, highlight pre) to match. */
+    .cr-line-numbers {
+        font-size: 16px;
+        line-height: 1.55;
+    }
+
+    .cr-editor {
+        font-size: 16px !important;
+        line-height: 1.55 !important;
+    }
+
+    .cr-hl-bg {
+        font-size: 16px !important;
+        line-height: 1.55 !important;
+    }
+
+    .cr-py-hl-wrap .cr-editor {
+        font-size: 16px !important;
+        line-height: 1.55 !important;
+    }
+
+    .cr-py-hl-wrap .cr-hl-bg {
+        font-size: 16px !important;
+        line-height: 1.55 !important;
+    }
+
     .code-runner {
         width: 100%;
         border-radius: 0;
