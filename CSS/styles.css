@@ -964,13 +964,14 @@ ul li ul li ul li {
 }
 
 @media (max-width: 600px) {
-    /* Stack the LI/SC table vertically on mobile and undo the aggressive
-       general table rules (max-width:120px, hyphens:auto) that squash it. */
+    /* Stack the LI/SC table vertically on mobile.
+       Hide the original header row and re-inject labels via ::before so the
+       order becomes: [LI heading] → LI content → [SC heading] → SC content. */
+
+    /* Override the aggressive general mobile table rules for this table */
     .LIandSC,
-    .LIandSC thead,
     .LIandSC tbody,
     .LIandSC tr,
-    .LIandSC th,
     .LIandSC td {
         display: block !important;
         width: 100% !important;
@@ -979,26 +980,47 @@ ul li ul li ul li {
         box-sizing: border-box;
     }
 
-    .LIandSC th {
-        text-align: left;
-        padding: 10px 12px !important;
-        font-size: 14px !important;
-        hyphens: none !important;
+    /* Hide the original <th> header row */
+    .LIandSC tr:first-child {
+        display: none !important;
     }
 
     .LIandSC td {
         padding: 12px !important;
-        border-top: none;
-        font-size: 14px !important;
+        font-size: 15px !important;
         hyphens: none !important;
+        border-top: none;
     }
 
     .LIandSC td p,
     .LIandSC td li,
     .LIandSC td ul {
-        font-size: 14px !important;
+        font-size: 15px !important;
         hyphens: none !important;
         max-width: none !important;
+    }
+
+    /* Inject column headings as styled labels above each data cell */
+    .LIandSC td:first-child::before {
+        content: "Learning Intentions";
+        display: block;
+        background-color: #182c62;
+        color: white;
+        font-weight: bold;
+        font-size: 15px;
+        padding: 10px 12px;
+        margin: -12px -12px 12px -12px;
+    }
+
+    .LIandSC td:last-child::before {
+        content: "Success Criteria";
+        display: block;
+        background-color: #182c62;
+        color: white;
+        font-weight: bold;
+        font-size: 15px;
+        padding: 10px 12px;
+        margin: -12px -12px 12px -12px;
     }
 }
 
