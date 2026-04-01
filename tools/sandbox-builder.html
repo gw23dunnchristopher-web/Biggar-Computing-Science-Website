@@ -324,7 +324,7 @@
         }
         .ct-close-btn:hover { background: #30363d; color: #e6edf3; }
         /* ── split: editor + panel ── */
-        .code-main { flex: 1; display: flex; overflow: hidden; }
+        .code-main { flex: 1; display: flex; overflow: hidden; position: relative; }
         /* ── shared panel styles ── */
         .sb-preview-panel, .sb-output-panel {
             flex: 1; display: flex; flex-direction: column;
@@ -344,47 +344,17 @@
         }
         .sb-out-err  { color: #f87171; }
         .sb-out-info { color: #8b949e; font-style: italic; }
-        /* ── CodeMirror overrides ── */
-        .CodeMirror {
-            flex: 1; min-height: 0; height: 100%;
-            font-family: 'Courier New', Consolas, monospace; font-size: 0.85rem; line-height: 1.6;
-        }
-        .CodeMirror-scroll { height: 100%; }
-
-        /* ── bhsdark theme ── */
-        .cm-s-bhsdark.CodeMirror        { background: #0d1117; color: #e6edf3; }
-        .cm-s-bhsdark .CodeMirror-gutters { background: #0d1117; border-right: 1px solid #21262d; }
-        .cm-s-bhsdark .CodeMirror-linenumber { color: #4d5566; padding: 0 8px 0 4px; }
-        .cm-s-bhsdark .CodeMirror-cursor { border-left: 2px solid #e6edf3; }
-        .cm-s-bhsdark .CodeMirror-selected,
-        .cm-s-bhsdark.CodeMirror-focused .CodeMirror-selected { background: #1f3f5f; }
-        .cm-s-bhsdark .cm-keyword    { color: #ff79c6; font-weight: bold; }
-        .cm-s-bhsdark .cm-def        { color: #50fa7b; }
-        .cm-s-bhsdark .cm-variable   { color: #f8f8f2; }
-        .cm-s-bhsdark .cm-variable-2 { color: #8be9fd; }
-        .cm-s-bhsdark .cm-number     { color: #bd93f9; }
-        .cm-s-bhsdark .cm-string     { color: #f1fa8c; }
-        .cm-s-bhsdark .cm-string-2   { color: #f1fa8c; }
-        .cm-s-bhsdark .cm-comment    { color: #6272a4; font-style: italic; }
-        .cm-s-bhsdark .cm-operator   { color: #ff79c6; }
-        .cm-s-bhsdark .cm-builtin    { color: #8be9fd; }
-        .cm-s-bhsdark .cm-atom       { color: #bd93f9; }
-        .cm-s-bhsdark .cm-tag        { color: #ff79c6; }
-        .cm-s-bhsdark .cm-attribute  { color: #50fa7b; }
-        .cm-s-bhsdark .cm-qualifier  { color: #50fa7b; }
-        .cm-s-bhsdark .cm-property   { color: #66d9ef; }
-        .cm-s-bhsdark .cm-meta       { color: #50fa7b; }
-        .cm-s-bhsdark .cm-error      { color: #ff5555; }
+        /* ── Ace editor container ── */
+        #aceEditorDiv { flex: 1; overflow: hidden; font-size: 0.85rem; }
     </style>
 
-    <!-- CodeMirror 5 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css">
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/python/python.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/xml/xml.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/javascript/javascript.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/css/css.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/htmlmixed/htmlmixed.js"></script>
+    <!-- Ace Editor (uses window.ace — no conflict with Replit's CodeMirror global) -->
+    <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.36.5/src-noconflict/ace.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.36.5/src-noconflict/theme-tomorrow_night.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.36.5/src-noconflict/mode-python.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.36.5/src-noconflict/mode-html.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.36.5/src-noconflict/mode-css.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.36.5/src-noconflict/mode-javascript.js"></script>
 </head>
 <body>
 
@@ -1392,8 +1362,15 @@
         location.reload();
     });
 
-    /* ── CodeMirror initialisation (last — so login/other handlers always attach first) ── */
-    (function initCodeMirror() {
+    /* ── Editor initialisation (last — so login/other handlers always attach first) ── */
+    (function initEditor() {
+        var ACE_MODE = {
+            'python':    'ace/mode/python',
+            'htmlmixed': 'ace/mode/html',
+            'css':       'ace/mode/css',
+            'javascript':'ace/mode/javascript',
+        };
+
         function wireChangeHandler() {
             cmEditor.on('change', function () {
                 if (activeFile) current.files[activeFile] = cmEditor.getValue();
@@ -1401,7 +1378,7 @@
             });
         }
 
-        /* Textarea-based fallback facade (Tab key + compatible API) */
+        /* Textarea-based fallback (Tab key + compatible API) */
         function makeTextareaFallback() {
             codeEditor.style.display = '';
             codeEditor.addEventListener('keydown', function (e) {
@@ -1420,27 +1397,47 @@
             };
         }
 
-        if (typeof CodeMirror === 'undefined' || typeof CodeMirror.fromTextarea !== 'function') {
+        /* Try Ace Editor (window.ace — no conflict with Replit's CodeMirror global) */
+        if (typeof ace === 'undefined' || typeof ace.edit !== 'function') {
             cmEditor = makeTextareaFallback();
             wireChangeHandler();
             return;
         }
 
         try {
-            cmEditor = CodeMirror.fromTextarea(codeEditor, {
-                theme:          'bhsdark',
-                lineNumbers:    true,
-                indentUnit:     4,
-                tabSize:        4,
-                indentWithTabs: false,
-                extraKeys:      { Tab: 'indentMore', 'Shift-Tab': 'indentLess' },
-                lineWrapping:   false,
-                autofocus:      false,
+            ace.config.set('useWorker', false);  /* disable web workers — avoids extra CSP rules */
+
+            var aceDiv = document.createElement('div');
+            aceDiv.id  = 'aceEditorDiv';
+            codeEditor.parentNode.insertBefore(aceDiv, codeEditor.nextSibling);
+            codeEditor.style.display = 'none';
+
+            var aceInst = ace.edit(aceDiv);
+            aceInst.setTheme('ace/theme/tomorrow_night');
+            aceInst.setOptions({
+                showPrintMargin:      false,
+                displayIndentGuides:  false,
+                fontSize:             '0.85rem',
+                fontFamily:           "'Courier New', Consolas, monospace",
+                tabSize:              4,
+                useSoftTabs:          true,
+                highlightActiveLine:  true,
+                showGutter:           true,
             });
-            cmEditor.setSize('100%', '100%');
+
+            cmEditor = {
+                getValue:  function ()    { return aceInst.getValue(); },
+                setValue:  function (v)   { aceInst.setValue(v, -1); },  /* -1 = move cursor to start */
+                setOption: function (k,v) {
+                    if (k === 'readOnly') { aceInst.setReadOnly(!!v); return; }
+                    if (k === 'mode')     { aceInst.getSession().setMode(ACE_MODE[v] || 'ace/mode/text'); }
+                },
+                setSize:   function ()    {},
+                on:        function (evt, fn) { if (evt === 'change') aceInst.on('change', fn); }
+            };
             wireChangeHandler();
         } catch (e) {
-            console.warn('CodeMirror init failed, falling back to plain textarea:', e);
+            console.warn('Ace init failed, falling back to plain textarea:', e);
             cmEditor = makeTextareaFallback();
             wireChangeHandler();
         }
