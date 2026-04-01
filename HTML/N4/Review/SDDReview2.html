@@ -11,15 +11,173 @@
         <link rel="stylesheet" href="/CSS/quiz.css" />
         <script>
             window.QUIZ_CONFIGS = {
-                analysis: {
+                readableCode: {
                     questions: [
-                            
+                        {
+                            type: "paragraph",
+                            text: "Explain why it is important to write readable code. Give two specific ways a programmer can make their code easier to read.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for each valid point to a maximum of 2 marks. Accept any two of: using descriptive variable names, adding comments, using consistent indentation, breaking code into logical sections, avoiding unnecessary complexity. Student wording may vary — look for the meaning.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "In Python, what character is placed at the start of a line to mark it as a comment? Explain why comments are useful.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for correctly identifying the # (hash) character. Award 1 mark for a valid explanation such as: comments explain what the code does, making it easier for other programmers (or yourself later) to understand it.",
+                        },
+                        {
+                            type: "table",
+                            text: "A programmer has used the variable names shown in the table below. For each one, decide whether it is a good or poor choice of name and explain why.",
+                            marks: 4,
+                            markingScheme: "Award 1 mark per row for a correct judgement and a valid reason. x = poor (not descriptive, does not explain what it stores). student_score = good (clearly describes what the variable holds). a = poor (single letter, gives no information about its purpose). total_price = good (clearly describes what is being stored).",
+                            tableHeaders: ["Variable Name", "Good or Poor?", "Reason"],
+                            columnWidths: ["30%", "20%", "50%"],
+                            tableRows: [
+                                ["x", "", ""],
+                                ["student_score", "", ""],
+                                ["a", "", ""],
+                                ["total_price", "", ""],
+                            ],
+                        },
                     ],
                 },
-                design: {
+                inputOutput: {
                     questions: [
-                       ],
-                    
+                        {
+                            type: "pseudocode",
+                            text: "Write the line of Python code that asks the user to enter their age and stores it as an integer in a variable called <span class='codeText'>age</span>.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for correct use of input() with a sensible prompt string. Award 1 mark for correctly wrapping input() with int() and assigning to the variable age. The correct answer is: age = int(input(\"Enter your age: \"))",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "Explain why it is necessary to use <span class='codeText'>int()</span> when collecting a number from the user with <span class='codeText'>input()</span>.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for identifying that input() always returns a string (text), even if the user types a number. Award 1 mark for explaining that int() converts the string to an integer so that it can be used in calculations.",
+                        },
+                        {
+                            type: "pseudocode",
+                            text: ["A program stores a student's first name in a variable called <span class='codeText'>first_name</span> and their exam score in a variable called <span class='codeText'>score</span>.", "Write a single line of code that displays the following output (replacing the values with the actual variables):", "Name: Alice, Score: 85"],
+                            marks: 2,
+                            markingScheme: "Award 1 mark for correctly using print(). Award 1 mark for correctly combining the variables and string labels in the output, for example: print(\"Name: \" + first_name + \", Score: \" + str(score)) or print(\"Name:\", first_name, \", Score:\", score).",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "A student writes <span class='codeText'>print(\"The answer is: \" + 42)</span>. Explain why this line of code would cause an error, and write the corrected version.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for explaining that you cannot concatenate a string and an integer directly in Python. Award 1 mark for the corrected code: print(\"The answer is: \" + str(42)) or print(\"The answer is:\", 42).",
+                        },
+                    ],
+                },
+                arithmetic: {
+                    questions: [
+                        {
+                            type: "table",
+                            text: "Complete the table by writing the result that each Python calculation would produce.",
+                            marks: 5,
+                            markingScheme: "Award 1 mark per correct answer. 10 + 3 = 13, 10 - 3 = 7, 10 * 3 = 30, 10 / 4 = 2.5, 10 // 4 = 2, 10 % 3 = 1, 2 ** 4 = 16.",
+                            tableHeaders: ["Calculation", "Result"],
+                            columnWidths: ["50%", "50%"],
+                            tableRows: [
+                                ["10 + 3", ""],
+                                ["10 - 3", ""],
+                                ["10 * 3", ""],
+                                ["10 / 4", ""],
+                                ["10 // 4", ""],
+                                ["10 % 3", ""],
+                                ["2 ** 4", ""],
+                            ],
+                        },
+                        {
+                            type: "paragraph",
+                            text: "Explain the difference between the <span class='codeText'>/</span> operator and the <span class='codeText'>//</span> operator in Python. Give an example of each.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for identifying that / produces a decimal (float) result, e.g. 7 / 2 = 3.5. Award 1 mark for identifying that // performs integer/floor division and discards the remainder, e.g. 7 // 2 = 3.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "What does the <span class='codeText'>%</span> (modulo) operator return? Describe one situation in a program where this operator would be useful.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for correctly stating that the modulo operator returns the remainder after division (e.g. 10 % 3 = 1). Award 1 mark for a valid use case, such as: checking whether a number is even or odd (num % 2 == 0), checking divisibility, wrapping values around a range, etc.",
+                        },
+                        {
+                            type: "pseudocode",
+                            text: "Write a line of Python code that calculates the area of a rectangle. The width is stored in a variable called <span class='codeText'>width</span> and the height is stored in <span class='codeText'>height</span>. Store the result in a variable called <span class='codeText'>area</span>.",
+                            marks: 1,
+                            markingScheme: "Award 1 mark for: area = width * height",
+                        },
+                    ],
+                },
+                loopsTotal: {
+                    questions: [
+                        {
+                            type: "paragraph",
+                            text: "Explain what a fixed loop is and give one example of when you would use one in a program.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for a correct definition, e.g. 'A loop that repeats a section of code a set number of times (when you know in advance how many repetitions are needed).' Award 1 mark for any valid example, such as: asking for marks from 10 students, printing a times table, processing a fixed number of items.",
+                        },
+                        {
+                            type: "table",
+                            text: "Complete the table by writing the sequence of numbers that each <span class='codeText'>range()</span> call would produce.",
+                            marks: 3,
+                            markingScheme: "Award 1 mark per correct answer. range(4) = 0, 1, 2, 3. range(1, 6) = 1, 2, 3, 4, 5. range(0, 10, 2) = 0, 2, 4, 6, 8.",
+                            tableHeaders: ["range() call", "Numbers produced"],
+                            columnWidths: ["40%", "60%"],
+                            tableRows: [
+                                ["range(4)", ""],
+                                ["range(1, 6)", ""],
+                                ["range(0, 10, 2)", ""],
+                            ],
+                        },
+                        {
+                            type: "pseudocode",
+                            text: "Write a program that asks the user to enter 4 numbers and uses a fixed loop and a running total to calculate and display their sum.",
+                            marks: 4,
+                            markingScheme: "Award 1 mark for initialising the total to 0 before the loop. Award 1 mark for a correct for loop using range(4). Award 1 mark for collecting a number from the user inside the loop using input() and int(). Award 1 mark for correctly updating the running total inside the loop and displaying the final result after the loop.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "A student forgets to initialise their running total variable to 0 before the loop begins. Explain why this would cause their program to crash on the first iteration.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for identifying that the variable does not yet exist (or has no value/type) when the loop first tries to add to it. Award 1 mark for explaining that Python cannot add a number to a variable that has not been given a value — it has no 'starting point' for the calculation.",
+                        },
+                    ],
+                },
+                selection: {
+                    questions: [
+                        {
+                            type: "table",
+                            text: "Match each Python comparison operator to its correct meaning.",
+                            marks: 4,
+                            markingScheme: "Award 1 mark per correct row. == Equal to, != Not equal to, >= Greater than or equal to, < Less than.",
+                            tableHeaders: ["Operator", "Meaning"],
+                            columnWidths: ["30%", "70%"],
+                            tableRows: [
+                                ["==", ""],
+                                ["!=", ""],
+                                [">=", ""],
+                                ["<", ""],
+                            ],
+                        },
+                        {
+                            type: "paragraph",
+                            text: ["A teacher uses <span class='codeText'>if score > 50:</span> to award a pass.", ["A student who scored exactly 50 is told they have failed.", "The teacher changes the condition to <span class='codeText'>if score >= 50:</span>."], "Explain why the second version is fairer, using the terms <b>exclusive</b> and <b>inclusive</b>."],
+                            marks: 2,
+                            markingScheme: "Award 1 mark for explaining that > is exclusive — the boundary value (50) is not included, so a score of exactly 50 returns False. Award 1 mark for explaining that >= is inclusive — the boundary value is included, so a score of exactly 50 returns True and the student passes.",
+                        },
+                        {
+                            type: "pseudocode",
+                            text: "Write a program that asks the user to enter a number and then displays 'Positive' if the number is greater than 0, 'Negative' if it is less than 0, or 'Zero' if it is exactly 0.",
+                            marks: 3,
+                            markingScheme: "Award 1 mark for correctly using if with > 0 and printing 'Positive'. Award 1 mark for correctly using elif with < 0 and printing 'Negative'. Award 1 mark for correctly using else and printing 'Zero'.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "What does <span class='codeText'>elif</span> stand for, and when would you use it in a program instead of just using a separate <span class='codeText'>if</span> statement?",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for correctly stating that elif stands for 'else if'. Award 1 mark for explaining that elif is used when there are more than two possible outcomes — it only runs if the previous if (or elif) condition was False, whereas a separate if would always be checked regardless of earlier conditions.",
+                        },
+                    ],
                 },
             };
         </script>
@@ -40,9 +198,7 @@
                 <div id="content">
                     <div id="mainHeading"><h1>National 4</h1></div>
                     <div class="contentHeading">
-                        <h1>
-                            SDD Review 2 - Basic Coding and Coding Constructs
-                        </h1>
+                        <h1>SDD Review 2 - Basic Coding and Coding Constructs</h1>
                     </div>
                     <div class="contentContainer">
                         <p>
@@ -52,18 +208,16 @@
                             you can use the sidebar to navigate to the relevant
                             page.
                         </p>
-                        <h2>Analysis</h2>
-                        <div
-                            data-quiz-id="analysis"
-                            class="quiz-container"
-                        ></div>
-                        <h2>Basic Coding</h2>
-                        <div data-quiz-id="design" class="quiz-container"></div>
-                        <h2>Coding Constructs</h2>
-                        <div
-                            data-quiz-id="variables"
-                            class="quiz-container"
-                        ></div>
+                        <h2>Readable Code</h2>
+                        <div data-quiz-id="readableCode" class="quiz-container"></div>
+                        <h2>Input and Output</h2>
+                        <div data-quiz-id="inputOutput" class="quiz-container"></div>
+                        <h2>Arithmetic</h2>
+                        <div data-quiz-id="arithmetic" class="quiz-container"></div>
+                        <h2>Fixed Loops and Running Total</h2>
+                        <div data-quiz-id="loopsTotal" class="quiz-container"></div>
+                        <h2>Selection</h2>
+                        <div data-quiz-id="selection" class="quiz-container"></div>
                     </div>
                 </div>
             </div>
