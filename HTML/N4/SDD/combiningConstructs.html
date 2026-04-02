@@ -45,19 +45,15 @@
                         ],
                     },
                     {
-                        type: "pseudocode",
+                        type: "paragraph",
                         text: [
-                            "Write a Python program that does the following:",
-                            [
-                                "Creates a variable called total and sets it to 0.",
-                                "Uses a loop to ask the user to enter a number 5 times.",
-                                "Only adds the number to total if it is greater than 0.",
-                                "After the loop has finished, prints the value of total.",
-                            ],
+                            "The code below uses two nested loops.",
+                            { type: "code", language: "python", content: "for x in range(3):\n    for y in range(4):\n        print(\"Hello World\")" },
+                            "How many times in total will Hello World be printed? Explain how you worked out your answer.",
                         ],
-                        marks: 3,
+                        marks: 2,
                         markingScheme:
-                            "Award 1 mark for: total = 0 set before the loop. Award 1 mark for: a correct for loop running 5 times (e.g. for x in range(5):) with an input statement inside it. Award 1 mark for: a correct if statement inside the loop that checks whether the number is greater than 0 and adds it to total if so (e.g. if number > 0: total = total + number), AND a print statement after the loop that outputs total.",
+                            "Award 1 mark for the correct answer: 12 times. Award 1 mark for a correct explanation: the outer loop runs 3 times, and for each of those 3 runs the inner loop runs 4 times, so 3 × 4 = 12.",
                     },
                 ],
             };
