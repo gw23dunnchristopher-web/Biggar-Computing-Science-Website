@@ -42,7 +42,7 @@
                         text: [
                             "The code below asks the user to enter a temperature for 4 days and counts how many days were above 20 degrees.",
                             { type: "code", language: "python", content: "daysAbove20 = 0\nfor x in range(4):\n    temperature = int(input(\"Enter temperature: \"))\n    if temperature > 20:\n        daysAbove20 = daysAbove20 + 1" },
-                            "The user enters the following temperatures in order: 15, 23, 20, 27. Complete the trace table to show the value of daysAbove20 after each iteration of the loop.",
+                            "The user enters the following temperatures in order: 15, 23, 20, 27. Complete the trace table to show the value of daysAbove20 each time it goes through the loop.",
                         ],
                         marks: 4,
                         markingScheme:
@@ -322,6 +322,42 @@
                         <p>
                             One of the questions below uses a <strong>trace table</strong>. A trace table is a way of tracking the value of a variable step by step as a program runs. You follow the code from top to bottom and record what the variable's value is after each step. This helps you check that your program is doing what you expect.
                         </p>
+                        <p>Here is a worked example. The code below counts how many numbers in a loop are greater than 1:</p>
+                        <div class="codeBox">
+                            <p>total = 0</p>
+                            <p>for x in range(4):</p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;if x > 1:</p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;total = total + 1</p>
+                        </div>
+                        <p>We can trace through this code step by step, recording the value of <code>total</code> after each loop iteration:</p>
+                        <table style="max-width:350px;">
+                            <tr>
+                                <th>x</th>
+                                <th>x &gt; 1?</th>
+                                <th>total</th>
+                            </tr>
+                            <tr>
+                                <td>0</td>
+                                <td>No — condition is false, total stays the same</td>
+                                <td>0</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>No — condition is false, total stays the same</td>
+                                <td>0</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Yes — condition is true, total increases by 1</td>
+                                <td>1</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Yes — condition is true, total increases by 1</td>
+                                <td>2</td>
+                            </tr>
+                        </table>
+                        <p>After the loop finishes, <code>total</code> is <strong>2</strong>, because only the values 2 and 3 were greater than 1.</p>
                         <div class="quiz-container"></div>
                     </div>
                 </div>
