@@ -127,7 +127,8 @@ table td p {
     margin: 0;
 }
 
-.subheader th {
+.subheader th,
+th.subheader {
     background-color: lightgreen;
 }
 
