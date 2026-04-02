@@ -1,0 +1,46 @@
+{
+  "type": "python-quiz",
+  "title": "Combining Constructs Exercises",
+  "questions": [
+    {
+      "label": "Exercise 1",
+      "prompt": "Write a program that loops 5 times.\nEach time round the loop, ask the user to enter a number.\nIf the number is greater than 0, print \"Positive\".\nOtherwise, print \"Negative\".",
+      "marks": 3,
+      "starter": "# Loop 5 times\n# Ask user for a number each time\n# Print Positive or Negative\n",
+      "scheme": "Award 1 mark for a correct for loop that runs 5 times.\nAward 1 mark for asking the user to input a number inside the loop (using int() with input()).\nAward 1 mark for a correct if/else inside the loop that prints the right message based on whether the number is greater than 0.",
+      "example": "for x in range(5):\n    number = int(input(\"Enter a number: \"))\n    if number > 0:\n        print(\"Positive\")\n    else:\n        print(\"Negative\")"
+    },
+    {
+      "label": "Exercise 2",
+      "prompt": "Write a program that:\n- Sets a counter variable to 0 before the loop starts.\n- Loops 4 times, asking the user for a number each time.\n- If the number entered is greater than 10, adds 1 to the counter.\n- After the loop, prints how many numbers were greater than 10.",
+      "marks": 4,
+      "starter": "# Set counter to 0\n# Loop 4 times\n# Check if each number is > 10 and update counter\n# Print the final counter\n",
+      "scheme": "Award 1 mark for setting the counter to 0 before the loop.\nAward 1 mark for a correct for loop that runs 4 times.\nAward 1 mark for asking the user for a number inside the loop and checking if it is greater than 10.\nAward 1 mark for adding 1 to the counter when the condition is true, and printing the counter after the loop.",
+      "example": "count = 0\n\nfor x in range(4):\n    number = int(input(\"Enter a number: \"))\n    if number > 10:\n        count = count + 1\n\nprint(\"Numbers greater than 10: \" + str(count))"
+    },
+    {
+      "label": "Exercise 3",
+      "prompt": "A teacher wants to find out how many students passed and failed a test.\nA pass is a score of 50 or more.\n\nWrite a program that:\n- Sets two counters to 0: one for passes, one for fails.\n- Loops 5 times, asking the user for a score each time.\n- If the score is 50 or more, adds 1 to the passes counter.\n- Otherwise, adds 1 to the fails counter.\n- After the loop, prints both the number of passes and the number of fails.",
+      "marks": 5,
+      "starter": "# Set passes and fails counters to 0\n# Loop 5 times\n# Check each score and update the correct counter\n# Print passes and fails\n",
+      "scheme": "Award 1 mark for setting both counters (passes and fails) to 0 before the loop.\nAward 1 mark for a correct loop that runs 5 times.\nAward 1 mark for asking the user to input a score inside the loop.\nAward 1 mark for correctly using if/else to check whether the score is 50 or more and updating the right counter.\nAward 1 mark for printing both the passes and fails values after the loop.",
+      "example": "passes = 0\nfails = 0\n\nfor x in range(5):\n    score = int(input(\"Enter a score: \"))\n    if score >= 50:\n        passes = passes + 1\n    else:\n        fails = fails + 1\n\nprint(\"Passes: \" + str(passes))\nprint(\"Fails: \" + str(fails))"
+    },
+    {
+      "label": "Exercise 4",
+      "prompt": "A shopper wants to track their spending.\nItems costing more than £20 are classed as expensive; anything else is cheap.\n\nWrite a program that:\n- Asks the user how many items they bought.\n- Sets two totals to 0: one for expensive items, one for cheap items.\n- Loops that many times, asking for the price of each item.\n- If the price is more than 20, adds it to the expensive total.\n- Otherwise, adds it to the cheap total.\n- After the loop, prints both totals.",
+      "marks": 5,
+      "starter": "# Ask how many items\n# Set expensiveTotal and cheapTotal to 0\n# Loop that many times\n# Add each price to the correct total\n# Print both totals\n",
+      "scheme": "Award 1 mark for asking the user for the number of items and using that value to control the loop.\nAward 1 mark for setting both totals (expensiveTotal and cheapTotal) to 0 before the loop.\nAward 1 mark for asking for the price of each item inside the loop.\nAward 1 mark for correctly using if/else to add the price to the right total based on whether it is greater than 20.\nAward 1 mark for printing both totals after the loop.",
+      "example": "numItems = int(input(\"How many items did you buy? \"))\nexpensiveTotal = 0\ncheapTotal = 0\n\nfor x in range(numItems):\n    price = float(input(\"Enter the price of item \" + str(x + 1) + \": \"))\n    if price > 20:\n        expensiveTotal = expensiveTotal + price\n    else:\n        cheapTotal = cheapTotal + price\n\nprint(\"Total spent on expensive items: £\" + str(expensiveTotal))\nprint(\"Total spent on cheap items: £\" + str(cheapTotal))"
+    },
+    {
+      "label": "Exercise 5",
+      "prompt": "A weather station records the temperature every day for a week.\nWrite a program that:\n- Sets two counters to 0: one for hot days (above 15°C) and one for freezing days (below 0°C).\n- Loops 7 times, asking the user to enter the temperature for each day.\n- If the temperature is above 15, adds 1 to the hot days counter.\n- If the temperature is below 0, adds 1 to the freezing days counter.\n- After the loop, prints how many hot days and how many freezing days there were.\n\nHint: You will need to use both if and elif here.",
+      "marks": 5,
+      "starter": "# Set hotDays and freezingDays counters to 0\n# Loop 7 times\n# Check each temperature and update the correct counter\n# Print both counters\n",
+      "scheme": "Award 1 mark for setting both counters (hotDays and freezingDays) to 0 before the loop.\nAward 1 mark for a correct loop that runs 7 times.\nAward 1 mark for asking the user for a temperature inside the loop.\nAward 1 mark for correctly using if and elif (not two separate if statements) to check both conditions and update the right counter.\nAward 1 mark for printing both counters after the loop with meaningful output.",
+      "example": "hotDays = 0\nfreezingDays = 0\n\nfor x in range(7):\n    temp = int(input(\"Enter the temperature for day \" + str(x + 1) + \": \"))\n    if temp > 15:\n        hotDays = hotDays + 1\n    elif temp < 0:\n        freezingDays = freezingDays + 1\n\nprint(\"Hot days (above 15°C): \" + str(hotDays))\nprint(\"Freezing days (below 0°C): \" + str(freezingDays))"
+    }
+  ]
+}
