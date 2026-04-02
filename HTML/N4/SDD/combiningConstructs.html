@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>N4 Computing Science - Combining Constructs</title>
+        <script src="/JavaScript/N4Script.js"></script>
+        <script src="/JavaScript/quiz.js"></script>
+        <script src="/JavaScript/codeRunner.js"></script>
+        <link rel="stylesheet" href="/CSS/quiz.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/codeRunner.css" />
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: 'Most simple programs run in a straight line from top to bottom (this is called a sequence). Explain how using a selection statement (like an if statement) changes the "path" a program takes.',
+                        marks: 1,
+                        markingScheme:
+                            "Award 1 mark for each of the following points:  When the loop starts the total must be set to 0, when the loop finishes the total will be set to 17.",
+                    },
+                ],
+            };
+        </script>
+    </head>
+
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+            <header>
+                <h1>BHS Computing Science</h1>
+                <img src="/Images/Header/banner.png" />
+            </header>
+            <div id="pageContainer">
+                <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+                <div id="sidebar"></div>
+                <div id="content">
+                    <div id="mainHeading"><h1>National 4</h1></div>
+                    <div class="contentHeading">
+                        <h1>SDD - Combining Constructs</h1>
+                    </div>
+                    <div class="contentContainer">
+                        <table class="LIandSC">
+                            <tr>
+                                <th>Learning Intentions</th>
+                                <th>Success Criteria</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    We are learning about:
+                                    <ul>
+                                        <li>Creating more complex programs.</li>
+                                        <li>
+                                            Combining the coding constructs that
+                                            we have learned about so far.
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    I am looking for you to:
+                                    <ul>
+                                        <li>
+                                            Give an example of a scenario where
+                                            you would combine a loop and a
+                                            selection statement.
+                                        </li>
+                                        <li>
+                                            Write code that combines loops and
+                                            selection statements.
+                                        </li>
+                                        <li>
+                                            Write code that uses a running total
+                                            within a loop that also uses a
+                                            selection statement.
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                        <h2>Fixed Loops and Selection Statements Recap</h2>
+                        <p>So far we have learned about:</p>
+                        <ul>
+                            <li>Fixed loops</li>
+                            <li>Using a running total.</li>
+                            <li>IF statements</li>
+                            <li>IF...ELSE statements</li>
+                        </ul>
+                        <p>Here is a brief recap of each of these concepts.</p>
+                        <table>
+                            <tr>
+                                <th>Construct</th>
+                                <th>Usage</th>
+                                <th>Code Example</th>
+                                <th>Result</th>
+                            </tr>
+                            <tr>
+                                <th class="subheader">Fixed Loop</th>
+                                <td>
+                                    Used when you know how many times you want
+                                    to repeat a block of code.
+                                </td>
+                                <td>
+                                    <div class="codeBox">
+                                        <p>for x in range(5):</p>
+                                        <p>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;print("Hello
+                                            World")
+                                        </p>
+                                    </div>
+                                </td>
+                                <td>
+                                    This code will print "Hello World" 5 times.
+                                </td>
+                            </tr>
+                            <tr>
+                                <th  class="subheader">Running Total</th>
+                                <td>
+                                    Used when you want to add up a series of
+                                    numbers.
+                                </td>
+                                <td>
+                                    <div class="codeBox">
+                                        <p>total = 0</p>
+                                        <p>for x in range(5):</p>
+                                        <p>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;total =
+                                            total + 1
+                                        </p>
+                                    </div>
+                                </td>
+                                <td>
+                                    This code will add 1 to the total 5 times,
+                                    so the total will be 5.
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="subheader">IF Statement</th>
+                                <td>
+                                    Used when you want to check if a condition
+                                    is true.
+                                </td>
+                                <td>
+                                    <div class="codeBox">
+                                        <p>if number > 3:</p>
+                                        <p>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;print("The
+                                            number is greater than 3")
+                                        </p>
+                                    </div>
+                                </td>
+                                <td>
+                                    This code will print "The number is greater
+                                    than 3" if the integer stored in a variable
+                                    called 'number' is greater than 3.
+                                </td>
+                            </tr>
+                            <tr>
+                                <th  class="subheader">IF...ELSE Statement</th>
+                                <td>
+                                    Used when you want to check if a condition
+                                    is true or false.
+                                </td>
+                                <td>
+                                    <div class="codeBox">
+                                        <p>if number > 3:</p>
+                                        <p>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;print("The
+                                            number is greater than 3")
+                                        </p>
+                                        <p>else:</p>
+                                        <p>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;print("The
+                                            number is less than or equal to 3")
+                                        </p>
+                                    </div>
+                                </td>
+                                <td>
+                                    This code will print "The number is greater
+                                    than 3" if the integer stored in a variable
+                                    called 'number' is greater than 3, otherwise
+                                    it will print "The number is less than or
+                                    equal to 3".
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div id="left">
+                    <p>Biggar High School</p>
+                    <p>Market Rd, Biggar</p>
+                    <p>ML12 6AG</p>
+                </div>
+                <div id="center"></div>
+                <div id="right">
+                    <p>&copy;C Dunn, 2025</p>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>
