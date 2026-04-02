@@ -57,12 +57,10 @@ The platform uses a Node.js/Express server to serve static content. While infras
 ### WebSocket Communication
 - **ws**: WebSocket library (server-side infrastructure).
 
-### Revision Sub-App
-- **React + TypeScript SPA** at `/revision/` — Higher CS past-paper revision tool with student accounts, teacher dashboard, AI marking, class management, and assignment tracking.
-- **Build**: `npm run build:revision` (Vite, `vite.revision.config.ts`, output to `public/revision/`).
-- **Routes**: `server/revision-routes.ts` + `server/revision-storage.ts`, registered via `registerRevisionRoutes(app)` in `server/index.ts`.
-- **DB Schema**: `shared/revision-schema.ts` — tables prefixed `rev_` where names conflict with existing tables.
-- **Auth**: Bearer token stored in `rev_sessions`; no cookies (fully separate from BHS teacher auth).
+### Revision Sub-Apps
+- **Higher CS Revision** at `/revision/` — React + TypeScript SPA; student accounts, teacher dashboard, AI marking, class management, assignment tracking. Build: `npm run build:revision` (Vite, `vite.revision.config.ts`, output `public/revision/`). Routes: `server/revision-routes.ts` + `server/revision-storage.ts`. DB schema: `shared/revision-schema.ts` (tables prefixed `rev_`). Auth: Bearer token in `rev_sessions`.
+- **N5 CS Revision** at `/revision-n5/` — React + TypeScript SPA; same features as Higher app but for National 5. Build: `npm run build:n5` (Vite, `vite.n5.config.ts`, output `public/revision-n5/`). Routes: `server/n5-routes.ts` + `server/n5-storage.ts`, registered via `registerN5Routes(app)`. DB schema: `shared/n5-schema.ts` (tables prefixed `n5_`). N5 sidebar link updated to `/revision-n5/`. Questions need seeding.
+- **Auth (both apps)**: Bearer token; no cookies (fully separate from BHS teacher auth).
 
 ### AI Services
 - **Google Gemini API**: For AI quiz marking and feedback.

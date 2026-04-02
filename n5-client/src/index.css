@@ -1,0 +1,601 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Color System - Black, White & Red */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius: 0.5rem;
+}
+
+:root {
+  /* Light Mode - Black, White, Red */
+  --background: 0 0% 100%; /* White */
+  --foreground: 0 0% 3.9%; /* Almost Black */
+
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 3.9%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 3.9%;
+
+  --primary: 0 72.2% 50.6%; /* Red 600 */
+  --primary-foreground: 0 85.7% 97.3%; /* Very light red/white */
+
+  --secondary: 0 0% 96.1%; /* Light Grey */
+  --secondary-foreground: 0 0% 9%;
+
+  --muted: 0 0% 96.1%;
+  --muted-foreground: 0 0% 45.1%;
+
+  --accent: 0 0% 96.1%;
+  --accent-foreground: 0 0% 9%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 0 0% 89.8%;
+  --input: 0 0% 89.8%;
+  --ring: 0 72.2% 50.6%; /* Red Ring */
+
+  --chart-1: 0 72.2% 50.6%;
+  --chart-2: 0 0% 25%;
+  --chart-3: 0 0% 45%;
+  --chart-4: 0 0% 65%;
+  --chart-5: 0 0% 85%;
+}
+
+.dark {
+  /* Dark Mode - Black, White, Red */
+  --background: 0 0% 3.9%; /* Almost Black */
+  --foreground: 0 0% 98%; /* White */
+
+  --card: 0 0% 3.9%;
+  --card-foreground: 0 0% 98%;
+
+  --popover: 0 0% 3.9%;
+  --popover-foreground: 0 0% 98%;
+
+  --primary: 0 72.2% 50.6%; /* Red 600 */
+  --primary-foreground: 0 85.7% 97.3%;
+
+  --secondary: 0 0% 14.9%;
+  --secondary-foreground: 0 0% 98%;
+
+  --muted: 0 0% 14.9%;
+  --muted-foreground: 0 0% 63.9%;
+
+  --accent: 0 0% 14.9%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 0 0% 14.9%;
+  --input: 0 0% 14.9%;
+  --ring: 0 72.2% 50.6%;
+
+  --chart-1: 0 72.2% 50.6%;
+  --chart-2: 0 0% 65%;
+  --chart-3: 0 0% 45%;
+  --chart-4: 0 0% 25%;
+  --chart-5: 0 0% 15%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    font-variant-ligatures: none;
+  }
+  html {
+    min-width: 1024px;
+    overflow-x: auto;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: calc(1rem * var(--a11y-font-scale, 1));
+    line-height: calc(1.5 * var(--a11y-line-scale, 1));
+    min-width: 1024px;
+  }
+}
+
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('/Fonts/OpenDyslexic-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('/Fonts/OpenDyslexic-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+.dyslexia-font {
+  --font-sans: 'OpenDyslexic', sans-serif !important;
+  --font-mono: 'OpenDyslexic', monospace !important;
+}
+
+.dyslexia-font,
+.dyslexia-font * {
+  font-family: 'OpenDyslexic', sans-serif !important;
+}
+
+.dyslexia-font code,
+.dyslexia-font pre,
+.dyslexia-font .font-mono,
+.dyslexia-font [class*="mono"] {
+  font-family: 'OpenDyslexic', monospace !important;
+}
+
+html[data-custom-bg] body,
+html[data-custom-bg] [class*="bg-neutral-50"],
+html[data-custom-bg] [class*="bg-neutral-100"],
+html[data-custom-bg] [class*="bg-gray-50"],
+html[data-custom-bg] [class*="bg-white"] {
+  background-color: hsl(var(--background)) !important;
+}
+
+html.dark[data-custom-bg] body,
+html.dark[data-custom-bg] [class*="bg-neutral-950"],
+html.dark[data-custom-bg] [class*="bg-neutral-900"],
+html.dark[data-custom-bg] [class*="bg-neutral-800"] {
+  background-color: hsl(var(--background)) !important;
+}
+
+html[data-custom-bg] pre[class*="bg-neutral-9"],
+html.dark[data-custom-bg] pre[class*="bg-neutral-9"],
+html[data-custom-bg] pre[class*="bg-neutral-950"],
+html.dark[data-custom-bg] pre[class*="bg-neutral-950"],
+html[data-custom-bg] [class*="bg-neutral-9"][class*="font-mono"],
+html.dark[data-custom-bg] [class*="bg-neutral-9"][class*="font-mono"],
+html[data-custom-bg] [class*="bg-neutral-9"][class*="overflow-x-auto"],
+html.dark[data-custom-bg] [class*="bg-neutral-9"][class*="overflow-x-auto"],
+html[data-custom-bg] [class*="bg-neutral-950"][class*="overflow-x-auto"],
+html.dark[data-custom-bg] [class*="bg-neutral-950"][class*="overflow-x-auto"] {
+  background-color: #171717 !important;
+}
+
+html[data-custom-text] body,
+html[data-custom-text] [class*="text-neutral-9"],
+html[data-custom-text] [class*="text-neutral-8"],
+html[data-custom-text] [class*="text-neutral-7"],
+html[data-custom-text] [class*="text-black"],
+html[data-custom-text] p,
+html[data-custom-text] h1,
+html[data-custom-text] h2,
+html[data-custom-text] h3,
+html[data-custom-text] h4,
+html[data-custom-text] h5,
+html[data-custom-text] h6,
+html[data-custom-text] span,
+html[data-custom-text] label,
+html[data-custom-text] li {
+  color: hsl(var(--foreground)) !important;
+}
+
+html.dark[data-custom-text] body,
+html.dark[data-custom-text] [class*="text-neutral-1"],
+html.dark[data-custom-text] [class*="text-neutral-2"],
+html.dark[data-custom-text] [class*="text-neutral-3"],
+html.dark[data-custom-text] [class*="text-white"],
+html.dark[data-custom-text] p,
+html.dark[data-custom-text] h1,
+html.dark[data-custom-text] h2,
+html.dark[data-custom-text] h3,
+html.dark[data-custom-text] h4,
+html.dark[data-custom-text] h5,
+html.dark[data-custom-text] h6,
+html.dark[data-custom-text] span,
+html.dark[data-custom-text] label,
+html.dark[data-custom-text] li {
+  color: hsl(var(--foreground)) !important;
+}
+
+html[data-custom-text] [class*="text-neutral-5"],
+html[data-custom-text] [class*="text-neutral-4"],
+html.dark[data-custom-text] [class*="text-neutral-5"],
+html.dark[data-custom-text] [class*="text-neutral-4"] {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+html[data-custom-text] pre[class*="bg-neutral-9"],
+html[data-custom-text] pre[class*="bg-neutral-9"] code,
+html[data-custom-text] pre[class*="bg-neutral-9"] span,
+html[data-custom-text] [class*="bg-neutral-9"] pre,
+html[data-custom-text] [class*="bg-neutral-9"] pre span,
+html[data-custom-text] [class*="bg-neutral-950"] pre,
+html[data-custom-text] [class*="bg-neutral-950"] pre span,
+html[data-custom-text] textarea[class*="bg-neutral-9"],
+html.dark[data-custom-text] pre[class*="bg-neutral-9"],
+html.dark[data-custom-text] pre[class*="bg-neutral-9"] code,
+html.dark[data-custom-text] pre[class*="bg-neutral-9"] span,
+html.dark[data-custom-text] [class*="bg-neutral-9"] pre,
+html.dark[data-custom-text] [class*="bg-neutral-9"] pre span,
+html.dark[data-custom-text] [class*="bg-neutral-950"] pre,
+html.dark[data-custom-text] [class*="bg-neutral-950"] pre span,
+html.dark[data-custom-text] textarea[class*="bg-neutral-9"] {
+  color: #fafafa !important;
+}
+
+.high-contrast pre[class*="bg-neutral-9"],
+.high-contrast pre[class*="bg-neutral-9"] code,
+.high-contrast pre[class*="bg-neutral-9"] span,
+.high-contrast [class*="bg-neutral-9"] pre,
+.high-contrast [class*="bg-neutral-9"] pre span,
+.high-contrast [class*="bg-neutral-950"] pre,
+.high-contrast [class*="bg-neutral-950"] pre span,
+.high-contrast textarea[class*="bg-neutral-9"] {
+  color: #fafafa !important;
+}
+
+.high-contrast {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 0%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 0%;
+  --primary: 240 100% 35%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 90%;
+  --secondary-foreground: 0 0% 0%;
+  --muted: 0 0% 90%;
+  --muted-foreground: 0 0% 20%;
+  --accent: 0 0% 90%;
+  --accent-foreground: 0 0% 0%;
+  --destructive: 0 100% 40%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 0%;
+  --input: 0 0% 0%;
+  --ring: 240 100% 35%;
+}
+
+.high-contrast.dark {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 0%;
+  --card-foreground: 0 0% 100%;
+  --popover: 0 0% 0%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 54 100% 50%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 12%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 12%;
+  --muted-foreground: 0 0% 85%;
+  --accent: 0 0% 12%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 100% 60%;
+  --destructive-foreground: 0 0% 0%;
+  --border: 0 0% 100%;
+  --input: 0 0% 100%;
+  --ring: 54 100% 50%;
+}
+
+.high-contrast .text-muted-foreground,
+.high-contrast [class*="text-neutral-"],
+.high-contrast [class*="text-gray-"],
+.high-contrast [class*="text-slate-"] {
+  color: hsl(var(--foreground)) !important;
+  opacity: 0.9;
+}
+
+.high-contrast .border,
+.high-contrast [class*="border-neutral-"],
+.high-contrast [class*="border-gray-"] {
+  border-color: hsl(var(--border)) !important;
+}
+
+.high-contrast .glass-panel {
+  background: hsl(var(--background)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.reduced-motion,
+.reduced-motion * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+[data-colour-overlay="cream"]::after,
+[data-colour-overlay="blue"]::after,
+[data-colour-overlay="pink"]::after,
+[data-colour-overlay="green"]::after,
+[data-colour-overlay="yellow"]::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9989;
+  mix-blend-mode: multiply;
+}
+
+[data-colour-overlay="cream"]::after {
+  background-color: rgba(255, 243, 220, 0.3);
+}
+
+[data-colour-overlay="blue"]::after {
+  background-color: rgba(200, 220, 255, 0.25);
+}
+
+[data-colour-overlay="pink"]::after {
+  background-color: rgba(255, 210, 220, 0.25);
+}
+
+[data-colour-overlay="green"]::after {
+  background-color: rgba(210, 255, 220, 0.25);
+}
+
+[data-colour-overlay="yellow"]::after {
+  background-color: rgba(255, 255, 200, 0.25);
+}
+
+.reading-guide-active {
+  cursor: crosshair;
+}
+
+html[data-colour-overlay="none"]::after {
+  display: none;
+}
+
+
+@keyframes collapsible-down {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes collapsible-up {
+  from {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.animate-collapsible-down {
+  animation: collapsible-down 0.2s ease-out;
+}
+
+.animate-collapsible-up {
+  animation: collapsible-up 0.2s ease-out;
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/80 dark:bg-black/80 backdrop-blur-md border border-black/10 dark:border-white/10 shadow-xl;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Force dialog to stay within viewport */
+[data-radix-dialog-content] {
+  max-width: calc(100vw - 2rem) !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+[data-radix-dialog-content] * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* TipTap Rich Text Editor Styles */
+.ProseMirror {
+  outline: none;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.ProseMirror li {
+  margin: 0.25rem 0;
+}
+
+.ProseMirror li p {
+  margin: 0;
+}
+
+.ProseMirror p {
+  margin: 0.25rem 0;
+}
+
+.ProseMirror p:first-child {
+  margin-top: 0;
+}
+
+.ProseMirror p:last-child {
+  margin-bottom: 0;
+}
+
+.rich-text-content {
+  font-size: 0.875rem;
+  line-height: 1.625;
+  color: var(--color-foreground);
+}
+
+.rich-text-content p {
+  margin-bottom: 0.75em;
+  margin-top: 0;
+}
+
+.rich-text-content p:last-child {
+  margin-bottom: 0;
+}
+
+.rich-text-content p:empty,
+.rich-text-content p:has(> br:only-child) {
+  margin-bottom: 0.5em;
+  min-height: 0.75em;
+}
+
+.rich-text-content strong,
+.rich-text-content b {
+  font-weight: 700;
+}
+
+.rich-text-content em,
+.rich-text-content i {
+  font-style: italic;
+}
+
+.rich-text-content ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-top: 0.5em;
+  margin-bottom: 0.75em;
+}
+
+.rich-text-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-top: 0.5em;
+  margin-bottom: 0.75em;
+}
+
+.rich-text-content li {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+.rich-text-content li p {
+  margin: 0;
+}
+
+.rich-text-content ul ul {
+  list-style-type: circle;
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+.rich-text-content ul ul ul {
+  list-style-type: square;
+}
+
+.rich-text-content code {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  background-color: hsl(var(--muted));
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
+.rich-text-content pre {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  background-color: hsl(var(--muted));
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 0.75em 0;
+}
+
+.rich-text-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.rich-text-content blockquote {
+  border-left: 3px solid hsl(var(--border));
+  padding-left: 1rem;
+  margin: 0.75em 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.rich-text-content h1, .rich-text-content h2, .rich-text-content h3,
+.rich-text-content h4, .rich-text-content h5, .rich-text-content h6 {
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+.rich-text-content h1 { font-size: 1.5rem; }
+.rich-text-content h2 { font-size: 1.25rem; }
+.rich-text-content h3 { font-size: 1.125rem; }
+
+.rich-text-content sup {
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 0;
+}
+
+.rich-text-content sub {
+  font-size: 0.75em;
+  vertical-align: sub;
+  line-height: 0;
+}

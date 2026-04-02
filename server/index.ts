@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import { db, pool, hasDatabase } from './db';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { registerRoutes as registerRevisionRoutes } from './revision-routes';
+import { registerN5Routes } from './n5-routes';
 
 process.on('uncaughtException', (err) => {
   console.error('Uncaught exception:', err);
@@ -996,6 +997,26 @@ if (fs.existsSync(revisionBuildDir)) {
 } else {
   app.get('/revision/*splat', (_req, res) => {
     res.status(503).send('Revision app not built yet. Run: npm run build:revision');
+  });
+}
+
+// ---------------------------------------------------------------------------
+// N5 Revision App — routes + static serving at /revision-n5/
+// ---------------------------------------------------------------------------
+const n5BuildDir = path.join(path.resolve('.'), 'public', 'revision-n5');
+
+registerN5Routes(app).catch((err: Error) => {
+  console.error('N5 revision routes registration failed:', err);
+});
+
+if (fs.existsSync(n5BuildDir)) {
+  app.use('/revision-n5', express.static(n5BuildDir, { dotfiles: 'deny' }));
+  app.get('/revision-n5/*splat', (_req, res) => {
+    res.sendFile(path.join(n5BuildDir, 'index.html'));
+  });
+} else {
+  app.get('/revision-n5/*splat', (_req, res) => {
+    res.status(503).send('N5 revision app not built yet. Run: npm run build:n5');
   });
 }
 
