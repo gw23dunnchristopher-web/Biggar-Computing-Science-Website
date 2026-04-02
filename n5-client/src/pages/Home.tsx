@@ -255,7 +255,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="w-full flex flex-col items-center space-y-4 relative z-10">
-            <div className="inline-block bg-blue-800 text-white text-sm font-bold px-4 py-1 rounded-full mb-4 uppercase tracking-wider">
+            <div className="inline-block bg-red-600 text-white text-sm font-bold px-4 py-1 rounded-full mb-4 uppercase tracking-wider">
               N5 Level
             </div>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white">
