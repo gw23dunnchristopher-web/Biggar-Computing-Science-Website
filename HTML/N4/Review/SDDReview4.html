@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>N4 Computing Science - SDD Review 4</title>
+        <script src="/JavaScript/N4Script.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script>
+            window.QUIZ_CONFIGS = {
+                combining: {
+                    questions: [
+                        {
+                            type: "paragraph",
+                            text: "Explain why you would use a selection statement inside a loop. Give one example of a real-world situation where this would be useful.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for explaining that a loop repeats a section of code, but you may want to take different actions depending on the value encountered during each iteration (e.g. only doing something when a condition is met). Award 1 mark for any valid real-world example, such as: counting how many temperatures in a week were above 20, checking which students in a class passed a test, counting how many items in a shopping list cost more than £5.",
+                        },
+                        {
+                            type: "table",
+                            text: "The program below counts how many values of <span class='codeText'>x</span> are greater than 2 as the loop runs.<br><br><span class='codeText'>count = 0<br>for x in range(5):<br>&nbsp;&nbsp;&nbsp;&nbsp;if x > 2:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count = count + 1</span><br><br>Complete the trace table to show the value of <span class='codeText'>count</span> after each iteration.",
+                            marks: 4,
+                            markingScheme: "Award 1 mark per correct row. x=0: count stays 0 (0 is not greater than 2). x=1: count stays 0 (1 is not greater than 2). x=2: count stays 0 (2 is not greater than 2 — condition is strictly greater than). x=3: count becomes 1. x=4: count becomes 2.",
+                            tableHeaders: ["x", "count"],
+                            columnWidths: ["30%", "70%"],
+                            tableClass: "trace-narrow",
+                            tableRows: [
+                                ["0", ""],
+                                ["1", ""],
+                                ["2", ""],
+                                ["3", ""],
+                                ["4", ""],
+                            ],
+                        },
+                        {
+                            type: "pseudocode",
+                            text: "Write a program that asks the user to enter 6 test scores. Count how many scores are a pass (50 or above) and display the total number of passes after all scores have been entered.",
+                            marks: 4,
+                            markingScheme: "Award 1 mark for initialising a passes counter to 0 before the loop. Award 1 mark for a correct for loop that runs exactly 6 times. Award 1 mark for asking the user for a score inside the loop and checking whether it is 50 or above. Award 1 mark for adding 1 to the counter when the condition is true, and displaying the final counter after the loop ends.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "A student writes a program that loops 5 times, asking the user to enter a number each time. They want to calculate the total of all numbers entered AND count how many of those numbers are negative. Explain how many variables they will need to track both of these things, and what each variable should be set to before the loop begins.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for stating that two separate variables are needed — one for the running total and one for the count of negative numbers. Award 1 mark for correctly stating that both variables should be initialised to 0 before the loop starts.",
+                        },
+                    ],
+                },
+                testingEval: {
+                    questions: [
+                        {
+                            type: "paragraph",
+                            text: ["Name the five columns found in a testing table.", "For each test you carry out, explain the difference between what goes in the <strong>Expected Output</strong> column and the <strong>Actual Output</strong> column."],
+                            marks: 3,
+                            markingScheme: "Award 1 mark for correctly naming all five columns: Test Number, Input, Expected Output, Actual Output, Pass/Fail. Award 1 mark for correctly explaining that the Expected Output is written down before the program is run — it is what you predict will happen. Award 1 mark for correctly explaining that the Actual Output is recorded after running the program — it is what the program actually produced.",
+                        },
+                        {
+                            type: "table",
+                            text: "A program asks the user to enter an age. If the age is 18 or over it prints <span class='codeText'>\"Adult\"</span>; otherwise it prints <span class='codeText'>\"Not an adult\"</span>. Complete the Expected Output column for each test.",
+                            marks: 3,
+                            markingScheme: "Award 1 mark per correct row. Test 1 (input 17): Expected output — the program prints 'Not an adult'. Test 2 (input 18): Expected output — the program prints 'Adult' (18 is exactly the boundary, and the condition uses >= so it is included). Test 3 (input 0): Expected output — the program prints 'Not an adult'.",
+                            tableHeaders: ["Test Number", "Input", "Expected Output"],
+                            columnWidths: ["15%", "15%", "70%"],
+                            tableRows: [
+                                ["1", "17", ""],
+                                ["2", "18", ""],
+                                ["3", "0", ""],
+                            ],
+                        },
+                        {
+                            type: "paragraph",
+                            text: "A student runs their program with the test input <span class='codeText'>18</span>. They expected the output to be <span class='codeText'>\"Adult\"</span>, but the program printed <span class='codeText'>\"Not an adult\"</span>. Using the correct testing terminology, describe this result and explain what the student should do next.",
+                            marks: 2,
+                            markingScheme: "Award 1 mark for correctly identifying this as a failed test (the actual output did not match the expected output). Award 1 mark for explaining that the student should modify or fix the program (e.g. correct the condition) so that it produces the right output for this input, then re-test it.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: ["What does it mean for a program to be <strong>fit for purpose</strong>?", "Which stage of software development is used as a checklist to decide whether a program is fit for purpose?"],
+                            marks: 2,
+                            markingScheme: "Award 1 mark for correctly explaining that a program is fit for purpose when it meets all of the requirements set out for it — it does everything it was designed to do. Award 1 mark for correctly identifying the Analysis stage, where the functional requirements (inputs, processes, outputs) were defined, as the checklist used during evaluation.",
+                        },
+                    ],
+                },
+            };
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
+        <style></style>
+    </head>
+
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+            <header>
+                <h1>BHS Computing Science</h1>
+                <img src="/Images/Header/banner.png" />
+            </header>
+            <div id="pageContainer">
+                <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+                <div id="sidebar"></div>
+                <div id="content">
+                    <div id="mainHeading"><h1>National 4</h1></div>
+                    <div class="contentHeading">
+                        <h1>SDD Review 4 - Combining Constructs &amp; Testing</h1>
+                    </div>
+                    <div class="contentContainer">
+                        <p>
+                            This is a review of the Combining Constructs and Testing and Evaluation topics
+                            covered in this unit. If you need to go back and review any of these topics,
+                            you can use the sidebar to navigate to the relevant page.
+                        </p>
+                        <h2>Combining Constructs</h2>
+                        <div data-quiz-id="combining" class="quiz-container"></div>
+                        <h2>Testing and Evaluation</h2>
+                        <div data-quiz-id="testingEval" class="quiz-container"></div>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div id="left">
+                    <p>Biggar High School</p>
+                    <p>Market Rd, Biggar</p>
+                    <p>ML12 6AG</p>
+                </div>
+                <div id="center"></div>
+                <div id="right">
+                    <p>&copy;C Dunn, 2025</p>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>
