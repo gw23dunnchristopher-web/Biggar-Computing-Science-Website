@@ -204,7 +204,7 @@ export default function Home() {
         </div>
 
         <div className="absolute top-6 right-6 flex items-center gap-4">
-          <a href="https://computing-science-website.replit.app/HTML/Higher/HigherHome.html">
+          <a href="/HTML/Higher/HigherHome.html">
             <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
               Return to Main Website
             </Button>

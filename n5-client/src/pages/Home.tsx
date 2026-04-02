@@ -161,61 +161,63 @@ export default function Home() {
           alt=""
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-36 h-36 md:w-48 md:h-48 object-contain opacity-15 pointer-events-none"
         />
-        <div className="absolute top-6 left-6 right-6 flex items-center justify-between gap-4 flex-wrap z-10">
-          <div className="flex items-center gap-3 flex-wrap">
-            <Button 
-              variant="outline" 
-              className="bg-orange-600/20 text-orange-200 border-orange-400/30 hover:bg-orange-600/40 hover:text-white"
-              onClick={() => setRandomQuizOpen(true)}
-              data-testid="button-random-quiz"
-            >
-              <Shuffle className="w-4 h-4 mr-2" />
-              Random Quiz
-            </Button>
-            <Link href="/my-quizzes">
-              <Button variant="outline" className="bg-purple-600/20 text-purple-200 border-purple-400/30 hover:bg-purple-600/40 hover:text-white">
-                <BookOpen className="w-4 h-4 mr-2" />
-                My Quizzes
-              </Button>
-            </Link>
-
-            {studentAuth.isLoggedIn ? (
-              <>
-                <span className="text-sm text-blue-200" data-testid="text-student-username">
-                  <User className="w-4 h-4 inline mr-1" />
-                  {studentAuth.username}
-                </span>
-                <Link href="/my-progress">
-                  <Button
-                    variant="outline"
-                    className="bg-green-600/20 text-green-200 border-green-400/30 hover:bg-green-600/40 hover:text-white"
-                    data-testid="link-my-progress"
-                  >
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    My Progress
-                  </Button>
-                </Link>
+        <div className="absolute top-6 left-6 flex items-center gap-4">
+          {studentAuth.isLoggedIn ? (
+            <div className="flex items-center gap-2" data-testid="student-indicator">
+              <div className="flex items-center gap-2 bg-blue-600/20 border border-blue-400/30 rounded-full px-3 py-1.5">
+                <User className="w-4 h-4 text-blue-300" />
+                <span className="text-sm text-blue-200 font-medium" data-testid="text-student-username">{studentAuth.username}</span>
+              </div>
+              <Link href="/my-progress">
                 <Button
                   variant="outline"
-                  className="bg-blue-600/20 text-blue-200 border-blue-400/30 hover:bg-blue-600/40 hover:text-white"
-                  onClick={() => studentAuth.logout()}
-                  data-testid="button-student-logout"
+                  size="sm"
+                  className="bg-green-600/20 text-green-200 border-green-400/30 hover:bg-green-600/40"
+                  data-testid="link-my-progress"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Student Logout
-                </Button>
-              </>
-            ) : (
-              <Link href="/student/login">
-                <Button variant="outline" className="bg-blue-600/20 text-blue-200 border-blue-400/30 hover:bg-blue-600/40 hover:text-white" data-testid="link-student-login">
-                  <User className="w-4 h-4 mr-2" />
-                  Student Login
+                  <BarChart3 className="w-4 h-4 mr-1" />
+                  My Progress
                 </Button>
               </Link>
-            )}
-          </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+                onClick={() => studentAuth.logout()}
+                data-testid="button-student-logout"
+              >
+                <LogOut className="w-4 h-4 mr-1" />
+                Logout
+              </Button>
+            </div>
+          ) : (
+            <Link href="/student/login">
+              <Button variant="outline" className="bg-blue-600/20 text-blue-200 border-blue-400/30 hover:bg-blue-600/40" data-testid="link-student-login">
+                <User className="w-4 h-4 mr-2" />
+                Student Login
+              </Button>
+            </Link>
+          )}
 
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <Link href="/my-quizzes">
+            <Button variant="outline" className="bg-purple-600/20 text-purple-200 border-purple-400/30 hover:bg-purple-600/40">
+              <BookOpen className="w-4 h-4 mr-2" />
+              My Quizzes
+            </Button>
+          </Link>
+
+          <Button
+            onClick={() => setRandomQuizOpen(true)}
+            variant="outline"
+            className="bg-orange-500/20 text-orange-200 border-orange-400/30 hover:bg-orange-500/40"
+            data-testid="button-random-quiz"
+          >
+            <Shuffle className="w-4 h-4 mr-2" />
+            Random Quiz
+          </Button>
+        </div>
+
+        <div className="absolute top-6 right-6 flex items-center gap-4">
             <a href="/HTML/N5/N5Home.html">
               <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
                 Return to Main Website
@@ -248,7 +250,6 @@ export default function Home() {
 
             <ModeToggle />
           </div>
-        </div>
         <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -289,7 +290,7 @@ export default function Home() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 + 0.3 }}
-                    className="group relative h-full bg-white dark:bg-neutral-900 border-2 border-neutral-300 dark:border-neutral-700 rounded-3xl p-10 hover:shadow-2xl hover:border-red-400/50 dark:hover:border-red-500/50 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col"
+                    className="group relative h-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-10 hover:shadow-2xl hover:border-red-400/50 dark:hover:border-red-500/50 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col"
                   >
                     <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br from-red-50 to-transparent dark:from-red-950/40 dark:to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-tr from-neutral-100 to-transparent dark:from-neutral-800/40 dark:to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -329,7 +330,7 @@ export default function Home() {
           className="w-full mt-4"
         >
           <Link href="/timed-mode">
-              <div className="bg-gradient-to-r from-red-600 to-neutral-900 rounded-2xl p-8 text-white shadow-xl cursor-pointer hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 flex items-center justify-between relative overflow-hidden group border-2 border-red-700/50">
+              <div className="bg-gradient-to-r from-red-600 to-neutral-900 rounded-2xl p-8 text-white shadow-xl cursor-pointer hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 flex items-center justify-between relative overflow-hidden group">
                   <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
                   <div className="relative z-10 flex-1">
                       <div className="flex items-center gap-3 mb-2">
@@ -353,14 +354,14 @@ export default function Home() {
             className="w-full mt-4"
           >
             <Link href="/assignments">
-              <div className="bg-gradient-to-r from-orange-600 to-neutral-900 rounded-2xl p-8 text-white shadow-xl cursor-pointer hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 flex items-center justify-between relative overflow-hidden group border-2 border-orange-700/50">
+              <div className="bg-gradient-to-r from-purple-600 to-neutral-900 rounded-2xl p-8 text-white shadow-xl cursor-pointer hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 flex items-center justify-between relative overflow-hidden group">
                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
                 <div className="relative z-10 flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <FileText className="w-6 h-6" />
                   </div>
                   <h2 className="text-3xl font-bold mb-2">Coursework Assignment</h2>
-                  <p className="text-orange-100 max-w-xl">
+                  <p className="text-purple-100 max-w-xl">
                     Complete your N5 coursework assignment. 40 marks, 6 hours. Software Design (compulsory) plus Database OR Web Design.
                   </p>
                 </div>

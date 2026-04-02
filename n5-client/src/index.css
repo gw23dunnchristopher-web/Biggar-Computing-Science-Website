@@ -131,14 +131,12 @@
     font-variant-ligatures: none;
   }
   html {
-    min-width: 1024px;
     overflow-x: auto;
   }
   body {
     @apply bg-background text-foreground;
     font-size: calc(1rem * var(--a11y-font-scale, 1));
     line-height: calc(1.5 * var(--a11y-line-scale, 1));
-    min-width: 1024px;
   }
 }
 
