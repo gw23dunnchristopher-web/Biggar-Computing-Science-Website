@@ -180,9 +180,38 @@
                             </tr>
                         </table>
                         <h2>Nested Constructs</h2>
+                        <h3>Nested if Statments</h3>
                         <p>It is possible to place constructs inside other, constructs.  This is called 'nesting' the constructs.  You could, for example, place an if statement inside another if statement. As shown in the example below:</p>
-                        
+                        <div class="codeBox">
+                            <p>if number > 3:</p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;if number < 6:</p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print("The number is greater than 3 and less than 6")</p>
+                            <p>else:</p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;print("The number is less than or equal to 3")</p>
+                        </div>
+                        <p>This code will print "The number is greater than 3 and less than 6" if the integer stored in a variable called 'number' is greater than 3 and less than 6, otherwise it will print "The number is less than or equal to 3".</p>
+                        <p>Note the indentation used here - the second if statement has been indented to show that it is inside the first if statement.</p>
+                        <h3>Nested Loops</h3>
+                        <p>Likewise, you can also place a loop inside another loop.  Look at the example below:</p>
+                        <div class="codeBox">
+                            <p>for x in range(5):</p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;for y in range(5):</p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print("Hello World")</p>
+                        </div>
+                        <p>This code will print "Hello World" 25 times.  The first loop will run 5 times, and for each time it runs, the second loop will run 5 times.  So, 5 x 5 = 25. You can see that the second loop has been indented so that it is clearly inside the first.</p>
                     </div>
+                    <h3>If statement nested within loops</h3>
+                    <p>You can also nest an if statement inside a loop.  This is useful when you want to check a condition for each item in a loop.  The example below is a program that asks the user to enter the temperature for each day of the week, and then shows the number of days that were above 20 degrees:</p>
+                    <div class="codeBox">
+                        <p>daysAbove20 = 0</p>
+                        <p>for x in range(7):</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;temperature = int(input("Enter the temperature for day " + str(x + 1) + ": "))</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;if temperature > 20:</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;daysAbove20 = daysAbove20 + 1</p>
+                        <p>print("There were " + str(daysAbove20) + " days above 20 degrees")</p>
+                    </div>
+                    <p>This code uses a running total within a loop, but a selection statement has been added so that it will only add 1 to the total if the temperature entered was above 20.</p>
+                    <h2>Combining Constructs Questions</h2>
                 </div>
             </div>
             <footer>
