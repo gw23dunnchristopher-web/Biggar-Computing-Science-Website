@@ -3,11 +3,57 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>N4 Computing Science - SDD Input and Output</title>
+        <title>N4 Computing Science - SDD Testing and Evaluation</title>
         <script src="/JavaScript/N4Script.js"></script>
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: "Describe the three steps that should be carried out when testing a program.",
+                        marks: 3,
+                        markingScheme: "Award 1 mark for each of the following steps, in any reasonable order: (1) Gather or choose test data to enter into the program. (2) Write down what you expect the program to do (or output) for each piece of test data before running it. (3) Run the program with the test data and check whether the actual output matches what you expected.",
+                    },
+                    {
+                        type: "paragraph",
+                        text: ["A testing table has five columns. Name all five columns.", "Describe what information should be recorded in the <strong>Expected Output</strong> column and the <strong>Actual Output</strong> column."],
+                        marks: 4,
+                        markingScheme: "Award 1 mark for naming all five columns correctly: Test Number, Input, Expected Output, Actual Output, Pass/Fail. Award 1 mark if the student correctly states that 'Expected Output' is what you predict the program will do before you run it. Award 1 mark if the student correctly states that 'Actual Output' is what the program actually does when you run it. Award 1 mark if the student shows an understanding that the two columns are compared to decide whether the test passes or fails.",
+                    },
+                    {
+                        type: "paragraph",
+                        text: "A student tests their program with the input <span class='codeText'>-5</span> and discovers the test has failed. What does it mean for a test to fail, and what should the student do next?",
+                        marks: 2,
+                        markingScheme: "Award 1 mark for correctly explaining that a test fails when the actual output does not match the expected output. Award 1 mark for stating that the student should modify or fix the program so that it produces the correct output for that input, and then re-test it.",
+                    },
+                    {
+                        type: "table",
+                        text: "A program asks the user to enter a number of hours worked in a week. If the hours entered are greater than 40 it prints <span class='codeText'>\"Overtime worked\"</span>, otherwise it prints <span class='codeText'>\"No overtime\"</span>. Complete the Expected Output column for each test.",
+                        marks: 3,
+                        markingScheme: "Award 1 mark per correct row. Test 1 (input 25): Expected output should state the program prints 'No overtime'. Test 2 (input 40): Expected output should state the program prints 'No overtime' (40 is not greater than 40). Test 3 (input 55): Expected output should state the program prints 'Overtime worked'.",
+                        tableHeaders: ["Test Number", "Input", "Expected Output"],
+                        columnWidths: ["15%", "15%", "70%"],
+                        tableRows: [
+                            ["1", "25", ""],
+                            ["2", "40", ""],
+                            ["3", "55", ""],
+                        ],
+                    },
+                    {
+                        type: "paragraph",
+                        text: ["What does the term <strong>fit for purpose</strong> mean when evaluating a program?", "Describe the stage of development that is used as a checklist to decide whether a program is fit for purpose."],
+                        marks: 2,
+                        markingScheme: "Award 1 mark for correctly explaining that a program is 'fit for purpose' if it meets all of the requirements that were set out for it (i.e. it does everything it was supposed to do). Award 1 mark for correctly identifying that the Analysis stage (specifically the functional requirements identified during analysis) is used as a checklist to evaluate whether the program meets its requirements.",
+                    },
+                ],
+            };
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
+        <style></style>
     </head>
 
     <body>
@@ -23,10 +69,212 @@
                 <div id="content">
                     <div id="mainHeading"><h1>National 4</h1></div>
                     <div class="contentHeading">
-                        <h1>SDD - Input and Output</h1>
+                        <h1>SDD - Testing and Evaluation</h1>
                     </div>
                     <div class="contentContainer">
-                        
+                        <table class="LIandSC">
+                            <tr>
+                                <th>Learning Intentions</th>
+                                <th>Success Criteria</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    We are learning about:
+                                    <ul>
+                                        <li>
+                                            The testing and evaluation stages of
+                                            software development.
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    I am looking for you to:
+                                    <ul>
+                                        <li>
+                                            State the three different types of
+                                            test data used in testing programs,
+                                            and give examples.
+                                        </li>
+                                        <li>
+                                            Explain what the term 'fitness for
+                                            purpose' means, and use it to
+                                            evaluate a program.
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                        <h2>Testing</h2>
+                        <p>
+                            When we test a program, we are trying to make sure
+                            that it works as expected. There is a process to
+                            doing this:
+                        </p>
+                        <ol>
+                            <li>
+                                Get some test data to enter into the program.
+                            </li>
+                            <li>
+                                Think about and write down what we would expect
+                                to happen when we enter this data.
+                            </li>
+                            <li>
+                                Try entering the test data to see if the outcome
+                                matches our expectation.
+                            </li>
+                        </ol>
+
+                        <p>
+                            At the N4 level, you will be given data with which
+                            to test your program, and you may need to create a
+                            testing table to show the expected output. Here is
+                            an example of a testing table for a program that
+                            asks the user to enter their age and displays
+                            whether they are old enough to vote (18 or over).
+                        </p>
+
+                        <table>
+                            <tr>
+                                <th>Test Number</th>
+                                <th>Input</th>
+                                <th>Expected Output</th>
+                                <th>Actual Output</th>
+                                <th>Pass/Fail</th>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>17</td>
+                                <td>
+                                    The program should display "You are not old
+                                    enough to vote".
+                                </td>
+                                <td>
+                                    The program displayed "You are not old
+                                    enough to vote"."
+                                </td>
+                                <td>Pass</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>18</td>
+                                <td>
+                                    The program should display "You are old
+                                    enough to vote".
+                                </td>
+                                <td>
+                                    The program displayed "You are old enough to
+                                    vote".
+                                </td>
+                                <td>Pass</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>-5</td>
+                                <td>
+                                    The program should display "Invalid age".
+                                </td>
+                                <td>
+                                    The program displayed "You are not old
+                                    enough to vote"."
+                                </td>
+                                <td>Fail</td>
+                            </tr>
+                        </table>
+
+                        <p>
+                            For each of the tests we did, first we wrote down
+                            what we expected the program to do, then we ran the
+                            program and wrote down what it's output actually
+                            was. If the actual output matches our expectations
+                            the program passes the test, otherwise it fails.
+                        </p>
+                        <p>
+                            We can see here that the program failed the first
+                            test, so we would need to modify it so that it can
+                            pass this test (in this case by adding another
+                            condition to check if the input is less than 0).
+                        </p>
+
+                        <h2>Evaluation</h2>
+                        <p>
+                            After we have tested the program we need to evaluate
+                            it. This means looking at the functional
+                            requirements that we established in the Analysis
+                            stage, and then checking if the program meets all of
+                            those requirments. If it does meet all the
+                            requirements then it is considered to be
+                            <b>Fit for Purpose</b>.
+                        </p>
+                        <p>
+                            Here's an example of the analysis of a program,
+                            together with its evaluation:
+                        </p>
+                        <table>
+                            <tr>
+                                <th>Analysis</th>
+                                <th>Evaluation</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p><b>Purpose</b></p>
+                                    <p>
+                                        The purpose of this program is to
+                                        calculate the total cost of a meal at a
+                                        restaurant.
+                                    </p>
+                                    <p><b>Inputs</b></p>
+                                    <p>
+                                        The program will ask the user to enter
+                                        the price of the meal and the price of
+                                        the drink.
+                                    </p>
+                                    <p><b>Processes</b></p>
+                                    <p>
+                                        The program will calculate the total
+                                        cost of the meal by adding the price of
+                                        the meal and the price of the drink.
+                                    </p>
+                                    <p><b>Outputs</b></p>
+                                    <p>
+                                        The program will display the total cost
+                                        of the meal.
+                                    </p>
+                                </td>
+                                <td>
+                                    <p>
+                                        <b
+                                            >Does the program meet the
+                                            requirements?</b
+                                        >
+                                    </p>
+                                    <p>
+                                        Yes, the program meets all the
+                                        requirements. It asks the user to enter
+                                        the price of the meal and the price of
+                                        the drink, calculates the total cost of
+                                        the meal by adding the price of the meal
+                                        and the price of the drink, and displays
+                                        the total cost of the meal.
+                                    </p>
+                                    <p>
+                                        <b>Is the program fit for purpose?</b>
+                                    </p>
+                                    <p>
+                                        Yes, the program is fit for purpose. It
+                                        meets all the requirements and works as
+                                        expected.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                        <p>
+                            As you can see, your analysis of the
+                            program acts as a checklist to determine
+                            whether or not it is fit for purpose.
+                        </p>
+
+                        <h2>Testing and Evaluation Questions</h2>
+                        <div class="quiz-container"></div>
                     </div>
                 </div>
             </div>
