@@ -1,1 +1,0 @@
-import{c as r,r as t}from"./index-74hm1Nr4.js";const n=[["path",{d:"m9 18 6-6-6-6",key:"mthhwq"}]],a=r("chevron-right",n);var c=t.createContext(void 0);function s(o){const e=t.useContext(c);return o||e||"ltr"}export{a as C,s as u};
