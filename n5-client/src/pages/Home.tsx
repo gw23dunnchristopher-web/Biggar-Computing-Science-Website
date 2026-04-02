@@ -1,44 +1,88 @@
 import { Link, useLocation } from "wouter";
 import { TOPICS, Topic, Question } from "@/lib/past-papers";
-import { Code, Database, Globe, ArrowRight, Clock, BookOpen, LogOut, Shuffle, FileText, User, BarChart3 } from "lucide-react";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/mode-toggle";
+import { Shuffle, Clock } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogFooter,
+  DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useStudentAuth } from "@/components/StudentAuthContext";
 
-const icons = {
-  sdcs: Code,
-  dd: Database,
-  wd: Globe,
+const S: Record<string, React.CSSProperties> = {
+  sidebarLink: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "10px",
+    color: "#fff",
+    textDecoration: "none",
+    backgroundColor: "#333333",
+    fontSize: "16px",
+    cursor: "pointer",
+    borderBottom: "1px solid #3a3a3a",
+    transition: "background-color 0.15s",
+  },
+  contentHeading: {
+    fontFamily: "arial",
+    marginBottom: "20px",
+    color: "#17479b",
+    backgroundColor: "#c5f1ff",
+    textAlign: "center",
+    border: "solid #376cfd",
+    borderWidth: "1px 0",
+    padding: "8px",
+  },
+  h2: {
+    textAlign: "left",
+    color: "#0c3f71",
+    borderBottom: "solid #5252c8",
+    fontSize: "25px",
+    margin: "20px 0",
+    padding: "4px 0",
+  },
+  th: {
+    border: "1px solid black",
+    padding: "10px",
+    backgroundColor: "lightblue",
+    textAlign: "center",
+  },
+  td: {
+    border: "1px solid black",
+    padding: "10px",
+  },
+  actionBtn: {
+    display: "inline-block",
+    padding: "10px 20px",
+    backgroundColor: "#030346",
+    color: "white",
+    textDecoration: "none",
+    borderRadius: "3px",
+    fontWeight: "bold",
+    fontSize: "15px",
+    cursor: "pointer",
+    border: "none",
+    fontFamily: "Arial, sans-serif",
+  },
 };
 
 export default function Home() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const studentAuth = useStudentAuth();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [randomQuizOpen, setRandomQuizOpen] = useState(false);
+
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [isTeacherLoggedIn, setIsTeacherLoggedIn] = useState(false);
+  const [randomQuizOpen, setRandomQuizOpen] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<string[]>(["sdcs", "dd", "wd"]);
   const [questionCount, setQuestionCount] = useState(5);
   const [hasPublishedAssignments, setHasPublishedAssignments] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("teacherToken");
-    setIsLoggedIn(!!token);
+    setIsTeacherLoggedIn(!!localStorage.getItem("teacherToken"));
   }, []);
 
   useEffect(() => {
@@ -65,415 +109,379 @@ export default function Home() {
         const response = await fetch('/api/assignments');
         if (response.ok) {
           const data = await response.json();
-          const published = data.filter((a: { isPublished: boolean }) => a.isPublished);
-          setHasPublishedAssignments(published.length > 0);
+          setHasPublishedAssignments(data.filter((a: { isPublished: boolean }) => a.isPublished).length > 0);
         }
-      } catch (error) {
-        console.error("Error checking assignments:", error);
-      }
+      } catch {}
     };
     checkPublishedAssignments();
   }, []);
 
-
   const handleLogout = () => {
     localStorage.removeItem("teacherToken");
     localStorage.removeItem("teacherTokenExpires");
-    setIsLoggedIn(false);
+    setIsTeacherLoggedIn(false);
   };
 
   const toggleTopic = (topicId: string) => {
-    setSelectedTopics(prev => 
-      prev.includes(topicId) 
-        ? prev.filter(t => t !== topicId)
-        : [...prev, topicId]
+    setSelectedTopics(prev =>
+      prev.includes(topicId) ? prev.filter(t => t !== topicId) : [...prev, topicId]
     );
   };
 
-  const getAvailableQuestionCount = () => {
-    return questions.filter(q => selectedTopics.includes(q.topic)).length;
-  };
+  const getAvailableQuestionCount = () =>
+    questions.filter(q => selectedTopics.includes(q.topic)).length;
 
   const calculateTotalMarks = (questionList: Question[]): number => {
     let total = 0;
     for (const question of questionList) {
       for (const sq of question.subQuestions) {
         if (sq.subParts && sq.subParts.length > 0) {
-          for (const part of sq.subParts) {
-            total += part.maxMarks || 0;
-          }
-        } else {
-          total += sq.maxMarks || 0;
-        }
+          for (const part of sq.subParts) total += part.maxMarks || 0;
+        } else { total += sq.maxMarks || 0; }
       }
     }
     return total;
   };
 
   const getEstimatedTime = (): number => {
-    const availableQuestions = questions.filter(q => selectedTopics.includes(q.topic));
-    const count = Math.min(questionCount, availableQuestions.length);
-    const sampleQuestions = availableQuestions.slice(0, count);
-    const totalMarks = calculateTotalMarks(sampleQuestions);
-    return Math.ceil(totalMarks * 1.125);
+    const available = questions.filter(q => selectedTopics.includes(q.topic));
+    const count = Math.min(questionCount, available.length);
+    const sampleQuestions = available.slice(0, count);
+    return Math.ceil(calculateTotalMarks(sampleQuestions) * 1.125);
   };
 
+  const questionsByTopic = TOPICS.reduce((acc, topic) => {
+    acc[topic.id] = questions.filter(q => q.topic === topic.id);
+    return acc;
+  }, {} as Record<string, Question[]>);
+
+  const maxQuestions = getAvailableQuestionCount();
+
   const startRandomQuiz = () => {
-    const availableQuestions = questions.filter(q => selectedTopics.includes(q.topic));
-    
-    if (availableQuestions.length === 0) {
-      toast({
-        title: "No questions available",
-        description: "Please select at least one topic with questions.",
-        variant: "destructive"
-      });
+    const available = questions.filter(q => selectedTopics.includes(q.topic));
+    if (available.length === 0) {
+      toast({ title: "No questions available", description: "Please select at least one topic with questions.", variant: "destructive" });
       return;
     }
-
-    const count = Math.min(questionCount, availableQuestions.length);
-    const shuffled = [...availableQuestions].sort(() => Math.random() - 0.5);
+    const count = Math.min(questionCount, available.length);
+    const shuffled = [...available].sort(() => Math.random() - 0.5);
     const selectedQuestions = shuffled.slice(0, count);
-
     const totalMarks = calculateTotalMarks(selectedQuestions);
-    const calculatedTime = Math.ceil(totalMarks * 1.125);
-
     const quizId = `random-${Date.now()}`;
-    const quiz = {
+    localStorage.setItem("student_current_quiz", JSON.stringify({
       id: quizId,
       name: `Random Quiz (${count} questions)`,
       questionIds: selectedQuestions.map(q => q.id),
       questions: selectedQuestions,
-      timeLimit: calculatedTime,
-      createdAt: new Date().toISOString()
-    };
-
-    localStorage.setItem("student_current_quiz", JSON.stringify(quiz));
+      timeLimit: Math.ceil(totalMarks * 1.125),
+      createdAt: new Date().toISOString(),
+    }));
     setRandomQuizOpen(false);
     setLocation(`/timed-exam/student-quiz/${quizId}`);
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex flex-col items-center font-sans selection:bg-red-100 selection:text-red-900">
+    <div style={{ fontFamily: "Arial, sans-serif", minHeight: "100vh" }}>
 
-      <div className="w-full bg-black dark:bg-neutral-800 pt-20 pb-8 mb-12 relative overflow-hidden">
-        <img
-          src="/revision-n5/Biggar_HS_Logo_1766054584535.png"
-          alt=""
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-36 h-36 md:w-48 md:h-48 object-contain opacity-15 pointer-events-none"
-        />
-        <div className="absolute top-6 left-6 flex items-center gap-4">
-          {studentAuth.isLoggedIn ? (
-            <div className="flex items-center gap-2" data-testid="student-indicator">
-              <div className="flex items-center gap-2 bg-blue-600/20 border border-blue-400/30 rounded-full px-3 py-1.5">
-                <User className="w-4 h-4 text-blue-300" />
-                <span className="text-sm text-blue-200 font-medium" data-testid="text-student-username">{studentAuth.username}</span>
-              </div>
-              <Link href="/my-progress">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-green-600/20 text-green-200 border-green-400/30 hover:bg-green-600/40"
-                  data-testid="link-my-progress"
-                >
-                  <BarChart3 className="w-4 h-4 mr-1" />
-                  My Progress
-                </Button>
-              </Link>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white/10 text-white border-white/20 hover:bg-white/20"
-                onClick={() => studentAuth.logout()}
-                data-testid="button-student-logout"
-              >
-                <LogOut className="w-4 h-4 mr-1" />
-                Logout
-              </Button>
-            </div>
-          ) : (
-            <Link href="/student/login">
-              <Button variant="outline" className="bg-blue-600/20 text-blue-200 border-blue-400/30 hover:bg-blue-600/40" data-testid="link-student-login">
-                <User className="w-4 h-4 mr-2" />
-                Student Login
-              </Button>
-            </Link>
-          )}
+      {/* Fixed black header */}
+      <header style={{
+        position: "fixed", top: 0, left: 0, width: "100%", height: "100px",
+        backgroundColor: "black", zIndex: 100, display: "flex", alignItems: "center", overflow: "hidden",
+      }}>
+        <h1 style={{ color: "white", padding: "0 30px", fontSize: "30px", fontFamily: "Arial", fontWeight: "bold", whiteSpace: "nowrap" }}>
+          BHS Computing Science
+        </h1>
+        <img src="/Images/Header/banner.png" alt="" style={{ height: "100px", marginLeft: "auto" }}
+          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+      </header>
 
-          <Link href="/my-quizzes">
-            <Button variant="outline" className="bg-purple-600/20 text-purple-200 border-purple-400/30 hover:bg-purple-600/40">
-              <BookOpen className="w-4 h-4 mr-2" />
-              My Quizzes
-            </Button>
-          </Link>
-
-          <Button
-            onClick={() => setRandomQuizOpen(true)}
-            variant="outline"
-            className="bg-orange-500/20 text-orange-200 border-orange-400/30 hover:bg-orange-500/40"
-            data-testid="button-random-quiz"
-          >
-            <Shuffle className="w-4 h-4 mr-2" />
-            Random Quiz
-          </Button>
-        </div>
-
-        <div className="absolute top-6 right-6 flex items-center gap-4">
-            <a href="/HTML/N5/N5Home.html">
-              <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
-                Return to Main Website
-              </Button>
-            </a>
-
-            {isLoggedIn ? (
-              <>
-                <Link href="/teacher/dashboard">
-                  <Button variant="outline" className="bg-green-600/20 text-green-200 border-green-400/30 hover:bg-green-600/40 hover:text-white">
-                    Teacher Dashboard
-                  </Button>
-                </Link>
-                <Button 
-                  variant="outline" 
-                  className="bg-red-600/20 text-red-200 border-red-400/30 hover:bg-red-600/40 hover:text-white"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <Link href="/teacher/login">
-                <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
-                  Teacher Access
-                </Button>
-              </Link>
-            )}
-
-            <ModeToggle />
-          </div>
-        <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="w-full flex flex-col items-center space-y-4 relative z-10">
-            <div className="inline-block bg-red-600 text-white text-sm font-bold px-4 py-1 rounded-full mb-4 uppercase tracking-wider">
-              N5 Level
-            </div>
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white">
-            CS Revision Tool
-            </h1>
-            <p className="text-neutral-400 text-sm">Biggar High School</p>
-        </motion.div>
+      {/* Fixed navy sub-header */}
+      <div style={{
+        position: "fixed", top: "100px", left: 0, width: "100%",
+        backgroundColor: "#030346", color: "white", fontFamily: "arial",
+        textAlign: "center", padding: "10px", zIndex: 100,
+      }}>
+        <h1 style={{ fontSize: "22px", fontWeight: "normal" }}>National 5 CS Revision Tool</h1>
       </div>
 
-      <div className="w-full bg-neutral-50 dark:bg-neutral-900/30 py-16">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="mb-12 text-center"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold text-neutral-900 dark:text-white mb-2">
-              Choose Your Topic
-            </h2>
-            <p className="text-neutral-600 dark:text-neutral-400 text-lg">
-              Select a subject to start revising for your N5 Computing Science exam
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
-            {TOPICS.map((topic, index) => {
-              const Icon = icons[topic.id as Topic];
-              return (
-                <Link key={topic.id} href={`/revise/${topic.id}`}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 + 0.3 }}
-                    className="group relative h-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-10 hover:shadow-2xl hover:border-red-400/50 dark:hover:border-red-500/50 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col"
-                  >
-                    <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br from-red-50 to-transparent dark:from-red-950/40 dark:to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-tr from-neutral-100 to-transparent dark:from-neutral-800/40 dark:to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                    <div className="relative z-10 flex flex-col h-full">
-                      <div className="mb-8 p-4 bg-gradient-to-br from-neutral-100 to-neutral-50 dark:from-neutral-800 dark:to-neutral-900 w-fit rounded-2xl group-hover:from-red-500 group-hover:to-red-600 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-md">
-                        <Icon className="w-10 h-10" />
-                      </div>
-
-                      <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mb-3 leading-tight">
-                        {topic.name}
-                      </h3>
-
-                      <p className="text-neutral-600 dark:text-neutral-400 mb-8 flex-grow leading-relaxed text-base">
-                        {topic.description}
-                      </p>
-
-                      <div className="flex items-center text-red-600 dark:text-red-400 font-semibold group-hover:text-red-700 dark:group-hover:text-red-300 transition-colors duration-300">
-                        Start Revision
-                        <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
-                      </div>
-                    </div>
-                  </motion.div>
-                </Link>
-              );
-            })}
-          </div>
+      {/* Fixed footer */}
+      <footer style={{
+        position: "fixed", bottom: 0, left: 0, width: "100%",
+        backgroundColor: "black", height: "50px", display: "flex",
+        alignItems: "center", zIndex: 100, padding: "0 20px",
+      }}>
+        <div style={{ color: "lightgrey", fontSize: "10px", fontFamily: "arial" }}>
+          Biggar High School &nbsp;&nbsp; Market Rd, Biggar &nbsp;&nbsp; ML12 6AG
         </div>
-      </div>
-
-      <div className="w-full max-w-7xl mx-auto px-6 md:px-12 pb-16 flex flex-col items-center">
-        {/* Timed Mode CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="w-full mt-4"
-        >
-          <Link href="/timed-mode">
-              <div className="bg-gradient-to-r from-red-600 to-neutral-900 rounded-2xl p-8 text-white shadow-xl cursor-pointer hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 flex items-center justify-between relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-                  <div className="relative z-10 flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                          <Clock className="w-6 h-6" />
-                      </div>
-                      <h2 className="text-3xl font-bold mb-2">Timed Exam Mode</h2>
-                      <p className="text-red-100 max-w-xl">
-                          Simulate real exam conditions. Choose a paper, answer questions against the clock (1 hour 30 minutes), and get graded automatically at the end.
-                      </p>
-                  </div>
-                  <ArrowRight className="w-8 h-8 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-              </div>
-          </Link>
-        </motion.div>
-
-        {hasPublishedAssignments && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="w-full mt-4"
-          >
-            <Link href="/assignments">
-              <div className="bg-gradient-to-r from-purple-600 to-neutral-900 rounded-2xl p-8 text-white shadow-xl cursor-pointer hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 flex items-center justify-between relative overflow-hidden group">
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-                <div className="relative z-10 flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <FileText className="w-6 h-6" />
-                  </div>
-                  <h2 className="text-3xl font-bold mb-2">Coursework Assignment</h2>
-                  <p className="text-purple-100 max-w-xl">
-                    Complete your N5 coursework assignment. 40 marks, 6 hours. Software Design (compulsory) plus Database OR Web Design.
-                  </p>
-                </div>
-                <ArrowRight className="w-8 h-8 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-              </div>
-            </Link>
-          </motion.div>
-        )}
-
+        <div style={{ marginLeft: "auto", color: "lightgrey", fontSize: "10px", fontFamily: "arial" }}>
+          ©C Dunn, 2025
         </div>
-
-      <footer className="w-full py-4 px-6">
-        <p className="text-right text-neutral-400 text-xs">© C Dunn</p>
       </footer>
 
+      {/* Main layout */}
+      <div style={{ display: "flex", marginTop: "150px", marginBottom: "50px", minHeight: "calc(100vh - 200px)" }}>
+
+        {/* Fixed sidebar */}
+        <div style={{
+          position: "fixed", top: "150px", left: 0, width: "320px",
+          backgroundColor: "#333333", height: "calc(100vh - 200px)", overflowY: "auto",
+        }}>
+          <div style={{ padding: "10px", backgroundColor: "#2a2a2a", borderBottom: "1px solid #444" }}>
+            <input type="text" placeholder="Search N5 pages..."
+              style={{
+                width: "100%", padding: "8px 12px", border: "1px solid #555",
+                borderRadius: "4px", backgroundColor: "#1a1a1a", color: "#fff",
+                fontSize: "14px", boxSizing: "border-box",
+              }} readOnly />
+          </div>
+
+          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            <li>
+              <Link href="/">
+                <a style={S.sidebarLink}><span>Home</span></a>
+              </Link>
+            </li>
+            <li>
+              <a href="/HTML/N5/N5Home.html" style={S.sidebarLink}><span>Main Website</span></a>
+            </li>
+            <li style={{ borderTop: "1px solid #555" }}>
+              <div style={{ ...S.sidebarLink, backgroundColor: "#2a2a2a", fontSize: "12px", color: "#aaa", cursor: "default", textTransform: "uppercase", letterSpacing: "1px" }}>
+                Revision Topics
+              </div>
+            </li>
+            {TOPICS.map(topic => (
+              <li key={topic.id}>
+                <Link href={`/revise/${topic.id}`}>
+                  <a style={S.sidebarLink}>
+                    <span>{topic.name}</span>
+                    <span style={{ fontSize: "11px" }}>&#9654;</span>
+                  </a>
+                </Link>
+              </li>
+            ))}
+            <li style={{ borderTop: "1px solid #555" }}>
+              <div style={{ ...S.sidebarLink, backgroundColor: "#2a2a2a", fontSize: "12px", color: "#aaa", cursor: "default", textTransform: "uppercase", letterSpacing: "1px" }}>
+                Tools
+              </div>
+            </li>
+            <li>
+              <Link href="/timed-mode">
+                <a style={S.sidebarLink}><span>Past Papers</span></a>
+              </Link>
+            </li>
+            <li>
+              <a style={S.sidebarLink} onClick={() => setRandomQuizOpen(true)} data-testid="button-random-quiz">
+                <span>Random Quiz</span>
+              </a>
+            </li>
+            <li>
+              <Link href="/my-quizzes">
+                <a style={S.sidebarLink}><span>My Quizzes</span></a>
+              </Link>
+            </li>
+            {hasPublishedAssignments && (
+              <li>
+                <Link href="/assignments">
+                  <a style={S.sidebarLink}><span>Coursework Assignment</span></a>
+                </Link>
+              </li>
+            )}
+            <li style={{ borderTop: "1px solid #555" }}>
+              <div style={{ ...S.sidebarLink, backgroundColor: "#2a2a2a", fontSize: "12px", color: "#aaa", cursor: "default", textTransform: "uppercase", letterSpacing: "1px" }}>
+                Account
+              </div>
+            </li>
+            {studentAuth.isLoggedIn ? (
+              <>
+                <li>
+                  <div style={{ ...S.sidebarLink, backgroundColor: "#1a3a5c", cursor: "default" }}>
+                    <span data-testid="text-student-username">&#128393; {studentAuth.username}</span>
+                  </div>
+                </li>
+                <li>
+                  <Link href="/my-progress">
+                    <a style={{ ...S.sidebarLink, paddingLeft: "20px" }} data-testid="link-my-progress"><span>My Progress</span></a>
+                  </Link>
+                </li>
+                <li>
+                  <a style={{ ...S.sidebarLink, paddingLeft: "20px" }} onClick={() => studentAuth.logout()} data-testid="button-student-logout">
+                    <span>Logout</span>
+                  </a>
+                </li>
+              </>
+            ) : (
+              <li>
+                <Link href="/student/login">
+                  <a style={S.sidebarLink} data-testid="link-student-login"><span>Student Login</span></a>
+                </Link>
+              </li>
+            )}
+            {isTeacherLoggedIn ? (
+              <>
+                <li>
+                  <Link href="/teacher/dashboard">
+                    <a style={S.sidebarLink}><span>Teacher Dashboard</span></a>
+                  </Link>
+                </li>
+                <li>
+                  <a style={{ ...S.sidebarLink, paddingLeft: "20px" }} onClick={handleLogout}>
+                    <span>Teacher Logout</span>
+                  </a>
+                </li>
+              </>
+            ) : (
+              <li>
+                <Link href="/teacher/login">
+                  <a style={S.sidebarLink}><span>Teacher Access</span></a>
+                </Link>
+              </li>
+            )}
+          </ul>
+        </div>
+
+        {/* Content area */}
+        <div style={{ marginLeft: "320px", width: "calc(100% - 320px)", backgroundColor: "white", padding: "10px 10px 60px" }}>
+
+          <div style={S.contentHeading as React.CSSProperties}>
+            <h1 style={{ fontSize: "28px" }}>Course Overview</h1>
+          </div>
+
+          <div style={{ maxWidth: "1400px", margin: "auto", padding: "10px", textAlign: "left" }}>
+            <p style={{ textAlign: "center", fontSize: "18px", padding: "10px" }}>
+              <b>Use the sidebar to select a topic or action to get started with your National 5 Computing Science revision!</b>
+            </p>
+
+            <h2 style={S.h2 as React.CSSProperties}>Revision Topics</h2>
+            <p style={{ fontSize: "18px", padding: "10px" }}>
+              Select a topic from the sidebar or the table below to practise past paper questions with AI-powered marking and feedback.
+            </p>
+
+            <table style={{ borderCollapse: "collapse", margin: "20px auto", width: "100%", border: "1px solid black" }}>
+              <thead>
+                <tr>
+                  <th style={S.th as React.CSSProperties}>Topic</th>
+                  <th style={S.th as React.CSSProperties}>Description</th>
+                  <th style={S.th as React.CSSProperties}>Questions</th>
+                  <th style={S.th as React.CSSProperties}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {TOPICS.map(topic => (
+                  <tr key={topic.id}>
+                    <td style={{ ...S.td, fontWeight: "bold" } as React.CSSProperties}>{topic.name}</td>
+                    <td style={S.td as React.CSSProperties}>{topic.description}</td>
+                    <td style={{ ...S.td, textAlign: "center" } as React.CSSProperties}>
+                      {questionsByTopic[topic.id]?.length || 0}
+                    </td>
+                    <td style={{ ...S.td, textAlign: "center" } as React.CSSProperties}>
+                      <Link href={`/revise/${topic.id}`}>
+                        <a style={{ color: "#17479b", textDecoration: "underline", fontWeight: "bold" }}>
+                          Revise &#9654;
+                        </a>
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <h2 style={S.h2 as React.CSSProperties}>Quick Actions</h2>
+            <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", padding: "10px 0" }}>
+              <Link href="/timed-mode">
+                <a style={S.actionBtn as React.CSSProperties}>&#9654; Past Papers</a>
+              </Link>
+              <a style={S.actionBtn as React.CSSProperties} onClick={() => setRandomQuizOpen(true)} data-testid="button-random-quiz-content">
+                &#9654; Random Quiz
+              </a>
+              <Link href="/my-quizzes">
+                <a style={{ ...S.actionBtn, backgroundColor: "#17479b" } as React.CSSProperties}>&#9654; My Quizzes</a>
+              </Link>
+              {hasPublishedAssignments && (
+                <Link href="/assignments">
+                  <a style={{ ...S.actionBtn, backgroundColor: "#2d4ba4" } as React.CSSProperties}>&#9654; Coursework Assignment</a>
+                </Link>
+              )}
+            </div>
+
+            <h2 style={S.h2 as React.CSSProperties}>About This Tool</h2>
+            <p style={{ fontSize: "18px", padding: "10px" }}>
+              This revision tool provides access to National 5 Computing Science past paper questions with AI-powered marking and feedback.
+              Work through questions topic by topic, or try a timed past paper to practise exam conditions.
+            </p>
+            <ul style={{ listStyleType: "circle", marginLeft: "30px", fontSize: "18px" }}>
+              <li style={{ marginBottom: "10px", padding: "5px" }}>Practice questions from past SQA exam papers</li>
+              <li style={{ marginBottom: "10px", padding: "5px" }}>AI-marked responses with detailed feedback</li>
+              <li style={{ marginBottom: "10px", padding: "5px" }}>Timed past paper mode to simulate exam conditions</li>
+              <li style={{ marginBottom: "10px", padding: "5px" }}>Save your own quizzes and track your progress</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Random Quiz Dialog */}
       <Dialog open={randomQuizOpen} onOpenChange={setRandomQuizOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Shuffle className="w-5 h-5 text-orange-500" />
+              <Shuffle className="w-5 h-5" />
               Random Quiz
             </DialogTitle>
-            <DialogDescription>
-              Generate a quiz with randomly selected questions from your chosen topics.
-            </DialogDescription>
           </DialogHeader>
-          
           <div className="space-y-6 py-4">
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Select Topics</Label>
+            <div>
+              <label className="block text-sm font-medium mb-3">Select Topics</label>
               <div className="space-y-2">
                 {TOPICS.map(topic => {
-                  const topicQuestionCount = questions.filter(q => q.topic === topic.id).length;
-                  const Icon = icons[topic.id as Topic];
+                  const count = questionsByTopic[topic.id]?.length || 0;
                   return (
-                    <div 
-                      key={topic.id} 
-                      className="flex items-center space-x-3 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                    <div
+                      key={topic.id}
+                      className="flex items-center gap-3 p-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 cursor-pointer"
+                      onClick={() => toggleTopic(topic.id)}
                     >
-                      <Checkbox 
-                        id={`topic-${topic.id}`}
+                      <Checkbox
                         checked={selectedTopics.includes(topic.id)}
                         onCheckedChange={() => toggleTopic(topic.id)}
-                        data-testid={`checkbox-topic-${topic.id}`}
                       />
-                      <Icon className="w-4 h-4 text-neutral-500" />
-                      <Label 
-                        htmlFor={`topic-${topic.id}`} 
-                        className="flex-1 cursor-pointer text-sm"
-                      >
-                        {topic.name}
-                      </Label>
-                      <span className="text-xs text-neutral-500">
-                        {topicQuestionCount} questions
-                      </span>
+                      <span className="flex-1 font-medium">{topic.name}</span>
+                      <span className="text-sm text-neutral-500">{count} questions</span>
                     </div>
                   );
                 })}
               </div>
-              <p className="text-xs text-neutral-500">
-                {getAvailableQuestionCount()} questions available from selected topics
-              </p>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="question-count" className="text-sm font-medium">
-                Number of Questions
-              </Label>
-              <div className="flex items-center gap-3">
+            <div>
+              <label className="block text-sm font-medium mb-2">Number of Questions</label>
+              <div className="flex items-center gap-4">
                 <Input
-                  id="question-count"
                   type="number"
-                  min={1}
-                  max={Math.max(1, getAvailableQuestionCount())}
                   value={questionCount}
-                  onChange={(e) => setQuestionCount(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) => setQuestionCount(Math.max(1, Math.min(parseInt(e.target.value) || 1, maxQuestions)))}
                   className="w-24"
-                  data-testid="input-question-count"
+                  min={1}
+                  max={maxQuestions}
                 />
-                <span className="text-sm text-neutral-500">
-                  (max: {getAvailableQuestionCount()})
+                <span className="text-sm text-neutral-500">Max: {maxQuestions} available</span>
+              </div>
+            </div>
+            <div className="bg-blue-50 rounded-lg p-4">
+              <div className="flex items-center justify-between text-sm">
+                <span>Estimated time:</span>
+                <span className="font-semibold flex items-center gap-1">
+                  <Clock className="w-4 h-4" />
+                  ~{getEstimatedTime()} minutes
                 </span>
               </div>
             </div>
-
-            <div className="p-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">Estimated Time</p>
-                  <p className="text-xs text-neutral-500">Based on 1.125 minutes per mark</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-orange-600">{getEstimatedTime()} min</p>
-                  <p className="text-xs text-neutral-500">
-                    (~{Math.round(getEstimatedTime() / 1.125)} marks)
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
-
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRandomQuizOpen(false)}>
-              Cancel
-            </Button>
-            <Button 
+            <Button variant="outline" onClick={() => setRandomQuizOpen(false)}>Cancel</Button>
+            <Button
               onClick={startRandomQuiz}
+              style={{ backgroundColor: "#030346" }}
               disabled={selectedTopics.length === 0 || getAvailableQuestionCount() === 0}
-              className="bg-orange-600 hover:bg-orange-700"
               data-testid="button-start-random-quiz"
             >
-              <Shuffle className="w-4 h-4 mr-2" />
               Start Quiz
             </Button>
           </DialogFooter>

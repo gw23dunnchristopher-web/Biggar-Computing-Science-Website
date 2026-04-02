@@ -26,7 +26,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Color System - Black, White & Red */
+  /* Color System - Black, White & Navy Blue */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
 
@@ -68,7 +68,7 @@
 }
 
 :root {
-  /* Light Mode - Black, White, Red */
+  /* Light Mode - Black, White, Navy Blue */
   --background: 0 0% 100%; /* White */
   --foreground: 0 0% 3.9%; /* Almost Black */
 
@@ -78,8 +78,8 @@
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 3.9%;
 
-  --primary: 0 72.2% 50.6%; /* Red 600 */
-  --primary-foreground: 0 85.7% 97.3%; /* Very light red/white */
+  --primary: 216 74% 35%; /* Navy Blue #17479b */
+  --primary-foreground: 0 0% 98%; /* White */
 
   --secondary: 0 0% 96.1%; /* Light Grey */
   --secondary-foreground: 0 0% 9%;
@@ -95,17 +95,17 @@
 
   --border: 0 0% 89.8%;
   --input: 0 0% 89.8%;
-  --ring: 0 72.2% 50.6%; /* Red Ring */
+  --ring: 216 74% 35%; /* Navy Blue Ring */
 
-  --chart-1: 0 72.2% 50.6%;
-  --chart-2: 0 0% 25%;
-  --chart-3: 0 0% 45%;
-  --chart-4: 0 0% 65%;
-  --chart-5: 0 0% 85%;
+  --chart-1: 216 74% 35%;
+  --chart-2: 216 50% 50%;
+  --chart-3: 216 40% 65%;
+  --chart-4: 216 30% 75%;
+  --chart-5: 216 20% 85%;
 }
 
 .dark {
-  /* Dark Mode - Black, White, Red */
+  /* Dark Mode - Black, White, Navy Blue */
   --background: 0 0% 3.9%; /* Almost Black */
   --foreground: 0 0% 98%; /* White */
 
@@ -115,8 +115,8 @@
   --popover: 0 0% 3.9%;
   --popover-foreground: 0 0% 98%;
 
-  --primary: 0 72.2% 50.6%; /* Red 600 */
-  --primary-foreground: 0 85.7% 97.3%;
+  --primary: 216 74% 50%; /* Lighter Navy Blue for dark mode */
+  --primary-foreground: 0 0% 98%;
 
   --secondary: 0 0% 14.9%;
   --secondary-foreground: 0 0% 98%;
@@ -132,13 +132,13 @@
 
   --border: 0 0% 14.9%;
   --input: 0 0% 14.9%;
-  --ring: 0 72.2% 50.6%;
+  --ring: 216 74% 50%;
 
-  --chart-1: 0 72.2% 50.6%;
-  --chart-2: 0 0% 65%;
-  --chart-3: 0 0% 45%;
-  --chart-4: 0 0% 25%;
-  --chart-5: 0 0% 15%;
+  --chart-1: 216 74% 50%;
+  --chart-2: 216 50% 65%;
+  --chart-3: 216 40% 45%;
+  --chart-4: 216 30% 25%;
+  --chart-5: 216 20% 15%;
 }
 
 @layer base {
