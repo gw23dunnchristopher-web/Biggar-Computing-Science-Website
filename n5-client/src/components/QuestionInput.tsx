@@ -198,7 +198,7 @@ function renderMainInput(
         {getRequirementBadge(subQ.codeRequirement)}
         <Textarea 
           placeholder={placeholderText}
-          className="min-h-[200px] text-base font-mono p-4 resize-y bg-neutral-900 text-neutral-100 border-neutral-800 focus:border-red-500"
+          className="min-h-[200px] text-base font-mono p-4 resize-y bg-neutral-900 text-neutral-100 border-neutral-800 focus:border-blue-800"
           value={currentInput["main"] || ""}
           onChange={(e) => onChange("main", e.target.value)}
           onKeyDown={(e) => { onCodeKeyDown?.(e); handleTabKey(e, onChange); }}
@@ -222,7 +222,7 @@ function renderMainInput(
               <Input 
                 value={currentInput[field.key] || ""}
                 onChange={(e) => onChange(field.key, e.target.value)}
-                className="flex-1 min-w-0 bg-white dark:bg-neutral-950 border-2 border-neutral-300 dark:border-neutral-700 focus:border-red-500 shadow-sm"
+                className="flex-1 min-w-0 bg-white dark:bg-neutral-950 border-2 border-neutral-300 dark:border-neutral-700 focus:border-blue-800 shadow-sm"
                 data-testid={`input-${field.key}-${subQ.id}`}
               />
             )}
@@ -549,7 +549,7 @@ function renderMainInput(
                                     onChange(cellKey, newVal);
                                   }
                                 }}
-                                className="bg-white dark:bg-neutral-950 border-2 border-neutral-300 dark:border-neutral-700 focus:border-red-500 shadow-sm resize-y"
+                                className="bg-white dark:bg-neutral-950 border-2 border-neutral-300 dark:border-neutral-700 focus:border-blue-800 shadow-sm resize-y"
                                 style={{ minHeight: rowMinHeights[rowIdx] !== "auto" ? rowMinHeights[rowIdx] : "60px" }}
                                 rows={lineCount}
                               />
@@ -610,7 +610,7 @@ function renderMainInput(
                             placeholder={`Enter ${col.header.toLowerCase()}...`}
                             value={currentInput[key] || ""}
                             onChange={(e) => onChange(key, e.target.value)}
-                            className="bg-white dark:bg-neutral-950 border-2 border-neutral-300 dark:border-neutral-700 focus:border-red-500 shadow-sm"
+                            className="bg-white dark:bg-neutral-950 border-2 border-neutral-300 dark:border-neutral-700 focus:border-blue-800 shadow-sm"
                           />
                         )}
                       </td>
@@ -655,7 +655,7 @@ function renderMainInput(
                           placeholder="Enter answer..."
                           value={rowValue}
                           onChange={(e) => handleRowChange(e.target.value)}
-                          className="w-full min-h-[100px] bg-white dark:bg-neutral-950 border-2 border-neutral-300 dark:border-neutral-700 focus:border-red-500 shadow-sm resize-y"
+                          className="w-full min-h-[100px] bg-white dark:bg-neutral-950 border-2 border-neutral-300 dark:border-neutral-700 focus:border-blue-800 shadow-sm resize-y"
                           rows={Math.max((rowValue || teacherVal).split("\n").length, 3)}
                         />
                       ) : (
@@ -663,7 +663,7 @@ function renderMainInput(
                           placeholder="Enter answer..."
                           value={rowValue}
                           onChange={(e) => handleRowChange(e.target.value)}
-                          className="w-full bg-white dark:bg-neutral-950 border-2 border-neutral-300 dark:border-neutral-700 focus:border-red-500 shadow-sm"
+                          className="w-full bg-white dark:bg-neutral-950 border-2 border-neutral-300 dark:border-neutral-700 focus:border-blue-800 shadow-sm"
                         />
                       );
                     })()
@@ -1043,7 +1043,7 @@ export function ScreenshotUploadInput({ subQ, currentInput, onChange, onUpload }
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="h-32 border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg flex flex-col items-center justify-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors disabled:opacity-50"
+            className="h-32 border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg flex flex-col items-center justify-center gap-2 hover:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-colors disabled:opacity-50"
             type="button"
             data-testid="button-add-file"
           >

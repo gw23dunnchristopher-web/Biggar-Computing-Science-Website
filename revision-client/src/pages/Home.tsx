@@ -140,7 +140,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex flex-col items-center font-sans selection:bg-red-100 selection:text-red-900">
+    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex flex-col items-center font-sans selection:bg-blue-100 selection:text-blue-900">
 
       <div className="w-full bg-black dark:bg-neutral-800 pt-20 pb-8 mb-12 relative overflow-hidden">
         <img
@@ -223,7 +223,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="w-full flex flex-col items-center space-y-4 relative z-10">
-            <div className="inline-block bg-red-600 text-white text-sm font-bold px-4 py-1 rounded-full mb-4 uppercase tracking-wider">
+            <div className="inline-block bg-blue-800 text-white text-sm font-bold px-4 py-1 rounded-full mb-4 uppercase tracking-wider">
               Higher Level
             </div>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white">
@@ -258,13 +258,13 @@ export default function Home() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 + 0.3 }}
-                    className="group relative h-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-10 hover:shadow-2xl hover:border-red-400/50 dark:hover:border-red-500/50 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col"
+                    className="group relative h-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-10 hover:shadow-2xl hover:border-blue-700/50 dark:hover:border-blue-700/50 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col"
                   >
-                    <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br from-red-50 to-transparent dark:from-red-950/40 dark:to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent dark:from-blue-950/40 dark:to-transparent rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-tr from-neutral-100 to-transparent dark:from-neutral-800/40 dark:to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                     <div className="relative z-10 flex flex-col h-full">
-                      <div className="mb-8 p-4 bg-gradient-to-br from-neutral-100 to-neutral-50 dark:from-neutral-800 dark:to-neutral-900 w-fit rounded-2xl group-hover:from-red-500 group-hover:to-red-600 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-md">
+                      <div className="mb-8 p-4 bg-gradient-to-br from-neutral-100 to-neutral-50 dark:from-neutral-800 dark:to-neutral-900 w-fit rounded-2xl group-hover:from-blue-500 group-hover:to-red-600 group-hover:text-white transition-all duration-300 shadow-sm group-hover:shadow-md">
                         <Icon className="w-10 h-10" />
                       </div>
 
@@ -276,7 +276,7 @@ export default function Home() {
                         {topic.description}
                       </p>
 
-                      <div className="flex items-center text-red-600 dark:text-red-400 font-semibold group-hover:text-red-700 dark:group-hover:text-red-300 transition-colors duration-300">
+                      <div className="flex items-center text-blue-800 dark:text-blue-400 font-semibold group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-300">
                         Start Revision
                         <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                       </div>
@@ -356,14 +356,14 @@ export default function Home() {
           className="w-full mt-4"
         >
           <Link href="/timed-mode">
-              <div className="bg-gradient-to-r from-red-600 to-neutral-900 rounded-2xl p-8 text-white shadow-xl cursor-pointer hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 flex items-center justify-between relative overflow-hidden group">
+              <div className="bg-gradient-to-r from-blue-800 to-neutral-900 rounded-2xl p-8 text-white shadow-xl cursor-pointer hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 flex items-center justify-between relative overflow-hidden group">
                   <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
                   <div className="relative z-10 flex-1">
                       <div className="flex items-center gap-3 mb-2">
                           <Clock className="w-6 h-6" />
                       </div>
                       <h2 className="text-3xl font-bold mb-2">Timed Exam Mode</h2>
-                      <p className="text-red-100 max-w-xl">
+                      <p className="text-blue-100 max-w-xl">
                           Simulate real exam conditions. Choose a paper, answer questions against the clock (2 hours), and get graded automatically at the end.
                       </p>
                   </div>

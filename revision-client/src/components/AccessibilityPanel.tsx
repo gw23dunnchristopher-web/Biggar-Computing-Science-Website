@@ -50,7 +50,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${checked ? "bg-red-600" : "bg-neutral-600"}`}
+      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${checked ? "bg-blue-800" : "bg-neutral-600"}`}
     >
       <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg transform transition-transform ${checked ? "translate-x-5" : "translate-x-0"}`} />
     </button>
@@ -62,7 +62,7 @@ function ColourSwatch({ color, active, isDefault, onClick }: { color: string; ac
     <button
       type="button"
       onClick={onClick}
-      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${active ? "ring-2 ring-red-500 ring-offset-2 ring-offset-neutral-900 border-red-500" : "border-neutral-600 hover:border-neutral-400"}`}
+      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${active ? "ring-2 ring-blue-700 ring-offset-2 ring-offset-neutral-900 border-blue-700" : "border-neutral-600 hover:border-neutral-400"}`}
       style={color ? { backgroundColor: color } : undefined}
     >
       {isDefault && <X className="w-4 h-4 text-neutral-400" />}
