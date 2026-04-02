@@ -1078,7 +1078,8 @@ ${studentAnswer}`;
             model: "gemini-2.5-flash",
             contents: geminiContents,
             config: {
-              responseMimeType: "application/json"
+              responseMimeType: "application/json",
+              thinkingConfig: { thinkingBudget: 0 }
             }
           });
           responseText = geminiResponse.text;

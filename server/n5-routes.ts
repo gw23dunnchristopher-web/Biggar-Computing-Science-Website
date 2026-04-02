@@ -1649,10 +1649,13 @@ FEEDBACK FORMATTING:
 - Use "• " (bullet character) at the start of each point
 - Put each bullet on its own line (separate with newline character)
 - Each bullet MUST correspond to a specific mark point from the marking scheme
-- State whether that mark was awarded or not, with a brief reason
+- State whether that mark was awarded or not, with a brief reason — ONE sentence per bullet, no lengthy explanations
 - Example for a 3-mark question:
 "• [1/1] You correctly identified the primary key as studentID.\n• [1/1] You correctly identified the foreign key.\n• [0/1] You did not identify the correct data type — it should be real, not integer."
 - Do NOT add extra commentary beyond the mark-by-mark breakdown
+- Do NOT repeat the question or marking scheme back to the student
+- Be direct — state what was correct or incorrect without lengthy explanation
+- IMPORTANT: Only award WHOLE marks (integers). Never give half marks or decimal marks (e.g. 1.5, 2.5). Round down if unsure.
 
 TECHNICAL FEEDBACK - USE SUBJECT-APPROPRIATE LANGUAGE:
 - Read the question context to determine the topic area and use appropriate technical terminology
@@ -1863,14 +1866,20 @@ ${studentAnswer}`;
             const geminiResponse = await gemini.models.generateContent({
               model: "gemini-2.5-flash",
               contents: [{ role: "user", parts: contentParts }],
-              config: { responseMimeType: "application/json" }
+              config: {
+                responseMimeType: "application/json",
+                thinkingConfig: { thinkingBudget: 0 }
+              }
             });
             responseText = geminiResponse.text;
           } else {
             const geminiResponse = await gemini.models.generateContent({
               model: "gemini-2.5-flash",
               contents: `${systemPrompt}\n\n${userPrompt}`,
-              config: { responseMimeType: "application/json" }
+              config: {
+                responseMimeType: "application/json",
+                thinkingConfig: { thinkingBudget: 0 }
+              }
             });
             responseText = geminiResponse.text;
           }
