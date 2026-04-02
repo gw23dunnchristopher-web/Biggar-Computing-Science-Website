@@ -17,10 +17,47 @@
                 questions: [
                     {
                         type: "paragraph",
-                        text: 'Most simple programs run in a straight line from top to bottom (this is called a sequence). Explain how using a selection statement (like an if statement) changes the "path" a program takes.',
-                        marks: 1,
+                        text: [
+                            "What is meant by the term 'nesting' in programming?",
+                            "Give one example of a situation where you might nest an if statement inside a loop.",
+                        ],
+                        marks: 2,
                         markingScheme:
-                            "Award 1 mark for each of the following points:  When the loop starts the total must be set to 0, when the loop finishes the total will be set to 17.",
+                            "Award 1 mark for: placing/putting one construct inside another construct. Award 1 mark for a valid example, such as: checking whether each number entered by a user is positive and only adding it to a total if it is; going through a list of scores and counting how many are above a certain value; repeating an action a set number of times and doing something different depending on a condition each time.",
+                    },
+                    {
+                        type: "table",
+                        text: [
+                            "The code below asks the user to enter a temperature for 4 days and counts how many days were above 20 degrees.",
+                            { type: "code", language: "python", content: "daysAbove20 = 0\nfor x in range(4):\n    temperature = int(input(\"Enter temperature: \"))\n    if temperature > 20:\n        daysAbove20 = daysAbove20 + 1" },
+                            "The user enters the following temperatures in order: 15, 23, 20, 27. Complete the trace table to show the value of daysAbove20 after each iteration of the loop.",
+                        ],
+                        marks: 4,
+                        markingScheme:
+                            "Award 1 mark per correct row. After temperature 15: daysAbove20 = 0 (15 is not greater than 20). After temperature 23: daysAbove20 = 1 (23 > 20). After temperature 20: daysAbove20 = 1 (20 is NOT greater than 20 — the condition uses strictly greater than). After temperature 27: daysAbove20 = 2 (27 > 20).",
+                        tableHeaders: ["Temperature Entered", "daysAbove20 after this iteration"],
+                        columnWidths: ["50%", "50%"],
+                        tableRows: [
+                            ["15", ""],
+                            ["23", ""],
+                            ["20", ""],
+                            ["27", ""],
+                        ],
+                    },
+                    {
+                        type: "pseudocode",
+                        text: [
+                            "Write a Python program that does the following:",
+                            [
+                                "Creates a variable called total and sets it to 0.",
+                                "Uses a loop to ask the user to enter a number 5 times.",
+                                "Only adds the number to total if it is greater than 0.",
+                                "After the loop has finished, prints the value of total.",
+                            ],
+                        ],
+                        marks: 3,
+                        markingScheme:
+                            "Award 1 mark for: total = 0 set before the loop. Award 1 mark for: a correct for loop running 5 times (e.g. for x in range(5):) with an input statement inside it. Award 1 mark for: a correct if statement inside the loop that checks whether the number is greater than 0 and adds it to total if so (e.g. if number > 0: total = total + number), AND a print statement after the loop that outputs total.",
                     },
                 ],
             };
@@ -215,7 +252,7 @@
                             statement has been indented to show that it is
                             inside the first if statement.
                         </p>
-                        
+
                         <h3>Nested Loops</h3>
                         <p>
                             Likewise, you can also place a loop inside another
@@ -236,46 +273,44 @@
                             25. You can see that the second loop has been
                             indented so that it is clearly inside the first.
                         </p>
-                    </div>
-                    
-                    <h3>If statement nested within loops</h3>
-                    <p>
-                        You can also nest an if statement inside a loop. This is
-                        useful when you want to check a condition for each item
-                        in a loop. The example below is a program that asks the
-                        user to enter the temperature for each day of the week,
-                        and then shows the number of days that were above 20
-                        degrees:
-                    </p>
-                    <div class="codeBox">
-                        <p>daysAbove20 = 0</p>
-                        <p>for x in range(7):</p>
-                        <p>
-                            &nbsp;&nbsp;&nbsp;&nbsp;temperature =
-                            int(input("Enter the temperature for day " + str(x +
-                            1) + ": "))
-                        </p>
-                        <p>&nbsp;&nbsp;&nbsp;&nbsp;if temperature > 20:</p>
-                        <p>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;daysAbove20
-                            = daysAbove20 + 1
-                        </p>
-                        <p>
-                            print("There were " + str(daysAbove20) + " days
-                            above 20 degrees")
-                        </p>
-                    </div>
-                    
-                    <p>
-                        This code uses a running total within a loop, but a
-                        selection statement has been added so that it will only
-                        add 1 to the total if the temperature entered was above
-                        20.
-                    </p>
 
-                    <h2>Combining Constructs Questions</h2>
-                    <div class="quiz-container"></div>
-                    
+                        <h3>If statement nested within loops</h3>
+                        <p>
+                            You can also nest an if statement inside a loop.
+                            This is useful when you want to check a condition
+                            for each item in a loop. The example below is a
+                            program that asks the user to enter the temperature
+                            for each day of the week, and then shows the number
+                            of days that were above 20 degrees:
+                        </p>
+                        <div class="codeBox">
+                            <p>daysAbove20 = 0</p>
+                            <p>for x in range(7):</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;temperature =
+                                int(input("Enter the temperature for day " +
+                                str(x + 1) + ": "))
+                            </p>
+                            <p>&nbsp;&nbsp;&nbsp;&nbsp;if temperature > 20:</p>
+                            <p>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;daysAbove20
+                                = daysAbove20 + 1
+                            </p>
+                            <p>
+                                print("There were " + str(daysAbove20) + " days
+                                above 20 degrees")
+                            </p>
+                        </div>
+
+                        <p>
+                            This code uses a running total within a loop, but a
+                            selection statement has been added so that it will
+                            only add 1 to the total if the temperature entered
+                            was above 20.
+                        </p>
+
+                        <h2>Combining Constructs Questions</h2>
+                        <div class="quiz-container"></div>
                     </div>
                 </div>
             </div>
