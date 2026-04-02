@@ -12,6 +12,18 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/codeRunner.css" />
         <link rel="stylesheet" href="/CSS/styles.css" />
+        <style>
+            .quiz-table.trace-narrow {
+                max-width: 200px;
+                width: 200px;
+                margin: 0 auto;
+            }
+            .quiz-table.trace-narrow th,
+            .quiz-table.trace-narrow td {
+                text-align: center;
+                padding: 8px;
+            }
+        </style>
         <script>
             window.QUIZ_CONFIG = {
                 questions: [
@@ -35,8 +47,9 @@
                         marks: 4,
                         markingScheme:
                             "Award 1 mark per correct row. After temperature 15: daysAbove20 = 0 (15 is not greater than 20). After temperature 23: daysAbove20 = 1 (23 > 20). After temperature 20: daysAbove20 = 1 (20 is NOT greater than 20 — the condition uses strictly greater than). After temperature 27: daysAbove20 = 2 (27 > 20).",
-                        tableHeaders: ["Temperature Entered", "daysAbove20 after this iteration"],
+                        tableHeaders: ["Temp.", "daysAbove20"],
                         columnWidths: ["50%", "50%"],
+                        tableClass: "trace-narrow",
                         tableRows: [
                             ["15", ""],
                             ["23", ""],
