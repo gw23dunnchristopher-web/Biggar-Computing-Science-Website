@@ -796,22 +796,10 @@
             <button class="tool-tab" data-ptab="n5">N5 CS</button>
         </div>
         <div class="tool-tab-panel active" data-ptab="higher">
-            <div class="np-panel" id="ap-higher">
-                <div class="np-toolbar">
-                    <span class="np-count" id="ap-higher-count"></span>
-                    <button class="np-btn np-btn-primary" id="ap-higher-new">+ New Assignment</button>
-                </div>
-                <div class="np-body" id="ap-higher-body"><div class="np-loading">Loading…</div></div>
-            </div>
+            <iframe data-src="/revision/teacher/assignments" title="Higher CS Assignments" style="width:100%;flex:1;border:none;background:#0d1117"></iframe>
         </div>
         <div class="tool-tab-panel" data-ptab="n5">
-            <div class="np-panel" id="ap-n5">
-                <div class="np-toolbar">
-                    <span class="np-count" id="ap-n5-count"></span>
-                    <button class="np-btn np-btn-primary" id="ap-n5-new">+ New Assignment</button>
-                </div>
-                <div class="np-body" id="ap-n5-body"><div class="np-loading">Loading…</div></div>
-            </div>
+            <iframe data-src="/revision-n5/teacher/assignments" title="N5 CS Assignments" style="width:100%;flex:1;border:none;background:#0d1117"></iframe>
         </div>
     </div>
 
@@ -845,24 +833,10 @@
             <button class="tool-tab" data-ptab="n5">N5 CS</button>
         </div>
         <div class="tool-tab-panel active" data-ptab="higher">
-            <div class="np-panel" id="an-higher">
-                <div class="np-toolbar">
-                    <label for="an-higher-class">Class:</label>
-                    <select class="np-select" id="an-higher-class"><option value="">— select —</option></select>
-                    <button class="np-btn np-btn-sm" id="an-higher-refresh" title="Refresh">↻</button>
-                </div>
-                <div class="np-body" id="an-higher-body"><div class="np-empty">Select a class to view progress.</div></div>
-            </div>
+            <iframe data-src="/revision/teacher/progress" title="Higher CS Analytics" style="width:100%;flex:1;border:none;background:#0d1117"></iframe>
         </div>
         <div class="tool-tab-panel" data-ptab="n5">
-            <div class="np-panel" id="an-n5">
-                <div class="np-toolbar">
-                    <label for="an-n5-class">Class:</label>
-                    <select class="np-select" id="an-n5-class"><option value="">— select —</option></select>
-                    <button class="np-btn np-btn-sm" id="an-n5-refresh" title="Refresh">↻</button>
-                </div>
-                <div class="np-body" id="an-n5-body"><div class="np-empty">Select a class to view progress.</div></div>
-            </div>
+            <iframe data-src="/revision-n5/teacher/analytics" title="N5 CS Analytics" style="width:100%;flex:1;border:none;background:#0d1117"></iframe>
         </div>
     </div>
 
@@ -963,11 +937,29 @@
         fireNativeInit(panelName, ptab);
     }
 
+    /* Load an iframe lazily — waits for token exchange so the SPA finds auth in localStorage */
+    function loadIframeTab(panelId, ptab) {
+        var panel = document.getElementById(panelId);
+        if (!panel) return;
+        var tabPanel = panel.querySelector('.tool-tab-panel[data-ptab="' + ptab + '"]');
+        if (!tabPanel) return;
+        var iframe = tabPanel.querySelector('iframe[data-src]');
+        if (!iframe || iframe.dataset.loaded) return;
+        var app = ptab === 'higher' ? 'higher' : 'n5';
+        var pending = (window._revExchange || {})[app];
+        Promise.resolve(pending).then(function () {
+            if (!iframe.dataset.loaded) {
+                iframe.src = iframe.dataset.src;
+                iframe.dataset.loaded = '1';
+            }
+        });
+    }
+
     function fireNativeInit(panelName, ptab) {
         if (panelName === 'questions'   && window.npqInit)  window.npqInit(ptab);
-        if (panelName === 'assignments' && window.npaInit)  window.npaInit(ptab);
+        if (panelName === 'assignments') loadIframeTab('iframePanelAssignments', ptab);
         if (panelName === 'exams'       && window.nppInit && ptab === 'higher') window.nppInit();
-        if (panelName === 'analytics'   && window.nananInit) window.nananInit(ptab);
+        if (panelName === 'analytics')   loadIframeTab('iframePanelAnalytics', ptab);
     }
 
     /* Track which named panel is active so tab-switches know what to call */
@@ -2358,13 +2350,11 @@
 
 <script>
 /* ════════════════════════════════════════════════════════════
-   Native tool panel modules — Questions, Assignments,
-   Past Papers, Analytics.
-   All modules expose an init function on window:
+   Native tool panel modules — Questions and Past Papers.
+   Assignments and Analytics use lazy-loaded iframes (see loadIframeTab).
+   Init functions:
      npqInit(app)   — Questions
-     npaInit(app)   — Assignments
      nppInit()      — Past Papers (Higher only)
-     nananInit(app) — Analytics
    app = 'higher' | 'n5'
 ════════════════════════════════════════════════════════════ */
 
@@ -2659,135 +2649,7 @@ var NP = (function () {
     };
 })();
 
-/* ════════════════════════════════
-   MODULE 2 — Assignments panel
-════════════════════════════════ */
-(function () {
-    var S = {
-        higher: { assignments: [], listenersSet: false, showForm: false },
-        n5:     { assignments: [], listenersSet: false, showForm: false },
-    };
 
-    function bodyEl(app) { return document.getElementById('ap-' + app + '-body'); }
-    function countEl(app) { return document.getElementById('ap-' + app + '-count'); }
-
-    async function load(app) {
-        bodyEl(app).innerHTML = '<div class="np-loading">Loading assignments…</div>';
-        var tok = await NP.waitForToken(app);
-        if (!tok) { bodyEl(app).innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
-        var url = app === 'higher' ? '/api/assignments/all-full' : '/api/n5/assignments';
-        try {
-            var r = await fetch(url, { headers: NP.authHdr(app) });
-            if (r.status === 401) { bodyEl(app).innerHTML = '<div class="np-error">Session expired — please log in again via the Classes panel.</div>'; return; }
-            S[app].assignments = r.ok ? await r.json() : [];
-            render(app);
-        } catch (e) {
-            bodyEl(app).innerHTML = '<div class="np-error">Failed to load assignments.</div>';
-        }
-    }
-
-    function render(app) {
-        var asgns = S[app].assignments;
-        countEl(app).textContent = asgns.length + ' assignment' + (asgns.length !== 1 ? 's' : '');
-
-        var html = '';
-
-        if (S[app].showForm) {
-            html += '<div class="np-form" id="ap-' + app + '-form">';
-            html += '<div><label>Title</label><input id="ap-' + app + '-form-title" placeholder="Assignment title" maxlength="120"></div>';
-            html += '<div><label>Description (optional)</label><textarea id="ap-' + app + '-form-desc" rows="2" placeholder="Brief description…"></textarea></div>';
-            html += '<div class="np-form-actions">';
-            html += '<button class="np-btn" id="ap-' + app + '-form-cancel">Cancel</button>';
-            html += '<button class="np-btn np-btn-primary" id="ap-' + app + '-form-save">Create Assignment</button>';
-            html += '</div></div>';
-        }
-
-        if (asgns.length === 0) {
-            html += '<div class="np-empty">No assignments yet.</div>';
-        } else {
-            asgns.forEach(function (a) {
-                var pub = a.isPublished;
-                var secCount = a.sectionCount != null ? a.sectionCount : (a.sections ? a.sections.length : '?');
-                html += '<div class="np-card">';
-                html += '<div class="np-card-info">';
-                html += '<div class="np-card-title">' + NP.esc(a.title) + ' <span class="np-badge ' + (pub ? 'np-badge-green' : 'np-badge-grey') + '">' + (pub ? 'Published' : 'Draft') + '</span></div>';
-                html += '<div class="np-card-meta">' + secCount + ' section(s)' + (a.description ? ' · ' + NP.esc(a.description).substring(0, 60) : '') + '</div>';
-                html += '</div>';
-                html += '<div class="np-card-actions">';
-                html += '<button class="np-btn np-btn-sm a-edit" data-id="' + NP.esc(a.id) + '" title="Edit sections in full editor">✏ Edit</button>';
-                html += '<button class="np-btn np-btn-sm np-btn-warning a-pub" data-id="' + NP.esc(a.id) + '" data-pub="' + pub + '" title="' + (pub ? 'Unpublish' : 'Publish') + '">' + (pub ? '⏸ Unpublish' : '▶ Publish') + '</button>';
-                html += '<button class="np-btn np-btn-sm np-btn-danger a-del" data-id="' + NP.esc(a.id) + '" title="Delete assignment">✕</button>';
-                html += '</div></div>';
-            });
-        }
-
-        bodyEl(app).innerHTML = html;
-
-        if (S[app].showForm) {
-            document.getElementById('ap-' + app + '-form-cancel').addEventListener('click', function () { S[app].showForm = false; render(app); });
-            document.getElementById('ap-' + app + '-form-save').addEventListener('click', function () { createAssignment(app); });
-            setTimeout(function () { var t = document.getElementById('ap-' + app + '-form-title'); if (t) t.focus(); }, 50);
-        }
-
-        bodyEl(app).querySelectorAll('.a-edit').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var base = app === 'higher' ? '/revision' : '/revision-n5';
-                NP.openOverlay(base + '/teacher/assignments', 'Edit Assignment', function () { load(app); });
-            });
-        });
-        bodyEl(app).querySelectorAll('.a-pub').forEach(function (btn) {
-            btn.addEventListener('click', function () { togglePublished(app, btn.dataset.id, btn.dataset.pub === 'true'); });
-        });
-        bodyEl(app).querySelectorAll('.a-del').forEach(function (btn) {
-            btn.addEventListener('click', function () { deleteAssignment(app, btn.dataset.id); });
-        });
-    }
-
-    async function createAssignment(app) {
-        var titleEl = document.getElementById('ap-' + app + '-form-title');
-        var descEl  = document.getElementById('ap-' + app + '-form-desc');
-        var title = titleEl.value.trim();
-        if (!title) { titleEl.focus(); return; }
-        var url = app === 'higher' ? '/api/assignments' : '/api/n5/assignments';
-        try {
-            var r = await fetch(url, { method: 'POST', headers: NP.authHdr(app), body: JSON.stringify({ title: title, description: descEl.value.trim() || null }) });
-            if (!r.ok) throw new Error();
-            S[app].showForm = false;
-            load(app);
-        } catch (e) { alert('Failed to create assignment.'); }
-    }
-
-    async function togglePublished(app, id, currentlyPub) {
-        var url = app === 'higher' ? '/api/assignments/' + id : '/api/n5/assignments/' + id;
-        try {
-            await fetch(url, { method: 'PATCH', headers: NP.authHdr(app), body: JSON.stringify({ isPublished: !currentlyPub }) });
-            load(app);
-        } catch (e) { alert('Failed to update assignment.'); }
-    }
-
-    async function deleteAssignment(app, id) {
-        if (!confirm('Delete this assignment and all its sections? This cannot be undone.')) return;
-        var url = app === 'higher' ? '/api/assignments/' + id : '/api/n5/assignments/' + id;
-        try {
-            await fetch(url, { method: 'DELETE', headers: NP.authHdr(app) });
-            load(app);
-        } catch (e) { alert('Failed to delete assignment.'); }
-    }
-
-    function setupListeners(app) {
-        if (S[app].listenersSet) return;
-        S[app].listenersSet = true;
-        document.getElementById('ap-' + app + '-new').addEventListener('click', function () {
-            S[app].showForm = !S[app].showForm;
-            render(app);
-        });
-    }
-
-    window.npaInit = function (app) {
-        setupListeners(app);
-        load(app);
-    };
-})();
 
 /* ════════════════════════════════
    MODULE 3 — Past Papers panel (Higher only)
@@ -2917,202 +2779,6 @@ var NP = (function () {
     };
 })();
 
-/* ════════════════════════════════
-   MODULE 4 — Analytics panel
-════════════════════════════════ */
-(function () {
-    var S = {
-        higher: { classes: [], selectedId: '', students: [], listenersSet: false },
-        n5:     { classes: [], selectedId: '', students: [], listenersSet: false },
-    };
-
-    function bodyEl(app) { return document.getElementById('an-' + app + '-body'); }
-    function classSelect(app) { return document.getElementById('an-' + app + '-class'); }
-
-    async function loadClasses(app) {
-        var tok = await NP.waitForToken(app);
-        if (!tok) { bodyEl(app).innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
-        var url = app === 'higher' ? '/api/classes' : '/api/teacher/classes';
-        try {
-            var r = await fetch(url, { headers: NP.authHdr(app) });
-            if (r.status === 401) { bodyEl(app).innerHTML = '<div class="np-error">Session expired — please log in again via the Classes panel.</div>'; return; }
-            S[app].classes = r.ok ? await r.json() : [];
-            rebuildClassSelect(app);
-            if (S[app].selectedId) {
-                loadProgress(app, S[app].selectedId);
-            } else {
-                bodyEl(app).innerHTML = '<div class="np-empty">Select a class above to view student progress.</div>';
-            }
-        } catch (e) {
-            bodyEl(app).innerHTML = '<div class="np-error">Failed to load classes.</div>';
-        }
-    }
-
-    function rebuildClassSelect(app) {
-        var sel = classSelect(app);
-        var cur = S[app].selectedId;
-        sel.innerHTML = '<option value="">— select class —</option>';
-        S[app].classes.forEach(function (c) {
-            var opt = document.createElement('option');
-            opt.value = c.id;
-            opt.textContent = c.name;
-            if (c.id === cur) opt.selected = true;
-            sel.appendChild(opt);
-        });
-    }
-
-    async function loadProgress(app, classId) {
-        bodyEl(app).innerHTML = '<div class="np-loading">Loading student progress…</div>';
-        try {
-            var url = app === 'higher'
-                ? '/api/classes/' + classId + '/progress'
-                : '/api/teacher/classes/' + classId + '/overview';
-            var r = await fetch(url, { headers: NP.authHdr(app) });
-            if (!r.ok) throw new Error();
-            S[app].students = await r.json();
-            renderStudentTable(app);
-        } catch (e) {
-            bodyEl(app).innerHTML = '<div class="np-error">Failed to load progress data.</div>';
-        }
-    }
-
-    function renderStudentTable(app) {
-        var students = S[app].students;
-        if (!students.length) {
-            bodyEl(app).innerHTML = '<div class="np-empty">No students in this class yet.</div>';
-            return;
-        }
-
-        var html = '<div class="np-table-wrap"><table class="np-table"><thead><tr>';
-        if (app === 'higher') {
-            html += '<th>Student</th><th>Exams Done</th><th>Avg Score</th><th>In Progress</th><th>Assignments</th><th>Last Active</th>';
-        } else {
-            html += '<th>Student</th><th>Exams Submitted</th><th>Assignments</th><th>Best Grade</th>';
-        }
-        html += '</tr></thead><tbody>';
-
-        students.forEach(function (s) {
-            html += '<tr class="an-row" data-id="' + NP.esc(s.id) + '" title="Click to view detail">';
-            if (app === 'higher') {
-                var avg = s.averageScore != null ? s.averageScore + '%' : '—';
-                var badge = s.averageScore >= 70 ? 'np-badge-green' : (s.averageScore >= 50 ? 'np-badge-orange' : (s.averageScore > 0 ? 'np-badge-red' : 'np-badge-grey'));
-                html += '<td><span class="np-link">' + NP.esc(s.username) + '</span></td>';
-                html += '<td>' + (s.examCount || 0) + '</td>';
-                html += '<td><span class="np-badge ' + badge + '">' + avg + '</span></td>';
-                html += '<td>' + (s.examsInProgress || 0) + '</td>';
-                html += '<td>' + (s.assignmentsCompleted || 0) + ' done, ' + (s.assignmentsInProgress || 0) + ' in progress</td>';
-                html += '<td>' + NP.fmtDate(s.lastActive) + '</td>';
-            } else {
-                var examCount = (s.examResults || []).length;
-                var attCount  = (s.assignmentAttempts || []).length;
-                var bestGrade = '';
-                (s.examResults || []).forEach(function (r) { if (r.grade && (!bestGrade || r.grade < bestGrade)) bestGrade = r.grade; });
-                html += '<td><span class="np-link">' + NP.esc(s.username) + '</span></td>';
-                html += '<td>' + examCount + '</td>';
-                html += '<td>' + attCount + '</td>';
-                html += '<td>' + (bestGrade || '—') + '</td>';
-            }
-            html += '</tr>';
-        });
-
-        html += '</tbody></table></div>';
-        bodyEl(app).innerHTML = html;
-
-        bodyEl(app).querySelectorAll('.an-row').forEach(function (row) {
-            row.addEventListener('click', function () { showStudentDetail(app, row.dataset.id); });
-        });
-    }
-
-    async function showStudentDetail(app, studentId) {
-        var student = S[app].students.find(function (s) { return s.id === studentId; });
-        if (!student) return;
-
-        bodyEl(app).innerHTML = '<div class="np-loading">Loading detail…</div>';
-
-        try {
-            var detail;
-            if (app === 'higher') {
-                var [resR, attR] = await Promise.all([
-                    fetch('/api/students/' + studentId + '/results', { headers: NP.authHdr('higher') }),
-                    fetch('/api/students/' + studentId + '/assignment-attempts', { headers: NP.authHdr('higher') }),
-                ]);
-                var results  = resR.ok  ? await resR.json()  : [];
-                var attempts = attR.ok ? await attR.json() : [];
-                detail = { student: { username: student.username }, examResults: results, assignments: attempts.map(function (a) { return { attempt: a, responses: [] }; }) };
-            } else {
-                var r = await fetch('/api/teacher/students/' + studentId + '/detail', { headers: NP.authHdr('n5') });
-                detail = r.ok ? await r.json() : null;
-            }
-            if (!detail) throw new Error();
-            renderStudentDetail(app, detail);
-        } catch (e) {
-            bodyEl(app).innerHTML = '<div class="np-error">Failed to load student detail.</div>';
-        }
-    }
-
-    function renderStudentDetail(app, detail) {
-        var username = detail.student ? detail.student.username : '—';
-        var exams    = detail.examResults || [];
-        var assigns  = detail.assignments || [];
-
-        var html = '';
-        html += '<button class="np-back-btn" id="an-' + app + '-back">← Back to class</button>';
-        html += '<div class="np-section-hdr" style="margin-top:8px">Student: ' + NP.esc(username) + '</div>';
-
-        html += '<div class="np-section-hdr" style="margin-top:10px">Exam Submissions (' + exams.length + ')</div>';
-        if (!exams.length) {
-            html += '<div class="np-empty" style="padding:8px 0">No exam submissions yet.</div>';
-        } else {
-            html += '<div class="np-table-wrap"><table class="np-table"><thead><tr><th>Year / Paper</th><th>Score</th><th>Grade</th><th>Date</th></tr></thead><tbody>';
-            exams.forEach(function (r) {
-                var score = r.score != null && r.maxScore != null
-                    ? r.score + ' / ' + r.maxScore + ' (' + Math.round((r.score / r.maxScore) * 100) + '%)'
-                    : (r.percentage != null ? r.percentage + '%' : '—');
-                html += '<tr><td>' + NP.esc(String(r.year || r.additionalExamId || '—')) + '</td><td>' + score + '</td><td>' + NP.esc(r.grade || '—') + '</td><td>' + NP.fmtDate(r.completedAt || r.timestamp) + '</td></tr>';
-            });
-            html += '</tbody></table></div>';
-        }
-
-        html += '<div class="np-section-hdr" style="margin-top:10px">Assignments (' + assigns.length + ')</div>';
-        if (!assigns.length) {
-            html += '<div class="np-empty" style="padding:8px 0">No assignment attempts yet.</div>';
-        } else {
-            html += '<div class="np-table-wrap"><table class="np-table"><thead><tr><th>Assignment</th><th>Status</th><th>Score</th><th>Completed</th></tr></thead><tbody>';
-            assigns.forEach(function (a) {
-                var att = a.attempt || a;
-                var score = att.totalScore != null && att.maxMarks != null && att.maxMarks > 0
-                    ? att.totalScore + ' / ' + att.maxMarks + ' (' + att.percentage + '%)'
-                    : (att.status === 'completed' ? 'Completed' : att.status);
-                html += '<tr><td>' + NP.esc(att.assignmentTitle || att.assignmentId || '—') + '</td><td>' + NP.esc(att.status || '—') + '</td><td>' + score + '</td><td>' + NP.fmtDate(att.completedAt) + '</td></tr>';
-            });
-            html += '</tbody></table></div>';
-        }
-
-        bodyEl(app).innerHTML = html;
-        document.getElementById('an-' + app + '-back').addEventListener('click', function () {
-            renderStudentTable(app);
-        });
-    }
-
-    function setupListeners(app) {
-        if (S[app].listenersSet) return;
-        S[app].listenersSet = true;
-        classSelect(app).addEventListener('change', function () {
-            S[app].selectedId = classSelect(app).value;
-            if (S[app].selectedId) loadProgress(app, S[app].selectedId);
-            else bodyEl(app).innerHTML = '<div class="np-empty">Select a class above to view student progress.</div>';
-        });
-        document.getElementById('an-' + app + '-refresh').addEventListener('click', function () {
-            if (S[app].selectedId) loadProgress(app, S[app].selectedId);
-            else loadClasses(app);
-        });
-    }
-
-    window.nananInit = function (app) {
-        setupListeners(app);
-        loadClasses(app);
-    };
-})();
 </script>
 
 </body>

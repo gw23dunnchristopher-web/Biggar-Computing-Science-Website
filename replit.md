@@ -66,9 +66,9 @@ The platform uses a Node.js/Express server to serve static content. While infras
 - **Teacher Dashboard** (`tools/sandbox-builder.html`): Unified tool panels for both Higher and N5. Tool-nav items:
   - **Classes** — Native class manager (auto-login via tokens set at dashboard login, class CRUD, student generation, reset password, rename [Higher], credentials CSV [N5]).
   - **Questions** — Native panel; questions grouped by Past Paper year (newest first), Practice, Additional Exams, Other. Custom quiz activate/deactivate + delete inline.
-  - **Assignments** — Native panel; list with publish toggle and delete; inline create form; edit via overlay.
-  - **Past Papers** — Higher-only native panel grouped by year; N5 shows unavailable message.
-  - **Analytics** — Native panel; class selector → student table → student detail (exam history + assignment attempts).
+  - **Assignments** — Lazy-loaded iframe: Higher → `/revision/teacher/assignments`; N5 → `/revision-n5/teacher/assignments`. Iframe src set only once the token-exchange promise resolves.
+  - **Past Papers** — Higher-only native panel grouped by year (collapsible groups); N5 shows unavailable message.
+  - **Analytics** — Lazy-loaded iframe: Higher → `/revision/teacher/progress`; N5 → `/revision-n5/teacher/analytics`. Same lazy/token-exchange pattern as Assignments.
   - Auth tokens: Higher `teacher_token`/`teacher_token_expires`; N5 `teacherToken`/`teacherTokenExpires`. `NP.getToken(app)` / `NP.authHdr(app)` read these for all native panels.
 
 ### AI Services
