@@ -11,12 +11,14 @@
         <link rel="stylesheet" href="/CSS/quiz.css" />
         <script>
             window.QUIZ_CONFIG = {
+                hideNumbers: true,
                 questions: [{
                         type: "table",
-                        hideNumbers:true,
                         collapsed:false,
                         text: "Can you think of five other websites or organisations that use information systems?  What data do they store?",
                         marks: 5,
+                        columnAlignments: ["center","center","left"],
+                        columnWidths: ["10%","20%","70%"],
                         tableHeaders: ["No.","Website/Organisation", "What data does it store?"],
                         tableRows:[["1","",""],["2","",""],["3","",""],["4","",""],["5","",""]],
                         markingScheme: "Award 1 mark per row. Award 1 mark for each website/organisation assuming that the pupil has also described the data it stores."
