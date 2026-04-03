@@ -368,24 +368,6 @@ export async function registerN5Routes(
     }
   });
 
-  // Verify session endpoint
-  app.get("/api/teacher/verify", (req, res) => {
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    
-    if (!token) {
-      return res.status(401).json({ message: "No token provided" });
-    }
-
-    const session = sessions.get(token);
-    
-    if (!session || session.expiresAt < Date.now()) {
-      sessions.delete(token);
-      return res.status(401).json({ message: "Invalid or expired token" });
-    }
-
-    res.json({ valid: true, username: session.username });
-  });
-
   // Non-conflicting login/verify aliases for the native teacher dashboard.
   // The /api/teacher/login path is shadowed by Higher revision routes (registered first),
   // so N5 needs its own paths to write into its own in-memory sessions Map.
