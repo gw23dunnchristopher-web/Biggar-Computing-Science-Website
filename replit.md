@@ -61,14 +61,15 @@ The platform uses a Node.js/Express server to serve static content. While infras
 - **Higher CS Revision** at `/revision/` — React + TypeScript SPA; student accounts, teacher dashboard, AI marking, class management, assignment tracking. Build: `npm run build:revision` (Vite, `vite.revision.config.ts`, output `public/revision/`). Routes: `server/revision-routes.ts` + `server/revision-storage.ts`. DB schema: `shared/revision-schema.ts` (tables prefixed `rev_`). Auth: Bearer token in `rev_sessions`.
 - **N5 CS Revision** at `/revision-n5/` — React + TypeScript SPA; same features as Higher app but for National 5. Build: `npm run build:n5` (Vite, `vite.n5.config.ts`, output `public/revision-n5/`). Routes: `server/n5-routes.ts` + `server/n5-storage.ts`, registered via `registerN5Routes(app)`. DB schema: `shared/n5-schema.ts` (tables prefixed `n5_`). N5 sidebar link updated to `/revision-n5/`. Questions need seeding.
 - **Auth (both apps)**: Bearer token; no cookies (fully separate from BHS teacher auth).
-- **Auth routing note**: Both apps originally registered `/api/teacher/login` — Higher's wins (first-registered). N5 now has `/api/n5/teacher/login` and `/api/n5/teacher/verify` (added to `server/n5-routes.ts`) which write to N5's own in-memory sessions Map. The native class manager uses these non-conflicting paths for N5.
+- **Auth routing note**: Both apps originally registered `/api/teacher/login` — Higher's wins (first-registered). N5 has `/api/n5/teacher/login` and `/api/n5/teacher/verify` (added to `server/n5-routes.ts`). N5 teacher sessions are now DB-backed (written to `rev_sessions` table) and restored on server startup, so they survive restarts.
+- **Unified dashboard login**: Logging in to the Teacher Dashboard (`/api/teacher-auth`) automatically also logs in to both the Higher (`/api/teacher/login`) and N5 (`/api/n5/teacher/login`) revision APIs using the same credentials, storing `teacher_token`/`teacher_token_expires` and `teacherToken`/`teacherTokenExpires` in localStorage. Sign Out clears all three. The class manager login forms still exist as a fallback.
 - **Teacher Dashboard** (`tools/sandbox-builder.html`): Unified tool panels for both Higher and N5. Tool-nav items:
-  - **Classes** — Native class manager (login, class CRUD, student generation, reset password, rename [Higher], credentials CSV [N5]).
-  - **Questions** — Higher: `/revision/teacher/quizzes`; N5: `/revision-n5/teacher/quizzes`. Lazy-loaded iframes.
-  - **Assignments** — Higher: `/revision/teacher/assignments`; N5: `/revision-n5/teacher/assignments`. Lazy-loaded iframes.
-  - **Past Papers** — Higher: `/revision/teacher/past-papers`; N5: "not available" message (no N5 equivalent).
-  - **Analytics** — Higher: `/revision/teacher/progress`; N5: `/revision-n5/teacher/analytics`. Lazy-loaded iframes.
-  - Each iframe tool uses `.tool-tab`/`.tool-tab-panel` with `data-src` for lazy loading. Auth tokens: Higher `teacher_token`/`teacher_token_expires`; N5 `teacherToken`/`teacherTokenExpires`.
+  - **Classes** — Native class manager (auto-login via tokens set at dashboard login, class CRUD, student generation, reset password, rename [Higher], credentials CSV [N5]).
+  - **Questions** — Native panel; questions grouped by Past Paper year (newest first), Practice, Additional Exams, Other. Custom quiz activate/deactivate + delete inline.
+  - **Assignments** — Native panel; list with publish toggle and delete; inline create form; edit via overlay.
+  - **Past Papers** — Higher-only native panel grouped by year; N5 shows unavailable message.
+  - **Analytics** — Native panel; class selector → student table → student detail (exam history + assignment attempts).
+  - Auth tokens: Higher `teacher_token`/`teacher_token_expires`; N5 `teacherToken`/`teacherTokenExpires`. `NP.getToken(app)` / `NP.authHdr(app)` read these for all native panels.
 
 ### AI Services
 - **Google Gemini API**: For AI quiz marking and feedback.

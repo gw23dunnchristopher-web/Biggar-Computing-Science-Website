@@ -1425,6 +1425,33 @@
             });
     }
 
+    /* Acquire revision-app tokens (Higher + N5) using the same credentials.
+       Called after the outer dashboard auth succeeds so the user only logs in once. */
+    function acquireRevisionTokens(email, pw) {
+        var body = JSON.stringify({ username: email, password: pw });
+        var hdr  = { 'Content-Type': 'application/json' };
+
+        fetch('/api/teacher/login', { method: 'POST', headers: hdr, body: body })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+                if (d && d.token) {
+                    localStorage.setItem('teacher_token', d.token);
+                    localStorage.setItem('teacher_token_expires', String(d.expiresAt));
+                }
+            })
+            .catch(function () {});
+
+        fetch('/api/n5/teacher/login', { method: 'POST', headers: hdr, body: body })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+                if (d && d.token) {
+                    localStorage.setItem('teacherToken', d.token);
+                    localStorage.setItem('teacherTokenExpires', String(d.expiresAt));
+                }
+            })
+            .catch(function () {});
+    }
+
     /* Log in with Teacher Tools credentials → get a session token */
     function loginWithCredentials() {
         var email = pwEmail.value.trim();
@@ -1447,6 +1474,8 @@
             if (d.ok && d.token) {
                 localStorage.setItem('bhscs-teacher-token', d.token);
                 localStorage.setItem('bhscs-teacher-auth-email', email.toLowerCase().trim());
+                /* Also log in to revision apps so tool panels work without a second login */
+                acquireRevisionTokens(email, pw);
                 tryAuth(d.token);
             } else {
                 pwErr.textContent = 'Incorrect email or password.';
@@ -2176,10 +2205,14 @@
     stSave.addEventListener('click', doSettingsSave);
     stConfPw.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSettingsSave(); });
 
-    /* ── Sign Out ── */
+    /* ── Sign Out — clears outer token AND both revision-app tokens ── */
     logoutBtn.addEventListener('click', function() {
         localStorage.removeItem('bhscs-teacher-token');
         localStorage.removeItem('bhscs-teacher-auth');
+        localStorage.removeItem('teacher_token');
+        localStorage.removeItem('teacher_token_expires');
+        localStorage.removeItem('teacherToken');
+        localStorage.removeItem('teacherTokenExpires');
         location.reload();
     });
 
