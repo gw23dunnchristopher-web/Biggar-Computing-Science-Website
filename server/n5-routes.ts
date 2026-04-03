@@ -1,7 +1,8 @@
 import type { Express } from "express";
 import { storage, db } from "./n5-storage";
-import { sql, lt } from "drizzle-orm";
+import { sql, lt, gt, eq } from "drizzle-orm";
 import { studentSessions as studentSessionsTable } from "@shared/n5-schema";
+import { sessions as revTeacherSessions } from "@shared/revision-schema";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import OpenAI from "openai";
@@ -72,6 +73,7 @@ const groq = new OpenAI({
 });
 
 const MAX_SESSIONS = 100;
+/* In-memory cache — write-through to DB so sessions survive server restarts */
 const sessions = new Map<string, { username: string; expiresAt: number }>();
 
 function cleanExpiredSessions() {
@@ -81,9 +83,13 @@ function cleanExpiredSessions() {
       sessions.delete(token);
     }
   }
+  /* Also purge from DB asynchronously */
+  if (db) {
+    db.delete(revTeacherSessions).where(lt(revTeacherSessions.expiresAt, new Date())).catch(() => {});
+  }
 }
 
-function addSession(token: string, data: { username: string; expiresAt: number }) {
+async function addSession(token: string, data: { username: string; expiresAt: number }, userId: string) {
   cleanExpiredSessions();
   if (sessions.size >= MAX_SESSIONS) {
     let oldestToken = "";
@@ -94,9 +100,37 @@ function addSession(token: string, data: { username: string; expiresAt: number }
         oldestToken = t;
       }
     }
-    if (oldestToken) sessions.delete(oldestToken);
+    if (oldestToken) {
+      sessions.delete(oldestToken);
+      if (db) db.delete(revTeacherSessions).where(eq(revTeacherSessions.token, oldestToken)).catch(() => {});
+    }
   }
   sessions.set(token, data);
+  if (db) {
+    try {
+      await db.insert(revTeacherSessions).values({
+        token,
+        userId,
+        username: data.username,
+        expiresAt: new Date(data.expiresAt),
+      }).onConflictDoNothing();
+    } catch (e) {
+      console.error("N5 session DB write error:", e);
+    }
+  }
+}
+
+async function restoreN5SessionsFromDb() {
+  if (!db) return;
+  try {
+    const rows = await db.select().from(revTeacherSessions).where(gt(revTeacherSessions.expiresAt, new Date()));
+    rows.forEach(row => {
+      sessions.set(row.token, { username: row.username, expiresAt: row.expiresAt.getTime() });
+    });
+    console.log(`[N5] Restored ${rows.length} teacher session(s) from DB`);
+  } catch (e) {
+    console.error("[N5] Could not restore sessions from DB:", e);
+  }
 }
 
 setInterval(cleanExpiredSessions, 60 * 60 * 1000);
@@ -167,6 +201,9 @@ function pcmToWav(pcmData: Buffer, sampleRate: number, channels: number, bitsPer
 export async function registerN5Routes(
   app: Express
 ): Promise<void> {
+  /* Restore teacher sessions that survived across restarts */
+  restoreN5SessionsFromDb();
+
   // Serve static files from public/assets directory, with fallback to attached_assets
   const expressStatic = (await import("express")).default.static;
   app.use("/assets", expressStatic(uploadDir));
@@ -309,10 +346,7 @@ export async function registerN5Routes(
       const sessionToken = crypto.randomBytes(32).toString("hex");
       const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
       
-      addSession(sessionToken, {
-        username: user.username,
-        expiresAt
-      });
+      await addSession(sessionToken, { username: user.username, expiresAt }, user.id);
 
       res.json({ 
         success: true, 
@@ -369,7 +403,7 @@ export async function registerN5Routes(
       }
       const sessionToken = crypto.randomBytes(32).toString("hex");
       const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
-      addSession(sessionToken, { username: user.username, expiresAt });
+      await addSession(sessionToken, { username: user.username, expiresAt }, user.id);
       res.json({ success: true, token: sessionToken, expiresAt });
     } catch (error: any) {
       console.error("N5 login error:", error?.message || error);

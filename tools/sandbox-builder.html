@@ -235,6 +235,7 @@
         .np-empty { color: #8b949e; text-align: center; padding: 30px 20px; font-size: 0.83rem; }
         .np-error { color: #f87171; text-align: center; padding: 30px 20px; font-size: 0.83rem; }
         .np-section-hdr { color: #8b949e; font-size: 0.68rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 0 4px; border-bottom: 1px solid #21262d; margin-top: 4px; flex-shrink: 0; }
+        .np-subsection-hdr { color: #58a6ff; font-size: 0.7rem; font-weight: 600; padding: 6px 0 2px; margin-top: 8px; }
         .np-card { background: #161b22; border: 1px solid #21262d; border-radius: 6px; padding: 10px 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
         .np-card-info { min-width: 0; flex: 1; }
         .np-card-title { color: #e6edf3; font-size: 0.85rem; font-weight: 600; line-height: 1.4; }
@@ -2364,6 +2365,7 @@ var NP = (function () {
 
     async function load(app) {
         bodyEl(app).innerHTML = '<div class="np-loading">Loading questions and quizzes…</div>';
+        if (!NP.getToken(app)) { bodyEl(app).innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
         var hdr = NP.authHdr(app);
         try {
             var qUrl  = app === 'higher' ? '/api/questions?forExamPaper=all' : '/api/questions/all';
@@ -2411,25 +2413,61 @@ var NP = (function () {
             });
         }
 
-        /* Questions section */
+        /* Questions section — grouped by Past Paper year, Practice, and Additional Exams */
         html += '<div class="np-section-hdr" style="margin-top:10px">Questions (' + qs.length + (term ? ' matching' : '') + ')</div>';
         if (qs.length === 0) {
             html += '<div class="np-empty" style="padding:10px 0">' + (term ? 'No questions match your search.' : 'No questions yet. Use <em>New Question</em> to add one.') + '</div>';
         } else {
-            qs.forEach(function (q) {
+            function renderQCard(q) {
                 var marks = NP.calcMarks(q);
-                var yearBadge = q.year ? '<span class="np-badge np-badge-blue">' + q.year + '</span> ' : '';
                 var typeBadge = q.isPractice ? '<span class="np-badge np-badge-green">Practice</span> ' : (q.isAdditionalExam ? '<span class="np-badge np-badge-orange">Exam</span> ' : '');
-                html += '<div class="np-card">';
-                html += '<div class="np-card-info">';
-                html += '<div class="np-card-title">' + yearBadge + typeBadge + NP.esc(q.title) + '</div>';
-                html += '<div class="np-card-meta">' + NP.topicLabel(q.topic || '') + ' · ' + marks + ' mark' + (marks !== 1 ? 's' : '') + ' · ' + (q.subQuestions || []).length + ' sub-question(s)</div>';
-                html += '</div>';
-                html += '<div class="np-card-actions">';
-                html += '<button class="np-btn np-btn-sm q-edit" data-id="' + NP.esc(q.id) + '" title="Edit question">✏ Edit</button>';
-                html += '<button class="np-btn np-btn-sm np-btn-danger q-del" data-id="' + NP.esc(q.id) + '" title="Delete question">✕</button>';
-                html += '</div></div>';
+                var h = '<div class="np-card">';
+                h += '<div class="np-card-info">';
+                h += '<div class="np-card-title">' + typeBadge + NP.esc(q.title) + '</div>';
+                h += '<div class="np-card-meta">' + NP.topicLabel(q.topic || '') + ' · ' + marks + ' mark' + (marks !== 1 ? 's' : '') + ' · ' + (q.subQuestions || []).length + ' sub-question(s)</div>';
+                h += '</div><div class="np-card-actions">';
+                h += '<button class="np-btn np-btn-sm q-edit" data-id="' + NP.esc(q.id) + '" title="Edit question">✏ Edit</button>';
+                h += '<button class="np-btn np-btn-sm np-btn-danger q-del" data-id="' + NP.esc(q.id) + '" title="Delete question">✕</button>';
+                h += '</div></div>';
+                return h;
+            }
+
+            /* Group: Practice questions */
+            var practiceQs = qs.filter(function (q) { return q.isPractice; });
+            /* Group: Past Papers by year */
+            var pastPaperQs = qs.filter(function (q) { return !q.isPractice && !q.isAdditionalExam && q.year; });
+            /* Group: Additional Exams */
+            var additionalQs = qs.filter(function (q) { return q.isAdditionalExam; });
+            /* Group: Unclassified (no year, not practice, not additional) */
+            var otherQs = qs.filter(function (q) { return !q.isPractice && !q.isAdditionalExam && !q.year; });
+
+            if (practiceQs.length) {
+                html += '<div class="np-subsection-hdr">Practice Questions (' + practiceQs.length + ')</div>';
+                practiceQs.forEach(function (q) { html += renderQCard(q); });
+            }
+
+            /* Past papers grouped by year descending */
+            var yearMap = {};
+            pastPaperQs.forEach(function (q) {
+                var yr = String(q.year);
+                if (!yearMap[yr]) yearMap[yr] = [];
+                yearMap[yr].push(q);
             });
+            var years = Object.keys(yearMap).sort(function (a, b) { return Number(b) - Number(a); });
+            years.forEach(function (yr) {
+                html += '<div class="np-subsection-hdr">' + yr + ' Past Paper (' + yearMap[yr].length + ')</div>';
+                yearMap[yr].forEach(function (q) { html += renderQCard(q); });
+            });
+
+            if (additionalQs.length) {
+                html += '<div class="np-subsection-hdr">Additional Exams (' + additionalQs.length + ')</div>';
+                additionalQs.forEach(function (q) { html += renderQCard(q); });
+            }
+
+            if (otherQs.length) {
+                html += '<div class="np-subsection-hdr">Other (' + otherQs.length + ')</div>';
+                otherQs.forEach(function (q) { html += renderQCard(q); });
+            }
         }
 
         bodyEl(app).innerHTML = html;
@@ -2519,10 +2557,11 @@ var NP = (function () {
 
     async function load(app) {
         bodyEl(app).innerHTML = '<div class="np-loading">Loading assignments…</div>';
+        if (!NP.getToken(app)) { bodyEl(app).innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
         var url = app === 'higher' ? '/api/assignments/all-full' : '/api/n5/assignments';
         try {
             var r = await fetch(url, { headers: NP.authHdr(app) });
-            if (r.status === 401) { bodyEl(app).innerHTML = '<div class="np-error">Session expired — please log in again.</div>'; return; }
+            if (r.status === 401) { bodyEl(app).innerHTML = '<div class="np-error">Session expired — please log in again via the Classes panel.</div>'; return; }
             S[app].assignments = r.ok ? await r.json() : [];
             render(app);
         } catch (e) {
@@ -2643,9 +2682,10 @@ var NP = (function () {
 
     async function load() {
         bodyEl().innerHTML = '<div class="np-loading">Loading past papers…</div>';
+        if (!NP.getToken('higher')) { bodyEl().innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
         try {
             var r = await fetch('/api/questions?forExamPaper=all', { headers: NP.authHdr('higher') });
-            if (r.status === 401) { bodyEl().innerHTML = '<div class="np-error">Session expired — please log in again.</div>'; return; }
+            if (r.status === 401) { bodyEl().innerHTML = '<div class="np-error">Session expired — please log in again via the Classes panel.</div>'; return; }
             S.questions = r.ok ? await r.json() : [];
             render();
         } catch (e) {
@@ -2760,10 +2800,11 @@ var NP = (function () {
     function classSelect(app) { return document.getElementById('an-' + app + '-class'); }
 
     async function loadClasses(app) {
+        if (!NP.getToken(app)) { bodyEl(app).innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
         var url = app === 'higher' ? '/api/classes' : '/api/teacher/classes';
         try {
             var r = await fetch(url, { headers: NP.authHdr(app) });
-            if (r.status === 401) { bodyEl(app).innerHTML = '<div class="np-error">Session expired — please log in again.</div>'; return; }
+            if (r.status === 401) { bodyEl(app).innerHTML = '<div class="np-error">Session expired — please log in again via the Classes panel.</div>'; return; }
             S[app].classes = r.ok ? await r.json() : [];
             rebuildClassSelect(app);
             if (S[app].selectedId) {
