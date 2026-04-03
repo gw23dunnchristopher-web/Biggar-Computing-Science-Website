@@ -1487,19 +1487,23 @@
         return !!(tok && exp > Date.now());
     }
 
+    /* Pending token-exchange promises — panels await these so they don't fail
+       if the user clicks before the background exchange finishes. */
+    window._revExchange = { higher: null, n5: null };
+
     /* Ensure revision tokens are valid — called on every successful outer auth
        (page load or login).  If a token is missing or expired, exchanges the
        outer teacher token for a fresh one so all panels work without a separate
        revision-app login. */
     function ensureRevisionTokens(outerTok) {
         if (!revTokenValid('teacher_token', 'teacher_token_expires')) {
-            fetch('/api/revision-auth', { method: 'POST', headers: { 'X-Teacher-Password': outerTok } })
+            window._revExchange.higher = fetch('/api/revision-auth', { method: 'POST', headers: { 'X-Teacher-Password': outerTok } })
                 .then(function (r) { return r.ok ? r.json() : null; })
                 .then(storeHigherToken)
                 .catch(function () {});
         }
         if (!revTokenValid('teacherToken', 'teacherTokenExpires')) {
-            fetch('/api/n5/revision-auth', { method: 'POST', headers: { 'X-Teacher-Password': outerTok } })
+            window._revExchange.n5 = fetch('/api/n5/revision-auth', { method: 'POST', headers: { 'X-Teacher-Password': outerTok } })
                 .then(function (r) { return r.ok ? r.json() : null; })
                 .then(storeN5Token)
                 .catch(function () {});
@@ -2438,7 +2442,16 @@ var NP = (function () {
         if (_onOverlayClose) { _onOverlayClose(); _onOverlayClose = null; }
     }
 
-    return { getToken, authHdr, topicLabel, calcMarks, esc, fmtDate, openOverlay, closeOverlay };
+    /* Awaits any in-progress token exchange so panels don't fail if opened
+       before the background fetch completes.  Returns the token once ready,
+       or null if authentication was not possible. */
+    async function waitForToken(app) {
+        var prom = (window._revExchange || {})[app];
+        if (prom) await prom;
+        return getToken(app);
+    }
+
+    return { getToken, waitForToken, authHdr, topicLabel, calcMarks, esc, fmtDate, openOverlay, closeOverlay };
 })();
 
 /* ════════════════════════════════
@@ -2454,7 +2467,8 @@ var NP = (function () {
 
     async function load(app) {
         bodyEl(app).innerHTML = '<div class="np-loading">Loading questions and quizzes…</div>';
-        if (!NP.getToken(app)) { bodyEl(app).innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
+        var tok = await NP.waitForToken(app);
+        if (!tok) { bodyEl(app).innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
         var hdr = NP.authHdr(app);
         try {
             var qUrl  = app === 'higher' ? '/api/questions?forExamPaper=all' : '/api/questions/all';
@@ -2659,7 +2673,8 @@ var NP = (function () {
 
     async function load(app) {
         bodyEl(app).innerHTML = '<div class="np-loading">Loading assignments…</div>';
-        if (!NP.getToken(app)) { bodyEl(app).innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
+        var tok = await NP.waitForToken(app);
+        if (!tok) { bodyEl(app).innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
         var url = app === 'higher' ? '/api/assignments/all-full' : '/api/n5/assignments';
         try {
             var r = await fetch(url, { headers: NP.authHdr(app) });
@@ -2784,7 +2799,8 @@ var NP = (function () {
 
     async function load() {
         bodyEl().innerHTML = '<div class="np-loading">Loading past papers…</div>';
-        if (!NP.getToken('higher')) { bodyEl().innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
+        var tok = await NP.waitForToken('higher');
+        if (!tok) { bodyEl().innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
         try {
             var r = await fetch('/api/questions?forExamPaper=all', { headers: NP.authHdr('higher') });
             if (r.status === 401) { bodyEl().innerHTML = '<div class="np-error">Session expired — please log in again via the Classes panel.</div>'; return; }
@@ -2914,7 +2930,8 @@ var NP = (function () {
     function classSelect(app) { return document.getElementById('an-' + app + '-class'); }
 
     async function loadClasses(app) {
-        if (!NP.getToken(app)) { bodyEl(app).innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
+        var tok = await NP.waitForToken(app);
+        if (!tok) { bodyEl(app).innerHTML = '<div class="np-error">Please log in via the Classes panel to use this tool.</div>'; return; }
         var url = app === 'higher' ? '/api/classes' : '/api/teacher/classes';
         try {
             var r = await fetch(url, { headers: NP.authHdr(app) });
