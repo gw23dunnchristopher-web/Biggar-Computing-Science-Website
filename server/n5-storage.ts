@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/node-postgres";
-import { eq, sql, and, isNull, or } from "drizzle-orm";
+import { eq, sql, and, isNull, or, inArray } from "drizzle-orm";
 import pkg from "pg";
 const { Pool } = pkg;
 import { 
@@ -1391,7 +1391,7 @@ class DatabaseStorage implements IStorage {
     const classStudents = await d.select().from(students).where(eq(students.classId, classId));
     const studentIds = classStudents.map(s => s.id);
     if (studentIds.length === 0) return [];
-    return d.select().from(activeExamProgress).where(sql`${activeExamProgress.studentId} = ANY(${studentIds})`);
+    return d.select().from(activeExamProgress).where(inArray(activeExamProgress.studentId, studentIds));
   }
 }
 

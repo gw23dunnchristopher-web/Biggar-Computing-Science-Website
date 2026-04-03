@@ -360,6 +360,46 @@ app.post('/api/n5/revision-auth', requireTeacher, async (req: express.Request, r
   }
 });
 
+/* Reverse SSO: exchange a valid Higher revision-app token for an outer dashboard HMAC token.
+   Also exchanges for the N5 token so all three stay in sync. */
+app.post('/api/teacher-auth/from-revision', async (req: express.Request, res: express.Response) => {
+  try {
+    if (!db) return res.status(503).json({ error: 'Database not available' });
+    const revToken = (req.headers['x-revision-token'] as string || '').trim();
+    if (!revToken) return res.status(400).json({ error: 'Missing X-Revision-Token header' });
+
+    /* Validate against rev_sessions */
+    const sessionRows = await db.select().from(revSessionsTable)
+      .where(eq(revSessionsTable.token, revToken))
+      .limit(1);
+    if (!sessionRows.length) return res.status(401).json({ error: 'Invalid or expired revision token' });
+    const session = sessionRows[0];
+    if (session.expiresAt && new Date(session.expiresAt) < new Date()) {
+      return res.status(401).json({ error: 'Revision token expired' });
+    }
+
+    /* Look up the teacher's email */
+    const userRows = await db.select().from(revUsersTable)
+      .where(eq(revUsersTable.id, session.userId))
+      .limit(1);
+    if (!userRows.length) return res.status(404).json({ error: 'Teacher account not found' });
+    const email = userRows[0].email;
+
+    /* Issue outer HMAC token */
+    const outerToken = makeTeacherToken(email);
+
+    /* Also issue fresh N5 token so all three are in sync */
+    const n5Token = crypto.randomBytes(32).toString('hex');
+    const n5Expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await n5AddSession(n5Token, { username: userRows[0].username, expiresAt: n5Expires.getTime() }, userRows[0].id);
+
+    res.json({ ok: true, token: outerToken, n5Token, n5TokenExpires: n5Expires.getTime() });
+  } catch (err) {
+    console.error('[from-revision] error:', err);
+    res.status(500).json({ error: 'Token exchange failed' });
+  }
+});
+
 function safeName(raw: string): string {
   return raw.replace(/[^a-z0-9_-]/gi, '').substring(0, 80);
 }

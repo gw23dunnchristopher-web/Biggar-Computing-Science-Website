@@ -202,6 +202,14 @@
         .cm-rename-inp { background: #0d1117; border: 1px solid #58a6ff; border-radius: 3px; color: #e6edf3; padding: 2px 6px; font-size: 0.8rem; width: 120px; font-family: inherit; }
         .cm-rename-inp:focus { outline: none; }
 
+        /* ── inner tabs within Past Papers panel ── */
+        .np-inner-tabs { display: flex; border-bottom: 1px solid #21262d; background: #0d1117; flex-shrink: 0; }
+        .np-inner-tab { background: none; border: none; border-bottom: 2px solid transparent; color: #8b949e; cursor: pointer; font-family: inherit; font-size: 0.78rem; padding: 6px 14px; transition: color 0.15s; }
+        .np-inner-tab:hover { color: #e6edf3; }
+        .np-inner-tab.active { color: #58a6ff; border-bottom-color: #1f6feb; }
+        .np-inner-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+        .np-inner-panel.active { display: flex; }
+
         /* ── combined tool panels (Questions / Assignments / Exams / Analytics) ── */
         .tool-tab { background: none; border: none; border-bottom: 2px solid transparent; color: #8b949e; cursor: pointer; font-family: inherit; font-size: 0.82rem; padding: 8px 16px; transition: color 0.15s; }
         .tool-tab:hover { color: #e6edf3; }
@@ -560,10 +568,6 @@
             Classes
         </button>
         <hr class="tool-nav-sep">
-        <button class="tool-nav-item" data-tool="questions" title="Quiz &amp; Question Editor">
-            <span class="tn-icon">&#x2753;</span>
-            Questions
-        </button>
         <button class="tool-nav-item" data-tool="assignments" title="Assignment Manager">
             <span class="tn-icon">&#x1F4CB;</span>
             Assignments
@@ -683,109 +687,14 @@
     <!-- Class Manager — tabbed panel -->
     <div class="iframe-panel" id="iframePanelClasses">
         <div class="cm-tabs">
-            <button class="cm-tab active" data-cm-tab="higher">Higher CS</button>
-            <button class="cm-tab" data-cm-tab="n5">N5 CS</button>
-        </div>
-        <div class="cm-tab-panel active" id="cmTabHigher">
-            <div class="cm-login" id="cmLoginHigher">
-                <div class="cm-login-box">
-                    <h2>Higher CS — Teacher Login</h2>
-                    <p>Sign in to manage your classes and students.</p>
-                    <input type="text" class="cm-login-input" id="cmHEmail" placeholder="Username or email" autocomplete="username">
-                    <input type="password" class="cm-login-input" id="cmHPass" placeholder="Password" autocomplete="current-password">
-                    <button class="cm-login-btn" id="cmHLoginBtn">Sign In</button>
-                    <div class="cm-err" id="cmHErr"></div>
-                </div>
-            </div>
-            <div class="cm-workspace" id="cmWorkspaceHigher" style="display:none;">
-                <div class="cm-class-sidebar">
-                    <div class="cm-sidebar-hdr">
-                        <span class="cm-sidebar-title">Classes</span>
-                        <button class="cm-btn-new" id="cmHNewBtn">+ New</button>
-                        <button class="cm-btn-out" id="cmHOutBtn">Sign Out</button>
-                    </div>
-                    <div class="cm-class-list" id="cmHClassList"></div>
-                </div>
-                <div class="cm-student-panel">
-                    <div class="cm-student-hdr" id="cmHStudentHdr" style="display:none;">
-                        <span class="cm-student-hdr-title" id="cmHStudentTitle"></span>
-                        <input type="number" class="cm-gen-inp" id="cmHGenCount" value="5" min="1" max="50" title="Number of students to generate">
-                        <button class="cm-btn-action" id="cmHGenBtn">+ Generate Students</button>
-                    </div>
-                    <div class="cm-student-prompt" id="cmHStudentPrompt">Select a class to view students</div>
-                    <div class="cm-student-list" id="cmHStudentList" style="display:none;">
-                        <table class="cm-student-table">
-                            <thead><tr><th>Username</th><th>Password</th><th>Status</th><th></th></tr></thead>
-                            <tbody id="cmHStudentBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="cm-tab-panel" id="cmTabN5">
-            <div class="cm-login" id="cmLoginN5">
-                <div class="cm-login-box">
-                    <h2>N5 CS — Teacher Login</h2>
-                    <p>Sign in to manage your classes and students.</p>
-                    <input type="text" class="cm-login-input" id="cmN5Email" placeholder="Username or email" autocomplete="username">
-                    <input type="password" class="cm-login-input" id="cmN5Pass" placeholder="Password" autocomplete="current-password">
-                    <button class="cm-login-btn" id="cmN5LoginBtn">Sign In</button>
-                    <div class="cm-err" id="cmN5Err"></div>
-                </div>
-            </div>
-            <div class="cm-workspace" id="cmWorkspaceN5" style="display:none;">
-                <div class="cm-class-sidebar">
-                    <div class="cm-sidebar-hdr">
-                        <span class="cm-sidebar-title">Classes</span>
-                        <button class="cm-btn-new" id="cmN5NewBtn">+ New</button>
-                        <button class="cm-btn-out" id="cmN5OutBtn">Sign Out</button>
-                    </div>
-                    <div class="cm-class-list" id="cmN5ClassList"></div>
-                </div>
-                <div class="cm-student-panel">
-                    <div class="cm-student-hdr" id="cmN5StudentHdr" style="display:none;">
-                        <span class="cm-student-hdr-title" id="cmN5StudentTitle"></span>
-                        <input type="number" class="cm-gen-inp" id="cmN5GenCount" value="5" min="1" max="50" title="Number of students to generate">
-                        <button class="cm-btn-action" id="cmN5GenBtn">+ Generate</button>
-                        <button class="cm-btn-action" id="cmN5CredBtn">&#x2B07; Credentials</button>
-                    </div>
-                    <div class="cm-student-prompt" id="cmN5StudentPrompt">Select a class to view students</div>
-                    <div class="cm-student-list" id="cmN5StudentList" style="display:none;">
-                        <table class="cm-student-table">
-                            <thead><tr><th>Username</th><th>Password</th><th>Status</th><th></th></tr></thead>
-                            <tbody id="cmN5StudentBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Questions / Quiz Manager -->
-    <div class="iframe-panel" id="iframePanelQuestions">
-        <div class="cm-tabs">
             <button class="tool-tab active" data-ptab="higher">Higher CS</button>
             <button class="tool-tab" data-ptab="n5">N5 CS</button>
         </div>
         <div class="tool-tab-panel active" data-ptab="higher">
-            <div class="np-panel" id="qp-higher">
-                <div class="np-toolbar">
-                    <input type="search" class="np-search" id="qp-higher-search" placeholder="Search questions…">
-                    <button class="np-btn" id="qp-higher-new-quiz">+ Manage Quizzes</button>
-                    <button class="np-btn np-btn-primary" id="qp-higher-new-q">+ New Question</button>
-                </div>
-                <div class="np-body" id="qp-higher-body"><div class="np-loading">Loading…</div></div>
-            </div>
+            <iframe data-src="/revision/teacher/classes" title="Higher CS Class Manager" style="width:100%;flex:1;border:none;background:#0d1117"></iframe>
         </div>
         <div class="tool-tab-panel" data-ptab="n5">
-            <div class="np-panel" id="qp-n5">
-                <div class="np-toolbar">
-                    <input type="search" class="np-search" id="qp-n5-search" placeholder="Search questions…">
-                    <button class="np-btn" id="qp-n5-new-quiz">+ Manage Quizzes</button>
-                    <button class="np-btn np-btn-primary" id="qp-n5-new-q">+ New Question</button>
-                </div>
-                <div class="np-body" id="qp-n5-body"><div class="np-loading">Loading…</div></div>
-            </div>
+            <iframe data-src="/revision-n5/teacher/classes" title="N5 CS Class Manager" style="width:100%;flex:1;border:none;background:#0d1117"></iframe>
         </div>
     </div>
 
@@ -809,19 +718,39 @@
             <button class="tool-tab active" data-ptab="higher">Higher CS</button>
             <button class="tool-tab" data-ptab="n5">N5 CS</button>
         </div>
-        <div class="tool-tab-panel active" data-ptab="higher">
-            <div class="np-panel" id="pp-higher">
-                <div class="np-toolbar">
-                    <input type="search" class="np-search" id="pp-higher-search" placeholder="Search past papers…">
-                    <button class="np-btn np-btn-primary" id="pp-higher-new">+ New Question</button>
+        <div class="tool-tab-panel active" data-ptab="higher" style="flex-direction:column;">
+            <div class="np-inner-tabs">
+                <button class="np-inner-tab active" data-inner="questions">Question Bank</button>
+                <button class="np-inner-tab" data-inner="papers">Paper Management</button>
+            </div>
+            <div class="np-inner-panel active" data-inner="questions">
+                <div class="np-panel" id="qp-higher">
+                    <div class="np-toolbar">
+                        <input type="search" class="np-search" id="qp-higher-search" placeholder="Search questions…">
+                        <button class="np-btn" id="qp-higher-new-quiz">+ Manage Quizzes</button>
+                        <button class="np-btn np-btn-primary" id="qp-higher-new-q">+ New Question</button>
+                    </div>
+                    <div class="np-body" id="qp-higher-body"><div class="np-loading">Loading…</div></div>
                 </div>
-                <div class="np-body" id="pp-higher-body"><div class="np-loading">Loading…</div></div>
+            </div>
+            <div class="np-inner-panel" data-inner="papers">
+                <div class="np-panel" id="pp-higher">
+                    <div class="np-toolbar">
+                        <input type="search" class="np-search" id="pp-higher-search" placeholder="Search past papers…">
+                        <button class="np-btn np-btn-primary" id="pp-higher-new">+ New Question</button>
+                    </div>
+                    <div class="np-body" id="pp-higher-body"><div class="np-loading">Loading…</div></div>
+                </div>
             </div>
         </div>
         <div class="tool-tab-panel" data-ptab="n5">
-            <div class="tool-unavailable">
-                <strong>Not available for N5 CS</strong>
-                <p>Past paper management is only available in Higher CS. N5 question banks are managed via the Questions tab.</p>
+            <div class="np-panel" id="qp-n5">
+                <div class="np-toolbar">
+                    <input type="search" class="np-search" id="qp-n5-search" placeholder="Search questions…">
+                    <button class="np-btn" id="qp-n5-new-quiz">+ Manage Quizzes</button>
+                    <button class="np-btn np-btn-primary" id="qp-n5-new-q">+ New Question</button>
+                </div>
+                <div class="np-body" id="qp-n5-body"><div class="np-loading">Loading…</div></div>
             </div>
         </div>
     </div>
@@ -911,12 +840,11 @@
     var sidebar                  = document.querySelector('.sidebar');
     var editorPaneEl             = document.getElementById('editorPane');
     var iframePanelClasses       = document.getElementById('iframePanelClasses');
-    var iframePanelQuestions     = document.getElementById('iframePanelQuestions');
     var iframePanelAssignments   = document.getElementById('iframePanelAssignments');
     var iframePanelExams         = document.getElementById('iframePanelExams');
     var iframePanelAnalytics     = document.getElementById('iframePanelAnalytics');
 
-    var allIframePanels = [iframePanelClasses, iframePanelQuestions, iframePanelAssignments, iframePanelExams, iframePanelAnalytics];
+    var allIframePanels = [iframePanelClasses, iframePanelAssignments, iframePanelExams, iframePanelAnalytics];
 
     function hideAllPanels() {
         allIframePanels.forEach(function (p) { p.classList.remove('active'); });
@@ -956,9 +884,12 @@
     }
 
     function fireNativeInit(panelName, ptab) {
-        if (panelName === 'questions'   && window.npqInit)  window.npqInit(ptab);
+        if (panelName === 'classes')     loadIframeTab('iframePanelClasses', ptab);
         if (panelName === 'assignments') loadIframeTab('iframePanelAssignments', ptab);
-        if (panelName === 'exams'       && window.nppInit && ptab === 'higher') window.nppInit();
+        if (panelName === 'exams') {
+            if (window.npqInit)  window.npqInit(ptab);
+            if (window.nppInit && ptab === 'higher') window.nppInit();
+        }
         if (panelName === 'analytics')   loadIframeTab('iframePanelAnalytics', ptab);
     }
 
@@ -976,12 +907,7 @@
                 sidebar.style.display = '';
                 editorPaneEl.style.display = '';
             } else if (tool === 'classes') {
-                iframePanelClasses.classList.add('active');
-                var activeTab = iframePanelClasses.querySelector('.cm-tab.active');
-                var which = activeTab ? activeTab.dataset.cmTab : 'higher';
-                if (window.cmInitApp) window.cmInitApp(which);
-            } else if (tool === 'questions') {
-                activateToolPanel(iframePanelQuestions, 'questions');
+                activateToolPanel(iframePanelClasses, 'classes');
             } else if (tool === 'assignments') {
                 activateToolPanel(iframePanelAssignments, 'assignments');
             } else if (tool === 'exams') {
@@ -992,15 +918,15 @@
         });
     });
 
-    /* ── Higher / N5 sub-tab switching for all 4 native tool panels ── */
+    /* ── Higher / N5 sub-tab switching ── */
     document.querySelectorAll('.tool-tab').forEach(function (tab) {
         tab.addEventListener('click', function () {
             var panel = tab.closest('.iframe-panel');
-            panel.querySelectorAll('.tool-tab').forEach(function (t) { t.classList.remove('active'); });
+            panel.querySelectorAll(':scope > .cm-tabs > .tool-tab').forEach(function (t) { t.classList.remove('active'); });
             tab.classList.add('active');
             var ptab = tab.dataset.ptab;
-            panel.querySelectorAll('.tool-tab-panel').forEach(function (p) { p.classList.remove('active'); });
-            var activePanel = panel.querySelector('.tool-tab-panel[data-ptab="' + ptab + '"]');
+            panel.querySelectorAll(':scope > .tool-tab-panel').forEach(function (p) { p.classList.remove('active'); });
+            var activePanel = panel.querySelector(':scope > .tool-tab-panel[data-ptab="' + ptab + '"]');
             if (activePanel) {
                 activePanel.classList.add('active');
                 if (activePanelName) fireNativeInit(activePanelName, ptab);
@@ -1008,387 +934,19 @@
         });
     });
 
-    /* ── native class manager ── */
-    (function () {
-        var cmCfg = {
-            higher: {
-                tokenKey:    'teacher_token',
-                expiresKey:  'teacher_token_expires',
-                loginUrl:    '/api/teacher/login',
-                classesUrl:  '/api/classes',
-                studentUrl:  function (cid) { return '/api/classes/' + cid + '/students'; },
-                delClassUrl: function (id)  { return '/api/classes/' + id; },
-                delStudUrl:  function (id)  { return '/api/students/' + id; },
-                resetPwUrl:  function (id)  { return '/api/students/' + id + '/reset-password'; },
-                renameUrl:   function (id)  { return '/api/students/' + id + '/username'; },
-                bulkUrl:     function (cid) { return '/api/classes/' + cid + '/students'; },
-                hasRename: true, hasCreds: false
-            },
-            n5: {
-                tokenKey:    'teacherToken',
-                expiresKey:  'teacherTokenExpires',
-                loginUrl:    '/api/n5/teacher/login',
-                classesUrl:  '/api/teacher/classes',
-                studentUrl:  function (cid) { return '/api/teacher/classes/' + cid + '/students'; },
-                delClassUrl: function (id)  { return '/api/teacher/classes/' + id; },
-                delStudUrl:  function (id)  { return '/api/teacher/students/' + id; },
-                resetPwUrl:  function (id)  { return '/api/teacher/students/' + id + '/reset-password'; },
-                bulkUrl:     function (cid) { return '/api/teacher/classes/' + cid + '/students/bulk'; },
-                credUrl:     function (cid) { return '/api/teacher/classes/' + cid + '/credentials'; },
-                hasRename: false, hasCreds: true
-            }
-        };
-
-        var cmSt = {
-            higher: { token: null, selId: null, selName: '' },
-            n5:     { token: null, selId: null, selName: '' }
-        };
-
-        function el(id) { return document.getElementById(id); }
-
-        function storedTok(app) {
-            var c = cmCfg[app];
-            var t = localStorage.getItem(c.tokenKey);
-            var e = parseInt(localStorage.getItem(c.expiresKey) || '0');
-            return (t && e > Date.now()) ? t : null;
-        }
-
-        function authHdr(app) {
-            return { 'Authorization': 'Bearer ' + cmSt[app].token, 'Content-Type': 'application/json' };
-        }
-
-        function esc(s) {
-            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
-
-        function ids(app) {
-            var h = app === 'higher';
-            return {
-                login:   h ? 'cmLoginHigher'    : 'cmLoginN5',
-                ws:      h ? 'cmWorkspaceHigher' : 'cmWorkspaceN5',
-                list:    h ? 'cmHClassList'      : 'cmN5ClassList',
-                sHdr:    h ? 'cmHStudentHdr'     : 'cmN5StudentHdr',
-                sTitle:  h ? 'cmHStudentTitle'   : 'cmN5StudentTitle',
-                sPrompt: h ? 'cmHStudentPrompt'  : 'cmN5StudentPrompt',
-                sList:   h ? 'cmHStudentList'    : 'cmN5StudentList',
-                sBody:   h ? 'cmHStudentBody'    : 'cmN5StudentBody',
-                genCnt:  h ? 'cmHGenCount'       : 'cmN5GenCount',
-                email:   h ? 'cmHEmail'          : 'cmN5Email',
-                pass:    h ? 'cmHPass'           : 'cmN5Pass',
-                err:     h ? 'cmHErr'            : 'cmN5Err'
-            };
-        }
-
-        function showLoginOrWs(app) {
-            var i = ids(app);
-            if (cmSt[app].token) {
-                el(i.login).style.display = 'none';
-                el(i.ws).style.display = 'flex';
-            } else {
-                el(i.login).style.display = 'flex';
-                el(i.ws).style.display = 'none';
-            }
-        }
-
-        function cmInitApp(app) {
-            var saved = storedTok(app);
-            if (saved) {
-                cmSt[app].token = saved;
-                showLoginOrWs(app);
-                loadClasses(app);
-            } else {
-                cmSt[app].token = null;
-                showLoginOrWs(app);
-            }
-        }
-        window.cmInitApp = cmInitApp;
-
-        function doLogin(app) {
-            var c = cmCfg[app]; var i = ids(app);
-            var username = el(i.email).value.trim();
-            var password = el(i.pass).value;
-            el(i.err).textContent = '';
-            if (!username || !password) { el(i.err).textContent = 'Please enter username and password.'; return; }
-            fetch(c.loginUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username, password: password }) })
-            .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
-            .then(function (res) {
-                if (!res.ok) { el(i.err).textContent = res.data.message || 'Login failed.'; return; }
-                cmSt[app].token = res.data.token;
-                localStorage.setItem(c.tokenKey, res.data.token);
-                localStorage.setItem(c.expiresKey, String(res.data.expiresAt));
-                el(i.pass).value = '';
-                showLoginOrWs(app);
-                loadClasses(app);
-            })
-            .catch(function () { el(i.err).textContent = 'Network error. Please try again.'; });
-        }
-
-        function doLogout(app) {
-            var c = cmCfg[app];
-            cmSt[app].token = null; cmSt[app].selId = null;
-            localStorage.removeItem(c.tokenKey); localStorage.removeItem(c.expiresKey);
-            showLoginOrWs(app);
-        }
-
-        function handleUnauth(app) { doLogout(app); }
-
-        function loadClasses(app) {
-            var c = cmCfg[app]; var i = ids(app);
-            fetch(c.classesUrl, { headers: authHdr(app) })
-            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
-            .then(function (classes) {
-                if (!classes) return;
-                var listEl = el(i.list);
-                if (!classes.length) {
-                    listEl.innerHTML = '<div style="padding:12px 14px;color:#8b949e;font-size:0.8rem;">No classes yet — click + New to create one.</div>';
-                    return;
-                }
-                listEl.innerHTML = classes.map(function (cls) {
-                    var active = cmSt[app].selId === String(cls.id) ? ' active' : '';
-                    var count  = (cls.studentCount != null) ? ' <span class="cm-class-count">(' + cls.studentCount + ')</span>' : '';
-                    return '<div class="cm-class-item' + active + '" data-id="' + esc(cls.id) + '" data-name="' + esc(cls.name) + '">' +
-                        '<span class="cm-class-name">' + esc(cls.name) + '</span>' + count +
-                        '<button class="cm-class-del" data-id="' + esc(cls.id) + '" data-name="' + esc(cls.name) + '" title="Delete class">\uD83D\uDDD1</button>' +
-                        '</div>';
-                }).join('');
-                listEl.querySelectorAll('.cm-class-item').forEach(function (row) {
-                    row.addEventListener('click', function (e) {
-                        if (e.target.closest('.cm-class-del')) return;
-                        selectClass(app, row.dataset.id, row.dataset.name);
-                    });
-                });
-                listEl.querySelectorAll('.cm-class-del').forEach(function (btn) {
-                    btn.addEventListener('click', function (e) { e.stopPropagation(); deleteClass(app, btn.dataset.id, btn.dataset.name); });
-                });
-            })
-            .catch(function (err) { console.error('Load classes error', err); });
-        }
-
-        function promptNewClass(app) {
-            var i = ids(app); var listEl = el(i.list);
-            if (listEl.querySelector('.cm-new-class-row')) return;
-            var row = document.createElement('div');
-            row.className = 'cm-new-class-row';
-            row.innerHTML = '<input class="cm-new-class-inp" placeholder="Class name\u2026" maxlength="80">' +
-                '<button class="cm-new-class-ok">\u2713</button>' +
-                '<button class="cm-new-class-cancel">\u2715</button>';
-            listEl.insertBefore(row, listEl.firstChild);
-            var inp = row.querySelector('.cm-new-class-inp');
-            inp.focus();
-            function confirm() { var name = inp.value.trim(); if (name) createClass(app, name, row); }
-            row.querySelector('.cm-new-class-ok').addEventListener('click', confirm);
-            row.querySelector('.cm-new-class-cancel').addEventListener('click', function () { row.remove(); });
-            inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') confirm(); if (e.key === 'Escape') row.remove(); });
-        }
-
-        function createClass(app, name, rowEl) {
-            var c = cmCfg[app];
-            fetch(c.classesUrl, { method: 'POST', headers: authHdr(app), body: JSON.stringify({ name: name }) })
-            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
-            .then(function (cls) { if (!cls) return; if (rowEl) rowEl.remove(); loadClasses(app); })
-            .catch(function (err) { console.error('Create class error', err); });
-        }
-
-        function deleteClass(app, classId, className) {
-            if (!confirm('Delete class "' + className + '"? This will also delete all students in the class.')) return;
-            var c = cmCfg[app];
-            fetch(c.delClassUrl(classId), { method: 'DELETE', headers: authHdr(app) })
-            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
-            .then(function (d) {
-                if (!d) return;
-                if (cmSt[app].selId === String(classId)) { cmSt[app].selId = null; clearStudentPanel(app); }
-                loadClasses(app);
-            })
-            .catch(function (err) { console.error('Delete class error', err); });
-        }
-
-        function selectClass(app, classId, className) {
-            cmSt[app].selId = String(classId); cmSt[app].selName = className;
-            var i = ids(app);
-            el(i.list).querySelectorAll('.cm-class-item').forEach(function (row) { row.classList.toggle('active', row.dataset.id === String(classId)); });
-            el(i.sHdr).style.display = 'flex';
-            el(i.sTitle).textContent = className;
-            el(i.sPrompt).style.display = 'none';
-            el(i.sList).style.display = 'block';
-            loadStudents(app, classId);
-        }
-
-        function clearStudentPanel(app) {
-            var i = ids(app);
-            el(i.sHdr).style.display = 'none';
-            el(i.sPrompt).style.display = 'flex';
-            el(i.sList).style.display = 'none';
-        }
-
-        function loadStudents(app, classId) {
-            var c = cmCfg[app]; var i = ids(app);
-            fetch(c.studentUrl(classId), { headers: authHdr(app) })
-            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
-            .then(function (students) {
-                if (!students) return;
-                var c2 = cmCfg[app];
-                var bodyEl = el(i.sBody);
-                if (!students.length) {
-                    bodyEl.innerHTML = '<tr><td colspan="4" style="color:#8b949e;text-align:center;padding:20px;">No students yet. Use &ldquo;+ Generate&rdquo; to add some.</td></tr>';
-                    return;
-                }
-                bodyEl.innerHTML = students.map(function (s) {
-                    var changed = s.mustChangePassword === false;
-                    var statusHtml = changed
-                        ? '<span class="cm-status-changed">Password changed</span>'
-                        : '<span class="cm-status-default">Default password</span>';
-                    var renBtn = c2.hasRename
-                        ? '<button class="cm-act-btn rename-btn" data-id="' + esc(s.id) + '" data-name="' + esc(s.username) + '" title="Rename">\u270E</button>'
-                        : '';
-                    return '<tr data-id="' + esc(s.id) + '">' +
-                        '<td class="cm-name-cell" data-id="' + esc(s.id) + '">' + esc(s.username) + '</td>' +
-                        '<td class="cm-pw-cell" data-id="' + esc(s.id) + '">\u2014</td>' +
-                        '<td>' + statusHtml + '</td>' +
-                        '<td style="white-space:nowrap;">' +
-                        '<button class="cm-act-btn reset-btn" data-id="' + esc(s.id) + '" title="Reset password">\uD83D\uDD11</button>' +
-                        renBtn +
-                        '<button class="cm-act-btn danger del-btn" data-id="' + esc(s.id) + '" data-name="' + esc(s.username) + '" title="Delete student">\uD83D\uDDD1</button>' +
-                        '</td></tr>';
-                }).join('');
-                bodyEl.querySelectorAll('.reset-btn').forEach(function (btn) {
-                    btn.addEventListener('click', function () { resetPassword(app, btn.dataset.id); });
-                });
-                bodyEl.querySelectorAll('.del-btn').forEach(function (btn) {
-                    btn.addEventListener('click', function () { deleteStudent(app, btn.dataset.id, btn.dataset.name); });
-                });
-                if (c2.hasRename) {
-                    bodyEl.querySelectorAll('.rename-btn').forEach(function (btn) {
-                        btn.addEventListener('click', function () { startRename(app, btn.dataset.id, btn.dataset.name); });
-                    });
-                }
-            })
-            .catch(function (err) { console.error('Load students error', err); });
-        }
-
-        function generateStudents(app) {
-            var cid = cmSt[app].selId; if (!cid) return;
-            var c = cmCfg[app]; var i = ids(app);
-            var count = parseInt(el(i.genCnt).value) || 5;
-            if (count < 1 || count > 50) { alert('Please enter a number between 1 and 50.'); return; }
-            fetch(c.bulkUrl(cid), { method: 'POST', headers: authHdr(app), body: JSON.stringify({ count: count }) })
-            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
-            .then(function (d) {
-                if (!d) return;
-                var newStudents = Array.isArray(d) ? d : (d.students || []);
-                loadStudents(app, cid);
-                loadClasses(app);
-                if (newStudents.length) {
-                    var creds = newStudents.map(function (s) { return s.username + '  :  ' + (s.plainPassword || '(see table)'); }).join('\n');
-                    alert('Generated ' + newStudents.length + ' student(s):\n\n' + creds + '\n\nSave these passwords now — they cannot be retrieved later.');
-                }
-            })
-            .catch(function (err) { console.error('Generate students error', err); });
-        }
-
-        function resetPassword(app, studentId) {
-            var c = cmCfg[app];
-            fetch(c.resetPwUrl(studentId), { method: 'POST', headers: authHdr(app) })
-            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
-            .then(function (d) {
-                if (!d) return;
-                var pw = d.plainPassword || '';
-                var pwCell = document.querySelector('.cm-pw-cell[data-id="' + studentId + '"]');
-                if (pwCell) pwCell.innerHTML = '<span class="cm-pw-badge">' + esc(pw) + '</span>';
-            })
-            .catch(function (err) { console.error('Reset password error', err); });
-        }
-
-        function deleteStudent(app, studentId, username) {
-            if (!confirm('Delete student "' + username + '"?')) return;
-            var c = cmCfg[app];
-            fetch(c.delStudUrl(studentId), { method: 'DELETE', headers: authHdr(app) })
-            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
-            .then(function (d) {
-                if (!d) return;
-                var row = document.querySelector('tr[data-id="' + studentId + '"]');
-                if (row) row.remove();
-                loadClasses(app);
-            })
-            .catch(function (err) { console.error('Delete student error', err); });
-        }
-
-        function startRename(app, studentId, currentName) {
-            var nameCell = document.querySelector('.cm-name-cell[data-id="' + studentId + '"]');
-            if (!nameCell || nameCell.querySelector('.cm-rename-inp')) return;
-            nameCell.innerHTML = '<input class="cm-rename-inp" value="' + esc(currentName) + '" maxlength="50">' +
-                '<button class="cm-act-btn" id="rSave' + studentId + '" title="Save">\u2713</button>' +
-                '<button class="cm-act-btn" id="rCancel' + studentId + '" title="Cancel">\u2715</button>';
-            var inp = nameCell.querySelector('.cm-rename-inp');
-            inp.focus(); inp.select();
-            function save() { doRename(app, studentId, inp.value.trim(), currentName, nameCell); }
-            document.getElementById('rSave' + studentId).addEventListener('click', save);
-            document.getElementById('rCancel' + studentId).addEventListener('click', function () { nameCell.textContent = currentName; nameCell.dataset.id = studentId; });
-            inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') save(); if (e.key === 'Escape') { nameCell.textContent = currentName; nameCell.dataset.id = studentId; } });
-        }
-
-        function doRename(app, studentId, newName, oldName, nameCell) {
-            if (!newName || newName === oldName) { nameCell.textContent = oldName; nameCell.dataset.id = studentId; return; }
-            var c = cmCfg[app];
-            fetch(c.renameUrl(studentId), { method: 'PATCH', headers: authHdr(app), body: JSON.stringify({ username: newName }) })
-            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
-            .then(function (d) {
-                if (!d) return;
-                var name = d.username || newName;
-                nameCell.textContent = name; nameCell.dataset.id = studentId;
-                var row = nameCell.closest('tr');
-                if (row) {
-                    var delBtn = row.querySelector('.del-btn'); if (delBtn) delBtn.dataset.name = name;
-                    var renBtn = row.querySelector('.rename-btn'); if (renBtn) renBtn.dataset.name = name;
-                }
-            })
-            .catch(function (err) { console.error('Rename error', err); nameCell.textContent = oldName; nameCell.dataset.id = studentId; });
-        }
-
-        function downloadCredentials(app) {
-            var cid = cmSt[app].selId; if (!cid) return;
-            var c = cmCfg[app]; var className = cmSt[app].selName;
-            fetch(c.credUrl(cid), { headers: authHdr(app) })
-            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
-            .then(function (d) {
-                if (!d) return;
-                var lines = ['Username,Initial Password,Status'];
-                (d.students || []).forEach(function (s) {
-                    lines.push([s.username, s.initialPassword || '', s.hasChangedPassword ? 'Changed' : 'Default'].join(','));
-                });
-                var blob = new Blob([lines.join('\n')], { type: 'text/csv' });
-                var url = URL.createObjectURL(blob);
-                var a = document.createElement('a'); a.href = url;
-                a.download = (d.className || className) + '-credentials.csv';
-                a.click(); URL.revokeObjectURL(url);
-            })
-            .catch(function (err) { console.error('Download credentials error', err); });
-        }
-
-        /* Wire up static buttons */
-        el('cmHLoginBtn').addEventListener('click', function () { doLogin('higher'); });
-        el('cmN5LoginBtn').addEventListener('click', function () { doLogin('n5'); });
-        el('cmHPass').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin('higher'); });
-        el('cmN5Pass').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin('n5'); });
-        el('cmHOutBtn').addEventListener('click', function () { doLogout('higher'); });
-        el('cmN5OutBtn').addEventListener('click', function () { doLogout('n5'); });
-        el('cmHNewBtn').addEventListener('click', function () { promptNewClass('higher'); });
-        el('cmN5NewBtn').addEventListener('click', function () { promptNewClass('n5'); });
-        el('cmHGenBtn').addEventListener('click', function () { generateStudents('higher'); });
-        el('cmN5GenBtn').addEventListener('click', function () { generateStudents('n5'); });
-        el('cmN5CredBtn').addEventListener('click', function () { downloadCredentials('n5'); });
-
-        /* Class manager tab switching */
-        document.querySelectorAll('.cm-tab').forEach(function (tab) {
-            tab.addEventListener('click', function () {
-                document.querySelectorAll('.cm-tab').forEach(function (t) { t.classList.remove('active'); });
-                tab.classList.add('active');
-                var which = tab.dataset.cmTab;
-                document.querySelectorAll('.cm-tab-panel').forEach(function (p) { p.classList.remove('active'); });
-                el(which === 'higher' ? 'cmTabHigher' : 'cmTabN5').classList.add('active');
-                cmInitApp(which);
-            });
+    /* ── Inner sub-tab switching (Question Bank / Paper Management within Past Papers) ── */
+    document.querySelectorAll('.np-inner-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var container = tab.closest('.tool-tab-panel');
+            container.querySelectorAll('.np-inner-tab').forEach(function (t) { t.classList.remove('active'); });
+            tab.classList.add('active');
+            var inner = tab.dataset.inner;
+            container.querySelectorAll('.np-inner-panel').forEach(function (p) { p.classList.remove('active'); });
+            var activeInner = container.querySelector('.np-inner-panel[data-inner="' + inner + '"]');
+            if (activeInner) activeInner.classList.add('active');
         });
-    }());
+    });
+
 
     /* ── auth ── */
     var pwEmail = document.getElementById('pwEmail');
@@ -1603,7 +1161,33 @@
         authOverlay.style.display = 'none'; /* hide while auto-authenticating */
         tryAuth(password);
     } else {
-        authOverlay.style.display = 'flex';
+        /* SSO fallback: if the teacher is already logged into a revision app,
+           exchange that token for an outer dashboard token automatically */
+        var existingRevToken = revTokenValid('teacher_token', 'teacher_token_expires')
+            ? localStorage.getItem('teacher_token') : null;
+        if (existingRevToken) {
+            authOverlay.style.display = 'none';
+            fetch('/api/teacher-auth/from-revision', {
+                method: 'POST',
+                headers: { 'X-Revision-Token': existingRevToken }
+            })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+                if (d && d.ok && d.token) {
+                    localStorage.setItem('bhscs-teacher-token', d.token);
+                    if (d.n5Token) {
+                        localStorage.setItem('teacherToken', d.n5Token);
+                        localStorage.setItem('teacherTokenExpires', String(d.n5TokenExpires));
+                    }
+                    tryAuth(d.token);
+                } else {
+                    authOverlay.style.display = 'flex';
+                }
+            })
+            .catch(function () { authOverlay.style.display = 'flex'; });
+        } else {
+            authOverlay.style.display = 'flex';
+        }
     }
 
     pwBtn.addEventListener('click', loginWithCredentials);

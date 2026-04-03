@@ -64,12 +64,13 @@ The platform uses a Node.js/Express server to serve static content. While infras
 - **Auth routing note**: Both apps originally registered `/api/teacher/login` — Higher's wins (first-registered). N5 has `/api/n5/teacher/login` and `/api/n5/teacher/verify` (added to `server/n5-routes.ts`). N5 teacher sessions are now DB-backed (written to `rev_sessions` table) and restored on server startup, so they survive restarts.
 - **Unified dashboard login**: Logging in to the Teacher Dashboard (`/api/teacher-auth`) automatically also logs in to both the Higher (`/api/teacher/login`) and N5 (`/api/n5/teacher/login`) revision APIs using the same credentials, storing `teacher_token`/`teacher_token_expires` and `teacherToken`/`teacherTokenExpires` in localStorage. Sign Out clears all three. The class manager login forms still exist as a fallback.
 - **Teacher Dashboard** (`tools/sandbox-builder.html`): Unified tool panels for both Higher and N5. Tool-nav items:
-  - **Classes** — Native class manager (auto-login via tokens set at dashboard login, class CRUD, student generation, reset password, rename [Higher], credentials CSV [N5]).
-  - **Questions** — Native panel; questions grouped by Past Paper year (newest first), Practice, Additional Exams, Other. Custom quiz activate/deactivate + delete inline.
+  - **Classes** — Lazy-loaded iframe: Higher → `/revision/teacher/classes`; N5 → `/revision-n5/teacher/classes`.
   - **Assignments** — Lazy-loaded iframe: Higher → `/revision/teacher/assignments`; N5 → `/revision-n5/teacher/assignments`. Iframe src set only once the token-exchange promise resolves.
-  - **Past Papers** — Higher-only native panel grouped by year (collapsible groups); N5 shows unavailable message.
+  - **Past Papers** — Higher CS tab has inner tabs: "Question Bank" (npqInit native panel with questions grouped by year) and "Paper Management" (nppInit native panel). N5 CS tab shows the N5 question bank directly.
   - **Analytics** — Lazy-loaded iframe: Higher → `/revision/teacher/progress`; N5 → `/revision-n5/teacher/analytics`. Same lazy/token-exchange pattern as Assignments.
-  - Auth tokens: Higher `teacher_token`/`teacher_token_expires`; N5 `teacherToken`/`teacherTokenExpires`. `NP.getToken(app)` / `NP.authHdr(app)` read these for all native panels.
+  - Auth tokens: Higher `teacher_token`/`teacher_token_expires`; N5 `teacherToken`/`teacherTokenExpires`. `NP.getToken(app)` / `NP.authHdr(app)` read these for native panels.
+- **SSO**: Logging into the dashboard auto-logs into both revision apps via token exchange (`/api/revision-auth`, `/api/n5/revision-auth`). Reverse SSO: if already logged into the Higher Revision App (`teacher_token` present in localStorage), the dashboard auto-exchanges it for an outer token via `/api/teacher-auth/from-revision`, which also issues a fresh N5 token.
+- **N5 active-exam bug fix**: `getActiveExamProgressByClass` in `server/n5-storage.ts` switched from raw SQL `ANY()` to Drizzle `inArray()` to avoid PostgreSQL array-type error.
 
 ### AI Services
 - **Google Gemini API**: For AI quiz marking and feedback.
