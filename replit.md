@@ -63,12 +63,13 @@ The platform uses a Node.js/Express server to serve static content. While infras
 - **Auth (both apps)**: Bearer token; no cookies (fully separate from BHS teacher auth).
 - **Auth routing note**: Both apps originally registered `/api/teacher/login` — Higher's wins (first-registered). N5 has `/api/n5/teacher/login` and `/api/n5/teacher/verify` (added to `server/n5-routes.ts`). N5 teacher sessions are now DB-backed (written to `rev_sessions` table) and restored on server startup, so they survive restarts.
 - **Unified dashboard login**: Logging in to the Teacher Dashboard (`/api/teacher-auth`) automatically also logs in to both the Higher (`/api/teacher/login`) and N5 (`/api/n5/teacher/login`) revision APIs using the same credentials, storing `teacher_token`/`teacher_token_expires` and `teacherToken`/`teacherTokenExpires` in localStorage. Sign Out clears all three. The class manager login forms still exist as a fallback.
-- **Teacher Dashboard** (`tools/sandbox-builder.html`): Unified tool panels for both Higher and N5. Tool-nav items:
-  - **Classes** — Lazy-loaded iframe: Higher → `/revision/teacher/classes`; N5 → `/revision-n5/teacher/classes`.
-  - **Assignments** — Lazy-loaded iframe: Higher → `/revision/teacher/assignments`; N5 → `/revision-n5/teacher/assignments`. Iframe src set only once the token-exchange promise resolves.
-  - **Past Papers** — Higher CS tab has inner tabs: "Question Bank" (npqInit native panel with questions grouped by year) and "Paper Management" (nppInit native panel). N5 CS tab shows the N5 question bank directly.
-  - **Analytics** — Lazy-loaded iframe: Higher → `/revision/teacher/progress`; N5 → `/revision-n5/teacher/analytics`. Same lazy/token-exchange pattern as Assignments.
-  - Auth tokens: Higher `teacher_token`/`teacher_token_expires`; N5 `teacherToken`/`teacherTokenExpires`. `NP.getToken(app)` / `NP.authHdr(app)` read these for native panels.
+- **Teacher Dashboard** (`tools/sandbox-builder.html`): Simplified nav with four icons. Tool-nav items:
+  - **Sandbox Builder** — file-tree editor + preview for Python/HTML sandbox exercises.
+  - **Higher CS** — Full-page lazy-loaded iframe: `/revision/teacher/classes` (the entire Higher teacher dashboard embedded).
+  - **N5 CS** — Full-page lazy-loaded iframe: `/revision-n5/teacher/classes` (the entire N5 teacher dashboard embedded).
+  - **Analytics** — Tabbed panel: Higher → `/revision/teacher/progress`; N5 → `/revision-n5/teacher/analytics`.
+  - The old Classes/Assignments/Past Papers separate nav items and the NP native question panel have been removed.
+  - Auth tokens: Higher `teacher_token`/`teacher_token_expires`; N5 `teacherToken`/`teacherTokenExpires`. iframes load lazily after token-exchange resolves.
 - **SSO**: Logging into the dashboard auto-logs into both revision apps via token exchange (`/api/revision-auth`, `/api/n5/revision-auth`). Reverse SSO: if already logged into the Higher Revision App (`teacher_token` present in localStorage), the dashboard auto-exchanges it for an outer token via `/api/teacher-auth/from-revision`, which also issues a fresh N5 token.
 - **N5 active-exam bug fix**: `getActiveExamProgressByClass` in `server/n5-storage.ts` switched from raw SQL `ANY()` to Drizzle `inArray()` to avoid PostgreSQL array-type error.
 - **Unified settings (cross-tab sync)**: Both revision apps share `"vite-ui-theme"` (dark/light/system) and `"a11y-settings"` localStorage keys. `storage` event listeners added to both `theme-provider.tsx` and `AccessibilityContext.tsx` files so changes in one tab/app are instantly reflected in all others including the main website.
