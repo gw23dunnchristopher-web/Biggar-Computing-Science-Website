@@ -3732,6 +3732,122 @@ Format your response as JSON:
     }
   });
 
+  /* ── /api/n5/* — unambiguous routes for the teacher dashboard native panels ─────
+     These paths avoid the route-shadowing caused by Higher CS registering the same
+     generic paths (/api/questions, /api/assignments, /api/custom-quizzes) first.   */
+
+  /* DELETE a single N5 question */
+  app.delete("/api/n5/questions/:id", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      if (!token || !sessions.has(token)) return res.status(401).json({ error: "Unauthorized" });
+      await storage.deleteQuestion(req.params.id);
+      res.json({ ok: true });
+    } catch (error) {
+      console.error("N5 delete question error:", error);
+      res.status(500).json({ error: "Failed to delete question" });
+    }
+  });
+
+  /* GET all N5 custom quizzes (teacher) */
+  app.get("/api/n5/custom-quizzes", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      if (!token || !sessions.has(token)) return res.status(401).json({ error: "Unauthorized" });
+      const quizzes = await storage.getAllCustomQuizzes();
+      res.json(quizzes);
+    } catch (error) {
+      console.error("N5 get quizzes error:", error);
+      res.status(500).json({ error: "Failed to fetch quizzes" });
+    }
+  });
+
+  /* PATCH a N5 custom quiz (e.g. toggle isActive) */
+  app.patch("/api/n5/custom-quizzes/:id", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      if (!token || !sessions.has(token)) return res.status(401).json({ error: "Unauthorized" });
+      const quiz = await storage.updateCustomQuiz(req.params.id, req.body);
+      res.json(quiz);
+    } catch (error) {
+      console.error("N5 patch quiz error:", error);
+      res.status(500).json({ error: "Failed to update quiz" });
+    }
+  });
+
+  /* DELETE a N5 custom quiz */
+  app.delete("/api/n5/custom-quizzes/:id", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      if (!token || !sessions.has(token)) return res.status(401).json({ error: "Unauthorized" });
+      await storage.deleteCustomQuiz(req.params.id);
+      res.json({ ok: true });
+    } catch (error) {
+      console.error("N5 delete quiz error:", error);
+      res.status(500).json({ error: "Failed to delete quiz" });
+    }
+  });
+
+  /* GET all N5 assignments (teacher) */
+  app.get("/api/n5/assignments", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      if (!token || !sessions.has(token)) return res.status(401).json({ error: "Unauthorized" });
+      const allAssignments = await storage.getAllAssignments();
+      const withSections = await Promise.all(
+        allAssignments.map(async (a) => {
+          const sections = await storage.getAssignmentSections(a.id);
+          return { ...a, sectionCount: sections.length };
+        })
+      );
+      res.json(withSections);
+    } catch (error) {
+      console.error("N5 get assignments error:", error);
+      res.status(500).json({ error: "Failed to fetch assignments" });
+    }
+  });
+
+  /* POST create a N5 assignment */
+  app.post("/api/n5/assignments", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      if (!token || !sessions.has(token)) return res.status(401).json({ error: "Unauthorized" });
+      const { title, description } = req.body;
+      if (!title || !title.trim()) return res.status(400).json({ error: "Title required" });
+      const assignment = await storage.createAssignment({ title: title.trim(), description: description || null, isPublished: false } as any);
+      res.status(201).json(assignment);
+    } catch (error) {
+      console.error("N5 create assignment error:", error);
+      res.status(500).json({ error: "Failed to create assignment" });
+    }
+  });
+
+  /* PATCH a N5 assignment (title / isPublished) */
+  app.patch("/api/n5/assignments/:id", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      if (!token || !sessions.has(token)) return res.status(401).json({ error: "Unauthorized" });
+      const assignment = await storage.updateAssignment(req.params.id, req.body);
+      res.json(assignment);
+    } catch (error) {
+      console.error("N5 patch assignment error:", error);
+      res.status(500).json({ error: "Failed to update assignment" });
+    }
+  });
+
+  /* DELETE a N5 assignment */
+  app.delete("/api/n5/assignments/:id", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      if (!token || !sessions.has(token)) return res.status(401).json({ error: "Unauthorized" });
+      await storage.deleteAssignment(req.params.id);
+      res.json({ ok: true });
+    } catch (error) {
+      console.error("N5 delete assignment error:", error);
+      res.status(500).json({ error: "Failed to delete assignment" });
+    }
+  });
+
 }
 
 function buildUserAnswer(response: any): any {
