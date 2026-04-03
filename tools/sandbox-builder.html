@@ -147,7 +147,60 @@
         .cm-tab.active { color: #58a6ff; border-bottom-color: #1f6feb; }
         .cm-tab-panel { flex: 1; display: none; flex-direction: column; overflow: hidden; }
         .cm-tab-panel.active { display: flex; }
-        .cm-tab-panel iframe { flex: 1; border: none; width: 100%; height: 100%; }
+
+        /* ── class manager native UI ── */
+        .cm-login { display: flex; align-items: center; justify-content: center; flex: 1; background: #0d1117; }
+        .cm-login-box { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 32px; width: 340px; }
+        .cm-login-box h2 { font-size: 1rem; margin-bottom: 4px; color: #e6edf3; }
+        .cm-login-box > p { font-size: 0.8rem; color: #8b949e; margin-bottom: 20px; }
+        .cm-login-input { width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 6px; color: #e6edf3; padding: 8px 12px; font-size: 0.85rem; margin-bottom: 10px; font-family: inherit; box-sizing: border-box; }
+        .cm-login-input:focus { outline: none; border-color: #58a6ff; }
+        .cm-login-btn { width: 100%; background: #1f6feb; color: white; border: none; border-radius: 6px; padding: 9px; font-size: 0.85rem; font-weight: bold; cursor: pointer; font-family: inherit; }
+        .cm-login-btn:hover { background: #388bfd; }
+        .cm-err { font-size: 0.8rem; color: #f87171; margin-top: 10px; min-height: 1.2rem; }
+        .cm-workspace { display: flex; flex: 1; overflow: hidden; }
+        .cm-class-sidebar { width: 220px; background: #0d1117; border-right: 1px solid #30363d; display: flex; flex-direction: column; flex-shrink: 0; }
+        .cm-sidebar-hdr { padding: 8px 10px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.06em; color: #8b949e; border-bottom: 1px solid #21262d; display: flex; align-items: center; gap: 5px; }
+        .cm-sidebar-title { flex: 1; }
+        .cm-btn-new { background: #1f6feb; color: white; border: none; border-radius: 4px; padding: 3px 8px; font-size: 0.72rem; cursor: pointer; white-space: nowrap; }
+        .cm-btn-new:hover { background: #388bfd; }
+        .cm-btn-out { background: none; border: 1px solid #30363d; border-radius: 4px; padding: 3px 6px; font-size: 0.68rem; color: #8b949e; cursor: pointer; white-space: nowrap; }
+        .cm-btn-out:hover { color: #f87171; border-color: #5a2323; }
+        .cm-class-list { flex: 1; overflow-y: auto; }
+        .cm-class-item { display: flex; align-items: center; gap: 6px; padding: 8px 14px; cursor: pointer; border-bottom: 1px solid #21262d; }
+        .cm-class-item:hover { background: #1c2128; }
+        .cm-class-item.active { background: #1c2128; border-left: 3px solid #1f6feb; padding-left: 11px; }
+        .cm-class-name { flex: 1; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cm-class-count { font-size: 0.72rem; color: #8b949e; flex-shrink: 0; }
+        .cm-class-del { background: none; border: none; color: #8b949e; cursor: pointer; font-size: 0.8rem; opacity: 0; padding: 2px 4px; border-radius: 2px; line-height: 1; }
+        .cm-class-item:hover .cm-class-del { opacity: 1; }
+        .cm-class-del:hover { color: #f87171; }
+        .cm-new-class-row { padding: 6px 10px; border-bottom: 1px solid #21262d; display: flex; gap: 4px; }
+        .cm-new-class-inp { flex: 1; background: #0d1117; border: 1px solid #30363d; border-radius: 4px; color: #e6edf3; padding: 4px 8px; font-size: 0.8rem; font-family: inherit; }
+        .cm-new-class-inp:focus { outline: none; border-color: #58a6ff; }
+        .cm-new-class-ok { background: #238636; color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 0.75rem; cursor: pointer; }
+        .cm-new-class-cancel { background: none; border: 1px solid #30363d; color: #8b949e; border-radius: 4px; padding: 4px 8px; font-size: 0.75rem; cursor: pointer; }
+        .cm-student-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #0d1117; }
+        .cm-student-hdr { padding: 10px 16px; border-bottom: 1px solid #30363d; background: #161b22; display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+        .cm-student-hdr-title { font-size: 0.9rem; font-weight: bold; flex: 1; min-width: 100px; }
+        .cm-btn-action { background: #21262d; color: #e6edf3; border: 1px solid #30363d; border-radius: 5px; padding: 5px 11px; font-size: 0.78rem; cursor: pointer; font-family: inherit; }
+        .cm-btn-action:hover { background: #30363d; }
+        .cm-gen-inp { width: 52px; background: #161b22; border: 1px solid #30363d; border-radius: 4px; color: #e6edf3; padding: 4px 6px; font-size: 0.8rem; text-align: center; font-family: inherit; }
+        .cm-gen-inp:focus { outline: none; border-color: #58a6ff; }
+        .cm-student-prompt { display: flex; align-items: center; justify-content: center; flex: 1; color: #8b949e; font-size: 0.9rem; }
+        .cm-student-list { flex: 1; overflow-y: auto; }
+        .cm-student-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        .cm-student-table th { background: #161b22; padding: 7px 12px; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8b949e; border-bottom: 1px solid #30363d; position: sticky; top: 0; z-index: 1; }
+        .cm-student-table td { padding: 7px 12px; border-bottom: 1px solid #21262d; vertical-align: middle; }
+        .cm-student-table tr:hover td { background: #1c2128; }
+        .cm-pw-badge { display: inline-block; background: #0d1117; border: 1px solid #238636; border-radius: 4px; padding: 2px 8px; font-family: monospace; font-size: 0.8rem; color: #7ee787; }
+        .cm-status-default { color: #f0883e; font-size: 0.75rem; }
+        .cm-status-changed { color: #7ee787; font-size: 0.75rem; }
+        .cm-act-btn { background: none; border: none; cursor: pointer; font-size: 0.85rem; padding: 2px 5px; border-radius: 3px; color: #8b949e; }
+        .cm-act-btn:hover { color: #e6edf3; background: #30363d; }
+        .cm-act-btn.danger:hover { color: #f87171; background: #3d1a1a; }
+        .cm-rename-inp { background: #0d1117; border: 1px solid #58a6ff; border-radius: 3px; color: #e6edf3; padding: 2px 6px; font-size: 0.8rem; width: 120px; font-family: inherit; }
+        .cm-rename-inp:focus { outline: none; }
 
         /* ── collapsible group headers ── */
         .sb-group-hdr {
@@ -554,10 +607,77 @@
             <button class="cm-tab" data-cm-tab="n5">N5 CS</button>
         </div>
         <div class="cm-tab-panel active" id="cmTabHigher">
-            <iframe id="iframeClassesHigher" title="Higher CS — Class Manager"></iframe>
+            <div class="cm-login" id="cmLoginHigher">
+                <div class="cm-login-box">
+                    <h2>Higher CS — Teacher Login</h2>
+                    <p>Sign in to manage your classes and students.</p>
+                    <input type="text" class="cm-login-input" id="cmHEmail" placeholder="Username or email" autocomplete="username">
+                    <input type="password" class="cm-login-input" id="cmHPass" placeholder="Password" autocomplete="current-password">
+                    <button class="cm-login-btn" id="cmHLoginBtn">Sign In</button>
+                    <div class="cm-err" id="cmHErr"></div>
+                </div>
+            </div>
+            <div class="cm-workspace" id="cmWorkspaceHigher" style="display:none;">
+                <div class="cm-class-sidebar">
+                    <div class="cm-sidebar-hdr">
+                        <span class="cm-sidebar-title">Classes</span>
+                        <button class="cm-btn-new" id="cmHNewBtn">+ New</button>
+                        <button class="cm-btn-out" id="cmHOutBtn">Sign Out</button>
+                    </div>
+                    <div class="cm-class-list" id="cmHClassList"></div>
+                </div>
+                <div class="cm-student-panel">
+                    <div class="cm-student-hdr" id="cmHStudentHdr" style="display:none;">
+                        <span class="cm-student-hdr-title" id="cmHStudentTitle"></span>
+                        <input type="number" class="cm-gen-inp" id="cmHGenCount" value="5" min="1" max="50" title="Number of students to generate">
+                        <button class="cm-btn-action" id="cmHGenBtn">+ Generate Students</button>
+                    </div>
+                    <div class="cm-student-prompt" id="cmHStudentPrompt">Select a class to view students</div>
+                    <div class="cm-student-list" id="cmHStudentList" style="display:none;">
+                        <table class="cm-student-table">
+                            <thead><tr><th>Username</th><th>Password</th><th>Status</th><th></th></tr></thead>
+                            <tbody id="cmHStudentBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="cm-tab-panel" id="cmTabN5">
-            <iframe id="iframeClassesN5" title="N5 CS — Class Manager"></iframe>
+            <div class="cm-login" id="cmLoginN5">
+                <div class="cm-login-box">
+                    <h2>N5 CS — Teacher Login</h2>
+                    <p>Sign in to manage your classes and students.</p>
+                    <input type="text" class="cm-login-input" id="cmN5Email" placeholder="Username or email" autocomplete="username">
+                    <input type="password" class="cm-login-input" id="cmN5Pass" placeholder="Password" autocomplete="current-password">
+                    <button class="cm-login-btn" id="cmN5LoginBtn">Sign In</button>
+                    <div class="cm-err" id="cmN5Err"></div>
+                </div>
+            </div>
+            <div class="cm-workspace" id="cmWorkspaceN5" style="display:none;">
+                <div class="cm-class-sidebar">
+                    <div class="cm-sidebar-hdr">
+                        <span class="cm-sidebar-title">Classes</span>
+                        <button class="cm-btn-new" id="cmN5NewBtn">+ New</button>
+                        <button class="cm-btn-out" id="cmN5OutBtn">Sign Out</button>
+                    </div>
+                    <div class="cm-class-list" id="cmN5ClassList"></div>
+                </div>
+                <div class="cm-student-panel">
+                    <div class="cm-student-hdr" id="cmN5StudentHdr" style="display:none;">
+                        <span class="cm-student-hdr-title" id="cmN5StudentTitle"></span>
+                        <input type="number" class="cm-gen-inp" id="cmN5GenCount" value="5" min="1" max="50" title="Number of students to generate">
+                        <button class="cm-btn-action" id="cmN5GenBtn">+ Generate</button>
+                        <button class="cm-btn-action" id="cmN5CredBtn">&#x2B07; Credentials</button>
+                    </div>
+                    <div class="cm-student-prompt" id="cmN5StudentPrompt">Select a class to view students</div>
+                    <div class="cm-student-list" id="cmN5StudentList" style="display:none;">
+                        <table class="cm-student-table">
+                            <thead><tr><th>Username</th><th>Password</th><th>Status</th><th></th></tr></thead>
+                            <tbody id="cmN5StudentBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -630,18 +750,15 @@
     var draftBadge     = document.getElementById('draftBadge');
 
     /* ── tool-nav switching ── */
-    var sidebar               = document.querySelector('.sidebar');
-    var editorPaneEl          = document.getElementById('editorPane');
-    var iframePanelClasses    = document.getElementById('iframePanelClasses');
-    var iframePanelHigher     = document.getElementById('iframePanelHigher');
-    var iframePanelN5         = document.getElementById('iframePanelN5');
-    var iframeClassesHigher   = document.getElementById('iframeClassesHigher');
-    var iframeClassesN5       = document.getElementById('iframeClassesN5');
-    var iframeHigher          = document.getElementById('iframeHigher');
-    var iframeN5              = document.getElementById('iframeN5');
-    var classesLoaded         = { higher: false, n5: false };
-    var higherLoaded          = false;
-    var n5Loaded              = false;
+    var sidebar            = document.querySelector('.sidebar');
+    var editorPaneEl       = document.getElementById('editorPane');
+    var iframePanelClasses = document.getElementById('iframePanelClasses');
+    var iframePanelHigher  = document.getElementById('iframePanelHigher');
+    var iframePanelN5      = document.getElementById('iframePanelN5');
+    var iframeHigher       = document.getElementById('iframeHigher');
+    var iframeN5           = document.getElementById('iframeN5');
+    var higherLoaded       = false;
+    var n5Loaded           = false;
 
     var allIframePanels = [iframePanelClasses, iframePanelHigher, iframePanelN5];
 
@@ -656,23 +773,15 @@
             document.querySelectorAll('.tool-nav-item').forEach(function (b) { b.classList.remove('active'); });
             btn.classList.add('active');
             var tool = btn.dataset.tool;
-
             hideAllPanels();
-
             if (tool === 'sandbox-builder') {
                 sidebar.style.display = '';
                 editorPaneEl.style.display = '';
             } else if (tool === 'classes') {
                 iframePanelClasses.classList.add('active');
-                /* Load the active tab's iframe lazily */
                 var activeTab = iframePanelClasses.querySelector('.cm-tab.active');
-                if (activeTab && activeTab.dataset.cmTab === 'higher' && !classesLoaded.higher) {
-                    iframeClassesHigher.src = '/revision/teacher/classes';
-                    classesLoaded.higher = true;
-                } else if (activeTab && activeTab.dataset.cmTab === 'n5' && !classesLoaded.n5) {
-                    iframeClassesN5.src = '/revision-n5/teacher/classes';
-                    classesLoaded.n5 = true;
-                }
+                var which = activeTab ? activeTab.dataset.cmTab : 'higher';
+                if (window.cmInitApp) window.cmInitApp(which);
             } else if (tool === 'higher-tools') {
                 iframePanelHigher.classList.add('active');
                 if (!higherLoaded) { iframeHigher.src = '/revision/teacher/dashboard'; higherLoaded = true; }
@@ -683,22 +792,387 @@
         });
     });
 
-    /* ── class manager tab switching ── */
-    document.querySelectorAll('.cm-tab').forEach(function (tab) {
-        tab.addEventListener('click', function () {
-            document.querySelectorAll('.cm-tab').forEach(function (t) { t.classList.remove('active'); });
-            tab.classList.add('active');
-            var which = tab.dataset.cmTab;
-            document.querySelectorAll('.cm-tab-panel').forEach(function (p) { p.classList.remove('active'); });
-            if (which === 'higher') {
-                document.getElementById('cmTabHigher').classList.add('active');
-                if (!classesLoaded.higher) { iframeClassesHigher.src = '/revision/teacher/classes'; classesLoaded.higher = true; }
-            } else if (which === 'n5') {
-                document.getElementById('cmTabN5').classList.add('active');
-                if (!classesLoaded.n5) { iframeClassesN5.src = '/revision-n5/teacher/classes'; classesLoaded.n5 = true; }
+    /* ── native class manager ── */
+    (function () {
+        var cmCfg = {
+            higher: {
+                tokenKey:    'teacher_token',
+                expiresKey:  'teacher_token_expires',
+                loginUrl:    '/api/teacher/login',
+                classesUrl:  '/api/classes',
+                studentUrl:  function (cid) { return '/api/classes/' + cid + '/students'; },
+                delClassUrl: function (id)  { return '/api/classes/' + id; },
+                delStudUrl:  function (id)  { return '/api/students/' + id; },
+                resetPwUrl:  function (id)  { return '/api/students/' + id + '/reset-password'; },
+                renameUrl:   function (id)  { return '/api/students/' + id + '/username'; },
+                bulkUrl:     function (cid) { return '/api/classes/' + cid + '/students'; },
+                hasRename: true, hasCreds: false
+            },
+            n5: {
+                tokenKey:    'teacherToken',
+                expiresKey:  'teacherTokenExpires',
+                loginUrl:    '/api/n5/teacher/login',
+                classesUrl:  '/api/teacher/classes',
+                studentUrl:  function (cid) { return '/api/teacher/classes/' + cid + '/students'; },
+                delClassUrl: function (id)  { return '/api/teacher/classes/' + id; },
+                delStudUrl:  function (id)  { return '/api/teacher/students/' + id; },
+                resetPwUrl:  function (id)  { return '/api/teacher/students/' + id + '/reset-password'; },
+                bulkUrl:     function (cid) { return '/api/teacher/classes/' + cid + '/students/bulk'; },
+                credUrl:     function (cid) { return '/api/teacher/classes/' + cid + '/credentials'; },
+                hasRename: false, hasCreds: true
             }
+        };
+
+        var cmSt = {
+            higher: { token: null, selId: null, selName: '' },
+            n5:     { token: null, selId: null, selName: '' }
+        };
+
+        function el(id) { return document.getElementById(id); }
+
+        function storedTok(app) {
+            var c = cmCfg[app];
+            var t = localStorage.getItem(c.tokenKey);
+            var e = parseInt(localStorage.getItem(c.expiresKey) || '0');
+            return (t && e > Date.now()) ? t : null;
+        }
+
+        function authHdr(app) {
+            return { 'Authorization': 'Bearer ' + cmSt[app].token, 'Content-Type': 'application/json' };
+        }
+
+        function esc(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function ids(app) {
+            var h = app === 'higher';
+            return {
+                login:   h ? 'cmLoginHigher'    : 'cmLoginN5',
+                ws:      h ? 'cmWorkspaceHigher' : 'cmWorkspaceN5',
+                list:    h ? 'cmHClassList'      : 'cmN5ClassList',
+                sHdr:    h ? 'cmHStudentHdr'     : 'cmN5StudentHdr',
+                sTitle:  h ? 'cmHStudentTitle'   : 'cmN5StudentTitle',
+                sPrompt: h ? 'cmHStudentPrompt'  : 'cmN5StudentPrompt',
+                sList:   h ? 'cmHStudentList'    : 'cmN5StudentList',
+                sBody:   h ? 'cmHStudentBody'    : 'cmN5StudentBody',
+                genCnt:  h ? 'cmHGenCount'       : 'cmN5GenCount',
+                email:   h ? 'cmHEmail'          : 'cmN5Email',
+                pass:    h ? 'cmHPass'           : 'cmN5Pass',
+                err:     h ? 'cmHErr'            : 'cmN5Err'
+            };
+        }
+
+        function showLoginOrWs(app) {
+            var i = ids(app);
+            if (cmSt[app].token) {
+                el(i.login).style.display = 'none';
+                el(i.ws).style.display = 'flex';
+            } else {
+                el(i.login).style.display = 'flex';
+                el(i.ws).style.display = 'none';
+            }
+        }
+
+        function cmInitApp(app) {
+            var saved = storedTok(app);
+            if (saved) {
+                cmSt[app].token = saved;
+                showLoginOrWs(app);
+                loadClasses(app);
+            } else {
+                cmSt[app].token = null;
+                showLoginOrWs(app);
+            }
+        }
+        window.cmInitApp = cmInitApp;
+
+        function doLogin(app) {
+            var c = cmCfg[app]; var i = ids(app);
+            var username = el(i.email).value.trim();
+            var password = el(i.pass).value;
+            el(i.err).textContent = '';
+            if (!username || !password) { el(i.err).textContent = 'Please enter username and password.'; return; }
+            fetch(c.loginUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username, password: password }) })
+            .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+            .then(function (res) {
+                if (!res.ok) { el(i.err).textContent = res.data.message || 'Login failed.'; return; }
+                cmSt[app].token = res.data.token;
+                localStorage.setItem(c.tokenKey, res.data.token);
+                localStorage.setItem(c.expiresKey, String(res.data.expiresAt));
+                el(i.pass).value = '';
+                showLoginOrWs(app);
+                loadClasses(app);
+            })
+            .catch(function () { el(i.err).textContent = 'Network error. Please try again.'; });
+        }
+
+        function doLogout(app) {
+            var c = cmCfg[app];
+            cmSt[app].token = null; cmSt[app].selId = null;
+            localStorage.removeItem(c.tokenKey); localStorage.removeItem(c.expiresKey);
+            showLoginOrWs(app);
+        }
+
+        function handleUnauth(app) { doLogout(app); }
+
+        function loadClasses(app) {
+            var c = cmCfg[app]; var i = ids(app);
+            fetch(c.classesUrl, { headers: authHdr(app) })
+            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
+            .then(function (classes) {
+                if (!classes) return;
+                var listEl = el(i.list);
+                if (!classes.length) {
+                    listEl.innerHTML = '<div style="padding:12px 14px;color:#8b949e;font-size:0.8rem;">No classes yet — click + New to create one.</div>';
+                    return;
+                }
+                listEl.innerHTML = classes.map(function (cls) {
+                    var active = cmSt[app].selId === String(cls.id) ? ' active' : '';
+                    var count  = (cls.studentCount != null) ? ' <span class="cm-class-count">(' + cls.studentCount + ')</span>' : '';
+                    return '<div class="cm-class-item' + active + '" data-id="' + esc(cls.id) + '" data-name="' + esc(cls.name) + '">' +
+                        '<span class="cm-class-name">' + esc(cls.name) + '</span>' + count +
+                        '<button class="cm-class-del" data-id="' + esc(cls.id) + '" data-name="' + esc(cls.name) + '" title="Delete class">\uD83D\uDDD1</button>' +
+                        '</div>';
+                }).join('');
+                listEl.querySelectorAll('.cm-class-item').forEach(function (row) {
+                    row.addEventListener('click', function (e) {
+                        if (e.target.closest('.cm-class-del')) return;
+                        selectClass(app, row.dataset.id, row.dataset.name);
+                    });
+                });
+                listEl.querySelectorAll('.cm-class-del').forEach(function (btn) {
+                    btn.addEventListener('click', function (e) { e.stopPropagation(); deleteClass(app, btn.dataset.id, btn.dataset.name); });
+                });
+            })
+            .catch(function (err) { console.error('Load classes error', err); });
+        }
+
+        function promptNewClass(app) {
+            var i = ids(app); var listEl = el(i.list);
+            if (listEl.querySelector('.cm-new-class-row')) return;
+            var row = document.createElement('div');
+            row.className = 'cm-new-class-row';
+            row.innerHTML = '<input class="cm-new-class-inp" placeholder="Class name\u2026" maxlength="80">' +
+                '<button class="cm-new-class-ok">\u2713</button>' +
+                '<button class="cm-new-class-cancel">\u2715</button>';
+            listEl.insertBefore(row, listEl.firstChild);
+            var inp = row.querySelector('.cm-new-class-inp');
+            inp.focus();
+            function confirm() { var name = inp.value.trim(); if (name) createClass(app, name, row); }
+            row.querySelector('.cm-new-class-ok').addEventListener('click', confirm);
+            row.querySelector('.cm-new-class-cancel').addEventListener('click', function () { row.remove(); });
+            inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') confirm(); if (e.key === 'Escape') row.remove(); });
+        }
+
+        function createClass(app, name, rowEl) {
+            var c = cmCfg[app];
+            fetch(c.classesUrl, { method: 'POST', headers: authHdr(app), body: JSON.stringify({ name: name }) })
+            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
+            .then(function (cls) { if (!cls) return; if (rowEl) rowEl.remove(); loadClasses(app); })
+            .catch(function (err) { console.error('Create class error', err); });
+        }
+
+        function deleteClass(app, classId, className) {
+            if (!confirm('Delete class "' + className + '"? This will also delete all students in the class.')) return;
+            var c = cmCfg[app];
+            fetch(c.delClassUrl(classId), { method: 'DELETE', headers: authHdr(app) })
+            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
+            .then(function (d) {
+                if (!d) return;
+                if (cmSt[app].selId === String(classId)) { cmSt[app].selId = null; clearStudentPanel(app); }
+                loadClasses(app);
+            })
+            .catch(function (err) { console.error('Delete class error', err); });
+        }
+
+        function selectClass(app, classId, className) {
+            cmSt[app].selId = String(classId); cmSt[app].selName = className;
+            var i = ids(app);
+            el(i.list).querySelectorAll('.cm-class-item').forEach(function (row) { row.classList.toggle('active', row.dataset.id === String(classId)); });
+            el(i.sHdr).style.display = 'flex';
+            el(i.sTitle).textContent = className;
+            el(i.sPrompt).style.display = 'none';
+            el(i.sList).style.display = 'block';
+            loadStudents(app, classId);
+        }
+
+        function clearStudentPanel(app) {
+            var i = ids(app);
+            el(i.sHdr).style.display = 'none';
+            el(i.sPrompt).style.display = 'flex';
+            el(i.sList).style.display = 'none';
+        }
+
+        function loadStudents(app, classId) {
+            var c = cmCfg[app]; var i = ids(app);
+            fetch(c.studentUrl(classId), { headers: authHdr(app) })
+            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
+            .then(function (students) {
+                if (!students) return;
+                var c2 = cmCfg[app];
+                var bodyEl = el(i.sBody);
+                if (!students.length) {
+                    bodyEl.innerHTML = '<tr><td colspan="4" style="color:#8b949e;text-align:center;padding:20px;">No students yet. Use &ldquo;+ Generate&rdquo; to add some.</td></tr>';
+                    return;
+                }
+                bodyEl.innerHTML = students.map(function (s) {
+                    var changed = s.mustChangePassword === false;
+                    var statusHtml = changed
+                        ? '<span class="cm-status-changed">Password changed</span>'
+                        : '<span class="cm-status-default">Default password</span>';
+                    var renBtn = c2.hasRename
+                        ? '<button class="cm-act-btn rename-btn" data-id="' + esc(s.id) + '" data-name="' + esc(s.username) + '" title="Rename">\u270E</button>'
+                        : '';
+                    return '<tr data-id="' + esc(s.id) + '">' +
+                        '<td class="cm-name-cell" data-id="' + esc(s.id) + '">' + esc(s.username) + '</td>' +
+                        '<td class="cm-pw-cell" data-id="' + esc(s.id) + '">\u2014</td>' +
+                        '<td>' + statusHtml + '</td>' +
+                        '<td style="white-space:nowrap;">' +
+                        '<button class="cm-act-btn reset-btn" data-id="' + esc(s.id) + '" title="Reset password">\uD83D\uDD11</button>' +
+                        renBtn +
+                        '<button class="cm-act-btn danger del-btn" data-id="' + esc(s.id) + '" data-name="' + esc(s.username) + '" title="Delete student">\uD83D\uDDD1</button>' +
+                        '</td></tr>';
+                }).join('');
+                bodyEl.querySelectorAll('.reset-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () { resetPassword(app, btn.dataset.id); });
+                });
+                bodyEl.querySelectorAll('.del-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () { deleteStudent(app, btn.dataset.id, btn.dataset.name); });
+                });
+                if (c2.hasRename) {
+                    bodyEl.querySelectorAll('.rename-btn').forEach(function (btn) {
+                        btn.addEventListener('click', function () { startRename(app, btn.dataset.id, btn.dataset.name); });
+                    });
+                }
+            })
+            .catch(function (err) { console.error('Load students error', err); });
+        }
+
+        function generateStudents(app) {
+            var cid = cmSt[app].selId; if (!cid) return;
+            var c = cmCfg[app]; var i = ids(app);
+            var count = parseInt(el(i.genCnt).value) || 5;
+            if (count < 1 || count > 50) { alert('Please enter a number between 1 and 50.'); return; }
+            fetch(c.bulkUrl(cid), { method: 'POST', headers: authHdr(app), body: JSON.stringify({ count: count }) })
+            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
+            .then(function (d) {
+                if (!d) return;
+                var newStudents = Array.isArray(d) ? d : (d.students || []);
+                loadStudents(app, cid);
+                loadClasses(app);
+                if (newStudents.length) {
+                    var creds = newStudents.map(function (s) { return s.username + '  :  ' + (s.plainPassword || '(see table)'); }).join('\n');
+                    alert('Generated ' + newStudents.length + ' student(s):\n\n' + creds + '\n\nSave these passwords now — they cannot be retrieved later.');
+                }
+            })
+            .catch(function (err) { console.error('Generate students error', err); });
+        }
+
+        function resetPassword(app, studentId) {
+            var c = cmCfg[app];
+            fetch(c.resetPwUrl(studentId), { method: 'POST', headers: authHdr(app) })
+            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
+            .then(function (d) {
+                if (!d) return;
+                var pw = d.plainPassword || '';
+                var pwCell = document.querySelector('.cm-pw-cell[data-id="' + studentId + '"]');
+                if (pwCell) pwCell.innerHTML = '<span class="cm-pw-badge">' + esc(pw) + '</span>';
+            })
+            .catch(function (err) { console.error('Reset password error', err); });
+        }
+
+        function deleteStudent(app, studentId, username) {
+            if (!confirm('Delete student "' + username + '"?')) return;
+            var c = cmCfg[app];
+            fetch(c.delStudUrl(studentId), { method: 'DELETE', headers: authHdr(app) })
+            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
+            .then(function (d) {
+                if (!d) return;
+                var row = document.querySelector('tr[data-id="' + studentId + '"]');
+                if (row) row.remove();
+                loadClasses(app);
+            })
+            .catch(function (err) { console.error('Delete student error', err); });
+        }
+
+        function startRename(app, studentId, currentName) {
+            var nameCell = document.querySelector('.cm-name-cell[data-id="' + studentId + '"]');
+            if (!nameCell || nameCell.querySelector('.cm-rename-inp')) return;
+            nameCell.innerHTML = '<input class="cm-rename-inp" value="' + esc(currentName) + '" maxlength="50">' +
+                '<button class="cm-act-btn" id="rSave' + studentId + '" title="Save">\u2713</button>' +
+                '<button class="cm-act-btn" id="rCancel' + studentId + '" title="Cancel">\u2715</button>';
+            var inp = nameCell.querySelector('.cm-rename-inp');
+            inp.focus(); inp.select();
+            function save() { doRename(app, studentId, inp.value.trim(), currentName, nameCell); }
+            document.getElementById('rSave' + studentId).addEventListener('click', save);
+            document.getElementById('rCancel' + studentId).addEventListener('click', function () { nameCell.textContent = currentName; nameCell.dataset.id = studentId; });
+            inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') save(); if (e.key === 'Escape') { nameCell.textContent = currentName; nameCell.dataset.id = studentId; } });
+        }
+
+        function doRename(app, studentId, newName, oldName, nameCell) {
+            if (!newName || newName === oldName) { nameCell.textContent = oldName; nameCell.dataset.id = studentId; return; }
+            var c = cmCfg[app];
+            fetch(c.renameUrl(studentId), { method: 'PATCH', headers: authHdr(app), body: JSON.stringify({ username: newName }) })
+            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
+            .then(function (d) {
+                if (!d) return;
+                var name = d.username || newName;
+                nameCell.textContent = name; nameCell.dataset.id = studentId;
+                var row = nameCell.closest('tr');
+                if (row) {
+                    var delBtn = row.querySelector('.del-btn'); if (delBtn) delBtn.dataset.name = name;
+                    var renBtn = row.querySelector('.rename-btn'); if (renBtn) renBtn.dataset.name = name;
+                }
+            })
+            .catch(function (err) { console.error('Rename error', err); nameCell.textContent = oldName; nameCell.dataset.id = studentId; });
+        }
+
+        function downloadCredentials(app) {
+            var cid = cmSt[app].selId; if (!cid) return;
+            var c = cmCfg[app]; var className = cmSt[app].selName;
+            fetch(c.credUrl(cid), { headers: authHdr(app) })
+            .then(function (r) { if (r.status === 401) { handleUnauth(app); return null; } return r.json(); })
+            .then(function (d) {
+                if (!d) return;
+                var lines = ['Username,Initial Password,Status'];
+                (d.students || []).forEach(function (s) {
+                    lines.push([s.username, s.initialPassword || '', s.hasChangedPassword ? 'Changed' : 'Default'].join(','));
+                });
+                var blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a'); a.href = url;
+                a.download = (d.className || className) + '-credentials.csv';
+                a.click(); URL.revokeObjectURL(url);
+            })
+            .catch(function (err) { console.error('Download credentials error', err); });
+        }
+
+        /* Wire up static buttons */
+        el('cmHLoginBtn').addEventListener('click', function () { doLogin('higher'); });
+        el('cmN5LoginBtn').addEventListener('click', function () { doLogin('n5'); });
+        el('cmHPass').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin('higher'); });
+        el('cmN5Pass').addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin('n5'); });
+        el('cmHOutBtn').addEventListener('click', function () { doLogout('higher'); });
+        el('cmN5OutBtn').addEventListener('click', function () { doLogout('n5'); });
+        el('cmHNewBtn').addEventListener('click', function () { promptNewClass('higher'); });
+        el('cmN5NewBtn').addEventListener('click', function () { promptNewClass('n5'); });
+        el('cmHGenBtn').addEventListener('click', function () { generateStudents('higher'); });
+        el('cmN5GenBtn').addEventListener('click', function () { generateStudents('n5'); });
+        el('cmN5CredBtn').addEventListener('click', function () { downloadCredentials('n5'); });
+
+        /* Class manager tab switching */
+        document.querySelectorAll('.cm-tab').forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                document.querySelectorAll('.cm-tab').forEach(function (t) { t.classList.remove('active'); });
+                tab.classList.add('active');
+                var which = tab.dataset.cmTab;
+                document.querySelectorAll('.cm-tab-panel').forEach(function (p) { p.classList.remove('active'); });
+                el(which === 'higher' ? 'cmTabHigher' : 'cmTabN5').classList.add('active');
+                cmInitApp(which);
+            });
         });
-    });
+    }());
 
     /* ── auth ── */
     var pwEmail = document.getElementById('pwEmail');

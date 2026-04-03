@@ -347,6 +347,52 @@ export async function registerN5Routes(
     res.json({ valid: true, username: session.username });
   });
 
+  // Non-conflicting login/verify aliases for the native teacher dashboard.
+  // The /api/teacher/login path is shadowed by Higher revision routes (registered first),
+  // so N5 needs its own paths to write into its own in-memory sessions Map.
+  app.post("/api/n5/teacher/login", async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username/email and password required" });
+    }
+    try {
+      let user = await storage.getUserByUsername(username);
+      if (!user && username.includes("@")) {
+        user = await storage.getUserByEmail(username);
+      }
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      const isValid = await bcrypt.compare(password, user.password);
+      if (!isValid) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      const sessionToken = crypto.randomBytes(32).toString("hex");
+      const expiresAt = Date.now() + 24 * 60 * 60 * 1000;
+      addSession(sessionToken, { username: user.username, expiresAt });
+      res.json({ success: true, token: sessionToken, expiresAt });
+    } catch (error: any) {
+      console.error("N5 login error:", error?.message || error);
+      if (error?.message?.includes('connect') || error?.message?.includes('timeout')) {
+        return res.status(503).json({ message: "Database connection issue. Please try again." });
+      }
+      res.status(500).json({ message: "Server error. Please try again." });
+    }
+  });
+
+  app.get("/api/n5/teacher/verify", (req, res) => {
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+    const session = sessions.get(token);
+    if (!session || session.expiresAt < Date.now()) {
+      sessions.delete(token);
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+    res.json({ valid: true, username: session.username });
+  });
+
   // Password reset endpoint
   // Request password reset - sends email with reset link
   app.post("/api/teacher/reset-password", async (req, res) => {
