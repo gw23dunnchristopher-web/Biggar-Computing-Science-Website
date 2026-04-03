@@ -2478,7 +2478,7 @@ ${studentAnswer}`;
   // ============ ASSIGNMENT ROUTES ============
 
   // Get all assignments (teacher)
-  app.get("/api/assignments", async (_req, res) => {
+  app.get("/api/n5/assignments", async (_req, res) => {
     try {
       const allAssignments = await storage.getAllAssignments();
       const assignmentsWithDetails = await Promise.all(
@@ -2507,7 +2507,7 @@ ${studentAnswer}`;
   });
 
   // Get published assignments (student)
-  app.get("/api/assignments/active", async (_req, res) => {
+  app.get("/api/n5/assignments/active", async (_req, res) => {
     try {
       const publishedAssignments = await storage.getPublishedAssignments();
       res.json(publishedAssignments);
@@ -2518,7 +2518,7 @@ ${studentAnswer}`;
   });
 
   // Get single assignment with sections and parts
-  app.get("/api/assignments/:id", async (req, res) => {
+  app.get("/api/n5/assignments/:id", async (req, res) => {
     try {
       const assignment = await storage.getAssignment(req.params.id);
       if (!assignment) {
@@ -2547,7 +2547,7 @@ ${studentAnswer}`;
   });
 
   // Create assignment (teacher)
-  app.post("/api/assignments", async (req, res) => {
+  app.post("/api/n5/assignments", async (req, res) => {
     try {
       const { year, title, totalMarks, totalTimeMinutes, isPublished } = req.body;
       const assignment = await storage.createAssignment({
@@ -2565,7 +2565,7 @@ ${studentAnswer}`;
   });
 
   // Update assignment (teacher)
-  app.put("/api/assignments/:id", async (req, res) => {
+  app.put("/api/n5/assignments/:id", async (req, res) => {
     try {
       console.log("PUT assignment:", req.params.id, "with body:", JSON.stringify(req.body));
       const { id, createdAt, ...updateData } = req.body;
@@ -2580,7 +2580,7 @@ ${studentAnswer}`;
   });
 
   // Partial update assignment (teacher) - for checklist updates
-  app.patch("/api/assignments/:id", async (req, res) => {
+  app.patch("/api/n5/assignments/:id", async (req, res) => {
     try {
       console.log("PATCH assignment:", req.params.id, "with body:", JSON.stringify(req.body));
       const assignment = await storage.updateAssignment(req.params.id, req.body);
@@ -2593,7 +2593,7 @@ ${studentAnswer}`;
   });
 
   // Delete assignment (teacher)
-  app.delete("/api/assignments/:id", async (req, res) => {
+  app.delete("/api/n5/assignments/:id", async (req, res) => {
     try {
       await storage.deleteAssignment(req.params.id);
       res.json({ success: true });
@@ -2604,7 +2604,7 @@ ${studentAnswer}`;
   });
 
   // Create assignment section
-  app.post("/api/assignments/:assignmentId/sections", async (req, res) => {
+  app.post("/api/n5/assignments/:assignmentId/sections", async (req, res) => {
     try {
       const { sectionType, title, isCompulsory, orderIndex, informationSheet } = req.body;
       const section = await storage.createAssignmentSection({
@@ -2623,7 +2623,7 @@ ${studentAnswer}`;
   });
 
   // Update assignment section
-  app.put("/api/assignment-sections/:id", async (req, res) => {
+  app.put("/api/n5/assignment-sections/:id", async (req, res) => {
     try {
       const section = await storage.updateAssignmentSection(req.params.id, req.body);
       res.json(section);
@@ -2634,7 +2634,7 @@ ${studentAnswer}`;
   });
 
   // PATCH assignment section (partial update)
-  app.patch("/api/assignment-sections/:id", async (req, res) => {
+  app.patch("/api/n5/assignment-sections/:id", async (req, res) => {
     try {
       console.log("PATCH section:", req.params.id, "with body:", JSON.stringify(req.body));
       const section = await storage.updateAssignmentSection(req.params.id, req.body);
@@ -2648,7 +2648,7 @@ ${studentAnswer}`;
   });
 
   // Delete assignment section
-  app.delete("/api/assignment-sections/:id", async (req, res) => {
+  app.delete("/api/n5/assignment-sections/:id", async (req, res) => {
     try {
       await storage.deleteAssignmentSection(req.params.id);
       res.json({ success: true });
@@ -2659,7 +2659,7 @@ ${studentAnswer}`;
   });
 
   // Create assignment part
-  app.post("/api/assignment-sections/:sectionId/parts", async (req, res) => {
+  app.post("/api/n5/assignment-sections/:sectionId/parts", async (req, res) => {
     try {
       const { partLabel, title, instructions, maxMarks, orderIndex, isPractical, aiGradingGuidance, subQuestions, inputStyle, contentBlocks, requiresUpload } = req.body;
       const part = await storage.createAssignmentPart({
@@ -2684,7 +2684,7 @@ ${studentAnswer}`;
   });
 
   // Update assignment part
-  app.put("/api/assignment-parts/:id", async (req, res) => {
+  app.put("/api/n5/assignment-parts/:id", async (req, res) => {
     try {
       const part = await storage.updateAssignmentPart(req.params.id, req.body);
       res.json(part);
@@ -2695,7 +2695,7 @@ ${studentAnswer}`;
   });
 
   // Delete assignment part
-  app.delete("/api/assignment-parts/:id", async (req, res) => {
+  app.delete("/api/n5/assignment-parts/:id", async (req, res) => {
     try {
       await storage.deleteAssignmentPart(req.params.id);
       res.json({ success: true });
@@ -2706,7 +2706,7 @@ ${studentAnswer}`;
   });
 
   // Upload resource file for assignment part
-  app.post("/api/assignment-parts/:partId/resources", assignmentUpload.single("file"), async (req, res) => {
+  app.post("/api/n5/assignment-parts/:partId/resources", assignmentUpload.single("file"), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
@@ -2727,7 +2727,7 @@ ${studentAnswer}`;
   });
 
   // Delete resource
-  app.delete("/api/assignment-resources/:id", async (req, res) => {
+  app.delete("/api/n5/assignment-resources/:id", async (req, res) => {
     try {
       await storage.deleteAssignmentResource(req.params.id);
       res.json({ success: true });
@@ -2740,7 +2740,7 @@ ${studentAnswer}`;
   // ============ STUDENT ASSIGNMENT ATTEMPT ROUTES ============
 
   // Start or get existing assignment attempt
-  app.post("/api/assignment-attempts/start", async (req, res) => {
+  app.post("/api/n5/assignment-attempts/start", async (req, res) => {
     try {
       const { assignmentId, localStudentId, chosenOptionalSection } = req.body;
       
@@ -2798,7 +2798,7 @@ ${studentAnswer}`;
   });
 
   // Get attempt by ID
-  app.get("/api/assignment-attempts/:id", async (req, res) => {
+  app.get("/api/n5/assignment-attempts/:id", async (req, res) => {
     try {
       const attempt = await storage.getAssignmentAttempt(req.params.id);
       if (!attempt) {
@@ -2812,7 +2812,7 @@ ${studentAnswer}`;
   });
 
   // Get all attempts for a student (syncs localStorage with server)
-  app.get("/api/assignment-attempts/student/:studentId", async (req, res) => {
+  app.get("/api/n5/assignment-attempts/student/:studentId", async (req, res) => {
     try {
       const attempts = await storage.getAssignmentAttemptsByStudent(req.params.studentId);
       res.json(attempts);
@@ -2823,7 +2823,7 @@ ${studentAnswer}`;
   });
 
   // Update attempt (pause, resume, update time, complete part)
-  app.put("/api/assignment-attempts/:id", async (req, res) => {
+  app.put("/api/n5/assignment-attempts/:id", async (req, res) => {
     try {
       const existingAttempt = await storage.getAssignmentAttempt(req.params.id);
       if (!existingAttempt) {
@@ -2882,7 +2882,7 @@ ${studentAnswer}`;
   });
 
   // Get responses for an attempt
-  app.get("/api/assignment-attempts/:attemptId/responses", async (req, res) => {
+  app.get("/api/n5/assignment-attempts/:attemptId/responses", async (req, res) => {
     try {
       const responses = await storage.getAssignmentResponses(req.params.attemptId);
       res.json(responses);
@@ -2893,7 +2893,7 @@ ${studentAnswer}`;
   });
 
   // Submit or update a response (with optional screenshot upload)
-  app.post("/api/assignment-responses", assignmentUpload.array("screenshots", 10), async (req, res) => {
+  app.post("/api/n5/assignment-responses", assignmentUpload.array("screenshots", 10), async (req, res) => {
     try {
       const { attemptId, partId, subQuestionId, textAnswer, codeAnswer, drawingData, userInputs } = req.body;
       
@@ -3564,7 +3564,7 @@ Format your response as JSON:
     };
   }
 
-  app.post("/api/assignment-responses/:id/grade", async (req, res) => {
+  app.post("/api/n5/assignment-responses/:id/grade", async (req, res) => {
     try {
       const { aiGradingGuidance, maxMarks, markingGuidanceData, inputStyle } = req.body;
 
@@ -3586,7 +3586,7 @@ Format your response as JSON:
     }
   });
 
-  app.post("/api/assignment-attempts/:id/grade-all", async (req, res) => {
+  app.post("/api/n5/assignment-attempts/:id/grade-all", async (req, res) => {
     try {
       const attempt = await storage.getAssignmentAttempt(req.params.id);
       if (!attempt) {

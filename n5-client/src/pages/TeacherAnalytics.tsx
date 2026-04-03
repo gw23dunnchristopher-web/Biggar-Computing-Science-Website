@@ -1473,7 +1473,7 @@ function AssignmentAnalyticsTab() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/assignments").then(r => r.json()).then(setAssignments).catch(console.error);
+    fetch("/api/n5/assignments").then(r => r.json()).then(setAssignments).catch(console.error);
   }, []);
 
   useEffect(() => {

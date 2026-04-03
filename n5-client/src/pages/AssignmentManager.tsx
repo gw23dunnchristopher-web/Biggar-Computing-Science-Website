@@ -214,7 +214,7 @@ export default function AssignmentManager() {
   const fetchAssignments = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/assignments");
+      const response = await fetch("/api/n5/assignments");
       if (!response.ok) throw new Error("Failed to fetch assignments");
       const data = await response.json();
       setAssignments(data);
@@ -227,7 +227,7 @@ export default function AssignmentManager() {
 
   const fetchAssignmentDetails = async (assignmentId: string) => {
     try {
-      const response = await fetch(`/api/assignments/${assignmentId}`);
+      const response = await fetch(`/api/n5/assignments/${assignmentId}`);
       if (!response.ok) throw new Error("Failed to fetch assignment details");
       const data = await response.json();
       setAssignments(prev => prev.map(a => a.id === assignmentId ? data : a));
@@ -238,7 +238,7 @@ export default function AssignmentManager() {
 
   const handleCreateAssignment = async () => {
     try {
-      const response = await fetch("/api/assignments", {
+      const response = await fetch("/api/n5/assignments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAssignment),
@@ -258,7 +258,7 @@ export default function AssignmentManager() {
     if (!editingAssignment) return;
     try {
       const { sections, ...assignmentData } = editingAssignment;
-      const response = await fetch(`/api/assignments/${editingAssignment.id}`, {
+      const response = await fetch(`/api/n5/assignments/${editingAssignment.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(assignmentData),
@@ -275,7 +275,7 @@ export default function AssignmentManager() {
 
   const handleDeleteAssignment = async (id: string) => {
     try {
-      const response = await fetch(`/api/assignments/${id}`, { method: "DELETE" });
+      const response = await fetch(`/api/n5/assignments/${id}`, { method: "DELETE" });
       if (!response.ok) throw new Error("Failed to delete assignment");
       setAssignments(prev => prev.filter(a => a.id !== id));
       toast({ title: "Success", description: "Assignment deleted" });
@@ -292,7 +292,7 @@ export default function AssignmentManager() {
         title: newSection.title || SECTION_TYPES.find(s => s.id === newSection.sectionType)?.name || newSection.sectionType,
         isCompulsory: newSection.sectionType === "sdd",
       };
-      const response = await fetch(`/api/assignments/${editingSection.assignmentId}/sections`, {
+      const response = await fetch(`/api/n5/assignments/${editingSection.assignmentId}/sections`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(sectionData),
@@ -309,7 +309,7 @@ export default function AssignmentManager() {
 
   const handleDeleteSection = async (sectionId: string, assignmentId: string) => {
     try {
-      const response = await fetch(`/api/assignment-sections/${sectionId}`, { method: "DELETE" });
+      const response = await fetch(`/api/n5/assignment-sections/${sectionId}`, { method: "DELETE" });
       if (!response.ok) throw new Error("Failed to delete section");
       await fetchAssignmentDetails(assignmentId);
       toast({ title: "Success", description: "Section deleted" });
@@ -320,7 +320,7 @@ export default function AssignmentManager() {
 
   const handleUpdateEvidenceChecklist = async (assignmentId: string, checklist: ChecklistItem[]) => {
     try {
-      const response = await fetch(`/api/assignments/${assignmentId}`, {
+      const response = await fetch(`/api/n5/assignments/${assignmentId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ evidenceChecklist: checklist }),
@@ -391,12 +391,12 @@ export default function AssignmentManager() {
     
     try {
       const [response1, response2] = await Promise.all([
-        fetch(`/api/assignment-sections/${currentSection.id}`, {
+        fetch(`/api/n5/assignment-sections/${currentSection.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ orderIndex: swapSection.orderIndex }),
         }),
-        fetch(`/api/assignment-sections/${swapSection.id}`, {
+        fetch(`/api/n5/assignment-sections/${swapSection.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ orderIndex: currentSection.orderIndex }),
@@ -424,7 +424,7 @@ export default function AssignmentManager() {
   const handleCreatePart = async () => {
     if (!editingPart?.sectionId) return;
     try {
-      const response = await fetch(`/api/assignment-sections/${editingPart.sectionId}/parts`, {
+      const response = await fetch(`/api/n5/assignment-sections/${editingPart.sectionId}/parts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newPart),
@@ -446,7 +446,7 @@ export default function AssignmentManager() {
   const handleUpdatePart = async () => {
     if (!editingPart?.part) return;
     try {
-      const response = await fetch(`/api/assignment-parts/${editingPart.part.id}`, {
+      const response = await fetch(`/api/n5/assignment-parts/${editingPart.part.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(editingPart.part),
@@ -466,7 +466,7 @@ export default function AssignmentManager() {
 
   const handleDeletePart = async (partId: string, sectionId: string) => {
     try {
-      const response = await fetch(`/api/assignment-parts/${partId}`, { method: "DELETE" });
+      const response = await fetch(`/api/n5/assignment-parts/${partId}`, { method: "DELETE" });
       if (!response.ok) throw new Error("Failed to delete part");
       const section = assignments.flatMap(a => a.sections || []).find(s => s.id === sectionId);
       if (section) {
@@ -484,7 +484,7 @@ export default function AssignmentManager() {
     formData.append("description", description);
     
     try {
-      const response = await fetch(`/api/assignment-parts/${partId}/resources`, {
+      const response = await fetch(`/api/n5/assignment-parts/${partId}/resources`, {
         method: "POST",
         body: formData,
       });
@@ -504,7 +504,7 @@ export default function AssignmentManager() {
 
   const handleDeleteResource = async (resourceId: string, partId: string) => {
     try {
-      const response = await fetch(`/api/assignment-resources/${resourceId}`, { method: "DELETE" });
+      const response = await fetch(`/api/n5/assignment-resources/${resourceId}`, { method: "DELETE" });
       if (!response.ok) throw new Error("Failed to delete resource");
       const part = assignments.flatMap(a => a.sections || []).flatMap(s => s.parts || []).find(p => p.id === partId);
       if (part) {
@@ -1571,7 +1571,7 @@ export default function AssignmentManager() {
               <Button onClick={async () => {
                 if (!editingInfoSheet) return;
                 try {
-                  const response = await fetch(`/api/assignment-sections/${editingInfoSheet.sectionId}`, {
+                  const response = await fetch(`/api/n5/assignment-sections/${editingInfoSheet.sectionId}`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ informationSheet: editingInfoSheet.blocks }),
@@ -2508,7 +2508,7 @@ export default function AssignmentManager() {
                 setQuestionsModalOpen(false);
                 if (editingPart?.part?.id) {
                   try {
-                    const response = await fetch(`/api/assignment-parts/${editingPart.part.id}`, {
+                    const response = await fetch(`/api/n5/assignment-parts/${editingPart.part.id}`, {
                       method: "PUT",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify(editingPart.part),

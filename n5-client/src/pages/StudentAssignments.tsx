@@ -37,7 +37,7 @@ export default function StudentAssignments() {
 
   const fetchAssignments = async () => {
     try {
-      const response = await fetch("/api/assignments/active");
+      const response = await fetch("/api/n5/assignments/active");
       if (!response.ok) throw new Error("Failed to fetch assignments");
       const data = await response.json();
       setAssignments(data);
@@ -46,7 +46,7 @@ export default function StudentAssignments() {
       const attemptMap = new Map<string, AssignmentAttempt>();
       
       try {
-        const attemptsResponse = await fetch(`/api/assignment-attempts/student/${localStudentId}`);
+        const attemptsResponse = await fetch(`/api/n5/assignment-attempts/student/${localStudentId}`);
         if (attemptsResponse.ok) {
           const serverAttempts = await attemptsResponse.json();
           for (const attempt of serverAttempts) {

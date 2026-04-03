@@ -194,7 +194,7 @@ export default function StudentAssignmentFlow() {
     if (!assignmentId) return;
     
     try {
-      const response = await fetch(`/api/assignments/${assignmentId}`);
+      const response = await fetch(`/api/n5/assignments/${assignmentId}`);
       if (!response.ok) throw new Error("Failed to fetch assignment");
       const data = await response.json();
       setAssignment(data);
@@ -204,7 +204,7 @@ export default function StudentAssignmentFlow() {
       let attemptData: AssignmentAttempt | null = null;
       
       try {
-        const serverAttemptsResponse = await fetch(`/api/assignment-attempts/student/${localStudentId}`);
+        const serverAttemptsResponse = await fetch(`/api/n5/assignment-attempts/student/${localStudentId}`);
         if (serverAttemptsResponse.ok) {
           const serverAttempts = await serverAttemptsResponse.json();
           const matchingAttempt = serverAttempts.find((a: AssignmentAttempt) => a.assignmentId === assignmentId && a.status !== "cancelled");
@@ -297,7 +297,7 @@ export default function StudentAssignmentFlow() {
 
   const loadResponseForPart = async (attemptId: string, partId: string) => {
     try {
-      const response = await fetch(`/api/assignment-attempts/${attemptId}/responses`);
+      const response = await fetch(`/api/n5/assignment-attempts/${attemptId}/responses`);
       if (response.ok) {
         const data = await response.json();
         const partResponses = data.filter((r: AssignmentResponse) => r.partId === partId);
@@ -354,7 +354,7 @@ export default function StudentAssignmentFlow() {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
       if (studentToken) headers["Authorization"] = `Bearer ${studentToken}`;
 
-      const response = await fetch("/api/assignment-attempts/start", {
+      const response = await fetch("/api/n5/assignment-attempts/start", {
         method: "POST",
         headers,
         body: JSON.stringify(bodyData),
@@ -395,7 +395,7 @@ export default function StudentAssignmentFlow() {
     localStorage.setItem(`assignment_attempt_${attempt.assignmentId}`, JSON.stringify(updatedAttempt));
     
     try {
-      await fetch(`/api/assignment-attempts/${attempt.id}`, {
+      await fetch(`/api/n5/assignment-attempts/${attempt.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -439,7 +439,7 @@ export default function StudentAssignmentFlow() {
     setAttempt(updatedAttempt);
     
     try {
-      await fetch(`/api/assignment-attempts/${attempt!.id}`, {
+      await fetch(`/api/n5/assignment-attempts/${attempt!.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "in_progress" }),
@@ -457,7 +457,7 @@ export default function StudentAssignmentFlow() {
     if (attempt) {
       localStorage.removeItem(`assignment_attempt_${attempt.assignmentId}`);
       try {
-        await fetch(`/api/assignment-attempts/${attempt.id}`, {
+        await fetch(`/api/n5/assignment-attempts/${attempt.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: "cancelled" }),
@@ -514,7 +514,7 @@ export default function StudentAssignmentFlow() {
           
           formData.append("userInputs", JSON.stringify(subQInputs));
           
-          const response = await fetch("/api/assignment-responses", {
+          const response = await fetch("/api/n5/assignment-responses", {
             method: "POST",
             body: formData,
           });
@@ -531,7 +531,7 @@ export default function StudentAssignmentFlow() {
         if (codeAnswer) formData.append("codeAnswer", codeAnswer);
         if (Object.keys(userInputs).length > 0) formData.append("userInputs", JSON.stringify(userInputs));
         
-        const response = await fetch("/api/assignment-responses", {
+        const response = await fetch("/api/n5/assignment-responses", {
           method: "POST",
           body: formData,
         });
@@ -642,7 +642,7 @@ export default function StudentAssignmentFlow() {
     setAttempt(updatedAttempt);
     
     try {
-      await fetch(`/api/assignment-attempts/${attempt.id}`, {
+      await fetch(`/api/n5/assignment-attempts/${attempt.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
