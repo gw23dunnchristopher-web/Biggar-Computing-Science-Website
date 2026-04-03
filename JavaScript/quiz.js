@@ -70,7 +70,8 @@
  *       marks: 4,
  *       markingScheme: "1 mark per correct row.",
  *       tableHeaders: ["Term", "Definition"],
- *       columnWidths: ["30%", "70%"],    // optional — omit for equal columns
+ *       columnWidths: ["30%", "70%"],           // optional — omit for equal columns
+ *       columnAlignments: ["left", "center"],   // optional — "left" | "center" | "right" per column
  *       tableRows: [
  *         ["Variable", ""],           // "" = blank cell student fills in
  *         ["Constant", ""],
@@ -410,10 +411,17 @@
             html += '</colgroup>';
         }
 
+        var alignments = q.columnAlignments || [];
+
+        function colAlignStyle(colIndex) {
+            var a = alignments[colIndex];
+            return a ? ' style="text-align:' + escHtml(a) + '"' : '';
+        }
+
         if (q.tableHeaders && q.tableHeaders.length) {
             html += '<thead><tr>';
-            q.tableHeaders.forEach(function (h) {
-                html += '<th>' + escHtml(h) + '</th>';
+            q.tableHeaders.forEach(function (h, colIndex) {
+                html += '<th' + colAlignStyle(colIndex) + '>' + escHtml(h) + '</th>';
             });
             html += '</tr></thead>';
         }
@@ -422,10 +430,11 @@
         (q.tableRows || []).forEach(function (row, rowIndex) {
             html += '<tr>';
             row.forEach(function (cell, colIndex) {
+                var alignAttr = colAlignStyle(colIndex);
                 if (cell === '') {
-                    html += '<td><textarea class="quiz-table-input" data-prefix="' + prefix + '" data-qindex="' + index + '" data-row="' + rowIndex + '" data-col="' + colIndex + '" placeholder="..." rows="3"></textarea></td>';
+                    html += '<td' + alignAttr + '><textarea class="quiz-table-input" data-prefix="' + prefix + '" data-qindex="' + index + '" data-row="' + rowIndex + '" data-col="' + colIndex + '" placeholder="..." rows="3"></textarea></td>';
                 } else {
-                    html += '<td class="given-cell">' + escHtml(cell) + '</td>';
+                    html += '<td class="given-cell"' + alignAttr + '>' + escHtml(cell) + '</td>';
                 }
             });
             html += '</tr>';

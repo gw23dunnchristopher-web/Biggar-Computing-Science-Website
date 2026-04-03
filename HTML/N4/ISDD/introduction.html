@@ -9,7 +9,21 @@
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/quiz.css" />
-
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [{
+                        type: "table",
+                        hideNumbers:true,
+                        collapsed:false,
+                        text: "Can you think of five other websites or organisations that use information systems?  What data do they store?",
+                        marks: 5,
+                        tableHeaders: ["No.","Website/Organisation", "What data does it store?"],
+                        tableRows:[["1","",""],["2","",""],["3","",""],["4","",""],["5","",""]],
+                        markingScheme: "Award 1 mark per row. Award 1 mark for each website/organisation assuming that the pupil has also described the data it stores."
+                    },
+                ],
+            };
+        </script>
         <script src="/JavaScript/quiz.js"></script>
         <style></style>
     </head>
@@ -73,6 +87,8 @@
                             kinds of Information Systems: Websites and
                             Databases.
                         </p>
+                        <p>Before you continue, answer the question below by completing the table.</p>
+                        <div class="quiz-container"></div>
                     </div>
                 </div>
             </div>
