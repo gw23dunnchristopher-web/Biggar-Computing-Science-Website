@@ -27,18 +27,21 @@ export default function TeacherLogin() {
 
   // Check if already logged in and redirect to dashboard
   useEffect(() => {
-    const token = localStorage.getItem("teacherToken");
-    const expiresAt = localStorage.getItem("teacherTokenExpires");
+    // Accept both N5 and Higher key-pairs — same session table
+    const token = localStorage.getItem("teacherToken")
+      || localStorage.getItem("teacher_token");
+    const expiresAt = localStorage.getItem("teacherTokenExpires")
+      || localStorage.getItem("teacher_token_expires");
     
     if (token && expiresAt) {
       const now = Date.now();
       if (now < parseInt(expiresAt)) {
-        // Token is still valid, redirect to dashboard
         setLocation("/teacher/dashboard");
       } else {
-        // Token expired, clear it
         localStorage.removeItem("teacherToken");
         localStorage.removeItem("teacherTokenExpires");
+        localStorage.removeItem("teacher_token");
+        localStorage.removeItem("teacher_token_expires");
       }
     }
   }, [setLocation]);
@@ -57,8 +60,11 @@ export default function TeacherLogin() {
       const data = await response.json();
 
       if (response.ok) {
+        // Store under both key-pairs so Higher app also recognises the session
         localStorage.setItem("teacherToken", data.token);
         localStorage.setItem("teacherTokenExpires", data.expiresAt.toString());
+        localStorage.setItem("teacher_token", data.token);
+        localStorage.setItem("teacher_token_expires", data.expiresAt.toString());
         toast({
           title: "Login Successful",
           description: "Welcome to the Teacher Dashboard",

@@ -419,3 +419,146 @@ html.reading-guide-active #a11y-reading-guide { display: block; }
         height: 28px;
     }
 }
+
+/* ====================================================================
+   Dark mode — triggered by the shared vite-ui-theme key writing
+   the class "dark" on <html>. Sidebar already has its own dark style.
+   ==================================================================== */
+
+html.dark body {
+    background-color: #0f0f17;
+    color: #e2e2ea;
+}
+
+html.dark #loading {
+    background: #0f0f17;
+    color: #e2e2ea;
+}
+
+/* Main content area */
+html.dark #content,
+html.dark #mainContent {
+    background-color: #0f0f17;
+    color: #e2e2ea;
+}
+
+html.dark .contentContainer {
+    background-color: #0f0f17;
+    color: #e2e2ea;
+}
+
+html.dark .contentContainer p,
+html.dark .contentContainer li,
+html.dark .contentContainer span,
+html.dark .contentContainer label {
+    color: #e2e2ea;
+}
+
+/* Headings */
+html.dark h3 {
+    color: #7fa8e8;
+    border-bottom-color: #3a4fa8;
+}
+
+html.dark .contentContainer h2 {
+    color: #7fa8e8;
+    border-bottom-color: #3a4fa8;
+}
+
+html.dark .contentHeading {
+    color: #9bbff0;
+    background-color: #1a1f3a;
+    border-color: #3a4fa8;
+}
+
+/* Links */
+html.dark .contentContainer a,
+html.dark #content a {
+    color: #60a0e8;
+}
+
+html.dark .contentContainer a:hover,
+html.dark #content a:hover {
+    color: #90c0ff;
+}
+
+/* Tables */
+html.dark table,
+html.dark table th,
+html.dark table td {
+    border-color: #3a3a50;
+}
+
+html.dark table {
+    background-color: #1a1a2e;
+}
+
+html.dark table th {
+    background-color: #1e2d4a;
+    color: #b0c8f0;
+}
+
+html.dark table td {
+    background-color: #161625;
+    color: #e2e2ea;
+}
+
+html.dark .subheader th,
+html.dark th.subheader {
+    background-color: #1a3028;
+    color: #a0d0b8;
+}
+
+/* Code blocks */
+html.dark code,
+html.dark pre {
+    background-color: #1c2112;
+    color: #c8e0a0;
+    border-color: #3a4a20;
+}
+
+/* Info boxes / callout-style divs with light backgrounds */
+html.dark .infoBox,
+html.dark .info-box,
+html.dark .note,
+html.dark .callout {
+    background-color: #1a1f3a;
+    border-color: #3a4fa8;
+    color: #e2e2ea;
+}
+
+/* Navigation buttons (Next / Back) */
+html.dark .page-nav-btn {
+    background-color: #1e2d4a;
+    color: #b0c8f0;
+    border-color: #3a4fa8;
+}
+
+html.dark .page-nav-btn:hover {
+    background-color: #263860;
+}
+
+/* Quiz elements inside lesson pages */
+html.dark .quiz-container,
+html.dark .quiz-card {
+    background-color: #1a1a2e;
+    color: #e2e2ea;
+    border-color: #3a3a50;
+}
+
+/* Image captions and figure elements */
+html.dark figcaption {
+    color: #a0a0b8;
+}
+
+/* Scrollbars (where supported) */
+html.dark ::-webkit-scrollbar {
+    background-color: #1a1a2e;
+}
+html.dark ::-webkit-scrollbar-thumb {
+    background-color: #3a3a60;
+    border-radius: 4px;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+    background-color: #5a5a80;
+}

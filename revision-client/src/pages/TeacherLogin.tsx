@@ -20,8 +20,11 @@ export default function TeacherLogin() {
 
   useEffect(() => {
     const checkExistingSession = async () => {
-      const token = localStorage.getItem("teacher_token");
-      const expires = localStorage.getItem("teacher_token_expires");
+      // Check both token key-pairs (Higher and N5) — same session table
+      const token = localStorage.getItem("teacher_token")
+        || localStorage.getItem("teacherToken");
+      const expires = localStorage.getItem("teacher_token_expires")
+        || localStorage.getItem("teacherTokenExpires");
       
       if (token && expires && parseInt(expires) > Date.now()) {
         try {
@@ -53,8 +56,11 @@ export default function TeacherLogin() {
       const data = await response.json();
 
       if (response.ok) {
+        // Store under both key-pairs so N5 app also recognises the session
         localStorage.setItem("teacher_token", data.token);
         localStorage.setItem("teacher_token_expires", data.expiresAt.toString());
+        localStorage.setItem("teacherToken", data.token);
+        localStorage.setItem("teacherTokenExpires", data.expiresAt.toString());
         toast({
           title: "Login Successful",
           description: "Welcome to the Teacher Dashboard",

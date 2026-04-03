@@ -155,7 +155,7 @@ interface ExamResult {
 }
 
 function getAuthHeaders() {
-  const token = localStorage.getItem("teacher_token");
+  const token = localStorage.getItem("teacher_token") || localStorage.getItem("teacherToken");
   return { Authorization: `Bearer ${token}` };
 }
 
@@ -1574,7 +1574,7 @@ export default function ClassProgress() {
   const [activeTab, setActiveTab] = useState<"progress" | "analysis" | "results">("progress");
 
   useEffect(() => {
-    const token = localStorage.getItem("teacher_token");
+    const token = localStorage.getItem("teacher_token") || localStorage.getItem("teacherToken");
     if (!token) {
       setLocation("/teacher/login");
       return;

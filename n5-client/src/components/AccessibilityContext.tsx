@@ -102,6 +102,20 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
     } catch {}
   }, [settings]);
 
+  // Keep in sync when settings are changed in another tab or the main website
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          setSettings(prev => ({ ...prev, ...parsed }));
+        } catch {}
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
   useEffect(() => {
     const root = document.documentElement;
 

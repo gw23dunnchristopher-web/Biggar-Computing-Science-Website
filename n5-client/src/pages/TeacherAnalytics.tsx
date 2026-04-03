@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { DiagramEditor } from "@/components/ui/diagram-editor";
 
 function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem("teacherToken");
+  const token = localStorage.getItem("teacherToken") || localStorage.getItem("teacher_token");
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -618,7 +618,7 @@ function ClassOverviewTab() {
 
       {loading && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-neutral-500" />
         </div>
       )}
 
@@ -695,7 +695,7 @@ function ClassOverviewTab() {
 
           {detailLoading && (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+              <Loader2 className="h-6 w-6 animate-spin text-neutral-500" />
             </div>
           )}
 
@@ -747,7 +747,7 @@ function ClassOverviewTab() {
                   <div className="space-y-2">
                     <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Unlinked Exam Results</h3>
                     <p className="text-xs text-neutral-500">These results were saved without a student account. Click "Link" to assign one to this student.</p>
-                    {orphansLoading && <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />}
+                    {orphansLoading && <Loader2 className="h-4 w-4 animate-spin text-neutral-500" />}
                     {!orphansLoading && orphanedResults.length === 0 && (
                       <p className="text-sm text-neutral-500">No unlinked results found.</p>
                     )}
@@ -1052,7 +1052,7 @@ function StudentResultsTab() {
 
       {loading && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-neutral-500" />
         </div>
       )}
 
@@ -1106,7 +1106,7 @@ function StudentResultsTab() {
                   <div className="border-t border-neutral-200 dark:border-neutral-800">
                     {detailLoading && (
                       <div className="flex items-center justify-center py-6">
-                        <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
+                        <Loader2 className="h-5 w-5 animate-spin text-neutral-500" />
                       </div>
                     )}
 
@@ -1426,7 +1426,7 @@ function PaperAnalyticsTab() {
 
       {loading && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-neutral-500" />
         </div>
       )}
 
@@ -1502,7 +1502,7 @@ function AssignmentAnalyticsTab() {
 
       {loading && (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-neutral-500" />
         </div>
       )}
 
@@ -1551,11 +1551,13 @@ export default function TeacherAnalytics() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    const token = localStorage.getItem("teacherToken");
-    const expires = localStorage.getItem("teacherTokenExpires");
+    const token = localStorage.getItem("teacherToken") || localStorage.getItem("teacher_token");
+    const expires = localStorage.getItem("teacherTokenExpires") || localStorage.getItem("teacher_token_expires");
     if (!token || !expires || parseInt(expires) < Date.now()) {
       localStorage.removeItem("teacherToken");
       localStorage.removeItem("teacherTokenExpires");
+      localStorage.removeItem("teacher_token");
+      localStorage.removeItem("teacher_token_expires");
       setLocation("/teacher/login");
     }
   }, [setLocation]);
@@ -1565,12 +1567,11 @@ export default function TeacherAnalytics() {
       <header className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 px-6 py-4 sticky top-0 z-[200]">
         <div className="container mx-auto max-w-6xl flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <BarChart3 className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+            <Button variant="ghost" size="sm" onClick={() => setLocation("/teacher/dashboard")} data-testid="button-back-dashboard">
+              <ArrowLeft className="h-4 w-4 mr-1" /> Dashboard
+            </Button>
             <h1 className="text-xl font-bold text-neutral-900 dark:text-white" data-testid="text-analytics-title">Analytics</h1>
           </div>
-          <Button variant="outline" onClick={() => setLocation("/teacher/dashboard")} data-testid="button-back-dashboard">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
-          </Button>
         </div>
       </header>
 

@@ -1,0 +1,1 @@
+import{j as s,g as e}from"./index-NzI55EKE.js";function m({children:t,className:a}){return s.jsx("div",{className:e("flex flex-col md:flex-row gap-4 items-start justify-center",a),"data-testid":"row-layout",children:t})}function r({children:t,className:a}){return s.jsx("div",{className:e("flex-1 min-w-0 md:min-w-[200px] md:max-w-[50%]",a),children:t})}export{m as R,r as a};

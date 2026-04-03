@@ -35,6 +35,22 @@ const TeacherAnalytics = lazy(() => import("@/pages/TeacherAnalytics"));
 const MyProgress = lazy(() => import("@/pages/MyProgress"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
+// Sync both teacher token key-pairs on startup so switching between
+// the Higher and N5 apps does not require re-login
+;(function syncTeacherTokens() {
+  const higherToken = localStorage.getItem("teacher_token");
+  const higherExpires = localStorage.getItem("teacher_token_expires");
+  const n5Token = localStorage.getItem("teacherToken");
+  const n5Expires = localStorage.getItem("teacherTokenExpires");
+  if (higherToken && higherExpires && (!n5Token || !n5Expires)) {
+    localStorage.setItem("teacherToken", higherToken);
+    localStorage.setItem("teacherTokenExpires", higherExpires);
+  } else if (n5Token && n5Expires && (!higherToken || !higherExpires)) {
+    localStorage.setItem("teacher_token", n5Token);
+    localStorage.setItem("teacher_token_expires", n5Expires);
+  }
+})();
+
 function LoadingSpinner() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950">

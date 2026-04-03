@@ -37,7 +37,22 @@
             if (_earlySettings.dyslexiaFont === true) {
                 document.documentElement.classList.add('dyslexia-font');
             }
-            /* Always preload the font eagerly via FontFace API so it is
+            /* Apply dark/light mode from the shared vite-ui-theme key IMMEDIATELY
+           so the page doesn't flash before the panel is ready.              */
+        try {
+            var _earlyTheme = localStorage.getItem('vite-ui-theme');
+            if (_earlyTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else if (_earlyTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+            } else if (_earlyTheme === 'system' || !_earlyTheme) {
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                }
+            }
+        } catch (_e) {}
+
+        /* Always preload the font eagerly via FontFace API so it is
                in document.fonts before the toggle is clicked, making the
                switch instant rather than relying on font-display:swap.   */
             if (window.FontFace && !document.getElementById('a11y-fonts-preloaded')) {
@@ -58,6 +73,7 @@
     })();
 
     var STORAGE_KEY = 'a11y-settings';
+    var THEME_KEY = 'vite-ui-theme';
     var DEFAULT_SETTINGS = {
         highContrast: false,
         fontSize: 100,
@@ -237,6 +253,24 @@
             document.documentElement.classList.remove('reading-guide-active');
             if (guide) guide.style.display = 'none';
         }
+    }
+
+    function applyDarkMode() {
+        var theme = localStorage.getItem(THEME_KEY) || 'system';
+        var isDark;
+        if (theme === 'dark') {
+            isDark = true;
+        } else if (theme === 'light') {
+            isDark = false;
+        } else {
+            isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        if (isDark) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        if (darkModeInput) darkModeInput.checked = (theme === 'dark');
     }
 
     function applyAllSettings() {
@@ -748,6 +782,7 @@
     var indicatorEl, resetEl;
     var toggleInputs = {};
     var sliderInputs = {};
+    var darkModeInput = null;
 
     function updateIndicator() {
         if (!indicatorEl) return;
@@ -812,6 +847,40 @@
         /* Body */
         var body = document.createElement('div');
         body.id = 'a11y-panel-body';
+
+        /* Dark mode toggle — uses the shared vite-ui-theme key */
+        (function () {
+            var dmRow = document.createElement('div');
+            dmRow.className = 'a11y-row';
+            var dmHeader = document.createElement('div');
+            dmHeader.className = 'a11y-row-header';
+            var dmLbl = document.createElement('span');
+            dmLbl.className = 'a11y-row-label';
+            dmLbl.textContent = 'Dark Mode';
+            var dmTog = document.createElement('label');
+            dmTog.className = 'a11y-toggle';
+            var dmInp = document.createElement('input');
+            dmInp.type = 'checkbox';
+            var currentTheme = localStorage.getItem(THEME_KEY) || 'system';
+            dmInp.checked = (currentTheme === 'dark');
+            dmInp.addEventListener('change', function () {
+                localStorage.setItem(THEME_KEY, dmInp.checked ? 'dark' : 'light');
+                applyDarkMode();
+            });
+            darkModeInput = dmInp;
+            var dmSlider = document.createElement('span');
+            dmSlider.className = 'a11y-toggle-slider';
+            dmTog.appendChild(dmInp);
+            dmTog.appendChild(dmSlider);
+            dmHeader.appendChild(dmLbl);
+            dmHeader.appendChild(dmTog);
+            dmRow.appendChild(dmHeader);
+            var dmDesc = document.createElement('div');
+            dmDesc.className = 'a11y-row-desc';
+            dmDesc.textContent = 'Switch to a dark background across the whole site';
+            dmRow.appendChild(dmDesc);
+            body.appendChild(dmRow);
+        })();
 
         /* High contrast toggle */
         var hcRow = makeToggleRow('High Contrast', 'Increase colour contrast for better readability', 'highContrast');
@@ -902,6 +971,10 @@
         document.querySelectorAll('.a11y-swatch').forEach(function (sw) {
             sw.classList.remove('active');
         });
+        // Sync dark mode toggle separately (uses a different storage key)
+        if (darkModeInput) {
+            darkModeInput.checked = (localStorage.getItem(THEME_KEY) === 'dark');
+        }
     }
 
     function openPanel() {
@@ -925,11 +998,27 @@
     function init() {
         loadSettings();
         applyAllSettings();
+        applyDarkMode();
         createPanel();
         initReadingGuide();
         initTTS();
         updateIndicator();
         updateResetBtn();
+
+        // Cross-tab sync: pick up changes made in the revision apps or another tab
+        window.addEventListener('storage', function (e) {
+            if (e.key === THEME_KEY) {
+                applyDarkMode();
+            } else if (e.key === STORAGE_KEY && e.newValue) {
+                try {
+                    settings = Object.assign({}, DEFAULT_SETTINGS, JSON.parse(e.newValue));
+                    applyAllSettings();
+                    updateIndicator();
+                    updateResetBtn();
+                    syncPanelToSettings();
+                } catch (_e) {}
+            }
+        });
     }
 
     if (document.readyState === 'loading') {

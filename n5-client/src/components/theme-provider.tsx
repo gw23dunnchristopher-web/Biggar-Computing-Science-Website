@@ -47,6 +47,17 @@ export function ThemeProvider({
     root.classList.add(theme)
   }, [theme])
 
+  // Keep in sync when the theme is changed in another tab or the main website
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === storageKey && e.newValue && ["dark", "light", "system"].includes(e.newValue)) {
+        setTheme(e.newValue as Theme)
+      }
+    }
+    window.addEventListener("storage", handleStorage)
+    return () => window.removeEventListener("storage", handleStorage)
+  }, [storageKey])
+
   const value = {
     theme,
     setTheme: (theme: Theme) => {
