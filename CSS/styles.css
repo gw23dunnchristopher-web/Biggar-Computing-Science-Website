@@ -1209,3 +1209,28 @@ table img {
         margin-bottom: 20px;
     }
 }
+
+/* Heirarchical Lists */
+.heirarchical-list {
+    counter-reset: section;
+    list-style-type: none;
+    padding-left: 0px;
+}
+
+.heirarchical-list ol {
+    list-style-type: none;
+    padding-left:2rem;
+}
+
+.heirarchical-list li {
+    counter-increment: section;
+    padding-left: 2.5rem;
+    position: relative;
+}
+
+.heirarchical-list li::before {
+    content: counters(section, ".") ". ";
+    position: absolute;
+    left: 0;
+    font-weight:bold;
+}
