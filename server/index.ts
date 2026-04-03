@@ -551,7 +551,7 @@ app.use(express.static(publicRoot, {
   index: ['index.html']
 }));
 
-if (hasDatabase) {
+if (false && hasDatabase) {
   const session = require('express-session');
   const bcrypt = require('bcrypt');
   const connectPgSimple = require('connect-pg-simple');
@@ -590,7 +590,7 @@ declare module 'express-session' {
   }
 }
 
-if (hasDatabase) {
+if (false && hasDatabase) {
   const { users, classes, classStudents, assignments, submissions } = require('../shared/schema');
   const { eq, and, desc } = require('drizzle-orm');
   const bcrypt = require('bcrypt');
