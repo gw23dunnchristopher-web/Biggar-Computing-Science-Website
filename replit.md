@@ -62,7 +62,13 @@ The platform uses a Node.js/Express server to serve static content. While infras
 - **N5 CS Revision** at `/revision-n5/` — React + TypeScript SPA; same features as Higher app but for National 5. Build: `npm run build:n5` (Vite, `vite.n5.config.ts`, output `public/revision-n5/`). Routes: `server/n5-routes.ts` + `server/n5-storage.ts`, registered via `registerN5Routes(app)`. DB schema: `shared/n5-schema.ts` (tables prefixed `n5_`). N5 sidebar link updated to `/revision-n5/`. Questions need seeding.
 - **Auth (both apps)**: Bearer token; no cookies (fully separate from BHS teacher auth).
 - **Auth routing note**: Both apps originally registered `/api/teacher/login` — Higher's wins (first-registered). N5 now has `/api/n5/teacher/login` and `/api/n5/teacher/verify` (added to `server/n5-routes.ts`) which write to N5's own in-memory sessions Map. The native class manager uses these non-conflicting paths for N5.
-- **Teacher Dashboard** (`tools/sandbox-builder.html`): Native class manager built in vanilla JS. Classes tab has Higher CS and N5 CS sub-tabs. Per-tab: login form, class list (create/delete), student list (generate, reset password, delete, rename [Higher only], download credentials CSV [N5 only]). Higher tokens stored as `teacher_token`/`teacher_token_expires`; N5 tokens as `teacherToken`/`teacherTokenExpires`.
+- **Teacher Dashboard** (`tools/sandbox-builder.html`): Unified tool panels for both Higher and N5. Tool-nav items:
+  - **Classes** — Native class manager (login, class CRUD, student generation, reset password, rename [Higher], credentials CSV [N5]).
+  - **Questions** — Higher: `/revision/teacher/quizzes`; N5: `/revision-n5/teacher/quizzes`. Lazy-loaded iframes.
+  - **Assignments** — Higher: `/revision/teacher/assignments`; N5: `/revision-n5/teacher/assignments`. Lazy-loaded iframes.
+  - **Past Papers** — Higher: `/revision/teacher/past-papers`; N5: "not available" message (no N5 equivalent).
+  - **Analytics** — Higher: `/revision/teacher/progress`; N5: `/revision-n5/teacher/analytics`. Lazy-loaded iframes.
+  - Each iframe tool uses `.tool-tab`/`.tool-tab-panel` with `data-src` for lazy loading. Auth tokens: Higher `teacher_token`/`teacher_token_expires`; N5 `teacherToken`/`teacherTokenExpires`.
 
 ### AI Services
 - **Google Gemini API**: For AI quiz marking and feedback.
