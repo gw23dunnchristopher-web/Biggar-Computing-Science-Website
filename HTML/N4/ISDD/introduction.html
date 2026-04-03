@@ -11,17 +11,42 @@
         <link rel="stylesheet" href="/CSS/quiz.css" />
         <script>
             window.QUIZ_CONFIG = {
-                hideNumbers: true,
-                questions: [{
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: "In your own words, explain what an information system is.",
+                        marks: 2,
+                        markingScheme:
+                            "Award 1 mark for correctly stating that an information system is a digital way of storing and organising information. Award 1 mark for correctly stating that an information system can be used to store data, sort it, and search through it.",
+                    },
+                    {
+                        type: "paragraph",
+                        text: "In your own words, explain the difference between data and information.",
+                        marks: 2,
+                        markingScheme:
+                            "Award 1 mark for correctly stating that data is raw facts and figures that are collected and stored. Award 1 mark for correctly stating that information is data that has been processed, analysed, and presented in a way that makes it useful and meaningful.",
+                    },
+                    {
                         type: "table",
-                        collapsed:false,
+                        hideNumbers: true,
                         text: "Can you think of five other websites or organisations that use information systems?  What data do they store?",
                         marks: 5,
-                        columnAlignments: ["center","center","left"],
-                        columnWidths: ["10%","20%","70%"],
-                        tableHeaders: ["No.","Website/Organisation", "What data does it store?"],
-                        tableRows:[["1","",""],["2","",""],["3","",""],["4","",""],["5","",""]],
-                        markingScheme: "Award 1 mark per row. Award 1 mark for each website/organisation assuming that the pupil has also described the data it stores."
+                        columnAlignments: ["center", "center", "left"],
+                        columnWidths: ["10%", "20%", "70%"],
+                        tableHeaders: [
+                            "No.",
+                            "Website/Organisation",
+                            "What data does it store?",
+                        ],
+                        tableRows: [
+                            ["1", "", ""],
+                            ["2", "", ""],
+                            ["3", "", ""],
+                            ["4", "", ""],
+                            ["5", "", ""],
+                        ],
+                        markingScheme:
+                            "Award 1 mark per row. Award 1 mark for each website/organisation assuming that the pupil has also described the data it stores.",
                     },
                 ],
             };
@@ -46,15 +71,51 @@
                         <h1>ISDD - Introduction</h1>
                     </div>
                     <div class="contentContainer">
+                        <table class="LIandSC">
+                            <tr>
+                                <th>Learning Intentions</th>
+                                <th>Success Criteria</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    We are learning about:
+                                    <ul>
+                                        <li>Information Systems.</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    I am looking for you to:
+                                    <ul>
+                                        <li>
+                                            Describe what an information system
+                                            is and what it is for.
+                                        </li>
+                                        <li>
+                                            Explain the difference between data
+                                            and information.
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
                         <h2>What are Information Systems?</h2>
                         <p>
-                            An information system is a program or app on a
-                            computer that is used to store and organise
-                            information. For example:
+                            An information system a way of digitally storing and
+                            organising information and data. Websites are a
+                            formed of information system, because the
+                            information on a website is sorted into files and
+                            folders so that people can easily find and access
+                            it. Databases are also a common type of information
+                            system, since they are tools specifically created
+                            for storing data, sorting it and searching through
+                            it. Many services combine both, with people using a
+                            website to manipulate a database that works in the
+                            background. Here are some examples of information
+                            systems:
                         </p>
                         <ul>
                             <li>
-                                Out school uses an information system to store
+                                Our school uses an information system to store
                                 data on all the pupils who go to school here.
                                 It's called SEEMiS.
                             </li>
@@ -89,7 +150,40 @@
                             kinds of Information Systems: Websites and
                             Databases.
                         </p>
-                        <p>Before you continue, answer the question below by completing the table.</p>
+                        <p>
+                            Before you continue, answer the question below by
+                            completing the table.
+                        </p>
+
+                        <h2>Data and Information</h2>
+                        <img src="/Images/N4/SDD/ISDD/dataVsInformation.jpg" class="cImg" style="max-width:1000px">
+                        <p>
+                            We have often heard the terms <b>data</b> and
+                            <b>information</b>. They are are often used
+                            interchangeably, so people assume that they are the
+                            same thing. They are not! Here's the difference:
+                        </p>
+                        <ul>
+                            <li>
+                                <b>Data</b> is raw facts and figures that are
+                                collected and stored. It is the basic building
+                                blocks of information. For example, the number
+                                of apples sold in a store each day is data - it
+                                is just a number.
+                            </li>
+                            <li>
+                                <b>Information</b> is data that has been
+                                processed, analysed, and presented in a way that
+                                makes it useful and meaningful. For example, if
+                                we take the data on the number of apples sold
+                                each day and calculate the average number of
+                                apples sold per day, we have created
+                                information.
+                            </li>
+                        </ul>
+                        <p>In short, information is data that people have assignment a meaning to.</p>
+                            
+                        <h2>Information Systems Quiz</h2>
                         <div class="quiz-container"></div>
                     </div>
                 </div>
