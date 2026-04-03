@@ -74,7 +74,8 @@ const groq = new OpenAI({
 
 const MAX_SESSIONS = 100;
 /* In-memory cache — write-through to DB so sessions survive server restarts */
-const sessions = new Map<string, { username: string; expiresAt: number }>();
+export const n5Sessions = new Map<string, { username: string; expiresAt: number }>();
+const sessions = n5Sessions;
 
 function cleanExpiredSessions() {
   const now = Date.now();
@@ -87,6 +88,10 @@ function cleanExpiredSessions() {
   if (db) {
     db.delete(revTeacherSessions).where(lt(revTeacherSessions.expiresAt, new Date())).catch(() => {});
   }
+}
+
+export async function n5AddSession(token: string, data: { username: string; expiresAt: number }, userId: string): Promise<void> {
+  return addSession(token, data, userId);
 }
 
 async function addSession(token: string, data: { username: string; expiresAt: number }, userId: string) {

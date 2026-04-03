@@ -5,7 +5,9 @@ import crypto from 'crypto';
 import { db, pool, hasDatabase } from './db';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { registerRoutes as registerRevisionRoutes } from './revision-routes';
-import { registerN5Routes } from './n5-routes';
+import { registerN5Routes, n5Sessions, n5AddSession } from './n5-routes';
+import { eq } from 'drizzle-orm';
+import { sessions as revSessionsTable, users as revUsersTable } from '@shared/revision-schema';
 
 process.on('uncaughtException', (err) => {
   console.error('Uncaught exception:', err);
@@ -308,6 +310,55 @@ function requireTeacher(req: express.Request, res: express.Response, next: expre
   if (pw && (pw === TEACHER_PASSWORD || teacherTokens.has(pw) || verifyTeacherToken(pw))) return next();
   return res.status(401).json({ error: 'Unauthorised' });
 }
+
+/* Token exchange: outer dashboard token → revision-app session token.
+   Called by the Teacher Dashboard so a single sign-in covers all panels. */
+function extractEmailFromOuterToken(tok: string): string {
+  try {
+    const dot = tok.indexOf('.');
+    if (dot === -1) return '';
+    const payload = JSON.parse(Buffer.from(tok.slice(0, dot), 'base64url').toString('utf8'));
+    return (payload.email as string) || '';
+  } catch { return ''; }
+}
+
+app.post('/api/revision-auth', requireTeacher, async (req: express.Request, res: express.Response) => {
+  try {
+    if (!db) return res.status(503).json({ error: 'Database not available' });
+    const email = extractEmailFromOuterToken((req.headers['x-teacher-password'] as string) || '');
+    let rows = email
+      ? await db.select().from(revUsersTable).where(eq(revUsersTable.email, email)).limit(1)
+      : await db.select().from(revUsersTable).limit(1);
+    if (!rows.length) return res.status(404).json({ error: 'No teacher account found in the revision app. Please log in via the Classes panel.' });
+    const user = rows[0];
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await db.insert(revSessionsTable).values({ token, userId: user.id, username: user.username, expiresAt }).onConflictDoNothing();
+    res.json({ token, expiresAt: expiresAt.getTime() });
+  } catch (err) {
+    console.error('revision-auth exchange error:', err);
+    res.status(500).json({ error: 'Token exchange failed' });
+  }
+});
+
+app.post('/api/n5/revision-auth', requireTeacher, async (req: express.Request, res: express.Response) => {
+  try {
+    if (!db) return res.status(503).json({ error: 'Database not available' });
+    const email = extractEmailFromOuterToken((req.headers['x-teacher-password'] as string) || '');
+    let rows = email
+      ? await db.select().from(revUsersTable).where(eq(revUsersTable.email, email)).limit(1)
+      : await db.select().from(revUsersTable).limit(1);
+    if (!rows.length) return res.status(404).json({ error: 'No teacher account found in the revision app. Please log in via the Classes panel.' });
+    const user = rows[0];
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await n5AddSession(token, { username: user.username, expiresAt: expiresAt.getTime() }, user.id);
+    res.json({ token, expiresAt: expiresAt.getTime() });
+  } catch (err) {
+    console.error('n5 revision-auth exchange error:', err);
+    res.status(500).json({ error: 'Token exchange failed' });
+  }
+});
 
 function safeName(raw: string): string {
   return raw.replace(/[^a-z0-9_-]/gi, '').substring(0, 80);

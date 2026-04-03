@@ -236,6 +236,11 @@
         .np-error { color: #f87171; text-align: center; padding: 30px 20px; font-size: 0.83rem; }
         .np-section-hdr { color: #8b949e; font-size: 0.68rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 0 4px; border-bottom: 1px solid #21262d; margin-top: 4px; flex-shrink: 0; }
         .np-subsection-hdr { color: #58a6ff; font-size: 0.7rem; font-weight: 600; padding: 6px 0 2px; margin-top: 8px; }
+        .np-collapsible { cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between; }
+        .np-collapsible::after { content: '▸'; font-size: 0.75em; color: #8b949e; flex-shrink: 0; }
+        .np-collapsible.np-open::after { content: '▾'; }
+        .np-group-body { display: none; }
+        .np-group-body.np-open { display: block; }
         .np-card { background: #161b22; border: 1px solid #21262d; border-radius: 6px; padding: 10px 12px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
         .np-card-info { min-width: 0; flex: 1; }
         .np-card-title { color: #e6edf3; font-size: 0.85rem; font-weight: 600; line-height: 1.4; }
@@ -1412,6 +1417,8 @@
                 password = tok;
                 authOverlay.style.display = 'none';
                 sandboxes = data;
+                /* Ensure revision-app tokens are valid so all tool panels work */
+                ensureRevisionTokens(tok);
                 /* Restore any in-progress draft first; fall back to sidebar render */
                 if (!restoreDraft()) renderSbList();
             })
@@ -1425,31 +1432,78 @@
             });
     }
 
-    /* Acquire revision-app tokens (Higher + N5) using the same credentials.
-       Called after the outer dashboard auth succeeds so the user only logs in once. */
-    function acquireRevisionTokens(email, pw) {
+    /* Store Higher revision token from a response object */
+    function storeHigherToken(d) {
+        if (d && d.token) {
+            localStorage.setItem('teacher_token', d.token);
+            localStorage.setItem('teacher_token_expires', String(d.expiresAt));
+        }
+    }
+    /* Store N5 revision token from a response object */
+    function storeN5Token(d) {
+        if (d && d.token) {
+            localStorage.setItem('teacherToken', d.token);
+            localStorage.setItem('teacherTokenExpires', String(d.expiresAt));
+        }
+    }
+
+    /* Acquire revision-app tokens (Higher + N5).
+       Tries password login first, then falls back to the outer-token exchange
+       so a single dashboard sign-in always covers every panel. */
+    function acquireRevisionTokens(outerTok, email, pw) {
         var body = JSON.stringify({ username: email, password: pw });
-        var hdr  = { 'Content-Type': 'application/json' };
+        var hdrJ = { 'Content-Type': 'application/json' };
+        var hdrX = { 'X-Teacher-Password': outerTok };
 
-        fetch('/api/teacher/login', { method: 'POST', headers: hdr, body: body })
+        /* Higher */
+        fetch('/api/teacher/login', { method: 'POST', headers: hdrJ, body: body })
             .then(function (r) { return r.ok ? r.json() : null; })
             .then(function (d) {
-                if (d && d.token) {
-                    localStorage.setItem('teacher_token', d.token);
-                    localStorage.setItem('teacher_token_expires', String(d.expiresAt));
-                }
+                if (d && d.token) { storeHigherToken(d); return; }
+                /* Fallback: token exchange */
+                return fetch('/api/revision-auth', { method: 'POST', headers: hdrX })
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(storeHigherToken);
             })
             .catch(function () {});
 
-        fetch('/api/n5/teacher/login', { method: 'POST', headers: hdr, body: body })
+        /* N5 */
+        fetch('/api/n5/teacher/login', { method: 'POST', headers: hdrJ, body: body })
             .then(function (r) { return r.ok ? r.json() : null; })
             .then(function (d) {
-                if (d && d.token) {
-                    localStorage.setItem('teacherToken', d.token);
-                    localStorage.setItem('teacherTokenExpires', String(d.expiresAt));
-                }
+                if (d && d.token) { storeN5Token(d); return; }
+                /* Fallback: token exchange */
+                return fetch('/api/n5/revision-auth', { method: 'POST', headers: hdrX })
+                    .then(function (r) { return r.ok ? r.json() : null; })
+                    .then(storeN5Token);
             })
             .catch(function () {});
+    }
+
+    /* Inline token validity check — safe to call before NP module loads */
+    function revTokenValid(key, expKey) {
+        var tok = localStorage.getItem(key);
+        var exp = parseInt(localStorage.getItem(expKey) || '0');
+        return !!(tok && exp > Date.now());
+    }
+
+    /* Ensure revision tokens are valid — called on every successful outer auth
+       (page load or login).  If a token is missing or expired, exchanges the
+       outer teacher token for a fresh one so all panels work without a separate
+       revision-app login. */
+    function ensureRevisionTokens(outerTok) {
+        if (!revTokenValid('teacher_token', 'teacher_token_expires')) {
+            fetch('/api/revision-auth', { method: 'POST', headers: { 'X-Teacher-Password': outerTok } })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(storeHigherToken)
+                .catch(function () {});
+        }
+        if (!revTokenValid('teacherToken', 'teacherTokenExpires')) {
+            fetch('/api/n5/revision-auth', { method: 'POST', headers: { 'X-Teacher-Password': outerTok } })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(storeN5Token)
+                .catch(function () {});
+        }
     }
 
     /* Log in with Teacher Tools credentials → get a session token */
@@ -1475,7 +1529,7 @@
                 localStorage.setItem('bhscs-teacher-token', d.token);
                 localStorage.setItem('bhscs-teacher-auth-email', email.toLowerCase().trim());
                 /* Also log in to revision apps so tool panels work without a second login */
-                acquireRevisionTokens(email, pw);
+                acquireRevisionTokens(d.token, email, pw);
                 tryAuth(d.token);
             } else {
                 pwErr.textContent = 'Incorrect email or password.';
@@ -2319,9 +2373,11 @@ var NP = (function () {
     };
 
     function getToken(app) {
-        return app === 'higher'
-            ? localStorage.getItem('teacher_token')
-            : localStorage.getItem('teacherToken');
+        var key    = app === 'higher' ? 'teacher_token'         : 'teacherToken';
+        var expKey = app === 'higher' ? 'teacher_token_expires' : 'teacherTokenExpires';
+        var tok = localStorage.getItem(key);
+        var exp = parseInt(localStorage.getItem(expKey) || '0');
+        return (tok && exp > Date.now()) ? tok : null;
     }
 
     function authHdr(app) {
@@ -2479,7 +2535,7 @@ var NP = (function () {
                 practiceQs.forEach(function (q) { html += renderQCard(q); });
             }
 
-            /* Past papers grouped by year descending */
+            /* Past papers grouped by year descending — each group starts collapsed */
             var yearMap = {};
             pastPaperQs.forEach(function (q) {
                 var yr = String(q.year);
@@ -2488,8 +2544,11 @@ var NP = (function () {
             });
             var years = Object.keys(yearMap).sort(function (a, b) { return Number(b) - Number(a); });
             years.forEach(function (yr) {
-                html += '<div class="np-subsection-hdr">' + yr + ' Past Paper (' + yearMap[yr].length + ')</div>';
+                var gid = 'qpyg-' + yr.replace(/\s+/g, '_');
+                html += '<div class="np-subsection-hdr np-collapsible" data-target="' + gid + '">' + yr + ' Past Paper (' + yearMap[yr].length + ')</div>';
+                html += '<div class="np-group-body" id="' + gid + '">';
                 yearMap[yr].forEach(function (q) { html += renderQCard(q); });
+                html += '</div>';
             });
 
             if (additionalQs.length) {
@@ -2504,6 +2563,16 @@ var NP = (function () {
         }
 
         bodyEl(app).innerHTML = html;
+
+        /* collapsible group toggles */
+        bodyEl(app).querySelectorAll('.np-collapsible').forEach(function (hdr) {
+            hdr.addEventListener('click', function () {
+                var grp = document.getElementById(hdr.dataset.target);
+                if (!grp) return;
+                var open = grp.classList.toggle('np-open');
+                hdr.classList.toggle('np-open', open);
+            });
+        });
 
         /* wire quiz actions */
         bodyEl(app).querySelectorAll('.qz-toggle').forEach(function (btn) {
@@ -2777,11 +2846,23 @@ var NP = (function () {
             addExams.forEach(function (q) { html += qCard(q); });
         }
         years.forEach(function (yr) {
-            html += '<div class="np-section-hdr" style="margin-top:10px">' + NP.esc(yr) + ' (' + byYear[yr].length + ')</div>';
+            var gid = 'ppyg-' + String(yr).replace(/\s+/g, '_');
+            html += '<div class="np-section-hdr np-collapsible" style="margin-top:10px" data-target="' + gid + '">' + NP.esc(yr) + ' (' + byYear[yr].length + ')</div>';
+            html += '<div class="np-group-body" id="' + gid + '">';
             byYear[yr].forEach(function (q) { html += qCard(q); });
+            html += '</div>';
         });
 
         bodyEl().innerHTML = html;
+
+        bodyEl().querySelectorAll('.np-collapsible').forEach(function (hdr) {
+            hdr.addEventListener('click', function () {
+                var grp = document.getElementById(hdr.dataset.target);
+                if (!grp) return;
+                var open = grp.classList.toggle('np-open');
+                hdr.classList.toggle('np-open', open);
+            });
+        });
 
         bodyEl().querySelectorAll('.pp-edit').forEach(function (btn) {
             btn.addEventListener('click', function () {
