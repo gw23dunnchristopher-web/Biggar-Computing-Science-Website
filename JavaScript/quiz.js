@@ -43,7 +43,14 @@
  *       // Each string item = paragraph. Each array item = a bullet list.
  *
  *       marks: 2,
- *       markingScheme: "Award 1 mark for X. Award 1 mark for Y."
+ *       markingScheme: "Award 1 mark for X. Award 1 mark for Y.",
+ *
+ *       // Optional: start the question expanded (default is collapsed)
+ *       collapsed: false,
+ *
+ *       // Optional: number sub-lists instead of using bullet points.
+ *       // "1" → 1, 2, 3 …   "a" → a, b, c …   omit for bullets (default)
+ *       numbering: "a"
  *     },
  *     {
  *       type: "pseudocode",
@@ -274,16 +281,20 @@
         return escHtml(text);
     }
 
-    function renderText(text) {
+    function renderText(text, numbering) {
         if (!Array.isArray(text)) {
             return '<p>' + String(text) + '</p>';
         }
         return text.map(function (item) {
             if (Array.isArray(item)) {
-                var bullets = item.map(function (b) {
+                var items = item.map(function (b) {
                     return '<li>' + String(b) + '</li>';
                 }).join('');
-                return '<ul class="quiz-question-bullets">' + bullets + '</ul>';
+                if (numbering) {
+                    var typeAttr = numbering === 'a' ? ' type="a"' : ' type="1"';
+                    return '<ol class="quiz-question-list"' + typeAttr + '>' + items + '</ol>';
+                }
+                return '<ul class="quiz-question-bullets">' + items + '</ul>';
             }
             if (item && typeof item === 'object' && item.type === 'table') {
                 return renderTextTable(item);
@@ -341,16 +352,21 @@
 
         var html = '<div class="quiz-question" id="' + qId + '">';
 
+        // Determine initial collapsed state — default is collapsed (true) unless explicitly false
+        var startCollapsed = q.collapsed !== false;
+        var ariaExpanded = startCollapsed ? 'false' : 'true';
+        var hiddenAttr = startCollapsed ? ' hidden' : '';
+
         // Clickable toggle header
-        html += '<button type="button" class="quiz-question-toggle" aria-expanded="false" aria-controls="' + bodyId + '">';
+        html += '<button type="button" class="quiz-question-toggle" aria-expanded="' + ariaExpanded + '" aria-controls="' + bodyId + '">';
         html += '<span class="quiz-question-number">Q' + num + '.</span>';
         html += '<span class="quiz-marks">(' + marksLabel + ')</span>';
         html += '<span class="quiz-chevron" aria-hidden="true">&#9656;</span>';
         html += '</button>';
 
         // Collapsible body
-        html += '<div class="quiz-question-body" id="' + bodyId + '" hidden>';
-        html += '<div class="quiz-question-text">' + renderText(getQuestionText(q)) + '</div>';
+        html += '<div class="quiz-question-body" id="' + bodyId + '"' + hiddenAttr + '>';
+        html += '<div class="quiz-question-text">' + renderText(getQuestionText(q), q.numbering) + '</div>';
 
         if (q.type === 'pseudocode') {
             var codePlaceholder;

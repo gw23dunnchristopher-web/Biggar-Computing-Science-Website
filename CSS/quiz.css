@@ -112,6 +112,18 @@
     margin-bottom: 4px;
 }
 
+.quiz-question-list {
+    margin: 4px 0 8px 22px;
+    padding: 0;
+}
+
+.quiz-question-list li {
+    font-size: 15px;
+    color: inherit;
+    line-height: 1.6;
+    margin-bottom: 4px;
+}
+
 /* Inline table inside question text (e.g. pseudocode steps) */
 .quiz-question-table {
     border-collapse: collapse;
