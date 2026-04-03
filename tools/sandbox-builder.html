@@ -136,6 +136,19 @@
         .iframe-panel.active { display: flex; }
         .iframe-panel iframe { flex: 1; border: none; width: 100%; height: 100%; }
 
+        /* ── class manager tabs ── */
+        .cm-tabs { display: flex; border-bottom: 1px solid #30363d; background: #161b22; flex-shrink: 0; }
+        .cm-tab {
+            background: none; border: none; border-bottom: 2px solid transparent;
+            color: #8b949e; padding: 10px 22px; font-size: 0.85rem; cursor: pointer;
+            font-family: inherit; transition: color 0.15s;
+        }
+        .cm-tab:hover { color: #e6edf3; }
+        .cm-tab.active { color: #58a6ff; border-bottom-color: #1f6feb; }
+        .cm-tab-panel { flex: 1; display: none; flex-direction: column; overflow: hidden; }
+        .cm-tab-panel.active { display: flex; }
+        .cm-tab-panel iframe { flex: 1; border: none; width: 100%; height: 100%; }
+
         /* ── collapsible group headers ── */
         .sb-group-hdr {
             padding: 8px 10px 4px 14px;
@@ -417,6 +430,11 @@
             Sandbox Builder
         </button>
         <hr class="tool-nav-sep">
+        <button class="tool-nav-item" data-tool="classes" title="Class Manager">
+            <span class="tn-icon">&#x1F465;</span>
+            Classes
+        </button>
+        <hr class="tool-nav-sep">
         <button class="tool-nav-item" data-tool="higher-tools" title="Higher CS Revision — Teacher Tools">
             <span class="tn-icon">&#x1F4D8;</span>
             Higher Tools
@@ -529,6 +547,20 @@
 
     </div>
 
+    <!-- Class Manager — tabbed panel -->
+    <div class="iframe-panel" id="iframePanelClasses">
+        <div class="cm-tabs">
+            <button class="cm-tab active" data-cm-tab="higher">Higher CS</button>
+            <button class="cm-tab" data-cm-tab="n5">N5 CS</button>
+        </div>
+        <div class="cm-tab-panel active" id="cmTabHigher">
+            <iframe id="iframeClassesHigher" title="Higher CS — Class Manager"></iframe>
+        </div>
+        <div class="cm-tab-panel" id="cmTabN5">
+            <iframe id="iframeClassesN5" title="N5 CS — Class Manager"></iframe>
+        </div>
+    </div>
+
     <!-- Higher CS Revision — teacher tools iframe -->
     <div class="iframe-panel" id="iframePanelHigher">
         <iframe id="iframeHigher" title="Higher CS Revision — Teacher Tools"></iframe>
@@ -598,14 +630,26 @@
     var draftBadge     = document.getElementById('draftBadge');
 
     /* ── tool-nav switching ── */
-    var sidebar          = document.querySelector('.sidebar');
-    var editorPaneEl     = document.getElementById('editorPane');
-    var iframePanelHigher= document.getElementById('iframePanelHigher');
-    var iframePanelN5    = document.getElementById('iframePanelN5');
-    var iframeHigher     = document.getElementById('iframeHigher');
-    var iframeN5         = document.getElementById('iframeN5');
-    var higherLoaded     = false;
-    var n5Loaded         = false;
+    var sidebar               = document.querySelector('.sidebar');
+    var editorPaneEl          = document.getElementById('editorPane');
+    var iframePanelClasses    = document.getElementById('iframePanelClasses');
+    var iframePanelHigher     = document.getElementById('iframePanelHigher');
+    var iframePanelN5         = document.getElementById('iframePanelN5');
+    var iframeClassesHigher   = document.getElementById('iframeClassesHigher');
+    var iframeClassesN5       = document.getElementById('iframeClassesN5');
+    var iframeHigher          = document.getElementById('iframeHigher');
+    var iframeN5              = document.getElementById('iframeN5');
+    var classesLoaded         = { higher: false, n5: false };
+    var higherLoaded          = false;
+    var n5Loaded              = false;
+
+    var allIframePanels = [iframePanelClasses, iframePanelHigher, iframePanelN5];
+
+    function hideAllPanels() {
+        allIframePanels.forEach(function (p) { p.classList.remove('active'); });
+        sidebar.style.display = 'none';
+        editorPaneEl.style.display = 'none';
+    }
 
     document.querySelectorAll('.tool-nav-item').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -613,23 +657,45 @@
             btn.classList.add('active');
             var tool = btn.dataset.tool;
 
+            hideAllPanels();
+
             if (tool === 'sandbox-builder') {
                 sidebar.style.display = '';
                 editorPaneEl.style.display = '';
-                iframePanelHigher.classList.remove('active');
-                iframePanelN5.classList.remove('active');
+            } else if (tool === 'classes') {
+                iframePanelClasses.classList.add('active');
+                /* Load the active tab's iframe lazily */
+                var activeTab = iframePanelClasses.querySelector('.cm-tab.active');
+                if (activeTab && activeTab.dataset.cmTab === 'higher' && !classesLoaded.higher) {
+                    iframeClassesHigher.src = '/revision/teacher/classes';
+                    classesLoaded.higher = true;
+                } else if (activeTab && activeTab.dataset.cmTab === 'n5' && !classesLoaded.n5) {
+                    iframeClassesN5.src = '/revision-n5/teacher/classes';
+                    classesLoaded.n5 = true;
+                }
             } else if (tool === 'higher-tools') {
-                sidebar.style.display = 'none';
-                editorPaneEl.style.display = 'none';
-                iframePanelN5.classList.remove('active');
                 iframePanelHigher.classList.add('active');
                 if (!higherLoaded) { iframeHigher.src = '/revision/teacher/dashboard'; higherLoaded = true; }
             } else if (tool === 'n5-tools') {
-                sidebar.style.display = 'none';
-                editorPaneEl.style.display = 'none';
-                iframePanelHigher.classList.remove('active');
                 iframePanelN5.classList.add('active');
                 if (!n5Loaded) { iframeN5.src = '/revision-n5/teacher/dashboard'; n5Loaded = true; }
+            }
+        });
+    });
+
+    /* ── class manager tab switching ── */
+    document.querySelectorAll('.cm-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            document.querySelectorAll('.cm-tab').forEach(function (t) { t.classList.remove('active'); });
+            tab.classList.add('active');
+            var which = tab.dataset.cmTab;
+            document.querySelectorAll('.cm-tab-panel').forEach(function (p) { p.classList.remove('active'); });
+            if (which === 'higher') {
+                document.getElementById('cmTabHigher').classList.add('active');
+                if (!classesLoaded.higher) { iframeClassesHigher.src = '/revision/teacher/classes'; classesLoaded.higher = true; }
+            } else if (which === 'n5') {
+                document.getElementById('cmTabN5').classList.add('active');
+                if (!classesLoaded.n5) { iframeClassesN5.src = '/revision-n5/teacher/classes'; classesLoaded.n5 = true; }
             }
         });
     });
