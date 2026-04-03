@@ -27,6 +27,9 @@
  *
  * ── Question format ───────────────────────────────────────────────────────
  * window.QUIZ_CONFIG = {
+ *   // Optional: hide "Q1.", "Q2." … labels on every question in this quiz
+ *   hideNumbers: true,
+ *
  *   questions: [
  *     {
  *       type: "paragraph",               // "paragraph" | "pseudocode" | "table"
@@ -50,7 +53,10 @@
  *
  *       // Optional: number sub-lists instead of using bullet points.
  *       // "1" → 1, 2, 3 …   "a" → a, b, c …   omit for bullets (default)
- *       numbering: "a"
+ *       numbering: "a",
+ *
+ *       // Optional: hide the "Q1." label on this question
+ *       hideNumber: true
  *     },
  *     {
  *       type: "pseudocode",
@@ -132,7 +138,8 @@
         var html = '<div class="quiz-section">';
 
         questions.forEach(function (q, i) {
-            html += renderQuestion(q, i, prefix);
+            var hideNum = !!(config.hideNumbers || q.hideNumber);
+            html += renderQuestion(q, i, prefix, hideNum);
         });
 
         html += '<button class="quiz-submit-btn">Submit Answers</button>';
@@ -343,7 +350,7 @@
         }).join('\n');
     }
 
-    function renderQuestion(q, index, prefix) {
+    function renderQuestion(q, index, prefix, hideNum) {
         var num = index + 1;
         var marksLabel = q.marks === 1 ? '1 mark' : q.marks + ' marks';
         var qId = prefix + '-q-' + index;
@@ -359,7 +366,9 @@
 
         // Clickable toggle header
         html += '<button type="button" class="quiz-question-toggle" aria-expanded="' + ariaExpanded + '" aria-controls="' + bodyId + '">';
-        html += '<span class="quiz-question-number">Q' + num + '.</span>';
+        if (!hideNum) {
+            html += '<span class="quiz-question-number">Q' + num + '.</span>';
+        }
         html += '<span class="quiz-marks">(' + marksLabel + ')</span>';
         html += '<span class="quiz-chevron" aria-hidden="true">&#9656;</span>';
         html += '</button>';
