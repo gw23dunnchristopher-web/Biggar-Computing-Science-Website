@@ -65,6 +65,7 @@ interface DataGridProps {
   records: DbRecord[];
   allRecords?: DbRecord[];
   databaseId: number;
+  focusNewRowRef?: React.MutableRefObject<(() => void) | null>;
   sortState?: { field: string, dir: 'asc' | 'desc' } | null;
   onSortChange?: (field: string) => void;
   onSortAscending?: (field: string) => void;
@@ -89,7 +90,7 @@ interface DataGridProps {
 }
 
 export function DataGrid({
-  table, records, allRecords, databaseId, sortState, onSortChange,
+  table, records, allRecords, databaseId, focusNewRowRef, sortState, onSortChange,
   onSortAscending, onSortDescending,
   selectedRowId, onSelectRow,
   selectedFieldName, onSelectField,
@@ -114,6 +115,21 @@ export function DataGrid({
   const [unhideDlg, setUnhideDlg] = useState(false);
   const isCreatingRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const newRowTrRef = useRef<HTMLTableRowElement>(null);
+
+  useEffect(() => {
+    if (focusNewRowRef) {
+      focusNewRowRef.current = () => {
+        const container = containerRef.current;
+        const newRowTr = newRowTrRef.current;
+        if (container) container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+        if (newRowTr) {
+          const firstInput = newRowTr.querySelector<HTMLInputElement | HTMLSelectElement>('input, select');
+          if (firstInput) setTimeout(() => firstInput.focus(), 150);
+        }
+      };
+    }
+  }, [focusNewRowRef]);
 
   const allFieldsSorted = [...table.fields].sort((a, b) => a.sortOrder - b.sortOrder);
   const fields = allFieldsSorted.filter(f => !hiddenFields.includes(f.name));
@@ -956,6 +972,7 @@ export function DataGrid({
 
                 {/* New Record Row */}
                 <tr
+                  ref={newRowTrRef}
                   className="border-b border-gray-200 bg-white"
                   onContextMenu={() => setCtxTarget({ type: 'new-row' })}
                 >

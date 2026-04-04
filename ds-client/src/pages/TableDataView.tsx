@@ -98,6 +98,8 @@ export function TableDataView({
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const focusNewRowRef = useRef<(() => void) | null>(null);
+
   const [sortState, setSortState] = useState<{ field: string; dir: 'asc' | 'desc' } | null>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [selectedFieldName, setSelectedFieldName] = useState<string | null>(null);
@@ -480,18 +482,14 @@ export function TableDataView({
                 </RibbonDropdownButton>
               </RibbonGroup>
               <RibbonGroup name="Sort &amp; Filter">
-                <RibbonDropdownButton
-                  icon={<SortAsc size={22} />}
-                  label="Sort"
-                  disabled={!selectedFieldName && !sortState}
-                >
-                  <RibbonButton icon={<SortAsc size={22} />} label="Ascending"
-                    onClick={() => { const f = selectedFieldName || sortState?.field; if (f) setSortState({ field: f, dir: 'asc' }); }}
-                    disabled={!selectedFieldName && !sortState} />
-                  <RibbonButton icon={<SortDesc size={22} />} label="Descending"
-                    onClick={() => { const f = selectedFieldName || sortState?.field; if (f) setSortState({ field: f, dir: 'desc' }); }}
-                    disabled={!selectedFieldName && !sortState} />
-                </RibbonDropdownButton>
+                <RibbonButton icon={<SortAsc size={22} />} label="Ascending"
+                  onClick={() => { const f = selectedFieldName || sortState?.field; if (f) setSortState({ field: f, dir: 'asc' }); }}
+                  active={sortState?.dir === 'asc'}
+                  disabled={!selectedFieldName && !sortState} />
+                <RibbonButton icon={<SortDesc size={22} />} label="Descending"
+                  onClick={() => { const f = selectedFieldName || sortState?.field; if (f) setSortState({ field: f, dir: 'desc' }); }}
+                  active={sortState?.dir === 'desc'}
+                  disabled={!selectedFieldName && !sortState} />
                 <RibbonButton icon={<Filter size={22} />} label="Filter"
                   active={!!fieldFilter}
                   onClick={() => { if (fieldFilter) { setFieldFilter(null); setCurrentPage(1); } else if (selectedFieldName) { handleApplyFilter({ type: 'isNotEmpty', field: selectedFieldName }); } }}
@@ -502,7 +500,7 @@ export function TableDataView({
                 <RibbonButton icon={<FilterX size={22} />} label="Clear" onClick={handleRemoveFilter} disabled={!fieldFilter && !sortState} />
               </RibbonGroup>
               <RibbonGroup name="Records">
-                <RibbonButton icon={<PlusCircle size={22} />} label="New" disabled />
+                <RibbonButton icon={<PlusCircle size={22} />} label="New" onClick={() => focusNewRowRef.current?.()} />
                 <RibbonButton icon={<Trash2 size={22} />} label="Delete" onClick={handleDeleteSelectedRecord} disabled={!selectedRowId || deleteRecord.isPending} />
                 <RibbonDropdownButton icon={<RefreshCw size={22} />} label="More">
                   <RibbonButton icon={<Save size={22} />} label="Save" disabled />
@@ -515,12 +513,7 @@ export function TableDataView({
                 </RibbonDropdownButton>
               </RibbonGroup>
               <RibbonGroup name="Find">
-                <RibbonDropdownButton icon={<Search size={22} />} label="Find">
-                  <RibbonButton icon={<Search size={22} />} label="Find" onClick={() => setFindOpen(true)} />
-                  <RibbonButton icon={<Search size={22} />} label="Replace" onClick={() => setFindOpen(true)} />
-                  <RibbonButton icon={<Search size={22} />} label="Go To" disabled />
-                  <RibbonButton icon={<Search size={22} />} label="Select" disabled />
-                </RibbonDropdownButton>
+                <RibbonButton icon={<Search size={22} />} label="Find" onClick={() => setFindOpen(true)} />
               </RibbonGroup>
               <RibbonGroup name="Export">
                 <RibbonButton icon={<Download size={22} />} label="Export CSV" onClick={handleExportCSV} />
@@ -637,6 +630,7 @@ export function TableDataView({
               records={pagedRecords}
               allRecords={filteredRecords}
               databaseId={databaseId}
+              focusNewRowRef={focusNewRowRef}
               sortState={sortState}
               onSortChange={handleSortChange}
               onSortAscending={handleSortAscending}
