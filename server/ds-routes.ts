@@ -268,6 +268,51 @@ export function registerDsRoutes(app: Express) {
     res.status(204).send();
   });
 
+  /* ── Sandboxes (databases with embed tokens) ── */
+  app.get("/api/ds/sandboxes", async (req, res) => {
+    const { userId } = req.query;
+    if (!userId || typeof userId !== "string") return res.status(400).json({ error: "userId is required" });
+    const host = process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}` : "http://localhost:3000";
+    const databases = await db!.select().from(dsDatabases).where(eq(dsDatabases.userId, userId)).orderBy(dsDatabases.createdAt);
+    const embeds = await db!.select().from(dsEmbeds).where(eq(dsEmbeds.userId, userId));
+    const embedByDbId = new Map(embeds.map(e => [e.databaseId, e]));
+    const sandboxes = databases
+      .filter(d => embedByDbId.has(d.id))
+      .map(d => {
+        const embed = embedByDbId.get(d.id)!;
+        const embedUrl = `${host}/data-sculptor/?embed=${embed.token}`;
+        const iframeCode = `<iframe src="${embedUrl}" width="100%" height="600" frameborder="0" style="border: 1px solid #ccc; border-radius: 4px;"></iframe>`;
+        return { ...tsFmt(d, "createdAt", "updatedAt"), token: embed.token, embedUrl, iframeCode };
+      });
+    res.json(sandboxes);
+  });
+
+  app.post("/api/ds/sandboxes", async (req, res) => {
+    const { name, userId, taskDescription } = req.body;
+    if (!name || !userId) return res.status(400).json({ error: "name and userId are required" });
+    const host = process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}` : "http://localhost:3000";
+    const [d] = await db!.insert(dsDatabases).values({ name, userId, taskDescription: taskDescription?.trim() || null }).returning();
+    const token = crypto.randomBytes(16).toString("hex");
+    await db!.insert(dsEmbeds).values({ token, databaseId: d.id, userId }).returning();
+    const embedUrl = `${host}/data-sculptor/?embed=${token}`;
+    const iframeCode = `<iframe src="${embedUrl}" width="100%" height="600" frameborder="0" style="border: 1px solid #ccc; border-radius: 4px;"></iframe>`;
+    res.status(201).json({ ...tsFmt(d, "createdAt", "updatedAt"), token, embedUrl, iframeCode });
+  });
+
+  app.delete("/api/ds/sandboxes/:dbId", async (req, res) => {
+    const id = parseInt(req.params.dbId);
+    await db!.delete(dsEmbeds).where(eq(dsEmbeds.databaseId, id));
+    await db!.delete(dsStudentSessions).where(eq(dsStudentSessions.sandboxDatabaseId, id));
+    await db!.delete(dsRecords).where(eq(dsRecords.databaseId, id));
+    const tables = await db!.select({ id: dsTables.id }).from(dsTables).where(eq(dsTables.databaseId, id));
+    for (const t of tables) {
+      await db!.delete(dsFields).where(eq(dsFields.tableId, t.id));
+    }
+    await db!.delete(dsTables).where(eq(dsTables.databaseId, id));
+    await db!.delete(dsDatabases).where(eq(dsDatabases.id, id));
+    res.status(204).send();
+  });
+
   /* ── Embeds ── */
   app.post("/api/ds/embeds", async (req, res) => {
     const { databaseId, userId } = req.body;
