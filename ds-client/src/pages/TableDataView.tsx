@@ -129,6 +129,10 @@ export function TableDataView({
   const [fieldOpSize, setFieldOpSize] = useState('');
   const [addMoreType, setAddMoreType] = useState<string>('text');
 
+  // Filter menu state
+  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+  const [filterInputState, setFilterInputState] = useState<{ op: string; label: string; fieldType: string; val: string; val2: string } | null>(null);
+
   const { data: table, isLoading: tableLoading } = useGetTable(databaseId, tableId);
   const { data: allRecords, isLoading: recordsLoading } = useListRecords(databaseId, tableId, {});
   const deleteRecord = useDeleteRecord();
@@ -358,6 +362,33 @@ export function TableDataView({
     setCurrentPage(1);
   };
 
+  const openFilterInput = (op: string, label: string) => {
+    const ft = selectedField?.fieldType ?? 'text';
+    setFilterMenuOpen(false);
+    setFilterInputState({ op, label, fieldType: ft, val: '', val2: '' });
+  };
+
+  const applyFilterInput = () => {
+    if (!filterInputState || !selectedFieldName) return;
+    const { op, fieldType, val, val2 } = filterInputState;
+    const coerce = (v: string) => (fieldType === 'number' || fieldType === 'currency') ? Number(v) : v;
+    let filter: FieldFilter = null;
+    if (op === 'eq') filter = { type: 'eq', field: selectedFieldName, value: coerce(val) };
+    else if (op === 'ne') filter = { type: 'ne', field: selectedFieldName, value: coerce(val) };
+    else if (op === 'lt') filter = { type: 'lt', field: selectedFieldName, value: coerce(val) };
+    else if (op === 'lte') filter = { type: 'lte', field: selectedFieldName, value: coerce(val) };
+    else if (op === 'gt') filter = { type: 'gt', field: selectedFieldName, value: coerce(val) };
+    else if (op === 'gte') filter = { type: 'gte', field: selectedFieldName, value: coerce(val) };
+    else if (op === 'between') filter = { type: 'between', field: selectedFieldName, lo: coerce(val), hi: coerce(val2) };
+    else if (op === 'startsWith') filter = { type: 'startsWith', field: selectedFieldName, value: val };
+    else if (op === 'notStartsWith') filter = { type: 'notStartsWith', field: selectedFieldName, value: val };
+    else if (op === 'endsWith') filter = { type: 'endsWith', field: selectedFieldName, value: val };
+    else if (op === 'notEndsWith') filter = { type: 'notEndsWith', field: selectedFieldName, value: val };
+    else if (op === 'contains') filter = { type: 'contains', field: selectedFieldName, value: val };
+    else if (op === 'notContains') filter = { type: 'notContains', field: selectedFieldName, value: val };
+    if (filter) { handleApplyFilter(filter); setFilterInputState(null); }
+  };
+
   const handleExportCSV = () => {
     if (!table || !filteredRecords.length) return;
     const flds = [...table.fields].sort((a, b) => a.sortOrder - b.sortOrder);
@@ -492,8 +523,8 @@ export function TableDataView({
               </RibbonGroup>
               <RibbonGroup name="Sort &amp; Filter">
                 <RibbonButton icon={<Filter size={22} />} label="Filter"
-                  active={!!fieldFilter}
-                  onClick={() => { if (fieldFilter) { setFieldFilter(null); setCurrentPage(1); } else if (selectedFieldName) { handleApplyFilter({ type: 'isNotEmpty', field: selectedFieldName }); } }}
+                  active={!!fieldFilter || filterMenuOpen}
+                  onClick={() => { if (fieldFilter) { setFieldFilter(null); setCurrentPage(1); } else if (filterMenuOpen) { setFilterMenuOpen(false); } else if (selectedFieldName) { setFilterMenuOpen(true); } }}
                   disabled={!fieldFilter && !selectedFieldName} />
                 <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
                   <RibbonButton size="small" icon={<SortAsc size={14} />} label="Ascending"
@@ -760,6 +791,117 @@ export function TableDataView({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ── Filter Menu Panel ── */}
+      {filterMenuOpen && (
+        <div className="fixed inset-0 z-[150]" onClick={() => setFilterMenuOpen(false)}>
+          <div
+            className="absolute bg-white border border-gray-300 shadow-xl rounded w-56 text-sm overflow-hidden"
+            style={{ top: 90, left: 200 }}
+            onClick={e => e.stopPropagation()}
+          >
+            {(() => {
+              const ft = selectedField?.fieldType ?? 'text';
+              const isNumber = ft === 'number' || ft === 'currency';
+              const isDate = ft === 'date';
+              const isBool = ft === 'boolean';
+              if (isBool) return (
+                <>
+                  <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">Yes/No Filters</div>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => { setFilterMenuOpen(false); handleApplyFilter({ type: 'eq', field: selectedFieldName!, value: true }); }}>Is Yes</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => { setFilterMenuOpen(false); handleApplyFilter({ type: 'eq', field: selectedFieldName!, value: false }); }}>Is No</button>
+                  <div className="border-t border-gray-200" />
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => { setFilterMenuOpen(false); handleApplyFilter({ type: 'isEmpty', field: selectedFieldName! }); }}>Is Empty (Blank)</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => { setFilterMenuOpen(false); handleApplyFilter({ type: 'isNotEmpty', field: selectedFieldName! }); }}>Is Not Empty</button>
+                </>
+              );
+              if (isDate) return (
+                <>
+                  <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">Date Filters</div>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('eq', 'Equals (Date)')}>Equals…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('ne', 'Does Not Equal (Date)')}>Does Not Equal…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('lt', 'Before')}>Before…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('gt', 'After')}>After…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('between', 'Between (Dates)')}>Between…</button>
+                  <div className="border-t border-gray-200" />
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => { setFilterMenuOpen(false); handleApplyFilter({ type: 'isEmpty', field: selectedFieldName! }); }}>Is Empty (Blank)</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => { setFilterMenuOpen(false); handleApplyFilter({ type: 'isNotEmpty', field: selectedFieldName! }); }}>Is Not Empty</button>
+                </>
+              );
+              if (isNumber) return (
+                <>
+                  <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">Number Filters</div>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('eq', 'Equals')}>Equals…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('ne', 'Does Not Equal')}>Does Not Equal…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('lt', 'Less Than')}>Less Than…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('lte', 'Less Than or Equal To')}>Less Than or Equal To…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('gt', 'Greater Than')}>Greater Than…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('gte', 'Greater Than or Equal To')}>Greater Than or Equal To…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('between', 'Between')}>Between…</button>
+                  <div className="border-t border-gray-200" />
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => { setFilterMenuOpen(false); handleApplyFilter({ type: 'isEmpty', field: selectedFieldName! }); }}>Is Empty (Blank)</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => { setFilterMenuOpen(false); handleApplyFilter({ type: 'isNotEmpty', field: selectedFieldName! }); }}>Is Not Empty</button>
+                </>
+              );
+              return (
+                <>
+                  <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-200">Text Filters</div>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('eq', 'Equals')}>Equals…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('ne', 'Does Not Equal')}>Does Not Equal…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('startsWith', 'Begins With')}>Begins With…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('notStartsWith', 'Does Not Begin With')}>Does Not Begin With…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('contains', 'Contains')}>Contains…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('notContains', 'Does Not Contain')}>Does Not Contain…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('endsWith', 'Ends With')}>Ends With…</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => openFilterInput('notEndsWith', 'Does Not End With')}>Does Not End With…</button>
+                  <div className="border-t border-gray-200" />
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => { setFilterMenuOpen(false); handleApplyFilter({ type: 'isEmpty', field: selectedFieldName! }); }}>Is Empty (Blank)</button>
+                  <button className="w-full text-left px-3 py-1.5 hover:bg-[#ddeeff]" onClick={() => { setFilterMenuOpen(false); handleApplyFilter({ type: 'isNotEmpty', field: selectedFieldName! }); }}>Is Not Empty</button>
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* ── Filter Input Dialog ── */}
+      {filterInputState && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30" onClick={() => setFilterInputState(null)}>
+          <div className="bg-white border border-gray-300 shadow-xl rounded w-80 p-4" onClick={e => e.stopPropagation()}>
+            <div className="text-sm font-semibold text-gray-800 mb-1">{filterInputState.label}</div>
+            <div className="text-xs text-gray-500 mb-3">Field: <strong>{selectedFieldName}</strong></div>
+            <div className="space-y-2 mb-4">
+              <div>
+                <label className="text-xs text-gray-500 block mb-1">{filterInputState.op === 'between' ? 'From' : 'Value'}</label>
+                <input
+                  type={filterInputState.fieldType === 'date' ? 'date' : (filterInputState.fieldType === 'number' || filterInputState.fieldType === 'currency') ? 'number' : 'text'}
+                  value={filterInputState.val}
+                  autoFocus
+                  onChange={e => setFilterInputState(s => s ? { ...s, val: e.target.value } : s)}
+                  onKeyDown={e => { if (e.key === 'Enter' && filterInputState.op !== 'between') applyFilterInput(); if (e.key === 'Escape') setFilterInputState(null); }}
+                  className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:border-[#C42B1C] focus:outline-none"
+                />
+              </div>
+              {filterInputState.op === 'between' && (
+                <div>
+                  <label className="text-xs text-gray-500 block mb-1">To</label>
+                  <input
+                    type={filterInputState.fieldType === 'date' ? 'date' : (filterInputState.fieldType === 'number' || filterInputState.fieldType === 'currency') ? 'number' : 'text'}
+                    value={filterInputState.val2}
+                    onChange={e => setFilterInputState(s => s ? { ...s, val2: e.target.value } : s)}
+                    onKeyDown={e => { if (e.key === 'Enter') applyFilterInput(); if (e.key === 'Escape') setFilterInputState(null); }}
+                    className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:border-[#C42B1C] focus:outline-none"
+                  />
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setFilterInputState(null)} className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50">Cancel</button>
+              <button onClick={applyFilterInput} className="px-3 py-1.5 text-sm bg-[#C42B1C] text-white rounded hover:bg-[#9B2118]">OK</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Name & Caption Dialog ── */}
       <Dialog open={fieldOpDialog === 'rename'} onOpenChange={v => !v && setFieldOpDialog(null)}>

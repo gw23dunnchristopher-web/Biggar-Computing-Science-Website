@@ -115,6 +115,8 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
   const [lwValueField, setLwValueField] = useState('');
   const [lwDisplayField, setLwDisplayField] = useState('');
   const [lwEnforceIntegrity, setLwEnforceIntegrity] = useState(false);
+  const [lwSortField, setLwSortField] = useState('');
+  const [lwSortDir, setLwSortDir] = useState<'asc' | 'desc'>('asc');
 
   const openLookupWizard = useCallback((fieldIdx: number) => {
     setLwFieldIdx(fieldIdx);
@@ -136,6 +138,8 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
     }
     setLwStep(1);
     setLwEnforceIntegrity(false);
+    setLwSortField('');
+    setLwSortDir('asc');
     setLookupWizardOpen(true);
   }, [fields]);
 
@@ -334,6 +338,39 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
                 {lwStep === 3 && lwSourceType === 'table' && (
                   <>
                     <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+                      What sort order do you want for the items in your lookup list?
+                    </p>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs font-medium text-gray-600 block mb-1">Sort Field</label>
+                        <select
+                          value={lwSortField}
+                          onChange={e => setLwSortField(e.target.value)}
+                          className="w-full border border-gray-300 px-2 py-1 text-sm outline-none focus:border-[#C42B1C] rounded-sm"
+                        >
+                          <option value="">(none)</option>
+                          {lwTableFields.map((f: any) => <option key={f.name} value={f.name}>{f.name}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium text-gray-600 block mb-1">Sort Order</label>
+                        <select
+                          value={lwSortDir}
+                          onChange={e => setLwSortDir(e.target.value as 'asc' | 'desc')}
+                          className="w-full border border-gray-300 px-2 py-1 text-sm outline-none focus:border-[#C42B1C] rounded-sm"
+                          disabled={!lwSortField}
+                        >
+                          <option value="asc">Ascending</option>
+                          <option value="desc">Descending</option>
+                        </select>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {lwStep === 4 && lwSourceType === 'table' && (
+                  <>
+                    <p className="text-sm text-gray-700 mb-4 leading-relaxed">
                       Do you want to enable data integrity between these tables?
                     </p>
                     <label className="flex items-start gap-2 cursor-pointer">
@@ -380,6 +417,14 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
                     className="bg-[#C42B1C] hover:bg-[#9B2118]"
                     disabled={!lwTableId || !lwValueField}
                     onClick={() => setLwStep(3)}
+                  >
+                    Next <ChevronRight size={14} className="ml-1" />
+                  </Button>
+                ) : lwStep === 3 && lwSourceType === 'table' ? (
+                  <Button
+                    size="sm"
+                    className="bg-[#C42B1C] hover:bg-[#9B2118]"
+                    onClick={() => setLwStep(4)}
                   >
                     Next <ChevronRight size={14} className="ml-1" />
                   </Button>
@@ -556,7 +601,7 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
               onClick={() => { if (ctxFieldIdx !== null) removeField(ctxFieldIdx); }}
             >
               <Trash2 className="w-3.5 h-3.5 mr-2" />
-              Delete Field
+              Delete Rows
             </ContextMenuItem>
           </>
         )}
@@ -602,34 +647,6 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
                   </td>
                 </tr>
 
-                {/* Caption */}
-                <tr className="border-b border-gray-300 hover:bg-gray-100">
-                  <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Caption</td>
-                  <td className="px-2 py-0.5">
-                    <input
-                      value={selectedField.caption ?? ''}
-                      onChange={e => updateSelected('caption', e.target.value || null)}
-                      className="w-full max-w-xs bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm"
-                      placeholder={selectedField.name}
-                    />
-                  </td>
-                </tr>
-
-                {/* Default Value — not for autonumber/calculated/attachment */}
-                {!['autonumber', 'calculated', 'attachment'].includes(selectedField.fieldType) && (
-                  <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Default Value</td>
-                    <td className="px-2 py-0.5">
-                      <input
-                        value={selectedField.defaultValue ?? ''}
-                        onChange={e => updateSelected('defaultValue', e.target.value || null)}
-                        className="w-full max-w-xs bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm"
-                        placeholder={selectedField.fieldType === 'boolean' ? 'No' : selectedField.fieldType === 'currency' ? '0.00' : ''}
-                      />
-                    </td>
-                  </tr>
-                )}
-
                 {/* Field Size — text and longtext */}
                 {(selectedField.fieldType === 'text' || selectedField.fieldType === 'longtext') && (
                   <tr className="border-b border-gray-300 hover:bg-gray-100">
@@ -664,44 +681,6 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
                         <option>Double</option>
                         <option>Decimal</option>
                       </select>
-                    </td>
-                  </tr>
-                )}
-
-                {/* Calculated Expression */}
-                {selectedField.fieldType === 'calculated' && (
-                  <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-purple-100 border-r border-gray-300 select-none">Expression</td>
-                    <td className="px-2 py-0.5">
-                      <input
-                        value={calcExpr}
-                        onChange={e => updateSelected('description', encodeCalculatedExpr(e.target.value))}
-                        className="w-full max-w-lg bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm font-mono"
-                        placeholder='=[FirstName] & " " & [LastName]'
-                      />
-                      <span className="ml-2 text-gray-400">Use =[FieldName] to reference other fields</span>
-                    </td>
-                  </tr>
-                )}
-
-                {/* Lookup config */}
-                {selectedField.fieldType === 'lookup' && (
-                  <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-red-100 border-r border-gray-300 select-none">Lookup Source</td>
-                    <td className="px-2 py-0.5 flex items-center gap-2">
-                      <span className="text-xs text-gray-600">
-                        {lookupConfig?.type === 'valuelist'
-                          ? `Value list (${lookupConfig.values?.length ?? 0} items)`
-                          : lookupConfig?.type === 'table'
-                          ? `Table → ${tables.find(t => t.id === lookupConfig.tableId)?.name ?? lookupConfig.tableId}`
-                          : 'Not configured'}
-                      </span>
-                      <button
-                        onClick={() => selectedIndex !== null && openLookupWizard(selectedIndex)}
-                        className="text-xs text-[#C42B1C] underline hover:no-underline"
-                      >
-                        Edit Lookup Wizard…
-                      </button>
                     </td>
                   </tr>
                 )}
@@ -761,6 +740,72 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
                         <option value="auto">Auto</option>
                         {[0,1,2,3,4].map(n => <option key={n} value={n}>{n}</option>)}
                       </select>
+                    </td>
+                  </tr>
+                )}
+
+                {/* Caption */}
+                <tr className="border-b border-gray-300 hover:bg-gray-100">
+                  <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Caption</td>
+                  <td className="px-2 py-0.5">
+                    <input
+                      value={selectedField.caption ?? ''}
+                      onChange={e => updateSelected('caption', e.target.value || null)}
+                      className="w-full max-w-xs bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm"
+                      placeholder={selectedField.name}
+                    />
+                  </td>
+                </tr>
+
+                {/* Default Value — not for autonumber/calculated/attachment */}
+                {!['autonumber', 'calculated', 'attachment'].includes(selectedField.fieldType) && (
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Default Value</td>
+                    <td className="px-2 py-0.5">
+                      <input
+                        value={selectedField.defaultValue ?? ''}
+                        onChange={e => updateSelected('defaultValue', e.target.value || null)}
+                        className="w-full max-w-xs bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm"
+                        placeholder={selectedField.fieldType === 'boolean' ? 'No' : selectedField.fieldType === 'currency' ? '0.00' : ''}
+                      />
+                    </td>
+                  </tr>
+                )}
+
+                {/* Calculated Expression */}
+                {selectedField.fieldType === 'calculated' && (
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-purple-100 border-r border-gray-300 select-none">Expression</td>
+                    <td className="px-2 py-0.5">
+                      <input
+                        value={calcExpr}
+                        onChange={e => updateSelected('description', encodeCalculatedExpr(e.target.value))}
+                        className="w-full max-w-lg bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm font-mono"
+                        placeholder='=[FirstName] & " " & [LastName]'
+                      />
+                      <span className="ml-2 text-gray-400">Use =[FieldName] to reference other fields</span>
+                    </td>
+                  </tr>
+                )}
+
+                {/* Lookup config */}
+                {selectedField.fieldType === 'lookup' && (
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-red-100 border-r border-gray-300 select-none">Lookup Source</td>
+                    <td className="px-2 py-0.5 flex items-center gap-2">
+                      <span className="text-xs text-gray-600">
+                        {lookupConfig?.type === 'valuelist'
+                          ? `Value list (${lookupConfig.values?.length ?? 0} items)`
+                          : lookupConfig?.type === 'table'
+                          ? `Table → ${tables.find(t => t.id === lookupConfig.tableId)?.name ?? lookupConfig.tableId}`
+                          : 'Not configured'}
+                      </span>
+                      <button
+                        onClick={() => selectedIndex !== null && openLookupWizard(selectedIndex)}
+                        className="text-xs text-[#C42B1C] underline hover:no-underline"
+                      >
+                        Edit Lookup Wizard…
+                      </button>
                     </td>
                   </tr>
                 )}
