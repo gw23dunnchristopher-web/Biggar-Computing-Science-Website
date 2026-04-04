@@ -482,22 +482,34 @@ export function TableDataView({
                 </RibbonDropdownButton>
               </RibbonGroup>
               <RibbonGroup name="Sort &amp; Filter">
-                <RibbonButton icon={<SortAsc size={22} />} label="Ascending"
-                  onClick={() => { const f = selectedFieldName || sortState?.field; if (f) setSortState({ field: f, dir: 'asc' }); }}
-                  active={sortState?.dir === 'asc'}
-                  disabled={!selectedFieldName && !sortState} />
-                <RibbonButton icon={<SortDesc size={22} />} label="Descending"
-                  onClick={() => { const f = selectedFieldName || sortState?.field; if (f) setSortState({ field: f, dir: 'desc' }); }}
-                  active={sortState?.dir === 'desc'}
-                  disabled={!selectedFieldName && !sortState} />
                 <RibbonButton icon={<Filter size={22} />} label="Filter"
                   active={!!fieldFilter}
                   onClick={() => { if (fieldFilter) { setFieldFilter(null); setCurrentPage(1); } else if (selectedFieldName) { handleApplyFilter({ type: 'isNotEmpty', field: selectedFieldName }); } }}
                   disabled={!fieldFilter && !selectedFieldName} />
-                <RibbonButton icon={<CheckSquare size={22} />} label="Selection"
-                  onClick={() => { if (selectedFieldName && selectedRowId) { const rec = filteredRecords.find(r => r.id === selectedRowId); if (rec) handleFilterBySelection(selectedFieldName, rec.data[selectedFieldName]); } }}
-                  disabled={!selectedFieldName || !selectedRowId} />
-                <RibbonButton icon={<FilterX size={22} />} label="Clear" onClick={handleRemoveFilter} disabled={!fieldFilter && !sortState} />
+                <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
+                  <RibbonButton size="small" icon={<SortAsc size={14} />} label="Ascending"
+                    onClick={() => { const f = selectedFieldName || sortState?.field; if (f) setSortState({ field: f, dir: 'asc' }); }}
+                    active={sortState?.dir === 'asc'}
+                    disabled={!selectedFieldName && !sortState} />
+                  <RibbonButton size="small" icon={<SortDesc size={14} />} label="Descending"
+                    onClick={() => { const f = selectedFieldName || sortState?.field; if (f) setSortState({ field: f, dir: 'desc' }); }}
+                    active={sortState?.dir === 'desc'}
+                    disabled={!selectedFieldName && !sortState} />
+                  <RibbonButton size="small" icon={<FilterX size={14} />} label="Remove Sort"
+                    onClick={() => setSortState(null)}
+                    disabled={!sortState} />
+                </div>
+                <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
+                  <RibbonButton size="small" icon={<CheckSquare size={14} />} label="Selection"
+                    onClick={() => { if (selectedFieldName && selectedRowId) { const rec = filteredRecords.find(r => r.id === selectedRowId); if (rec) handleFilterBySelection(selectedFieldName, rec.data[selectedFieldName]); } }}
+                    disabled={!selectedFieldName || !selectedRowId} />
+                  <RibbonButton size="small" icon={<AlignLeft size={14} />} label="Advanced"
+                    disabled />
+                  <RibbonButton size="small" icon={<Filter size={14} />} label="Toggle Filter"
+                    active={!!fieldFilter}
+                    onClick={() => { setFieldFilter(null); setCurrentPage(1); }}
+                    disabled={!fieldFilter} />
+                </div>
               </RibbonGroup>
               <RibbonGroup name="Records">
                 <RibbonButton icon={<PlusCircle size={22} />} label="New" onClick={() => focusNewRowRef.current?.()} />

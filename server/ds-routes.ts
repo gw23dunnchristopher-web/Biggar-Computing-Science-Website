@@ -332,7 +332,7 @@ export function registerDsRoutes(app: Express) {
     if (!embed) return res.status(404).json({ error: "Embed not found" });
     let sandboxDatabaseId: number;
     if (sessionKey) {
-      const [session] = await db!.select().from(dsStudentSessions).where(eq(dsStudentSessions.sessionKey, sessionKey));
+      const [session] = await db!.select().from(dsStudentSessions).where(and(eq(dsStudentSessions.sessionKey, sessionKey), eq(dsStudentSessions.token, token)));
       if (session) {
         sandboxDatabaseId = session.sandboxDatabaseId;
       } else {
