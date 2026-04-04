@@ -11,14 +11,14 @@ interface ShellProps {
 
 export function Shell({ title, ribbon, sidebar, children, isEmbed, statusBar }: ShellProps) {
   return (
-    <div className={`flex flex-col h-screen w-screen bg-white overflow-hidden text-sm ${isEmbed ? 'border-4 border-red-500 rounded-xl shadow-2xl m-4 h-[calc(100vh-32px)] w-[calc(100vw-32px)] relative' : ''}`}>
+    <div className="flex flex-col h-screen w-full bg-white overflow-hidden text-sm">
       {isEmbed && (
-        <div className="absolute top-0 left-0 right-0 bg-red-500 text-white text-xs font-bold text-center py-1 z-50">
-          STUDENT SANDBOX MODE - Changes do not affect the original database
+        <div className="flex-none bg-red-500 text-white text-xs font-bold text-center py-1 z-50">
+          STUDENT SANDBOX MODE — Changes do not affect the original database
         </div>
       )}
       {ribbon}
-      <div className={`flex flex-1 overflow-hidden ${isEmbed ? 'pt-6' : ''}`}>
+      <div className="flex flex-1 overflow-hidden">
         {sidebar}
         <div className="flex-1 bg-[#e6e6e6] overflow-auto flex shadow-inner relative z-0">
           <div className="flex-1 m-2 bg-white shadow-sm border border-gray-300 rounded overflow-hidden flex flex-col">
