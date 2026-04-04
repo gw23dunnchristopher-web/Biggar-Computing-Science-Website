@@ -64,6 +64,7 @@ export function DatabaseView() {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [dbName, setDbName] = useState('');
+  const [dbTaskDescription, setDbTaskDescription] = useState('');
 
   // Confirm-delete dialogs
   const [deleteTableConfirm, setDeleteTableConfirm] = useState<{ open: boolean; tableId: number | null; tableName: string }>({ open: false, tableId: null, tableName: '' });
@@ -336,14 +337,14 @@ export function DatabaseView() {
   const handleSaveSettings = async () => {
     if (!dbName.trim()) return;
     try {
-      await updateDb.mutateAsync({ databaseId, data: { name: dbName } });
+      await updateDb.mutateAsync({ databaseId, data: { name: dbName, taskDescription: dbTaskDescription.trim() || null } });
       toast({ title: 'Database updated' });
       setIsSettingsOpen(false);
       queryClient.invalidateQueries({ queryKey: ['/api/databases', databaseId] });
     } catch { toast({ title: 'Update failed', variant: 'destructive' }); }
   };
 
-  const openSettings = () => { setDbName(db?.name || ''); setIsSettingsOpen(true); };
+  const openSettings = () => { setDbName(db?.name || ''); setDbTaskDescription(db?.taskDescription || ''); setIsSettingsOpen(true); };
 
   const handleCompact = async () => {
     try {
@@ -743,9 +744,21 @@ export function DatabaseView() {
       <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Database Settings</DialogTitle></DialogHeader>
-          <div className="py-4">
-            <label className="text-sm font-medium mb-2 block">Database Name</label>
-            <Input value={dbName} onChange={e => setDbName(e.target.value)} autoFocus onKeyDown={e => e.key === 'Enter' && handleSaveSettings()} />
+          <div className="py-4 space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Database Name</label>
+              <Input value={dbName} onChange={e => setDbName(e.target.value)} autoFocus />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">Task Description <span className="text-gray-400 font-normal text-xs">(shown to students for AI marking)</span></label>
+              <textarea
+                value={dbTaskDescription}
+                onChange={e => setDbTaskDescription(e.target.value)}
+                rows={4}
+                placeholder="Describe what students should do with this database, e.g. 'Write a query to find all customers who placed an order in the last 30 days.'"
+                className="w-full border border-gray-200 rounded-md text-sm p-2 resize-none focus:outline-none focus:ring-2 focus:ring-[#C42B1C]"
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>Cancel</Button>

@@ -4,6 +4,7 @@ export const dsDatabases = pgTable("ds_databases", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   userId: text("user_id").notNull(),
+  taskDescription: text("task_description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

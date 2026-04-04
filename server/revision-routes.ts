@@ -672,7 +672,7 @@ export async function registerRoutes(
   // AI-powered answer grading endpoint with caching for cost efficiency
   app.post("/api/grade-answer", async (req, res) => {
     try {
-      const { studentAnswer, markingScheme, maxMarks, questionContext, aiGuidance, referenceFiles, studentUploadedFiles, erdModelAnswer, navModelAnswer } = req.body;
+      const { studentAnswer, markingScheme, maxMarks, questionContext, aiGuidance, referenceFiles, studentUploadedFiles, erdModelAnswer, navModelAnswer, studentDiagramImage } = req.body;
 
       if (process.env.NODE_ENV !== "production") {
         console.log("Grading request received, marks:", maxMarks);
@@ -808,6 +808,25 @@ export async function registerRoutes(
         }
         if (codeTexts.length > 0) {
           studentCodeContents = "\n\nSTUDENT'S UPLOADED FILE(S) — you MUST read and grade these:\n" + codeTexts.join("\n\n");
+        }
+      }
+
+      // Process studentDiagramImage (base64 data URL sent directly from client)
+      if (studentDiagramImage && typeof studentDiagramImage === "string" && studentDiagramImage.startsWith("data:")) {
+        const commaIdx = studentDiagramImage.indexOf(",");
+        if (commaIdx > -1) {
+          const headerPart = studentDiagramImage.substring(0, commaIdx);
+          const base64Part = studentDiagramImage.substring(commaIdx + 1);
+          const mimeMatch = headerPart.match(/data:([^;]+)/);
+          const mimeType = mimeMatch ? mimeMatch[1] : "image/png";
+          if (base64Part) {
+            studentImages.push({ base64: base64Part, mimeType, name: "student-diagram" });
+            if (!studentCodeContents) {
+              studentCodeContents = "\n\nSTUDENT'S DIAGRAM IMAGE — analyse this image as their answer to the diagram question. Grade it against the marking scheme.";
+            } else {
+              studentCodeContents += "\n\n[Student also submitted a diagram image — see the attached image for visual grading]";
+            }
+          }
         }
       }
 

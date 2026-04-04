@@ -93,6 +93,57 @@ function ScoreBar({ score, maxScore, label }: { score: number; maxScore: number;
   );
 }
 
+function ExamBarChart({ data }: { data: { label: string; pct: number }[] }) {
+  if (data.length === 0) return null;
+  const BAR_H = 120;
+  const BAR_W = 36;
+  const GAP = 12;
+  const LABEL_H = 56;
+  const TOP_PAD = 28;
+  const LEFT_PAD = 32;
+  const totalW = LEFT_PAD + data.length * (BAR_W + GAP) + GAP;
+  const totalH = TOP_PAD + BAR_H + LABEL_H;
+  return (
+    <div className="overflow-x-auto">
+      <svg width={Math.max(totalW, 200)} height={totalH} aria-label="Student score chart">
+        {[25, 50, 75, 100].map(pct => {
+          const y = TOP_PAD + BAR_H - (pct / 100) * BAR_H;
+          return (
+            <g key={pct}>
+              <line x1={LEFT_PAD} y1={y} x2={totalW} y2={y} stroke="currentColor" strokeOpacity="0.1" strokeWidth="1" />
+              <text x={LEFT_PAD - 4} y={y + 4} fontSize="9" fill="currentColor" fillOpacity="0.5" textAnchor="end">{pct}%</text>
+            </g>
+          );
+        })}
+        {data.map((item, i) => {
+          const x = LEFT_PAD + GAP + i * (BAR_W + GAP);
+          const barH = Math.max((item.pct / 100) * BAR_H, item.pct > 0 ? 3 : 0);
+          const y = TOP_PAD + BAR_H - barH;
+          const color = item.pct >= 70 ? "#22c55e" : item.pct >= 40 ? "#f59e0b" : "#ef4444";
+          return (
+            <g key={item.label}>
+              <rect x={x} y={y} width={BAR_W} height={barH} fill={color} fillOpacity="0.85" rx="3" />
+              <text x={x + BAR_W / 2} y={y - 5} fontSize="10" fontWeight="600" fill="currentColor" textAnchor="middle">{item.pct}%</text>
+              <text
+                x={x + BAR_W / 2}
+                y={TOP_PAD + BAR_H + 10}
+                fontSize="9"
+                fill="currentColor"
+                fillOpacity="0.75"
+                textAnchor="end"
+                transform={`rotate(-45, ${x + BAR_W / 2}, ${TOP_PAD + BAR_H + 10})`}
+              >
+                {item.label.length > 14 ? item.label.slice(0, 13) + "…" : item.label}
+              </text>
+            </g>
+          );
+        })}
+        <line x1={LEFT_PAD} y1={TOP_PAD + BAR_H} x2={totalW} y2={TOP_PAD + BAR_H} stroke="currentColor" strokeOpacity="0.2" strokeWidth="1.5" />
+      </svg>
+    </div>
+  );
+}
+
 function DifficultyBadge({ difficulty }: { difficulty: number }) {
   if (difficulty < 30) {
     return <Badge data-testid="badge-difficulty-easy" className="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400 hover:bg-green-100">Easy ({difficulty}%)</Badge>;
@@ -624,6 +675,30 @@ function ClassOverviewTab() {
 
       {!loading && selectedClassId && overview.length === 0 && (
         <div className="text-center py-12 text-neutral-500" data-testid="text-no-students">No students found in this class.</div>
+      )}
+
+      {!loading && overview.filter(s => s.examResults.length > 0).length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Class Score Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ExamBarChart
+              data={overview
+                .filter(s => s.examResults.length > 0)
+                .map(s => {
+                  const totalScore = s.examResults.reduce((sum, r) => sum + r.score, 0);
+                  const totalMax = s.examResults.reduce((sum, r) => sum + r.maxScore, 0);
+                  const pct = totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : 0;
+                  return { label: s.username, pct };
+                })
+                .sort((a, b) => b.pct - a.pct)}
+            />
+          </CardContent>
+        </Card>
       )}
 
       {!loading && overview.length > 0 && (

@@ -17,6 +17,7 @@ export interface Database {
   id: number;
   name: string;
   userId: string;
+  taskDescription?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -28,6 +29,7 @@ export interface CreateDatabaseRequest {
 
 export interface UpdateDatabaseRequest {
   name: string;
+  taskDescription?: string | null;
 }
 
 export type FieldDefinitionFieldType =

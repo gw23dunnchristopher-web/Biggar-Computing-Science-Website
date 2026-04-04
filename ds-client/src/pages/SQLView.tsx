@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Play, Square, Code2, Trash2, ChevronRight, ChevronDown,
   Table2, Hash, Type, Calendar, ToggleLeft, KeyRound, Clock,
-  Copy, AlertCircle, CheckCircle2, Info
+  Copy, AlertCircle, CheckCircle2, Info, Sparkles, X
 } from 'lucide-react';
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
@@ -135,6 +135,8 @@ export function SQLView({
   const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [hasRun, setHasRun] = useState(false);
+  const [grading, setGrading] = useState(false);
+  const [gradingFeedback, setGradingFeedback] = useState<string | null>(null);
 
   // Load schema
   const loadSchema = useCallback(async () => {
@@ -168,6 +170,23 @@ export function SQLView({
       setError(e.message || 'An error occurred');
     } finally {
       setRunning(false);
+    }
+  };
+
+  const gradeQuery = async () => {
+    if (!sql.trim() || grading) return;
+    setGrading(true);
+    setGradingFeedback(null);
+    try {
+      const res = await apiFetch(`/api/ds/grade-sandbox`, {
+        method: 'POST',
+        body: JSON.stringify({ databaseId, sql, results: result, taskDescription: db.taskDescription || "" }),
+      });
+      setGradingFeedback(res?.feedback || "No feedback received.");
+    } catch (e: any) {
+      setGradingFeedback(`Error: ${e.message || "Could not get feedback."}`);
+    } finally {
+      setGrading(false);
     }
   };
 
@@ -382,6 +401,14 @@ export function SQLView({
         {/* ── Main Editor + Results ────────────────────────────────── */}
         <div className="flex-1 flex flex-col overflow-hidden">
 
+          {/* Task description banner (student mode) */}
+          {isStudentMode && db.taskDescription && (
+            <div className="flex items-start gap-2 px-3 py-2 bg-amber-50 border-b border-amber-200 text-xs text-amber-900">
+              <Info size={13} className="flex-shrink-0 mt-0.5 text-amber-600" />
+              <span><strong>Task:</strong> {db.taskDescription}</span>
+            </div>
+          )}
+
           {/* Editor header */}
           <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1a237e] text-white text-xs">
             <Code2 size={14} />
@@ -428,10 +455,21 @@ export function SQLView({
               <Play size={13} />
               {running ? 'Running…' : 'Run Query'}
             </Button>
+            {isStudentMode && hasRun && (
+              <Button
+                size="sm"
+                onClick={gradeQuery}
+                disabled={grading || !sql.trim()}
+                className="bg-[#6a1b9a] hover:bg-[#4a148c] text-white h-7 px-3 text-xs gap-1.5"
+              >
+                <Sparkles size={13} />
+                {grading ? 'Marking…' : 'Submit for Marking'}
+              </Button>
+            )}
             <Button
               size="sm"
               variant="outline"
-              onClick={() => { setSql(''); setResult(null); setError(null); setHasRun(false); editorRef.current?.focus(); }}
+              onClick={() => { setSql(''); setResult(null); setError(null); setHasRun(false); setGradingFeedback(null); editorRef.current?.focus(); }}
               className="h-7 px-3 text-xs border-gray-600 text-gray-300 hover:text-white hover:bg-gray-700 bg-transparent gap-1.5"
             >
               <Trash2 size={12} />
@@ -468,6 +506,24 @@ export function SQLView({
               ))}
             </div>
           </div>
+
+          {/* AI Marking feedback panel */}
+          {gradingFeedback && (
+            <div className="border-t border-purple-200 bg-purple-50 flex flex-col" style={{ maxHeight: '260px', overflowY: 'auto' }}>
+              <div className="flex items-center gap-2 px-3 py-2 bg-purple-100 border-b border-purple-200 flex-shrink-0">
+                <Sparkles size={13} className="text-purple-600" />
+                <span className="text-xs font-semibold text-purple-800">AI Marking Feedback</span>
+                <button
+                  onClick={() => setGradingFeedback(null)}
+                  className="ml-auto text-purple-400 hover:text-purple-700"
+                  aria-label="Dismiss feedback"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+              <div className="px-4 py-3 text-sm text-gray-800 whitespace-pre-wrap">{gradingFeedback}</div>
+            </div>
+          )}
 
           {/* Results area */}
           <div className="flex-1 overflow-hidden flex flex-col bg-white">

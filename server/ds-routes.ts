@@ -7,6 +7,9 @@ import {
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
 import alasql from "alasql";
+import { GoogleGenAI } from "@google/genai";
+
+const gemini = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
 
 function ts(d: Date) { return d.toISOString(); }
 function tsFmt(obj: any, ...keys: string[]) {
@@ -122,9 +125,11 @@ export function registerDsRoutes(app: Express) {
 
   app.put("/api/ds/databases/:dbId", async (req, res) => {
     const id = parseInt(req.params.dbId);
-    const { name } = req.body;
+    const { name, taskDescription } = req.body;
     if (!name) return res.status(400).json({ error: "name is required" });
-    const [d] = await db!.update(dsDatabases).set({ name, updatedAt: new Date() }).where(eq(dsDatabases.id, id)).returning();
+    const updateData: any = { name, updatedAt: new Date() };
+    if (taskDescription !== undefined) updateData.taskDescription = taskDescription || null;
+    const [d] = await db!.update(dsDatabases).set(updateData).where(eq(dsDatabases.id, id)).returning();
     if (!d) return res.status(404).json({ error: "Database not found" });
     res.json(tsFmt(d, "createdAt", "updatedAt"));
   });
@@ -557,5 +562,55 @@ export function registerDsRoutes(app: Express) {
     const orphans = allRecords.filter(r => !validIds.has(r.tableId));
     for (const r of orphans) await db!.delete(dsRecords).where(eq(dsRecords.id, r.id));
     res.json({ message: "Compact & Repair complete", tablesChecked: tables.length, orphanedRecordsRemoved: orphans.length, status: "healthy" });
+  });
+
+  /* ── AI SQL Grading ── */
+  app.post("/api/ds/grade-sandbox", async (req, res) => {
+    const { databaseId, sql, results, taskDescription: clientTaskDesc } = req.body;
+    if (!sql) return res.status(400).json({ error: "sql is required" });
+    if (!gemini) return res.status(503).json({ error: "AI grading is not available (no API key configured)" });
+
+    let taskDescription = clientTaskDesc || "";
+    if (!taskDescription && databaseId) {
+      const [dbRow] = await db!.select({ taskDescription: dsDatabases.taskDescription }).from(dsDatabases).where(eq(dsDatabases.id, parseInt(databaseId)));
+      taskDescription = dbRow?.taskDescription || "";
+    }
+
+    const resultSummary = results
+      ? (results.columns && results.rows
+          ? `Columns: ${results.columns.join(", ")}\nRows (first 10):\n${results.rows.slice(0, 10).map((r: any) => JSON.stringify(r)).join("\n")}`
+          : results.isDml
+            ? `${results.statementType?.toUpperCase()} successful — ${results.rowsAffected} row(s) affected`
+            : "No results")
+      : "Query was not run";
+
+    const prompt = `You are a Computing Science teacher marking a student's SQL query exercise.
+
+${taskDescription ? `TASK: ${taskDescription}\n` : ""}STUDENT'S SQL QUERY:
+\`\`\`sql
+${sql}
+\`\`\`
+
+QUERY RESULTS:
+${resultSummary}
+
+Please mark this SQL query. Your response must be structured as follows:
+1. **Mark**: Give a mark out of 4 (0–4) based on correctness and efficiency.
+2. **Feedback**: 2–4 sentences of specific, constructive feedback written for a Computing Science student. Mention what was done well and what could be improved.
+3. **Suggestions**: One or two practical improvements the student could make.
+
+Be encouraging but honest. Use British English spelling.`;
+
+    try {
+      const response = await gemini.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: prompt,
+      });
+      const text = response.text || "";
+      res.json({ feedback: text });
+    } catch (err: any) {
+      console.error("DS grading error:", err?.message || err);
+      res.status(500).json({ error: "AI grading failed. Please try again." });
+    }
   });
 }
