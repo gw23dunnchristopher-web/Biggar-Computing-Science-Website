@@ -43,9 +43,12 @@ export function EmbedView({ token }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTableId, setActiveTableId] = useState<number | null>(null);
+  const [resetKey, setResetKey] = useState(0);
 
   useEffect(() => {
     const sessionKey = getOrCreateSessionKey();
+    setIsLoading(true);
+    setError(null);
     fetch(`/api/ds/embeds/${token}`, {
       headers: { 'Content-Type': 'application/json', 'x-session-key': sessionKey }
     })
@@ -62,7 +65,21 @@ export function EmbedView({ token }: Props) {
         setError(e.message);
         setIsLoading(false);
       });
-  }, [token]);
+  }, [token, resetKey]);
+
+  async function handleReset() {
+    const sessionKey = sessionStorage.getItem(SESSION_KEY_STORAGE);
+    if (sessionKey) {
+      await fetch(`/api/ds/embeds/${token}/reset`, {
+        method: 'POST',
+        headers: { 'x-session-key': sessionKey }
+      });
+      sessionStorage.removeItem(SESSION_KEY_STORAGE);
+    }
+    setSnapshot(null);
+    setActiveTableId(null);
+    setResetKey(k => k + 1);
+  }
 
   if (isLoading) {
     return (
@@ -89,6 +106,7 @@ export function EmbedView({ token }: Props) {
         tables={snapshot.tables}
         isStudentMode={true}
         onSelectTable={setActiveTableId}
+        onReset={handleReset}
       />
     );
   }

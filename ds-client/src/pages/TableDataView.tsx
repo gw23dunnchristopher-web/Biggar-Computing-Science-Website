@@ -16,7 +16,7 @@ import {
   Grid3X3, Trash2, RefreshCw, SortAsc, SortDesc, Search,
   Download, Filter, FilterX, ChevronFirst, ChevronLast, ChevronLeft,
   ChevronRight as ChevronRightIcon, Copy, Scissors, ClipboardPaste,
-  PlusCircle, Save, Sigma, CheckSquare, AlignLeft, ChevronDown, EyeOff
+  PlusCircle, Save, Sigma, CheckSquare, AlignLeft, ChevronDown, EyeOff, RotateCcw
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -61,6 +61,7 @@ interface Props {
   onAnalyse?: () => void;
   onDocumenter?: () => void;
   onObjectDependencies?: () => void;
+  onReset?: () => void;
 }
 
 type FieldFilter =
@@ -93,6 +94,7 @@ export function TableDataView({
   onCreateReport, onCreateBlankReport, onCreateAutoReport,
   onShare, onSettings,
   onImportCSV, onExportData, onOpenRelationships, onCompact, onAnalyse, onDocumenter, onObjectDependencies,
+  onReset,
 }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -110,6 +112,7 @@ export function TableDataView({
   const [pageSize] = useState(100);
   const [deleteRecordConfirm, setDeleteRecordConfirm] = useState(false);
   const [deleteFieldConfirm, setDeleteFieldConfirm] = useState(false);
+  const [resetConfirm, setResetConfirm] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
   const [hiddenFields, setHiddenFields] = useState<string[]>([]);
   const [showTotals, setShowTotals] = useState(false);
@@ -460,12 +463,19 @@ export function TableDataView({
       allDatabasesLink={isStudentMode ? undefined : '/'}
       contextSection={isStudentMode ? undefined : contextSection}
       pinnedContent={
-        <RibbonGroup name="View">
-          <RibbonDropdownButton icon={<Grid3X3 size={22} />} label="Datasheet">
-            <RibbonButton icon={<Grid3X3 size={22} />} label="Datasheet" active />
-            <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" onClick={() => setLocation(`/databases/${databaseId}/tables/${tableId}/design`)} />
-          </RibbonDropdownButton>
-        </RibbonGroup>
+        <>
+          <RibbonGroup name="View">
+            <RibbonDropdownButton icon={<Grid3X3 size={22} />} label="Datasheet">
+              <RibbonButton icon={<Grid3X3 size={22} />} label="Datasheet" active />
+              <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" onClick={() => setLocation(`/databases/${databaseId}/tables/${tableId}/design`)} />
+            </RibbonDropdownButton>
+          </RibbonGroup>
+          {onReset && (
+            <RibbonGroup name="Sandbox">
+              <RibbonButton icon={<RotateCcw size={22} />} label="Reset" onClick={() => setResetConfirm(true)} />
+            </RibbonGroup>
+          )}
+        </>
       }
       tabs={[
         {
@@ -875,6 +885,18 @@ export function TableDataView({
         confirmLabel="Delete Record"
         onConfirm={doDeleteRecord}
       />
+
+      {/* ── Reset Sandbox Confirm ── */}
+      {onReset && (
+        <ConfirmDialog
+          open={resetConfirm}
+          onOpenChange={setResetConfirm}
+          title="Reset Sandbox"
+          description="This will delete all your changes and restore the sandbox to its original state. Are you sure?"
+          confirmLabel="Reset"
+          onConfirm={onReset}
+        />
+      )}
     </Shell>
   );
 }

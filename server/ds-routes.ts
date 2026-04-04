@@ -356,6 +356,26 @@ export function registerDsRoutes(app: Express) {
     });
   });
 
+  app.post("/api/ds/embeds/:token/reset", async (req, res) => {
+    const { token } = req.params;
+    const sessionKey = req.headers["x-session-key"] as string | undefined;
+    if (!sessionKey) return res.status(400).json({ error: "No session key" });
+    const [session] = await db!.select().from(dsStudentSessions).where(and(eq(dsStudentSessions.sessionKey, sessionKey), eq(dsStudentSessions.token, token)));
+    if (!session) return res.status(404).json({ error: "Session not found" });
+    const dbId = session.sandboxDatabaseId;
+    await db!.delete(dsStudentSessions).where(and(eq(dsStudentSessions.sessionKey, sessionKey), eq(dsStudentSessions.token, token)));
+    await db!.delete(dsRecords).where(eq(dsRecords.databaseId, dbId));
+    const tables = await db!.select({ id: dsTables.id }).from(dsTables).where(eq(dsTables.databaseId, dbId));
+    for (const t of tables) await db!.delete(dsFields).where(eq(dsFields.tableId, t.id));
+    await db!.delete(dsTables).where(eq(dsTables.databaseId, dbId));
+    await db!.delete(dsQueries).where(eq(dsQueries.databaseId, dbId));
+    await db!.delete(dsForms).where(eq(dsForms.databaseId, dbId));
+    await db!.delete(dsReports).where(eq(dsReports.databaseId, dbId));
+    await db!.delete(dsRelationships).where(eq(dsRelationships.databaseId, dbId));
+    await db!.delete(dsDatabases).where(eq(dsDatabases.id, dbId));
+    res.json({ ok: true });
+  });
+
   /* ── Queries ── */
   app.get("/api/ds/databases/:dbId/queries", async (req, res) => {
     const databaseId = parseInt(req.params.dbId);
