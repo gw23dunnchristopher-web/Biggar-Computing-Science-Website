@@ -12,11 +12,6 @@ interface ShellProps {
 export function Shell({ title, ribbon, sidebar, children, isEmbed, statusBar }: ShellProps) {
   return (
     <div className="flex flex-col h-screen w-full bg-white overflow-hidden text-sm">
-      {isEmbed && (
-        <div className="flex-none bg-red-500 text-white text-xs font-bold text-center py-1 z-50">
-          STUDENT SANDBOX MODE — Changes do not affect the original database
-        </div>
-      )}
       {ribbon}
       <div className="flex flex-1 overflow-hidden">
         {sidebar}
