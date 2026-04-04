@@ -43,12 +43,8 @@
             var _earlyTheme = localStorage.getItem('vite-ui-theme');
             if (_earlyTheme === 'dark') {
                 document.documentElement.classList.add('dark');
-            } else if (_earlyTheme === 'light') {
+            } else {
                 document.documentElement.classList.remove('dark');
-            } else if (_earlyTheme === 'system' || !_earlyTheme) {
-                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    document.documentElement.classList.add('dark');
-                }
             }
         } catch (_e) {}
 
@@ -257,15 +253,7 @@
 
     function applyDarkMode() {
         var theme = localStorage.getItem(THEME_KEY) || 'system';
-        var isDark;
         if (theme === 'dark') {
-            isDark = true;
-        } else if (theme === 'light') {
-            isDark = false;
-        } else {
-            isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-        if (isDark) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');

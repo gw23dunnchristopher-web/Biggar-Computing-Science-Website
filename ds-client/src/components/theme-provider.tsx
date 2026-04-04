@@ -14,7 +14,7 @@ type ThemeProviderState = {
 }
 
 const initialState: ThemeProviderState = {
-  theme: "system",
+  theme: "light",
   setTheme: () => null,
 }
 
@@ -22,40 +22,34 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
+  defaultTheme = "light",
   storageKey = "vite-ui-theme",
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  )
+  const [theme, setTheme] = useState<Theme>(() => {
+    const stored = localStorage.getItem(storageKey) as Theme
+    if (!stored || stored === "system") return defaultTheme
+    return stored
+  })
 
   useEffect(() => {
     const root = window.document.documentElement
-
     root.classList.remove("light", "dark")
-
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light"
-
-      root.classList.add(systemTheme)
-      return
-    }
-
     root.classList.add(theme)
   }, [theme])
 
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
-      if (e.key === storageKey && e.newValue && ["dark", "light", "system"].includes(e.newValue)) {
-        setTheme(e.newValue as Theme)
+      if (e.key !== storageKey || !e.newValue) return
+      const incoming = e.newValue as Theme
+      if (incoming === "system") {
+        setTheme(defaultTheme)
+      } else if (incoming === "dark" || incoming === "light") {
+        setTheme(incoming)
       }
     }
     window.addEventListener("storage", handleStorage)
     return () => window.removeEventListener("storage", handleStorage)
-  }, [storageKey])
+  }, [storageKey, defaultTheme])
 
   const value = {
     theme,

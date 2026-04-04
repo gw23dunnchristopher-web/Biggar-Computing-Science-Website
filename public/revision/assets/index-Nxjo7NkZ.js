@@ -1,0 +1,1 @@
+import{c as t,r as o}from"./index-Cn_qQH3V.js";const n=[["path",{d:"M20 6 9 17l-5-5",key:"1gmf2c"}]],s=t("check",n);const r=[["path",{d:"m9 18 6-6-6-6",key:"mthhwq"}]],h=t("chevron-right",r);var a=o.createContext(void 0);function d(e){const c=o.useContext(a);return e||c||"ltr"}export{h as C,s as a,d as u};

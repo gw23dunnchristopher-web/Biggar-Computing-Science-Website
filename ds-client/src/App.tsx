@@ -37,7 +37,7 @@ function Router() {
 
 function App() {
   return (
-    <ThemeProvider storageKey="vite-ui-theme" defaultTheme="system">
+    <ThemeProvider storageKey="vite-ui-theme" defaultTheme="light">
       <QueryClientProvider client={queryClient}>
         <TooltipProvider delayDuration={0}>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>

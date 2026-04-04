@@ -98,7 +98,7 @@ function AppRouter() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <AccessibilityProvider>
           <StudentAuthProvider>
             <QuestionProvider>
