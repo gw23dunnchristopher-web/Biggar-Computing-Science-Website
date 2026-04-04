@@ -299,12 +299,16 @@ export function registerDsRoutes(app: Express) {
     }
     const [database] = await db!.select().from(dsDatabases).where(eq(dsDatabases.id, sandboxDatabaseId));
     if (!database) return res.status(404).json({ error: "Sandbox database not found" });
+    const [originalDb] = await db!.select({ taskDescription: dsDatabases.taskDescription }).from(dsDatabases).where(eq(dsDatabases.id, embed.databaseId));
     const tables = await db!.select().from(dsTables).where(eq(dsTables.databaseId, sandboxDatabaseId)).orderBy(dsTables.createdAt);
     const tablesWithFields = await Promise.all(tables.map(async (table) => {
       const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, table.id)).orderBy(dsFields.sortOrder);
       return { ...tsFmt(table, "createdAt", "updatedAt"), fields: fields.map(f => tsFmt(f, "createdAt", "updatedAt")) };
     }));
-    res.json({ database: tsFmt(database, "createdAt", "updatedAt"), tables: tablesWithFields });
+    res.json({
+      database: { ...tsFmt(database, "createdAt", "updatedAt"), taskDescription: originalDb?.taskDescription ?? null },
+      tables: tablesWithFields,
+    });
   });
 
   /* ── Queries ── */
@@ -562,6 +566,54 @@ export function registerDsRoutes(app: Express) {
     const orphans = allRecords.filter(r => !validIds.has(r.tableId));
     for (const r of orphans) await db!.delete(dsRecords).where(eq(dsRecords.id, r.id));
     res.json({ message: "Compact & Repair complete", tablesChecked: tables.length, orphanedRecordsRemoved: orphans.length, status: "healthy" });
+  });
+
+  /* ── AI Database Structure Grading (for student embed / N4 mode) ── */
+  app.post("/api/ds/grade-database", async (req, res) => {
+    const { sandboxDatabaseId, taskDescription: clientTaskDesc } = req.body;
+    if (!sandboxDatabaseId) return res.status(400).json({ error: "sandboxDatabaseId is required" });
+    if (!gemini) return res.status(503).json({ error: "AI marking is not available (no API key configured)" });
+
+    const dbId = parseInt(sandboxDatabaseId);
+    const [dbRow] = await db!.select().from(dsDatabases).where(eq(dsDatabases.id, dbId));
+    if (!dbRow) return res.status(404).json({ error: "Database not found" });
+
+    const taskDescription = clientTaskDesc || dbRow.taskDescription || "";
+
+    const tables = await db!.select().from(dsTables).where(eq(dsTables.databaseId, dbId)).orderBy(dsTables.createdAt);
+    const tableDetails = await Promise.all(tables.map(async (t) => {
+      const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, t.id)).orderBy(dsFields.sortOrder);
+      const records = await db!.select().from(dsRecords).where(and(eq(dsRecords.tableId, t.id), eq(dsRecords.databaseId, dbId)));
+      const sampleRows = records.slice(0, 5).map(r => r.data);
+      return { name: t.name, fields: fields.map(f => ({ name: f.name, type: f.fieldType, isPrimaryKey: f.isPrimaryKey, isRequired: f.isRequired })), rowCount: records.length, sampleRows };
+    }));
+
+    const dbSummary = tableDetails.map(t =>
+      `Table: ${t.name} (${t.rowCount} row${t.rowCount !== 1 ? "s" : ""})\n  Fields: ${t.fields.map(f => `${f.name} (${f.type}${f.isPrimaryKey ? ", PK" : ""}${f.isRequired ? ", required" : ""})`).join(", ")}\n  Sample data: ${t.sampleRows.length > 0 ? t.sampleRows.map(r => JSON.stringify(r)).join("; ") : "none"}`
+    ).join("\n\n");
+
+    const prompt = `You are a Computing Science teacher marking an N4 Computing Science database exercise.
+
+${taskDescription ? `TASK: ${taskDescription}\n` : ""}STUDENT'S DATABASE:
+${dbSummary}
+
+Please mark this database. Your response must be structured as follows:
+1. **Mark**: Give a mark out of 4 (0–4) based on how well the database design matches the task requirements.
+2. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Comment on the table structure, field names, data types, and any sample data entered.
+3. **Suggestions**: One or two practical improvements the student could make to their database design.
+
+Be encouraging but honest. Use British English spelling.`;
+
+    try {
+      const response = await gemini.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: prompt,
+      });
+      res.json({ feedback: response.text || "" });
+    } catch (err: any) {
+      console.error("DS database grading error:", err?.message || err);
+      res.status(500).json({ error: "AI marking failed. Please try again." });
+    }
   });
 
   /* ── AI SQL Grading ── */
