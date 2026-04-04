@@ -114,6 +114,7 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
   const [lwTableId, setLwTableId] = useState<number | null>(null);
   const [lwValueField, setLwValueField] = useState('');
   const [lwDisplayField, setLwDisplayField] = useState('');
+  const [lwEnforceIntegrity, setLwEnforceIntegrity] = useState(false);
 
   const openLookupWizard = useCallback((fieldIdx: number) => {
     setLwFieldIdx(fieldIdx);
@@ -134,6 +135,7 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
       setLwDisplayField('');
     }
     setLwStep(1);
+    setLwEnforceIntegrity(false);
     setLookupWizardOpen(true);
   }, [fields]);
 
@@ -328,6 +330,36 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
                     </div>
                   </>
                 )}
+
+                {lwStep === 3 && lwSourceType === 'table' && (
+                  <>
+                    <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+                      Do you want to enable data integrity between these tables?
+                    </p>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 accent-[#C42B1C]"
+                        checked={lwEnforceIntegrity}
+                        onChange={e => setLwEnforceIntegrity(e.target.checked)}
+                      />
+                      <div>
+                        <div className="text-sm font-medium">Enable Data Integrity</div>
+                        <div className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                          Prevents invalid links between tables. You cannot enter a value in this lookup field unless a matching record exists in the source table.
+                        </div>
+                      </div>
+                    </label>
+                    <p className="text-xs text-gray-400 mt-4">
+                      What label would you like for your lookup field?
+                    </p>
+                    <input
+                      defaultValue={lwValueField}
+                      className="mt-1 w-full border border-gray-300 px-2 py-1 text-sm outline-none focus:border-[#C42B1C] rounded-sm"
+                      placeholder="Label for the lookup column..."
+                    />
+                  </>
+                )}
               </div>
             </div>
 
@@ -342,15 +374,20 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
                   <Button size="sm" className="bg-[#C42B1C] hover:bg-[#9B2118]" onClick={() => setLwStep(2)}>
                     Next <ChevronRight size={14} className="ml-1" />
                   </Button>
+                ) : lwStep === 2 && lwSourceType === 'table' ? (
+                  <Button
+                    size="sm"
+                    className="bg-[#C42B1C] hover:bg-[#9B2118]"
+                    disabled={!lwTableId || !lwValueField}
+                    onClick={() => setLwStep(3)}
+                  >
+                    Next <ChevronRight size={14} className="ml-1" />
+                  </Button>
                 ) : (
                   <Button
                     size="sm"
                     className="bg-[#C42B1C] hover:bg-[#9B2118]"
-                    disabled={
-                      lwSourceType === 'valuelist'
-                        ? lwValues.filter(v => v.trim()).length === 0
-                        : !lwTableId || !lwValueField
-                    }
+                    disabled={lwSourceType === 'valuelist' ? lwValues.filter(v => v.trim()).length === 0 : false}
                     onClick={finishLookupWizard}
                   >
                     Finish
@@ -616,6 +653,21 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
                   </tr>
                 )}
 
+                {/* Field Size — number */}
+                {selectedField.fieldType === 'number' && (
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Field Size</td>
+                    <td className="px-2 py-0.5">
+                      <select className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option>Long Integer</option>
+                        <option>Single</option>
+                        <option>Double</option>
+                        <option>Decimal</option>
+                      </select>
+                    </td>
+                  </tr>
+                )}
+
                 {/* Calculated Expression */}
                 {selectedField.fieldType === 'calculated' && (
                   <tr className="border-b border-gray-300 hover:bg-gray-100">
@@ -663,6 +715,38 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
                         <option>Pound (£ 1,234.56)</option>
                         <option>Euro (€ 1,234.56)</option>
                         <option>Dollar ($ 1,234.56)</option>
+                      </select>
+                    </td>
+                  </tr>
+                )}
+
+                {/* Date/Time format */}
+                {selectedField.fieldType === 'date' && (
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Format</td>
+                    <td className="px-2 py-0.5">
+                      <select className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option value="">General Date (16/04/2025 15:24:00)</option>
+                        <option value="longdate">Long Date (16 April 2025)</option>
+                        <option value="mediumdate">Medium Date (16-Apr-25)</option>
+                        <option value="shortdate">Short Date (16/04/2025)</option>
+                        <option value="longtime">Long Time (15:24:00)</option>
+                        <option value="mediumtime">Medium Time (03:24 PM)</option>
+                        <option value="shorttime">Short Time (15:24)</option>
+                      </select>
+                    </td>
+                  </tr>
+                )}
+
+                {/* Yes/No format */}
+                {selectedField.fieldType === 'boolean' && (
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Format</td>
+                    <td className="px-2 py-0.5">
+                      <select className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option>Yes/No</option>
+                        <option>True/False</option>
+                        <option>On/Off</option>
                       </select>
                     </td>
                   </tr>
