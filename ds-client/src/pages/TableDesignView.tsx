@@ -6,11 +6,12 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonContextSection } from '@/components/layout/Ribbon';
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
 import { DesignGrid } from '@/components/ui/design-grid';
-import { Save, Grid3X3, Key, PlusSquare, MinusSquare, Eye, List, Settings2, AlertTriangle } from 'lucide-react';
+import { Save, Grid3X3, Key, PlusSquare, MinusSquare, Eye, List, Settings2, AlertTriangle, RotateCcw } from 'lucide-react';
 import { DesignViewIcon } from '@/components/ui/design-view-icon';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 async function apiFetch(path: string, opts?: RequestInit) {
@@ -89,9 +90,12 @@ interface Props {
   onCreateAutoReport?: () => void;
   onShare?: () => void;
   onSettings?: () => void;
+  isStudentMode?: boolean;
+  onSwitchToDatasheet?: () => void;
+  onReset?: () => void;
 }
 
-export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable, queries = [], forms = [], reports = [], onDeleteQuery, onDeleteForm, onDeleteReport, onRefresh, onCreateTable, onCreateQuery, onQueryWizard, onCreateForm, onCreateBlankForm, onCreateAutoForm, onCreateReport, onCreateBlankReport, onCreateAutoReport, onShare, onSettings }: Props) {
+export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable, queries = [], forms = [], reports = [], onDeleteQuery, onDeleteForm, onDeleteReport, onRefresh, onCreateTable, onCreateQuery, onQueryWizard, onCreateForm, onCreateBlankForm, onCreateAutoForm, onCreateReport, onCreateBlankReport, onCreateAutoReport, onShare, onSettings, isStudentMode, onSwitchToDatasheet, onReset }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -102,6 +106,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
   const [fields, setFields] = useState<UpdateFieldRequest[]>([]);
   const [tableName, setTableName] = useState('');
   const [selectedFieldIndex, setSelectedFieldIndex] = useState<number | null>(null);
+  const [resetConfirm, setResetConfirm] = useState(false);
 
   // ── Type-change warning ──
   const [typeChangeDialog, setTypeChangeDialog] = useState<TypeChangePending | null>(null);
@@ -293,16 +298,23 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
   const ribbon = (
     <Ribbon
       title={db.name}
-      homeLink={`/databases/${databaseId}`}
-      allDatabasesLink="/"
-      contextSection={contextSection}
+      homeLink={isStudentMode ? undefined : `/databases/${databaseId}`}
+      allDatabasesLink={isStudentMode ? undefined : '/'}
+      contextSection={isStudentMode ? undefined : contextSection}
       pinnedContent={
-        <RibbonGroup name="View">
-          <RibbonDropdownButton icon={<DesignViewIcon size={22} />} label="Design">
-            <RibbonButton icon={<Grid3X3 size={22} />} label="Datasheet" onClick={() => setLocation(`/databases/${databaseId}/tables/${tableId}/data`)} />
-            <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" active />
-          </RibbonDropdownButton>
-        </RibbonGroup>
+        <>
+          <RibbonGroup name="View">
+            <RibbonDropdownButton icon={<DesignViewIcon size={22} />} label="Design">
+              <RibbonButton icon={<Grid3X3 size={22} />} label="Datasheet" onClick={() => onSwitchToDatasheet ? onSwitchToDatasheet() : setLocation(`/databases/${databaseId}/tables/${tableId}/data`)} />
+              <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" active />
+            </RibbonDropdownButton>
+          </RibbonGroup>
+          {onReset && (
+            <RibbonGroup name="Sandbox">
+              <RibbonButton icon={<RotateCcw size={22} />} label="Reset" onClick={() => setResetConfirm(true)} />
+            </RibbonGroup>
+          )}
+        </>
       }
       tabs={[
         {
@@ -337,7 +349,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
       <div className="flex items-center gap-1">
         <button
           title="Datasheet View"
-          onClick={() => setLocation(`/databases/${databaseId}/tables/${tableId}/data`)}
+          onClick={() => onSwitchToDatasheet ? onSwitchToDatasheet() : setLocation(`/databases/${databaseId}/tables/${tableId}/data`)}
           className="p-0.5 rounded hover:bg-gray-200 text-gray-500 hover:text-gray-700"
         >
           <Grid3X3 size={13} />
@@ -437,6 +449,17 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
             </div>
           </div>
         </div>
+      )}
+
+      {onReset && (
+        <ConfirmDialog
+          open={resetConfirm}
+          onOpenChange={setResetConfirm}
+          title="Reset Sandbox"
+          description="This will delete all your changes and restore the sandbox to its original state. Are you sure?"
+          confirmLabel="Reset"
+          onConfirm={onReset}
+        />
       )}
     </Shell>
   );

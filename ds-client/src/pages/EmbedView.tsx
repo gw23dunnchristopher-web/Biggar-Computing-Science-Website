@@ -3,6 +3,7 @@ import { Shell } from '@/components/layout/Shell';
 import { Ribbon } from '@/components/layout/Ribbon';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TableDataView } from './TableDataView';
+import { TableDesignView } from './TableDesignView';
 
 const SESSION_KEY_STORAGE = 'student_session_key';
 
@@ -43,6 +44,7 @@ export function EmbedView({ token }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTableId, setActiveTableId] = useState<number | null>(null);
+  const [activeView, setActiveView] = useState<'datasheet' | 'design'>('datasheet');
   const [resetKey, setResetKey] = useState(0);
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export function EmbedView({ token }: Props) {
     }
     setSnapshot(null);
     setActiveTableId(null);
+    setActiveView('datasheet');
     setResetKey(k => k + 1);
   }
 
@@ -98,6 +101,20 @@ export function EmbedView({ token }: Props) {
   }
 
   if (activeTableId) {
+    if (activeView === 'design') {
+      return (
+        <TableDesignView
+          databaseId={snapshot.database.id}
+          tableId={activeTableId}
+          db={snapshot.database}
+          tables={snapshot.tables}
+          onDeleteTable={() => {}}
+          isStudentMode={true}
+          onSwitchToDatasheet={() => setActiveView('datasheet')}
+          onReset={handleReset}
+        />
+      );
+    }
     return (
       <TableDataView
         databaseId={snapshot.database.id}
@@ -105,8 +122,9 @@ export function EmbedView({ token }: Props) {
         db={snapshot.database}
         tables={snapshot.tables}
         isStudentMode={true}
-        onSelectTable={setActiveTableId}
+        onSelectTable={(id) => { setActiveTableId(id); setActiveView('datasheet'); }}
         onReset={handleReset}
+        onSwitchToDesign={() => setActiveView('design')}
       />
     );
   }

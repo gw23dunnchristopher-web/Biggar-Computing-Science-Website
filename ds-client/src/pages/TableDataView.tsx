@@ -62,6 +62,7 @@ interface Props {
   onDocumenter?: () => void;
   onObjectDependencies?: () => void;
   onReset?: () => void;
+  onSwitchToDesign?: () => void;
 }
 
 type FieldFilter =
@@ -94,7 +95,7 @@ export function TableDataView({
   onCreateReport, onCreateBlankReport, onCreateAutoReport,
   onShare, onSettings,
   onImportCSV, onExportData, onOpenRelationships, onCompact, onAnalyse, onDocumenter, onObjectDependencies,
-  onReset,
+  onReset, onSwitchToDesign,
 }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -467,7 +468,7 @@ export function TableDataView({
           <RibbonGroup name="View">
             <RibbonDropdownButton icon={<Grid3X3 size={22} />} label="Datasheet">
               <RibbonButton icon={<Grid3X3 size={22} />} label="Datasheet" active />
-              <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" onClick={() => setLocation(`/databases/${databaseId}/tables/${tableId}/design`)} />
+              <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" onClick={() => onSwitchToDesign ? onSwitchToDesign() : setLocation(`/databases/${databaseId}/tables/${tableId}/design`)} />
             </RibbonDropdownButton>
           </RibbonGroup>
           {onReset && (
@@ -579,7 +580,7 @@ export function TableDataView({
         </button>
         <button
           title="Design View"
-          onClick={() => setLocation(`/databases/${databaseId}/tables/${tableId}/design`)}
+          onClick={() => onSwitchToDesign ? onSwitchToDesign() : setLocation(`/databases/${databaseId}/tables/${tableId}/design`)}
           className="w-5 h-4 flex items-center justify-center hover:bg-gray-200 border border-transparent rounded-sm text-gray-500"
         >
           <DesignViewIcon size={12} />
