@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, boolean, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, boolean, jsonb, timestamp, unique } from "drizzle-orm/pg-core";
 
 export const dsDatabases = pgTable("ds_databases", {
   id: serial("id").primaryKey(),
@@ -53,10 +53,12 @@ export const dsEmbeds = pgTable("ds_embeds", {
 export const dsStudentSessions = pgTable("ds_student_sessions", {
   id: serial("id").primaryKey(),
   token: text("token").notNull(),
-  sessionKey: text("session_key").notNull().unique(),
+  sessionKey: text("session_key").notNull(),
   sandboxDatabaseId: integer("sandbox_database_id").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (t) => ({
+  sessionTokenUniq: unique().on(t.sessionKey, t.token),
+}));
 
 export const dsQueries = pgTable("ds_queries", {
   id: serial("id").primaryKey(),
