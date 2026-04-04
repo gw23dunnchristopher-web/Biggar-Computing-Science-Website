@@ -1083,6 +1083,34 @@ export async function registerN5Routes(
     }
   });
 
+  app.patch("/api/teacher/students/:id/username", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      if (!token || !sessions.has(token)) return res.status(401).json({ error: "Unauthorized" });
+
+      const { username } = req.body;
+      if (!username || typeof username !== "string") {
+        return res.status(400).json({ error: "Username is required" });
+      }
+      const sanitised = username.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "");
+      if (!sanitised || sanitised.length < 2 || sanitised.length > 50) {
+        return res.status(400).json({ error: "Username must be 2–50 characters (letters, numbers, hyphens, underscores)" });
+      }
+      try {
+        const updated = await storage.updateStudentUsername(req.params.id, sanitised);
+        res.json({ username: updated.username });
+      } catch (err: any) {
+        if (err.message === "Username already taken") {
+          return res.status(409).json({ error: "That username is already in use" });
+        }
+        throw err;
+      }
+    } catch (error) {
+      console.error("Rename student error:", error);
+      res.status(500).json({ error: "Failed to rename student" });
+    }
+  });
+
   app.post("/api/teacher/students/:id/reset-password", async (req, res) => {
     try {
       const token = req.headers.authorization?.replace("Bearer ", "");

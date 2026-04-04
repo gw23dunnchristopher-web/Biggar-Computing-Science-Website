@@ -174,6 +174,7 @@ export interface IStorage {
   getStudent(id: string): Promise<Student | undefined>;
   getStudentByUsername(username: string): Promise<Student | undefined>;
   updateStudentPassword(id: string, password: string, mustChangePassword?: boolean, initialPassword?: string | null): Promise<void>;
+  updateStudentUsername(id: string, username: string): Promise<Student>;
   deleteStudent(id: string): Promise<void>;
   // Exam result methods
   saveExamResult(result: InsertExamResult): Promise<ExamResult>;
@@ -554,6 +555,7 @@ class MemoryStorage implements IStorage {
   async getStudent(id: string): Promise<Student | undefined> { return undefined; }
   async getStudentByUsername(username: string): Promise<Student | undefined> { return undefined; }
   async updateStudentPassword(id: string, password: string, mustChangePassword?: boolean): Promise<void> {}
+  async updateStudentUsername(id: string, username: string): Promise<Student> { throw new Error("Not supported in memory mode"); }
   async deleteStudent(id: string): Promise<void> {}
   async saveExamResult(result: InsertExamResult): Promise<ExamResult> { throw new Error("Not supported in memory mode"); }
   async getExamResult(id: string): Promise<ExamResult | undefined> { return undefined; }
@@ -1225,6 +1227,16 @@ class DatabaseStorage implements IStorage {
     }
     await d.update(students).set(updateData).where(eq(students.id, id));
   }
+  async updateStudentUsername(id: string, username: string): Promise<Student> {
+    const d = this.checkDb();
+    const existing = await d.select().from(students).where(eq(students.username, username));
+    if (existing.length > 0 && existing[0].id !== id) {
+      throw new Error("Username already taken");
+    }
+    const [row] = await d.update(students).set({ username }).where(eq(students.id, id)).returning();
+    if (!row) throw new Error("Student not found");
+    return row;
+  }
   async deleteStudent(id: string): Promise<void> {
     const d = this.checkDb();
     await d.delete(students).where(eq(students.id, id));
@@ -1465,6 +1477,7 @@ export const storage: IStorage = {
   getStudent: (id) => activeStorage.getStudent(id),
   getStudentByUsername: (username) => activeStorage.getStudentByUsername(username),
   updateStudentPassword: (id, password, mustChangePassword, initialPassword) => activeStorage.updateStudentPassword(id, password, mustChangePassword, initialPassword),
+  updateStudentUsername: (id, username) => activeStorage.updateStudentUsername(id, username),
   deleteStudent: (id) => activeStorage.deleteStudent(id),
   saveExamResult: (result) => activeStorage.saveExamResult(result),
   getExamResult: (id) => activeStorage.getExamResult(id),

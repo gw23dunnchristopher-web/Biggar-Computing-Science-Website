@@ -9,41 +9,40 @@
   --font-sans: 'Inter', sans-serif;
   --font-mono: 'Fira Code', monospace;
 
-  /* Windows 11 Light Theme Inspired Palette */
-  --color-background: hsl(0 0% 98%);
-  --color-foreground: hsl(222 47% 11%);
-  --color-border: hsl(214 32% 91%);
-  --color-input: hsl(214 32% 91%);
-  --color-ring: hsl(207 100% 42%);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
 
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(222 47% 11%);
-  --color-card-border: hsl(214 32% 91%);
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--border));
 
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(222 47% 11%);
-  --color-popover-border: hsl(214 32% 91%);
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--border));
 
-  --color-primary: hsl(207 100% 42%); /* Microsoft Blue #C42B1C */
-  --color-primary-foreground: hsl(0 0% 100%);
-  
-  --color-secondary: hsl(210 40% 96%);
-  --color-secondary-foreground: hsl(222 47% 11%);
-  
-  --color-muted: hsl(210 40% 96%);
-  --color-muted-foreground: hsl(215 16% 47%);
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
 
-  --color-accent: hsl(207 100% 95%);
-  --color-accent-foreground: hsl(207 100% 42%);
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
 
-  --color-destructive: hsl(0 84% 60%);
-  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
 
-  --color-sidebar: hsl(0 0% 100%);
-  --color-sidebar-foreground: hsl(222 47% 11%);
-  --color-sidebar-border: hsl(214 32% 91%);
-  --color-sidebar-accent: hsl(210 40% 96%);
-  --color-sidebar-accent-foreground: hsl(222 47% 11%);
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-border: hsl(var(--border));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
 
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -53,23 +52,55 @@
 
 :root {
   --background: 0 0% 98%;
-  --foreground: 222 47% 11%;
+  --foreground: 0 0% 3.9%;
   --border: 214 32% 91%;
   --input: 214 32% 91%;
-  --ring: 207 100% 42%;
+  --ring: 4 73% 44%;
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --primary: 207 100% 42%;
-  --primary-foreground: 0 0% 100%;
+  --card-foreground: 0 0% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 3.9%;
+  --primary: 4 73% 44%;
+  --primary-foreground: 0 0% 98%;
   --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
+  --secondary-foreground: 0 0% 9%;
   --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-  --accent: 207 100% 95%;
-  --accent-foreground: 207 100% 42%;
+  --muted-foreground: 0 0% 45.1%;
+  --accent: 4 73% 96%;
+  --accent-foreground: 4 73% 35%;
   --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
+  --destructive-foreground: 0 0% 98%;
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 0 0% 3.9%;
+  --sidebar-accent: 210 40% 96%;
+  --sidebar-accent-foreground: 0 0% 9%;
   --radius: 0.5rem;
+}
+
+.dark {
+  --background: 0 0% 3.9%;
+  --foreground: 0 0% 98%;
+  --border: 217 19% 20%;
+  --input: 217 19% 20%;
+  --ring: 4 73% 55%;
+  --card: 0 0% 7%;
+  --card-foreground: 0 0% 98%;
+  --popover: 0 0% 7%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 4 73% 55%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 217 19% 15%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 217 19% 15%;
+  --muted-foreground: 0 0% 63.9%;
+  --accent: 4 73% 15%;
+  --accent-foreground: 4 73% 70%;
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 0 0% 98%;
+  --sidebar: 0 0% 5%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-accent: 217 19% 12%;
+  --sidebar-accent-foreground: 0 0% 98%;
 }
 
 @layer base {
@@ -96,6 +127,16 @@
   }
   ::-webkit-scrollbar-thumb:hover {
     background: #a8a8a8;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: #4a4a4a;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #5a5a5a;
     border: 2px solid transparent;
     background-clip: padding-box;
   }
