@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+
+  /* Windows 11 Light Theme Inspired Palette */
+  --color-background: hsl(0 0% 98%);
+  --color-foreground: hsl(222 47% 11%);
+  --color-border: hsl(214 32% 91%);
+  --color-input: hsl(214 32% 91%);
+  --color-ring: hsl(207 100% 42%);
+
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(222 47% 11%);
+  --color-card-border: hsl(214 32% 91%);
+
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(222 47% 11%);
+  --color-popover-border: hsl(214 32% 91%);
+
+  --color-primary: hsl(207 100% 42%); /* Microsoft Blue #C42B1C */
+  --color-primary-foreground: hsl(0 0% 100%);
+  
+  --color-secondary: hsl(210 40% 96%);
+  --color-secondary-foreground: hsl(222 47% 11%);
+  
+  --color-muted: hsl(210 40% 96%);
+  --color-muted-foreground: hsl(215 16% 47%);
+
+  --color-accent: hsl(207 100% 95%);
+  --color-accent-foreground: hsl(207 100% 42%);
+
+  --color-destructive: hsl(0 84% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+
+  --color-sidebar: hsl(0 0% 100%);
+  --color-sidebar-foreground: hsl(222 47% 11%);
+  --color-sidebar-border: hsl(214 32% 91%);
+  --color-sidebar-accent: hsl(210 40% 96%);
+  --color-sidebar-accent-foreground: hsl(222 47% 11%);
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
+:root {
+  --background: 0 0% 98%;
+  --foreground: 222 47% 11%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 207 100% 42%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --primary: 207 100% 42%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 207 100% 95%;
+  --accent-foreground: 207 100% 42%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply font-sans antialiased bg-background text-foreground overflow-hidden h-screen w-screen;
+  }
+  
+  /* Webkit scrollbar styling for a native app feel */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+}
+
+/* Custom DataGrid utilities */
+.access-grid-cell {
+  @apply border-r border-b border-gray-300 px-2 py-1 text-sm bg-transparent outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-inset focus-within:bg-white;
+}
+
+.ribbon-button-active {
+  @apply bg-red-50 border border-red-200;
+}
+
+@media print {
+  /* Hide all chrome, show only the report body */
+  body > * { display: none !important; }
+  .print-root { display: block !important; }
+
+  /* Inside the report view — hide toolbars, show content */
+  .print\:hidden { display: none !important; }
+  nav, header, aside { display: none !important; }
+
+  /* Reset layout for print */
+  html, body { height: auto !important; overflow: visible !important; }
+  * { box-shadow: none !important; }
+}

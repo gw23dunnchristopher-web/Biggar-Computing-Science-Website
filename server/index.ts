@@ -6,6 +6,7 @@ import { db, pool, hasDatabase } from './db';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { registerRoutes as registerRevisionRoutes } from './revision-routes';
 import { registerN5Routes, n5Sessions, n5AddSession } from './n5-routes';
+import { registerDsRoutes } from './ds-routes';
 import { eq } from 'drizzle-orm';
 import { sessions as revSessionsTable, users as revUsersTable } from '@shared/revision-schema';
 
@@ -1108,6 +1109,24 @@ if (fs.existsSync(n5BuildDir)) {
 } else {
   app.get('/revision-n5/*splat', (_req, res) => {
     res.status(503).send('N5 revision app not built yet. Run: npm run build:n5');
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Data Sculptor — API routes + static serving at /data-sculptor/
+// ---------------------------------------------------------------------------
+registerDsRoutes(app);
+
+const dsBuildDir = path.join(path.resolve('.'), 'public', 'data-sculptor');
+
+if (fs.existsSync(dsBuildDir)) {
+  app.use('/data-sculptor', express.static(dsBuildDir, { dotfiles: 'deny' }));
+  app.get('/data-sculptor/*splat', (_req, res) => {
+    res.sendFile(path.join(dsBuildDir, 'index.html'));
+  });
+} else {
+  app.get('/data-sculptor/*splat', (_req, res) => {
+    res.status(503).send('Data Sculptor not built yet. Run: npm run build:ds');
   });
 }
 

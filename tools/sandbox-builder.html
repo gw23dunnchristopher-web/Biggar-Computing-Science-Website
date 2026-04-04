@@ -576,6 +576,11 @@
             <span class="tn-icon">&#x1F4CA;</span>
             Analytics
         </button>
+        <hr class="tool-nav-sep">
+        <button class="tool-nav-item" data-tool="data-sculptor" title="Data Sculptor — MS Access Tool">
+            <span class="tn-icon">&#x1F5C3;</span>
+            Data Sculptor
+        </button>
     </nav>
 
     <!-- sidebar: sandbox list -->
@@ -690,6 +695,11 @@
         <iframe data-src="/revision-n5/teacher/classes" title="N5 CS Teacher Dashboard" style="width:100%;flex:1;border:none;background:#0d1117"></iframe>
     </div>
 
+    <!-- Data Sculptor -->
+    <div class="iframe-panel" id="iframePanelDataSculptor">
+        <iframe data-src="/data-sculptor/" title="Data Sculptor" style="width:100%;flex:1;border:none;background:#f9fafb"></iframe>
+    </div>
+
     <!-- Analytics & Progress -->
     <div class="iframe-panel" id="iframePanelAnalytics">
         <div class="cm-tabs">
@@ -769,8 +779,9 @@
     var iframePanelHigher        = document.getElementById('iframePanelHigher');
     var iframePanelN5            = document.getElementById('iframePanelN5');
     var iframePanelAnalytics     = document.getElementById('iframePanelAnalytics');
+    var iframePanelDataSculptor  = document.getElementById('iframePanelDataSculptor');
 
-    var allIframePanels = [iframePanelHigher, iframePanelN5, iframePanelAnalytics];
+    var allIframePanels = [iframePanelHigher, iframePanelN5, iframePanelAnalytics, iframePanelDataSculptor];
 
     function hideAllPanels() {
         allIframePanels.forEach(function (p) { p.classList.remove('active'); });
@@ -823,8 +834,9 @@
     }
 
     function fireNativeInit(panelName) {
-        if (panelName === 'higher')    loadIframe('iframePanelHigher', 'higher');
-        if (panelName === 'n5')        loadIframe('iframePanelN5', 'n5');
+        if (panelName === 'higher')        loadIframe('iframePanelHigher', 'higher');
+        if (panelName === 'n5')            loadIframe('iframePanelN5', 'n5');
+        if (panelName === 'data-sculptor') loadIframe('iframePanelDataSculptor', 'data-sculptor');
         if (panelName === 'analytics') {
             var activeTab = iframePanelAnalytics.querySelector('.tool-tab.active');
             var ptab = activeTab ? activeTab.dataset.ptab : 'higher';
@@ -851,6 +863,8 @@
                 activateToolPanel(iframePanelN5, 'n5');
             } else if (tool === 'analytics') {
                 activateToolPanel(iframePanelAnalytics, 'analytics');
+            } else if (tool === 'data-sculptor') {
+                activateToolPanel(iframePanelDataSculptor, 'data-sculptor');
             }
         });
     });
