@@ -463,9 +463,7 @@ export function TableDataView({
         <RibbonGroup name="View">
           <RibbonDropdownButton icon={<Grid3X3 size={22} />} label="Datasheet">
             <RibbonButton icon={<Grid3X3 size={22} />} label="Datasheet" active />
-            {!isStudentMode && (
-              <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" onClick={() => setLocation(`/databases/${databaseId}/tables/${tableId}/design`)} />
-            )}
+            <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" onClick={() => setLocation(`/databases/${databaseId}/tables/${tableId}/design`)} />
           </RibbonDropdownButton>
         </RibbonGroup>
       }
@@ -569,15 +567,13 @@ export function TableDataView({
         <button title="Datasheet View" className="w-5 h-4 flex items-center justify-center bg-white border border-gray-400 rounded-sm text-[#C42B1C]">
           <Grid3X3 className="w-3 h-3" />
         </button>
-        {!isStudentMode && (
-          <button
-            title="Design View"
-            onClick={() => setLocation(`/databases/${databaseId}/tables/${tableId}/design`)}
-            className="w-5 h-4 flex items-center justify-center hover:bg-gray-200 border border-transparent rounded-sm text-gray-500"
-          >
-            <DesignViewIcon size={12} />
-          </button>
-        )}
+        <button
+          title="Design View"
+          onClick={() => setLocation(`/databases/${databaseId}/tables/${tableId}/design`)}
+          className="w-5 h-4 flex items-center justify-center hover:bg-gray-200 border border-transparent rounded-sm text-gray-500"
+        >
+          <DesignViewIcon size={12} />
+        </button>
       </div>
     </div>
   );
