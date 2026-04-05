@@ -1098,6 +1098,14 @@ table img {
     width: 120px;
 }
 
+.SQLImage {
+    display: block;
+    margin: 4px auto;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+}
+
 #connector {
     width: 50px;
     margin: auto;

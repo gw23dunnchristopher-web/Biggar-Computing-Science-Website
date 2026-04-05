@@ -63,6 +63,7 @@ interface Props {
   onCreateTable?: () => void;
   onCreateQuery?: () => void;
   onQueryWizard?: () => void;
+  onCreateSqlQuery?: () => void;
   onCreateForm?: () => void;
   onCreateBlankForm?: () => void;
   onCreateAutoForm?: () => void;
@@ -83,7 +84,7 @@ function isImageUrl(val: unknown): boolean {
 export function FormView({
   databaseId, formId, db, tables, queries = [], forms = [], reports = [],
   onDeleteTable, onDeleteQuery, onDeleteForm, onDeleteReport, onRefresh,
-  isStudentMode, onCreateTable, onCreateQuery, onQueryWizard,
+  isStudentMode, onCreateTable, onCreateQuery, onQueryWizard, onCreateSqlQuery,
   onCreateForm, onCreateBlankForm, onCreateAutoForm,
   onCreateReport, onCreateBlankReport, onCreateAutoReport,
   onShare, onSettings
@@ -274,7 +275,7 @@ export function FormView({
   const commonTabProps = {
     onCreateTable: onCreateTable || (() => {}),
     onCreateQuery: onCreateQuery || (() => {}),
-    onQueryWizard, onCreateForm, onCreateBlankForm, onCreateAutoForm,
+    onQueryWizard, onCreateSqlQuery, onCreateForm, onCreateBlankForm, onCreateAutoForm,
     onCreateReport, onCreateBlankReport, onCreateAutoReport, onShare, onSettings,
   };
 

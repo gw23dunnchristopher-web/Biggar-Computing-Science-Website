@@ -19,6 +19,59 @@ import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
 
 
+/** Syntax-highlight an SQL string, returning an HTML string (dark theme). */
+function highlightSQL(text: string): string {
+  const KEYWORDS = new Set([
+    'SELECT','FROM','WHERE','AND','OR','NOT','ORDER','BY','ASC','DESC',
+    'GROUP','HAVING','INNER','OUTER','LEFT','RIGHT','FULL','CROSS','JOIN','ON',
+    'INSERT','INTO','VALUES','UPDATE','SET','DELETE','DISTINCT','AS','LIKE',
+    'IN','BETWEEN','IS','NULL','COUNT','SUM','AVG','MAX','MIN','ROUND',
+    'UPPER','LOWER','ALL','ANY','EXISTS','UNION','CASE','WHEN','THEN','ELSE',
+    'END','LIMIT','OFFSET','CREATE','DROP','ALTER','TABLE','DATABASE','WITH','USING',
+  ]);
+
+  function esc(s: string): string {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function highlightCode(code: string): string {
+    return code.replace(/(\b[A-Za-z_][A-Za-z0-9_]*\b|\d+(?:\.\d+)?|[&<>])/g, (m) => {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      if (/^\d/.test(m)) return `<span style="color:#b5cea8">${m}</span>`;
+      if (KEYWORDS.has(m.toUpperCase())) return `<span style="color:#569cd6;font-weight:500">${m.toUpperCase()}</span>`;
+      return `<span style="color:#9cdcfe">${esc(m)}</span>`;
+    });
+  }
+
+  let result = '';
+  let i = 0;
+  while (i < text.length) {
+    if (text[i] === '-' && text[i + 1] === '-') {
+      const end = text.indexOf('\n', i);
+      const chunk = end === -1 ? text.slice(i) : text.slice(i, end);
+      result += `<span style="color:#6a9955">${esc(chunk)}</span>`;
+      i = end === -1 ? text.length : end;
+    } else if (text[i] === "'") {
+      let j = i + 1;
+      while (j < text.length) {
+        if (text[j] === "'" && text[j + 1] === "'") { j += 2; continue; }
+        if (text[j] === "'") { j++; break; }
+        j++;
+      }
+      result += `<span style="color:#ce9178">${esc(text.slice(i, j))}</span>`;
+      i = j;
+    } else {
+      let j = i;
+      while (j < text.length && text[j] !== "'" && !(text[j] === '-' && text[j + 1] === '-')) j++;
+      result += highlightCode(text.slice(i, j));
+      i = j;
+    }
+  }
+  return result;
+}
+
 async function apiFetch(path: string, opts?: RequestInit) {
   const res = await fetch(path, {
     ...opts,
@@ -126,6 +179,7 @@ export function SQLView({
 }: Props) {
   const { toast } = useToast();
   const editorRef = useRef<HTMLTextAreaElement>(null);
+  const highlightRef = useRef<HTMLDivElement>(null);
 
   const [sql, setSql] = useState('SELECT *\nFROM TableName');
   const [schema, setSchema] = useState<SchemaTable[]>([]);
@@ -423,24 +477,39 @@ export function SQLView({
           </div>
 
           {/* Editor area */}
-          <div className="flex bg-[#1e1e1e] border-b border-gray-700" style={{ minHeight: '180px', maxHeight: '320px' }}>
+          <div className="flex bg-[#1e1e1e] border-b border-gray-700 overflow-y-auto" style={{ minHeight: '180px', maxHeight: '320px' }}>
             {/* Line numbers */}
             <div className="flex-shrink-0 select-none bg-[#1e1e1e] text-gray-500 text-xs font-mono py-3 pl-3 pr-2 text-right leading-[22px]" style={{ minWidth: '36px' }}>
               {lines.map((_, i) => (
                 <div key={i}>{i + 1}</div>
               ))}
             </div>
-            {/* Textarea */}
-            <textarea
-              ref={editorRef}
-              value={sql}
-              onChange={e => setSql(e.target.value)}
-              onKeyDown={handleKeyDown}
-              spellCheck={false}
-              className="flex-1 bg-transparent text-gray-100 text-sm font-mono resize-none outline-none py-3 pr-3 leading-[22px] placeholder-gray-600"
-              placeholder="SELECT * FROM TableName"
-              style={{ caretColor: '#7dd3fc' }}
-            />
+            {/* Editor wrapper: syntax highlight overlay + transparent textarea */}
+            <div className="flex-1 relative">
+              {/* Syntax highlight backdrop (dark theme) */}
+              <div
+                ref={highlightRef}
+                className="absolute inset-0 text-sm font-mono py-3 pr-3 leading-[22px] whitespace-pre-wrap break-words pointer-events-none overflow-hidden text-gray-100"
+                dangerouslySetInnerHTML={{ __html: highlightSQL(sql) + '\u200b' }}
+                aria-hidden
+              />
+              {/* Transparent textarea */}
+              <textarea
+                ref={editorRef}
+                value={sql}
+                onChange={e => setSql(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onScroll={() => {
+                  if (highlightRef.current && editorRef.current) {
+                    highlightRef.current.scrollTop = editorRef.current.scrollTop;
+                    highlightRef.current.scrollLeft = editorRef.current.scrollLeft;
+                  }
+                }}
+                spellCheck={false}
+                className="absolute inset-0 w-full h-full bg-transparent text-sm font-mono resize-none outline-none py-3 pr-3 leading-[22px]"
+                style={{ color: 'transparent', caretColor: '#7dd3fc' }}
+              />
+            </div>
           </div>
 
           {/* Run toolbar */}

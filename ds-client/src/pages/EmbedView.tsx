@@ -70,7 +70,7 @@ export function EmbedView({ token, initialMode }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTableId, setActiveTableId] = useState<number | null>(null);
-  const [activeView, setActiveView] = useState<ActiveView>(initialMode === 'sql' ? 'sql' : 'datasheet');
+  const [activeView, setActiveView] = useState<ActiveView>('datasheet');
   const [resetKey, setResetKey] = useState(0);
 
   // Forms / Reports / Queries
@@ -129,22 +129,7 @@ export function EmbedView({ token, initialMode }: Props) {
         setSnapshot(data);
         // Load forms/reports/queries for the database
         await Promise.all([loadForms(data.database.id), loadReports(data.database.id), loadQueries(data.database.id)]);
-        if (initialMode !== 'sql') {
-          setActiveTableId(data.tables?.[0]?.id ?? null);
-        } else {
-          // Create a temp query in the sandboxed database
-          try {
-            const res = await fetch(`/api/ds/databases/${data.database.id}/queries`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ name: 'Query1', definition: { tables: [], columns: [] } })
-            });
-            if (res.ok) {
-              const q = await res.json();
-              setTempQueryId(q.id);
-            }
-          } catch {}
-        }
+        setActiveTableId(data.tables?.[0]?.id ?? null);
         setIsLoading(false);
       })
       .catch(e => {
@@ -212,7 +197,7 @@ export function EmbedView({ token, initialMode }: Props) {
     setActiveTableId(null);
     setTempQueryId(null);
     setSqlSubView('query');
-    setActiveView(initialMode === 'sql' ? 'sql' : 'datasheet');
+    setActiveView('datasheet');
     setForms([]);
     setReports([]);
     setQueries([]);
@@ -272,9 +257,36 @@ export function EmbedView({ token, initialMode }: Props) {
     }
   }
 
+  // ── Create SQL query and switch to SQL editor ───────────────────────────
+  async function handleCreateSqlQuery() {
+    if (!dbId) return;
+    // If already have a temp query, just switch to it
+    if (tempQueryId) {
+      setSqlSubView('query');
+      setActiveView('sql');
+      return;
+    }
+    try {
+      const res = await fetch(`/api/ds/databases/${dbId}/queries`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'Query1', definition: { tables: [], columns: [] } })
+      });
+      if (res.ok) {
+        const q = await res.json();
+        setTempQueryId(q.id);
+        setSqlSubView('query');
+        setActiveView('sql');
+      }
+    } catch {
+      toast({ title: 'Failed to open SQL editor', variant: 'destructive' });
+    }
+  }
+
   // ── Shared wizard callbacks ──────────────────────────────────────────────
   const wizardProps = {
     onQueryWizard: () => setQueryWizardOpen(true),
+    onCreateSqlQuery: handleCreateSqlQuery,
     onCreateForm: () => setFormWizardOpen(true),
     onCreateBlankForm: () => openQuickCreate('blankForm'),
     onCreateAutoForm: () => openQuickCreate('autoForm'),

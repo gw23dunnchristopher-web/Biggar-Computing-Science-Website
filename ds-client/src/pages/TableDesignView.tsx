@@ -81,6 +81,7 @@ interface Props {
   onCreateTable?: () => void;
   onCreateQuery?: () => void;
   onQueryWizard?: () => void;
+  onCreateSqlQuery?: () => void;
   onCreateForm?: () => void;
   onCreateBlankForm?: () => void;
   onCreateAutoForm?: () => void;
@@ -101,7 +102,7 @@ interface Props {
   onReset?: () => void;
 }
 
-export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable, queries = [], forms = [], reports = [], onDeleteQuery, onDeleteForm, onDeleteReport, onRefresh, onCreateTable, onCreateQuery, onQueryWizard, onCreateForm, onCreateBlankForm, onCreateAutoForm, onCreateReport, onCreateBlankReport, onCreateAutoReport, onShare, onSettings, onImportCSV, onExportData, onOpenRelationships, onCompact, onAnalyse, onDocumenter, onObjectDependencies, isStudentMode, onSwitchToDatasheet, onReset }: Props) {
+export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable, queries = [], forms = [], reports = [], onDeleteQuery, onDeleteForm, onDeleteReport, onRefresh, onCreateTable, onCreateQuery, onQueryWizard, onCreateSqlQuery, onCreateForm, onCreateBlankForm, onCreateAutoForm, onCreateReport, onCreateBlankReport, onCreateAutoReport, onShare, onSettings, onImportCSV, onExportData, onOpenRelationships, onCompact, onAnalyse, onDocumenter, onObjectDependencies, isStudentMode, onSwitchToDatasheet, onReset }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -260,6 +261,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
     onCreateTable: onCreateTable || (() => {}),
     onCreateQuery: onCreateQuery || (() => {}),
     onQueryWizard,
+    onCreateSqlQuery,
     onCreateForm,
     onCreateBlankForm,
     onCreateAutoForm,

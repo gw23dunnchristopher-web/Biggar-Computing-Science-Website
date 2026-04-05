@@ -46,6 +46,7 @@ interface Props {
   onCreateTable?: () => void;
   onCreateQuery?: () => void;
   onQueryWizard?: () => void;
+  onCreateSqlQuery?: () => void;
   onCreateForm?: () => void;
   onCreateBlankForm?: () => void;
   onCreateAutoForm?: () => void;
@@ -90,7 +91,7 @@ export function TableDataView({
   databaseId, tableId, db, tables, onDeleteTable, isStudentMode,
   onSelectTable, queries = [], forms = [], reports = [], onSelectQuery, onDeleteQuery, onDeleteForm, onDeleteReport,
   onRefresh,
-  onCreateTable, onCreateQuery, onQueryWizard,
+  onCreateTable, onCreateQuery, onQueryWizard, onCreateSqlQuery,
   onCreateForm, onCreateBlankForm, onCreateAutoForm,
   onCreateReport, onCreateBlankReport, onCreateAutoReport,
   onShare, onSettings,
@@ -460,6 +461,7 @@ export function TableDataView({
     onCreateTable: onCreateTable || (() => {}),
     onCreateQuery: onCreateQuery || (() => {}),
     onQueryWizard,
+    onCreateSqlQuery,
     onCreateForm,
     onCreateBlankForm,
     onCreateAutoForm,

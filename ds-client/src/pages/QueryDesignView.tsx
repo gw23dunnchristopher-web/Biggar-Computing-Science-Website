@@ -53,6 +53,7 @@ interface Props {
   onCreateTable?: () => void;
   onCreateQuery?: () => void;
   onQueryWizard?: () => void;
+  onCreateSqlQuery?: () => void;
   onCreateForm?: () => void;
   onCreateBlankForm?: () => void;
   onCreateAutoForm?: () => void;
@@ -63,6 +64,59 @@ interface Props {
   onSettings?: () => void;
 }
 
+
+/** Syntax-highlight an SQL string, returning an HTML string (light theme). */
+function highlightSQL(text: string): string {
+  const KEYWORDS = new Set([
+    'SELECT','FROM','WHERE','AND','OR','NOT','ORDER','BY','ASC','DESC',
+    'GROUP','HAVING','INNER','OUTER','LEFT','RIGHT','FULL','CROSS','JOIN','ON',
+    'INSERT','INTO','VALUES','UPDATE','SET','DELETE','DISTINCT','AS','LIKE',
+    'IN','BETWEEN','IS','NULL','COUNT','SUM','AVG','MAX','MIN','ROUND',
+    'UPPER','LOWER','ALL','ANY','EXISTS','UNION','CASE','WHEN','THEN','ELSE',
+    'END','LIMIT','OFFSET','CREATE','DROP','ALTER','TABLE','DATABASE','WITH','USING',
+  ]);
+
+  function esc(s: string): string {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function highlightCode(code: string): string {
+    return code.replace(/(\b[A-Za-z_][A-Za-z0-9_]*\b|\d+(?:\.\d+)?|[&<>])/g, (m) => {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      if (/^\d/.test(m)) return `<span style="color:#098658">${m}</span>`;
+      if (KEYWORDS.has(m.toUpperCase())) return `<span style="color:#0000ff;font-weight:500">${m.toUpperCase()}</span>`;
+      return m;
+    });
+  }
+
+  let result = '';
+  let i = 0;
+  while (i < text.length) {
+    if (text[i] === '-' && text[i + 1] === '-') {
+      const end = text.indexOf('\n', i);
+      const chunk = end === -1 ? text.slice(i) : text.slice(i, end);
+      result += `<span style="color:#008000">${esc(chunk)}</span>`;
+      i = end === -1 ? text.length : end;
+    } else if (text[i] === "'") {
+      let j = i + 1;
+      while (j < text.length) {
+        if (text[j] === "'" && text[j + 1] === "'") { j += 2; continue; }
+        if (text[j] === "'") { j++; break; }
+        j++;
+      }
+      result += `<span style="color:#a31515">${esc(text.slice(i, j))}</span>`;
+      i = j;
+    } else {
+      let j = i;
+      while (j < text.length && text[j] !== "'" && !(text[j] === '-' && text[j + 1] === '-')) j++;
+      result += highlightCode(text.slice(i, j));
+      i = j;
+    }
+  }
+  return result;
+}
 
 async function apiFetch(path: string, opts?: RequestInit) {
   const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(opts?.headers as any) };
@@ -110,7 +164,7 @@ export function QueryDesignView({
   databaseId, queryId, db, tables, onDeleteTable, isStudentMode, initialView,
   queries = [], forms = [], reports = [], onSelectTable, onSelectQuery, onDeleteQuery, onDeleteForm, onDeleteReport,
   onRefresh,
-  onCreateTable, onCreateQuery, onQueryWizard,
+  onCreateTable, onCreateQuery, onQueryWizard, onCreateSqlQuery,
   onCreateForm, onCreateBlankForm, onCreateAutoForm,
   onCreateReport, onCreateBlankReport, onCreateAutoReport,
   onShare, onSettings
@@ -137,6 +191,7 @@ export function QueryDesignView({
   const [isSqlRunning, setIsSqlRunning] = useState(false);
   const sqlRef = useRef<HTMLTextAreaElement>(null);
   const sqlGutterRef = useRef<HTMLDivElement>(null);
+  const sqlHighlightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     apiFetch(`/api/ds/databases/${databaseId}/queries/${queryId}`)
@@ -338,6 +393,7 @@ export function QueryDesignView({
     onCreateTable: onCreateTable || (() => {}),
     onCreateQuery: onCreateQuery || (() => {}),
     onQueryWizard,
+    onCreateSqlQuery,
     onCreateForm,
     onCreateBlankForm,
     onCreateAutoForm,
@@ -737,16 +793,35 @@ export function QueryDesignView({
               >
                 {sqlText.split('\n').map((_, i) => `${i + 1}\n`).join('')}
               </div>
-              <textarea
-                ref={sqlRef}
-                value={sqlText}
-                onChange={e => { setSqlText(e.target.value); setSqlUserEdited(true); }}
-                onKeyDown={handleSqlKeyDown}
-                onScroll={() => { if (sqlGutterRef.current && sqlRef.current) sqlGutterRef.current.scrollTop = sqlRef.current.scrollTop; }}
-                className="flex-1 py-3 px-2 font-mono text-sm resize-none outline-none bg-white min-h-0 leading-[1.375rem]"
-                spellCheck={false}
-                placeholder="SELECT * FROM TableName"
-              />
+              {/* Editor wrapper: highlight overlay + transparent textarea */}
+              <div className="flex-1 relative overflow-hidden">
+                {/* Syntax highlight backdrop */}
+                <div
+                  ref={sqlHighlightRef}
+                  className="absolute inset-0 py-3 px-2 font-mono text-sm leading-[1.375rem] whitespace-pre-wrap break-words pointer-events-none overflow-hidden bg-white"
+                  dangerouslySetInnerHTML={{ __html: highlightSQL(sqlText) + '\u200b' }}
+                  aria-hidden
+                />
+                {/* Placeholder when textarea is empty */}
+                {!sqlText && (
+                  <div className="absolute top-0 left-0 py-3 px-2 font-mono text-sm leading-[1.375rem] text-gray-400 pointer-events-none select-none">
+                    SELECT * FROM TableName
+                  </div>
+                )}
+                <textarea
+                  ref={sqlRef}
+                  value={sqlText}
+                  onChange={e => { setSqlText(e.target.value); setSqlUserEdited(true); }}
+                  onKeyDown={handleSqlKeyDown}
+                  onScroll={() => {
+                    if (sqlGutterRef.current && sqlRef.current) sqlGutterRef.current.scrollTop = sqlRef.current.scrollTop;
+                    if (sqlHighlightRef.current && sqlRef.current) { sqlHighlightRef.current.scrollTop = sqlRef.current.scrollTop; sqlHighlightRef.current.scrollLeft = sqlRef.current.scrollLeft; }
+                  }}
+                  className="absolute inset-0 w-full h-full py-3 px-2 font-mono text-sm resize-none outline-none bg-transparent leading-[1.375rem]"
+                  style={{ color: 'transparent', caretColor: '#333' }}
+                  spellCheck={false}
+                />
+              </div>
             </div>
             {/* Run bar */}
             <div className="flex-none flex items-center gap-2 px-3 py-2 bg-[#f3f2f1] border-t border-gray-300">

@@ -7,7 +7,7 @@ import { RibbonGroup, RibbonButton } from './Ribbon';
 import {
   Table, List, FileSpreadsheet, FileText, FileType,
   Settings, GitBranch, BarChart2, Wrench, Upload,
-  PlugZap, FileDown, FileUp, Mail, Wand2, Download
+  PlugZap, FileDown, FileUp, Mail, Wand2, Download, Code2
 } from 'lucide-react';
 
 export interface CommonTabsProps {
@@ -32,6 +32,7 @@ export interface CommonTabsProps {
   onSettings?: () => void;
   onOpenSql?: () => void;
   onOpenRelationships?: () => void;
+  onCreateSqlQuery?: () => void;
   onCompact?: () => void;
   onAnalyse?: () => void;
   onDocumenter?: () => void;
@@ -40,7 +41,7 @@ export interface CommonTabsProps {
 
 /** CREATE tab — Tables, Queries, Forms, Reports, Macros */
 export function CreateTabContent({
-  onCreateTable, onCreateQuery, onQueryWizard,
+  onCreateTable, onCreateQuery, onQueryWizard, onCreateSqlQuery,
   onCreateForm, onCreateBlankForm, onCreateAutoForm,
   onCreateReport, onCreateBlankReport, onCreateAutoReport,
 }: CommonTabsProps) {
@@ -57,6 +58,7 @@ export function CreateTabContent({
       <RibbonGroup name="Queries">
         <RibbonButton icon={<Wand2 size={22} />} label="Query Wizard" onClick={onQueryWizard} disabled={!onQueryWizard} />
         <RibbonButton icon={<List size={22} />} label="Query Design" onClick={onCreateQuery} />
+        <RibbonButton icon={<Code2 size={22} />} label="SQL Query" onClick={onCreateSqlQuery} disabled={!onCreateSqlQuery} title="Open a blank SQL query editor" />
       </RibbonGroup>
       <RibbonGroup name="Forms">
         <RibbonButton

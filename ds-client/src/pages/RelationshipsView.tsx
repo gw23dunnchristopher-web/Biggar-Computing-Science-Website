@@ -63,6 +63,7 @@ interface Props {
   onCreateTable?: () => void;
   onCreateQuery?: () => void;
   onQueryWizard?: () => void;
+  onCreateSqlQuery?: () => void;
   onCreateForm?: () => void;
   onCreateBlankForm?: () => void;
   onCreateAutoForm?: () => void;
@@ -88,7 +89,7 @@ const TABLE_FIELD_H = 24;
 export function RelationshipsView({
   databaseId, db, tables, queries = [], forms = [], reports = [],
   onDeleteTable, onDeleteQuery, onDeleteForm, onDeleteReport, onRefresh,
-  isStudentMode, onSelectTable, onCreateTable, onCreateQuery, onQueryWizard,
+  isStudentMode, onSelectTable, onCreateTable, onCreateQuery, onQueryWizard, onCreateSqlQuery,
   onCreateForm, onCreateBlankForm, onCreateAutoForm,
   onCreateReport, onCreateBlankReport, onCreateAutoReport,
   onImportCSV, onExportData, onShare, onSettings, onOpenSql, onOpenRelationships,
@@ -219,6 +220,7 @@ export function RelationshipsView({
     onCreateTable: onCreateTable || (() => {}),
     onCreateQuery: onCreateQuery || (() => {}),
     onQueryWizard,
+    onCreateSqlQuery,
     onCreateForm,
     onCreateBlankForm,
     onCreateAutoForm,

@@ -79,6 +79,7 @@ interface Props {
   onCreateTable?: () => void;
   onCreateQuery?: () => void;
   onQueryWizard?: () => void;
+  onCreateSqlQuery?: () => void;
   onCreateForm?: () => void;
   onCreateBlankForm?: () => void;
   onCreateAutoForm?: () => void;
@@ -92,7 +93,7 @@ interface Props {
 export function ReportView({
   databaseId, reportId, db, tables, queries = [], forms = [], reports = [],
   onDeleteTable, onDeleteQuery, onDeleteForm, onDeleteReport, onRefresh,
-  isStudentMode, onCreateTable, onCreateQuery, onQueryWizard,
+  isStudentMode, onCreateTable, onCreateQuery, onQueryWizard, onCreateSqlQuery,
   onCreateForm, onCreateBlankForm, onCreateAutoForm,
   onCreateReport, onCreateBlankReport, onCreateAutoReport,
   onShare, onSettings
@@ -227,6 +228,7 @@ export function ReportView({
     onCreateTable: onCreateTable || (() => {}),
     onCreateQuery: onCreateQuery || (() => {}),
     onQueryWizard,
+    onCreateSqlQuery,
     onCreateForm,
     onCreateBlankForm,
     onCreateAutoForm,
