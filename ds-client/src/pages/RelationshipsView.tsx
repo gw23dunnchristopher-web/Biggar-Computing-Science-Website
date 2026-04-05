@@ -59,6 +59,7 @@ interface Props {
   onDeleteReport?: (id: number) => void;
   onRefresh?: () => void;
   isStudentMode?: boolean;
+  onSelectTable?: (id: number) => void;
   onCreateTable?: () => void;
   onCreateQuery?: () => void;
   onQueryWizard?: () => void;
@@ -87,7 +88,7 @@ const TABLE_FIELD_H = 24;
 export function RelationshipsView({
   databaseId, db, tables, queries = [], forms = [], reports = [],
   onDeleteTable, onDeleteQuery, onDeleteForm, onDeleteReport, onRefresh,
-  isStudentMode, onCreateTable, onCreateQuery, onQueryWizard,
+  isStudentMode, onSelectTable, onCreateTable, onCreateQuery, onQueryWizard,
   onCreateForm, onCreateBlankForm, onCreateAutoForm,
   onCreateReport, onCreateBlankReport, onCreateAutoReport,
   onImportCSV, onExportData, onShare, onSettings, onOpenSql, onOpenRelationships,
@@ -267,6 +268,7 @@ export function RelationshipsView({
       tables={tables || []}
       databaseId={databaseId}
       onDeleteTable={onDeleteTable}
+      onSelectTable={onSelectTable}
       queries={queries}
       onDeleteQuery={onDeleteQuery}
       forms={forms}
@@ -274,13 +276,14 @@ export function RelationshipsView({
       reports={reports}
       onDeleteReport={onDeleteReport}
       onRefresh={onRefresh}
+      isStudentMode={isStudentMode}
     />
   );
 
   const ribbonEl = (
     <Ribbon
       title={db.name}
-      allDatabasesLink="/"
+      allDatabasesLink={isStudentMode ? undefined : '/'}
       contextSection={contextSection}
       tabs={[
         { name: 'Home', content: <RibbonGroup name="View"><RibbonButton icon={<GitBranch size={22} />} label="Relationships" active /></RibbonGroup> },

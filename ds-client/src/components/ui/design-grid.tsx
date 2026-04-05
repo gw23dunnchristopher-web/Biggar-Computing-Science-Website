@@ -54,6 +54,7 @@ interface DesignGridProps {
   tables?: { id: number; name: string; fields?: { name: string }[] }[];
   databaseId?: number;
   onBeforeTypeChange?: (fieldIdx: number, oldType: string, newType: string) => Promise<boolean>;
+  showPropertySheet?: boolean;
 }
 
 type FieldTypeInfo = {
@@ -82,7 +83,7 @@ const FIELD_TYPE_LABELS: Record<string, string> = Object.fromEntries(
   FIELD_TYPES.map(t => [t.value, t.label])
 );
 
-export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onSelectedIndexChange, tables = [], databaseId, onBeforeTypeChange }: DesignGridProps) {
+export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onSelectedIndexChange, tables = [], databaseId, onBeforeTypeChange, showPropertySheet = true }: DesignGridProps) {
   const [localIdx, setLocalIdx] = useState<number | null>(null);
   const selectedIndex = controlledIdx !== undefined ? controlledIdx : localIdx;
   const setSelectedIndex = (i: number | null) => { setLocalIdx(i); onSelectedIndexChange?.(i); };
@@ -609,7 +610,7 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
       </ContextMenu>
 
       {/* ── Field Properties pane ── */}
-      <div className="h-64 border-t-2 border-gray-400 bg-[#f3f2f1] flex flex-col flex-none">
+      {showPropertySheet && <div className="h-64 border-t-2 border-gray-400 bg-[#f3f2f1] flex flex-col flex-none">
         <div className="px-4 py-1.5 bg-gray-300 border-b border-gray-400 text-xs font-semibold text-gray-800 select-none">
           Field Properties
           {selectedField && (
@@ -896,7 +897,7 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
             </table>
           </div>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

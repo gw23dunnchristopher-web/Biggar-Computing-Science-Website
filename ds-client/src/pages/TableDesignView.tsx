@@ -89,12 +89,19 @@ interface Props {
   onCreateAutoReport?: () => void;
   onShare?: () => void;
   onSettings?: () => void;
+  onImportCSV?: () => void;
+  onExportData?: () => void;
+  onOpenRelationships?: () => void;
+  onCompact?: () => void;
+  onAnalyse?: () => void;
+  onDocumenter?: () => void;
+  onObjectDependencies?: () => void;
   isStudentMode?: boolean;
   onSwitchToDatasheet?: () => void;
   onReset?: () => void;
 }
 
-export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable, queries = [], forms = [], reports = [], onDeleteQuery, onDeleteForm, onDeleteReport, onRefresh, onCreateTable, onCreateQuery, onQueryWizard, onCreateForm, onCreateBlankForm, onCreateAutoForm, onCreateReport, onCreateBlankReport, onCreateAutoReport, onShare, onSettings, isStudentMode, onSwitchToDatasheet, onReset }: Props) {
+export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable, queries = [], forms = [], reports = [], onDeleteQuery, onDeleteForm, onDeleteReport, onRefresh, onCreateTable, onCreateQuery, onQueryWizard, onCreateForm, onCreateBlankForm, onCreateAutoForm, onCreateReport, onCreateBlankReport, onCreateAutoReport, onShare, onSettings, onImportCSV, onExportData, onOpenRelationships, onCompact, onAnalyse, onDocumenter, onObjectDependencies, isStudentMode, onSwitchToDatasheet, onReset }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -106,6 +113,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
   const [tableName, setTableName] = useState('');
   const [selectedFieldIndex, setSelectedFieldIndex] = useState<number | null>(null);
   const [resetConfirm, setResetConfirm] = useState(false);
+  const [showPropertySheet, setShowPropertySheet] = useState(true);
 
   // ── Type-change warning ──
   const [typeChangeDialog, setTypeChangeDialog] = useState<TypeChangePending | null>(null);
@@ -260,6 +268,13 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
     onCreateAutoReport,
     onShare,
     onSettings,
+    onImportCSV,
+    onExportData,
+    onOpenRelationships,
+    onCompact,
+    onAnalyse,
+    onDocumenter,
+    onObjectDependencies,
   };
 
   const contextSection: RibbonContextSection = {
@@ -285,7 +300,12 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
               <RibbonButton icon={<MinusSquare size={22} />} label="Delete Rows" onClick={handleDeleteRow} />
             </RibbonGroup>
             <RibbonGroup name="Show/Hide">
-              <RibbonButton icon={<Eye size={22} />} label="Property Sheet" disabled />
+              <RibbonButton
+                icon={<Eye size={22} />}
+                label="Property Sheet"
+                active={showPropertySheet}
+                onClick={() => setShowPropertySheet(v => !v)}
+              />
               <RibbonButton icon={<List size={22} />} label="Indexes" disabled />
             </RibbonGroup>
           </>
@@ -299,7 +319,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
       title={db.name}
       homeLink={isStudentMode ? undefined : `/databases/${databaseId}`}
       allDatabasesLink={isStudentMode ? undefined : '/'}
-      contextSection={isStudentMode ? undefined : contextSection}
+      contextSection={contextSection}
       pinnedContent={
         <>
           <RibbonGroup name="View">
@@ -400,6 +420,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
             tables={tables.map((t: any) => ({ id: t.id, name: t.name, fields: t.fields ?? [] }))}
             databaseId={databaseId}
             onBeforeTypeChange={onBeforeTypeChange}
+            showPropertySheet={showPropertySheet}
           />
         </div>
       </div>

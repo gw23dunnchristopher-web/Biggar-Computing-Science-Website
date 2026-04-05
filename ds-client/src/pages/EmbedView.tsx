@@ -7,6 +7,7 @@ import { TableDesignView } from './TableDesignView';
 import { QueryDesignView } from './QueryDesignView';
 import { FormView } from './FormView';
 import { ReportView } from './ReportView';
+import { RelationshipsView } from './RelationshipsView';
 import { FormWizard } from '@/components/ui/form-wizard';
 import { ReportWizard } from '@/components/ui/report-wizard';
 import { QueryWizard } from '@/components/ui/query-wizard';
@@ -42,7 +43,7 @@ interface EmbedSnapshot {
   }>;
 }
 
-type ActiveView = 'datasheet' | 'design' | 'sql' | 'form' | 'report';
+type ActiveView = 'datasheet' | 'design' | 'sql' | 'form' | 'report' | 'relationships';
 
 function getOrCreateSessionKey(): string {
   let key = sessionStorage.getItem(SESSION_KEY_STORAGE);
@@ -280,6 +281,7 @@ export function EmbedView({ token, initialMode }: Props) {
     onCreateReport: () => setReportWizardOpen(true),
     onCreateBlankReport: () => openQuickCreate('blankReport'),
     onCreateAutoReport: () => openQuickCreate('autoReport'),
+    onOpenRelationships: () => setActiveView('relationships'),
     onImportCSV: () => setCsvImportOpen(true),
     onExportData: async () => {
       if (!snapshot || !activeTableId || !dbId) return;
@@ -552,6 +554,26 @@ export function EmbedView({ token, initialMode }: Props) {
           reports={reports}
           onSelectTable={(id) => { setActiveTableId(id); setSqlSubView('table'); }}
           onSelectQuery={() => setSqlSubView('query')}
+          {...wizardProps}
+        />
+        {wizardDialogs}
+      </>
+    );
+  }
+
+  // ── Relationships view ────────────────────────────────────────────────────
+  if (activeView === 'relationships') {
+    return (
+      <>
+        <RelationshipsView
+          databaseId={snapshot.database.id}
+          db={snapshot.database}
+          tables={snapshot.tables as any}
+          forms={forms}
+          reports={reports}
+          queries={queries}
+          isStudentMode={true}
+          onSelectTable={(id) => { setActiveTableId(id); setActiveView('datasheet'); }}
           {...wizardProps}
         />
         {wizardDialogs}
