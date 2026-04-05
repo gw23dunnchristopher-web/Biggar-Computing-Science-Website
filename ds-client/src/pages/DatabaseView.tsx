@@ -86,7 +86,6 @@ export function DatabaseView() {
 
   // Create naming dialogs
   const [createTableDialog, setCreateTableDialog] = useState<{ open: boolean; name: string; busy: boolean }>({ open: false, name: '', busy: false });
-  const [createQueryDialog, setCreateQueryDialog] = useState<{ open: boolean; name: string; busy: boolean }>({ open: false, name: '', busy: false });
 
   // Query Wizard
   const [queryWizardOpen, setQueryWizardOpen] = useState(false);
@@ -179,24 +178,17 @@ export function DatabaseView() {
     } catch { toast({ title: 'Failed to delete query', variant: 'destructive' }); }
   };
 
-  const handleCreateQuery = () => {
-    setCreateQueryDialog({ open: true, name: `Query${queries.length + 1}`, busy: false });
-  };
-  const doCreateQuery = async () => {
-    const name = createQueryDialog.name.trim();
-    if (!name) return;
-    setCreateQueryDialog(d => ({ ...d, busy: true }));
+  const handleCreateQuery = async () => {
+    const name = `Query${queries.length + 1}`;
     try {
       const q = await apiFetch(`/api/databases/${databaseId}/queries`, {
         method: 'POST',
         body: JSON.stringify({ name, definition: { tables: [], columns: [] } })
       });
       await loadQueries();
-      setCreateQueryDialog({ open: false, name: '', busy: false });
       setLocation(`/databases/${databaseId}/queries/${q.id}`);
     } catch {
       toast({ title: 'Failed to create query', variant: 'destructive' });
-      setCreateQueryDialog(d => ({ ...d, busy: false }));
     }
   };
 
@@ -793,31 +785,6 @@ export function DatabaseView() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Create Query naming dialog ── */}
-      <Dialog open={createQueryDialog.open} onOpenChange={open => !open && setCreateQueryDialog({ open: false, name: '', busy: false })}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Create Query</DialogTitle>
-            <DialogDescription>Enter a name for the new query.</DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <Input
-              value={createQueryDialog.name}
-              onChange={e => setCreateQueryDialog(d => ({ ...d, name: e.target.value }))}
-              autoFocus
-              onKeyDown={e => e.key === 'Enter' && doCreateQuery()}
-              className="border-gray-300 focus-visible:ring-[#c55a11]"
-              placeholder="Query name"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateQueryDialog({ open: false, name: '', busy: false })} disabled={createQueryDialog.busy}>Cancel</Button>
-            <Button onClick={doCreateQuery} disabled={createQueryDialog.busy || !createQueryDialog.name.trim()} className="bg-[#c55a11] hover:bg-[#a04a0d] text-white">
-              {createQueryDialog.busy ? 'Creating…' : 'Create'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

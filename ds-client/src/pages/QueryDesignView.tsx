@@ -267,15 +267,8 @@ export function QueryDesignView({
         setSqlUserEdited(false);
       } else if (!sqlUserEdited) {
         // No tables in design and user hasn't typed their own SQL —
-        // show a helpful starter listing every table in the database
-        const listing = tables.length > 0
-          ? tables.map(t => `--   ${t.name}`).join('\n')
-          : '--   (no tables yet)';
-        const firstTable = tables[0];
-        const starter = firstTable
-          ? `-- Available tables:\n${listing}\n\nSELECT *\nFROM ${sqlName(firstTable.name)}`
-          : `-- No tables in this database yet.\n-- Create a table first, then write SQL here.`;
-        setSqlText(starter);
+        // start with the same blank SQL that MS Access shows
+        setSqlText('SELECT;');
       }
       // If sqlUserEdited is true and definition has no tables, keep whatever the user typed
       setSqlResults(null);
