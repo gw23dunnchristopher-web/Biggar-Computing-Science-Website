@@ -960,7 +960,7 @@ export function DataGrid({
                                 <ExternalLink className="w-3 h-3 flex-none" />
                               </a>
                             ) : (
-                              <span className={`block truncate text-sm ${f.isPrimaryKey ? 'text-gray-400' : ''} ${f.fieldType === 'number' || f.fieldType === 'currency' || f.fieldType === 'autonumber' ? 'text-right' : ''}`}>
+                              <span className={`block truncate text-sm ${f.fieldType === 'autonumber' ? 'text-gray-400' : ''} ${f.fieldType === 'number' || f.fieldType === 'currency' || f.fieldType === 'autonumber' ? 'text-right' : ''}`}>
                                 {renderCellValue(f.fieldType, cellValue, f.name, r)}
                               </span>
                             )}
