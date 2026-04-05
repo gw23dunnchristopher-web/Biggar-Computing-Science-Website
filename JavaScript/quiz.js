@@ -97,15 +97,18 @@
            fixes both ordering and centering without touching every HTML page. */
         var contentEl = document.getElementById('content');
         if (contentEl) {
+            /* Prefer appending into .contentContainer so heading and body styles
+               (e.g. .contentContainer h2) apply correctly to any relocated elements. */
+            var targetEl = contentEl.querySelector('.contentContainer') || contentEl;
             document.querySelectorAll('.quiz-container').forEach(function (c) {
                 if (!contentEl.contains(c)) {
                     /* Also relocate an immediately-preceding heading so it travels
                        with the container rather than being left stranded outside. */
                     var prevSib = c.previousElementSibling;
                     if (prevSib && /^H[2-4]$/.test(prevSib.tagName)) {
-                        contentEl.appendChild(prevSib);
+                        targetEl.appendChild(prevSib);
                     }
-                    contentEl.appendChild(c);
+                    targetEl.appendChild(c);
                 }
             });
         }
