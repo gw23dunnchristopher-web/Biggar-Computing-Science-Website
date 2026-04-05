@@ -10,6 +10,10 @@ import { ReportView } from './ReportView';
 import { FormWizard } from '@/components/ui/form-wizard';
 import { ReportWizard } from '@/components/ui/report-wizard';
 import { QueryWizard } from '@/components/ui/query-wizard';
+import { CSVImportModal } from '@/components/ui/csv-import-modal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 
 const SESSION_KEY_STORAGE = 'student_session_key';
@@ -80,6 +84,17 @@ export function EmbedView({ token, initialMode }: Props) {
   const [reportWizardOpen, setReportWizardOpen] = useState(false);
   const [queryWizardOpen, setQueryWizardOpen] = useState(false);
 
+  // Quick create (Blank/Auto Form & Report)
+  const [quickCreate, setQuickCreate] = useState<{
+    type: 'blankForm' | 'autoForm' | 'blankReport' | 'autoReport';
+    tableId: number | null;
+    name: string;
+    busy: boolean;
+  } | null>(null);
+
+  // CSV import
+  const [csvImportOpen, setCsvImportOpen] = useState(false);
+
   // SQL mode: temp query for QueryDesignView
   const [tempQueryId, setTempQueryId] = useState<number | null>(null);
   const [tempQueryName] = useState('Query1');
@@ -136,6 +151,52 @@ export function EmbedView({ token, initialMode }: Props) {
         setIsLoading(false);
       });
   }, [token, resetKey]);
+
+  // ── Quick-create (Blank/Auto Form & Report) ─────────────────────────────
+  const openQuickCreate = (type: 'blankForm' | 'autoForm' | 'blankReport' | 'autoReport') => {
+    if (!snapshot) return;
+    const isForm = type === 'blankForm' || type === 'autoForm';
+    const baseName = isForm ? 'Form' : 'Report';
+    const collection = isForm ? forms : reports;
+    const defaultName = `${baseName}${collection.length + 1}`;
+    const firstTable = snapshot.tables?.[0];
+    setQuickCreate({ type, tableId: firstTable?.id ?? null, name: defaultName, busy: false });
+  };
+
+  const doQuickCreate = async () => {
+    if (!quickCreate || !quickCreate.tableId || !dbId) return;
+    setQuickCreate(q => q ? { ...q, busy: true } : q);
+    try {
+      const { type, tableId, name } = quickCreate;
+      const isForm = type === 'blankForm' || type === 'autoForm';
+      const isBlank = type === 'blankForm' || type === 'blankReport';
+      let fields: any[] = [];
+      if (!isBlank) {
+        try {
+          const td = await apiFetch(`/api/ds/databases/${dbId}/tables/${tableId}`);
+          const rawFields = [...(td.fields || [])].sort((a: any, b: any) => a.sortOrder - b.sortOrder);
+          fields = rawFields.map((f: any, i: number) => ({ id: f.id, name: f.name, label: f.name, visible: true, sortOrder: i }));
+        } catch { /* keep empty */ }
+      }
+      const definition = isForm
+        ? { tableId, layout: 'columnar', title: name, fields }
+        : { tableId, layout: 'tabular', title: name, fields, sortBy: null, groupBy: null };
+      if (isForm) {
+        const created = await apiFetch(`/api/ds/databases/${dbId}/forms`, { method: 'POST', body: JSON.stringify({ name, definition }) });
+        await loadForms(dbId);
+        setQuickCreate(null);
+        if (created?.id) { setActiveFormId(created.id); setActiveView('form'); }
+      } else {
+        const created = await apiFetch(`/api/ds/databases/${dbId}/reports`, { method: 'POST', body: JSON.stringify({ name, definition }) });
+        await loadReports(dbId);
+        setQuickCreate(null);
+        if (created?.id) { setActiveReportId(created.id); setActiveView('report'); }
+      }
+    } catch {
+      toast({ title: 'Failed to create', variant: 'destructive' });
+      setQuickCreate(q => q ? { ...q, busy: false } : q);
+    }
+  };
 
   async function handleReset() {
     const sessionKey = sessionStorage.getItem(SESSION_KEY_STORAGE);
@@ -214,7 +275,37 @@ export function EmbedView({ token, initialMode }: Props) {
   const wizardProps = {
     onQueryWizard: () => setQueryWizardOpen(true),
     onCreateForm: () => setFormWizardOpen(true),
+    onCreateBlankForm: () => openQuickCreate('blankForm'),
+    onCreateAutoForm: () => openQuickCreate('autoForm'),
     onCreateReport: () => setReportWizardOpen(true),
+    onCreateBlankReport: () => openQuickCreate('blankReport'),
+    onCreateAutoReport: () => openQuickCreate('autoReport'),
+    onImportCSV: () => setCsvImportOpen(true),
+    onExportData: async () => {
+      if (!snapshot || !activeTableId || !dbId) return;
+      const tbl = snapshot.tables.find(t => t.id === activeTableId);
+      if (!tbl) return;
+      try {
+        const data = await apiFetch(`/api/ds/databases/${dbId}/tables/${activeTableId}/records`);
+        const records: any[] = data?.records || data || [];
+        const flds = [...tbl.fields].sort((a, b) => a.sortOrder - b.sortOrder);
+        const header = flds.map(f => f.name).join(',');
+        const rows = records.map((r: any) => {
+          const rec = r.data || r;
+          return flds.map(f => {
+            const v = rec[f.name];
+            if (v === null || v === undefined) return '';
+            const s = String(v);
+            return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s;
+          }).join(',');
+        });
+        const blob = new Blob([[header, ...rows].join('\n')], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `${tbl.name}.csv`; a.click();
+        URL.revokeObjectURL(url);
+      } catch { toast({ title: 'Export failed', variant: 'destructive' }); }
+    },
   };
 
   if (isLoading) {
@@ -263,6 +354,88 @@ export function EmbedView({ token, initialMode }: Props) {
           databaseId={snapshot.database.id}
           apiFetch={apiFetch}
           onFinish={handleQueryWizardFinish}
+        />
+      )}
+
+      {/* Quick Create (Blank/Auto Form & Report) */}
+      {quickCreate && (() => {
+        const isForm = quickCreate.type === 'blankForm' || quickCreate.type === 'autoForm';
+        const isBlank = quickCreate.type === 'blankForm' || quickCreate.type === 'blankReport';
+        const titles: Record<string, string> = {
+          blankForm: 'Create Blank Form', autoForm: 'Create Auto Form',
+          blankReport: 'Create Report Design', autoReport: 'Create Auto Report',
+        };
+        const descs: Record<string, string> = {
+          blankForm: 'Creates an empty form with no fields. Open Design View to add fields manually.',
+          autoForm: 'Creates a form with all fields from the selected table already included.',
+          blankReport: 'Creates an empty report with no fields. Open Design View to add fields manually.',
+          autoReport: 'Creates a report with all fields from the selected table already included.',
+        };
+        return (
+          <Dialog open onOpenChange={v => !v && setQuickCreate(null)}>
+            <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle>{titles[quickCreate.type]}</DialogTitle>
+                <DialogDescription>{descs[quickCreate.type]}</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-2">
+                <div>
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">
+                    {isForm ? 'Form' : 'Report'} Name
+                  </label>
+                  <Input
+                    value={quickCreate.name}
+                    onChange={e => setQuickCreate(q => q ? { ...q, name: e.target.value } : q)}
+                    autoFocus
+                    placeholder={`e.g. ${isForm ? 'StudentForm' : 'StudentReport'}`}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-600 mb-1 block">Table</label>
+                  <select
+                    value={quickCreate.tableId ?? ''}
+                    onChange={e => setQuickCreate(q => q ? { ...q, tableId: Number(e.target.value) || null } : q)}
+                    className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm outline-none focus:border-[#C42B1C]"
+                  >
+                    <option value="">Select a table…</option>
+                    {(snapshot.tables || []).map(t => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                </div>
+                {isBlank && (
+                  <p className="text-[11px] text-gray-400 bg-gray-50 border border-gray-200 rounded px-3 py-2">
+                    The {isForm ? 'form' : 'report'} will open so you can view and then switch to Design View to add fields.
+                  </p>
+                )}
+              </div>
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={() => setQuickCreate(null)}>Cancel</Button>
+                <Button
+                  onClick={doQuickCreate}
+                  disabled={quickCreate.busy || !quickCreate.tableId || !quickCreate.name.trim()}
+                  className="bg-[#C42B1C] hover:bg-[#9B2118]"
+                >
+                  {quickCreate.busy ? 'Creating…' : `Create ${isForm ? 'Form' : 'Report'}`}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
+
+      {/* CSV Import */}
+      {csvImportOpen && dbId && (
+        <CSVImportModal
+          open={csvImportOpen}
+          onOpenChange={setCsvImportOpen}
+          databaseId={dbId}
+          onSuccess={() => {
+            setCsvImportOpen(false);
+            if (dbId) {
+              apiFetch(`/api/ds/embeds/${token}`).then(d => d && setSnapshot(d)).catch(() => {});
+            }
+          }}
         />
       )}
     </>

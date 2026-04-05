@@ -408,6 +408,21 @@ export function TableDataView({
     URL.revokeObjectURL(url);
   };
 
+  const handleCopy = () => {
+    if (!selectedRowId) return;
+    const record = filteredRecords.find(r => r.id === selectedRowId);
+    if (!record) return;
+    let text: string;
+    if (selectedFieldName) {
+      text = String(record.data[selectedFieldName] ?? '');
+    } else if (table) {
+      const flds = [...table.fields].sort((a, b) => a.sortOrder - b.sortOrder);
+      text = flds.map(f => String(record.data[f.name] ?? '')).join('\t');
+    } else return;
+    navigator.clipboard.writeText(text).catch(() => {});
+    toast({ title: 'Copied to clipboard', duration: 1500 });
+  };
+
   const refreshData = () => queryClient.invalidateQueries({ queryKey: getListRecordsQueryKey(databaseId, tableId) });
 
   const handleApplyFilter = (filter: FieldFilter) => {
@@ -518,7 +533,7 @@ export function TableDataView({
                 <RibbonDropdownButton icon={<ClipboardPaste size={22} />} label="Clipboard">
                   <RibbonButton icon={<ClipboardPaste size={22} />} label="Paste" disabled />
                   <RibbonButton icon={<Scissors size={22} />} label="Cut" disabled />
-                  <RibbonButton icon={<Copy size={22} />} label="Copy" disabled />
+                  <RibbonButton icon={<Copy size={22} />} label="Copy" onClick={handleCopy} disabled={!selectedRowId} />
                 </RibbonDropdownButton>
               </RibbonGroup>
               <RibbonGroup name="Sort &amp; Filter">
