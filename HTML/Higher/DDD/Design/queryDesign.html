@@ -513,7 +513,17 @@
                             <td>pricePersonNight DESC</td>
                         </tr>
                     </table>
-                    
+
+                    <h2>Try It Yourself</h2>
+                    <p>Now practise translating query designs into SQL using the Travel Agency database — the same four tables (Hotel, Resort, Booking, Customer) used in all the examples above. Design your query first using the query design table format, then run it in the sandbox below to verify your output.</p>
+                    <p>Try writing queries to:</p>
+                    <ul>
+                        <li>Display the hotel name, resort name and resort type for all hotels in Highland resorts, ordered alphabetically by hotel name.</li>
+                        <li>Display the hotel name and star rating for all 5-star hotels that have a swimming pool, ordered by price per night descending.</li>
+                        <li>Display the customer's full name, hotel name, and the total cost of their booking (<code>pricePersonNight * numberInParty * numberNights</code> aliased as <code>Total Cost</code>), joining Customer, Booking, and Hotel.</li>
+                        <li>Display each meal plan type and the average price per night for hotels offering that plan, ordered from most expensive to least expensive.</li>
+                    </ul>
+                    <iframe src="/data-sculptor/?embed=4672115e09e3af1f26c7dc93bf642a4b&mode=sql" width="100%" height="780" frameborder="0" style="border: 1px solid #ccc; border-radius: 6px; display: block; margin: 16px 0;"></iframe>
                     
                     <p>
                         A relational database is used to store details of items for sale in a fruit and 
