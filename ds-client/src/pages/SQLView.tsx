@@ -141,7 +141,7 @@ export function SQLView({
   // Load schema
   const loadSchema = useCallback(async () => {
     try {
-      const data = await apiFetch(`/api/databases/${databaseId}/sql/schema`);
+      const data = await apiFetch(`/api/ds/databases/${databaseId}/sql/schema`);
       setSchema(data || []);
       // Auto-expand first table
       if (data?.length > 0) setExpandedTables(new Set([data[0].id]));
@@ -161,7 +161,7 @@ export function SQLView({
     setResult(null);
     setHasRun(true);
     try {
-      const data = await apiFetch(`/api/databases/${databaseId}/sql`, {
+      const data = await apiFetch(`/api/ds/databases/${databaseId}/sql`, {
         method: 'POST',
         body: JSON.stringify({ sql }),
       });

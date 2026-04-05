@@ -580,9 +580,10 @@ export function registerDsRoutes(app: Express) {
         if (type === "select") {
           const rows = Array.isArray(result) ? result : [];
           const cols = rows.length > 0 ? Object.keys(rows[0]) : [];
-          return res.json({ columns: cols, rows, rowCount: rows.length, executionTime: elapsed });
+          return res.json({ columns: cols, rows, rowCount: rows.length, executionTimeMs: elapsed });
         }
-        return res.json({ rowsAffected: typeof result === "number" ? result : 1, executionTime: elapsed });
+        const rowsAffected = typeof result === "number" ? result : 1;
+        return res.json({ isDml: true, rowsAffected, statementType: type, executionTimeMs: elapsed });
       } finally {
         try { alasql(`DROP DATABASE ${instanceDb}`); } catch {}
       }

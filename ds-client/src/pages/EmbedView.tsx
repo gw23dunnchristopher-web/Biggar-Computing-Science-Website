@@ -4,11 +4,13 @@ import { Ribbon } from '@/components/layout/Ribbon';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TableDataView } from './TableDataView';
 import { TableDesignView } from './TableDesignView';
+import { SQLView } from './SQLView';
 
 const SESSION_KEY_STORAGE = 'student_session_key';
 
 interface Props {
   token: string;
+  initialMode?: 'sql';
 }
 
 interface EmbedSnapshot {
@@ -39,12 +41,12 @@ function getOrCreateSessionKey(): string {
   return key;
 }
 
-export function EmbedView({ token }: Props) {
+export function EmbedView({ token, initialMode }: Props) {
   const [snapshot, setSnapshot] = useState<EmbedSnapshot | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTableId, setActiveTableId] = useState<number | null>(null);
-  const [activeView, setActiveView] = useState<'datasheet' | 'design'>('datasheet');
+  const [activeView, setActiveView] = useState<'datasheet' | 'design' | 'sql'>(initialMode === 'sql' ? 'sql' : 'datasheet');
   const [resetKey, setResetKey] = useState(0);
 
   useEffect(() => {
@@ -60,7 +62,9 @@ export function EmbedView({ token }: Props) {
       })
       .then(data => {
         setSnapshot(data);
-        setActiveTableId(data.tables?.[0]?.id ?? null);
+        if (initialMode !== 'sql') {
+          setActiveTableId(data.tables?.[0]?.id ?? null);
+        }
         setIsLoading(false);
       })
       .catch(e => {
@@ -80,7 +84,7 @@ export function EmbedView({ token }: Props) {
     }
     setSnapshot(null);
     setActiveTableId(null);
-    setActiveView('datasheet');
+    setActiveView(initialMode === 'sql' ? 'sql' : 'datasheet');
     setResetKey(k => k + 1);
   }
 
@@ -97,6 +101,17 @@ export function EmbedView({ token }: Props) {
       <div className="p-8 text-center text-red-600 font-bold">
         Error: Invalid or expired embed token.
       </div>
+    );
+  }
+
+  if (activeView === 'sql') {
+    return (
+      <SQLView
+        databaseId={snapshot.database.id}
+        db={snapshot.database as any}
+        tables={snapshot.tables as any}
+        isStudentMode={false}
+      />
     );
   }
 

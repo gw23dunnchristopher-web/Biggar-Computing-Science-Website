@@ -21,9 +21,10 @@ const queryClient = new QueryClient({
 function Router() {
   const searchParams = new URLSearchParams(window.location.search);
   const embedToken = searchParams.get("embed");
+  const embedMode = searchParams.get("mode") as 'sql' | null;
 
   if (embedToken) {
-    return <EmbedView token={embedToken} />;
+    return <EmbedView token={embedToken} initialMode={embedMode === 'sql' ? 'sql' : undefined} />;
   }
 
   return (
