@@ -552,9 +552,11 @@ export function registerDsRoutes(app: Express) {
       alasql(`CREATE DATABASE ${instanceDb}`);
       alasql(`USE ${instanceDb}`);
       try {
+        const tableFieldMap: Map<number, typeof dsFields.$inferSelect[]> = new Map();
         for (const table of tables) {
           const safeName = safeIdent(table.name);
           const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, table.id)).orderBy(dsFields.sortOrder);
+          tableFieldMap.set(table.id, fields);
           const records = await db!.select().from(dsRecords).where(and(eq(dsRecords.tableId, table.id), eq(dsRecords.databaseId, databaseId)));
           if (fields.length === 0) { alasql(`CREATE TABLE ${safeName} (id INT)`); continue; }
           const colDefs = fields.map(f => {
@@ -582,7 +584,22 @@ export function registerDsRoutes(app: Express) {
           const cols = rows.length > 0 ? Object.keys(rows[0]) : [];
           return res.json({ columns: cols, rows, rowCount: rows.length, executionTimeMs: elapsed });
         }
+        // DML: write changes back to PostgreSQL so the next query sees updated data
         const rowsAffected = typeof result === "number" ? result : 1;
+        for (const table of tables) {
+          const safeName = safeIdent(table.name);
+          const fields = tableFieldMap.get(table.id) ?? [];
+          if (fields.length === 0) continue;
+          try {
+            const currentRows = alasql(`SELECT * FROM ${safeName}`) as any[];
+            await db!.delete(dsRecords).where(and(eq(dsRecords.tableId, table.id), eq(dsRecords.databaseId, databaseId)));
+            for (const row of currentRows) {
+              const data: Record<string, any> = {};
+              for (const f of fields) data[f.name] = row[safeIdent(f.name)] ?? null;
+              await db!.insert(dsRecords).values({ tableId: table.id, databaseId, data });
+            }
+          } catch (_) { /* ignore individual table sync errors */ }
+        }
         return res.json({ isDml: true, rowsAffected, statementType: type, executionTimeMs: elapsed });
       } finally {
         try { alasql(`DROP DATABASE ${instanceDb}`); } catch {}
