@@ -1020,6 +1020,7 @@
             if (d.ok && d.token) {
                 localStorage.setItem('bhscs-teacher-token', d.token);
                 localStorage.setItem('bhscs-teacher-auth-email', email.toLowerCase().trim());
+                localStorage.setItem('access_teacher_id', 'bhs-n5-access-teacher');
                 /* Also log in to revision apps so tool panels work without a second login */
                 acquireRevisionTokens(d.token, email, pw);
                 tryAuth(d.token);
