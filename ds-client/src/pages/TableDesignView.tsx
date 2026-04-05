@@ -13,9 +13,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 async function apiFetch(path: string, opts?: RequestInit) {
-  const r = await fetch(BASE + path, { ...opts, headers: { 'Content-Type': 'application/json', ...opts?.headers } });
+  const r = await fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', ...opts?.headers } });
   if (!r.ok) throw new Error(await r.text());
   return r.json();
 }
@@ -119,7 +118,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
     // Fetch records that have data for this field
     let recs: { id: number; data: Record<string, any> }[] = [];
     try {
-      const data = await apiFetch(`/api/databases/${databaseId}/tables/${tableId}/records`);
+      const data = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}/records`);
       recs = data.records ?? data ?? [];
     } catch { /* skip if can't fetch */ }
 
@@ -133,7 +132,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
         const updatedFields = fields.map((f, i) =>
           i === fieldIdx ? { ...f, fieldType: newType as any } : f
         );
-        await apiFetch(`/api/databases/${databaseId}/tables/${tableId}`, {
+        await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}`, {
           method: 'PUT',
           body: JSON.stringify({ name: tableName, fields: updatedFields }),
         });
@@ -150,7 +149,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
         for (const rec of affected) {
           const original = rec.data[fieldName];
           const converted = convertValue(original, oldType, newType);
-          await apiFetch(`/api/databases/${databaseId}/tables/${tableId}/records/${rec.id}`, {
+          await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}/records/${rec.id}`, {
             method: 'PUT',
             body: JSON.stringify({ data: { ...rec.data, [fieldName]: converted } }),
           });
@@ -160,7 +159,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
         const updatedFields = fields.map((f, i) =>
           i === fieldIdx ? { ...f, fieldType: newType as any } : f
         );
-        await apiFetch(`/api/databases/${databaseId}/tables/${tableId}`, {
+        await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}`, {
           method: 'PUT',
           body: JSON.stringify({ name: tableName, fields: updatedFields }),
         });
@@ -183,12 +182,12 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
     if (!typeChangeDialog) return;
     setTypeChangeBusy(true);
     try {
-      const data = await apiFetch(`/api/databases/${databaseId}/tables/${tableId}/records`);
+      const data = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}/records`);
       const recs: { id: number; data: Record<string, any> }[] = data.records ?? data ?? [];
       for (const rec of recs) {
         const v = rec.data[typeChangeDialog.fieldName];
         if (v !== null && v !== undefined && v !== '') {
-          await apiFetch(`/api/databases/${databaseId}/tables/${tableId}/records/${rec.id}`, {
+          await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}/records/${rec.id}`, {
             method: 'PUT',
             body: JSON.stringify({ data: { ...rec.data, [typeChangeDialog.fieldName]: null } }),
           });

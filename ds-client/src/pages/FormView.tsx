@@ -27,10 +27,9 @@ import {
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 async function apiFetch(path: string, opts?: RequestInit) {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(path, {
     ...opts,
     headers: { 'Content-Type': 'application/json', ...(opts?.headers as any) }
   });
@@ -108,15 +107,15 @@ export function FormView({
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const loadForm = useCallback(async () => {
-    const f = await apiFetch(`/api/databases/${databaseId}/forms/${formId}`);
+    const f = await apiFetch(`/api/ds/databases/${databaseId}/forms/${formId}`);
     setFormMeta(f);
     setDefinition(f.definition as FormDefinition);
   }, [databaseId, formId]);
 
   const loadRecords = useCallback(async (def: FormDefinition) => {
     const [recs, tbl] = await Promise.all([
-      apiFetch(`/api/databases/${databaseId}/tables/${def.tableId}/records`),
-      apiFetch(`/api/databases/${databaseId}/tables/${def.tableId}`)
+      apiFetch(`/api/ds/databases/${databaseId}/tables/${def.tableId}/records`),
+      apiFetch(`/api/ds/databases/${databaseId}/tables/${def.tableId}`)
     ]);
     setRecords(recs || []);
     setTableFields(tbl?.fields || []);
@@ -152,7 +151,7 @@ export function FormView({
       }
     });
     try {
-      const created = await apiFetch(`/api/databases/${databaseId}/tables/${definition.tableId}/records`, {
+      const created = await apiFetch(`/api/ds/databases/${databaseId}/tables/${definition.tableId}/records`, {
         method: 'POST', body: JSON.stringify({ data: emptyData })
       });
       const newRecs = [...records, created];
@@ -170,7 +169,7 @@ export function FormView({
   const doDeleteRecord = async () => {
     if (!currentRecord || !definition) return;
     try {
-      await apiFetch(`/api/databases/${databaseId}/tables/${definition.tableId}/records/${currentRecord.id}`, { method: 'DELETE' });
+      await apiFetch(`/api/ds/databases/${databaseId}/tables/${definition.tableId}/records/${currentRecord.id}`, { method: 'DELETE' });
       const newRecs = records.filter(r => r.id !== currentRecord.id);
       setRecords(newRecs);
       setCursor(Math.min(cursor, newRecs.length - 1));
@@ -213,7 +212,7 @@ export function FormView({
     try {
       const updatedData = { ...(currentRecord.data || {}), ...editValues };
       const updated = await apiFetch(
-        `/api/databases/${databaseId}/tables/${definition.tableId}/records/${currentRecord.id}`,
+        `/api/ds/databases/${databaseId}/tables/${definition.tableId}/records/${currentRecord.id}`,
         { method: 'PUT', body: JSON.stringify({ data: updatedData }) }
       );
       const newRecs = [...records];
@@ -252,7 +251,7 @@ export function FormView({
       formBgColor: bgColor,
     };
     try {
-      await apiFetch(`/api/databases/${databaseId}/forms/${formId}`, {
+      await apiFetch(`/api/ds/databases/${databaseId}/forms/${formId}`, {
         method: 'PUT',
         body: JSON.stringify({ name: formMeta.name, definition: newDef })
       });

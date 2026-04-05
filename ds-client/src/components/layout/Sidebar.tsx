@@ -18,9 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
-const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 async function apiFetch(path: string, opts?: RequestInit) {
-  const res = await fetch(BASE + path, {
+  const res = await fetch(path, {
     headers: { 'Content-Type': 'application/json', ...(opts?.headers ?? {}) },
     ...opts,
   });
@@ -120,22 +119,22 @@ export function Sidebar({
         queryClient.invalidateQueries({ queryKey: getGetTableQueryKey(databaseId, id) });
       } else if (type === 'query') {
         const q = queries.find(x => x.id === id);
-        const full = await apiFetch(`/api/databases/${databaseId}/queries/${id}`);
-        await apiFetch(`/api/databases/${databaseId}/queries/${id}`, {
+        const full = await apiFetch(`/api/ds/databases/${databaseId}/queries/${id}`);
+        await apiFetch(`/api/ds/databases/${databaseId}/queries/${id}`, {
           method: 'PUT',
           body: JSON.stringify({ name: renameName.trim(), definition: full?.definition ?? {} }),
         });
         onRefresh?.();
       } else if (type === 'form') {
-        const full = await apiFetch(`/api/databases/${databaseId}/forms/${id}`);
-        await apiFetch(`/api/databases/${databaseId}/forms/${id}`, {
+        const full = await apiFetch(`/api/ds/databases/${databaseId}/forms/${id}`);
+        await apiFetch(`/api/ds/databases/${databaseId}/forms/${id}`, {
           method: 'PUT',
           body: JSON.stringify({ name: renameName.trim(), definition: full?.definition ?? {} }),
         });
         onRefresh?.();
       } else if (type === 'report') {
-        const full = await apiFetch(`/api/databases/${databaseId}/reports/${id}`);
-        await apiFetch(`/api/databases/${databaseId}/reports/${id}`, {
+        const full = await apiFetch(`/api/ds/databases/${databaseId}/reports/${id}`);
+        await apiFetch(`/api/ds/databases/${databaseId}/reports/${id}`, {
           method: 'PUT',
           body: JSON.stringify({ name: renameName.trim(), definition: full?.definition ?? {} }),
         });
@@ -155,7 +154,7 @@ export function Sidebar({
     try {
       const copyName = `Copy of ${currentName}`;
       if (type === 'table') {
-        const full = await apiFetch(`/api/databases/${databaseId}/tables/${id}`);
+        const full = await apiFetch(`/api/ds/databases/${databaseId}/tables/${id}`);
         await createTable.mutateAsync({
           databaseId,
           data: {
@@ -170,22 +169,22 @@ export function Sidebar({
         });
         queryClient.invalidateQueries({ queryKey: getListTablesQueryKey(databaseId) });
       } else if (type === 'query') {
-        const full = await apiFetch(`/api/databases/${databaseId}/queries/${id}`);
-        await apiFetch(`/api/databases/${databaseId}/queries`, {
+        const full = await apiFetch(`/api/ds/databases/${databaseId}/queries/${id}`);
+        await apiFetch(`/api/ds/databases/${databaseId}/queries`, {
           method: 'POST',
           body: JSON.stringify({ name: copyName, definition: full?.definition ?? {} }),
         });
         onRefresh?.();
       } else if (type === 'form') {
-        const full = await apiFetch(`/api/databases/${databaseId}/forms/${id}`);
-        await apiFetch(`/api/databases/${databaseId}/forms`, {
+        const full = await apiFetch(`/api/ds/databases/${databaseId}/forms/${id}`);
+        await apiFetch(`/api/ds/databases/${databaseId}/forms`, {
           method: 'POST',
           body: JSON.stringify({ name: copyName, definition: full?.definition ?? {} }),
         });
         onRefresh?.();
       } else if (type === 'report') {
-        const full = await apiFetch(`/api/databases/${databaseId}/reports/${id}`);
-        await apiFetch(`/api/databases/${databaseId}/reports`, {
+        const full = await apiFetch(`/api/ds/databases/${databaseId}/reports/${id}`);
+        await apiFetch(`/api/ds/databases/${databaseId}/reports`, {
           method: 'POST',
           body: JSON.stringify({ name: copyName, definition: full?.definition ?? {} }),
         });

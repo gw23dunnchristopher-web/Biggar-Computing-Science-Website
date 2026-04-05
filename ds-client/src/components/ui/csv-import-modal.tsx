@@ -10,10 +10,8 @@ import { Input } from './input';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, FileSpreadsheet, Check, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
-
 async function apiFetch(path: string, opts?: RequestInit) {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(path, {
     ...opts,
     headers: { 'Content-Type': 'application/json', ...(opts?.headers as any) }
   });
@@ -194,7 +192,7 @@ export function CSVImportModal({ open, onOpenChange, databaseId, onSuccess }: Pr
           sortOrder: i,
         }))
       };
-      const createdTable = await apiFetch(`/api/databases/${databaseId}/tables`, {
+      const createdTable = await apiFetch(`/api/ds/databases/${databaseId}/tables`, {
         method: 'POST',
         body: JSON.stringify(tableData),
       });
@@ -216,7 +214,7 @@ export function CSVImportModal({ open, onOpenChange, databaseId, onSuccess }: Pr
             }
             data[col.name] = val;
           });
-          return apiFetch(`/api/databases/${databaseId}/tables/${createdTable.id}/records`, {
+          return apiFetch(`/api/ds/databases/${databaseId}/tables/${createdTable.id}/records`, {
             method: 'POST',
             body: JSON.stringify({ data }),
           });

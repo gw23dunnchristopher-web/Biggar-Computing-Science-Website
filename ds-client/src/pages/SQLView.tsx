@@ -18,10 +18,9 @@ import {
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 async function apiFetch(path: string, opts?: RequestInit) {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(path, {
     ...opts,
     headers: { 'Content-Type': 'application/json', ...(opts?.headers as any) }
   });

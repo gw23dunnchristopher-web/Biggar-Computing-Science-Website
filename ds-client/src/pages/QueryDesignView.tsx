@@ -40,6 +40,7 @@ interface Props {
   tables: TableType[];
   onDeleteTable?: (id: number) => void;
   isStudentMode?: boolean;
+  initialView?: 'design' | 'sql';
   queries?: ItemRow[];
   forms?: ItemRow[];
   reports?: ItemRow[];
@@ -62,13 +63,12 @@ interface Props {
   onSettings?: () => void;
 }
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 async function apiFetch(path: string, opts?: RequestInit) {
   const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(opts?.headers as any) };
   const sessionKey = sessionStorage.getItem('student_session_key');
   if (sessionKey) headers['x-session-key'] = sessionKey;
-  const res = await fetch(`${BASE}${path}`, { ...opts, headers });
+  const res = await fetch(path, { ...opts, headers });
   if (!res.ok) throw new Error(`API error ${res.status}`);
   if (res.status === 204) return null;
   return res.json();
@@ -107,7 +107,7 @@ function buildQuerySql(definition: QueryDefinition): string {
 }
 
 export function QueryDesignView({
-  databaseId, queryId, db, tables, onDeleteTable, isStudentMode,
+  databaseId, queryId, db, tables, onDeleteTable, isStudentMode, initialView,
   queries = [], forms = [], reports = [], onSelectTable, onSelectQuery, onDeleteQuery, onDeleteForm, onDeleteReport,
   onRefresh,
   onCreateTable, onCreateQuery, onQueryWizard,
@@ -118,7 +118,7 @@ export function QueryDesignView({
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const [view, setView] = useState<'design' | 'datasheet' | 'sql'>('design');
+  const [view, setView] = useState<'design' | 'datasheet' | 'sql'>(initialView ?? 'design');
   const [queryName, setQueryName] = useState('');
   const [definition, setDefinition] = useState<QueryDefinition>({ tables: [], columns: [] });
   const [tableDetails, setTableDetails] = useState<Record<number, TableWithFields>>({});
@@ -136,14 +136,19 @@ export function QueryDesignView({
   const [sqlError, setSqlError] = useState<string | null>(null);
   const [isSqlRunning, setIsSqlRunning] = useState(false);
   const sqlRef = useRef<HTMLTextAreaElement>(null);
+  const sqlGutterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    apiFetch(`/api/databases/${databaseId}/queries/${queryId}`)
+    apiFetch(`/api/ds/databases/${databaseId}/queries/${queryId}`)
       .then((q: QueryRow) => {
         setQueryName(q.name);
         setNameInput(q.name);
         const def = q.definition && typeof q.definition === 'object' ? q.definition as QueryDefinition : { tables: [], columns: [] };
         setDefinition({ tables: def.tables || [], columns: def.columns || [] });
+        if (initialView === 'sql') {
+          const sql = def.tables && def.tables.length > 0 ? buildQuerySql({ tables: def.tables || [], columns: def.columns || [] }) : 'SELECT;';
+          setSqlText(sql);
+        }
       })
       .catch(() => toast({ title: 'Failed to load query', variant: 'destructive' }));
   }, [queryId]);
@@ -151,7 +156,7 @@ export function QueryDesignView({
   useEffect(() => {
     definition.tables.forEach(t => {
       if (!tableDetails[t.tableId]) {
-        apiFetch(`/api/databases/${databaseId}/tables/${t.tableId}`)
+        apiFetch(`/api/ds/databases/${databaseId}/tables/${t.tableId}`)
           .then((td: TableWithFields) => setTableDetails(prev => ({ ...prev, [t.tableId]: td })))
           .catch(() => {});
       }
@@ -160,7 +165,7 @@ export function QueryDesignView({
 
   const handleAddTable = async (tableId: number, tableName: string) => {
     if (definition.tables.find(t => t.tableId === tableId)) return;
-    const td = await apiFetch(`/api/databases/${databaseId}/tables/${tableId}`).catch(() => null);
+    const td = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}`).catch(() => null);
     if (td) setTableDetails(prev => ({ ...prev, [tableId]: td }));
     setDefinition(prev => ({ ...prev, tables: [...prev.tables, { tableId, tableName }] }));
   };
@@ -211,7 +216,7 @@ export function QueryDesignView({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await apiFetch(`/api/databases/${databaseId}/queries/${queryId}`, {
+      await apiFetch(`/api/ds/databases/${databaseId}/queries/${queryId}`, {
         method: 'PUT',
         body: JSON.stringify({ name: queryName, definition })
       });
@@ -249,7 +254,7 @@ export function QueryDesignView({
     await handleSave();
     setIsRunning(true);
     try {
-      const data = await apiFetch(`/api/databases/${databaseId}/queries/${queryId}/run`, { method: 'POST' });
+      const data = await apiFetch(`/api/ds/databases/${databaseId}/queries/${queryId}/run`, { method: 'POST' });
       setResults(data);
       setView('datasheet');
     } catch {
@@ -290,7 +295,7 @@ export function QueryDesignView({
     setSqlError(null);
     setSqlResults(null);
     try {
-      const data = await apiFetch(`/api/databases/${databaseId}/sql`, {
+      const data = await apiFetch(`/api/ds/databases/${databaseId}/sql`, {
         method: 'POST',
         body: JSON.stringify({ sql: sqlText }),
       });
@@ -322,7 +327,7 @@ export function QueryDesignView({
     setQueryName(nameInput);
     setEditingName(false);
     try {
-      await apiFetch(`/api/databases/${databaseId}/queries/${queryId}`, {
+      await apiFetch(`/api/ds/databases/${databaseId}/queries/${queryId}`, {
         method: 'PUT',
         body: JSON.stringify({ name: nameInput, definition })
       });
@@ -723,32 +728,36 @@ export function QueryDesignView({
         {/* ── SQL View ── */}
         {view === 'sql' && (
           <div className="flex flex-col flex-1 overflow-hidden">
-            {/* Header bar */}
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#6c3eb5] text-white text-xs flex-none">
-              <Code2 size={14} />
-              <span className="font-medium">SQL View</span>
-              <div className="ml-auto text-purple-200 text-[11px]">Ctrl+Enter or F5 to run</div>
+            {/* Line numbers + Editor */}
+            <div className="flex-1 flex overflow-hidden border-b border-gray-300 min-h-0">
+              <div
+                ref={sqlGutterRef}
+                className="bg-[#f5f5f5] border-r border-gray-300 py-3 px-2 text-right text-xs font-mono text-gray-400 select-none overflow-hidden flex-none leading-[1.375rem] whitespace-pre-wrap"
+                style={{ minWidth: '2.5rem' }}
+              >
+                {sqlText.split('\n').map((_, i) => `${i + 1}\n`).join('')}
+              </div>
+              <textarea
+                ref={sqlRef}
+                value={sqlText}
+                onChange={e => { setSqlText(e.target.value); setSqlUserEdited(true); }}
+                onKeyDown={handleSqlKeyDown}
+                onScroll={() => { if (sqlGutterRef.current && sqlRef.current) sqlGutterRef.current.scrollTop = sqlRef.current.scrollTop; }}
+                className="flex-1 py-3 px-2 font-mono text-sm resize-none outline-none bg-white min-h-0 leading-[1.375rem]"
+                spellCheck={false}
+                placeholder="SELECT * FROM TableName"
+              />
             </div>
-            {/* Editor */}
-            <textarea
-              ref={sqlRef}
-              value={sqlText}
-              onChange={e => { setSqlText(e.target.value); setSqlUserEdited(true); }}
-              onKeyDown={handleSqlKeyDown}
-              className="flex-1 p-3 font-mono text-sm resize-none outline-none border-b border-gray-300 bg-white min-h-0"
-              spellCheck={false}
-              placeholder="SELECT * FROM TableName"
-            />
             {/* Run bar */}
             <div className="flex-none flex items-center gap-2 px-3 py-2 bg-[#f3f2f1] border-t border-gray-300">
               <button
                 onClick={handleRunSql}
                 disabled={isSqlRunning}
-                className="flex items-center gap-1.5 px-3 py-1 bg-[#6c3eb5] text-white text-xs rounded hover:bg-[#5a33a0] disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1 bg-[#e1dfdd] border border-gray-400 text-gray-700 text-xs rounded hover:bg-[#d2d0ce] disabled:opacity-50"
               >
                 <Play size={12} /> {isSqlRunning ? 'Running...' : 'Run'}
               </button>
-              <span className="text-xs text-gray-500">Ctrl+Enter or F5 to run</span>
+              <span className="text-xs text-gray-400">Ctrl+Enter or F5 to run</span>
             </div>
             {/* Results */}
             {sqlError && (
@@ -773,7 +782,7 @@ export function QueryDesignView({
                     </thead>
                     <tbody>
                       {sqlResults.rows.map((row, ri) => (
-                        <tr key={ri} className="border-b border-gray-200 hover:bg-purple-50/30">
+                        <tr key={ri} className="border-b border-gray-200 hover:bg-gray-50">
                           {sqlResults!.columns.map(col => (
                             <td key={col} className="border-r border-gray-200 px-2 py-1 max-w-[200px] truncate">
                               {row[col] === null || row[col] === undefined ? <span className="text-gray-400 italic">null</span> : String(row[col])}

@@ -13,9 +13,8 @@ import {
   CheckCircle2, AlertCircle, Loader2, ChevronRight
 } from 'lucide-react';
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 async function apiFetch(path: string, opts?: RequestInit) {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(path, {
     ...opts,
     headers: { 'Content-Type': 'application/json', ...(opts?.headers as any) }
   });
@@ -71,7 +70,7 @@ export function AnalyseModal({ open, onOpenChange, databaseId }: { open: boolean
   useEffect(() => {
     if (!open) return;
     setLoading(true);
-    apiFetch(`/api/databases/${databaseId}/analyse`).then(d => { setData(d); setExpanded(new Set(d?.tables?.map((t: any) => t.id) ?? [])); }).finally(() => setLoading(false));
+    apiFetch(`/api/ds/databases/${databaseId}/analyse`).then(d => { setData(d); setExpanded(new Set(d?.tables?.map((t: any) => t.id) ?? [])); }).finally(() => setLoading(false));
   }, [open, databaseId]);
 
   return (
@@ -174,7 +173,7 @@ export function DocumenterModal({ open, onOpenChange, databaseId, dbName }: {
   useEffect(() => {
     if (!open) return;
     setLoading(true);
-    apiFetch(`/api/databases/${databaseId}/sql/schema`).then(d => setSchema(d || [])).finally(() => setLoading(false));
+    apiFetch(`/api/ds/databases/${databaseId}/sql/schema`).then(d => setSchema(d || [])).finally(() => setLoading(false));
   }, [open, databaseId]);
 
   const handlePrint = () => window.print();
@@ -360,12 +359,12 @@ export function ExportDataModal({ open, onOpenChange, databaseId, tables }: {
       const tableObj = tables.find(t => t.id === tableId);
 
       // Fetch fields to get column order
-      const tableData = await apiFetch(`/api/databases/${databaseId}/tables/${tableId}`);
+      const tableData = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}`);
       const fields: { name: string }[] = tableData?.fields || [];
       const columns = fields.map(f => f.name);
 
       // Fetch records
-      const records = await apiFetch(`/api/databases/${databaseId}/tables/${tableId}/records`);
+      const records = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}/records`);
       const rows: Record<string, any>[] = (records || []).map((r: any) => r.data || r);
 
       const csv = rowsToCSV(columns, rows);

@@ -26,10 +26,9 @@ import { Button } from '@/components/ui/button';
 import { useCreateEmbed } from '@/api';
 import { Table, List, LayoutTemplate, FileText } from 'lucide-react';
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 async function apiFetch(path: string, opts?: RequestInit) {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(path, {
     ...opts,
     headers: { 'Content-Type': 'application/json', ...(opts?.headers as any) }
   });
@@ -102,17 +101,17 @@ export function DatabaseView() {
   // Loaders
   const loadQueries = useCallback(async () => {
     if (!databaseId) return;
-    try { setQueries(await apiFetch(`/api/databases/${databaseId}/queries`) || []); } catch {}
+    try { setQueries(await apiFetch(`/api/ds/databases/${databaseId}/queries`) || []); } catch {}
   }, [databaseId]);
 
   const loadForms = useCallback(async () => {
     if (!databaseId) return;
-    try { setForms(await apiFetch(`/api/databases/${databaseId}/forms`) || []); } catch {}
+    try { setForms(await apiFetch(`/api/ds/databases/${databaseId}/forms`) || []); } catch {}
   }, [databaseId]);
 
   const loadReports = useCallback(async () => {
     if (!databaseId) return;
-    try { setReports(await apiFetch(`/api/databases/${databaseId}/reports`) || []); } catch {}
+    try { setReports(await apiFetch(`/api/ds/databases/${databaseId}/reports`) || []); } catch {}
   }, [databaseId]);
 
   const loadData = useCallback(async () => {
@@ -172,7 +171,7 @@ export function DatabaseView() {
   const doDeleteQuery = async () => {
     if (!deleteQueryConfirm.queryId) return;
     try {
-      await apiFetch(`/api/databases/${databaseId}/queries/${deleteQueryConfirm.queryId}`, { method: 'DELETE' });
+      await apiFetch(`/api/ds/databases/${databaseId}/queries/${deleteQueryConfirm.queryId}`, { method: 'DELETE' });
       await loadQueries();
       setLocation(`/databases/${databaseId}`);
     } catch { toast({ title: 'Failed to delete query', variant: 'destructive' }); }
@@ -181,7 +180,7 @@ export function DatabaseView() {
   const handleCreateQuery = async () => {
     const name = `Query${queries.length + 1}`;
     try {
-      const q = await apiFetch(`/api/databases/${databaseId}/queries`, {
+      const q = await apiFetch(`/api/ds/databases/${databaseId}/queries`, {
         method: 'POST',
         body: JSON.stringify({ name, definition: { tables: [], columns: [] } })
       });
@@ -194,7 +193,7 @@ export function DatabaseView() {
 
   const handleQueryWizardFinish = async (name: string, definition: any) => {
     try {
-      const q = await apiFetch(`/api/databases/${databaseId}/queries`, {
+      const q = await apiFetch(`/api/ds/databases/${databaseId}/queries`, {
         method: 'POST',
         body: JSON.stringify({ name, definition })
       });
@@ -213,7 +212,7 @@ export function DatabaseView() {
   const doDeleteForm = async () => {
     if (!deleteFormConfirm.formId) return;
     try {
-      await apiFetch(`/api/databases/${databaseId}/forms/${deleteFormConfirm.formId}`, { method: 'DELETE' });
+      await apiFetch(`/api/ds/databases/${databaseId}/forms/${deleteFormConfirm.formId}`, { method: 'DELETE' });
       await loadForms();
       setLocation(`/databases/${databaseId}`);
     } catch { toast({ title: 'Failed to delete form', variant: 'destructive' }); }
@@ -221,7 +220,7 @@ export function DatabaseView() {
 
   const handleFormWizardFinish = async (name: string, definition: any, openMode: 'view' | 'modify') => {
     try {
-      const created = await apiFetch(`/api/databases/${databaseId}/forms`, {
+      const created = await apiFetch(`/api/ds/databases/${databaseId}/forms`, {
         method: 'POST',
         body: JSON.stringify({ name, definition })
       });
@@ -241,7 +240,7 @@ export function DatabaseView() {
   const doDeleteReport = async () => {
     if (!deleteReportConfirm.reportId) return;
     try {
-      await apiFetch(`/api/databases/${databaseId}/reports/${deleteReportConfirm.reportId}`, { method: 'DELETE' });
+      await apiFetch(`/api/ds/databases/${databaseId}/reports/${deleteReportConfirm.reportId}`, { method: 'DELETE' });
       await loadReports();
       setLocation(`/databases/${databaseId}`);
     } catch { toast({ title: 'Failed to delete report', variant: 'destructive' }); }
@@ -249,7 +248,7 @@ export function DatabaseView() {
 
   const handleReportWizardFinish = async (name: string, definition: any, openMode: 'preview' | 'modify') => {
     try {
-      const created = await apiFetch(`/api/databases/${databaseId}/reports`, {
+      const created = await apiFetch(`/api/ds/databases/${databaseId}/reports`, {
         method: 'POST',
         body: JSON.stringify({ name, definition })
       });
@@ -282,7 +281,7 @@ export function DatabaseView() {
       let fields: any[] = [];
       if (!isBlank) {
         try {
-          const td = await apiFetch(`/api/databases/${databaseId}/tables/${tableId}`);
+          const td = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}`);
           const rawFields = [...(td.fields || [])].sort((a: any, b: any) => a.sortOrder - b.sortOrder);
           fields = rawFields.map((f: any, i: number) => ({
             id: f.id, name: f.name, label: f.name, visible: true, sortOrder: i
@@ -295,14 +294,14 @@ export function DatabaseView() {
         : { tableId, layout: 'tabular', title: name, fields, sortBy: null, groupBy: null };
 
       if (isForm) {
-        const created = await apiFetch(`/api/databases/${databaseId}/forms`, {
+        const created = await apiFetch(`/api/ds/databases/${databaseId}/forms`, {
           method: 'POST', body: JSON.stringify({ name, definition })
         });
         await loadForms();
         const path = `/databases/${databaseId}/forms/${created.id}`;
         setLocation(isBlank ? `${path}?design=1` : path);
       } else {
-        const created = await apiFetch(`/api/databases/${databaseId}/reports`, {
+        const created = await apiFetch(`/api/ds/databases/${databaseId}/reports`, {
           method: 'POST', body: JSON.stringify({ name, definition })
         });
         await loadReports();
@@ -340,7 +339,7 @@ export function DatabaseView() {
 
   const handleCompact = async () => {
     try {
-      const result = await apiFetch(`/api/databases/${databaseId}/compact`, { method: 'POST' });
+      const result = await apiFetch(`/api/ds/databases/${databaseId}/compact`, { method: 'POST' });
       toast({
         title: 'Compact & Repair complete',
         description: `${result.tablesChecked} table${result.tablesChecked !== 1 ? 's' : ''} checked · ${result.orphanedRecordsRemoved} orphaned record${result.orphanedRecordsRemoved !== 1 ? 's' : ''} removed · Status: ${result.status}`,

@@ -21,10 +21,9 @@ import {
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 async function apiFetch(path: string, opts?: RequestInit) {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(path, {
     ...opts,
     headers: { 'Content-Type': 'application/json', ...(opts?.headers as any) }
   });
@@ -117,7 +116,7 @@ export function ReportView({
   const [isDesignSaving, setIsDesignSaving] = useState(false);
 
   const loadReport = useCallback(async () => {
-    const r = await apiFetch(`/api/databases/${databaseId}/reports/${reportId}`);
+    const r = await apiFetch(`/api/ds/databases/${databaseId}/reports/${reportId}`);
     setReportMeta(r);
     const def: ReportDefinition = r.definition as ReportDefinition;
     setDefinition(def);
@@ -130,7 +129,7 @@ export function ReportView({
   }, [databaseId, reportId]);
 
   const loadRecords = useCallback(async (def: ReportDefinition) => {
-    const recs = await apiFetch(`/api/databases/${databaseId}/tables/${def.tableId}/records`);
+    const recs = await apiFetch(`/api/ds/databases/${databaseId}/tables/${def.tableId}/records`);
     setRecords(recs || []);
   }, [databaseId]);
 
@@ -180,7 +179,7 @@ export function ReportView({
       headerImageUrl: designHeaderImage || undefined,
     };
     try {
-      await apiFetch(`/api/databases/${databaseId}/reports/${reportId}`, {
+      await apiFetch(`/api/ds/databases/${databaseId}/reports/${reportId}`, {
         method: 'PUT',
         body: JSON.stringify({ name: reportMeta.name, definition: newDef })
       });

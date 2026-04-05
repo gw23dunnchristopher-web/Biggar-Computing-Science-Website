@@ -15,10 +15,9 @@ import { GitBranch, Plus, Trash2, Link2, Info, KeyRound, Hash, Type, Calendar, T
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 async function apiFetch(path: string, opts?: RequestInit) {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(path, {
     ...opts,
     headers: { 'Content-Type': 'application/json', ...(opts?.headers as any) }
   });
@@ -112,7 +111,7 @@ export function RelationshipsView({
   const loadSchema = useCallback(async () => {
     const ts = await Promise.all(
       (tables || []).map(async t => {
-        const tableData = await apiFetch(`/api/databases/${databaseId}/tables/${t.id}`).catch(() => null);
+        const tableData = await apiFetch(`/api/ds/databases/${databaseId}/tables/${t.id}`).catch(() => null);
         const fields: Field[] = tableData?.fields || [];
         return { id: t.id, name: t.name, fields: fields.sort((a: Field, b: Field) => a.sortOrder - b.sortOrder) };
       })
@@ -135,7 +134,7 @@ export function RelationshipsView({
   }, [databaseId, tables]);
 
   const loadRelationships = useCallback(async () => {
-    const data = await apiFetch(`/api/databases/${databaseId}/relationships`).catch(() => []);
+    const data = await apiFetch(`/api/ds/databases/${databaseId}/relationships`).catch(() => []);
     setRelationships(data || []);
   }, [databaseId]);
 
@@ -146,7 +145,7 @@ export function RelationshipsView({
       toast({ title: 'All fields are required', variant: 'destructive' }); return;
     }
     try {
-      await apiFetch(`/api/databases/${databaseId}/relationships`, {
+      await apiFetch(`/api/ds/databases/${databaseId}/relationships`, {
         method: 'POST',
         body: JSON.stringify({
           fromTableId: parseInt(addForm.fromTableId),
@@ -167,7 +166,7 @@ export function RelationshipsView({
 
   const handleDeleteRelationship = async (id: number) => {
     try {
-      await apiFetch(`/api/databases/${databaseId}/relationships/${id}`, { method: 'DELETE' });
+      await apiFetch(`/api/ds/databases/${databaseId}/relationships/${id}`, { method: 'DELETE' });
       await loadRelationships();
       setSelectedRel(null);
     } catch { toast({ title: 'Failed to delete', variant: 'destructive' }); }

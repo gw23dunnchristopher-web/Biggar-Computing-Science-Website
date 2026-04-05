@@ -4,7 +4,7 @@ import { Ribbon } from '@/components/layout/Ribbon';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TableDataView } from './TableDataView';
 import { TableDesignView } from './TableDesignView';
-import { SQLView } from './SQLView';
+import { QueryDesignView } from './QueryDesignView';
 
 const SESSION_KEY_STORAGE = 'student_session_key';
 
@@ -49,6 +49,12 @@ export function EmbedView({ token, initialMode }: Props) {
   const [activeView, setActiveView] = useState<'datasheet' | 'design' | 'sql'>(initialMode === 'sql' ? 'sql' : 'datasheet');
   const [resetKey, setResetKey] = useState(0);
 
+  // SQL mode: temp query for QueryDesignView
+  const [tempQueryId, setTempQueryId] = useState<number | null>(null);
+  const [tempQueryName] = useState('Query1');
+  // When inside SQL mode, navigate between the query editor and a table's datasheet
+  const [sqlSubView, setSqlSubView] = useState<'query' | 'table'>('query');
+
   useEffect(() => {
     const sessionKey = getOrCreateSessionKey();
     setIsLoading(true);
@@ -60,10 +66,25 @@ export function EmbedView({ token, initialMode }: Props) {
         if (!r.ok) throw new Error('Invalid embed');
         return r.json();
       })
-      .then(data => {
+      .then(async (data: EmbedSnapshot) => {
         setSnapshot(data);
         if (initialMode !== 'sql') {
           setActiveTableId(data.tables?.[0]?.id ?? null);
+        } else {
+          // Create a temp query in the sandboxed database
+          try {
+            const res = await fetch(`/api/ds/databases/${data.database.id}/queries`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: 'Query1', definition: { tables: [], columns: [] } })
+            });
+            if (res.ok) {
+              const q = await res.json();
+              setTempQueryId(q.id);
+            }
+          } catch {
+            // If query creation fails, we'll show an error gracefully
+          }
         }
         setIsLoading(false);
       })
@@ -84,6 +105,8 @@ export function EmbedView({ token, initialMode }: Props) {
     }
     setSnapshot(null);
     setActiveTableId(null);
+    setTempQueryId(null);
+    setSqlSubView('query');
     setActiveView(initialMode === 'sql' ? 'sql' : 'datasheet');
     setResetKey(k => k + 1);
   }
@@ -104,17 +127,51 @@ export function EmbedView({ token, initialMode }: Props) {
     );
   }
 
+  // ── SQL mode ──────────────────────────────────────────────────────────────
   if (activeView === 'sql') {
+    if (!tempQueryId) {
+      return (
+        <div className="h-screen w-screen flex items-center justify-center bg-[#f3f2f1] font-bold text-gray-500">
+          Loading query editor...
+        </div>
+      );
+    }
+
+    // Student clicked a table from the SQL view — show its datasheet
+    if (sqlSubView === 'table' && activeTableId) {
+      return (
+        <TableDataView
+          databaseId={snapshot.database.id}
+          tableId={activeTableId}
+          db={snapshot.database}
+          tables={snapshot.tables}
+          isStudentMode={true}
+          onSelectTable={(id) => setActiveTableId(id)}
+          onSelectQuery={() => setSqlSubView('query')}
+          queries={[{ id: tempQueryId, name: tempQueryName, databaseId: snapshot.database.id }]}
+          onReset={handleReset}
+          onSwitchToDesign={() => {}}
+        />
+      );
+    }
+
+    // Default SQL sub-view: the Query Design View in SQL mode
     return (
-      <SQLView
+      <QueryDesignView
         databaseId={snapshot.database.id}
+        queryId={tempQueryId}
         db={snapshot.database as any}
         tables={snapshot.tables as any}
-        isStudentMode={false}
+        isStudentMode={true}
+        initialView="sql"
+        queries={[{ id: tempQueryId, name: tempQueryName, databaseId: snapshot.database.id }]}
+        onSelectTable={(id) => { setActiveTableId(id); setSqlSubView('table'); }}
+        onSelectQuery={() => setSqlSubView('query')}
       />
     );
   }
 
+  // ── Table datasheet / design mode ─────────────────────────────────────────
   if (activeTableId) {
     if (activeView === 'design') {
       return (
@@ -144,6 +201,7 @@ export function EmbedView({ token, initialMode }: Props) {
     );
   }
 
+  // ── No table selected — default landing ───────────────────────────────────
   const ribbon = (
     <Ribbon
       title={snapshot.database.name}
