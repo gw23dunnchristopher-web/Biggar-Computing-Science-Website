@@ -49,7 +49,7 @@ export function QueryWizard({ open, onOpenChange, tables, databaseId, onFinish, 
     if (tableDetails[selectedTableId]) {
       setAvailableFields([...tableDetails[selectedTableId].fields].sort((a, b) => a.sortOrder - b.sortOrder));
     } else {
-      apiFetch(`/api/databases/${databaseId}/tables/${selectedTableId}`)
+      apiFetch(`/api/ds/databases/${databaseId}/tables/${selectedTableId}`)
         .then((td: TableInfo) => {
           setTableDetails(prev => ({ ...prev, [td.id]: td }));
           setAvailableFields([...td.fields].sort((a, b) => a.sortOrder - b.sortOrder));

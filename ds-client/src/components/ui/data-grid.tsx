@@ -159,17 +159,17 @@ export function DataGrid({
   // ── Cell navigation helpers ──
   const moveFocus = useCallback((rowIdx: number, colIdx: number) => {
     const clampedRow = Math.max(0, Math.min(records.length - 1, rowIdx));
-    const editableFields = fields.filter(f => !f.isPrimaryKey);
+    const editableFields = fields.filter(f => f.fieldType !== 'autonumber');
     const clampedCol = Math.max(0, Math.min(editableFields.length - 1, colIdx));
     setFocusedCell({ rowIdx: clampedRow, colIdx: clampedCol });
     onSelectRow(records[clampedRow]?.id ?? null);
   }, [records, fields, onSelectRow]);
 
   const startEditing = useCallback((rowIdx: number, colIdx: number) => {
-    const editableFields = fields.filter(f => !f.isPrimaryKey);
+    const editableFields = fields.filter(f => f.fieldType !== 'autonumber');
     const field = editableFields[colIdx];
     const record = records[rowIdx];
-    if (!record || !field || field.isPrimaryKey) return;
+    if (!record || !field || field.fieldType === 'autonumber') return;
     const fullColIdx = fields.findIndex(f => f.name === field.name);
     setEditingCell({ recordId: record.id, fieldName: field.name, rowIdx, colIdx: fullColIdx });
     setEditingValue(record.data[field.name] ?? '');
@@ -182,7 +182,7 @@ export function DataGrid({
     if (editingCell) return;
     if (!focusedCell) return;
     const { rowIdx, colIdx } = focusedCell;
-    const editableFields = fields.filter(f => !f.isPrimaryKey);
+    const editableFields = fields.filter(f => f.fieldType !== 'autonumber');
     const fieldColIdx = editableFields.findIndex((_, i) => i === colIdx);
     switch (e.key) {
       case 'ArrowDown':
@@ -230,7 +230,7 @@ export function DataGrid({
     rowIdx: number,
     fullColIdx: number
   ) => {
-    const editableFields = fields.filter(f => !f.isPrimaryKey);
+    const editableFields = fields.filter(f => f.fieldType !== 'autonumber');
     const editableColIdx = editableFields.findIndex(f => f.name === fieldName);
 
     if (e.key === 'Tab') {
@@ -274,8 +274,9 @@ export function DataGrid({
   };
 
   const handleCellClick = (recordId: number, fieldName: string, value: any, isPrimaryKey: boolean, rowIdx: number, colIdx: number) => {
-    if (isPrimaryKey) return;
-    const editableFields = fields.filter(f => !f.isPrimaryKey);
+    const field = fields.find(f => f.name === fieldName);
+    if (field?.fieldType === 'autonumber') return;
+    const editableFields = fields.filter(f => f.fieldType !== 'autonumber');
     const editableColIdx = editableFields.findIndex(f => f.name === fieldName);
     setEditingCell({ recordId, fieldName, rowIdx, colIdx });
     setEditingValue(value ?? '');
@@ -443,7 +444,7 @@ export function DataGrid({
   };
 
   const renderNewRowInput = (type: string, fieldName: string, isPrimaryKey: boolean, defaultValue?: string | null) => {
-    if (isPrimaryKey || type === 'autonumber') return <span className="text-gray-300 text-xs px-1 italic">Auto</span>;
+    if (type === 'autonumber') return <span className="text-gray-300 text-xs px-1 italic">Auto</span>;
     if (type === 'calculated' || type === 'attachment') return <span className="text-gray-300 text-xs px-1 italic">—</span>;
     if (type === 'boolean') {
       return (
@@ -898,34 +899,34 @@ export function DataGrid({
                       </td>
                       {fields.map((f, colIdx) => {
                         const isCellEditing = editingCell?.recordId === r.id && editingCell?.fieldName === f.name;
-                        const editableColForCell = fields.filter(ef => !ef.isPrimaryKey).findIndex(ef => ef.name === f.name);
-                        const isCellFocused = !f.isPrimaryKey && focusedCell?.rowIdx === rowIdx && focusedCell.colIdx === editableColForCell;
+                        const editableColForCell = fields.filter(ef => ef.fieldType !== 'autonumber').findIndex(ef => ef.name === f.name);
+                        const isCellFocused = f.fieldType !== 'autonumber' && focusedCell?.rowIdx === rowIdx && focusedCell.colIdx === editableColForCell;
                         const cellValue = r.data[f.name];
                         return (
                           <td
                             key={f.id}
                             tabIndex={0}
                             className={`border-r border-gray-200 h-7 overflow-hidden focus:outline-none
-                              ${f.isPrimaryKey || f.fieldType === 'calculated' || f.fieldType === 'attachment' ? 'bg-gray-50 cursor-default' : f.fieldType === 'boolean' ? 'cursor-pointer' : 'cursor-text'}
+                              ${f.fieldType === 'autonumber' || f.fieldType === 'calculated' || f.fieldType === 'attachment' ? 'bg-gray-50 cursor-default' : f.fieldType === 'boolean' ? 'cursor-pointer' : 'cursor-text'}
                               ${isCellEditing ? 'p-0' : 'px-2'}
                               ${isCellFocused && !isCellEditing ? 'ring-1 ring-inset ring-[#C42B1C]' : ''}
                             `}
                             onDoubleClick={() => {
-                              if (!f.isPrimaryKey && f.fieldType !== 'calculated' && f.fieldType !== 'attachment' && f.fieldType !== 'boolean')
+                              if (f.fieldType !== 'autonumber' && f.fieldType !== 'calculated' && f.fieldType !== 'attachment' && f.fieldType !== 'boolean')
                                 handleCellClick(r.id, f.name, cellValue, false, rowIdx, colIdx);
                             }}
                             onClick={() => {
                               onSelectRow(r.id);
-                              if (!f.isPrimaryKey && f.fieldType !== 'calculated' && f.fieldType !== 'attachment') {
-                                const editableFields = fields.filter(ef => !ef.isPrimaryKey);
+                              if (f.fieldType !== 'autonumber' && f.fieldType !== 'calculated' && f.fieldType !== 'attachment') {
+                                const editableFields = fields.filter(ef => ef.fieldType !== 'autonumber');
                                 const editableColIdx = editableFields.findIndex(ef => ef.name === f.name);
                                 setFocusedCell({ rowIdx, colIdx: editableColIdx });
                               }
                             }}
                             onContextMenu={() => setCtxTarget({ type: 'cell', recordId: r.id, fieldName: f.name, value: cellValue, isPrimaryKey: f.isPrimaryKey, record: r })}
                             onFocus={() => {
-                              if (!f.isPrimaryKey) {
-                                const editableFields = fields.filter(ef => !ef.isPrimaryKey);
+                              if (f.fieldType !== 'autonumber') {
+                                const editableFields = fields.filter(ef => ef.fieldType !== 'autonumber');
                                 const editableColIdx = editableFields.findIndex(ef => ef.name === f.name);
                                 setFocusedCell({ rowIdx, colIdx: editableColIdx });
                               }

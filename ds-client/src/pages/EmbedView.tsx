@@ -52,8 +52,8 @@ export function EmbedView({ token, initialMode }: Props) {
   // SQL mode: temp query for QueryDesignView
   const [tempQueryId, setTempQueryId] = useState<number | null>(null);
   const [tempQueryName] = useState('Query1');
-  // When inside SQL mode, navigate between the query editor and a table's datasheet
-  const [sqlSubView, setSqlSubView] = useState<'query' | 'table'>('query');
+  // When inside SQL mode, navigate between the query editor, a table's datasheet, and design view
+  const [sqlSubView, setSqlSubView] = useState<'query' | 'table' | 'design'>('query');
 
   useEffect(() => {
     const sessionKey = getOrCreateSessionKey();
@@ -137,6 +137,22 @@ export function EmbedView({ token, initialMode }: Props) {
       );
     }
 
+    // Student clicked "Design View" from a table in SQL mode
+    if (sqlSubView === 'design' && activeTableId) {
+      return (
+        <TableDesignView
+          databaseId={snapshot.database.id}
+          tableId={activeTableId}
+          db={snapshot.database}
+          tables={snapshot.tables}
+          onDeleteTable={() => {}}
+          isStudentMode={true}
+          onSwitchToDatasheet={() => setSqlSubView('table')}
+          onReset={handleReset}
+        />
+      );
+    }
+
     // Student clicked a table from the SQL view — show its datasheet
     if (sqlSubView === 'table' && activeTableId) {
       return (
@@ -150,7 +166,7 @@ export function EmbedView({ token, initialMode }: Props) {
           onSelectQuery={() => setSqlSubView('query')}
           queries={[{ id: tempQueryId, name: tempQueryName, databaseId: snapshot.database.id }]}
           onReset={handleReset}
-          onSwitchToDesign={() => {}}
+          onSwitchToDesign={() => setSqlSubView('design')}
         />
       );
     }

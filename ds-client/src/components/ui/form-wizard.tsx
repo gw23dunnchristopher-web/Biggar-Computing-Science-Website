@@ -133,7 +133,7 @@ export function FormWizard({ open, onOpenChange, tables, databaseId, onFinish, a
     if (tableFields[selectedTableId]) {
       setAvailableFields([...tableFields[selectedTableId]].sort((a, b) => a.sortOrder - b.sortOrder));
     } else {
-      apiFetch(`/api/databases/${databaseId}/tables/${selectedTableId}`)
+      apiFetch(`/api/ds/databases/${databaseId}/tables/${selectedTableId}`)
         .then((td: any) => {
           const fields = td.fields || [];
           setTableFields(prev => ({ ...prev, [selectedTableId]: fields }));
