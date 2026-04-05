@@ -99,6 +99,12 @@
         if (contentEl) {
             document.querySelectorAll('.quiz-container').forEach(function (c) {
                 if (!contentEl.contains(c)) {
+                    /* Also relocate an immediately-preceding heading so it travels
+                       with the container rather than being left stranded outside. */
+                    var prevSib = c.previousElementSibling;
+                    if (prevSib && /^H[2-4]$/.test(prevSib.tagName)) {
+                        contentEl.appendChild(prevSib);
+                    }
                     contentEl.appendChild(c);
                 }
             });
@@ -135,12 +141,15 @@
 
     function renderQuiz(container, config, prefix) {
         var questions = config.questions;
+        /* Auto-expand the sole question when a container has only one. */
+        var autoExpand = questions.length === 1;
 
         var html = '<div class="quiz-section">';
 
         questions.forEach(function (q, i) {
             var hideNum = !!(config.hideNumbers || q.hideNumber);
-            html += renderQuestion(q, i, prefix, hideNum);
+            var effectiveQ = autoExpand ? Object.assign({}, q, { collapsed: false }) : q;
+            html += renderQuestion(effectiveQ, i, prefix, hideNum);
         });
 
         html += '<button class="quiz-submit-btn">Submit Answers</button>';
