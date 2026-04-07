@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>N4 Computing Science - Database Design</title>
+        <script src="/JavaScript/N4Script.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script>
+           
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
+        <style></style>
+    </head>
+
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+            <header>
+                <h1>BHS Computing Science</h1>
+                <img src="/Images/Header/banner.png" />
+            </header>
+            <div id="pageContainer">
+                <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+                <div id="sidebar"></div>
+                <div id="content">
+                    <div id="mainHeading"><h1>National 4</h1></div>
+                    <div class="contentHeading">
+                        <h1>Database Design</h1>
+                    </div>
+                    <div class="contentContainer">
+                        <table class="LIandSC">
+                            <tr>
+                                <th>Learning Intentions</th>
+                                <th>Success Criteria</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    We are learning about:
+                                    <ul>
+                                        <li>
+                                            Designing a database to meet
+                                            end-user requirements.
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    I am looking for you to:
+                                    <ul>
+                                        <li>
+                                            State the different data types that
+                                            can be used in a database.
+                                        </li>
+                                        <li>
+                                            Explain what a primary key is and
+                                            why it is important.
+                                        </li>
+                                        <li>
+                                            Use a data dictionary to show the
+                                            fields, data types and primary key
+                                            of a database.
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p>
+                            Now that we have identified the end-user and
+                            functional requirements of the database, we need to
+                            start designing it. This means that we need to
+                            ideintify the fields that we need to include in the
+                            database, and the data types that we will use for
+                            each field.
+                        </p>
+
+                        <h2>Data Types</h2>
+                        <p>
+                            Just like variables used in software development,
+                            fields in a database have a data type. The data type
+                            of a field determines what kind of data can be
+                            stored in it. The table below shows the most common
+                            data types used in Access and gives an example of
+                            each one.
+                        </p>
+                        <table class="cTable">
+                            <tr>
+                                <th>Data Type</th>
+                                <th>Description</th>
+                                <th>Example</th>
+                            </tr>
+                            <tr>
+                                <td>Short Text</td>
+                                <td>
+                                    Used for storing text data, up to 256
+                                    characters.
+                                </td>
+                                <td>John Smith</td>
+                            </tr>
+                            <tr>
+                                <td>Long Text</td>
+                                <td>
+                                    Used for storing text data, up to 65,536
+                                    characters.
+                                </td>
+                                <td>
+                                    This is a long text field. It can store a
+                                    lot of text data.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Number</td>
+                                <td>
+                                    Used for storing numbers and numerical data.
+                                    It can store either whole numbers or numbers
+                                    with decimal points.
+                                </td>
+                                <td>12345</td>
+                            </tr>
+                            <tr>
+                                <td>Currency</td>
+                                <td>Used for storing currencies.</td>
+                                <td>£123.45</td>
+                            </tr>
+                            <tr>
+                                <td>Date/Time</td>
+                                <td>
+                                    Used for storing a time, a date, or both.
+                                </td>
+                                <td>12/12/2021 12:00:00</td>
+                            </tr>
+                            <tr>
+                                <td>Yes/No</td>
+                                <td>Used for storing boolean values.</td>
+                                <td>Yes</td>
+                            </tr>
+                        </table>
+
+                        <p>
+                            It is also possible to attach files to a field in
+                            access using the <b>attachment</b> data type. If you
+                            look in the list of data types in the design view,
+                            you will also see 'Lookup Wizard' and 'Calculated'.
+                            Lookup Wizard is for data validation, and Calculated
+                            if you want a field to display a value based on the
+                            contents of other fields. We won't be using either
+                            of these in the N4 course.
+                        </p>
+
+                        <h2>Data Type Questions</h2>
+
+                        <h2>Primary Key</h2>
+                        <p>
+                            Every record in a database must be, in some way,
+                            unique. This is so that we don't accidentally create
+                            two records with exactly the same date. If that
+                            happened, we'd have no way of telling which was
+                            which! It's unlikely, but what if two students have
+                            exactly the same name and date of birth? They might
+                            live at different addresses and have different phone
+                            numbers, but what if they lived quite close to one
+                            another, their phone number wouldn't even be all
+                            that different.
+                        </p>
+                        <p>
+                            This is why we need <b>primary keys</b>. A primary
+                            key is a field in a database that uniquely
+                            identifies a record in a database, and it allows us
+                            to pick that one record out from the rest if we need
+                            to. You can see examples of primary keys in everyday
+                            life too! For example:
+                        </p>
+                        <ul>
+                            <li>
+                                Your National Insurance Number is a primary key
+                                for you, it uniquely identifies you.
+                            </li>
+                            <li>
+                                Your student ID number is a primary key for you,
+                                it uniquely identifies you as a student.
+                            </li>
+                            <li>
+                                Your passport number is a primary key for you,
+                                it uniquely identifies you as a person who has a
+                                passport.
+                            </li>
+                            <li>
+                                Cars are uniquely identified by their
+                                registration plate number.
+                            </li>
+                            <li>
+                                Customers who sign up for services will have a
+                                Customer ID number.
+                            </li>
+                            <li>
+                                You log into services like GLOW using a username
+                                that is unique to you.
+                            </li>
+                        </ul>
+                        <p>
+                            All of these are primary keys in a database, and
+                            when we design a database, our database will also
+                            need to have one field that is a primary key. In
+                            Access you can see the primary key in the design
+                            view because it has the little key icon next to it.
+                        </p>
+
+                        <h2>Data Dictionaries</h2>
+                        <p>
+                            Now that we know which data type we want to use for
+                            each field, and which field we want to be the
+                            primary key, we can create a data dictionary. A data
+                            dictionary is a table that shows the fields in the
+                            database, the data type of each field, and the
+                            primary key. More advanced data dictionaries will
+                            also include how many characters text fields will
+                            use, what format certain fields will be in (whole
+                            number or decimal number, date format, etc.),
+                            whether or not the field is required, and whether or
+                            not the field has any type of validation to control
+                            what data can be entered into it.
+                        </p>
+                        <p>
+                            This allows us to plan out our database before we
+                            start creating it, and it also allows us to easily
+                            see what fields we need to include in the database.
+                            For now, we will focus on creating a simple data
+                            dictionary that shows the fields, data types and
+                            primary key.
+                        </p>
+                        <p>
+                            Here's an example of a data dictionary for the
+                            database that you would need to make for the
+                            question below:
+                        </p>
+                        <div class="example">
+                            <p>
+                                <b>Question:</b> A school wants to create a
+                                database to store information about its pupils.
+                                The database should store the pupil's name, age,
+                                and class. The school wants to be able to search
+                                for pupils by name, and to display a list of all
+                                pupils in a particular class.
+                            </p>
+                            <table class="cTable">
+                                <tr>
+                                    <th>Field Name</th>
+                                    <th>Data Type</th>
+                                    <th>Primary Key</th>
+                                </tr>
+                                <tr>
+                                    <td>PupilID</td>
+                                    <td>Number</td>
+                                    <td>PK</td>
+                                </tr>
+                                <tr>
+                                    <td>PupilName</td>
+                                    <td>Short Text</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Age</td>
+                                    <td>Number</td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Class</td>
+                                    <td>Short Text</td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                            <p>
+                                Note that we only use the fields that were
+                                identified in the Analysis stage. You can see
+                                which field is the primary key because it says
+                                PK (for Primary Key) in that column.
+                            </p>
+                        </div>
+
+                        <p>
+                            In some of the following questions, you will have to
+                            complete a data dictionary to design a small
+                            database, based on the requirements in the question.
+                        </p>
+
+                        <h2>Database Design Questions</h2>
+                        
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div id="left">
+                    <p>Biggar High School</p>
+                    <p>Market Rd, Biggar</p>
+                    <p>ML12 6AG</p>
+                </div>
+                <div id="center"></div>
+                <div id="right">
+                    <p>&copy;C Dunn, 2025</p>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>

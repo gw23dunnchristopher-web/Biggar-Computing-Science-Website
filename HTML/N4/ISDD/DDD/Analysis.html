@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>N4 Computing Science - Database Analysis</title>
+        <script src="/JavaScript/N4Script.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: "In your own words, who are end-users?",
+                        marks: 1,
+                        markingScheme:
+                            "Award 1 mark for correctly stating that end-users are the people who will use the database.",
+                    },
+                    {
+                        type: "paragraph",
+                        text: "In your own words, what are end-user requrements?",
+                        marks: 1,
+                        markingScheme:
+                            "Award 1 mark for correctly stating that end-user requirements are the tasks that the end-users want to be able to do in the database.",
+                    },
+                    {
+                        type: "paragraph",
+                        text: "In your own words, what are functional requrements?",
+                        marks: 1,
+                        markingScheme:
+                            "Award 1 mark for correctly stating that functional requirements are the tasks that the database must be able to do to allow the end-users to carry out their tasks.",
+                    },
+                    {
+                        type: "table",
+                        text: [
+                            "Describe two end-user requirements and two functional requirements for the database that you would need to make for the question below:",
+                            "A cinema wants a database to manage its movies. It needs to store the movie title, the age rating (like PG or 15), and the duration in minutes. The cinema wants to find movies based on their rating and show a list of all movies currently playing.",
+                        ],
+                        columnWidths: ["50%", "50%"],
+                        tableHeaders: ["End-User Requirements", "Functional Requirements"],
+                        tableRows: [
+                            ["", ""],
+                            ["", ""],
+                        ],
+                        marks: 2,
+                        markingScheme:
+                            "Award 1 mark for correctly stating any two end-user requirements - The end-users need to search for all of the 'PG' movies to help parents find family friendly films / the end users need to see a full list of every movie title the cinema is currently showing / the end users want to store information on movies being shown at the cinema. Award 1 mark for correctly stating the functional requirements - the database needs to be able to filter the age rating, showing only the ratings that the user wants AND the database needs to display all of the movies currently being shown / the database must have fields to store the movie's title, age rating and duration. If the student names 1 correct end0user requirements and 1 correct functional requirement only, award only 1 mark.",
+                    },
+                    {
+                        type: "table",
+                        text: [
+                            "Describe two end-user requirements and two functional requirements for the database that you would need to make for the question below:",
+                            "A local football club wants a database for its players. It needs to store the player’s name, their position (e.g., Goalkeeper, Striker), and how many goals they have scored. The club wants to search for players by their position and see a list of players who have scored more than 10 goals.",
+                        ],
+                        columnWidths: ["50%", "50%"],
+                        tableHeaders: ["End-User Requirements", "Functional Requirements"],
+                        tableRows: [
+                            ["", ""],
+                            ["", ""],
+                        ],
+                        marks: 2,
+                        markingScheme:
+                            "Award 1 mark for correctly stating any two end-user requirements - The end-users need to needs to find all 'Defenders' quickly when picking the starting lineup / the end users wants to identify the top scorers to give out an award at the end of the season / the end users want to store information on football players at the club. Award 1 mark for correctly stating any two functional requirements - the database needs to be able to perform a search using the position field, showing only the positions that the user wants / the database needs to filter goals scored to only show records with more than 10 goals / the database must have fields to store each player's name, position and how many goals they have scored. If the student names 1 correct end0user requirements and 1 correct functional requirement only, award only 1 mark.",
+                    },
+                ],
+            };
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
+        <style></style>
+    </head>
+
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+            <header>
+                <h1>BHS Computing Science</h1>
+                <img src="/Images/Header/banner.png" />
+            </header>
+            <div id="pageContainer">
+                <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+                <div id="sidebar"></div>
+                <div id="content">
+                    <div id="mainHeading"><h1>National 4</h1></div>
+                    <div class="contentHeading">
+                        <h1>Database Analysis</h1>
+                    </div>
+                    <div class="contentContainer">
+                        <table class="LIandSC">
+                            <tr>
+                                <th>Learning Intentions</th>
+                                <th>Success Criteria</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    We are learning about:
+                                    <ul>
+                                        <li>
+                                            Analysing a problem to make a
+                                            database.
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    I am looking for you to:
+                                    <ul>
+                                        <li>
+                                            Explain what end user requirements
+                                            and functional Requirements are in
+                                            terms of databases.
+                                        </li>
+                                        <li>
+                                            Describe end-user requirements for a
+                                            simple problem, and the functional
+                                            requirements of the required
+                                            database.
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p>
+                            Before we create a database we need to figure out
+                            what our database is going to be for - in the case
+                            of your N4 work, you'll be given a problem that
+                            you'll need to make a database to solve, and you'll
+                            have to look at the question and think about what
+                            kind of database you need to make. In the analysis
+                            phase, we need to identify both the end-user and
+                            functional requirements of the database.
+                        </p>
+
+                        <h2>End-User Requirments</h2>
+                        <p>
+                            The people who will be using your database are
+                            called the <b>end users</b>. There will be a list of
+                            tasks that they will want to carry out using your
+                            database, tasks that they will require your database
+                            to do. These are called
+                            <b>end user requirements</b>.
+                        </p>
+                        <p>
+                            Here's an example of a question that you might be
+                            given for your N4 work, and the end user
+                            requirements for the database that you would need to
+                            make:
+                        </p>
+                        <div class="example">
+                            <p>
+                                <b>Question:</b> A school wants to create a
+                                database to store information about its pupils.
+                                The database should store the pupil's name, age,
+                                and class. The school wants to be able to search
+                                for pupils by name, and to display a list of all
+                                pupils in a particular class.
+                            </p>
+                            <p>
+                                <b>End User Requirements:</b>
+                            </p>
+                            <ul>
+                                <li>
+                                    The end-users want to store information on
+                                    each student, including their name, age, and
+                                    class.
+                                </li>
+                                <li>
+                                    The end-users want to be able to find a
+                                    pupil by searching for their name.
+                                </li>
+                                <li>
+                                    The end-users want to be see a list of all
+                                    of the students in a particular class.
+                                </li>
+                            </ul>
+                        </div>
+                        <p>
+                            You can see here that the end-user requirements are
+                            what the end-users want to be able to do with the
+                            database. What information they want to store and
+                            what tasks they want to be able to do.
+                        </p>
+
+                        <h2>Functional Requirements</h2>
+                        <p>
+                            The functional requirements of a database are the
+                            specific functions that the database must be able to
+                            perform to meet the end-user requirements. They are
+                            the tasks that the database must be able to do to
+                            allow the end-users to carry out their tasks.
+                        </p>
+                        <p>
+                            Here's an example of the functional requirements for
+                            the database that you would need to make for the
+                            question above:
+                        </p>
+                        <div class="example">
+                            <p>
+                                <b>Functional Requirements:</b>
+                            </p>
+                            <ul>
+                                <li>
+                                    The database must be have fields for the
+                                    pupil's name, age, and class.
+                                </li>
+                                <li>
+                                    The database must be able to perform a
+                                    simple search for pupils by name.
+                                </li>
+                                <li>
+                                    The database must be able to display a list
+                                    of all pupils in a particular class.
+                                </li>
+                            </ul>
+                        </div>
+                        <p>
+                            You can see that while the end-user requirements are
+                            all from the perspective of the people using your
+                            database, the functional requirements are all about
+                            what tasks the database itself needs to be able to
+                            do.
+                        </p>
+                        <h2>Database Analysis Questions</h2>
+                        <div class="quiz-container"></div>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div id="left">
+                    <p>Biggar High School</p>
+                    <p>Market Rd, Biggar</p>
+                    <p>ML12 6AG</p>
+                </div>
+                <div id="center"></div>
+                <div id="right">
+                    <p>&copy;C Dunn, 2025</p>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>

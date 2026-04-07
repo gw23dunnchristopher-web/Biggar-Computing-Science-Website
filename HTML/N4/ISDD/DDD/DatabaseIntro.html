@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>N4 Computing Science - Database Introduction</title>
+        <script src="/JavaScript/N4Script.js"></script>
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: "In your own words, explain what a database is.",
+                        marks: 2,
+                        markingScheme:
+                            "Award 1 mark for saying a 'collection of information' or something similar.  Award 1 mark for mentioning that the information is 'structured' or 'organised'.  If the answer is directly copied and pasted from the text do not award any marks.",
+                    },
+                    {
+                        type: "paragraph",
+                        text: "Records are organised into files, records and fields.  What is a record?",
+                        marks: 1,
+                        markingScheme:
+                            "Award 1 mark for mentioning that a record is a collection of information on one person or thing in the database.",
+                    },
+                    {
+                        type: "paragraph",
+                        text: "In terms of a database, explain what a field is.",
+                        marks: 1,
+                        markingScheme:
+                            "Award 1 mark for saying that a field is 'one piece of information' or 'one category of information' on a record.",
+                    },
+                    {
+                        type: "paragraph",
+                        text: "Describe two benefits of using an electronic database as compared to a paper-based database?",
+                        marks: 2,
+                        markingScheme:
+                            "Award 1 mark for each benefit mentioned to a maximum of two marks.  Accept any two of the following: speed, security, efficiency, easy to update, easy to backup.  The student must explain the benefit in their own words."
+                    },
+                ],
+            };
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
+        <style></style>
+    </head>
+
+    <body>
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+            <header>
+                <h1>BHS Computing Science</h1>
+                <img src="/Images/Header/banner.png" />
+            </header>
+            <div id="pageContainer">
+                <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+                <div id="sidebar"></div>
+                <div id="content">
+                    <div id="mainHeading"><h1>National 4</h1></div>
+                    <div class="contentHeading">
+                        <h1>Database Introduction</h1>
+                    </div>
+                    <div class="contentContainer">
+                        <table class="LIandSC">
+                            <tr>
+                                <th>Learning Intentions</th>
+                                <th>Success Criteria</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    We are learning about:
+                                    <ul>
+                                        <li>The structure of databases.</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    I am looking for you to:
+                                    <ul>
+                                        <li>
+                                            Show an understanding of what a
+                                            database is.
+                                        </li>
+                                        <li>
+                                            Describe how a database is
+                                            structured in terms of <b>File</b>,
+                                            <b>Record</b> and <b>Field</b>.
+                                        </li>
+                                        <li>
+                                            Explain the benefits of electronic
+                                            databases.
+                                        </li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                        <h2>What is a database?</h2>
+                        <img
+                            src="/Images/N4/DDD/fileCabinet.png"
+                            class="rImg"
+                            style="max-width: 300px"
+                        />
+                        <p>
+                            Any large amount of information must be stored in
+                            some sort of order so that can be accessed quickly
+                            and easily.
+                        </p>
+                        <p>
+                            A database is a
+                            <b>structured collection of similar information</b>.
+                        </p>
+                        <p>
+                            Databases can be stored <b>manually</b> (filing
+                            cabinets, index cards) or <b>electronically</b>,
+                            using a computer system.
+                        </p>
+                        <p>
+                            A program that is used for organising data on a
+                            computer system is called a database package or
+                            database management system.
+                        </p>
+                        <p>
+                            Typically, in High School, we use Microsoft's
+                            <b>Access</b> program to practice using databases.
+                            However, I have included a small program on this
+                            website that you can use. It is very similar to
+                            Access.
+                        </p>
+
+                        <h2>Database Structure</h2>
+                        <img
+                            src="/Images/N4/DDD/DBStructure.jpg"
+                            class="cImg"
+                            style="max-width: 800px"
+                        />
+                        <p>
+                            Think about a filing cabinet, the old kind of
+                            database before we moved onto electronic databases.
+                            Each filing cabinet contains files, they look a bit
+                            like folders. Inside the files are records - each
+                            record contains information on one person or thing
+                            in the database. Each record consists of a list of
+                            different bits of information on the person or thing
+                            that the record is about.
+                        </p>
+                        <p>
+                            Electronic databases are structured in almost
+                            exactly the same way - in Files, Records and Fields.
+                        </p>
+                        <ul>
+                            <li>
+                                <b>File</b> - A file is a collection of similar
+                                records. For example, a file of pupil records,
+                                or a file of staff records.
+                            </li>
+                            <li>
+                                <b>Record</b> - A record is a collection of
+                                fields that contain information about one person
+                                or thing. For example, a record of information
+                                on one pupil, or a record of information on one
+                                staff member.
+                            </li>
+                            <li>
+                                <b>Field</b> - A field is a single piece of
+                                information in a record. For example, a pupil's
+                                name, or a pupil's date of birth.
+                            </li>
+                        </ul>
+                        <p>
+                            Microsoft's Access program gives slightly different
+                            names to these. In Access, a file is called a
+                            <b>table</b>, a record is a <b>row</b> in the table,
+                            and a field is a <b>column</b>.
+                        </p>
+                        <h2>Electronic Database vs Paper Database</h2>
+                        <p>
+                            There are a large number of benefits to using an
+                            electronic database over a paper database:
+                        </p>
+                        <ul>
+                            <li>
+                                <b>Speed</b> - Databases can contain a lot of
+                                information, a computer can search through or
+                                sort the records in large databases much faster
+                                than a human can.
+                            </li>
+                            <li>
+                                <b>Security</b> - Electronic databases are much
+                                less likely to be damaged than paper databases.
+                                They are also much less likely to be stolen.
+                            </li>
+                            <li>
+                                <b>Efficiency</b> - When they are uploaded to
+                                the internet, electronic databases can be
+                                accessed from anywhere and can be shared with
+                                other people.
+                            </li>
+                            <li>
+                                <b>Easy to update</b> - It is much easier to add
+                                    new records, remove records or update
+                                    records in an electronic database.
+                            </li>
+                            <li>
+                                <b>Easy to backup</b> - Electronic databases can
+                                be backed up to a USB stick or a cloud storage
+                                service. This means that if the database is
+                                damaged, it can be easily restored.
+                            </li>
+                        </ul>
+
+                        <h2>Database Structure Questions</h2>
+                        <div class="quiz-container"></div>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div id="left">
+                    <p>Biggar High School</p>
+                    <p>Market Rd, Biggar</p>
+                    <p>ML12 6AG</p>
+                </div>
+                <div id="center"></div>
+                <div id="right">
+                    <p>&copy;C Dunn, 2025</p>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>
