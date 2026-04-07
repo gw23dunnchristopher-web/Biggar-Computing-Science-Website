@@ -9,13 +9,18 @@
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/quiz.css" />
+        <style>
+            .cTable td {
+                background-color: white;
+            }
+        </style>
         <script>
             window.QUIZ_CONFIGS = {
                 dataTypeQuestions: {
                     questions: [
                         {
                             type: "table",
-                            text: "A hotel wants to create a database to store information about its guests. State the most suitable Access data type for each of the fields in the table below.",
+                            text: "A hotel wants to create a database to store information about its guests. State the most suitable Access data type for each of the fields in the table below. The GuestIDs look like this '14552'.",
                             tableHeaders: ["Field Name", "Data Type"],
                             columnWidths: ["50%", "50%"],
                             tableRows: [
@@ -27,19 +32,22 @@
                                 ["BreakfastIncluded", ""],
                             ],
                             marks: 6,
-                            markingScheme: "Award 1 mark for each correct data type (max 6). Accept: GuestID – Number; GuestName – Short Text; DateOfArrival – Date/Time; NumberOfNights – Number; RoomCost – Currency or Number; BreakfastIncluded – Yes/No. Do not penalise capitalisation differences.",
+                            markingScheme:
+                                "Award 1 mark for each correct data type (max 6). Accept: GuestID – Number OR Autonumber; GuestName – Short Text; DateOfArrival – Date/Time; NumberOfNights – Number; RoomCost – Currency or Number; BreakfastIncluded – Yes/No. Do not penalise capitalisation differences.",
                         },
                         {
                             type: "paragraph",
-                            text: "A student suggests storing a player's shirt number using the Short Text data type. Give one reason why this would be a poor choice of data type.",
+                            text: "A student suggests storing a customer's phone number using the Number data type. Give one reason why this would be a poor choice of data type.",
                             marks: 1,
-                            markingScheme: "Award 1 mark for any valid reason, e.g. Short Text stores text/letters and cannot be used in calculations / you cannot sort shirt numbers numerically if they are stored as text / Number should be used for numerical data.",
+                            markingScheme:
+                                "Award 1 mark for 'you cannot start a number data type with a 0, which is what a phone number would start with'. Alternatively, some phone numberes are recorded with '+44' and the country code, using a symbol would also require short text.",
                         },
                         {
                             type: "paragraph",
                             text: "Explain why the Yes/No data type is the most suitable choice for a field called 'IsActive' in a customer database.",
                             marks: 1,
-                            markingScheme: "Award 1 mark for explaining that Yes/No stores boolean (true or false) values, and 'IsActive' can only ever be yes (true) or no (false), making it the most appropriate data type.",
+                            markingScheme:
+                                "Award 1 mark for explaining that Yes/No stores boolean (true or false) values, and 'IsActive' can only ever be yes (true) or no (false), making it the most appropriate data type.",
                         },
                     ],
                 },
@@ -49,13 +57,15 @@
                             type: "paragraph",
                             text: "Explain what a primary key is and why it is important in a database.",
                             marks: 2,
-                            markingScheme: "Award 1 mark for correctly explaining that a primary key is a field that uniquely identifies each record in the database (no two records can have the same value in this field). Award 1 mark for explaining why it is important, e.g. it ensures that every record is unique and can be told apart from all others / it allows a specific record to be located quickly / it prevents duplicate records from being stored in the database.",
+                            markingScheme:
+                                "Award 1 mark for correctly explaining that a primary key is a field that uniquely identifies each record in the database (no two records can have the same value in this field). Award 1 mark for explaining why it is important, e.g. it ensures that every record is unique and can be told apart from all others / it allows a specific record to be located quickly / it prevents duplicate records from being stored in the database.",
                         },
                         {
                             type: "paragraph",
                             text: "Give one real-life example of something that acts as a primary key, and explain why it is suitable.",
                             marks: 2,
-                            markingScheme: "Award 1 mark for a suitable real-life example, e.g. National Insurance number, student ID number, passport number, car registration plate, NHS number, ISBN (book number). Award 1 mark for explaining why it is suitable – e.g. it is unique to each person or item and can never be shared with another, so it can always be used to identify exactly one record.",
+                            markingScheme:
+                                "Award 1 mark for a suitable real-life example, e.g. National Insurance number, student ID number, passport number, car registration plate, NHS number, ISBN (book number). Award 1 mark for explaining why it is suitable – e.g. it is unique to each person or item and can never be shared with another, so it can always be used to identify exactly one record.",
                         },
                     ],
                 },
@@ -67,7 +77,11 @@
                                 "A cinema wants to create a database to store information about its films. The database needs to store the film title, the age rating (e.g. PG or 15), the duration in minutes, and whether the film is currently showing.",
                                 "Complete the data dictionary below. The first row has been completed for you.",
                             ],
-                            tableHeaders: ["Field Name", "Data Type", "Primary Key"],
+                            tableHeaders: [
+                                "Field Name",
+                                "Data Type",
+                                "Primary Key",
+                            ],
                             columnWidths: ["34%", "33%", "33%"],
                             tableRows: [
                                 ["FilmID", "Number", "PK"],
@@ -77,7 +91,8 @@
                                 ["CurrentlyShowing", "", ""],
                             ],
                             marks: 4,
-                            markingScheme: "Award 1 mark for each correct row (max 4). Accept: Title – Short Text – (blank); AgeRating – Short Text – (blank); DurationMins – Number – (blank); CurrentlyShowing – Yes/No – (blank). Do not penalise minor spelling differences in data type names.",
+                            markingScheme:
+                                "Award 1 mark for each correct row (max 4). Accept: Title – Short Text – (blank); AgeRating – Short Text – (blank); DurationMins – Number – (blank); CurrentlyShowing – Yes/No – (blank). Do not penalise minor spelling differences in data type names.",
                         },
                         {
                             type: "table",
@@ -85,7 +100,11 @@
                                 "A vet surgery wants to create a database to store information about its patients. The database needs to store the name of each pet, the species (e.g. Dog or Cat), the owner's name, the date of the last visit, and the weight of the animal in kilograms.",
                                 "Design a complete data dictionary for this database. You must choose and include a suitable primary key field of your own.",
                             ],
-                            tableHeaders: ["Field Name", "Data Type", "Primary Key"],
+                            tableHeaders: [
+                                "Field Name",
+                                "Data Type",
+                                "Primary Key",
+                            ],
                             columnWidths: ["34%", "33%", "33%"],
                             tableRows: [
                                 ["", "", ""],
@@ -96,7 +115,8 @@
                                 ["", "", ""],
                             ],
                             marks: 6,
-                            markingScheme: "Award 1 mark for including a suitable primary key field (e.g. PetID – Number – PK). Award 1 mark each for correctly naming and assigning a data type to the following fields: pet name (Short Text), species (Short Text), owner's name (Short Text), date of last visit (Date/Time), weight (Number). Max 6 marks total. Accept reasonable field name variations.",
+                            markingScheme:
+                                "Award 1 mark for including a suitable primary key field (e.g. PetID – Number OR Autonumber – PK). Award 1 mark each for correctly naming and assigning a data type to the following fields: pet name (Short Text), species (Short Text), owner's name (Short Text), date of last visit (Date/Time), weight (Number). Max 6 marks total. Accept reasonable field name variations.",
                         },
                         {
                             type: "table",
@@ -104,7 +124,11 @@
                                 "A local football club wants to create a database to keep track of its players. The database needs to store each player's name, their position (e.g. Goalkeeper or Striker), the date they joined the club, the number of goals they have scored, and whether they are currently registered to play.",
                                 "Design a complete data dictionary for this database. You must choose and include a suitable primary key field of your own.",
                             ],
-                            tableHeaders: ["Field Name", "Data Type", "Primary Key"],
+                            tableHeaders: [
+                                "Field Name",
+                                "Data Type",
+                                "Primary Key",
+                            ],
                             columnWidths: ["34%", "33%", "33%"],
                             tableRows: [
                                 ["", "", ""],
@@ -115,7 +139,8 @@
                                 ["", "", ""],
                             ],
                             marks: 6,
-                            markingScheme: "Award 1 mark for including a suitable primary key field (e.g. PlayerID – Number – PK). Award 1 mark each for correctly naming and assigning a data type to the following fields: player name (Short Text), position (Short Text), date joined (Date/Time), goals scored (Number), currently registered (Yes/No). Max 6 marks total. Accept reasonable field name variations.",
+                            markingScheme:
+                                "Award 1 mark for including a suitable primary key field (e.g. PlayerID – Number OR Autonumber – PK). Award 1 mark each for correctly naming and assigning a data type to the following fields: player name (Short Text), position (Short Text), date joined (Date/Time), goals scored (Number), currently registered (Yes/No). Max 6 marks total. Accept reasonable field name variations.",
                         },
                     ],
                 },
@@ -221,6 +246,14 @@
                                 </td>
                             </tr>
                             <tr>
+                                <td>Autonumber</td>
+                                <td>
+                                    Used for storing numbers that are
+                                    automatically generated by the database.
+                                </td>
+                                <td>1, 2, 3, 4, 5, 6, 7, 8, 9, 10</td>
+                            </tr>
+                            <tr>
                                 <td>Number</td>
                                 <td>
                                     Used for storing numbers and numerical data.
@@ -258,9 +291,20 @@
                             contents of other fields. We won't be using either
                             of these in the N4 course.
                         </p>
+                        <p>
+                            <i
+                                >Note: You can't type a number that starts with
+                                0 and has no decimal point into a number field.
+                                This is why we used the short text data type
+                                when typing in phone numbers.</i
+                            >
+                        </p>
 
                         <h2>Data Type Questions</h2>
-                        <div class="quiz-container" data-quiz-id="dataTypeQuestions"></div>
+                        <div
+                            class="quiz-container"
+                            data-quiz-id="dataTypeQuestions"
+                        ></div>
 
                         <h2>Primary Key</h2>
                         <p>
@@ -319,7 +363,10 @@
                         </p>
 
                         <h2>Primary Key Questions</h2>
-                        <div class="quiz-container" data-quiz-id="primaryKeyQuestions"></div>
+                        <div
+                            class="quiz-container"
+                            data-quiz-id="primaryKeyQuestions"
+                        ></div>
 
                         <h2>Data Dictionaries</h2>
                         <p>
@@ -400,7 +447,10 @@
                         </p>
 
                         <h2>Database Design Questions</h2>
-                        <div class="quiz-container" data-quiz-id="designQuestions"></div>
+                        <div
+                            class="quiz-container"
+                            data-quiz-id="designQuestions"
+                        ></div>
                     </div>
                 </div>
             </div>

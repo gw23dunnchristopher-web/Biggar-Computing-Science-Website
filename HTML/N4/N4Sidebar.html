@@ -1,112 +1,296 @@
 <script src="/JavaScript/N4Script.js"></script>
-<br>
+<br />
 <link rel="stylesheet" type="text/css" href="/CSS/styles.css" />
-<link rel="stylesheet" type="text/css" href="/CSS/sidebarStyles.css">
+<link rel="stylesheet" type="text/css" href="/CSS/sidebarStyles.css" />
 
 <div class="sidebar">
     <div class="sidebar-search">
-        <input type="text" id="sidebarSearch" placeholder="Search N4 pages..." oninput="searchPages()">
+        <input
+            type="text"
+            id="sidebarSearch"
+            placeholder="Search N4 pages..."
+            oninput="searchPages()"
+        />
         <div id="searchResults" class="search-results"></div>
     </div>
     <ul class="sidebar-menu">
+        <li class="menu-header">
+            <a id="HomeLink" href="/index.html"><span>Home</span></a>
+        </li>
 
-        <li class="menu-header"><a id="HomeLink" href="/index.html"><span>Home</span></a></li>
-
-        <li class="menu-header"><a id="N4Home" href="/HTML/N4/N4Home.html"><span>Course Overview</span></a></li>
-        <hr>
         <li class="menu-header">
-            <a href="#"><span>Getting Started</span><span class="arrow">&#9654;</span></a>
-            <ul class="submenu">
-                <li><a href="/HTML/N4/Start/CourseRoadmap.html"><span>Course Checklist</span></a></li>
-                <li><a href="/HTML/N4/Start/DigitalToolkit.html"><span>Digital Toolkit</span></a></li>
-                <li><a href="/HTML/N4/Start/StudyingComputing.html"><span>Studying Computing</span></a></li>
-            </ul>
+            <a id="N4Home" href="/HTML/N4/N4Home.html"
+                ><span>Course Overview</span></a
+            >
         </li>
+        <hr />
         <li class="menu-header">
-            <a href="#"><span>Software Design and Development</span><span class="arrow">&#9654;</span></a>
-            <ul class="submenu">
-                <li><a href="/HTML/N4/SDD/SDDUnitOutcomes.html"><span>Unit Outcomes</span></a></li>
-                <li><a href="/HTML/N4/SDD/Analysis.html"><span>Analysis</span></a></li>
-                <li><a href="/HTML/N4/SDD/Design.html"><span>Design</span></a></li>
-                <li>
-                    <a href="#"><span>Implementation</span><span class="arrow">&#9654;</span></a>
-                    <ul class="submenu">
-                        <li class="menu-item sub-menu"><a href="#"><span>Coding Basics</span><span class="arrow">&#9654;
-                            </span></a>
-                        <ul class="submenu">
-                            <li><a href="/HTML/N4/SDD/readableCode.html"><span>Creating Readable Code</span></a></li>
-                            <li><a href="/HTML/N4/SDD/VariablesAndDatatypes.html"><span>Variables and Datatypes</span></a></li>
-                            <li class="menu-item sub-menu"><a href="#"><span>Input and Output</span><span class="arrow">&#9654;                                </span></a>
-                                <ul class="submenu">
-                                    <li><a href="/HTML/N4/SDD/print.html"><span>The print() function</span></a></li>
-                                    <li><a href="/HTML/N4/SDD/input.html"><span>The input() function</span></a></li>
-                                </ul>
-                            </li>
-                            <li><a href="/HTML/N4/SDD/Arithmetic.html"><span>Arithmetic</span></a></li>
-                        </ul>
-                            <li class="menu-item sub-menu"><a href="#"><span>Programming Constructs</span><span                                                 class="arrow">&#9654;</span></a>
-                        <ul class="submenu">
-                            <li class="menu-item sub-menu"><a href="#"><span>Loops</span><span class="arrow">&#9654;</span></a>
-                                <ul class="submenu">
-                                    <li><a href="/HTML/N4/SDD/fixedLoop.html"><span>Fixed Loops</span></a></li>
-                                    <li><a href="/HTML/N4/SDD/runningTotal.html"><span>Running Total</span></a></li>
-                                </ul>
-                            </li>
-                            <li class="menu-item sub-menu"><a href="#"><span>Selection</span><span class="arrow">&#9654;</span></a>
-                                <ul class="submenu">
-                                    <li><a href="/HTML/N4/SDD/Selection.html"><span>IF...ELSE Statements</span></a></li>
-                                    <li><a href="/HTML/N4/SDD/Selection-elif.html"><span>IF...ELIF...ELSE Statements</span></a></li>
-                                </ul>
-                            </li>
-                            <li><a href="/HTML/N4/SDD/combiningConstructs.html"><span>Combining Constructs</span></a></li>
-                        </ul>
-                    </ul>
-                </li>
-                <li><a href="/HTML/N4/SDD/TestingAndEvaluation.html"><span>Testing and Evaluation</span></a></li>
-            </ul>
-        </li>
-        <li class="menu-header">
-            <a href="#"><span>Information Systems</span><span class="arrow">&#9654;</span></a>
-            <ul class="submenu">
-                <li><a href="/HTML/N4/ISDD/ISDDUnitOutcomes.html"><span>Unit Outcomes</span></a></li>
-                <li><a href="/HTML/N4/ISDD/introduction.html"><span>Introduction</span></a></li>
-                <li class="menu-item sub-menu"><a href="#"><span>Databases</span><span class="arrow">&#9654;</span></a>
-                    <ul class="submenu">
-                        <li><a href="/HTML/N4/ISDD/DDD/DatabaseIntro.html"><span>Introduction</span></a></li>
-                        <li><a href="/HTML/N4/ISDD/DDD/Analysis.html"><span>Analysis</span></a></li>
-                    </ul>
-                </li>
-                <li class="menu-item sub-menu"><a href="#"><span>Web Development</span><span class="arrow">&#9654;</span></a>
-                    <ul class="submenu">
-                    </ul>
-                </li>
-                <li class="menu-item sub-menu"><a href="#"><span>Computer Systems</span><span class="arrow">&#9654;</span></a>
-                    <ul class="submenu">
-                    </ul>
-                </li>
-            </ul>
-        </li>
-        <li class="menu-header">
-            <a href="#"><span>Added Value Unit</span><span class="arrow">&#9654;</span></a>
-        </li>
-        <li class="menu-header">
-            <a href="#"><span>Reviews</span><span class="arrow">&#9654;</span></a>
+            <a href="#"
+                ><span>Getting Started</span
+                ><span class="arrow">&#9654;</span></a
+            >
             <ul class="submenu">
                 <li>
-                <a href="#"><span>SDD</span><span class="arrow">&#9654;</span></a>
-                <ul class="submenu">
-                    <li><a href="/HTML/N4/Review/SDDReview1.html"><span>Review 1 - Analysis, Design, Variables</span></a></li>
-                    <li><a href="/HTML/N4/Review/SDDReview2.html"><span>Review 2 - Basic Coding</span></a></li>
-                    <li><a href="/HTML/N4/Review/SDDReview3.html"><span>Review 3 - Coding Constructs</span></a></li>
-                    <li><a href="/HTML/N4/Review/SDDReview4.html"><span>Review 4 - Combining Constructs &amp; Testing</span></a></li>
-                </ul>
-                <a href="#"><span>ISDD</span><span class="arrow">&#9654;</span></a>
-                <ul class="submenu">
-        
-                </ul>
+                    <a href="/HTML/N4/Start/CourseRoadmap.html"
+                        ><span>Course Checklist</span></a
+                    >
+                </li>
+                <li>
+                    <a href="/HTML/N4/Start/DigitalToolkit.html"
+                        ><span>Digital Toolkit</span></a
+                    >
+                </li>
+                <li>
+                    <a href="/HTML/N4/Start/StudyingComputing.html"
+                        ><span>Studying Computing</span></a
+                    >
                 </li>
             </ul>
         </li>
+        <li class="menu-header">
+            <a href="#"
+                ><span>Software Design and Development</span
+                ><span class="arrow">&#9654;</span></a
+            >
+            <ul class="submenu">
+                <li>
+                    <a href="/HTML/N4/SDD/SDDUnitOutcomes.html"
+                        ><span>Unit Outcomes</span></a
+                    >
+                </li>
+                <li>
+                    <a href="/HTML/N4/SDD/Analysis.html"
+                        ><span>Analysis</span></a
+                    >
+                </li>
+                <li>
+                    <a href="/HTML/N4/SDD/Design.html"><span>Design</span></a>
+                </li>
+                <li>
+                    <a href="#"
+                        ><span>Implementation</span
+                        ><span class="arrow">&#9654;</span></a
+                    >
+                    <ul class="submenu">
+                        <li class="menu-item sub-menu">
+                            <a href="#"
+                                ><span>Coding Basics</span
+                                ><span class="arrow">&#9654; </span></a
+                            >
+                            <ul class="submenu">
+                                <li>
+                                    <a href="/HTML/N4/SDD/readableCode.html"
+                                        ><span>Creating Readable Code</span></a
+                                    >
+                                </li>
+                                <li>
+                                    <a
+                                        href="/HTML/N4/SDD/VariablesAndDatatypes.html"
+                                        ><span>Variables and Datatypes</span></a
+                                    >
+                                </li>
+                                <li class="menu-item sub-menu">
+                                    <a href="#"
+                                        ><span>Input and Output</span
+                                        ><span class="arrow">&#9654; </span></a
+                                    >
+                                    <ul class="submenu">
+                                        <li>
+                                            <a href="/HTML/N4/SDD/print.html"
+                                                ><span
+                                                    >The print() function</span
+                                                ></a
+                                            >
+                                        </li>
+                                        <li>
+                                            <a href="/HTML/N4/SDD/input.html"
+                                                ><span
+                                                    >The input() function</span
+                                                ></a
+                                            >
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="/HTML/N4/SDD/Arithmetic.html"
+                                        ><span>Arithmetic</span></a
+                                    >
+                                </li>
+                            </ul>
+                        </li>
 
+                        <li class="menu-item sub-menu">
+                            <a href="#"
+                                ><span>Programming Constructs</span
+                                ><span class="arrow">&#9654;</span></a
+                            >
+                            <ul class="submenu">
+                                <li class="menu-item sub-menu">
+                                    <a href="#"
+                                        ><span>Loops</span
+                                        ><span class="arrow">&#9654;</span></a
+                                    >
+                                    <ul class="submenu">
+                                        <li>
+                                            <a
+                                                href="/HTML/N4/SDD/fixedLoop.html"
+                                                ><span>Fixed Loops</span></a
+                                            >
+                                        </li>
+                                        <li>
+                                            <a
+                                                href="/HTML/N4/SDD/runningTotal.html"
+                                                ><span>Running Total</span></a
+                                            >
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="menu-item sub-menu">
+                                    <a href="#"
+                                        ><span>Selection</span
+                                        ><span class="arrow">&#9654;</span></a
+                                    >
+                                    <ul class="submenu">
+                                        <li>
+                                            <a
+                                                href="/HTML/N4/SDD/Selection.html"
+                                                ><span
+                                                    >IF...ELSE Statements</span
+                                                ></a
+                                            >
+                                        </li>
+                                        <li>
+                                            <a
+                                                href="/HTML/N4/SDD/Selection-elif.html"
+                                                ><span
+                                                    >IF...ELIF...ELSE
+                                                    Statements</span
+                                                ></a
+                                            >
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a
+                                        href="/HTML/N4/SDD/combiningConstructs.html"
+                                        ><span>Combining Constructs</span></a
+                                    >
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="/HTML/N4/SDD/TestingAndEvaluation.html"
+                        ><span>Testing and Evaluation</span></a
+                    >
+                </li>
+            </ul>
+        </li>
+        <li class="menu-header">
+            <a href="#"
+                ><span>Information Systems</span
+                ><span class="arrow">&#9654;</span></a
+            >
+            <ul class="submenu">
+                <li>
+                    <a href="/HTML/N4/ISDD/ISDDUnitOutcomes.html"
+                        ><span>Unit Outcomes</span></a
+                    >
+                </li>
+                <li>
+                    <a href="/HTML/N4/ISDD/introduction.html"
+                        ><span>Introduction</span></a
+                    >
+                </li>
+                <li class="menu-item sub-menu">
+                    <a href="#"
+                        ><span>Databases</span
+                        ><span class="arrow">&#9654;</span></a
+                    >
+                    <ul class="submenu">
+                        <li>
+                            <a href="/HTML/N4/ISDD/DDD/DatabaseIntro.html"
+                                ><span>Introduction</span></a
+                            >
+                        </li>
+                        <li>
+                            <a href="/HTML/N4/ISDD/DDD/Analysis.html"
+                                ><span>Analysis</span></a
+                            >
+                        </li>
+                        <li>
+                            <a href="/HTML/N4/ISDD/DDD/Design.html"
+                                ><span>Design</span></a
+                            >
+                        </li>
+                    </ul>
+                </li>
+                <li class="menu-item sub-menu">
+                    <a href="#"
+                        ><span>Web Development</span
+                        ><span class="arrow">&#9654;</span></a
+                    >
+                    <ul class="submenu"></ul>
+                </li>
+                <li class="menu-item sub-menu">
+                    <a href="#"
+                        ><span>Computer Systems</span
+                        ><span class="arrow">&#9654;</span></a
+                    >
+                    <ul class="submenu"></ul>
+                </li>
+            </ul>
+        </li>
+        <li class="menu-header">
+            <a href="#"
+                ><span>Added Value Unit</span
+                ><span class="arrow">&#9654;</span></a
+            >
+        </li>
+        <li class="menu-header">
+            <a href="#"
+                ><span>Reviews</span><span class="arrow">&#9654;</span></a
+            >
+            <ul class="submenu">
+                <li>
+                    <a href="#"
+                        ><span>SDD</span><span class="arrow">&#9654;</span></a
+                    >
+                    <ul class="submenu">
+                        <li>
+                            <a href="/HTML/N4/Review/SDDReview1.html"
+                                ><span
+                                    >Review 1 - Analysis, Design,
+                                    Variables</span
+                                ></a
+                            >
+                        </li>
+                        <li>
+                            <a href="/HTML/N4/Review/SDDReview2.html"
+                                ><span>Review 2 - Basic Coding</span></a
+                            >
+                        </li>
+                        <li>
+                            <a href="/HTML/N4/Review/SDDReview3.html"
+                                ><span>Review 3 - Coding Constructs</span></a
+                            >
+                        </li>
+                        <li>
+                            <a href="/HTML/N4/Review/SDDReview4.html"
+                                ><span
+                                    >Review 4 - Combining Constructs &amp;
+                                    Testing</span
+                                ></a
+                            >
+                        </li>
+                    </ul>
+                    <a href="#"
+                        ><span>ISDD</span><span class="arrow">&#9654;</span></a
+                    >
+                    <ul class="submenu"></ul>
+                </li>
+            </ul>
+        </li>
     </ul>
 </div>
