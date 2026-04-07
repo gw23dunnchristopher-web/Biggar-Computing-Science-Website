@@ -10,7 +10,81 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/quiz.css" />
         <script>
-           
+            window.QUIZ_CONFIGS = {
+                dataTypeQuestions: {
+                    questions: [
+                        {
+                            type: "table",
+                            text: "A library wants to create a database to store information about its books. State the most suitable Access data type for each of the fields in the table below.",
+                            tableHeaders: ["Field Name", "Data Type"],
+                            columnWidths: ["50%", "50%"],
+                            tableRows: [
+                                ["BookID", ""],
+                                ["Title", ""],
+                                ["Author", ""],
+                                ["Available", ""],
+                                ["DatePublished", ""],
+                                ["Price", ""],
+                            ],
+                            marks: 6,
+                            markingScheme: "Award 1 mark for each correct data type (max 6). Accept: BookID – Number; Title – Short Text; Author – Short Text; Available – Yes/No; DatePublished – Date/Time; Price – Currency or Number. Do not penalise capitalisation differences.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "A student suggests storing a person's age using the Short Text data type. Give one reason why this would be a poor choice.",
+                            marks: 1,
+                            markingScheme: "Award 1 mark for any valid reason, e.g. Short Text stores letters/characters and cannot be used in calculations / you cannot sort ages numerically if they are stored as text / Number should be used for numerical data.",
+                        },
+                        {
+                            type: "paragraph",
+                            text: "Explain why the Yes/No data type is suitable for a field called 'InStock' in a product database.",
+                            marks: 1,
+                            markingScheme: "Award 1 mark for explaining that Yes/No stores boolean (true/false) values, and 'InStock' can only ever be true (in stock) or false (not in stock), making it the most suitable data type.",
+                        },
+                    ],
+                },
+                designQuestions: {
+                    questions: [
+                        {
+                            type: "table",
+                            text: [
+                                "A cinema wants to create a database to store information about its films. The database needs to store the film title, the age rating (e.g. PG or 15), the duration in minutes, and whether the film is currently showing.",
+                                "Complete the data dictionary below for this database. The first row has been done for you.",
+                            ],
+                            tableHeaders: ["Field Name", "Data Type", "Primary Key"],
+                            columnWidths: ["34%", "33%", "33%"],
+                            tableRows: [
+                                ["FilmID", "Number", "PK"],
+                                ["Title", "", ""],
+                                ["AgeRating", "", ""],
+                                ["DurationMins", "", ""],
+                                ["CurrentlyShowing", "", ""],
+                            ],
+                            marks: 4,
+                            markingScheme: "Award 1 mark for each correct row (max 4). Title – Short Text – (blank); AgeRating – Short Text – (blank); DurationMins – Number – (blank); CurrentlyShowing – Yes/No – (blank). Do not penalise minor spelling differences in data types.",
+                        },
+                        {
+                            type: "table",
+                            text: [
+                                "A vet surgery wants to create a database to store information about its patients. The database needs to store the pet's name, the species (e.g. Dog or Cat), the owner's name, the date of the last visit, and the weight of the animal in kilograms.",
+                                "Design a data dictionary for this database. You must include a suitable primary key field.",
+                            ],
+                            tableHeaders: ["Field Name", "Data Type", "Primary Key"],
+                            columnWidths: ["34%", "33%", "33%"],
+                            tableRows: [
+                                ["", "", ""],
+                                ["", "", ""],
+                                ["", "", ""],
+                                ["", "", ""],
+                                ["", "", ""],
+                                ["", "", ""],
+                            ],
+                            marks: 6,
+                            markingScheme: "Award 1 mark for including a suitable primary key field (e.g. PetID – Number – PK). Award 1 mark each for correctly naming and assigning a data type to: pet name (Short Text), species (Short Text), owner name (Short Text), last visit date (Date/Time), weight (Number or Currency). Max 6 marks total. Accept reasonable field names.",
+                        },
+                    ],
+                },
+            };
         </script>
         <script src="/JavaScript/quiz.js"></script>
         <style></style>
@@ -151,6 +225,7 @@
                         </p>
 
                         <h2>Data Type Questions</h2>
+                        <div class="quiz-container" data-quiz-id="dataTypeQuestions"></div>
 
                         <h2>Primary Key</h2>
                         <p>
@@ -287,7 +362,7 @@
                         </p>
 
                         <h2>Database Design Questions</h2>
-                        
+                        <div class="quiz-container" data-quiz-id="designQuestions"></div>
                     </div>
                 </div>
             </div>
