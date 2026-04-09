@@ -14,15 +14,7 @@
         <script>
             window.QUIZ_CONFIG = {
                 questions: [
-                    {
-                        type: "paragraph",
-                        text: [
-                            "The following program displays whether a student has achieved a Merit, Pass, or Fail. Find the error and explain how to fix it.",
-                            { type: "code", language: "python", content: "score = int(input(\"Enter your score: \"))\nif score >= 50:\n    print(\"Pass\")\nelif score >= 70:\n    print(\"Merit\")\nelse:\n    print(\"Fail\")" }
-                        ],
-                        marks: 1,
-                        markingScheme: "Award 1 mark for identifying that the conditions are in the wrong order. A student scoring 80 would be given \"Pass\" instead of \"Merit\" because score >= 50 is evaluated first. The >= 70 (Merit) check should come before the >= 50 (Pass) check."
-                    }
+                    
                 ]
             };
         </script>
@@ -269,8 +261,6 @@ else:
     print("Valid score:", score)
 </textarea></div>
                 </div>
-                        <h2>Find the Error</h2>
-                        <div class="quiz-container"></div>
             </div>
         </div>   
         <footer>

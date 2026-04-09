@@ -275,24 +275,8 @@
                         "text": "Explain why the above random seat allocation design becomes less efficient as more passengers are allocated seats.",
                         "marks": 2,
                         "markingScheme": "Award 1 mark for stating that as more seats are taken, a randomly generated number is more likely to already be an allocated seat. Award 1 mark for demonstrating understanding that this causes the program to loop more times before finding an available seat, making it slower."
-                },
-        {
-            type: "paragraph",
-            text: [
-                "The following program stores 5 scores in an array and displays the last one. Find the error and explain how to fix it.",
-                { type: "code", language: "python", content: "scores = []\nfor i in range(5):\n    score = int(input(\"Enter score: \"))\n    scores.append(score)\nprint(\"The last score is:\", scores[5])" }
-            ],
-            marks: 1,
-            markingScheme: "Award 1 mark for identifying that scores[5] causes an IndexError. Arrays are zero-indexed, so a 5-element array has valid indices 0 to 4. The last element is scores[4] (or scores[-1])."
-        }
-,
-        {
-            type: "paragraph",
-            text: [
-                "The following program stores 5 scores in an array and displays the last one. Find the error and explain how to fix it."
-
-        ]
-};
+                }
+;
     </script>
     <script src="/JavaScript/quiz.js"></script>
 </body>

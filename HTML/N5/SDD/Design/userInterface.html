@@ -20,15 +20,7 @@
         <script>
             window.QUIZ_CONFIG = {
                 questions: [
-                    {
-                        type: "paragraph",
-                        text: [
-                            "The following program calculates a user's BMI. Find the error and explain how to fix it.",
-                            { type: "code", language: "python", content: "weight = float(input(\"Enter your weight in kg: \"))\nheight = float(input(\"Enter your height in metres: \"))\nbmi = weight / height\nprint(\"Your BMI is:\", round(bmi, 1))" }
-                        ],
-                        marks: 1,
-                        markingScheme: "Award 1 mark for identifying that bmi = weight / height divides by height once, but BMI is weight divided by height squared. It should be bmi = weight / (height ** 2)."
-                    }
+                    
                 ]
             };
         </script>
@@ -66,8 +58,6 @@
                         <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
                     </div>
                 </div>
-                        <h2>Find the Error</h2>
-                        <div class="quiz-container"></div>
             </div>
         </div>   
         <footer>

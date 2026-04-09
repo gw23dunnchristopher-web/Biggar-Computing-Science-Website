@@ -187,24 +187,8 @@
                               "The final ELSE statement (Line 24–25) always executes — it runs when the IF/ELSE IF chains above it all fail (i.e. no1, no2, no3 don't match). But since Line 25 still increments numMatches by 1, every iteration adds 1 regardless of whether no4 matches. So all 4 iterations increment numMatches, giving 4 every time."
                         ]
                   }
-            },
-      {
-          type: "paragraph",
-          text: [
-              "The following function applies a discount to a price. Find the error and explain how to fix it.",
-              { type: "code", language: "python", content: "def apply_discount(price, member):\n    discount = 0\n    if member = True:\n        discount = price * 0.1\n    final_price = price - discount\n    return final_price\n\nprint(apply_discount(50.00, True))" }
-          ],
-          marks: 1,
-          markingScheme: "Award 1 mark for identifying that if member = True uses the assignment operator = instead of the comparison operator ==. This causes a SyntaxError. It should be if member == True: or simply if member:."
-      }
-,
-      {
-          type: "paragraph",
-          text: [
-              "The following function applies a discount to a price. Find the error and explain how to fix it."
-
-      ]
-};
+            }
+;
     </script>
     <script src="/JavaScript/quiz.js"></script>
 </body>

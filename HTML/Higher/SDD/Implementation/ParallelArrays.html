@@ -199,16 +199,7 @@ for i in range(numStudents):
                         ]
                   }
             }
-      ,
-      {
-          type: "paragraph",
-          text: [
-              "The following program displays each student's name alongside their score using parallel arrays. Find the error and explain how to fix it.",
-              { type: "code", language: "python", content: "names = [\"Alice\", \"Bob\", \"Carol\", \"Dave\"]\nscores = [85, 92, 78, 95]\nfor i in range(len(names)):\n    print(names[i], \":\", scores[i + 1])" }
-          ],
-          marks: 1,
-          markingScheme: "Award 1 mark for identifying that scores[i + 1] is off by one. When i equals 3 (the last valid index), i + 1 = 4 which is out of bounds, causing an IndexError. It should be scores[i]."
-      }
+      
 
 ]
 };

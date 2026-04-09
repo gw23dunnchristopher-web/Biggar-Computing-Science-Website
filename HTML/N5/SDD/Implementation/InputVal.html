@@ -143,23 +143,8 @@ print("Thank you, you entered " + answer)
                         "marks": 4,
                         "markingScheme": "Award 1 mark for using a conditional (while) loop. Award 1 mark for the correct loop condition (price < 50000 OR price > 600000). Award 1 mark for asking the user to input the property price inside the loop. Award 1 mark for displaying a suitable error message inside the loop."
                 }
-        ,
-        {
-            type: "paragraph",
-            text: [
-                "The following program keeps asking for a mark until a valid one is entered (0 to 100). Find the error and explain how to fix it.",
-                { type: "code", language: "python", content: "mark = int(input(\"Enter a mark (0-100): \"))\nwhile mark < 0 or mark > 100:\n    print(\"Invalid mark. Try again.\")\nmark = int(input(\"Enter a mark (0-100): \"))\nprint(\"Mark accepted:\", mark)" }
-            ],
-            marks: 1,
-            markingScheme: "Award 1 mark for identifying that the second input() call is outside the while loop due to incorrect indentation. It must be indented inside the loop, otherwise the loop repeats forever because mark never changes."
-        }
-,
-        {
-            type: "paragraph",
-            text: [
-                "The following program keeps asking for a mark until a valid one is entered (0 to 100). Find the error and explain how to fix it."
-]
-};
+        
+;
     </script>
     <script src="/JavaScript/quiz.js"></script>
     <script src="/JavaScript/codeRunner.js"></script>

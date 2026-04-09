@@ -126,23 +126,8 @@ print("The number of scores over 50 was " + str(counter))
                         "marks": 4,
                         "markingScheme": "Award 1 mark for setting a running total variable to 0. Award 1 mark for looping 365 times (or using len(guests) for the loop range). Award 1 mark for adding guests[index] to the running total inside the loop. Award 1 mark for using an incrementing array index (e.g. guests[x]) within the running total calculation."
                 }
-        ,
-        {
-            type: "paragraph",
-            text: [
-                "The following program displays all items in a list that cost more than £5. Find the error and explain how to fix it.",
-                { type: "code", language: "python", content: "prices = [3.99, 7.50, 1.25, 9.99, 4.75, 6.00]\nfor i in range(len(prices)):\n    if prices[i] > 5:\n        print(\"£\" + prices[i])" }
-            ],
-            marks: 1,
-            markingScheme: "Award 1 mark for identifying that \"£\" + prices[i] tries to concatenate a string with a float, causing a TypeError. It should be print(\"£\" + str(prices[i])) or use an f-string."
-        }
-,
-        {
-            type: "paragraph",
-            text: [
-                "The following program displays all items in a list that cost more than £5. Find the error and explain how to fix it."
-]
-};
+        
+;
     </script>
     <script src="/JavaScript/quiz.js"></script>
     <script src="/JavaScript/codeRunner.js"></script>
