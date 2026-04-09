@@ -33,6 +33,21 @@
                         marks: 2,
                         markingScheme: "1 Mark: For identifying that the program checks conditions in turn (top to bottom). 1 Mark: For explaining that if the lower condition (e.g., 60) was first, a student with 70 would be caught by the 60 condition and given the wrong grade (a B instead of an A) because the program stops checking once it finds a 'true' condition.)."
                     },
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program is meant to display a grade based on a mark. Find the error and explain how to fix it.",
+                            { type: "code", language: "python", content: "mark = int(input(\"Enter your mark: \"))\nif mark >= 70:\n    print(\"Grade: A\")\nif mark >= 50:\n    print(\"Grade: B\")\nelif mark >= 30:\n    print(\"Grade: C\")\nelse:\n    print(\"Grade: D\")" }
+                        ],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for identifying that the second if mark >= 50 should be elif mark >= 50. Using if instead of elif means a student scoring 70 or above would have both \"Grade: A\" and \"Grade: B\" printed."
+                    }
+,
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program is meant to display a grade based on a mark. Find the error and explain how to fix it."
+
                 ],
             };
         </script>

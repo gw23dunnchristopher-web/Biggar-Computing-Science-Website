@@ -169,7 +169,22 @@ print(number, "divided by", divisor, "leaves a remainder of", number % divisor)
                         ]
                   }
             }
-      ]
+      ,
+      {
+          type: "paragraph",
+          text: [
+              "The following program picks a random score from a list. Find the error and explain how to fix it."
+,
+      {
+          type: "paragraph",
+          text: [
+              "The following program picks a random score from a list. Find the error and explain how to fix it.",
+              { type: "code", language: "python", content: "import random\nscores = [45, 78, 23, 91, 56]\nrandom_index = random.randint(0, len(scores))\nprint(\"Random score:\", scores[random_index])" }
+          ],
+          marks: 1,
+          markingScheme: "Award 1 mark for identifying that random.randint(0, len(scores)) can return len(scores) (which is 5), but valid indices for a 5-element list are 0 to 4. This causes an IndexError. It should be random.randint(0, len(scores) - 1)."
+      }
+]
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>

@@ -184,7 +184,22 @@ print("The counter is " + str(counter))
                         "marks": 4,
                         "markingScheme": "Award 1 mark for calculating the cost of small windows (smallWindows * 299.99). Award 1 mark for                             calculating the cost of large windows (largeWindows * 499.99). Award 1 mark for updating a running total (adding the                           cost to totalCost). Award 1 mark for correct assignment to totalCost (e.g. totalCost += subTotal, or totalCost =                               totalCost + subTotal)."
                 }
-        ]
+        ,
+        {
+            type: "paragraph",
+            text: [
+                "The following program is meant to calculate the total cost of items in a list. Find the error and explain how to fix it.",
+                { type: "code", language: "python", content: "prices = [1.99, 3.49, 0.79, 5.00, 2.25]\nfor price in prices:\n    total = 0\n    total = total + price\nprint(\"Total cost: £\" + str(total))" }
+            ],
+            marks: 1,
+            markingScheme: "Award 1 mark for identifying that total = 0 is inside the loop, resetting to zero on every iteration. After the loop, total equals only the last price. Fix: move total = 0 to before the loop."
+        }
+,
+        {
+            type: "paragraph",
+            text: [
+                "The following program is meant to calculate the total cost of items in a list. Find the error and explain how to fix it."
+]
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>

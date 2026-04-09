@@ -162,7 +162,22 @@
                               "(ii) Actual parameter: emails OR uniques (variables passed in the call at Line 13)"
                         ]
                   }
-            }
+            },
+      {
+          type: "paragraph",
+          text: [
+              "The following program uses a function to calculate the total cost but cannot display the result. Find the error and explain how to fix it.",
+              { type: "code", language: "python", content: "def calculate_total(prices):\n    total = 0\n    for price in prices:\n        total = total + price\n    return total\n\nmy_prices = [1.99, 3.49, 5.00]\ncalculate_total(my_prices)\nprint(\"Total: £\" + str(total))" }
+          ],
+          marks: 1,
+          markingScheme: "Award 1 mark for identifying that the return value of calculate_total() is not stored, and total is a local variable that does not exist outside the function. Fix: result = calculate_total(my_prices) and change the print to use result: print(\"Total: £\" + str(result))."
+      }
+,
+      {
+          type: "paragraph",
+          text: [
+              "The following program uses a function to calculate the total cost but cannot display the result. Find the error and explain how to fix it."
+
       ]
 };
     </script>

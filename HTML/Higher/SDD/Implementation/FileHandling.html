@@ -156,7 +156,18 @@
                         ]
                   }
             }
-      ]
+      ,
+      {
+          type: "paragraph",
+          text: [
+              "The following program reads from a file and then appends a new entry. Find the error and explain how to fix it.",
+              { type: "code", language: "python", content: "myFile = open(\"data.txt\", \"r\")\nfor line in myFile:\n    print(line)\nmyFile.close()\n\nmyFile = open(\"data.txt\", \"a\")\nmyFile.write(\"New entry\n\")" }
+          ],
+          marks: 1,
+          markingScheme: "Award 1 mark for identifying that the file opened for appending (\"a\") is never closed. myFile.close() should be called after myFile.write(), or a with statement should be used to ensure the file is always closed properly."
+      }
+
+]
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>

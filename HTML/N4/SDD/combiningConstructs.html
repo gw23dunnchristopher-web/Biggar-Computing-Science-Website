@@ -68,6 +68,21 @@
                         markingScheme:
                             "Award 1 mark for the correct answer: 12 times. Award 1 mark for a correct explanation: the outer loop runs 3 times, and for each of those 3 runs the inner loop runs 4 times, so 3 × 4 = 12.",
                     },
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program is meant to count how many numbers from 1 to 10 are even. Find the error and explain how to fix it.",
+                            { type: "code", language: "python", content: "count = 0\nfor number in range(1, 11):\nif number % 2 == 0:\n    count = count + 1\nprint(\"Even numbers found:\", count)" }
+                        ],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for identifying that the if statement is not indented inside the for loop. It must be indented one level to be part of the loop body, otherwise Python raises an IndentationError."
+                    }
+,
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program is meant to count how many numbers from 1 to 10 are even. Find the error and explain how to fix it."
+
                 ],
             };
         </script>

@@ -178,7 +178,22 @@
                                             ""
                                   ]
                         ]
-              }
+              },
+    {
+        type: "paragraph",
+        text: [
+            "A taxi charges £3.00 for the first mile and £1.50 for each additional mile. The following program calculates the cost. Find the error and explain how to fix it.",
+            { type: "code", language: "python", content: "miles = float(input(\"Enter the number of miles: \"))\nif miles <= 1:\n    cost = 3.00\nelse:\n    cost = 3.00 + (miles * 1.50)\nprint(\"Cost: £\" + str(cost))" }
+        ],
+        marks: 1,
+        markingScheme: "Award 1 mark for identifying that cost = 3.00 + (miles * 1.50) incorrectly charges £1.50 for ALL miles including the first. It should be cost = 3.00 + ((miles - 1) * 1.50) to only charge for each mile after the first."
+    }
+,
+    {
+        type: "paragraph",
+        text: [
+            "A taxi charges £3.00 for the first mile and £1.50 for each additional mile. The following program calculates the cost. Find the error and explain how to fix it."
+
     ]
     };
     </script>

@@ -248,7 +248,22 @@ print("The maximum value is", maximum, "at position", position)
                         ]
                   }
             }
-      ]
+      ,
+      {
+          type: "paragraph",
+          text: [
+              "The following program finds the minimum and maximum values in a list. Find the error and explain how to fix it.",
+              { type: "code", language: "python", content: "numbers = [45, 12, 78, 3, 56, 91, 23]\nminimum = 0\nmaximum = 0\nfor number in numbers:\n    if number < minimum:\n        minimum = number\n    if number > maximum:\n        maximum = number\nprint(\"Minimum:\", minimum)\nprint(\"Maximum:\", maximum)" }
+          ],
+          marks: 1,
+          markingScheme: "Award 1 mark for identifying that minimum = 0 is an incorrect starting value. Since all numbers in the list are positive, no number will ever be less than 0, so minimum stays at 0 instead of finding the true minimum. It should be initialised to numbers[0]."
+      }
+,
+      {
+          type: "paragraph",
+          text: [
+              "The following program finds the minimum and maximum values in a list. Find the error and explain how to fix it."
+]
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>

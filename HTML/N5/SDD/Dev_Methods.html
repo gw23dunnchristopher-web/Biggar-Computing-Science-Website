@@ -16,6 +16,23 @@
                 }, 1000);
             });
         </script>
+            <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program is meant to display whether each number from 1 to 10 is odd or even. Find the error and explain how to fix it.",
+                            { type: "code", language: "python", content: "for number in range(1, 11):\n    if number / 2 == 0:\n        print(number, \"is even\")\n    else:\n        print(number, \"is odd\")" }
+                        ],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for identifying that number / 2 == 0 is incorrect. The / operator performs division and returns a float, so this condition is never True. The modulo operator % should be used: number % 2 == 0 checks whether the remainder after dividing by 2 is zero."
+                    }
+                ]
+            };
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
     </head>
     <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
         <div id="loading"></div>
@@ -64,6 +81,8 @@
                     <p>This is an iterative process - what that means is that you may need to return to an earlier stage because you realise that there is a problem with the program.</p>
                     <p>For example, when testing the program during the testing stage, you may need to return to the implementation stage.</p>
                 </div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container"></div>
             </div>
         </div>   
         <footer>

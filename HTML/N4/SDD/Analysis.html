@@ -93,6 +93,21 @@
                         tableRows: [["", "", ""]],
                         markingScheme: "Award 1 mark per cell. Input: item name, price per unit, and quantity (award mark if at least two of three are mentioned). Process: multiply price by quantity to get total cost, then check if total is £10 or more and apply 10% discount if so (award mark if both steps are mentioned, or award mark for either step alone). Output: item name, original total, and final price after discount (award mark if at least two of three outputs are mentioned)."
                     },
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program is meant to ask the user for two numbers and display their sum. Find the error and explain how to fix it.",
+                            { type: "code", language: "python", content: "num1 = input(\"Enter the first number: \")\nnum2 = input(\"Enter the second number: \")\ntotal = num1 + num2\nprint(\"The total is:\", total)" }
+                        ],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for identifying that num1 and num2 are stored as strings (no int() conversion), so the + operator concatenates them instead of adding them mathematically (e.g. entering 3 and 4 gives \"34\" instead of 7). Fix: change input() to int(input()) for both variables."
+                    }
+,
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program is meant to ask the user for two numbers and display their sum. Find the error and explain how to fix it."
+
                 ],
             };
         </script>

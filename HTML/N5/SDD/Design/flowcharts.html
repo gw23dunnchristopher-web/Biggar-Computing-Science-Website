@@ -141,7 +141,22 @@
                         "text": "A garden centre is considering selling orange trees for £23.00. Using the flowchart design shown on the page, explain why the design does not need to be changed to accommodate this.",
                         "marks": 1,
                         "markingScheme": "Award 1 mark for explaining that as an orange tree is not an apple or pear tree, it would still be set to £23 (the default else price), so the design already handles this case correctly without any modification."
-                }
+                },
+        {
+            type: "paragraph",
+            text: [
+                "The following pseudocode is meant to find the largest of two numbers. Find the error and explain how to fix it.",
+                { type: "code", language: "python", content: "RECEIVE num1 FROM (INTEGER) KEYBOARD\nRECEIVE num2 FROM (INTEGER) KEYBOARD\nIF num1 < num2 THEN\n    SET largest TO num1\nELSE\n    SET largest TO num2\nEND IF\nSEND \"The largest number is \" & largest TO DISPLAY" }
+            ],
+            marks: 1,
+            markingScheme: "Award 1 mark for identifying that IF num1 < num2 is backwards. If num1 is smaller, the code incorrectly sets largest to num1. The condition should be IF num1 > num2."
+        }
+,
+        {
+            type: "paragraph",
+            text: [
+                "The following pseudocode is meant to find the largest of two numbers. Find the error and explain how to fix it."
+
         ]
 };
     </script>

@@ -9,6 +9,23 @@
         <link rel="stylesheet" href="/CSS/sidebarStyles.css">
         <link rel="stylesheet" href="/CSS/styles.css">
         <link rel="stylesheet" href="/CSS/frameStyles.css">
+            <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following function is meant to return the second largest unique value in a list. Find the error and explain how to fix it.",
+                            { type: "code", language: "python", content: "def second_largest(numbers):\n    numbers.sort()\n    return numbers[-2]\n\ndata = [3, 1, 4, 1, 5, 9, 2, 6]\nprint(\"Second largest:\", second_largest(data))" }
+                        ],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for identifying that if the list contains duplicate maximum values, numbers[-2] returns the maximum again rather than the true second largest. The list should be deduplicated before sorting: numbers = list(set(numbers)); numbers.sort(); return numbers[-2]."
+                    }
+                ]
+            };
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
     </head>
     <body>
         <div id="loading"></div>
@@ -73,6 +90,8 @@
                         <div class="answerButton" onClick="answerButtonSwitch(this); toggleVisibility('answer1')">Show Answer</div>
                     </div>
                 </div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container"></div>
             </div>
         </div>
         <footer>

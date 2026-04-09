@@ -237,7 +237,22 @@ if found == False:
                         ]
                   }
             }
-      ]
+      ,
+      {
+          type: "paragraph",
+          text: [
+              "The following linear search function contains an error. Find it and explain how to fix it.",
+              { type: "code", language: "python", content: "def linear_search(data, target):\n    for i in range(len(data)):\n        if data[i] == target:\n            return i\n    return i\n\nnames = [\"Alice\", \"Bob\", \"Carol\", \"Dave\"]\nresult = linear_search(names, \"Eve\")\nprint(\"Found at index:\", result)" }
+          ],
+          marks: 1,
+          markingScheme: "Award 1 mark for identifying that return i after the loop returns the last index checked (3), not a \"not found\" indicator. If the target is absent, it incorrectly returns the final loop index. It should return -1 to indicate the target was not found."
+      }
+,
+      {
+          type: "paragraph",
+          text: [
+              "The following linear search function contains an error. Find it and explain how to fix it."
+]
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>

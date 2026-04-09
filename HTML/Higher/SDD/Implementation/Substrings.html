@@ -177,7 +177,18 @@ if len(word) >= 3:
                         ]
                   }
             }
-      ]
+      ,
+      {
+          type: "paragraph",
+          text: [
+              "The following program extracts the username from an email address (everything before the @ symbol). Find the error and explain how to fix it.",
+              { type: "code", language: "python", content: "email = \"student@school.com\"\nusername = email[0:email.index(\"@\") + 1]\nprint(\"Username:\", username)" }
+          ],
+          marks: 1,
+          markingScheme: "Award 1 mark for identifying that email.index(\"@\") + 1 includes the @ symbol in the result (e.g. \"student@\" instead of \"student\"). The + 1 should be removed: username = email[0:email.index(\"@\")]."
+      }
+
+]
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>

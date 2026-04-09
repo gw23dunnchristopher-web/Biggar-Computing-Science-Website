@@ -188,7 +188,22 @@
                               "number of holes won is ≥ 0 OR ≤ 9"
                         ]
                   }
-            }
+            },
+      {
+          type: "paragraph",
+          text: [
+              "The following program calculates the average of a list of temperatures. Find the error and explain how to fix it.",
+              { type: "code", language: "python", content: "temperatures = [12.5, 18.3, 7.8, 22.1, 15.0]\ntotal = 0\nfor i in range(len(temperatures)):\n    total + temperatures[i]\naverage = total / len(temperatures)\nprint(\"Average temperature:\", average)" }
+          ],
+          marks: 1,
+          markingScheme: "Award 1 mark for identifying that total + temperatures[i] calculates a value but does not assign it. total remains 0, so average is always 0. It should be total = total + temperatures[i] (or total += temperatures[i])."
+      }
+,
+      {
+          type: "paragraph",
+          text: [
+              "The following program calculates the average of a list of temperatures. Find the error and explain how to fix it."
+
       ]
 };
     </script>

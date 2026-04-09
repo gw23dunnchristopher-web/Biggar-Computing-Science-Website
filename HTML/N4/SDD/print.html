@@ -10,6 +10,23 @@
         <link rel="stylesheet" href="/CSS/styles.css" />
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/codeRunner.css" />
+            <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program displays a user's favourite colour. Find the error and explain how to fix it.",
+                            { type: "code", language: "python", content: "colour = \"blue\"\nprint(\"My favourite colour is \" + colour)\nprint(\"I have always liked the colour\" colour)" }
+                        ],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for identifying that the second print statement is missing the + operator between the string and the variable colour. It should be print(\"I have always liked the colour\" + colour)."
+                    }
+                ]
+            };
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
     </head>
 
     <body>
@@ -220,6 +237,8 @@
                         </ul>
                         <div class="py-quiz" data-sandbox="print-exercises"></div>
                     </div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container"></div>
                 </div>
             </div>
             <footer>

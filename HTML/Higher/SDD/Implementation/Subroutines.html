@@ -308,7 +308,22 @@ greet(studentName)
                         ]
                   }
             }
-      ]
+      ,
+      {
+          type: "paragraph",
+          text: [
+              "The following function calculates the area of a rectangle but the result is lost. Find the error and explain how to fix it.",
+              { type: "code", language: "python", content: "def calculate_area(length, width):\n    area = length * width\n\nresult = calculate_area(5, 3)\nprint(\"Area:\", result)" }
+          ],
+          marks: 1,
+          markingScheme: "Award 1 mark for identifying that the function calculates area but has no return statement. Without return area, the function returns None, so result is None. Add return area as the last line of the function."
+      }
+,
+      {
+          type: "paragraph",
+          text: [
+              "The following function calculates the area of a rectangle but the result is lost. Find the error and explain how to fix it."
+]
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>

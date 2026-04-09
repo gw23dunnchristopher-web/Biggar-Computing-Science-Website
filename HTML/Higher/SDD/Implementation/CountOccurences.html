@@ -142,7 +142,22 @@ print(target, "found", total, "times.")
                         ]
                   }
             }
-      ]
+      ,
+      {
+          type: "paragraph",
+          text: [
+              "The following program counts how many times a target value appears in a list. Find the error and explain how to fix it.",
+              { type: "code", language: "python", content: "values = [3, 7, 2, 7, 5, 7, 1, 4, 7]\ntarget = 7\ncount = 1\nfor value in values:\n    if value == target:\n        count = count + 1\nprint(target, \"appears\", count, \"times\")" }
+          ],
+          marks: 1,
+          markingScheme: "Award 1 mark for identifying that count = 1 should be count = 0. Starting the counter at 1 means the result is always 1 more than the actual number of occurrences."
+      }
+,
+      {
+          type: "paragraph",
+          text: [
+              "The following program counts how many times a target value appears in a list. Find the error and explain how to fix it."
+]
 };
     </script>
     <script src="/JavaScript/quiz.js"></script>

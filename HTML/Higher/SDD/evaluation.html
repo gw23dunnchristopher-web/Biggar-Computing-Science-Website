@@ -121,7 +121,22 @@
                               "Maintainability: if there is an error it can be identified and fixed in one place; OR code is easier to read/understand as each module has a specific purpose"
                         ]
                   }
-            }
+            },
+      {
+          type: "paragraph",
+          text: [
+              "The following program calculates the average score for students who passed (scored 60 or above). Find the error and explain how to fix it.",
+              { type: "code", language: "python", content: "scores = [55, 78, 43, 91, 62, 85, 70]\ntotal = 0\ncount = 0\nfor score in scores:\n    if score >= 60:\n        total = total + score\naverage = total / count\nprint(\"Average passing score:\", average)" }
+          ],
+          marks: 1,
+          markingScheme: "Award 1 mark for identifying that count is never incremented when a passing score is found (count += 1 is missing inside the if block), so dividing by count causes a ZeroDivisionError. Add count += 1 after total = total + score."
+      }
+,
+      {
+          type: "paragraph",
+          text: [
+              "The following program calculates the average score for students who passed (scored 60 or above). Find the error and explain how to fix it."
+
       ]
 };
     </script>

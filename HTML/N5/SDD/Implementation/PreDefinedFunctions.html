@@ -17,6 +17,23 @@
                 }, 1000);
             });
         </script>
+            <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program rounds a number to 2 decimal places. Find the error and explain how to fix it.",
+                            { type: "code", language: "python", content: "number = float(input(\"Enter a decimal number: \"))\nrounded = round(number)\nprint(\"Rounded to 2 decimal places:\", rounded)" }
+                        ],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for identifying that round(number) rounds to 0 decimal places (the nearest whole number). To round to 2 decimal places, the second argument must be supplied: round(number, 2)."
+                    }
+                ]
+            };
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
     </head>
     <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
         <div id="loading"></div>
@@ -173,6 +190,8 @@ for x in range(len(names)):
 </textarea></div>
                     
                 </div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container"></div>
             </div>
         </div>   
         <footer>

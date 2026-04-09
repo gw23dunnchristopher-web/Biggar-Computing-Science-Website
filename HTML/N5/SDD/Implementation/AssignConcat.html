@@ -17,6 +17,23 @@
                 }, 1000);
             });
         </script>
+            <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program builds a full name from a first and last name. Find the error and explain how to fix it.",
+                            { type: "code", language: "python", content: "firstName = input(\"Enter your first name: \")\nlastName = input(\"Enter your last name: \")\nfullName = firstName + lastName\nprint(\"Your full name is:\", fullName)" }
+                        ],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for identifying that firstName + lastName joins the names with no space between them (e.g. \"AliceSmith\"). A space should be included: fullName = firstName + \" \" + lastName."
+                    }
+                ]
+            };
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
     </head>
     <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
         <div id="loading"></div>
@@ -220,6 +237,8 @@ print("Hello,", name + "! You are", age, "years old.")
 </textarea></div>
                     
                 </div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container"></div>
             </div>
         </div>   
         <footer>

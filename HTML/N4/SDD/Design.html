@@ -144,6 +144,19 @@
                         },
                     ],
                 },
+                findTheError: {
+                    questions: [
+                        {
+                            type: "paragraph",
+                            text: [
+                                "The following pseudocode is meant to calculate the area of a rectangle. Find the error and explain how to fix it.",
+                                { type: "code", language: "python", content: "RECEIVE length FROM (INTEGER) KEYBOARD\nRECEIVE width FROM (INTEGER) KEYBOARD\nSET area TO length + width\nSEND \"The area is \" & area TO DISPLAY" }
+                            ],
+                            marks: 1,
+                            markingScheme: "Award 1 mark for identifying that SET area TO length + width uses addition instead of multiplication. It should be SET area TO length * width."
+                        }
+                    ]
+                }
             };
         </script>
     </head>
@@ -838,6 +851,8 @@
                         </details>
                         <p>Once you have completed all of the questions and attained at least 20 out of 26 marks, you can check off 'Design' in the SDD section of the <b>Course Checklist.</b></p>
                     </div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container" data-quiz-id="findTheError"></div>
                 </div>
             </div>
             <footer>

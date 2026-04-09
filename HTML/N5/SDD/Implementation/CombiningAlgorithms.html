@@ -17,6 +17,23 @@
                 }, 1000);
             });
         </script>
+            <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program is meant to find the highest score from a list. Find the error and explain how to fix it.",
+                            { type: "code", language: "python", content: "scores = [45, 72, 38, 91, 55]\nlargest = 0\nfor score in scores:\n    if score < largest:\n        largest = score\nprint(\"Highest score:\", largest)" }
+                        ],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for identifying that if score < largest finds the minimum, not the maximum. The condition should be if score > largest. Also, initialising largest = 0 would fail if all scores were negative — it should be initialised to scores[0]."
+                    }
+                ]
+            };
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
     </head>
     <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
         <div id="loading"></div>
@@ -70,6 +87,8 @@ print("Maximum score:", maximum)
 print(str(target) + " appears " + str(count) + " times")
 </textarea></div>
                 </div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container"></div>
             </div>
         </div>   
         <footer>

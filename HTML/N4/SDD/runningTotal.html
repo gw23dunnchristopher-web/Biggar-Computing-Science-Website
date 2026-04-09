@@ -36,6 +36,17 @@
                         markingScheme:
                             "1 Mark: Identifying that the computer cannot add a number to a variable that does not exist yet (or has no value). 1 Mark: Explaining that the program needs a 'baseline' or 'starting point' to perform the first addition.",
                     },
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program is meant to add up five numbers entered by the user. Find the error and explain how to fix it.",
+                            { type: "code", language: "python", content: "for count in range(5):\n    total = 0\n    number = int(input(\"Enter a number: \"))\n    total = total + number\nprint(\"The total is:\", total)" }
+                        ],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for identifying that total = 0 is inside the loop, so it resets to zero on every iteration. The result will always be the last number entered rather than the sum of all five. Fix: move total = 0 to before the loop."
+                    }
+
+
                 ],
             };
         </script>

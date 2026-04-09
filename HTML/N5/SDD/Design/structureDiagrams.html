@@ -142,7 +142,18 @@
                         "text": "The garden centre is considering selling orange trees for £23.00. Explain why the structure diagram design does not need to be changed to accommodate this.",
                         "marks": 1,
                         "markingScheme": "Award 1 mark for explaining that as an orange tree is not an apple or pear tree, the design would set its price to £23 by default (the else/default value), so no change to the design is needed."
-                }
+                },
+        {
+            type: "paragraph",
+            text: [
+                "The following program is meant to count down from 10 to 1 and print each number. Find the error and explain how to fix it.",
+                { type: "code", language: "python", content: "for number in range(10, 0):\n    print(number)" }
+            ],
+            marks: 1,
+            markingScheme: "Award 1 mark for identifying that range(10, 0) produces an empty sequence because Python defaults to a step of +1 and cannot count down. It should be range(10, 0, -1) to step backwards by 1 each time."
+        }
+
+
         ]
 };
     </script>

@@ -107,6 +107,19 @@
                         },
                     ],
                 },
+                findTheError: {
+                    questions: [
+                        {
+                            type: "paragraph",
+                            text: [
+                                "The following program is meant to calculate the area of a rectangle. Find the error and explain how to fix it.",
+                                { type: "code", language: "python", content: "length = int(input(\"Enter the length: \"))\nwidth = int(input(\"Enter the width: \"))\narea = length + width\nprint(\"The area is:\", area)" }
+                            ],
+                            marks: 1,
+                            markingScheme: "Award 1 mark for identifying that area = length + width uses addition instead of multiplication. The correct operator is *: area = length * width."
+                        }
+                    ]
+                }
             };
         </script>
     </head>
@@ -279,6 +292,8 @@
                         <h2>Now try coding some programs!</h2>
                         <div class="py-quiz" data-sandbox="arithmetic-quiz"></div>
                     </div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container" data-quiz-id="findTheError"></div>
                 </div>
             </div>
             <footer>

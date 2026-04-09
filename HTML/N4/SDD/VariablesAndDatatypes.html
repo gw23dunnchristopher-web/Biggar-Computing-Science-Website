@@ -39,6 +39,19 @@
                                 "Award 1 mark per completed row.  Row 1: String. Row 2: Real (or Float). Row 3: Integer. Row 4: ",
                         },
                     ]
+                },
+                findTheError: {
+                    questions: [
+                        {
+                            type: "paragraph",
+                            text: [
+                                "The following program is meant to add two numbers together. Find the error and explain how to fix it.",
+                                { type: "code", language: "python", content: "num1 = input(\"Enter the first number: \")\nnum2 = int(input(\"Enter the second number: \"))\nresult = num1 + num2\nprint(\"The result is:\", result)" }
+                            ],
+                            marks: 1,
+                            markingScheme: "Award 1 mark for identifying that num1 is stored as a string (no int() conversion), so num1 + num2 will raise a TypeError because you cannot add a string and an integer. Fix: change input() to int(input()) for num1."
+                        }
+                    ]
                 }
             };
         </script>
@@ -221,6 +234,8 @@
                         <p>Take a look at the question below.</p>
                         <div class="quiz-container" data-quiz-id="dataTypes"></div>
                     </div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container" data-quiz-id="findTheError"></div>
                 </div>
             </div>
             <footer>

@@ -285,7 +285,22 @@
                         "text": "(ii) Describe how Line 11 could be made more readable.",
                         "marks": 1,
                         "markingScheme": "Award 1 mark for any of: use meaningful variable names to clarify what un, sUn, pwd and sPwd represent; add white space above Line 11 to visually separate the IF statement from the surrounding code."
-              }
+              },
+    {
+        type: "paragraph",
+        text: [
+            "The following program checks whether a password is long enough (at least 8 characters). Find the error and explain how to fix it.",
+            { type: "code", language: "python", content: "password = input(\"Enter a password: \")\nif len(password) > 8:\n    print(\"Password accepted\")\nelse:\n    print(\"Password too short — must be at least 8 characters\")" }
+        ],
+        marks: 1,
+        markingScheme: "Award 1 mark for identifying that len(password) > 8 should be len(password) >= 8. A password of exactly 8 characters meets the requirement but would be incorrectly rejected by the > (strictly greater than) operator."
+    }
+,
+    {
+        type: "paragraph",
+        text: [
+            "The following program checks whether a password is long enough (at least 8 characters). Find the error and explain how to fix it."
+
     ]
     };
     </script>

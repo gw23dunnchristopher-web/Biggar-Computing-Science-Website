@@ -160,7 +160,18 @@
                               "Correct variable name \"machines\" and 80 elements"
                         ]
                   }
-            }
+            },
+      {
+          type: "paragraph",
+          text: [
+              "The following program searches a list of student records for those who achieved a top grade. Find the error and explain how to fix it.",
+              { type: "code", language: "python", content: "from dataclasses import dataclass\n\n@dataclass\nclass Student:\n    name: str\n    grade: str\n\nstudents = [Student(\"Alice\", \"A\"), Student(\"Bob\", \"B\"), Student(\"Carol\", \"A\")]\nfor i in range(len(students)):\n    if students[i].grade = \"A\":\n        print(students[i].name, \"achieved top grade\")" }
+          ],
+          marks: 1,
+          markingScheme: "Award 1 mark for identifying that students[i].grade = \"A\" uses the assignment operator = instead of the comparison operator ==. This causes a SyntaxError. It should be students[i].grade == \"A\"."
+      }
+
+
       ]
 };
     </script>

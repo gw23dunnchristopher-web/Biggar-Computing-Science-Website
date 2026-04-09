@@ -49,6 +49,21 @@
                         marks: 2,
                         markingScheme: "Award 1 mark for correctly explaining that a program is 'fit for purpose' if it meets all of the requirements that were set out for it (i.e. it does everything it was supposed to do). Award 1 mark for correctly identifying that the Analysis stage (specifically the functional requirements identified during analysis) is used as a checklist to evaluate whether the program meets its requirements.",
                     },
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program checks if a number is within the range 1 to 10 inclusive. Find the error and explain how to fix it.",
+                            { type: "code", language: "python", content: "number = int(input(\"Enter a number: \"))\nif number > 1 and number < 10:\n    print(\"In range\")\nelse:\n    print(\"Out of range\")" }
+                        ],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for identifying that > and < are strict inequalities, so the values 1 and 10 would be incorrectly reported as \"Out of range\". The operators should be >= and <= to include the boundary values."
+                    }
+,
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program checks if a number is within the range 1 to 10 inclusive. Find the error and explain how to fix it."
+
                 ],
             };
         </script>

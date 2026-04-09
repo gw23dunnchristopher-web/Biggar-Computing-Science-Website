@@ -17,6 +17,23 @@
                 }, 1000);
             });
         </script>
+            <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script>
+            window.QUIZ_CONFIG = {
+                questions: [
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program converts a temperature from Celsius to Fahrenheit. Find the error and explain how to fix it.",
+                            { type: "code", language: "python", content: "celsius = float(input(\"Enter temperature in Celsius: \"))\nfahrenheit = celsius * 9 / 5 + 32\nprint(str(celsius) + \"C is \" + fahrenheit + \"F\")" }
+                        ],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for identifying that fahrenheit is a float and cannot be concatenated to a string using +. It must be converted first: str(fahrenheit). Fix: print(str(celsius) + \"C is \" + str(fahrenheit) + \"F\")."
+                    }
+                ]
+            };
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
     </head>
     <body onload="loadSidebar('/HTML/N5/N5Sidebar.html','sidebar')">
         <div id="loading"></div>
@@ -158,6 +175,8 @@ incorrectResult = finalVelocity - initialVelocity / time
 print("Without brackets (wrong):", incorrectResult, "m/s²")
 </textarea></div>
                 </div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container"></div>
             </div>
         </div>   
         <footer>

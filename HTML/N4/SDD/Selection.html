@@ -49,6 +49,21 @@
                     markingScheme:
                         "1 Mark: For providing any logical \"backup\" plan (e.g., \"If it is raining, take an umbrella, else wear sunglasses\"). The student must show that the else action happens when the if is false."
                 },
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program checks whether a person is old enough to vote. Find the error and explain how to fix it.",
+                            { type: "code", language: "python", content: "age = int(input(\"Enter your age: \"))\nif age > 18:\n    print(\"You are old enough to vote.\")\nelse:\n    print(\"You are not old enough to vote.\")" }
+                        ],
+                        marks: 1,
+                        markingScheme: "Award 1 mark for identifying that if age > 18 should be if age >= 18. A person who is exactly 18 is old enough to vote, but the > operator (strictly greater than) would incorrectly tell them they cannot."
+                    }
+,
+                    {
+                        type: "paragraph",
+                        text: [
+                            "The following program checks whether a person is old enough to vote. Find the error and explain how to fix it."
+
                 ],
             };
         </script>
