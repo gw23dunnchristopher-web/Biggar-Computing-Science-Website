@@ -142,20 +142,16 @@
                             markingScheme:
                                 "Award 1 mark for setting the yearly total to 0 before the loop starts.  Award 1 mark for correctly using a                                     loop that repeats exactly 12 times. Award 1 mark for adding the new input to the running total inside the                                      loop. Award 1 mark for getting the average rainfall by dividing the yearly total by 12 after the loop has                                      finished.",
                         },
-                    ],
-                },
-                findTheError: {
-                    questions: [
                         {
-                            type: "paragraph",
-                            text: [
-                                "The following pseudocode is meant to calculate the area of a rectangle. Find the error and explain how to fix it.",
-                                { type: "code", language: "python", content: "RECEIVE length FROM (INTEGER) KEYBOARD\nRECEIVE width FROM (INTEGER) KEYBOARD\nSET area TO length + width\nSEND \"The area is \" & area TO DISPLAY" }
-                            ],
-                            marks: 1,
-                            markingScheme: "Award 1 mark for identifying that SET area TO length + width uses addition instead of multiplication. It should be SET area TO length * width."
-                        }
-                    ]
+                                                    type: "paragraph",
+                                                    text: [
+                                                        "The following pseudocode is meant to calculate the area of a rectangle. Find the error and explain how to fix it.",
+                                                        { type: "code", language: "python", content: "RECEIVE length FROM (INTEGER) KEYBOARD\nRECEIVE width FROM (INTEGER) KEYBOARD\nSET area TO length + width\nSEND \"The area is \" & area TO DISPLAY" }
+                                                    ],
+                                                    marks: 1,
+                                                    markingScheme: "Award 1 mark for identifying that SET area TO length + width uses addition instead of multiplication. It should be SET area TO length * width."
+                                                }
+                    ],
                 }
             };
         </script>
@@ -851,8 +847,6 @@
                         </details>
                         <p>Once you have completed all of the questions and attained at least 20 out of 26 marks, you can check off 'Design' in the SDD section of the <b>Course Checklist.</b></p>
                     </div>
-                        <h2>Find the Error</h2>
-                        <div class="quiz-container" data-quiz-id="findTheError"></div>
                 </div>
             </div>
             <footer>
