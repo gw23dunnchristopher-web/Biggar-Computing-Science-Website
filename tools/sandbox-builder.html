@@ -2200,35 +2200,11 @@
             .catch(function (e) { if (PB._loadSeq !== seq) return; setError('Failed to load questions: ' + e.message); });
     };
 
-    PB.questionTemplate = function () {
-        var ts = Date.now();
-        return JSON.stringify([{
-            'id': 'sub-' + ts,
-            'label': '(a)',
-            'maxMarks': 2,
-            'inputStyle': 'text',
-            'questionText': '',
-            'contentBlocks': [
-                {'id': 'block-' + ts, 'type': 'text', 'content': 'Question text goes here.'}
-            ],
-            'markingScheme': [
-                {'id': 'ms-' + ts, 'text': 'Correct answer point', 'marks': 1},
-                {'id': 'ms-' + (ts + 1), 'text': 'Additional correct point', 'marks': 1}
-            ],
-            'keywords': [],
-            'aiGuidance': 'Award 1 mark for each correct point made.'
-        }], null, 2);
-    };
-
-    PB.loadQTemplate = function () {
-        var ta = document.getElementById('qSubJson');
-        if (ta) ta.value = PB.questionTemplate();
-    };
-
     PB.renderQuestions = function () {
         var rows = PB.questions;
-        var course = PB.course === 'higher' ? 'Higher' : 'National 5';
-        var revUrl = PB.course === 'higher' ? '/revision/' : '/revision-n5/';
+        var course  = PB.course === 'higher' ? 'Higher' : 'National 5';
+        var revBase = PB.course === 'higher' ? '/revision' : '/revision-n5';
+
         /* build unique years + topics for filters */
         var years = [], topics = [], seenY = {}, seenT = {};
         rows.forEach(function (q) {
@@ -2249,33 +2225,17 @@
             + years.map(function (y) { return '<option value="' + esc(y) + '"' + (filterYear === String(y) ? ' selected' : '') + '>' + esc(y) + '</option>'; }).join('');
         var topicOpts = '<option value="">All topics</option>'
             + topics.map(function (t) { return '<option value="' + esc(t) + '"' + (filterTopic === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('');
-        var preYear = filterYear || (new Date().getFullYear() + 1);
 
-        /* ── Add Question card ── */
+        /* ── Open Editor card ── */
         var html = '<div class="pb-add-card">'
-            + '<h3>Add Question to ' + esc(course) + ' Bank</h3>'
-            + '<p style="margin:0 0 8px;font-size:0.8rem;color:#8b949e;">New questions appear immediately in the <a href="' + revUrl + '" target="_blank" style="color:#58a6ff;">' + esc(course) + ' Revision App</a>.</p>'
-            + '<div class="pb-add-row" style="flex-wrap:wrap;gap:8px;">'
-            + '<input class="pb-inp" id="qYear" type="number" placeholder="Year e.g. ' + preYear + '" value="' + esc(filterYear) + '" style="width:100px;">'
-            + '<input class="pb-inp" id="qTopic" placeholder="Topic e.g. dd" style="width:100px;">'
-            + '<input class="pb-inp" id="qTitle" placeholder="Title e.g. Question 8" style="flex:1;min-width:160px;">'
-            + '</div>'
-            + '<div style="margin:6px 0 4px;display:flex;gap:16px;align-items:center;">'
-            + '<label style="font-size:0.82rem;color:#8b949e;">Type:</label>'
-            + '<label style="font-size:0.82rem;"><input type="radio" name="qtype" value="regular" checked> Regular</label>'
-            + '<label style="font-size:0.82rem;"><input type="radio" name="qtype" value="practice"> Practice</label>'
-            + '<label style="font-size:0.82rem;"><input type="radio" name="qtype" value="quiz"> Quiz-only</label>'
-            + '</div>'
-            + '<div style="margin-top:6px;">'
-            + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'
-            + '<label style="font-size:0.82rem;color:#8b949e;">Sub-questions (JSON array)</label>'
-            + '<button class="pb-btn-ghost" style="font-size:0.75rem;padding:2px 8px;" onclick="PB.loadQTemplate()">Load template</button>'
-            + '</div>'
-            + '<textarea class="pb-inp" id="qSubJson" rows="5" style="font-family:monospace;font-size:0.77rem;resize:vertical;width:100%;box-sizing:border-box;" placeholder="Click \'Load template\' to see the format, then edit as needed."></textarea>'
-            + '</div>'
-            + '<div style="margin-top:8px;display:flex;gap:8px;align-items:center;">'
-            + '<button class="pb-btn" id="addQBtn">Add Question</button>'
-            + '<span class="pb-msg" id="qMsg" style="display:none;"></span>'
+            + '<h3>Add or Edit Questions</h3>'
+            + '<p style="margin:0 0 10px;font-size:0.82rem;color:#8b949e;">'
+            + 'Questions are created and edited using the full ' + esc(course) + ' Revision App editor — '
+            + 'with content blocks, marking schemes, AI guidance, and all input types. '
+            + 'This list refreshes automatically when you return here.</p>'
+            + '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">'
+            + '<button class="pb-btn" id="openEditorBtn">Open Question Editor ↗</button>'
+            + '<span style="font-size:0.78rem;color:#8b949e;">Opens the ' + esc(course) + ' Revision App in a new tab, already signed in.</span>'
             + '</div>'
             + '</div>';
 
@@ -2292,22 +2252,32 @@
             html += '<div class="pb-empty">No questions match the current filter.</div>';
         } else {
             html += '<div class="pb-table-wrap"><table class="pb-table">'
-                + '<thead><tr><th style="width:60px;">Year</th><th>Topic</th><th>Title</th><th>Type</th><th style="text-align:center;">Sub-Qs</th><th></th></tr></thead>'
-                + '<tbody>';
+                + '<thead><tr>'
+                + '<th style="width:60px;">Year</th>'
+                + '<th>Topic</th>'
+                + '<th>Title</th>'
+                + '<th>Type</th>'
+                + '<th style="text-align:center;">Sub-Qs</th>'
+                + '<th></th>'
+                + '</tr></thead><tbody>';
             filtered.forEach(function (q) {
-                var expanded = PB.expandedQuestion === q.id;
-                var type = q.isAdditionalExam ? 'Exam' : (q.isQuizOnly ? 'Quiz-only' : q.isPractice ? 'Practice' : 'Regular');
-                var subCount = Array.isArray(q.subQuestions) ? q.subQuestions.length : 0;
+                var expanded  = PB.expandedQuestion === q.id;
+                var type      = q.isAdditionalExam ? 'Exam' : (q.isQuizOnly ? 'Quiz-only' : q.isPractice ? 'Practice' : 'Regular');
+                var subCount  = Array.isArray(q.subQuestions) ? q.subQuestions.length : 0;
+                var editUrl   = revBase + '/teacher/question/' + encodeURIComponent(q.id);
                 html += '<tr>'
                     + '<td style="cursor:pointer;" onclick="PB.toggleQuestion(\'' + esc(q.id) + '\')">' + (q.year || '—') + '</td>'
                     + '<td style="cursor:pointer;" onclick="PB.toggleQuestion(\'' + esc(q.id) + '\')">'
-                    + '<span class="pb-badge topic">' + esc(q.topic) + '</span></td>'
+                    +   '<span class="pb-badge topic">' + esc(q.topic) + '</span></td>'
                     + '<td style="cursor:pointer;" onclick="PB.toggleQuestion(\'' + esc(q.id) + '\')">' + esc(q.title || '—') + '</td>'
                     + '<td style="cursor:pointer;" onclick="PB.toggleQuestion(\'' + esc(q.id) + '\')">'
-                    + '<span style="font-size:0.78rem;color:#8b949e;">' + esc(type) + '</span></td>'
+                    +   '<span style="font-size:0.78rem;color:#8b949e;">' + esc(type) + '</span></td>'
                     + '<td style="text-align:center;cursor:pointer;" onclick="PB.toggleQuestion(\'' + esc(q.id) + '\')">' + subCount + '</td>'
-                    + '<td style="white-space:nowrap;">'
-                    + '<button class="pb-btn-danger" style="font-size:0.75rem;padding:2px 8px;" onclick="PB.deleteQuestion(\'' + esc(q.id) + '\')">Delete</button>'
+                    + '<td style="white-space:nowrap;display:flex;gap:5px;">'
+                    +   '<button class="pb-btn-ghost" style="font-size:0.75rem;padding:2px 8px;" '
+                    +     'onclick="PB.openQuestionEditor(\'' + esc(q.id) + '\')">Edit ↗</button>'
+                    +   '<button class="pb-btn-danger" style="font-size:0.75rem;padding:2px 8px;" '
+                    +     'onclick="PB.deleteQuestion(\'' + esc(q.id) + '\')">Delete</button>'
                     + '</td></tr>';
                 if (expanded) {
                     html += '<tr><td colspan="6" style="padding:0 14px 12px;">'
@@ -2325,9 +2295,9 @@
         if (qfYear)  qfYear.onchange  = function () { PB.questionFilter.year  = this.value; PB.renderQuestions(); };
         if (qfTopic) qfTopic.onchange = function () { PB.questionFilter.topic = this.value; PB.renderQuestions(); };
 
-        /* wire up Add Question button */
-        var addQBtn = document.getElementById('addQBtn');
-        if (addQBtn) addQBtn.onclick = function () { PB.addQuestion(); };
+        /* wire up Open Editor button */
+        var openBtn = document.getElementById('openEditorBtn');
+        if (openBtn) openBtn.onclick = function () { PB.openQuestionEditor(); };
     };
 
     PB.toggleQuestion = function (id) {
@@ -2335,66 +2305,30 @@
         PB.renderQuestions();
     };
 
-    PB.addQuestion = function () {
-        var yearVal  = document.getElementById('qYear');
-        var topicVal = document.getElementById('qTopic');
-        var titleVal = document.getElementById('qTitle');
-        var typeEl   = document.querySelector('input[name="qtype"]:checked');
-        var subEl    = document.getElementById('qSubJson');
-        var msgEl    = document.getElementById('qMsg');
+    /* Exchange the Paper Builder token for a revision-app session token,
+       then open the question editor (id='new' for creating, or a question id for editing). */
+    PB.openQuestionEditor = function (questionId) {
+        var revBase    = PB.course === 'higher' ? '/revision' : '/revision-n5';
+        var exchangeUrl = PB.course === 'higher' ? '/api/revision-auth' : '/api/n5/revision-auth';
+        var targetId   = questionId || 'new';
+        var editorUrl  = revBase + '/teacher/question/' + encodeURIComponent(targetId);
 
-        var year  = yearVal  ? parseInt(yearVal.value.trim(), 10)  : NaN;
-        var topic = topicVal ? topicVal.value.trim().toLowerCase() : '';
-        var title = titleVal ? titleVal.value.trim() : '';
-        var qtype = typeEl   ? typeEl.value : 'regular';
-        var subRaw = subEl   ? subEl.value.trim() : '';
+        var btn = document.getElementById('openEditorBtn');
+        if (btn) { btn.disabled = true; btn.textContent = 'Opening…'; }
 
-        function showQMsg(msg, err) {
-            if (!msgEl) return;
-            msgEl.textContent = msg;
-            msgEl.style.display = 'inline';
-            msgEl.style.color = err ? '#f85149' : '#3fb950';
-            if (!err) setTimeout(function () { msgEl.style.display = 'none'; }, 3000);
-        }
-
-        if (!year || year < 1990 || year > 2100) { showQMsg('Valid year required (e.g. 2025)', true); return; }
-        if (!topic) { showQMsg('Topic is required (e.g. dd)', true); return; }
-        if (!title) { showQMsg('Title is required (e.g. Question 8)', true); return; }
-        if (!subRaw) { showQMsg('Sub-questions JSON is required — click Load template', true); return; }
-
-        var subQuestions;
-        try {
-            subQuestions = JSON.parse(subRaw);
-            if (!Array.isArray(subQuestions) || subQuestions.length === 0) throw new Error('must be a non-empty array');
-        } catch (e) {
-            showQMsg('Sub-questions JSON invalid: ' + e.message, true);
-            return;
-        }
-
-        var body = {
-            id: 'q-' + Date.now(),
-            year: year,
-            topic: topic,
-            title: title,
-            isPractice:       qtype === 'practice',
-            isQuizOnly:       qtype === 'quiz',
-            isAdditionalExam: false,
-            subQuestions:     subQuestions,
-        };
-
-        document.getElementById('addQBtn').disabled = true;
-        api('POST', '/api/content/questions?course=' + PB.course, body)
-            .then(function () {
-                showQMsg('Question added ✓', false);
-                if (yearVal)  yearVal.value  = '';
-                if (topicVal) topicVal.value = '';
-                if (titleVal) titleVal.value = '';
-                if (subEl)    subEl.value    = '';
-                PB.loadQuestions();
+        api('POST', exchangeUrl)
+            .then(function (resp) {
+                if (resp && resp.token) {
+                    localStorage.setItem('teacherToken', resp.token);
+                }
+                window.open(editorUrl, '_blank');
+                if (btn) { btn.disabled = false; btn.textContent = 'Open Question Editor ↗'; }
             })
             .catch(function (e) {
-                showQMsg(e.message, true);
-                document.getElementById('addQBtn').disabled = false;
+                /* Token exchange failed — open anyway (user may already be logged in) */
+                console.warn('[PB] token exchange failed:', e.message, '— opening editor anyway');
+                window.open(editorUrl, '_blank');
+                if (btn) { btn.disabled = false; btn.textContent = 'Open Question Editor ↗'; }
             });
     };
 
@@ -2507,6 +2441,16 @@
             .then(function () { PB.loadAssignments(); })
             .catch(function (e) { alert(e.message); });
     };
+
+    /* ── Auto-refresh questions when returning from the revision-app editor tab ── */
+    var _pbLastFocusRefresh = 0;
+    window.addEventListener('focus', function () {
+        if (PB.activeTab !== 'questions') return;
+        var now = Date.now();
+        if (now - _pbLastFocusRefresh < 5000) return; /* debounce 5 s */
+        _pbLastFocusRefresh = now;
+        PB.loadQuestions();
+    });
 
 })();
 </script>
