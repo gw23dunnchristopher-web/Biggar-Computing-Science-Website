@@ -604,6 +604,61 @@
         .pb-msg { font-size: 0.82rem; padding: 6px 12px; border-radius: 5px; display: inline-block; margin-top: 4px; }
         .pb-msg.ok  { background: #1a4a1a; color: #7ee787; }
         .pb-msg.err { background: #4a1a1a; color: #f87171; }
+        /* ── Question Editor Modal ──────────────────────────── */
+        .pb-qm-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999;
+            display: flex; align-items: flex-start; justify-content: center;
+            padding: 24px 16px; overflow-y: auto;
+        }
+        .pb-qm-box {
+            background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+            width: 100%; max-width: 700px; box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+        }
+        .pb-qm-hdr {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px; border-bottom: 1px solid #30363d;
+        }
+        .pb-qm-hdr h2 { margin: 0; font-size: 1rem; font-weight: 700; }
+        .pb-qm-close {
+            background: none; border: none; color: #8b949e; font-size: 1.3rem;
+            cursor: pointer; padding: 2px 8px; line-height: 1;
+        }
+        .pb-qm-close:hover { color: #e6edf3; }
+        .pb-qm-body {
+            padding: 18px 20px; display: flex; flex-direction: column; gap: 16px;
+            max-height: calc(100vh - 170px); overflow-y: auto;
+        }
+        .pb-qm-footer {
+            display: flex; gap: 10px; justify-content: flex-end;
+            padding: 12px 20px; border-top: 1px solid #30363d;
+        }
+        .pb-qm-grid { display: grid; grid-template-columns: 90px 120px 1fr; gap: 10px; }
+        .pb-field, .pb-field-full { display: flex; flex-direction: column; gap: 4px; }
+        .pb-field > label, .pb-field-full > label {
+            font-size: 0.73rem; color: #8b949e; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .pb-inp-full {
+            background: #0d1117; border: 1px solid #30363d; border-radius: 5px;
+            color: #e6edf3; padding: 7px 11px; font-size: 0.84rem; font-family: inherit;
+            width: 100%; box-sizing: border-box;
+        }
+        .pb-inp-full:focus { outline: none; border-color: #58a6ff; }
+        .pb-type-row { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+        .pb-type-row > .lbl { font-size: 0.73rem; color: #8b949e; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+        .pb-type-row label { font-size: 0.84rem; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .pb-sq-card { border: 1px solid #30363d; border-radius: 8px; overflow: hidden; }
+        .pb-sq-hdr {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 14px; background: #1c2128; border-bottom: 1px solid #30363d;
+        }
+        .pb-sq-hdr-lbl { font-size: 0.85rem; font-weight: 700; color: #79c0ff; }
+        .pb-sq-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+        .pb-sq-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+        .pb-sq-row .pb-field { flex: 1; min-width: 80px; }
+        .pb-sq-row .pb-field.narrow { flex: 0 0 90px; }
+        .pb-sq-row .pb-field.mid    { flex: 0 0 155px; }
+        .pb-qm-err { color: #f87171; font-size: 0.82rem; padding: 6px 0; display: none; }
     </style>
 
     <!-- Ace Editor (uses window.ace — no conflict with Replit's CodeMirror global) -->
@@ -2226,16 +2281,11 @@
         var topicOpts = '<option value="">All topics</option>'
             + topics.map(function (t) { return '<option value="' + esc(t) + '"' + (filterTopic === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('');
 
-        /* ── Open Editor card ── */
+        /* ── Add Question card ── */
         var html = '<div class="pb-add-card">'
-            + '<h3>Add or Edit Questions</h3>'
-            + '<p style="margin:0 0 10px;font-size:0.82rem;color:#8b949e;">'
-            + 'Questions are created and edited using the full ' + esc(course) + ' Revision App editor — '
-            + 'with content blocks, marking schemes, AI guidance, and all input types. '
-            + 'This list refreshes automatically when you return here.</p>'
-            + '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">'
-            + '<button class="pb-btn" id="openEditorBtn">Open Question Editor ↗</button>'
-            + '<span style="font-size:0.78rem;color:#8b949e;">Opens the ' + esc(course) + ' Revision App in a new tab, already signed in.</span>'
+            + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">'
+            +   '<h3>Questions — ' + esc(course) + '</h3>'
+            +   '<button class="pb-btn" onclick="PB.openQModal(null)">+ Add Question</button>'
             + '</div>'
             + '</div>';
 
@@ -2275,13 +2325,24 @@
                     + '<td style="text-align:center;cursor:pointer;" onclick="PB.toggleQuestion(\'' + esc(q.id) + '\')">' + subCount + '</td>'
                     + '<td style="white-space:nowrap;display:flex;gap:5px;">'
                     +   '<button class="pb-btn-ghost" style="font-size:0.75rem;padding:2px 8px;" '
-                    +     'onclick="PB.openQuestionEditor(\'' + esc(q.id) + '\')">Edit ↗</button>'
+                    +     'onclick="PB.openQModal(\'' + esc(q.id) + '\')">Edit</button>'
                     +   '<button class="pb-btn-danger" style="font-size:0.75rem;padding:2px 8px;" '
                     +     'onclick="PB.deleteQuestion(\'' + esc(q.id) + '\')">Delete</button>'
                     + '</td></tr>';
                 if (expanded) {
+                    var subsList = (q.subQuestions || []).map(function (s) {
+                        var txt = (Array.isArray(s.contentBlocks) && s.contentBlocks[0])
+                            ? s.contentBlocks[0].content : (s.questionText || '—');
+                        var preview = String(txt).slice(0, 110) + (txt && txt.length > 110 ? '…' : '');
+                        return '<li style="margin-bottom:5px;">'
+                            + '<strong style="color:#79c0ff;">' + esc(s.label || '?') + '</strong>'
+                            + ' <span style="color:#8b949e;font-size:0.76rem;">[' + (s.maxMarks || 0) + ' mark' + (s.maxMarks === 1 ? '' : 's') + ']</span> '
+                            + '<span>' + esc(preview) + '</span></li>';
+                    }).join('');
                     html += '<tr><td colspan="6" style="padding:0 14px 12px;">'
-                        + '<div class="pb-q-detail"><pre>' + esc(JSON.stringify(q.subQuestions, null, 2)) + '</pre></div>'
+                        + '<div class="pb-q-detail">'
+                        + (subsList ? '<ul style="margin:4px 0;padding-left:18px;">' + subsList + '</ul>' : '<em>No sub-questions</em>')
+                        + '</div>'
                         + '</td></tr>';
                 }
             });
@@ -2294,10 +2355,6 @@
         var qfTopic = document.getElementById('qfTopic');
         if (qfYear)  qfYear.onchange  = function () { PB.questionFilter.year  = this.value; PB.renderQuestions(); };
         if (qfTopic) qfTopic.onchange = function () { PB.questionFilter.topic = this.value; PB.renderQuestions(); };
-
-        /* wire up Open Editor button */
-        var openBtn = document.getElementById('openEditorBtn');
-        if (openBtn) openBtn.onclick = function () { PB.openQuestionEditor(); };
     };
 
     PB.toggleQuestion = function (id) {
@@ -2305,31 +2362,191 @@
         PB.renderQuestions();
     };
 
-    /* Exchange the Paper Builder token for a revision-app session token,
-       then open the question editor (id='new' for creating, or a question id for editing). */
-    PB.openQuestionEditor = function (questionId) {
-        var revBase    = PB.course === 'higher' ? '/revision' : '/revision-n5';
-        var exchangeUrl = PB.course === 'higher' ? '/api/revision-auth' : '/api/n5/revision-auth';
-        var targetId   = questionId || 'new';
-        var editorUrl  = revBase + '/teacher/question/' + encodeURIComponent(targetId);
+    /* ════════════════════════════════ QUESTION EDITOR MODAL ════════════════ */
 
-        var btn = document.getElementById('openEditorBtn');
-        if (btn) { btn.disabled = true; btn.textContent = 'Opening…'; }
+    PB._qEditId = null;
 
-        api('POST', exchangeUrl)
-            .then(function (resp) {
-                if (resp && resp.token) {
-                    localStorage.setItem('teacherToken', resp.token);
-                }
-                window.open(editorUrl, '_blank');
-                if (btn) { btn.disabled = false; btn.textContent = 'Open Question Editor ↗'; }
-            })
-            .catch(function (e) {
-                /* Token exchange failed — open anyway (user may already be logged in) */
-                console.warn('[PB] token exchange failed:', e.message, '— opening editor anyway');
-                window.open(editorUrl, '_blank');
-                if (btn) { btn.disabled = false; btn.textContent = 'Open Question Editor ↗'; }
+    /* Returns the HTML string for one sub-question card */
+    PB._sqCardHtml = function (sub, idx) {
+        var contentText = '';
+        if (Array.isArray(sub.contentBlocks)) {
+            sub.contentBlocks.forEach(function (b) {
+                if (b.content) contentText += (contentText ? '\n' : '') + b.content;
             });
+        }
+        var schemeText = Array.isArray(sub.markingScheme)
+            ? sub.markingScheme.map(function (m) { return (typeof m === 'object' && m.text) ? m.text : String(m); }).join('\n')
+            : '';
+        var kwords = Array.isArray(sub.keywords) ? sub.keywords.join(', ') : '';
+        var label  = sub.label || '(' + String.fromCharCode(97 + idx) + ')';
+        var styles = ['text', 'code-editor', 'sql-editor', 'number'].map(function (s) {
+            return '<option value="' + s + '"' + (sub.inputStyle === s ? ' selected' : '') + '>' + s + '</option>';
+        }).join('');
+        return '<div class="pb-sq-card">'
+            + '<div class="pb-sq-hdr">'
+            +   '<span class="pb-sq-hdr-lbl">Part ' + esc(label) + '</span>'
+            +   '<button class="pb-btn-danger" style="padding:2px 8px;font-size:0.75rem;" onclick="PB.removeSubQCard(this)">Remove</button>'
+            + '</div>'
+            + '<div class="pb-sq-body">'
+            +   '<div class="pb-sq-row">'
+            +     '<div class="pb-field narrow"><label>Label</label>'
+            +       '<input class="pb-inp-full" data-sq="label" value="' + esc(label) + '" placeholder="(a)"></div>'
+            +     '<div class="pb-field narrow"><label>Marks</label>'
+            +       '<input class="pb-inp-full" data-sq="marks" type="number" min="1" value="' + (sub.maxMarks || 2) + '"></div>'
+            +     '<div class="pb-field mid"><label>Input Style</label>'
+            +       '<select class="pb-inp-full" data-sq="style">' + styles + '</select></div>'
+            +   '</div>'
+            +   '<div class="pb-field-full"><label>Question Text</label>'
+            +     '<textarea class="pb-inp-full" data-sq="text" rows="3" placeholder="Enter question text…">' + esc(contentText) + '</textarea></div>'
+            +   '<div class="pb-field-full"><label>Marking Scheme <span style="font-weight:400;color:#6e7681;">(one mark point per line)</span></label>'
+            +     '<textarea class="pb-inp-full" data-sq="scheme" rows="4" '
+            +       'placeholder="Award 1 mark for…&#10;Award 1 mark for…">' + esc(schemeText) + '</textarea></div>'
+            +   '<div class="pb-field-full"><label>AI Guidance <span style="font-weight:400;color:#6e7681;">(optional)</span></label>'
+            +     '<textarea class="pb-inp-full" data-sq="guidance" rows="2" '
+            +       'placeholder="Accept any valid answer that shows understanding of…">' + esc(sub.aiGuidance || '') + '</textarea></div>'
+            +   '<div class="pb-field-full"><label>Keywords <span style="font-weight:400;color:#6e7681;">(comma-separated)</span></label>'
+            +     '<input class="pb-inp-full" data-sq="keywords" value="' + esc(kwords) + '" placeholder="e.g. primary key, foreign key"></div>'
+            + '</div>'
+            + '</div>';
+    };
+
+    PB.openQModal = function (id) {
+        PB._qEditId = id || null;
+        var q = id ? PB.questions.find(function (x) { return x.id === id; }) : null;
+
+        var yearVal  = q ? (q.year  || '') : (PB.questionFilter.year  || '');
+        var topicVal = q ? (q.topic || '') : '';
+        var titleVal = q ? (q.title || '') : '';
+        var qtype    = (q && q.isPractice) ? 'practice' : (q && q.isQuizOnly) ? 'quiz' : 'regular';
+        var subs     = (q && Array.isArray(q.subQuestions)) ? q.subQuestions : [];
+        var subHtml  = subs.map(function (s, i) { return PB._sqCardHtml(s, i); }).join('');
+
+        var overlay = document.createElement('div');
+        overlay.className = 'pb-qm-overlay';
+        overlay.id = 'pbQModal';
+        overlay.innerHTML = '<div class="pb-qm-box">'
+            + '<div class="pb-qm-hdr">'
+            +   '<h2>' + (id ? 'Edit Question' : 'New Question') + '</h2>'
+            +   '<button class="pb-qm-close" onclick="PB.closeQModal()">✕</button>'
+            + '</div>'
+            + '<div class="pb-qm-body">'
+            +   '<div class="pb-qm-grid">'
+            +     '<div class="pb-field"><label>Year</label>'
+            +       '<input class="pb-inp-full" id="qm-year" type="number" min="1990" max="2100" placeholder="2025" value="' + esc(yearVal) + '"></div>'
+            +     '<div class="pb-field"><label>Topic</label>'
+            +       '<input class="pb-inp-full" id="qm-topic" placeholder="e.g. dd" value="' + esc(topicVal) + '"></div>'
+            +     '<div class="pb-field"><label>Title</label>'
+            +       '<input class="pb-inp-full" id="qm-title" placeholder="e.g. Question 8" value="' + esc(titleVal) + '"></div>'
+            +   '</div>'
+            +   '<div class="pb-type-row">'
+            +     '<span class="lbl">Type</span>'
+            +     '<label><input type="radio" name="qm-type" value="regular"'  + (qtype==='regular'  ? ' checked' : '') + '> Regular</label>'
+            +     '<label><input type="radio" name="qm-type" value="practice"' + (qtype==='practice' ? ' checked' : '') + '> Practice</label>'
+            +     '<label><input type="radio" name="qm-type" value="quiz"'     + (qtype==='quiz'     ? ' checked' : '') + '> Quiz-only</label>'
+            +   '</div>'
+            +   '<div style="display:flex;align-items:center;justify-content:space-between;">'
+            +     '<span style="font-size:0.73rem;color:#8b949e;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Parts / Sub-questions</span>'
+            +     '<button class="pb-btn-ghost" onclick="PB.addSubQCard()">+ Add Part</button>'
+            +   '</div>'
+            +   '<div id="qm-subs" style="display:flex;flex-direction:column;gap:12px;">' + subHtml + '</div>'
+            +   '<div class="pb-qm-err" id="qm-err"></div>'
+            + '</div>'
+            + '<div class="pb-qm-footer">'
+            +   '<button class="pb-btn-ghost" onclick="PB.closeQModal()">Cancel</button>'
+            +   '<button class="pb-btn" id="qm-save-btn">Save Question</button>'
+            + '</div>'
+            + '</div>';
+        document.body.appendChild(overlay);
+        document.getElementById('qm-save-btn').onclick = function () { PB.saveQModal(); };
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) PB.closeQModal(); });
+        if (!id && subs.length === 0) PB.addSubQCard();
+    };
+
+    PB.addSubQCard = function () {
+        var container = document.getElementById('qm-subs');
+        if (!container) return;
+        var idx = container.children.length;
+        var label = '(' + String.fromCharCode(97 + idx) + ')';
+        var tmp = document.createElement('div');
+        tmp.innerHTML = PB._sqCardHtml(
+            { label: label, maxMarks: 2, inputStyle: 'text', contentBlocks: [], markingScheme: [], aiGuidance: '', keywords: [] },
+            idx
+        );
+        container.appendChild(tmp.firstElementChild);
+    };
+
+    PB.removeSubQCard = function (btn) {
+        var card = btn.closest('.pb-sq-card');
+        if (card) card.remove();
+    };
+
+    PB.saveQModal = function () {
+        var errEl   = document.getElementById('qm-err');
+        var saveBtn = document.getElementById('qm-save-btn');
+        function showErr(msg) { if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; } }
+        function clearErr()   { if (errEl) errEl.style.display = 'none'; }
+        clearErr();
+
+        var year  = parseInt(document.getElementById('qm-year').value);
+        var topic = document.getElementById('qm-topic').value.trim().toLowerCase();
+        var title = document.getElementById('qm-title').value.trim();
+        var typeEl = document.querySelector('input[name="qm-type"]:checked');
+        var qtype  = typeEl ? typeEl.value : 'regular';
+
+        if (!year || year < 1990 || year > 2100) { showErr('A valid year is required (e.g. 2025)'); return; }
+        if (!topic) { showErr('Topic is required (e.g. dd)'); return; }
+        if (!title) { showErr('Title is required (e.g. Question 8)'); return; }
+
+        var cards = document.querySelectorAll('#qm-subs .pb-sq-card');
+        if (cards.length === 0) { showErr('Add at least one part.'); return; }
+
+        var subQuestions = [];
+        cards.forEach(function (card, i) {
+            function get(attr) {
+                var el = card.querySelector('[data-sq="' + attr + '"]');
+                return el ? el.value : '';
+            }
+            var ts   = Date.now() + i;
+            var text = get('text').trim();
+            var kwStr = get('keywords').trim();
+            subQuestions.push({
+                id:            'sub-' + ts,
+                label:         get('label').trim() || '(' + String.fromCharCode(97 + i) + ')',
+                maxMarks:      Math.max(1, parseInt(get('marks')) || 1),
+                inputStyle:    get('style') || 'text',
+                questionText:  '',
+                contentBlocks: text ? [{ id: 'block-' + ts, type: 'text', content: text }] : [],
+                markingScheme: get('scheme').split('\n').filter(function (s) { return s.trim(); }),
+                aiGuidance:    get('guidance').trim(),
+                keywords:      kwStr ? kwStr.split(',').map(function (k) { return k.trim(); }).filter(Boolean) : [],
+            });
+        });
+
+        var isNew = !PB._qEditId;
+        var qId   = PB._qEditId || ('q-' + Date.now());
+        var body  = {
+            id: qId, year: year, topic: topic, title: title,
+            isPractice: qtype === 'practice', isQuizOnly: qtype === 'quiz',
+            isAdditionalExam: false, subQuestions: subQuestions,
+        };
+
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
+        var method = isNew ? 'POST' : 'PUT';
+        var path   = isNew
+            ? '/api/content/questions?course=' + PB.course
+            : '/api/content/questions/' + qId + '?course=' + PB.course;
+
+        api(method, path, body)
+            .then(function () { PB.closeQModal(); PB.loadQuestions(); })
+            .catch(function (e) {
+                showErr(e.message);
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save Question'; }
+            });
+    };
+
+    PB.closeQModal = function () {
+        var modal = document.getElementById('pbQModal');
+        if (modal) modal.remove();
     };
 
     PB.deleteQuestion = function (id) {
