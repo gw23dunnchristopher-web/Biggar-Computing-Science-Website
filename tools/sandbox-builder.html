@@ -528,8 +528,28 @@
         .pb-tab:hover { background: #21262d; color: #e6edf3; }
         .pb-tab.active { background: #21262d; color: #e6edf3; font-weight: 600; }
         .pb-content {
-            flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px;
+            flex: 1; min-height: 0; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px;
         }
+        /* ── Accordion (Papers / Assignments) ────────────────────────── */
+        .pb-acc { display: flex; flex-direction: column; gap: 8px; }
+        .pb-acc-item { background: #161b22; border: 1px solid #30363d; border-radius: 8px; overflow: hidden; }
+        .pb-acc-hdr {
+            display: flex; align-items: center; gap: 10px;
+            padding: 11px 14px; cursor: pointer; user-select: none;
+        }
+        .pb-acc-hdr:hover { background: #1c2128; }
+        .pb-acc-arrow { font-size: 0.6rem; color: #8b949e; flex-shrink: 0; width: 10px; text-align: center;
+                        transition: transform 0.15s; display: inline-block; }
+        .pb-acc-arrow.open { transform: rotate(90deg); }
+        .pb-acc-year { font-weight: 700; color: #58a6ff; font-size: 0.88rem; flex-shrink: 0; min-width: 38px; }
+        .pb-acc-name { flex: 1; font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+        .pb-acc-acts { display: flex; gap: 5px; flex-shrink: 0; }
+        .pb-acc-body { border-top: 1px solid #30363d; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; background: #0d1117; }
+        .pb-acc-q-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        .pb-acc-q-table th { text-align: left; padding: 6px 10px; color: #8b949e; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #21262d; }
+        .pb-acc-q-table td { padding: 7px 10px; border-bottom: 1px solid #1c2128; vertical-align: middle; }
+        .pb-acc-q-table tr:last-child td { border-bottom: none; }
+        .pb-acc-q-table tr:hover td { background: #161b22; }
         /* add-form card */
         .pb-add-card {
             background: #161b22; border: 1px solid #30363d; border-radius: 8px;
@@ -2123,9 +2143,17 @@
         });
     };
 
+    PB.expandedPaper = null;
+
+    PB.togglePaperAcc = function (id) {
+        PB.expandedPaper = (PB.expandedPaper === id) ? null : id;
+        PB.renderPapers();
+    };
+
     PB.renderPapers = function () {
         var course = PB.course === 'higher' ? 'Higher' : 'National 5';
         var rows = PB.papers;
+
         var html = '<div class="pb-add-card">'
             + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">'
             +   '<h3>Papers — ' + esc(course) + '</h3>'
@@ -2135,50 +2163,67 @@
 
         if (rows.length === 0) {
             html += '<div class="pb-empty">No ' + esc(course) + ' past papers yet.<br>'
-                + '<span style="font-size:0.8rem;">Use the form above to add a past paper record. '
-                + 'Questions are managed separately in the Questions tab.</span></div>';
+                + '<span style="font-size:0.8rem;">Click "+ Add Paper" above to add the first one.</span></div>';
         } else {
-            html += '<div class="pb-table-wrap"><table class="pb-table">'
-                + '<thead><tr><th>Year</th><th>Title</th><th>Questions</th><th>Status</th><th>Actions</th></tr></thead>'
-                + '<tbody id="papersBody">';
+            html += '<div class="pb-acc">';
             rows.forEach(function (p) {
-                var qCount = p.year
-                    ? PB.questions.filter(function (q) { return q.year === p.year; }).length
-                    : '—';
-                html += '<tr id="pr-' + esc(p.id) + '">'
-                    + '<td style="font-weight:600;color:#58a6ff;">' + (p.year || '—') + '</td>'
-                    + '<td>' + esc(p.title) + '</td>'
-                    + '<td style="text-align:center;">'
-                    + (p.year
-                        ? '<button class="pb-btn-ghost" style="font-size:0.75rem;padding:2px 8px;" '
-                          + 'onclick="PB.viewPaperQuestions(' + p.year + ')">' + qCount + ' Qs</button>'
-                        : '—')
-                    + '</td>'
-                    + '<td><span class="pb-badge ' + (p.isPublished ? 'pub' : 'draft') + '">'
-                    + (p.isPublished ? 'Published' : 'Draft') + '</span></td>'
-                    + '<td style="display:flex;gap:6px;flex-wrap:wrap;">'
-                    + '<button class="pb-btn-ghost" onclick="PB.openPaperModal(\'' + esc(p.id) + '\')">Edit</button>'
-                    + '<button class="pb-btn-ghost" onclick="PB.togglePublish(\'' + esc(p.id) + '\',' + !p.isPublished + ')">'
-                    + (p.isPublished ? 'Unpublish' : 'Publish') + '</button>'
-                    + '<button class="pb-btn-danger" onclick="PB.deletePaper(\'' + esc(p.id) + '\')">Delete</button>'
-                    + '</td></tr>';
+                var isOpen = PB.expandedPaper === p.id;
+                var qs = p.year ? PB.questions.filter(function (q) { return q.year === p.year; }) : [];
+
+                html += '<div class="pb-acc-item">'
+                    /* ── header ── */
+                    + '<div class="pb-acc-hdr" onclick="PB.togglePaperAcc(\'' + esc(p.id) + '\')">'
+                    +   '<span class="pb-acc-arrow' + (isOpen ? ' open' : '') + '">▶</span>'
+                    +   '<span class="pb-acc-year">' + (p.year || '—') + '</span>'
+                    +   '<span class="pb-acc-name">' + esc(p.title) + '</span>'
+                    +   '<span class="pb-badge ' + (p.isPublished ? 'pub' : 'draft') + '" style="flex-shrink:0;">'
+                    +     (p.isPublished ? 'Published' : 'Draft') + '</span>'
+                    +   '<span style="font-size:0.75rem;color:#8b949e;flex-shrink:0;">' + qs.length + ' Q' + (qs.length === 1 ? '' : 's') + '</span>'
+                    +   '<div class="pb-acc-acts" onclick="event.stopPropagation()">'
+                    +     '<button class="pb-btn-ghost" style="font-size:0.75rem;padding:2px 8px;" onclick="PB.openPaperModal(\'' + esc(p.id) + '\')">Edit</button>'
+                    +     '<button class="pb-btn-ghost" style="font-size:0.75rem;padding:2px 8px;" onclick="PB.togglePublish(\'' + esc(p.id) + '\',' + !p.isPublished + ')">'
+                    +       (p.isPublished ? 'Unpublish' : 'Publish') + '</button>'
+                    +     '<button class="pb-btn-danger" style="font-size:0.75rem;padding:2px 7px;" onclick="PB.deletePaper(\'' + esc(p.id) + '\')">Delete</button>'
+                    +   '</div>'
+                    + '</div>';
+
+                /* ── expanded body ── */
+                if (isOpen) {
+                    html += '<div class="pb-acc-body">';
+                    if (qs.length === 0) {
+                        html += '<p style="color:#8b949e;font-size:0.82rem;margin:0 0 6px;">No questions linked to ' + (p.year || 'this paper') + ' yet.</p>';
+                    } else {
+                        html += '<table class="pb-acc-q-table">'
+                            + '<thead><tr><th>Topic</th><th>Title</th><th>Type</th><th style="text-align:center;">Parts</th><th></th></tr></thead><tbody>';
+                        qs.forEach(function (q) {
+                            var type  = q.isPractice ? 'Practice' : q.isQuizOnly ? 'Quiz-only' : 'Regular';
+                            var parts = Array.isArray(q.subQuestions) ? q.subQuestions.length : 0;
+                            html += '<tr>'
+                                + '<td><span class="pb-badge topic">' + esc(q.topic || '—') + '</span></td>'
+                                + '<td>' + esc(q.title || '—') + '</td>'
+                                + '<td style="color:#8b949e;font-size:0.78rem;">' + esc(type) + '</td>'
+                                + '<td style="text-align:center;color:#8b949e;">' + parts + '</td>'
+                                + '<td style="display:flex;gap:5px;white-space:nowrap;">'
+                                +   '<button class="pb-btn-ghost" style="font-size:0.72rem;padding:2px 7px;" '
+                                +     'onclick="PB.openQModal(\'' + esc(q.id) + '\')">Edit</button>'
+                                +   '<button class="pb-btn-danger" style="font-size:0.72rem;padding:2px 6px;" '
+                                +     'onclick="PB.deleteQuestion(\'' + esc(q.id) + '\')">Delete</button>'
+                                + '</td></tr>';
+                        });
+                        html += '</tbody></table>';
+                    }
+                    html += '<div>'
+                        + '<button class="pb-btn-ghost" style="font-size:0.78rem;" '
+                        + 'onclick="PB.openQModal(null,' + (p.year || 0) + ')">+ Add Question to ' + (p.year || 'this paper') + '</button>'
+                        + '</div></div>';
+                }
+                html += '</div>';
             });
-            html += '</tbody></table></div>';
+            html += '</div>';
         }
         setContent(html);
     };
 
-    /* Switch to Questions tab filtered to a specific year (uses already-loaded data) */
-    PB.viewPaperQuestions = function (year) {
-        PB.questionFilter.year  = String(year);
-        PB.questionFilter.topic = '';
-        PB.activeTab = 'questions';
-        document.querySelectorAll('.pb-tab').forEach(function (b) {
-            b.classList.toggle('active', b.dataset.pbtab === 'questions');
-        });
-        /* Questions already loaded alongside Papers — just re-render with year filter */
-        PB.renderQuestions();
-    };
 
     /* ════════════════════════════════ PAPER MODAL ══════════════════════════ */
 
@@ -2444,11 +2489,11 @@
             + '</div>';
     };
 
-    PB.openQModal = function (id) {
+    PB.openQModal = function (id, preYear) {
         PB._qEditId = id || null;
         var q = id ? PB.questions.find(function (x) { return x.id === id; }) : null;
 
-        var yearVal  = q ? (q.year  || '') : (PB.questionFilter.year  || '');
+        var yearVal  = q ? (q.year  || '') : (preYear || PB.questionFilter.year  || '');
         var topicVal = q ? (q.topic || '') : '';
         var titleVal = q ? (q.title || '') : '';
         var qtype    = (q && q.isPractice) ? 'practice' : (q && q.isQuizOnly) ? 'quiz' : 'regular';
@@ -2601,9 +2646,17 @@
             .catch(function (e) { if (PB._loadSeq !== seq) return; setError('Failed to load assignments: ' + e.message); });
     };
 
+    PB.expandedAsm = null;
+
+    PB.toggleAsmAcc = function (id) {
+        PB.expandedAsm = (PB.expandedAsm === id) ? null : id;
+        PB.renderAssignments();
+    };
+
     PB.renderAssignments = function () {
         var course = PB.course === 'higher' ? 'Higher' : 'National 5';
         var rows = PB.assignments;
+
         var html = '<div class="pb-add-card">'
             + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">'
             +   '<h3>Assignments — ' + esc(course) + '</h3>'
@@ -2612,27 +2665,41 @@
             + '</div>';
 
         if (rows.length === 0) {
-            html += '<div class="pb-empty">No assignments yet. Create one above.</div>';
+            html += '<div class="pb-empty">No assignments yet. Click "+ Add Assignment" to create one.</div>';
         } else {
-            html += '<div class="pb-table-wrap"><table class="pb-table">'
-                + '<thead><tr><th>Year</th><th>Title</th><th>Marks</th><th>Active</th><th>Actions</th></tr></thead>'
-                + '<tbody id="assignBody">';
+            html += '<div class="pb-acc">';
             rows.forEach(function (a) {
+                var isOpen   = PB.expandedAsm === a.id;
                 var isActive = a.isPublished;
-                html += '<tr id="ar-' + esc(a.id) + '">'
-                    + '<td style="color:#8b949e;">' + esc(a.year) + '</td>'
-                    + '<td>' + esc(a.title) + '</td>'
-                    + '<td style="font-size:0.8rem;color:#8b949e;">' + esc(a.totalMarks || '—') + '</td>'
-                    + '<td><span class="pb-badge ' + (isActive ? 'pub' : 'draft') + '">'
-                    + (isActive ? 'Active' : 'Inactive') + '</span></td>'
-                    + '<td style="display:flex;gap:6px;flex-wrap:wrap;">'
-                    + '<button class="pb-btn-ghost" onclick="PB.openAsmModal(\'' + esc(a.id) + '\')">Edit</button>'
-                    + '<button class="pb-btn-ghost" onclick="PB.toggleAsmPublish(\'' + esc(a.id) + '\',' + !isActive + ')">'
-                    + (isActive ? 'Deactivate' : 'Activate') + '</button>'
-                    + '<button class="pb-btn-danger" onclick="PB.deleteAssignment(\'' + esc(a.id) + '\')">Delete</button>'
-                    + '</td></tr>';
+
+                html += '<div class="pb-acc-item">'
+                    /* ── header ── */
+                    + '<div class="pb-acc-hdr" onclick="PB.toggleAsmAcc(\'' + esc(a.id) + '\')">'
+                    +   '<span class="pb-acc-arrow' + (isOpen ? ' open' : '') + '">▶</span>'
+                    +   '<span class="pb-acc-year">' + esc(a.year) + '</span>'
+                    +   '<span class="pb-acc-name">' + esc(a.title) + '</span>'
+                    +   '<span class="pb-badge ' + (isActive ? 'pub' : 'draft') + '" style="flex-shrink:0;">'
+                    +     (isActive ? 'Active' : 'Inactive') + '</span>'
+                    +   '<div class="pb-acc-acts" onclick="event.stopPropagation()">'
+                    +     '<button class="pb-btn-ghost" style="font-size:0.75rem;padding:2px 8px;" onclick="PB.openAsmModal(\'' + esc(a.id) + '\')">Edit</button>'
+                    +     '<button class="pb-btn-ghost" style="font-size:0.75rem;padding:2px 8px;" onclick="PB.toggleAsmPublish(\'' + esc(a.id) + '\',' + !isActive + ')">'
+                    +       (isActive ? 'Deactivate' : 'Activate') + '</button>'
+                    +     '<button class="pb-btn-danger" style="font-size:0.75rem;padding:2px 7px;" onclick="PB.deleteAssignment(\'' + esc(a.id) + '\')">Delete</button>'
+                    +   '</div>'
+                    + '</div>';
+
+                /* ── expanded body ── */
+                if (isOpen) {
+                    html += '<div class="pb-acc-body">'
+                        + '<div style="display:flex;gap:24px;flex-wrap:wrap;font-size:0.84rem;">'
+                        +   '<span style="color:#8b949e;">Marks: <strong style="color:#e6edf3;">' + (a.totalMarks != null ? a.totalMarks : '—') + '</strong></span>'
+                        +   '<span style="color:#8b949e;">Time: <strong style="color:#e6edf3;">' + (a.totalTimeMinutes ? a.totalTimeMinutes + ' min' : '—') + '</strong></span>'
+                        + '</div>'
+                        + '</div>';
+                }
+                html += '</div>';
             });
-            html += '</tbody></table></div>';
+            html += '</div>';
         }
         setContent(html);
     };
