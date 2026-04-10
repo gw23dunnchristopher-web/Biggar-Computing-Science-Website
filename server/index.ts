@@ -7,6 +7,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { registerRoutes as registerRevisionRoutes } from './revision-routes';
 import { registerN5Routes, n5Sessions, n5AddSession } from './n5-routes';
 import { registerDsRoutes } from './ds-routes';
+import { registerProgressRoutes } from './progress-routes';
 import { eq } from 'drizzle-orm';
 import { sessions as revSessionsTable, users as revUsersTable } from '@shared/revision-schema';
 
@@ -1127,6 +1128,24 @@ if (fs.existsSync(dsBuildDir)) {
 } else {
   app.get('/data-sculptor/*splat', (_req, res) => {
     res.status(503).send('Data Sculptor not built yet. Run: npm run build:ds');
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Progress Tracker — API routes + static serving at /progress/
+// ---------------------------------------------------------------------------
+registerProgressRoutes(app);
+
+const progressBuildDir = path.join(path.resolve('.'), 'public', 'progress');
+
+if (fs.existsSync(progressBuildDir)) {
+  app.use('/progress', express.static(progressBuildDir, { dotfiles: 'deny' }));
+  app.get('/progress/*splat', (_req, res) => {
+    res.sendFile(path.join(progressBuildDir, 'index.html'));
+  });
+} else {
+  app.get('/progress/*splat', (_req, res) => {
+    res.status(503).send('Progress app not built yet. Run: npm run build:progress');
   });
 }
 
