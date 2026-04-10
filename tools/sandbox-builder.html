@@ -1971,6 +1971,7 @@
         assignments: [],
         questionFilter: { year: '', topic: '' },
         expandedQuestion: null,
+        _loadSeq: 0,   // incremented on each loadTab call; prevents stale renders
     };
 
     /* ── helpers ── */
@@ -2042,17 +2043,19 @@
     };
 
     PB.loadTab = function () {
-        if (PB.activeTab === 'papers')      PB.loadPapers();
+        PB._loadSeq++;
+        if (PB.activeTab === 'papers')          PB.loadPapers();
         else if (PB.activeTab === 'questions')   PB.loadQuestions();
         else if (PB.activeTab === 'assignments') PB.loadAssignments();
     };
 
     /* ════════════════════════════════ PAPERS ═══════════════════════════════ */
     PB.loadPapers = function () {
+        var seq = PB._loadSeq;
         setLoading();
         api('GET', '/api/content/papers?course=' + PB.course)
-            .then(function (rows) { PB.papers = rows; PB.renderPapers(); })
-            .catch(function (e) { setError('Failed to load papers: ' + e.message); });
+            .then(function (rows) { if (PB._loadSeq !== seq) return; PB.papers = rows; PB.renderPapers(); })
+            .catch(function (e) { if (PB._loadSeq !== seq) return; setError('Failed to load papers: ' + e.message); });
     };
 
     PB.renderPapers = function () {
@@ -2067,7 +2070,9 @@
             + '</div></div>';
 
         if (rows.length === 0) {
-            html += '<div class="pb-empty">No papers yet. Create one above.</div>';
+            html += '<div class="pb-empty">No ' + esc(course) + ' past papers yet.<br>'
+                + '<span style="font-size:0.8rem;">Use the form above to add a past paper record (e.g. "2024 Paper 1"). '
+                + 'Questions are managed separately in the Questions tab.</span></div>';
         } else {
             html += '<div class="pb-table-wrap"><table class="pb-table">'
                 + '<thead><tr><th>Title</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>'
@@ -2137,10 +2142,11 @@
 
     /* ════════════════════════════════ QUESTIONS ════════════════════════════ */
     PB.loadQuestions = function () {
+        var seq = PB._loadSeq;
         setLoading();
         api('GET', '/api/content/questions?course=' + PB.course)
-            .then(function (rows) { PB.questions = rows; PB.renderQuestions(); })
-            .catch(function (e) { setError('Failed to load questions: ' + e.message); });
+            .then(function (rows) { if (PB._loadSeq !== seq) return; PB.questions = rows; PB.renderQuestions(); })
+            .catch(function (e) { if (PB._loadSeq !== seq) return; setError('Failed to load questions: ' + e.message); });
     };
 
     PB.renderQuestions = function () {
@@ -2167,11 +2173,11 @@
             + topics.map(function (t) { return '<option value="' + esc(t) + '"' + (filterTopic === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('');
 
         var html = '<div class="pb-add-card">'
-            + '<h3>Filter</h3>'
+            + '<h3>Filter &nbsp;<span style="font-weight:400;font-size:0.8rem;color:#8b949e;">— ' + rows.length + ' question' + (rows.length === 1 ? '' : 's') + ' in database</span></h3>'
             + '<div class="pb-filter-row">'
             + '<label>Year</label><select class="pb-sel" id="qfYear">' + yearOpts + '</select>'
             + '<label>Topic</label><select class="pb-sel" id="qfTopic">' + topicOpts + '</select>'
-            + '<span style="color:#8b949e;font-size:0.82rem;">' + filtered.length + ' of ' + rows.length + ' questions</span>'
+            + '<span style="color:#8b949e;font-size:0.82rem;margin-left:auto;">' + filtered.length + ' of ' + rows.length + ' shown</span>'
             + '</div></div>';
 
         if (filtered.length === 0) {
@@ -2216,10 +2222,11 @@
 
     /* ════════════════════════════════ ASSIGNMENTS ══════════════════════════ */
     PB.loadAssignments = function () {
+        var seq = PB._loadSeq;
         setLoading();
         api('GET', '/api/content/assignments?course=' + PB.course)
-            .then(function (rows) { PB.assignments = rows; PB.renderAssignments(); })
-            .catch(function (e) { setError('Failed to load assignments: ' + e.message); });
+            .then(function (rows) { if (PB._loadSeq !== seq) return; PB.assignments = rows; PB.renderAssignments(); })
+            .catch(function (e) { if (PB._loadSeq !== seq) return; setError('Failed to load assignments: ' + e.message); });
     };
 
     PB.renderAssignments = function () {

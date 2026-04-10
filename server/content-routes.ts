@@ -21,7 +21,8 @@ export function registerContentRoutes(
   app: Express,
   requireTeacher: (req: Request, res: Response, next: NextFunction) => void,
 ) {
-  if (!db) return;
+  console.log('[content-routes] registerContentRoutes called, db available:', !!db);
+  if (!db) { console.error('[content-routes] db is null — content routes NOT registered'); return; }
 
   /* ── PAPERS ─────────────────────────────────────────────────────────── */
 
@@ -31,8 +32,9 @@ export function registerContentRoutes(
       const rows = await db!.select().from(bhsPapers)
         .where(eq(bhsPapers.course, course))
         .orderBy(asc(bhsPapers.createdAt));
+      console.log(`[content] GET papers course=${course} → ${rows.length} rows`);
       res.json(rows);
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
+    } catch (e: any) { console.error('[content] GET papers error:', e.message); res.status(500).json({ error: e.message }); }
   });
 
   app.post('/api/content/papers', requireTeacher, async (req, res) => {
@@ -82,8 +84,9 @@ export function registerContentRoutes(
       const rows = await db!.select().from(bhsQuestions)
         .where(eq(bhsQuestions.course, course))
         .orderBy(asc(bhsQuestions.year));
+      console.log(`[content] GET questions course=${course} → ${rows.length} rows`);
       res.json(rows);
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
+    } catch (e: any) { console.error('[content] GET questions error:', e.message); res.status(500).json({ error: e.message }); }
   });
 
   app.get('/api/content/questions/:id', requireTeacher, async (req, res) => {
