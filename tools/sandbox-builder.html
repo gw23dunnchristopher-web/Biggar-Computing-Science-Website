@@ -2124,6 +2124,14 @@
         else if (PB.activeTab === 'assignments') PB.loadAssignments();
     };
 
+    /* Map stored topic value → display label */
+    PB._topicLabel = function (t) {
+        if (t === 'sdcs') return 'SDCS';
+        if (t === 'wd')   return 'WDD';
+        if (t === 'dd')   return 'DDD';
+        return t || '—';
+    };
+
     /* Sort questions numerically by the first number in their title (so Q2 < Q10) */
     PB._sortQs = function (qs) {
         return qs.slice().sort(function (a, b) {
@@ -2211,7 +2219,7 @@
                             var type  = q.isPractice ? 'Practice' : q.isQuizOnly ? 'Quiz-only' : 'Regular';
                             var parts = Array.isArray(q.subQuestions) ? q.subQuestions.length : 0;
                             html += '<tr>'
-                                + '<td><span class="pb-badge topic">' + esc(q.topic || '—') + '</span></td>'
+                                + '<td><span class="pb-badge topic">' + esc(PB._topicLabel(q.topic)) + '</span></td>'
                                 + '<td>' + esc(q.title || '—') + '</td>'
                                 + '<td style="color:#8b949e;font-size:0.78rem;">' + esc(type) + '</td>'
                                 + '<td style="text-align:center;color:#8b949e;">' + parts + '</td>'
@@ -2370,7 +2378,7 @@
         var yearOpts = '<option value="">All years</option>'
             + years.map(function (y) { return '<option value="' + esc(y) + '"' + (filterYear === String(y) ? ' selected' : '') + '>' + esc(y) + '</option>'; }).join('');
         var topicOpts = '<option value="">All topics</option>'
-            + topics.map(function (t) { return '<option value="' + esc(t) + '"' + (filterTopic === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('');
+            + topics.map(function (t) { return '<option value="' + esc(t) + '"' + (filterTopic === t ? ' selected' : '') + '>' + esc(PB._topicLabel(t)) + '</option>'; }).join('');
 
         /* ── Add Question card ── */
         var html = '<div class="pb-add-card">'
@@ -2409,7 +2417,7 @@
                 html += '<tr>'
                     + '<td style="cursor:pointer;" onclick="PB.toggleQuestion(\'' + esc(q.id) + '\')">' + (q.year || '—') + '</td>'
                     + '<td style="cursor:pointer;" onclick="PB.toggleQuestion(\'' + esc(q.id) + '\')">'
-                    +   '<span class="pb-badge topic">' + esc(q.topic) + '</span></td>'
+                    +   '<span class="pb-badge topic">' + esc(PB._topicLabel(q.topic)) + '</span></td>'
                     + '<td style="cursor:pointer;" onclick="PB.toggleQuestion(\'' + esc(q.id) + '\')">' + esc(q.title || '—') + '</td>'
                     + '<td style="cursor:pointer;" onclick="PB.toggleQuestion(\'' + esc(q.id) + '\')">'
                     +   '<span style="font-size:0.78rem;color:#8b949e;">' + esc(type) + '</span></td>'
@@ -2515,19 +2523,33 @@
         var overlay = document.createElement('div');
         overlay.className = 'pb-qm-overlay';
         overlay.id = 'pbQModal';
+        var topics = [
+            { val: 'sdcs', short: 'SDCS', long: 'Software Design and Computer Systems' },
+            { val: 'wd',   short: 'WDD',  long: 'Web Design and Development' },
+            { val: 'dd',   short: 'DDD',  long: 'Database Design and Development' },
+        ];
+        var topicRadios = topics.map(function (t) {
+            var chk = (topicVal === t.val) ? ' checked' : '';
+            return '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap;">'
+                + '<input type="radio" name="qm-topic" value="' + t.val + '"' + chk + '>'
+                + '<span><strong>' + t.short + '</strong> <span style="color:#8b949e;font-size:0.78rem;">— ' + t.long + '</span></span>'
+                + '</label>';
+        }).join('');
+
         overlay.innerHTML = '<div class="pb-qm-box">'
             + '<div class="pb-qm-hdr">'
             +   '<h2>' + (id ? 'Edit Question' : 'New Question') + '</h2>'
             +   '<button class="pb-qm-close" onclick="PB.closeQModal()">✕</button>'
             + '</div>'
             + '<div class="pb-qm-body">'
-            +   '<div class="pb-qm-grid">'
-            +     '<div class="pb-field"><label>Year</label>'
+            +   '<div style="display:flex;gap:10px;">'
+            +     '<div class="pb-field" style="flex:0 0 105px;"><label>Year</label>'
             +       '<input class="pb-inp-full" id="qm-year" type="number" min="1990" max="2100" placeholder="2025" value="' + esc(yearVal) + '"></div>'
-            +     '<div class="pb-field"><label>Topic</label>'
-            +       '<input class="pb-inp-full" id="qm-topic" placeholder="e.g. dd" value="' + esc(topicVal) + '"></div>'
-            +     '<div class="pb-field"><label>Title</label>'
+            +     '<div class="pb-field" style="flex:1;"><label>Title</label>'
             +       '<input class="pb-inp-full" id="qm-title" placeholder="e.g. Question 8" value="' + esc(titleVal) + '"></div>'
+            +   '</div>'
+            +   '<div class="pb-field-full"><label>Topic</label>'
+            +     '<div style="display:flex;flex-direction:column;gap:6px;margin-top:2px;">' + topicRadios + '</div>'
             +   '</div>'
             +   '<div class="pb-type-row">'
             +     '<span class="lbl">Type</span>'
@@ -2578,14 +2600,15 @@
         function clearErr()   { if (errEl) errEl.style.display = 'none'; }
         clearErr();
 
-        var year  = parseInt(document.getElementById('qm-year').value);
-        var topic = document.getElementById('qm-topic').value.trim().toLowerCase();
-        var title = document.getElementById('qm-title').value.trim();
-        var typeEl = document.querySelector('input[name="qm-type"]:checked');
-        var qtype  = typeEl ? typeEl.value : 'regular';
+        var year     = parseInt(document.getElementById('qm-year').value);
+        var topicEl  = document.querySelector('input[name="qm-topic"]:checked');
+        var topic    = topicEl ? topicEl.value : '';
+        var title    = document.getElementById('qm-title').value.trim();
+        var typeEl   = document.querySelector('input[name="qm-type"]:checked');
+        var qtype    = typeEl ? typeEl.value : 'regular';
 
         if (!year || year < 1990 || year > 2100) { showErr('A valid year is required (e.g. 2025)'); return; }
-        if (!topic) { showErr('Topic is required (e.g. dd)'); return; }
+        if (!topic) { showErr('Please select a topic.'); return; }
         if (!title) { showErr('Title is required (e.g. Question 8)'); return; }
 
         var cards = document.querySelectorAll('#qm-subs .pb-sq-card');
