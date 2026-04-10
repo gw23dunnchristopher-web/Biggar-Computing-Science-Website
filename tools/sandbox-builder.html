@@ -1975,7 +1975,8 @@
 
     /* ── helpers ── */
     function api(method, path, body) {
-        var opts = { method: method, headers: { 'X-Teacher-Password': window.password || '' } };
+        var tok = localStorage.getItem('bhscs-teacher-token') || '';
+        var opts = { method: method, headers: { 'X-Teacher-Password': tok } };
         if (body !== undefined) {
             opts.headers['Content-Type'] = 'application/json';
             opts.body = JSON.stringify(body);
