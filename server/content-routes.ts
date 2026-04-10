@@ -85,6 +85,21 @@ export function registerContentRoutes(
         .where(eq(bhsQuestions.course, course))
         .orderBy(asc(bhsQuestions.year));
       console.log(`[content] GET questions course=${course} → ${rows.length} rows`);
+      if (req.query.summary === '1') {
+        // Lightweight summary — omit heavy JSON blobs, add subQuestionCount
+        const summary = rows.map(r => ({
+          id: r.id,
+          course: r.course,
+          year: r.year,
+          topic: r.topic,
+          title: r.title,
+          isPractice: r.isPractice,
+          isQuizOnly: r.isQuizOnly,
+          additionalPaperId: r.additionalPaperId,
+          subQuestionCount: Array.isArray(r.subQuestions) ? (r.subQuestions as any[]).length : 0,
+        }));
+        return res.json(summary);
+      }
       res.json(rows);
     } catch (e: any) { console.error('[content] GET questions error:', e.message); res.status(500).json({ error: e.message }); }
   });
