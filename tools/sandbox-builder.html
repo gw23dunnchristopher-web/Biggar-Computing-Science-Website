@@ -2127,13 +2127,11 @@
         var course = PB.course === 'higher' ? 'Higher' : 'National 5';
         var rows = PB.papers;
         var html = '<div class="pb-add-card">'
-            + '<h3>New ' + esc(course) + ' Paper</h3>'
-            + '<div class="pb-add-row">'
-            + '<input class="pb-inp pb-inp-sm" id="newPaperYear" placeholder="Year e.g. 2026" style="width:110px;">'
-            + '<input class="pb-inp" id="newPaperTitle" placeholder="Title e.g. 2026 Higher Past Paper">'
-            + '<button class="pb-btn" id="addPaperBtn">Add</button>'
-            + '<span class="pb-msg" style="display:none;"></span>'
-            + '</div></div>';
+            + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">'
+            +   '<h3>Papers — ' + esc(course) + '</h3>'
+            +   '<button class="pb-btn" onclick="PB.openPaperModal(null)">+ Add Paper</button>'
+            + '</div>'
+            + '</div>';
 
         if (rows.length === 0) {
             html += '<div class="pb-empty">No ' + esc(course) + ' past papers yet.<br>'
@@ -2159,7 +2157,7 @@
                     + '<td><span class="pb-badge ' + (p.isPublished ? 'pub' : 'draft') + '">'
                     + (p.isPublished ? 'Published' : 'Draft') + '</span></td>'
                     + '<td style="display:flex;gap:6px;flex-wrap:wrap;">'
-                    + '<button class="pb-btn-ghost" onclick="PB.editPaperInline(\'' + esc(p.id) + '\')">Edit</button>'
+                    + '<button class="pb-btn-ghost" onclick="PB.openPaperModal(\'' + esc(p.id) + '\')">Edit</button>'
                     + '<button class="pb-btn-ghost" onclick="PB.togglePublish(\'' + esc(p.id) + '\',' + !p.isPublished + ')">'
                     + (p.isPublished ? 'Unpublish' : 'Publish') + '</button>'
                     + '<button class="pb-btn-danger" onclick="PB.deletePaper(\'' + esc(p.id) + '\')">Delete</button>'
@@ -2168,18 +2166,6 @@
             html += '</tbody></table></div>';
         }
         setContent(html);
-        document.getElementById('addPaperBtn').onclick = function () { PB.addPaper(); };
-        /* auto-fill title when year is entered */
-        var yearInp = document.getElementById('newPaperYear');
-        if (yearInp) {
-            yearInp.oninput = function () {
-                var yr = yearInp.value.trim();
-                var titleInp = document.getElementById('newPaperTitle');
-                if (titleInp && yr.length === 4 && /^\d{4}$/.test(yr)) {
-                    titleInp.value = yr + ' ' + course + ' Past Paper';
-                }
-            };
-        }
     };
 
     /* Switch to Questions tab filtered to a specific year (uses already-loaded data) */
@@ -2194,41 +2180,89 @@
         PB.renderQuestions();
     };
 
-    PB.addPaper = function () {
-        var yearInp  = document.getElementById('newPaperYear');
-        var titleInp = document.getElementById('newPaperTitle');
-        var title = titleInp ? titleInp.value.trim() : '';
-        var year  = yearInp  ? parseInt(yearInp.value.trim(), 10) : null;
-        if (!title) return;
-        var body = { title: title, course: PB.course, isPublished: false };
-        if (year && year > 1990 && year < 2100) body.year = year;
-        api('POST', '/api/content/papers?course=' + PB.course, body)
-            .then(function () {
-                if (titleInp) titleInp.value = '';
-                if (yearInp)  yearInp.value  = '';
-                PB.loadPapers();
-            })
-            .catch(function (e) { showMsg(pbContent, e.message, true); });
+    /* ════════════════════════════════ PAPER MODAL ══════════════════════════ */
+
+    PB._paperEditId = null;
+
+    PB.openPaperModal = function (id) {
+        PB._paperEditId = id || null;
+        var p = id ? PB.papers.find(function (x) { return x.id === id; }) : null;
+        var course = PB.course === 'higher' ? 'Higher' : 'National 5';
+
+        var yearVal  = p ? (p.year  || '') : '';
+        var titleVal = p ? (p.title || '') : '';
+
+        var overlay = document.createElement('div');
+        overlay.className = 'pb-qm-overlay';
+        overlay.id = 'pbPaperModal';
+        overlay.innerHTML = '<div class="pb-qm-box" style="max-width:500px;">'
+            + '<div class="pb-qm-hdr">'
+            +   '<h2>' + (id ? 'Edit Paper' : 'New ' + esc(course) + ' Paper') + '</h2>'
+            +   '<button class="pb-qm-close" onclick="PB.closePaperModal()">✕</button>'
+            + '</div>'
+            + '<div class="pb-qm-body" style="max-height:none;">'
+            +   '<div style="display:flex;gap:10px;">'
+            +     '<div class="pb-field" style="flex:0 0 105px;"><label>Year</label>'
+            +       '<input class="pb-inp-full" id="pm-year" type="number" min="1990" max="2100" placeholder="2025" value="' + esc(yearVal) + '"></div>'
+            +     '<div class="pb-field" style="flex:1;"><label>Title</label>'
+            +       '<input class="pb-inp-full" id="pm-title" placeholder="e.g. 2025 ' + esc(course) + ' Past Paper" value="' + esc(titleVal) + '"></div>'
+            +   '</div>'
+            +   '<div class="pb-qm-err" id="pm-err"></div>'
+            + '</div>'
+            + '<div class="pb-qm-footer">'
+            +   '<button class="pb-btn-ghost" onclick="PB.closePaperModal()">Cancel</button>'
+            +   '<button class="pb-btn" id="pm-save-btn">Save Paper</button>'
+            + '</div>'
+            + '</div>';
+        document.body.appendChild(overlay);
+
+        var yearInp  = document.getElementById('pm-year');
+        var titleInp = document.getElementById('pm-title');
+        if (yearInp && titleInp) {
+            yearInp.oninput = function () {
+                var yr = yearInp.value.trim();
+                if (yr.length === 4 && /^\d{4}$/.test(yr) && !titleInp.value.trim()) {
+                    titleInp.value = yr + ' ' + course + ' Past Paper';
+                }
+            };
+        }
+        document.getElementById('pm-save-btn').onclick = function () { PB.savePaperModal(); };
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) PB.closePaperModal(); });
+        if (yearInp) yearInp.focus();
     };
 
-    PB.editPaperInline = function (id) {
-        var row = document.getElementById('pr-' + id);
-        if (!row) return;
-        var paper = PB.papers.find(function (p) { return p.id === id; });
-        if (!paper) return;
-        row.className = 'pb-edit-row';
-        row.innerHTML = '<td colspan="3"><input class="pb-edit-inp" id="editPaperInp" value="' + esc(paper.title) + '"></td>'
-            + '<td style="display:flex;gap:6px;"><button class="pb-btn" onclick="PB.saveEditPaper(\'' + esc(id) + '\')">Save</button>'
-            + '<button class="pb-btn-ghost" onclick="PB.renderPapers()">Cancel</button></td>';
+    PB.savePaperModal = function () {
+        var errEl   = document.getElementById('pm-err');
+        var saveBtn = document.getElementById('pm-save-btn');
+        function showErr(msg) { if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; } }
+
+        var year  = parseInt(document.getElementById('pm-year').value);
+        var title = document.getElementById('pm-title').value.trim();
+
+        if (!title) { showErr('Title is required.'); return; }
+        if (!year || year < 1990 || year > 2100) { showErr('A valid year is required.'); return; }
+
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
+        var isNew = !PB._paperEditId;
+        var body  = { title: title, year: year };
+        if (isNew) body.isPublished = false;
+
+        var method = isNew ? 'POST' : 'PUT';
+        var path   = isNew
+            ? '/api/content/papers?course=' + PB.course
+            : '/api/content/papers/' + PB._paperEditId + '?course=' + PB.course;
+
+        api(method, path, body)
+            .then(function () { PB.closePaperModal(); PB.loadPapers(); })
+            .catch(function (e) {
+                showErr(e.message);
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save Paper'; }
+            });
     };
 
-    PB.saveEditPaper = function (id) {
-        var inp = document.getElementById('editPaperInp');
-        var title = inp ? inp.value.trim() : '';
-        if (!title) return;
-        api('PUT', '/api/content/papers/' + id + '?course=' + PB.course, { title: title })
-            .then(function () { PB.loadPapers(); })
-            .catch(function (e) { alert(e.message); });
+    PB.closePaperModal = function () {
+        var modal = document.getElementById('pbPaperModal');
+        if (modal) modal.remove();
     };
 
     PB.togglePublish = function (id, val) {
@@ -2570,15 +2604,12 @@
     PB.renderAssignments = function () {
         var course = PB.course === 'higher' ? 'Higher' : 'National 5';
         var rows = PB.assignments;
-        var curYear = new Date().getFullYear();
         var html = '<div class="pb-add-card">'
-            + '<h3>New ' + esc(course) + ' Assignment</h3>'
-            + '<div class="pb-add-row">'
-            + '<input class="pb-inp" id="newAsmTitle" placeholder="Assignment title, e.g. 2025 Higher Assignment">'
-            + '<input class="pb-inp" id="newAsmYear" type="number" placeholder="Year" value="' + curYear + '" style="max-width:90px;">'
-            + '<button class="pb-btn" id="addAsmBtn">Add Assignment</button>'
-            + '<span class="pb-msg" style="display:none;"></span>'
-            + '</div></div>';
+            + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">'
+            +   '<h3>Assignments — ' + esc(course) + '</h3>'
+            +   '<button class="pb-btn" onclick="PB.openAsmModal(null)">+ Add Assignment</button>'
+            + '</div>'
+            + '</div>';
 
         if (rows.length === 0) {
             html += '<div class="pb-empty">No assignments yet. Create one above.</div>';
@@ -2595,7 +2626,7 @@
                     + '<td><span class="pb-badge ' + (isActive ? 'pub' : 'draft') + '">'
                     + (isActive ? 'Active' : 'Inactive') + '</span></td>'
                     + '<td style="display:flex;gap:6px;flex-wrap:wrap;">'
-                    + '<button class="pb-btn-ghost" onclick="PB.editAsmInline(\'' + esc(a.id) + '\')">Edit</button>'
+                    + '<button class="pb-btn-ghost" onclick="PB.openAsmModal(\'' + esc(a.id) + '\')">Edit</button>'
                     + '<button class="pb-btn-ghost" onclick="PB.toggleAsmPublish(\'' + esc(a.id) + '\',' + !isActive + ')">'
                     + (isActive ? 'Deactivate' : 'Activate') + '</button>'
                     + '<button class="pb-btn-danger" onclick="PB.deleteAssignment(\'' + esc(a.id) + '\')">Delete</button>'
@@ -2604,44 +2635,90 @@
             html += '</tbody></table></div>';
         }
         setContent(html);
-        document.getElementById('addAsmBtn').onclick = function () { PB.addAssignment(); };
     };
 
-    PB.addAssignment = function () {
-        var titleInp = document.getElementById('newAsmTitle');
-        var yearInp  = document.getElementById('newAsmYear');
-        var title = titleInp ? titleInp.value.trim() : '';
-        var year  = yearInp  ? parseInt(yearInp.value, 10) || new Date().getFullYear() : new Date().getFullYear();
-        if (!title) return;
-        api('POST', '/api/content/assignments?course=' + PB.course, {
-            title: title, year: year, isPublished: false,
-        })
-            .then(function () { if (titleInp) titleInp.value = ''; PB.loadAssignments(); })
-            .catch(function (e) { showMsg(pbContent, e.message, true); });
+    /* ════════════════════════════════ ASSIGNMENT MODAL ══════════════════════ */
+
+    PB._asmEditId = null;
+
+    PB.openAsmModal = function (id) {
+        PB._asmEditId = id || null;
+        var a = id ? PB.assignments.find(function (x) { return x.id === id; }) : null;
+        var course = PB.course === 'higher' ? 'Higher' : 'National 5';
+        var curYear = new Date().getFullYear();
+
+        var titleVal = a ? (a.title || '') : '';
+        var yearVal  = a ? (a.year  || curYear) : curYear;
+        var marksVal = a ? (a.totalMarks        != null ? a.totalMarks        : 40)  : 40;
+        var timeVal  = a ? (a.totalTimeMinutes  != null ? a.totalTimeMinutes  : 360) : 360;
+
+        var overlay = document.createElement('div');
+        overlay.className = 'pb-qm-overlay';
+        overlay.id = 'pbAsmModal';
+        overlay.innerHTML = '<div class="pb-qm-box" style="max-width:520px;">'
+            + '<div class="pb-qm-hdr">'
+            +   '<h2>' + (id ? 'Edit Assignment' : 'New ' + esc(course) + ' Assignment') + '</h2>'
+            +   '<button class="pb-qm-close" onclick="PB.closeAsmModal()">✕</button>'
+            + '</div>'
+            + '<div class="pb-qm-body" style="max-height:none;">'
+            +   '<div class="pb-field-full"><label>Title</label>'
+            +     '<input class="pb-inp-full" id="am-title" placeholder="e.g. 2025 ' + esc(course) + ' Assignment" value="' + esc(titleVal) + '"></div>'
+            +   '<div style="display:flex;gap:10px;flex-wrap:wrap;">'
+            +     '<div class="pb-field" style="flex:0 0 105px;"><label>Year</label>'
+            +       '<input class="pb-inp-full" id="am-year" type="number" min="1990" max="2100" value="' + esc(yearVal) + '"></div>'
+            +     '<div class="pb-field" style="flex:0 0 110px;"><label>Total Marks</label>'
+            +       '<input class="pb-inp-full" id="am-marks" type="number" min="1" value="' + esc(marksVal) + '"></div>'
+            +     '<div class="pb-field" style="flex:0 0 140px;"><label>Total Time (mins)</label>'
+            +       '<input class="pb-inp-full" id="am-time" type="number" min="1" value="' + esc(timeVal) + '"></div>'
+            +   '</div>'
+            +   '<div class="pb-qm-err" id="am-err"></div>'
+            + '</div>'
+            + '<div class="pb-qm-footer">'
+            +   '<button class="pb-btn-ghost" onclick="PB.closeAsmModal()">Cancel</button>'
+            +   '<button class="pb-btn" id="am-save-btn">Save Assignment</button>'
+            + '</div>'
+            + '</div>';
+        document.body.appendChild(overlay);
+        document.getElementById('am-save-btn').onclick = function () { PB.saveAsmModal(); };
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) PB.closeAsmModal(); });
+        var titleInp = document.getElementById('am-title');
+        if (titleInp) titleInp.focus();
     };
 
-    PB.editAsmInline = function (id) {
-        var row = document.getElementById('ar-' + id);
-        if (!row) return;
-        var a = PB.assignments.find(function (x) { return x.id === id; });
-        if (!a) return;
-        row.className = 'pb-edit-row';
-        row.innerHTML = '<td><input class="pb-edit-inp" id="editAsmYear" type="number" value="' + esc(a.year) + '" style="width:80px;"></td>'
-            + '<td colspan="2"><input class="pb-edit-inp" id="editAsmTitle" value="' + esc(a.title) + '"></td>'
-            + '<td colspan="2" style="display:flex;gap:6px;">'
-            + '<button class="pb-btn" onclick="PB.saveEditAsm(\'' + esc(id) + '\')">Save</button>'
-            + '<button class="pb-btn-ghost" onclick="PB.renderAssignments()">Cancel</button></td>';
+    PB.saveAsmModal = function () {
+        var errEl   = document.getElementById('am-err');
+        var saveBtn = document.getElementById('am-save-btn');
+        function showErr(msg) { if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; } }
+
+        var title = document.getElementById('am-title').value.trim();
+        var year  = parseInt(document.getElementById('am-year').value);
+        var marks = parseInt(document.getElementById('am-marks').value) || 40;
+        var time  = parseInt(document.getElementById('am-time').value)  || 360;
+
+        if (!title) { showErr('Title is required.'); return; }
+        if (!year || year < 1990 || year > 2100) { showErr('A valid year is required.'); return; }
+
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
+        var isNew = !PB._asmEditId;
+        var body  = { title: title, year: year, totalMarks: marks, totalTimeMinutes: time };
+        if (isNew) body.isPublished = false;
+
+        var method = isNew ? 'POST' : 'PUT';
+        var path   = isNew
+            ? '/api/content/assignments?course=' + PB.course
+            : '/api/content/assignments/' + PB._asmEditId + '?course=' + PB.course;
+
+        api(method, path, body)
+            .then(function () { PB.closeAsmModal(); PB.loadAssignments(); })
+            .catch(function (e) {
+                showErr(e.message);
+                if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save Assignment'; }
+            });
     };
 
-    PB.saveEditAsm = function (id) {
-        var titleInp = document.getElementById('editAsmTitle');
-        var yearInp  = document.getElementById('editAsmYear');
-        var title = titleInp ? titleInp.value.trim() : '';
-        var year  = yearInp  ? parseInt(yearInp.value, 10) : undefined;
-        if (!title) return;
-        api('PUT', '/api/content/assignments/' + id + '?course=' + PB.course, { title: title, year: year })
-            .then(function () { PB.loadAssignments(); })
-            .catch(function (e) { alert(e.message); });
+    PB.closeAsmModal = function () {
+        var modal = document.getElementById('pbAsmModal');
+        if (modal) modal.remove();
     };
 
     PB.toggleAsmPublish = function (id, val) {
