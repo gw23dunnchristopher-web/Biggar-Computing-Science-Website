@@ -2124,6 +2124,18 @@
         else if (PB.activeTab === 'assignments') PB.loadAssignments();
     };
 
+    /* Sort questions numerically by the first number in their title (so Q2 < Q10) */
+    PB._sortQs = function (qs) {
+        return qs.slice().sort(function (a, b) {
+            var ma = String(a.title || '').match(/\d+/);
+            var mb = String(b.title || '').match(/\d+/);
+            var na = ma ? parseInt(ma[0], 10) : 9999;
+            var nb = mb ? parseInt(mb[0], 10) : 9999;
+            if (na !== nb) return na - nb;
+            return String(a.title || '').localeCompare(String(b.title || ''));
+        });
+    };
+
     /* ════════════════════════════════ PAPERS ═══════════════════════════════ */
     PB.loadPapers = function () {
         var seq = PB._loadSeq;
@@ -2135,7 +2147,7 @@
         ]).then(function (results) {
             if (PB._loadSeq !== seq) return;
             PB.papers    = results[0];
-            PB.questions = results[1];
+            PB.questions = PB._sortQs(results[1]);
             PB.renderPapers();
         }).catch(function (e) {
             if (PB._loadSeq !== seq) return;
@@ -2330,7 +2342,7 @@
         var seq = PB._loadSeq;
         setLoading();
         api('GET', '/api/content/questions?course=' + PB.course)
-            .then(function (rows) { if (PB._loadSeq !== seq) return; PB.questions = rows; PB.renderQuestions(); })
+            .then(function (rows) { if (PB._loadSeq !== seq) return; PB.questions = PB._sortQs(rows); PB.renderQuestions(); })
             .catch(function (e) { if (PB._loadSeq !== seq) return; setError('Failed to load questions: ' + e.message); });
     };
 
