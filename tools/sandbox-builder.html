@@ -2225,18 +2225,12 @@
     PB.renderAssignments = function () {
         var course = PB.course === 'higher' ? 'Higher' : 'National 5';
         var rows = PB.assignments;
+        var curYear = new Date().getFullYear();
         var html = '<div class="pb-add-card">'
             + '<h3>New ' + esc(course) + ' Assignment</h3>'
             + '<div class="pb-add-row">'
-            + '<input class="pb-inp" id="newAsmTitle" placeholder="Assignment title">'
-            + '<select class="pb-sel" id="newAsmUnit">'
-            + '<option value="">— Unit (optional) —</option>'
-            + '<option>Software Design &amp; Development</option>'
-            + '<option>Computer Systems</option>'
-            + '<option>Database Design &amp; Development</option>'
-            + '<option>Web Design &amp; Development</option>'
-            + (PB.course === 'higher' ? '<option>Object-Oriented Programming</option>' : '')
-            + '</select>'
+            + '<input class="pb-inp" id="newAsmTitle" placeholder="Assignment title, e.g. 2025 Higher Assignment">'
+            + '<input class="pb-inp" id="newAsmYear" type="number" placeholder="Year" value="' + curYear + '" style="max-width:90px;">'
             + '<button class="pb-btn" id="addAsmBtn">Add Assignment</button>'
             + '<span class="pb-msg" style="display:none;"></span>'
             + '</div></div>';
@@ -2245,19 +2239,20 @@
             html += '<div class="pb-empty">No assignments yet. Create one above.</div>';
         } else {
             html += '<div class="pb-table-wrap"><table class="pb-table">'
-                + '<thead><tr><th>#</th><th>Title</th><th>Unit</th><th>Status</th><th>Actions</th></tr></thead>'
+                + '<thead><tr><th>Year</th><th>Title</th><th>Marks</th><th>Active</th><th>Actions</th></tr></thead>'
                 + '<tbody id="assignBody">';
-            rows.forEach(function (a, i) {
+            rows.forEach(function (a) {
+                var isActive = a.isPublished;
                 html += '<tr id="ar-' + esc(a.id) + '">'
-                    + '<td style="color:#8b949e;">' + (i + 1) + '</td>'
+                    + '<td style="color:#8b949e;">' + esc(a.year) + '</td>'
                     + '<td>' + esc(a.title) + '</td>'
-                    + '<td style="font-size:0.8rem;color:#8b949e;">' + esc(a.unit || '—') + '</td>'
-                    + '<td><span class="pb-badge ' + (a.isPublished ? 'pub' : 'draft') + '">'
-                    + (a.isPublished ? 'Published' : 'Draft') + '</span></td>'
+                    + '<td style="font-size:0.8rem;color:#8b949e;">' + esc(a.totalMarks || '—') + '</td>'
+                    + '<td><span class="pb-badge ' + (isActive ? 'pub' : 'draft') + '">'
+                    + (isActive ? 'Active' : 'Inactive') + '</span></td>'
                     + '<td style="display:flex;gap:6px;flex-wrap:wrap;">'
                     + '<button class="pb-btn-ghost" onclick="PB.editAsmInline(\'' + esc(a.id) + '\')">Edit</button>'
-                    + '<button class="pb-btn-ghost" onclick="PB.toggleAsmPublish(\'' + esc(a.id) + '\',' + !a.isPublished + ')">'
-                    + (a.isPublished ? 'Unpublish' : 'Publish') + '</button>'
+                    + '<button class="pb-btn-ghost" onclick="PB.toggleAsmPublish(\'' + esc(a.id) + '\',' + !isActive + ')">'
+                    + (isActive ? 'Deactivate' : 'Activate') + '</button>'
                     + '<button class="pb-btn-danger" onclick="PB.deleteAssignment(\'' + esc(a.id) + '\')">Delete</button>'
                     + '</td></tr>';
             });
@@ -2269,13 +2264,12 @@
 
     PB.addAssignment = function () {
         var titleInp = document.getElementById('newAsmTitle');
-        var unitInp  = document.getElementById('newAsmUnit');
+        var yearInp  = document.getElementById('newAsmYear');
         var title = titleInp ? titleInp.value.trim() : '';
-        var unit  = unitInp  ? unitInp.value.trim()  : '';
+        var year  = yearInp  ? parseInt(yearInp.value, 10) || new Date().getFullYear() : new Date().getFullYear();
         if (!title) return;
         api('POST', '/api/content/assignments?course=' + PB.course, {
-            title: title, unit: unit || null, course: PB.course,
-            isPublished: false, orderIndex: PB.assignments.length,
+            title: title, year: year, isPublished: false,
         })
             .then(function () { if (titleInp) titleInp.value = ''; PB.loadAssignments(); })
             .catch(function (e) { showMsg(pbContent, e.message, true); });
@@ -2287,21 +2281,20 @@
         var a = PB.assignments.find(function (x) { return x.id === id; });
         if (!a) return;
         row.className = 'pb-edit-row';
-        row.innerHTML = '<td colspan="3">'
-            + '<input class="pb-edit-inp" id="editAsmTitle" value="' + esc(a.title) + '" style="margin-bottom:6px;">'
-            + '<input class="pb-edit-inp" id="editAsmUnit" value="' + esc(a.unit || '') + '" placeholder="Unit (optional)">'
-            + '</td><td colspan="2" style="display:flex;gap:6px;">'
+        row.innerHTML = '<td><input class="pb-edit-inp" id="editAsmYear" type="number" value="' + esc(a.year) + '" style="width:80px;"></td>'
+            + '<td colspan="2"><input class="pb-edit-inp" id="editAsmTitle" value="' + esc(a.title) + '"></td>'
+            + '<td colspan="2" style="display:flex;gap:6px;">'
             + '<button class="pb-btn" onclick="PB.saveEditAsm(\'' + esc(id) + '\')">Save</button>'
             + '<button class="pb-btn-ghost" onclick="PB.renderAssignments()">Cancel</button></td>';
     };
 
     PB.saveEditAsm = function (id) {
         var titleInp = document.getElementById('editAsmTitle');
-        var unitInp  = document.getElementById('editAsmUnit');
+        var yearInp  = document.getElementById('editAsmYear');
         var title = titleInp ? titleInp.value.trim() : '';
-        var unit  = unitInp  ? unitInp.value.trim()  : '';
+        var year  = yearInp  ? parseInt(yearInp.value, 10) : undefined;
         if (!title) return;
-        api('PUT', '/api/content/assignments/' + id + '?course=' + PB.course, { title: title, unit: unit || null })
+        api('PUT', '/api/content/assignments/' + id + '?course=' + PB.course, { title: title, year: year })
             .then(function () { PB.loadAssignments(); })
             .catch(function (e) { alert(e.message); });
     };

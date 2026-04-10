@@ -138,7 +138,7 @@ export function registerContentRoutes(
       const course = getCourse(req, res); if (!course) return;
       const rows = await db!.select().from(bhsAssignments)
         .where(eq(bhsAssignments.course, course))
-        .orderBy(asc(bhsAssignments.orderIndex));
+        .orderBy(asc(bhsAssignments.year));
       res.json(rows);
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
@@ -146,9 +146,17 @@ export function registerContentRoutes(
   app.post('/api/content/assignments', requireTeacher, async (req, res) => {
     try {
       const course = getCourse(req, res); if (!course) return;
-      const { id: _id, course: _c, ...rest } = req.body;
+      const { title, year, totalMarks, totalTimeMinutes, isPublished, evidenceChecklist } = req.body;
+      if (!title) return res.status(400).json({ error: 'title is required' });
       const [row] = await db!.insert(bhsAssignments)
-        .values({ ...rest, course })
+        .values({
+          course, title,
+          year: year ?? new Date().getFullYear(),
+          totalMarks: totalMarks ?? 40,
+          totalTimeMinutes: totalTimeMinutes ?? 360,
+          isPublished: isPublished ?? false,
+          evidenceChecklist: evidenceChecklist ?? null,
+        })
         .returning();
       res.json(row);
     } catch (e: any) { res.status(500).json({ error: e.message }); }
@@ -157,7 +165,14 @@ export function registerContentRoutes(
   app.put('/api/content/assignments/:id', requireTeacher, async (req, res) => {
     try {
       const course = getCourse(req, res); if (!course) return;
-      const { id: _id, course: _c, ...updates } = req.body;
+      const { title, year, totalMarks, totalTimeMinutes, isPublished, evidenceChecklist } = req.body;
+      const updates: any = {};
+      if (title !== undefined)            updates.title = title;
+      if (year !== undefined)             updates.year = year;
+      if (totalMarks !== undefined)       updates.totalMarks = totalMarks;
+      if (totalTimeMinutes !== undefined) updates.totalTimeMinutes = totalTimeMinutes;
+      if (isPublished !== undefined)      updates.isPublished = isPublished;
+      if (evidenceChecklist !== undefined) updates.evidenceChecklist = evidenceChecklist;
       const [row] = await db!.update(bhsAssignments).set(updates)
         .where(and(eq(bhsAssignments.id, req.params.id), eq(bhsAssignments.course, course)))
         .returning();
