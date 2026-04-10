@@ -11,24 +11,6 @@
         <link rel="stylesheet" href="/CSS/quiz.css" />
        
         <script src="/JavaScript/quiz.js"></script>
-        <script>
-        window.QUIZ_CONFIGS = window.QUIZ_CONFIGS || {};
-        window.QUIZ_CONFIGS.fte = {
-            hideNumbers: true,
-            questions: [
-                {
-                            collapsed: false,
-                        type: "paragraph",
-                        text: [
-                            "The following program is meant to display the 5 times table from 1 to 10. Find the error and explain how to fix it.",
-                            { type: "code", language: "python", content: "for number in range(1, 11):\n    print(number, \"x 5 =\", number + 5)" }
-                        ],
-                        marks: 1,
-                        markingScheme: "Award 1 mark for identifying that number + 5 uses addition instead of multiplication. The correct expression is number * 5."
-                    }
-            ]
-        };
-    </script>
 </head>
 
     <body>
@@ -86,8 +68,6 @@
                                 </td>
                             </tr>       
                         </table>
-                        <h2>Find the Error</h2>
-                        <div class="quiz-container" data-quiz-id="fte"></div>
                     </div>
                 </div>
             </div>

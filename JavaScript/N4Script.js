@@ -211,6 +211,7 @@ function attachMenuListeners() {
             const arrow = this.querySelector('.arrow');
 
             if (submenu) {
+                event.preventDefault();
                 // Toggle submenu visibility
                 submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
                 arrow.classList.toggle('down');
