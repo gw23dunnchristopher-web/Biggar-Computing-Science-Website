@@ -25,14 +25,20 @@ function scoreTextColour(pct: number | null) {
   return "#f87171";
 }
 
-export default function BarChart({ bars, height = 200, barWidth = 36, gap = 14 }: BarChartProps) {
+const LABEL_AREA = 80;
+
+export default function BarChart({ bars, height = 220, barWidth = 36, gap = 14 }: BarChartProps) {
   const totalWidth = bars.length * (barWidth + gap) + gap;
-  const chartH = height - 32;
+  const chartH = height - LABEL_AREA;
 
   return (
     <div className="chart-wrap">
-      <svg width={totalWidth} height={height} style={{ display: "block", minWidth: "100%" }}>
-        {/* guide lines */}
+      <svg
+        width={totalWidth}
+        height={height}
+        style={{ display: "block", minWidth: "100%", overflow: "visible" }}
+      >
+        {/* horizontal guide lines */}
         {[0, 25, 50, 75, 100].map(pct => {
           const y = 4 + (chartH - 4) * (1 - pct / 100);
           return (
@@ -51,13 +57,15 @@ export default function BarChart({ bars, height = 200, barWidth = 36, gap = 14 }
           const barY = 4 + (chartH - 4) - barH;
           const colour = scoreColour(bar.value);
           const textColour = scoreTextColour(bar.value);
+          const labelX = x + barWidth / 2;
+          const labelY = chartH + 10;
 
           return (
             <g key={i}>
               {/* bar shadow */}
               <rect x={x + 2} y={barY + 2} width={barWidth} height={barH}
                 rx={4} fill="rgba(0,0,0,0.3)" />
-              {/* bar */}
+              {/* bar fill */}
               <rect x={x} y={barY} width={barWidth} height={barH}
                 rx={4} fill={colour} opacity={bar.value === null ? 0.3 : 1} />
               {/* active glow ring */}
@@ -70,10 +78,16 @@ export default function BarChart({ bars, height = 200, barWidth = 36, gap = 14 }
                 fill={textColour} fontSize={10} fontWeight="bold">
                 {bar.value !== null ? `${bar.value}%` : "—"}
               </text>
-              {/* username label below */}
-              <text x={x + barWidth / 2} y={chartH + 18} textAnchor="middle"
-                fill={bar.active ? "#4ade80" : "#8b949e"} fontSize={9}>
-                {bar.label.length > 10 ? bar.label.slice(0, 9) + "…" : bar.label}
+              {/* diagonal username label */}
+              <text
+                x={labelX}
+                y={labelY}
+                textAnchor="end"
+                fill={bar.active ? "#4ade80" : "#8b949e"}
+                fontSize={10}
+                transform={`rotate(-42, ${labelX}, ${labelY})`}
+              >
+                {bar.label.length > 16 ? bar.label.slice(0, 15) + "…" : bar.label}
               </text>
             </g>
           );

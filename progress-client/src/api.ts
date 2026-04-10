@@ -46,6 +46,17 @@ export interface ClassDetail {
   students: StudentSummary[];
 }
 
+export interface AnswerItem {
+  questionTitle: string;
+  questionText: string;
+  subLabel: string;
+  score: number;
+  maxMarks: number;
+  feedback: string;
+  suggestions: string;
+  userAnswer: Record<string, string>;
+}
+
 export interface ResultItem {
   id: string;
   title: string;
@@ -54,6 +65,7 @@ export interface ResultItem {
   percentage: number;
   completedAt: string | null;
   breakdown?: any;
+  answers?: AnswerItem[];
 }
 
 export interface ActiveExam {

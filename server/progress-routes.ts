@@ -120,7 +120,7 @@ export function registerProgressRoutes(app: Express) {
 
       let results: {
         id: string; title: string; score: number; maxMarks: number;
-        percentage: number; completedAt: Date | null; breakdown?: any;
+        percentage: number; completedAt: Date | null; breakdown?: any; answers?: any;
       }[] = [];
       let activeExam: { title: string; answeredCount: number; totalQuestions: number; timeLeft: number } | null = null;
 
@@ -135,6 +135,7 @@ export function registerProgressRoutes(app: Express) {
           maxMarks: r.maxMarks ?? 0,
           percentage: r.percentage ?? 0,
           completedAt: r.completedAt ?? null,
+          answers: r.answers ?? null,
         }));
         const [prog] = await db.select().from(studentExamProgress)
           .where(and(eq(studentExamProgress.studentId, studentId), eq(studentExamProgress.status, "in_progress")));
