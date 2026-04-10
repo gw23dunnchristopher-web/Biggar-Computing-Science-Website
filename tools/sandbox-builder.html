@@ -2628,10 +2628,17 @@
 
                 /* ── expanded body ── */
                 if (isOpen) {
+                    var asmBase = PB.course === 'higher' ? '/revision' : '/revision-n5';
+                    var asmUrl  = asmBase + '/teacher/assignments';
                     html += '<div class="pb-acc-body">'
-                        + '<div style="display:flex;gap:24px;flex-wrap:wrap;font-size:0.84rem;">'
-                        +   '<span style="color:#8b949e;">Marks: <strong style="color:#e6edf3;">' + (a.totalMarks != null ? a.totalMarks : '—') + '</strong></span>'
-                        +   '<span style="color:#8b949e;">Time: <strong style="color:#e6edf3;">' + (a.totalTimeMinutes ? a.totalTimeMinutes + ' min' : '—') + '</strong></span>'
+                        + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">'
+                        +   '<div style="display:flex;gap:24px;flex-wrap:wrap;font-size:0.84rem;">'
+                        +     '<span style="color:#8b949e;">Marks: <strong style="color:#e6edf3;">' + (a.totalMarks != null ? a.totalMarks : '—') + '</strong></span>'
+                        +     '<span style="color:#8b949e;">Time: <strong style="color:#e6edf3;">' + (a.totalTimeMinutes ? a.totalTimeMinutes + ' min' : '—') + '</strong></span>'
+                        +   '</div>'
+                        +   '<a href="' + asmUrl + '" target="_blank" class="pb-btn-ghost" style="font-size:0.78rem;text-decoration:none;">'
+                        +     '✏️ Edit Questions &amp; Sections ↗'
+                        +   '</a>'
                         + '</div>'
                         + '</div>';
                 }
