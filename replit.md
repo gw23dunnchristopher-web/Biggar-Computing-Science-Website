@@ -57,6 +57,13 @@ The platform uses a Node.js/Express server to serve static content. While infras
 ### WebSocket Communication
 - **ws**: WebSocket library (server-side infrastructure).
 
+### Unified Student & Class Database
+- `shared/bhs-schema.ts` defines `bhs_students` and `bhs_classes` — one table pair for all year groups, separated by a `course` column (`"n5"` | `"higher"` | `"n4"`).
+- `revision-storage.ts` (Higher) imports `bhsStudents as students, bhsClasses as classes` from `bhs-schema`. All class/student reads/writes use the unified table with `course: 'higher'` automatically added.
+- `n5-storage.ts` (N5) imports the same aliases. All class/student reads/writes use `course: 'n5'`. `getClasses()` filters by `course = 'n5'`; `getStudentByUsername` filters by `course = 'n5'`.
+- Unique constraint: `(username, course)` pair — so Higher and N5 students can share the same username without conflict.
+- Data migration: all rows from `rev_classes`/`rev_students` (Higher) and `n5_classes`/`n5_students` (N5) were copied into `bhs_classes`/`bhs_students` on 2026-04-10.
+
 ### Revision Sub-Apps
 - **Higher CS Revision** at `/revision/` — React + TypeScript SPA; student accounts, teacher dashboard, AI marking, class management, assignment tracking. Build: `npm run build:revision` (Vite, `vite.revision.config.ts`, output `public/revision/`). Routes: `server/revision-routes.ts` + `server/revision-storage.ts`. DB schema: `shared/revision-schema.ts` (tables prefixed `rev_`). Auth: Bearer token in `rev_sessions`.
 - **N5 CS Revision** at `/revision-n5/` — React + TypeScript SPA; same features as Higher app but for National 5. Build: `npm run build:n5` (Vite, `vite.n5.config.ts`, output `public/revision-n5/`). Routes: `server/n5-routes.ts` + `server/n5-storage.ts`, registered via `registerN5Routes(app)`. DB schema: `shared/n5-schema.ts` (tables prefixed `n5_`). N5 sidebar link updated to `/revision-n5/`. Questions need seeding.

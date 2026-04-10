@@ -12,8 +12,9 @@ import {
   type ActiveExamProgress, type InsertActiveExamProgress,
   users, questions, customQuizzes, passwordResetTokens,
   assignments, assignmentSections, assignmentParts, assignmentResources, assignmentAttempts, assignmentResponses,
-  classes, students, examResults, additionalPapers, activeExamProgress
+  examResults, additionalPapers, activeExamProgress
 } from "@shared/n5-schema";
+import { bhsStudents as students, bhsClasses as classes } from "@shared/bhs-schema";
 import { gt } from "drizzle-orm";
 import { Question } from "../n5-client/src/lib/past-papers";
 import bcrypt from "bcryptjs";
@@ -1182,17 +1183,17 @@ class DatabaseStorage implements IStorage {
   // Class methods
   async createClass(cls: InsertClass): Promise<Class> {
     const d = this.checkDb();
-    const [row] = await d.insert(classes).values(cls).returning();
-    return row;
+    const [row] = await d.insert(classes).values({ course: 'n5', ...cls } as any).returning();
+    return row as unknown as Class;
   }
   async getClasses(): Promise<Class[]> {
     const d = this.checkDb();
-    return d.select().from(classes);
+    return d.select().from(classes).where(eq(classes.course, 'n5')) as unknown as Promise<Class[]>;
   }
   async getClass(id: string): Promise<Class | undefined> {
     const d = this.checkDb();
     const [row] = await d.select().from(classes).where(eq(classes.id, id));
-    return row;
+    return row as unknown as Class | undefined;
   }
   async deleteClass(id: string): Promise<void> {
     const d = this.checkDb();
@@ -1202,22 +1203,22 @@ class DatabaseStorage implements IStorage {
   // Student methods
   async createStudent(student: InsertStudent): Promise<Student> {
     const d = this.checkDb();
-    const [row] = await d.insert(students).values(student).returning();
-    return row;
+    const [row] = await d.insert(students).values({ course: 'n5', ...student } as any).returning();
+    return row as unknown as Student;
   }
   async getStudentsByClass(classId: string): Promise<Student[]> {
     const d = this.checkDb();
-    return d.select().from(students).where(eq(students.classId, classId));
+    return d.select().from(students).where(eq(students.classId, classId)) as unknown as Promise<Student[]>;
   }
   async getStudent(id: string): Promise<Student | undefined> {
     const d = this.checkDb();
     const [row] = await d.select().from(students).where(eq(students.id, id));
-    return row;
+    return row as unknown as Student | undefined;
   }
   async getStudentByUsername(username: string): Promise<Student | undefined> {
     const d = this.checkDb();
-    const [row] = await d.select().from(students).where(eq(students.username, username));
-    return row;
+    const [row] = await d.select().from(students).where(and(eq(students.course, 'n5'), eq(students.username, username)));
+    return row as unknown as Student | undefined;
   }
   async updateStudentPassword(id: string, password: string, mustChangePassword: boolean = false, initialPassword?: string | null): Promise<void> {
     const d = this.checkDb();
@@ -1235,7 +1236,7 @@ class DatabaseStorage implements IStorage {
     }
     const [row] = await d.update(students).set({ username }).where(eq(students.id, id)).returning();
     if (!row) throw new Error("Student not found");
-    return row;
+    return row as unknown as Student;
   }
   async deleteStudent(id: string): Promise<void> {
     const d = this.checkDb();

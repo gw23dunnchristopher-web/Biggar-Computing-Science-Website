@@ -20,8 +20,9 @@ import {
   users, questions, passwordResetTokens, customQuizzes,
   additionalExams, assignments, assignmentSections, assignmentParts,
   assignmentResources, assignmentAttempts, assignmentResponses,
-  classes, students, studentSessions, studentExamResults, studentExamProgress
+  studentSessions, studentExamResults, studentExamProgress
 } from "@shared/revision-schema";
+import { bhsStudents as students, bhsClasses as classes } from "@shared/bhs-schema";
 import { Question } from "../revision-client/src/lib/past-papers";
 import bcrypt from "bcryptjs";
 
@@ -591,10 +592,10 @@ class DatabaseStorage implements IStorage {
   async updateAdditionalExam(id: string, data: Partial<InsertAdditionalExam & { isPublished: boolean }>) { const database = this.checkDb(); const result = await database.update(additionalExams).set(data).where(eq(additionalExams.id, id)).returning(); return result[0]; }
   async deleteAdditionalExam(id: string) { const database = this.checkDb(); await database.delete(questions).where(eq(questions.additionalExamId, id)); await database.delete(additionalExams).where(eq(additionalExams.id, id)); }
 
-  async createClass(c: InsertClass) { const database = this.checkDb(); const result = await database.insert(classes).values({ id: genId("cls"), ...c }).returning(); return result[0]; }
-  async getClass(id: string) { const database = this.checkDb(); const result = await database.select().from(classes).where(eq(classes.id, id)); return result[0]; }
-  async listClassesByTeacher(teacherId: string) { const database = this.checkDb(); return database.select().from(classes).where(eq(classes.teacherId, teacherId)).orderBy(desc(classes.createdAt)); }
-  async updateClass(id: string, data: Partial<InsertClass>) { const database = this.checkDb(); const result = await database.update(classes).set(data).where(eq(classes.id, id)).returning(); return result[0]; }
+  async createClass(c: InsertClass) { const database = this.checkDb(); const result = await database.insert(classes).values({ id: genId("cls"), course: 'higher', ...c } as any).returning(); return result[0] as unknown as Class; }
+  async getClass(id: string) { const database = this.checkDb(); const result = await database.select().from(classes).where(eq(classes.id, id)); return result[0] as unknown as Class | undefined; }
+  async listClassesByTeacher(teacherId: string) { const database = this.checkDb(); return database.select().from(classes).where(and(eq(classes.course, 'higher'), eq(classes.teacherId, teacherId))).orderBy(desc(classes.createdAt)) as unknown as Promise<Class[]>; }
+  async updateClass(id: string, data: Partial<InsertClass>) { const database = this.checkDb(); const result = await database.update(classes).set(data as any).where(eq(classes.id, id)).returning(); return result[0] as unknown as Class; }
   async deleteClass(id: string) {
     const database = this.checkDb();
     const classStudents = await this.listStudentsByClass(id);
@@ -606,10 +607,10 @@ class DatabaseStorage implements IStorage {
     await database.delete(classes).where(eq(classes.id, id));
   }
 
-  async createStudent(s: InsertStudent) { const database = this.checkDb(); const result = await database.insert(students).values({ id: genId("stu"), ...s }).returning(); return result[0]; }
-  async getStudent(id: string) { const database = this.checkDb(); const result = await database.select().from(students).where(eq(students.id, id)); return result[0]; }
-  async getStudentByUsername(username: string) { const database = this.checkDb(); const result = await database.select().from(students).where(eq(students.username, username)); return result[0]; }
-  async listStudentsByClass(classId: string) { const database = this.checkDb(); return database.select().from(students).where(eq(students.classId, classId)); }
+  async createStudent(s: InsertStudent) { const database = this.checkDb(); const result = await database.insert(students).values({ id: genId("stu"), course: 'higher', ...s } as any).returning(); return result[0] as unknown as Student; }
+  async getStudent(id: string) { const database = this.checkDb(); const result = await database.select().from(students).where(eq(students.id, id)); return result[0] as unknown as Student | undefined; }
+  async getStudentByUsername(username: string) { const database = this.checkDb(); const result = await database.select().from(students).where(and(eq(students.course, 'higher'), eq(students.username, username))); return result[0] as unknown as Student | undefined; }
+  async listStudentsByClass(classId: string) { const database = this.checkDb(); return database.select().from(students).where(eq(students.classId, classId)) as unknown as Promise<Student[]>; }
   async updateStudentPassword(id: string, password: string, mustChangePassword?: boolean) { const database = this.checkDb(); await database.update(students).set({ password, mustChangePassword: mustChangePassword ?? false }).where(eq(students.id, id)); }
   async updateStudentUsername(id: string, username: string) { const database = this.checkDb(); await database.update(students).set({ username }).where(eq(students.id, id)); }
   async deleteStudent(id: string) { const database = this.checkDb(); await database.delete(studentSessions).where(eq(studentSessions.studentId, id)); await database.delete(studentExamResults).where(eq(studentExamResults.studentId, id)); await database.delete(students).where(eq(students.id, id)); }
