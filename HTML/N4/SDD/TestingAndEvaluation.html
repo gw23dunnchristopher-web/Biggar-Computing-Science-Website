@@ -40,7 +40,7 @@
                         tableRows: [
                             ["1", "25", ""],
                             ["2", "40", ""],
-                            ["3", "55", ""],
+                            ["3", "55", ""]
                         ],
                     },
                     {
@@ -48,8 +48,17 @@
                         text: ["What does the term <strong>fit for purpose</strong> mean when evaluating a program?", "Describe the stage of development that is used as a checklist to decide whether a program is fit for purpose."],
                         marks: 2,
                         markingScheme: "Award 1 mark for correctly explaining that a program is 'fit for purpose' if it meets all of the requirements that were set out for it (i.e. it does everything it was supposed to do). Award 1 mark for correctly identifying that the Analysis stage (specifically the functional requirements identified during analysis) is used as a checklist to evaluate whether the program meets its requirements.",
-                    },
-                    {
+                    }
+;
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
+        <style></style>
+        <script>
+        window.QUIZ_CONFIGS = window.QUIZ_CONFIGS || {};
+        window.QUIZ_CONFIGS.fte = {
+            hideNumbers: true,
+            questions: [
+                {
                             collapsed: false,
                         type: "paragraph",
                         text: [
@@ -59,11 +68,10 @@
                         marks: 1,
                         markingScheme: "Award 1 mark for identifying that > and < are strict inequalities, so the values 1 and 10 would be incorrectly reported as \"Out of range\". The operators should be >= and <= to include the boundary values."
                     }
-;
-        </script>
-        <script src="/JavaScript/quiz.js"></script>
-        <style></style>
-    </head>
+            ]
+        };
+    </script>
+</head>
 
     <body>
         <div id="loading"></div>
@@ -274,6 +282,8 @@
 
                         <h2>Testing and Evaluation Questions</h2>
                         <div class="quiz-container"></div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container" data-quiz-id="fte"></div>
                     </div>
                 </div>
             </div>

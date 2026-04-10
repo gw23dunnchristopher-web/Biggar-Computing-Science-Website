@@ -35,8 +35,17 @@
                         marks: 2,
                         markingScheme:
                             "1 Mark: Identifying that the computer cannot add a number to a variable that does not exist yet (or has no value). 1 Mark: Explaining that the program needs a 'baseline' or 'starting point' to perform the first addition.",
-                    },
-                    {
+                    }
+
+],
+            };
+        </script>
+        <script>
+        window.QUIZ_CONFIGS = window.QUIZ_CONFIGS || {};
+        window.QUIZ_CONFIGS.fte = {
+            hideNumbers: true,
+            questions: [
+                {
                             collapsed: false,
                         type: "paragraph",
                         text: [
@@ -46,12 +55,10 @@
                         marks: 1,
                         markingScheme: "Award 1 mark for identifying that total = 0 is inside the loop, so it resets to zero on every iteration. The result will always be the last number entered rather than the sum of all five. Fix: move total = 0 to before the loop."
                     }
-
-
-                ],
-            };
-        </script>
-    </head>
+            ]
+        };
+    </script>
+</head>
 
     <body>
         <div id="loading"></div>
@@ -226,6 +233,8 @@
                         <p>Answer the questions below before moving on.</p>
                         <div class="quiz-container"></div>
 
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container" data-quiz-id="fte"></div>
                         <h2>Running Total Exercises</h2>
                          <p>Complete the exercises below.</p>
                         <div class="py-quiz" data-sandbox="running-total"></div>

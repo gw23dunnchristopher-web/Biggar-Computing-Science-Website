@@ -11,10 +11,13 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/codeRunner.css" />
             <link rel="stylesheet" href="/CSS/quiz.css" />
+        <script src="/JavaScript/quiz.js"></script>
         <script>
-            window.QUIZ_CONFIG = {
-                questions: [
-                    {
+        window.QUIZ_CONFIGS = window.QUIZ_CONFIGS || {};
+        window.QUIZ_CONFIGS.fte = {
+            hideNumbers: true,
+            questions: [
+                {
                             collapsed: false,
                         type: "paragraph",
                         text: [
@@ -24,11 +27,10 @@
                         marks: 1,
                         markingScheme: "Award 1 mark for identifying that the second print statement is missing the + operator between the string and the variable colour. It should be print(\"I have always liked the colour\" + colour)."
                     }
-                ]
-            };
-        </script>
-        <script src="/JavaScript/quiz.js"></script>
-    </head>
+            ]
+        };
+    </script>
+</head>
 
     <body>
         <div id="loading"></div>
@@ -228,6 +230,8 @@
                         </p>
                         <div class="py-runner" data-sandbox="using-str"></div>
 
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container" data-quiz-id="fte"></div>
                         <h2>Python Exercises</h2>
                         <p>The following Python editor contains exercises for you to complete.</p>
                         <ul>
@@ -236,7 +240,6 @@
                             <li>Click the 'Reset' button to reset the code to its original state.</li>
                             <li>Once you have completed an exercise you can click 'Submit for feedback' to check your answer.</li>
                         </ul>
-                        <div class="quiz-container"></div>
                         <div class="py-quiz" data-sandbox="print-exercises"></div>
                     </div>
                 </div>

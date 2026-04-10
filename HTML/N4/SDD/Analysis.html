@@ -16,7 +16,7 @@
                         type: "table",
                         text: [
                             "A program asks the user to enter their age and displays whether they are old enough to vote (18 or over).",
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
+                            "Complete the table to identify the inputs, processes, and outputs of this program."
                         ],
                         marks: 3,
                         tableHeaders: ["Input", "Process", "Output"],
@@ -31,9 +31,9 @@
                             [
                                 "Ask the user to enter the price of an item and the amount of money paid",
                                 "Calculate the change to be given",
-                                "Display the change",
+                                "Display the change"
                             ],
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
+                            "Complete the table to identify the inputs, processes, and outputs of this program."
                         ],
                         marks: 3,
                         tableHeaders: ["Input", "Process", "Output"],
@@ -49,9 +49,9 @@
                                 "Ask the user to enter their name, age, and whether they are a member (yes/no)",
                                 "Apply a 20% discount if the user is a member, or charge full price if not",
                                 "The standard entry fee is £12.00",
-                                "Display the user's name and the amount they must pay",
+                                "Display the user's name and the amount they must pay"
                             ],
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
+                            "Complete the table to identify the inputs, processes, and outputs of this program."
                         ],
                         marks: 3,
                         tableHeaders: ["Input", "Process", "Output"],
@@ -66,9 +66,9 @@
                             [
                                 "Read in temperature readings for each day of the week (7 values)",
                                 "Calculate the average temperature, and identify the highest and lowest temperatures recorded",
-                                "Display all three results with appropriate labels",
+                                "Display all three results with appropriate labels"
                             ],
-                            "Complete the table to identify the inputs, processes, and outputs of this program.",
+                            "Complete the table to identify the inputs, processes, and outputs of this program."
                         ],
                         marks: 3,
                         tableHeaders: ["Input", "Process", "Output"],
@@ -92,8 +92,19 @@
                         tableHeaders: ["Input", "Process", "Output"],
                         tableRows: [["", "", ""]],
                         markingScheme: "Award 1 mark per cell. Input: item name, price per unit, and quantity (award mark if at least two of three are mentioned). Process: multiply price by quantity to get total cost, then check if total is £10 or more and apply 10% discount if so (award mark if both steps are mentioned, or award mark for either step alone). Output: item name, original total, and final price after discount (award mark if at least two of three outputs are mentioned)."
-                    },
-                    {
+                    }
+;
+        </script>
+        <script src="/JavaScript/quiz.js"></script>
+        <style>
+
+        </style>
+        <script>
+        window.QUIZ_CONFIGS = window.QUIZ_CONFIGS || {};
+        window.QUIZ_CONFIGS.fte = {
+            hideNumbers: true,
+            questions: [
+                {
                             collapsed: false,
                         type: "paragraph",
                         text: [
@@ -103,13 +114,10 @@
                         marks: 1,
                         markingScheme: "Award 1 mark for identifying that num1 and num2 are stored as strings (no int() conversion), so the + operator concatenates them instead of adding them mathematically (e.g. entering 3 and 4 gives \"34\" instead of 7). Fix: change input() to int(input()) for both variables."
                     }
-;
-        </script>
-        <script src="/JavaScript/quiz.js"></script>
-        <style>
-
-        </style>
-    </head>
+            ]
+        };
+    </script>
+</head>
 
     <body>
         <div id="loading"></div>
@@ -270,6 +278,8 @@
                             submit to see if you were right!
                         </p>
                         <div class="quiz-container"></div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container" data-quiz-id="fte"></div>
                     </div>
                 </div>
             </div>

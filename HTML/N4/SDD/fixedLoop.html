@@ -38,8 +38,15 @@
                             text: "List the three numbers that the computer produces for <span class='codeText'>range(3)</span>. Explain why the number 3 is not included in that list.",
                             marks: 2,
                             markingScheme: "Award 1 mark if the student states '0, 1, 2'. Award 1 mark if the student shows that they understand that 3 is not included because when it reaches number 2 the code has already completed 3 times.",
-                    },
-                    {
+                    }
+;
+        </script>
+        <script>
+        window.QUIZ_CONFIGS = window.QUIZ_CONFIGS || {};
+        window.QUIZ_CONFIGS.fte = {
+            hideNumbers: true,
+            questions: [
+                {
                             collapsed: false,
                         type: "paragraph",
                         text: [
@@ -49,9 +56,10 @@
                         marks: 1,
                         markingScheme: "Award 1 mark for identifying that range(5) generates the numbers 0, 1, 2, 3, 4 — not 1 to 5. To print 1 to 5 the loop should use range(1, 6)."
                     }
-;
-        </script>
-    </head>
+            ]
+        };
+    </script>
+</head>
 
     <body>
         <div id="loading"></div>
@@ -275,6 +283,8 @@
                          <p>Answer the questions below before moving on.</p>
                          <div class="quiz-container"></div>
                         
+                         <h2>Find the Error</h2>
+                         <div class="quiz-container" data-quiz-id="fte"></div>
                          <h2>Fixed Loop Exercises</h2>
                          <p>Complete the exercises below.</p>
                         <div class="py-quiz" data-sandbox="fixed-loop"></div>

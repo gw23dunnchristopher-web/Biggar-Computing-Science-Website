@@ -23,7 +23,7 @@
                             tableRows: [["player_score", "", ""], ["2nd_place", "", ""], ["userAge", "", ""], ["total-amount", "", ""], ["favourite_colour", "", ""], ["class", "", ""], ["money$", "", ""]],
                             markingScheme:
                                 "Award 1 mark per completed row.  Row 1: Yes, reason can be left blank. Row 2: No, variable names cannot start with a number. Row 3: Yes, reason can be left blank. Row 4: No, You can't use hyphens. Row 5: Yes, reason can be left blank.  Row 6: No, class is a reserved word.  Row 7: No, Special symbols like $ are not allowed.",
-                        },
+                        }
                     ]
                 },
                 dataTypes: {
@@ -37,17 +37,7 @@
                             tableRows: [["player_name", "\"Alex\"", ""], ["item_price", "12.99", ""], ["level_number", "5", ""], ["is_game_over", "True", ""], ["user_email", "\"bob@email.com\"", ""], ["goals_scored", "0", ""], ["average_speed", "15.4", ""]],
                             markingScheme:
                                 "Award 1 mark per completed row.  Row 1: String. Row 2: Real (or Float). Row 3: Integer. Row 4: ",
-                        },
-                        {
-                                                        collapsed: false,
-                                                    type: "paragraph",
-                                                    text: [
-                                                        "The following program is meant to add two numbers together. Find the error and explain how to fix it.",
-                                                        { type: "code", language: "python", content: "num1 = input(\"Enter the first number: \")\nnum2 = int(input(\"Enter the second number: \"))\nresult = num1 + num2\nprint(\"The result is:\", result)" }
-                                                    ],
-                                                    marks: 1,
-                                                    markingScheme: "Award 1 mark for identifying that num1 is stored as a string (no int() conversion), so num1 + num2 will raise a TypeError because you cannot add a string and an integer. Fix: change input() to int(input()) for num1."
-                                                }
+                        }
                     ]
                 }
             };
@@ -60,7 +50,25 @@
             .dataTypes-table td:nth-child(1) {text-align: center; max-width: 100px; max-height: 50px;}
             .dataTypes-table td:nth-child(2) {text-align: center; max-width: 200px;}
         </style>
-    </head>
+        <script>
+        window.QUIZ_CONFIGS = window.QUIZ_CONFIGS || {};
+        window.QUIZ_CONFIGS.fte = {
+            hideNumbers: true,
+            questions: [
+                {
+                                                        collapsed: false,
+                                                    type: "paragraph",
+                                                    text: [
+                                                        "The following program is meant to add two numbers together. Find the error and explain how to fix it.",
+                                                        { type: "code", language: "python", content: "num1 = input(\"Enter the first number: \")\nnum2 = int(input(\"Enter the second number: \"))\nresult = num1 + num2\nprint(\"The result is:\", result)" }
+                                                    ],
+                                                    marks: 1,
+                                                    markingScheme: "Award 1 mark for identifying that num1 is stored as a string (no int() conversion), so num1 + num2 will raise a TypeError because you cannot add a string and an integer. Fix: change input() to int(input()) for num1."
+                                                }
+            ]
+        };
+    </script>
+</head>
 
     <body>
         <div id="loading"></div>
@@ -230,6 +238,8 @@
                         </p>
                         <p>Take a look at the question below.</p>
                         <div class="quiz-container" data-quiz-id="dataTypes"></div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container" data-quiz-id="fte"></div>
                     </div>
                 </div>
             </div>

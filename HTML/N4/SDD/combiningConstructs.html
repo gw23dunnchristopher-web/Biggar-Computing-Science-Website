@@ -31,7 +31,7 @@
                         type: "paragraph",
                         text: [
                             "What is meant by the term 'nesting' in programming?",
-                            "Give one example of a situation where you might nest an if statement inside a loop.",
+                            "Give one example of a situation where you might nest an if statement inside a loop."
                         ],
                         marks: 2,
                         markingScheme:
@@ -42,7 +42,7 @@
                         text: [
                             "The code below asks the user to enter a temperature for 4 days and counts how many days were above 20 degrees.",
                             { type: "code", language: "python", content: "daysAbove20 = 0\nfor x in range(4):\n    temperature = int(input(\"Enter temperature: \"))\n    if temperature > 20:\n        daysAbove20 = daysAbove20 + 1" },
-                            "The user enters the following temperatures in order: 15, 23, 20, 27. Complete the trace table to show the value of daysAbove20 each time it goes through the loop.",
+                            "The user enters the following temperatures in order: 15, 23, 20, 27. Complete the trace table to show the value of daysAbove20 each time it goes through the loop."
                         ],
                         marks: 4,
                         markingScheme:
@@ -54,7 +54,7 @@
                             ["15", ""],
                             ["23", ""],
                             ["20", ""],
-                            ["27", ""],
+                            ["27", ""]
                         ],
                     },
                     {
@@ -62,13 +62,20 @@
                         text: [
                             "The code below uses two nested loops.",
                             { type: "code", language: "python", content: "for x in range(3):\n    for y in range(4):\n        print(\"Hello World\")" },
-                            "How many times in total will Hello World be printed? Explain how you worked out your answer.",
+                            "How many times in total will Hello World be printed? Explain how you worked out your answer."
                         ],
                         marks: 2,
                         markingScheme:
                             "Award 1 mark for the correct answer: 12 times. Award 1 mark for a correct explanation: the outer loop runs 3 times, and for each of those 3 runs the inner loop runs 4 times, so 3 × 4 = 12.",
-                    },
-                    {
+                    }
+;
+        </script>
+        <script>
+        window.QUIZ_CONFIGS = window.QUIZ_CONFIGS || {};
+        window.QUIZ_CONFIGS.fte = {
+            hideNumbers: true,
+            questions: [
+                {
                             collapsed: false,
                         type: "paragraph",
                         text: [
@@ -78,9 +85,10 @@
                         marks: 1,
                         markingScheme: "Award 1 mark for identifying that the if statement is not indented inside the for loop. It must be indented one level to be part of the loop body, otherwise Python raises an IndentationError."
                     }
-;
-        </script>
-    </head>
+            ]
+        };
+    </script>
+</head>
 
     <body>
         <div id="loading"></div>
@@ -369,6 +377,8 @@
                         <p>After the loop finishes, <code>total</code> is <strong>2</strong>, because only the values 2 and 3 were greater than 1.</p>
                         <div class="quiz-container"></div>
 
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container" data-quiz-id="fte"></div>
                         <h2>Combining Constructs Exercises</h2>
                         <p>Complete the exercises below. Each one asks you to write a program that combines a loop with a selection statement. Use what you have learned on this page to help you.</p>
                         <div class="py-quiz" data-sandbox="combining-constructs"></div>

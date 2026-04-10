@@ -32,8 +32,15 @@
                         text: "In the grading program, why does the code check mark >= 70 before checking mark >= 60?",
                         marks: 2,
                         markingScheme: "1 Mark: For identifying that the program checks conditions in turn (top to bottom). 1 Mark: For explaining that if the lower condition (e.g., 60) was first, a student with 70 would be caught by the 60 condition and given the wrong grade (a B instead of an A) because the program stops checking once it finds a 'true' condition.)."
-                    },
-                    {
+                    }
+;
+        </script>
+        <script>
+        window.QUIZ_CONFIGS = window.QUIZ_CONFIGS || {};
+        window.QUIZ_CONFIGS.fte = {
+            hideNumbers: true,
+            questions: [
+                {
                             collapsed: false,
                         type: "paragraph",
                         text: [
@@ -43,9 +50,10 @@
                         marks: 1,
                         markingScheme: "Award 1 mark for identifying that the second if mark >= 50 should be elif mark >= 50. Using if instead of elif means a student scoring 70 or above would have both \"Grade: A\" and \"Grade: B\" printed."
                     }
-;
-        </script>
-    </head>
+            ]
+        };
+    </script>
+</head>
 
     <body>
         <div id="loading"></div>
@@ -219,6 +227,8 @@
                         <h2>Elif Questions</h2>
                         <div class="quiz-container"></div>
 
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container" data-quiz-id="fte"></div>
                         <h2>Elif Exercises</h2>
                         <p>Try the following exercises to practice using elif statements:</p>
                         <div class="py-quiz" data-sandbox="elif-exercise"></div>

@@ -11,13 +11,12 @@
         <link rel="stylesheet" href="/CSS/quiz.css" />
        
         <script src="/JavaScript/quiz.js"></script>
-        <style>
-
-        </style>
         <script>
-            window.QUIZ_CONFIG = {
-                questions: [
-                    {
+        window.QUIZ_CONFIGS = window.QUIZ_CONFIGS || {};
+        window.QUIZ_CONFIGS.fte = {
+            hideNumbers: true,
+            questions: [
+                {
                             collapsed: false,
                         type: "paragraph",
                         text: [
@@ -27,11 +26,10 @@
                         marks: 1,
                         markingScheme: "Award 1 mark for identifying that number + 5 uses addition instead of multiplication. The correct expression is number * 5."
                     }
-                ]
-            };
-        </script>
-        <script src="/JavaScript/quiz.js"></script>
-    </head>
+            ]
+        };
+    </script>
+</head>
 
     <body>
         <div id="loading"></div>
@@ -88,7 +86,8 @@
                                 </td>
                             </tr>       
                         </table>
-                        <div class="quiz-container"></div>
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container" data-quiz-id="fte"></div>
                     </div>
                 </div>
             </div>

@@ -32,7 +32,7 @@
                         columnWidths: ["40%", "20%", "40%"],   // optional — omit for equal columns
                         tableRows: [
                             ["If person is exactly 1.5m tall, gate opens.",  "", ""],
-                            ["If person is not exactly 1.5m tall, gate stays closed",  "", ""],
+                            ["If person is not exactly 1.5m tall, gate stays closed",  "", ""]
                         ],
                     },
                 {
@@ -48,8 +48,15 @@
                     marks: 1,
                     markingScheme:
                         "1 Mark: For providing any logical \"backup\" plan (e.g., \"If it is raining, take an umbrella, else wear sunglasses\"). The student must show that the else action happens when the if is false."
-                },
-                    {
+                }
+;
+        </script>
+        <script>
+        window.QUIZ_CONFIGS = window.QUIZ_CONFIGS || {};
+        window.QUIZ_CONFIGS.fte = {
+            hideNumbers: true,
+            questions: [
+                {
                             collapsed: false,
                         type: "paragraph",
                         text: [
@@ -59,9 +66,10 @@
                         marks: 1,
                         markingScheme: "Award 1 mark for identifying that if age > 18 should be if age >= 18. A person who is exactly 18 is old enough to vote, but the > operator (strictly greater than) would incorrectly tell them they cannot."
                     }
-;
-        </script>
-    </head>
+            ]
+        };
+    </script>
+</head>
 
     <body>
         <div id="loading"></div>
@@ -292,6 +300,8 @@
                         <p>Answer the questions below before moving on.</p>
                         <div class="quiz-container"></div>
                         
+                        <h2>Find the Error</h2>
+                        <div class="quiz-container" data-quiz-id="fte"></div>
                         <h2>IF...ELSE Exercises</h2>
                          <p>Complete the exercises below.</p>
                         <div class="py-quiz" data-sandbox="if-else-quiz"></div>

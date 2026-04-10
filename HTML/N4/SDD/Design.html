@@ -43,7 +43,7 @@
                             marks: 2,
                             markingScheme:
                                 "Award 1 mark for explaining that the indentation shows that lines 5 to 12 are part of the loop. Award 1                         mark for explaining that the indentation shows that these lines are part of or are outcomes of the decision (or if                             statement).",
-                        },
+                        }
                     ],
                 },
                 readingFlowcharts: {
@@ -68,7 +68,7 @@
                             marks: 3,
                             markingScheme:
                                 "Award 1 mark for stating that the program will ask you to enter your daily steps 7 times (or for a week).                                      Award 1 mark for saying that it will add all of the numbers entered together.  Award 1 mark for explaning                                      that the program will display whether you have reached your goal or not depending on the number of steps                                       entered.",
-                        },
+                        }
                     ],
                 },
                 readingStruct: {
@@ -92,7 +92,7 @@
                             marks: 2,
                             markingScheme:
                                 "Award 1 mark stating that the program will perform 2 additional actions, award an additional mark if they                                     answer describes the two actions - add monthly profit to yearly profit and display 'you made a profit this                                     month'.",
-                        },
+                        }
                     ],
                 },
                 writingPseudocode: {
@@ -105,8 +105,8 @@
                                 [
                                     "<b>Input:</b> The current temperature.",
                                     "<b>Process:</b> Check if the temperature is less than 5 degrees.",
-                                    "<b>Output:</b> If the temperature is less than 5, display the warning 'Too cold!'. Otherwise, display                                         'Temperature is OK'.",
-                                ],
+                                    "<b>Output:</b> If the temperature is less than 5, display the warning 'Too cold!'. Otherwise, display                                         'Temperature is OK'."
+                                ]
                             ],
                             marks: 2,
                             markingScheme:
@@ -120,8 +120,8 @@
                                 [
                                     " <b>Input:</b> For each of the 10 questions, ask the user if the answer was 'Correct' or 'Incorrect'.",
                                     "<b>Process:</b> Start a loop that repeats 10 times. Every time the user enters 'Correct', add 1 to the                                         total score.",
-                                    " <b>Output:</b> IAfter the loop, display 'Your final score is: ' followed by the total score.",
-                                ],
+                                    " <b>Output:</b> IAfter the loop, display 'Your final score is: ' followed by the total score."
+                                ]
                             ],
                             marks: 4,
                             markingScheme:
@@ -135,14 +135,23 @@
                                 [
                                     "<b>Input:</b> The amount of rain (in mm) for each of the 12 months.",
                                     "<b>Process:</b> Start a loop for 12 months. In each loop, get the rainfall amount and add it to a yearly                                      total. Divide the total by 12 to get the average.",
-                                    "<b>Output:</b> Display the average rainfall for the year.",
-                                ],
+                                    "<b>Output:</b> Display the average rainfall for the year."
+                                ]
                             ],
                             marks: 4,
                             markingScheme:
                                 "Award 1 mark for setting the yearly total to 0 before the loop starts.  Award 1 mark for correctly using a                                     loop that repeats exactly 12 times. Award 1 mark for adding the new input to the running total inside the                                      loop. Award 1 mark for getting the average rainfall by dividing the yearly total by 12 after the loop has                                      finished.",
-                        },
-                        {
+                        }
+                    ],
+                }
+            };
+        </script>
+        <script>
+        window.QUIZ_CONFIGS = window.QUIZ_CONFIGS || {};
+        window.QUIZ_CONFIGS.fte = {
+            hideNumbers: true,
+            questions: [
+                {
                                                         collapsed: false,
                                                     type: "paragraph",
                                                     text: [
@@ -152,11 +161,10 @@
                                                     marks: 1,
                                                     markingScheme: "Award 1 mark for identifying that SET area TO length + width uses addition instead of multiplication. It should be SET area TO length * width."
                                                 }
-                    ],
-                }
-            };
-        </script>
-    </head>
+            ]
+        };
+    </script>
+</head>
 
     <body>
         <div id="loading"></div>
@@ -845,6 +853,8 @@
                                 class="quiz-container"
                                 data-quiz-id="writingPseudocode"
                             ></div>
+                                <h2>Find the Error</h2>
+                                <div class="quiz-container" data-quiz-id="fte"></div>
                         </details>
                         <p>Once you have completed all of the questions and attained at least 20 out of 26 marks, you can check off 'Design' in the SDD section of the <b>Course Checklist.</b></p>
                     </div>
