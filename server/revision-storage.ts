@@ -17,12 +17,15 @@ import {
   type StudentSession,
   type StudentExamResult, type InsertStudentExamResult,
   type StudentExamProgress, type InsertStudentExamProgress,
-  users, questions, passwordResetTokens, customQuizzes,
-  additionalExams, assignments, assignmentSections, assignmentParts,
-  assignmentResources, assignmentAttempts, assignmentResponses,
+  users, passwordResetTokens,
+  assignmentAttempts, assignmentResponses,
   studentSessions, studentExamResults, studentExamProgress
 } from "@shared/revision-schema";
-import { bhsStudents as students, bhsClasses as classes } from "@shared/bhs-schema";
+import {
+  bhsStudents as students, bhsClasses as classes,
+  bhsQuestions, bhsPapers, bhsCustomQuizzes,
+  bhsAssignments, bhsAssignmentSections, bhsAssignmentParts, bhsAssignmentResources,
+} from "@shared/bhs-schema";
 import { Question } from "../revision-client/src/lib/past-papers";
 import bcrypt from "bcryptjs";
 
@@ -437,57 +440,57 @@ class DatabaseStorage implements IStorage {
   async updateUserPassword(id: string, password: string) { const database = this.checkDb(); await database.update(users).set({ password }).where(eq(users.id, id)); }
   async updateUserEmail(id: string, email: string) { const database = this.checkDb(); await database.update(users).set({ email }).where(eq(users.id, id)); }
 
-  async getAllQuestions() { const database = this.checkDb(); const result = await database.select().from(questions); return result.map(this.dbToQuestion); }
-  async getQuestion(id: string) { const database = this.checkDb(); const result = await database.select().from(questions).where(eq(questions.id, id)); return result[0] ? this.dbToQuestion(result[0]) : undefined; }
-  async createQuestion(question: Question) { const database = this.checkDb(); await database.insert(questions).values(this.questionToDb(question)); return question; }
-  async updateQuestion(question: Question) { const database = this.checkDb(); await database.update(questions).set(this.questionToDb(question)).where(eq(questions.id, question.id)); return question; }
-  async deleteQuestion(id: string) { const database = this.checkDb(); await database.delete(questions).where(eq(questions.id, id)); }
+  async getAllQuestions() { const database = this.checkDb(); const result = await database.select().from(bhsQuestions).where(eq(bhsQuestions.course, 'higher')); return result.map(this.dbToQuestion); }
+  async getQuestion(id: string) { const database = this.checkDb(); const result = await database.select().from(bhsQuestions).where(and(eq(bhsQuestions.id, id), eq(bhsQuestions.course, 'higher'))); return result[0] ? this.dbToQuestion(result[0]) : undefined; }
+  async createQuestion(question: Question) { const database = this.checkDb(); await database.insert(bhsQuestions).values({ ...this.questionToDb(question), course: 'higher' }); return question; }
+  async updateQuestion(question: Question) { const database = this.checkDb(); await database.update(bhsQuestions).set(this.questionToDb(question)).where(and(eq(bhsQuestions.id, question.id), eq(bhsQuestions.course, 'higher'))); return question; }
+  async deleteQuestion(id: string) { const database = this.checkDb(); await database.delete(bhsQuestions).where(and(eq(bhsQuestions.id, id), eq(bhsQuestions.course, 'higher'))); }
 
   async createPasswordResetToken(userId: string, token: string, expiresAt: Date) { const database = this.checkDb(); const result = await database.insert(passwordResetTokens).values({ id: genId("token"), userId, token, expiresAt, usedAt: null }).returning(); return result[0]; }
   async getPasswordResetToken(token: string) { const database = this.checkDb(); const result = await database.select().from(passwordResetTokens).where(eq(passwordResetTokens.token, token)); return result[0]; }
   async markPasswordResetTokenUsed(token: string) { const database = this.checkDb(); await database.update(passwordResetTokens).set({ usedAt: new Date() }).where(eq(passwordResetTokens.token, token)); }
 
-  async listCustomQuizzes() { const database = this.checkDb(); return database.select().from(customQuizzes).orderBy(desc(customQuizzes.createdAt)); }
-  async getCustomQuiz(id: string) { const database = this.checkDb(); const result = await database.select().from(customQuizzes).where(eq(customQuizzes.id, id)); return result[0]; }
-  async createCustomQuiz(quiz: InsertCustomQuiz) { const database = this.checkDb(); const result = await database.insert(customQuizzes).values({ id: genId("quiz"), ...quiz }).returning(); return result[0]; }
-  async updateCustomQuiz(id: string, data: Partial<InsertCustomQuiz>) { const database = this.checkDb(); const result = await database.update(customQuizzes).set(data).where(eq(customQuizzes.id, id)).returning(); return result[0]; }
-  async deleteCustomQuiz(id: string) { const database = this.checkDb(); await database.delete(customQuizzes).where(eq(customQuizzes.id, id)); }
+  async listCustomQuizzes() { const database = this.checkDb(); return database.select().from(bhsCustomQuizzes).where(eq(bhsCustomQuizzes.course, 'higher')).orderBy(desc(bhsCustomQuizzes.createdAt)); }
+  async getCustomQuiz(id: string) { const database = this.checkDb(); const result = await database.select().from(bhsCustomQuizzes).where(and(eq(bhsCustomQuizzes.id, id), eq(bhsCustomQuizzes.course, 'higher'))); return result[0]; }
+  async createCustomQuiz(quiz: InsertCustomQuiz) { const database = this.checkDb(); const result = await database.insert(bhsCustomQuizzes).values({ id: genId("quiz"), course: 'higher', ...quiz }).returning(); return result[0]; }
+  async updateCustomQuiz(id: string, data: Partial<InsertCustomQuiz>) { const database = this.checkDb(); const result = await database.update(bhsCustomQuizzes).set(data).where(and(eq(bhsCustomQuizzes.id, id), eq(bhsCustomQuizzes.course, 'higher'))).returning(); return result[0]; }
+  async deleteCustomQuiz(id: string) { const database = this.checkDb(); await database.delete(bhsCustomQuizzes).where(and(eq(bhsCustomQuizzes.id, id), eq(bhsCustomQuizzes.course, 'higher'))); }
 
-  async listAssignments() { const database = this.checkDb(); return database.select().from(assignments).orderBy(desc(assignments.createdAt)); }
-  async getAssignment(id: string) { const database = this.checkDb(); const result = await database.select().from(assignments).where(eq(assignments.id, id)); return result[0]; }
-  async createAssignment(a: InsertAssignment) { const database = this.checkDb(); const result = await database.insert(assignments).values({ id: genId("asgn"), ...a }).returning(); return result[0]; }
-  async updateAssignment(id: string, data: Partial<InsertAssignment>) { const database = this.checkDb(); const result = await database.update(assignments).set(data).where(eq(assignments.id, id)).returning(); return result[0]; }
+  async listAssignments() { const database = this.checkDb(); return database.select().from(bhsAssignments).where(eq(bhsAssignments.course, 'higher')).orderBy(desc(bhsAssignments.createdAt)); }
+  async getAssignment(id: string) { const database = this.checkDb(); const result = await database.select().from(bhsAssignments).where(and(eq(bhsAssignments.id, id), eq(bhsAssignments.course, 'higher'))); return result[0]; }
+  async createAssignment(a: InsertAssignment) { const database = this.checkDb(); const result = await database.insert(bhsAssignments).values({ id: genId("asgn"), course: 'higher', ...a } as any).returning(); return result[0]; }
+  async updateAssignment(id: string, data: Partial<InsertAssignment>) { const database = this.checkDb(); const result = await database.update(bhsAssignments).set(data as any).where(and(eq(bhsAssignments.id, id), eq(bhsAssignments.course, 'higher'))).returning(); return result[0]; }
   async deleteAssignment(id: string) {
     const database = this.checkDb();
     const sections = await this.listAssignmentSections(id);
     for (const sec of sections) {
       const parts = await this.listAssignmentParts(sec.id);
       for (const part of parts) {
-        await database.delete(assignmentResources).where(eq(assignmentResources.partId, part.id));
+        await database.delete(bhsAssignmentResources).where(eq(bhsAssignmentResources.partId, part.id));
       }
-      await database.delete(assignmentParts).where(eq(assignmentParts.sectionId, sec.id));
+      await database.delete(bhsAssignmentParts).where(eq(bhsAssignmentParts.sectionId, sec.id));
     }
-    await database.delete(assignmentSections).where(eq(assignmentSections.assignmentId, id));
-    await database.delete(assignments).where(eq(assignments.id, id));
+    await database.delete(bhsAssignmentSections).where(eq(bhsAssignmentSections.assignmentId, id));
+    await database.delete(bhsAssignments).where(and(eq(bhsAssignments.id, id), eq(bhsAssignments.course, 'higher')));
   }
 
   async getFullAssignment(id: string) {
     const database = this.checkDb();
     const [assignmentResult, allSections] = await Promise.all([
-      database.select().from(assignments).where(eq(assignments.id, id)),
-      database.select().from(assignmentSections).where(eq(assignmentSections.assignmentId, id)).orderBy(assignmentSections.orderIndex),
+      database.select().from(bhsAssignments).where(and(eq(bhsAssignments.id, id), eq(bhsAssignments.course, 'higher'))),
+      database.select().from(bhsAssignmentSections).where(eq(bhsAssignmentSections.assignmentId, id)).orderBy(bhsAssignmentSections.orderIndex),
     ]);
     const assignment = assignmentResult[0];
     if (!assignment) return undefined;
     if (allSections.length === 0) return { ...assignment, sections: [] };
     const sectionIds = allSections.map(s => s.id);
     const [allParts, ] = await Promise.all([
-      database.select().from(assignmentParts).where(inArray(assignmentParts.sectionId, sectionIds)).orderBy(assignmentParts.orderIndex),
+      database.select().from(bhsAssignmentParts).where(inArray(bhsAssignmentParts.sectionId, sectionIds)).orderBy(bhsAssignmentParts.orderIndex),
     ]);
     let allResources: AssignmentResource[] = [];
     const partIds = allParts.map(p => p.id);
     if (partIds.length > 0) {
-      allResources = await database.select().from(assignmentResources).where(inArray(assignmentResources.partId, partIds));
+      allResources = await database.select().from(bhsAssignmentResources).where(inArray(bhsAssignmentResources.partId, partIds)) as any;
     }
     const resourcesByPart = new Map<string, AssignmentResource[]>();
     for (const r of allResources) {
@@ -511,18 +514,18 @@ class DatabaseStorage implements IStorage {
   async listAllAssignmentsFull() {
     const database = this.checkDb();
     const [allAssignments, allSections] = await Promise.all([
-      database.select().from(assignments).orderBy(desc(assignments.createdAt)),
-      database.select().from(assignmentSections).orderBy(assignmentSections.orderIndex),
+      database.select().from(bhsAssignments).where(eq(bhsAssignments.course, 'higher')).orderBy(desc(bhsAssignments.createdAt)),
+      database.select().from(bhsAssignmentSections).orderBy(bhsAssignmentSections.orderIndex),
     ]);
     if (allAssignments.length === 0) return [];
     const sectionIds = allSections.map(s => s.id);
     let allParts: any[] = [];
     let allResources: AssignmentResource[] = [];
     if (sectionIds.length > 0) {
-      allParts = await database.select().from(assignmentParts).where(inArray(assignmentParts.sectionId, sectionIds)).orderBy(assignmentParts.orderIndex);
+      allParts = await database.select().from(bhsAssignmentParts).where(inArray(bhsAssignmentParts.sectionId, sectionIds)).orderBy(bhsAssignmentParts.orderIndex);
       const partIds = allParts.map(p => p.id);
       if (partIds.length > 0) {
-        allResources = await database.select().from(assignmentResources).where(inArray(assignmentResources.partId, partIds));
+        allResources = await database.select().from(bhsAssignmentResources).where(inArray(bhsAssignmentResources.partId, partIds)) as any;
       }
     }
     const resourcesByPart = new Map<string, AssignmentResource[]>();
@@ -549,29 +552,29 @@ class DatabaseStorage implements IStorage {
     }));
   }
 
-  async listAssignmentSections(assignmentId: string) { const database = this.checkDb(); return database.select().from(assignmentSections).where(eq(assignmentSections.assignmentId, assignmentId)).orderBy(assignmentSections.orderIndex); }
-  async getAssignmentSection(id: string) { const database = this.checkDb(); const result = await database.select().from(assignmentSections).where(eq(assignmentSections.id, id)); return result[0]; }
-  async createAssignmentSection(s: InsertAssignmentSection) { const database = this.checkDb(); const result = await database.insert(assignmentSections).values({ id: genId("sec"), ...s }).returning(); return result[0]; }
-  async updateAssignmentSection(id: string, data: Partial<InsertAssignmentSection>) { const database = this.checkDb(); const result = await database.update(assignmentSections).set(data).where(eq(assignmentSections.id, id)).returning(); return result[0]; }
+  async listAssignmentSections(assignmentId: string) { const database = this.checkDb(); return database.select().from(bhsAssignmentSections).where(eq(bhsAssignmentSections.assignmentId, assignmentId)).orderBy(bhsAssignmentSections.orderIndex); }
+  async getAssignmentSection(id: string) { const database = this.checkDb(); const result = await database.select().from(bhsAssignmentSections).where(eq(bhsAssignmentSections.id, id)); return result[0]; }
+  async createAssignmentSection(s: InsertAssignmentSection) { const database = this.checkDb(); const result = await database.insert(bhsAssignmentSections).values({ id: genId("sec"), ...s } as any).returning(); return result[0]; }
+  async updateAssignmentSection(id: string, data: Partial<InsertAssignmentSection>) { const database = this.checkDb(); const result = await database.update(bhsAssignmentSections).set(data as any).where(eq(bhsAssignmentSections.id, id)).returning(); return result[0]; }
   async deleteAssignmentSection(id: string) {
     const database = this.checkDb();
     const parts = await this.listAssignmentParts(id);
     for (const part of parts) {
-      await database.delete(assignmentResources).where(eq(assignmentResources.partId, part.id));
+      await database.delete(bhsAssignmentResources).where(eq(bhsAssignmentResources.partId, part.id));
     }
-    await database.delete(assignmentParts).where(eq(assignmentParts.sectionId, id));
-    await database.delete(assignmentSections).where(eq(assignmentSections.id, id));
+    await database.delete(bhsAssignmentParts).where(eq(bhsAssignmentParts.sectionId, id));
+    await database.delete(bhsAssignmentSections).where(eq(bhsAssignmentSections.id, id));
   }
 
-  async listAssignmentParts(sectionId: string) { const database = this.checkDb(); return database.select().from(assignmentParts).where(eq(assignmentParts.sectionId, sectionId)).orderBy(assignmentParts.orderIndex); }
-  async getAssignmentPart(id: string) { const database = this.checkDb(); const result = await database.select().from(assignmentParts).where(eq(assignmentParts.id, id)); return result[0]; }
-  async createAssignmentPart(p: InsertAssignmentPart) { const database = this.checkDb(); const result = await database.insert(assignmentParts).values({ id: genId("part"), ...p }).returning(); return result[0]; }
-  async updateAssignmentPart(id: string, data: Partial<InsertAssignmentPart>) { const database = this.checkDb(); const result = await database.update(assignmentParts).set(data).where(eq(assignmentParts.id, id)).returning(); return result[0]; }
-  async deleteAssignmentPart(id: string) { const database = this.checkDb(); await database.delete(assignmentResources).where(eq(assignmentResources.partId, id)); await database.delete(assignmentParts).where(eq(assignmentParts.id, id)); }
+  async listAssignmentParts(sectionId: string) { const database = this.checkDb(); return database.select().from(bhsAssignmentParts).where(eq(bhsAssignmentParts.sectionId, sectionId)).orderBy(bhsAssignmentParts.orderIndex); }
+  async getAssignmentPart(id: string) { const database = this.checkDb(); const result = await database.select().from(bhsAssignmentParts).where(eq(bhsAssignmentParts.id, id)); return result[0]; }
+  async createAssignmentPart(p: InsertAssignmentPart) { const database = this.checkDb(); const result = await database.insert(bhsAssignmentParts).values({ id: genId("part"), ...p } as any).returning(); return result[0]; }
+  async updateAssignmentPart(id: string, data: Partial<InsertAssignmentPart>) { const database = this.checkDb(); const result = await database.update(bhsAssignmentParts).set(data as any).where(eq(bhsAssignmentParts.id, id)).returning(); return result[0]; }
+  async deleteAssignmentPart(id: string) { const database = this.checkDb(); await database.delete(bhsAssignmentResources).where(eq(bhsAssignmentResources.partId, id)); await database.delete(bhsAssignmentParts).where(eq(bhsAssignmentParts.id, id)); }
 
-  async listAssignmentResources(partId: string) { const database = this.checkDb(); return database.select().from(assignmentResources).where(eq(assignmentResources.partId, partId)); }
-  async createAssignmentResource(r: InsertAssignmentResource) { const database = this.checkDb(); const result = await database.insert(assignmentResources).values({ id: genId("res"), ...r }).returning(); return result[0]; }
-  async deleteAssignmentResource(id: string) { const database = this.checkDb(); await database.delete(assignmentResources).where(eq(assignmentResources.id, id)); }
+  async listAssignmentResources(partId: string) { const database = this.checkDb(); return database.select().from(bhsAssignmentResources).where(eq(bhsAssignmentResources.partId, partId)); }
+  async createAssignmentResource(r: InsertAssignmentResource) { const database = this.checkDb(); const result = await database.insert(bhsAssignmentResources).values({ id: genId("res"), ...r } as any).returning(); return result[0]; }
+  async deleteAssignmentResource(id: string) { const database = this.checkDb(); await database.delete(bhsAssignmentResources).where(eq(bhsAssignmentResources.id, id)); }
 
   async listAssignmentAttempts(assignmentId: string) { const database = this.checkDb(); return database.select().from(assignmentAttempts).where(eq(assignmentAttempts.assignmentId, assignmentId)).orderBy(desc(assignmentAttempts.startedAt)); }
   async listAssignmentAttemptsByStudent(studentId: string) { const database = this.checkDb(); return database.select().from(assignmentAttempts).where(eq(assignmentAttempts.localStudentId, studentId)).orderBy(desc(assignmentAttempts.startedAt)); }
@@ -586,11 +589,11 @@ class DatabaseStorage implements IStorage {
   async createAssignmentResponse(r: InsertAssignmentResponse) { const database = this.checkDb(); const result = await database.insert(assignmentResponses).values({ id: genId("resp"), ...r }).returning(); return result[0]; }
   async updateAssignmentResponse(id: string, data: Partial<AssignmentResponse>) { const database = this.checkDb(); const { id: _id, ...updateData } = data; const result = await database.update(assignmentResponses).set(updateData).where(eq(assignmentResponses.id, id)).returning(); return result[0]; }
 
-  async listAdditionalExams() { const database = this.checkDb(); return database.select().from(additionalExams).orderBy(desc(additionalExams.createdAt)); }
-  async getAdditionalExam(id: string) { const database = this.checkDb(); const result = await database.select().from(additionalExams).where(eq(additionalExams.id, id)); return result[0]; }
-  async createAdditionalExam(e: InsertAdditionalExam) { const database = this.checkDb(); const result = await database.insert(additionalExams).values(e).returning(); return result[0]; }
-  async updateAdditionalExam(id: string, data: Partial<InsertAdditionalExam & { isPublished: boolean }>) { const database = this.checkDb(); const result = await database.update(additionalExams).set(data).where(eq(additionalExams.id, id)).returning(); return result[0]; }
-  async deleteAdditionalExam(id: string) { const database = this.checkDb(); await database.delete(questions).where(eq(questions.additionalExamId, id)); await database.delete(additionalExams).where(eq(additionalExams.id, id)); }
+  async listAdditionalExams() { const database = this.checkDb(); return database.select().from(bhsPapers).where(eq(bhsPapers.course, 'higher')).orderBy(desc(bhsPapers.createdAt)); }
+  async getAdditionalExam(id: string) { const database = this.checkDb(); const result = await database.select().from(bhsPapers).where(and(eq(bhsPapers.id, id), eq(bhsPapers.course, 'higher'))); return result[0]; }
+  async createAdditionalExam(e: InsertAdditionalExam) { const database = this.checkDb(); const result = await database.insert(bhsPapers).values({ course: 'higher', ...e } as any).returning(); return result[0]; }
+  async updateAdditionalExam(id: string, data: Partial<InsertAdditionalExam & { isPublished: boolean }>) { const database = this.checkDb(); const result = await database.update(bhsPapers).set(data as any).where(and(eq(bhsPapers.id, id), eq(bhsPapers.course, 'higher'))).returning(); return result[0]; }
+  async deleteAdditionalExam(id: string) { const database = this.checkDb(); await database.update(bhsQuestions).set({ additionalPaperId: null, isAdditionalExam: false }).where(and(eq(bhsQuestions.additionalPaperId, id), eq(bhsQuestions.course, 'higher'))); await database.delete(bhsPapers).where(and(eq(bhsPapers.id, id), eq(bhsPapers.course, 'higher'))); }
 
   async createClass(c: InsertClass) { const database = this.checkDb(); const result = await database.insert(classes).values({ id: genId("cls"), course: 'higher', ...c } as any).returning(); return result[0] as unknown as Class; }
   async getClass(id: string) { const database = this.checkDb(); const result = await database.select().from(classes).where(eq(classes.id, id)); return result[0] as unknown as Class | undefined; }
@@ -652,22 +655,22 @@ class DatabaseStorage implements IStorage {
   async linkExamResultToStudent(examResultId: string, studentId: string) { const database = this.checkDb(); await database.update(studentExamResults).set({ studentId }).where(eq(studentExamResults.id, examResultId)); }
   async getStudentCompletedAdditionalPaperIds(studentId: string) { const database = this.checkDb(); const results = await database.select({ additionalPaperId: studentExamResults.additionalPaperId }).from(studentExamResults).where(and(eq(studentExamResults.studentId, studentId), isNotNull(studentExamResults.additionalPaperId))); return results.map(r => r.additionalPaperId!).filter(Boolean); }
 
-  private dbToQuestion(dbQ: DbQuestion): Question {
+  private dbToQuestion(dbQ: any): Question {
     return {
       id: dbQ.id, year: dbQ.year ?? 0, topic: dbQ.topic as Question["topic"], title: dbQ.title,
       isPractice: dbQ.isPractice || false, isQuizOnly: dbQ.isQuizOnly || false,
-      isAdditionalExam: (dbQ as any).isAdditionalExam || false,
-      additionalExamId: (dbQ as any).additionalExamId || null,
+      isAdditionalExam: dbQ.isAdditionalExam || false,
+      additionalExamId: dbQ.additionalPaperId || null,
       scenario: dbQ.scenario as Question["scenario"], subQuestions: dbQ.subQuestions as Question["subQuestions"],
     };
   }
 
-  private questionToDb(q: Question): typeof questions.$inferInsert {
+  private questionToDb(q: Question): any {
     return {
       id: q.id, year: q.year, topic: q.topic, title: q.title,
       isPractice: q.isPractice || false, isQuizOnly: (q as any).isQuizOnly || false,
       isAdditionalExam: (q as any).isAdditionalExam || false,
-      additionalExamId: (q as any).additionalExamId || null,
+      additionalPaperId: (q as any).additionalExamId || (q as any).additionalPaperId || null,
       scenario: q.scenario || null, subQuestions: q.subQuestions,
     };
   }

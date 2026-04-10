@@ -3,19 +3,22 @@ import { eq, sql, and, isNull, or, inArray } from "drizzle-orm";
 import pkg from "pg";
 const { Pool } = pkg;
 import { 
-  type User, type InsertUser, type DbQuestion, type CustomQuiz, type InsertCustomQuiz, 
+  type User, type InsertUser, type CustomQuiz, type InsertCustomQuiz, 
   type Assignment, type InsertAssignment, type AssignmentSection, type InsertAssignmentSection,
   type AssignmentPart, type InsertAssignmentPart, type AssignmentResource, type InsertAssignmentResource,
   type AssignmentAttempt, type InsertAssignmentAttempt, type AssignmentResponse, type InsertAssignmentResponse,
   type Class, type InsertClass, type Student, type InsertStudent, type ExamResult, type InsertExamResult,
   type AdditionalPaper, type InsertAdditionalPaper,
   type ActiveExamProgress, type InsertActiveExamProgress,
-  users, questions, customQuizzes, passwordResetTokens,
-  assignments, assignmentSections, assignmentParts, assignmentResources, assignmentAttempts, assignmentResponses,
-  examResults, additionalPapers, activeExamProgress
+  users, passwordResetTokens,
+  assignmentAttempts, assignmentResponses,
+  examResults, activeExamProgress
 } from "@shared/n5-schema";
-import { bhsStudents as students, bhsClasses as classes } from "@shared/bhs-schema";
-import { gt } from "drizzle-orm";
+import {
+  bhsStudents as students, bhsClasses as classes,
+  bhsQuestions, bhsPapers, bhsCustomQuizzes,
+  bhsAssignments, bhsAssignmentSections, bhsAssignmentParts, bhsAssignmentResources,
+} from "@shared/bhs-schema";
 import { Question } from "../n5-client/src/lib/past-papers";
 import bcrypt from "bcryptjs";
 import fs from "fs";
@@ -811,25 +814,25 @@ class DatabaseStorage implements IStorage {
 
   async getAllQuestions(): Promise<Question[]> {
     const database = this.checkDb();
-    const result = await database.select().from(questions);
+    const result = await database.select().from(bhsQuestions).where(eq(bhsQuestions.course, 'n5'));
     return result.map(this.dbToQuestion);
   }
 
   async getRegularQuestions(): Promise<Question[]> {
     const database = this.checkDb();
-    const result = await database.select().from(questions).where(eq(questions.isQuizOnly, false));
+    const result = await database.select().from(bhsQuestions).where(and(eq(bhsQuestions.course, 'n5'), eq(bhsQuestions.isQuizOnly, false)));
     return result.map(this.dbToQuestion);
   }
 
   async getQuizOnlyQuestions(): Promise<Question[]> {
     const database = this.checkDb();
-    const result = await database.select().from(questions).where(eq(questions.isQuizOnly, true));
+    const result = await database.select().from(bhsQuestions).where(and(eq(bhsQuestions.course, 'n5'), eq(bhsQuestions.isQuizOnly, true)));
     return result.map(this.dbToQuestion);
   }
 
   async getQuestion(id: string): Promise<Question | undefined> {
     const database = this.checkDb();
-    const result = await database.select().from(questions).where(eq(questions.id, id));
+    const result = await database.select().from(bhsQuestions).where(and(eq(bhsQuestions.id, id), eq(bhsQuestions.course, 'n5')));
     if (result[0]) {
       return this.dbToQuestion(result[0]);
     }
@@ -839,191 +842,138 @@ class DatabaseStorage implements IStorage {
   async createQuestion(question: Question): Promise<Question> {
     const database = this.checkDb();
     const dbQuestion = this.questionToDb(question);
-    await database.insert(questions).values(dbQuestion);
+    await database.insert(bhsQuestions).values({ ...dbQuestion, course: 'n5' });
     return question;
   }
 
   async updateQuestion(question: Question): Promise<Question> {
     const database = this.checkDb();
     const dbQuestion = this.questionToDb(question);
-    await database.update(questions).set(dbQuestion).where(eq(questions.id, question.id));
+    await database.update(bhsQuestions).set(dbQuestion).where(and(eq(bhsQuestions.id, question.id), eq(bhsQuestions.course, 'n5')));
     return question;
   }
 
   async deleteQuestion(id: string): Promise<void> {
     const database = this.checkDb();
-    await database.delete(questions).where(eq(questions.id, id));
+    await database.delete(bhsQuestions).where(and(eq(bhsQuestions.id, id), eq(bhsQuestions.course, 'n5')));
   }
 
   async getAllCustomQuizzes(): Promise<CustomQuiz[]> {
     const database = this.checkDb();
-    const result = await database.select().from(customQuizzes);
-    return result;
+    const result = await database.select().from(bhsCustomQuizzes).where(eq(bhsCustomQuizzes.course, 'n5'));
+    return result as any;
   }
 
   async getActiveCustomQuizzes(): Promise<CustomQuiz[]> {
     const database = this.checkDb();
-    const result = await database.select().from(customQuizzes).where(eq(customQuizzes.isActive, true));
-    return result;
+    const result = await database.select().from(bhsCustomQuizzes).where(and(eq(bhsCustomQuizzes.course, 'n5'), eq(bhsCustomQuizzes.isActive, true)));
+    return result as any;
   }
 
   async getCustomQuiz(id: string): Promise<CustomQuiz | undefined> {
     const database = this.checkDb();
-    const result = await database.select().from(customQuizzes).where(eq(customQuizzes.id, id));
-    return result[0];
+    const result = await database.select().from(bhsCustomQuizzes).where(and(eq(bhsCustomQuizzes.id, id), eq(bhsCustomQuizzes.course, 'n5')));
+    return result[0] as any;
   }
 
   async createCustomQuiz(quiz: InsertCustomQuiz): Promise<CustomQuiz> {
     const database = this.checkDb();
-    const result = await database.insert(customQuizzes).values(quiz).returning();
-    return result[0];
+    const result = await database.insert(bhsCustomQuizzes).values({ course: 'n5', ...quiz } as any).returning();
+    return result[0] as any;
   }
 
   async updateCustomQuiz(id: string, quiz: Partial<InsertCustomQuiz>): Promise<CustomQuiz> {
     const database = this.checkDb();
-    const result = await database.update(customQuizzes).set(quiz).where(eq(customQuizzes.id, id)).returning();
-    return result[0];
+    const result = await database.update(bhsCustomQuizzes).set(quiz as any).where(and(eq(bhsCustomQuizzes.id, id), eq(bhsCustomQuizzes.course, 'n5'))).returning();
+    return result[0] as any;
   }
 
   async deleteCustomQuiz(id: string): Promise<void> {
     const database = this.checkDb();
-    await database.delete(customQuizzes).where(eq(customQuizzes.id, id));
+    await database.delete(bhsCustomQuizzes).where(and(eq(bhsCustomQuizzes.id, id), eq(bhsCustomQuizzes.course, 'n5')));
   }
 
   // Assignment methods - database implementation
   async getAllAssignments(): Promise<Assignment[]> {
     const database = this.checkDb();
-    return await database.select().from(assignments);
+    return await database.select().from(bhsAssignments).where(eq(bhsAssignments.course, 'n5')) as any;
   }
   async getPublishedAssignments(): Promise<Assignment[]> {
     const database = this.checkDb();
-    return await database.select().from(assignments).where(eq(assignments.isPublished, true));
+    return await database.select().from(bhsAssignments).where(and(eq(bhsAssignments.course, 'n5'), eq(bhsAssignments.isPublished, true))) as any;
   }
   async getAssignment(id: string): Promise<Assignment | undefined> {
     const database = this.checkDb();
-    const result = await database.select().from(assignments).where(eq(assignments.id, id));
-    return result[0];
+    const result = await database.select().from(bhsAssignments).where(and(eq(bhsAssignments.id, id), eq(bhsAssignments.course, 'n5')));
+    return result[0] as any;
   }
   async createAssignment(assignment: InsertAssignment): Promise<Assignment> {
     const database = this.checkDb();
-    const result = await database.insert(assignments).values(assignment).returning();
-    return result[0];
+    const result = await database.insert(bhsAssignments).values({ course: 'n5', ...assignment } as any).returning();
+    return result[0] as any;
   }
   async updateAssignment(id: string, assignment: Partial<InsertAssignment>): Promise<Assignment> {
     const database = this.checkDb();
-    const result = await database.update(assignments).set(assignment).where(eq(assignments.id, id)).returning();
-    return result[0];
+    const result = await database.update(bhsAssignments).set(assignment as any).where(and(eq(bhsAssignments.id, id), eq(bhsAssignments.course, 'n5'))).returning();
+    return result[0] as any;
   }
   async deleteAssignment(id: string): Promise<void> {
     const database = this.checkDb();
-    await database.delete(assignments).where(eq(assignments.id, id));
+    await database.delete(bhsAssignments).where(and(eq(bhsAssignments.id, id), eq(bhsAssignments.course, 'n5')));
   }
   async getAssignmentSections(assignmentId: string): Promise<AssignmentSection[]> {
     const database = this.checkDb();
-    return await database.select().from(assignmentSections).where(eq(assignmentSections.assignmentId, assignmentId));
+    return await database.select().from(bhsAssignmentSections).where(eq(bhsAssignmentSections.assignmentId, assignmentId)) as any;
   }
   async createAssignmentSection(section: InsertAssignmentSection): Promise<AssignmentSection> {
     const database = this.checkDb();
-    const result = await database.insert(assignmentSections).values(section).returning();
-    return result[0];
+    const result = await database.insert(bhsAssignmentSections).values(section as any).returning();
+    return result[0] as any;
   }
   async updateAssignmentSection(id: string, section: Partial<InsertAssignmentSection>): Promise<AssignmentSection> {
     const database = this.checkDb();
-    try {
-      const result = await database.update(assignmentSections).set(section).where(eq(assignmentSections.id, id)).returning();
-      return result[0];
-    } catch (error: any) {
-      if (error?.message?.includes('does not exist')) {
-        console.log("Fallback: column missing, using raw SQL update for orderIndex only");
-        const setClauses: string[] = [];
-        const values: any[] = [];
-        let paramIndex = 1;
-        
-        if (section.orderIndex !== undefined) {
-          setClauses.push(`order_index = $${paramIndex++}`);
-          values.push(section.orderIndex);
-        }
-        if (section.title !== undefined) {
-          setClauses.push(`title = $${paramIndex++}`);
-          values.push(section.title);
-        }
-        if ((section as any).informationSheet !== undefined) {
-          setClauses.push(`information_sheet = $${paramIndex++}`);
-          values.push(JSON.stringify((section as any).informationSheet));
-        }
-        
-        if (setClauses.length > 0) {
-          values.push(id);
-          const query = `UPDATE assignment_sections SET ${setClauses.join(', ')} WHERE id = $${paramIndex} RETURNING id, assignment_id as "assignmentId", title, order_index as "orderIndex", information_sheet as "informationSheet"`;
-          console.log("Raw SQL query:", query, values);
-          const rawResult = await database.execute(sql.raw(query.replace(/\$(\d+)/g, (_, n) => `'${values[parseInt(n) - 1]}'`)));
-          const row = (rawResult as any).rows?.[0] || (rawResult as any)[0];
-          if (row) {
-            return { ...row, description: null } as AssignmentSection;
-          }
-        }
-        
-        const current = await database.execute(sql.raw(`SELECT id, assignment_id as "assignmentId", title, order_index as "orderIndex", information_sheet as "informationSheet" FROM assignment_sections WHERE id = '${id}'`));
-        const currentRow = (current as any).rows?.[0] || (current as any)[0];
-        return { ...currentRow, description: null } as AssignmentSection;
-      }
-      throw error;
-    }
+    const result = await database.update(bhsAssignmentSections).set(section as any).where(eq(bhsAssignmentSections.id, id)).returning();
+    return result[0] as any;
   }
   async deleteAssignmentSection(id: string): Promise<void> {
     const database = this.checkDb();
-    await database.delete(assignmentSections).where(eq(assignmentSections.id, id));
+    await database.delete(bhsAssignmentSections).where(eq(bhsAssignmentSections.id, id));
   }
   async getAssignmentParts(sectionId: string): Promise<AssignmentPart[]> {
     const database = this.checkDb();
-    return await database.select().from(assignmentParts).where(eq(assignmentParts.sectionId, sectionId));
+    return await database.select().from(bhsAssignmentParts).where(eq(bhsAssignmentParts.sectionId, sectionId)) as any;
   }
   async getAssignmentPart(id: string): Promise<AssignmentPart | undefined> {
     const database = this.checkDb();
-    const result = await database.select().from(assignmentParts).where(eq(assignmentParts.id, id));
-    return result[0];
+    const result = await database.select().from(bhsAssignmentParts).where(eq(bhsAssignmentParts.id, id));
+    return result[0] as any;
   }
   async createAssignmentPart(part: InsertAssignmentPart): Promise<AssignmentPart> {
     const database = this.checkDb();
-    const result = await database.insert(assignmentParts).values(part).returning();
-    return result[0];
+    const result = await database.insert(bhsAssignmentParts).values(part as any).returning();
+    return result[0] as any;
   }
   async updateAssignmentPart(id: string, part: Partial<InsertAssignmentPart>): Promise<AssignmentPart> {
     const database = this.checkDb();
-    const result = await database.update(assignmentParts).set(part).where(eq(assignmentParts.id, id)).returning();
-    return result[0];
+    const result = await database.update(bhsAssignmentParts).set(part as any).where(eq(bhsAssignmentParts.id, id)).returning();
+    return result[0] as any;
   }
   async deleteAssignmentPart(id: string): Promise<void> {
     const database = this.checkDb();
-    await database.delete(assignmentParts).where(eq(assignmentParts.id, id));
+    await database.delete(bhsAssignmentParts).where(eq(bhsAssignmentParts.id, id));
   }
   async getAssignmentResources(partId: string): Promise<AssignmentResource[]> {
     const database = this.checkDb();
-    // Use raw SQL to handle missing 'description' column in older database schemas
-    try {
-      return await database.select().from(assignmentResources).where(eq(assignmentResources.partId, partId));
-    } catch (error: any) {
-      // If the description column doesn't exist, query without it
-      if (error.message?.includes('column "description" does not exist')) {
-        const result = await database.execute(sql`
-          SELECT id, part_id as "partId", file_name as "fileName", file_url as "fileUrl", 
-                 file_type as "fileType", NULL as description, uploaded_at as "uploadedAt"
-          FROM assignment_resources 
-          WHERE part_id = ${partId}
-        `);
-        return (result.rows || []) as AssignmentResource[];
-      }
-      throw error;
-    }
+    return await database.select().from(bhsAssignmentResources).where(eq(bhsAssignmentResources.partId, partId)) as any;
   }
   async createAssignmentResource(resource: InsertAssignmentResource): Promise<AssignmentResource> {
     const database = this.checkDb();
-    const result = await database.insert(assignmentResources).values(resource).returning();
-    return result[0];
+    const result = await database.insert(bhsAssignmentResources).values(resource as any).returning();
+    return result[0] as any;
   }
   async deleteAssignmentResource(id: string): Promise<void> {
     const database = this.checkDb();
-    await database.delete(assignmentResources).where(eq(assignmentResources.id, id));
+    await database.delete(bhsAssignmentResources).where(eq(bhsAssignmentResources.id, id));
   }
   async getAssignmentAttempt(id: string): Promise<AssignmentAttempt | undefined> {
     const database = this.checkDb();
@@ -1309,7 +1259,7 @@ class DatabaseStorage implements IStorage {
     return rows.map(fixAttemptArrays);
   }
 
-  private dbToQuestion(dbQ: DbQuestion): Question {
+  private dbToQuestion(dbQ: any): Question {
     return {
       id: dbQ.id,
       year: dbQ.year,
@@ -1324,7 +1274,7 @@ class DatabaseStorage implements IStorage {
     };
   }
 
-  private questionToDb(q: Question): typeof questions.$inferInsert {
+  private questionToDb(q: Question): any {
     return {
       id: q.id,
       year: q.year,
@@ -1341,31 +1291,36 @@ class DatabaseStorage implements IStorage {
 
   async createAdditionalPaper(paper: InsertAdditionalPaper): Promise<AdditionalPaper> {
     const d = this.checkDb();
-    const [row] = await d.insert(additionalPapers).values(paper).returning();
-    return row;
+    const [row] = await d.insert(bhsPapers).values({ course: 'n5', title: (paper as any).name ?? (paper as any).title, isPublished: (paper as any).isPublished ?? false }).returning();
+    return { ...row, name: row.title } as any;
   }
   async getAdditionalPapers(): Promise<AdditionalPaper[]> {
     const d = this.checkDb();
-    return d.select().from(additionalPapers).orderBy(additionalPapers.createdAt);
+    const rows = await d.select().from(bhsPapers).where(eq(bhsPapers.course, 'n5')).orderBy(bhsPapers.createdAt);
+    return rows.map(r => ({ ...r, name: r.title })) as any;
   }
   async getAdditionalPaper(id: string): Promise<AdditionalPaper | undefined> {
     const d = this.checkDb();
-    const [row] = await d.select().from(additionalPapers).where(eq(additionalPapers.id, id));
-    return row;
+    const [row] = await d.select().from(bhsPapers).where(and(eq(bhsPapers.id, id), eq(bhsPapers.course, 'n5')));
+    return row ? { ...row, name: row.title } as any : undefined;
   }
   async updateAdditionalPaper(id: string, paper: Partial<InsertAdditionalPaper & { isPublished: boolean }>): Promise<AdditionalPaper> {
     const d = this.checkDb();
-    const [row] = await d.update(additionalPapers).set(paper).where(eq(additionalPapers.id, id)).returning();
-    return row;
+    const updateData: any = { ...paper };
+    if ((paper as any).name !== undefined) updateData.title = (paper as any).name;
+    delete updateData.name;
+    const [row] = await d.update(bhsPapers).set(updateData).where(and(eq(bhsPapers.id, id), eq(bhsPapers.course, 'n5'))).returning();
+    return { ...row, name: row.title } as any;
   }
   async deleteAdditionalPaper(id: string): Promise<void> {
     const d = this.checkDb();
-    await d.update(questions).set({ additionalPaperId: null, isAdditionalExam: false }).where(eq(questions.additionalPaperId, id));
-    await d.delete(additionalPapers).where(eq(additionalPapers.id, id));
+    await d.update(bhsQuestions).set({ additionalPaperId: null, isAdditionalExam: false }).where(and(eq(bhsQuestions.additionalPaperId, id), eq(bhsQuestions.course, 'n5')));
+    await d.delete(bhsPapers).where(and(eq(bhsPapers.id, id), eq(bhsPapers.course, 'n5')));
   }
   async getPublishedAdditionalPapers(): Promise<AdditionalPaper[]> {
     const d = this.checkDb();
-    return d.select().from(additionalPapers).where(eq(additionalPapers.isPublished, true)).orderBy(additionalPapers.createdAt);
+    const rows = await d.select().from(bhsPapers).where(and(eq(bhsPapers.course, 'n5'), eq(bhsPapers.isPublished, true))).orderBy(bhsPapers.createdAt);
+    return rows.map(r => ({ ...r, name: r.title })) as any;
   }
   async upsertActiveExamProgress(progress: InsertActiveExamProgress): Promise<ActiveExamProgress> {
     const d = this.checkDb();

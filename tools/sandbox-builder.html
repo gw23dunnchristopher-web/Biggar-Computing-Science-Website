@@ -498,6 +498,112 @@
         .sb-out-info { color: #8b949e; font-style: italic; }
         /* ── Ace editor container ── */
         #aceEditorDiv { flex: 1; overflow: hidden; font-size: 0.85rem; }
+
+        /* ── Paper Builder panel ── */
+        .pb-panel {
+            flex: 1; display: flex; flex-direction: column; overflow: hidden;
+            background: #0d1117;
+        }
+        .pb-toolbar {
+            display: flex; align-items: center; gap: 20px;
+            padding: 10px 18px; background: #161b22; border-bottom: 1px solid #30363d;
+            flex-shrink: 0; flex-wrap: wrap;
+        }
+        .pb-course-toggle {
+            display: flex; border: 1px solid #30363d; border-radius: 6px; overflow: hidden;
+        }
+        .pb-course-btn {
+            background: #21262d; color: #8b949e; border: none; padding: 6px 16px;
+            font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit;
+            transition: background 0.15s, color 0.15s;
+        }
+        .pb-course-btn:first-child { border-right: 1px solid #30363d; }
+        .pb-course-btn.active { background: #1f6feb; color: #fff; }
+        .pb-tabs { display: flex; gap: 4px; }
+        .pb-tab {
+            background: none; border: none; color: #8b949e; padding: 6px 14px;
+            font-size: 0.84rem; cursor: pointer; border-radius: 6px; font-family: inherit;
+            transition: background 0.15s, color 0.15s;
+        }
+        .pb-tab:hover { background: #21262d; color: #e6edf3; }
+        .pb-tab.active { background: #21262d; color: #e6edf3; font-weight: 600; }
+        .pb-content {
+            flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px;
+        }
+        /* add-form card */
+        .pb-add-card {
+            background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+            padding: 16px 18px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .pb-add-card h3 { font-size: 0.85rem; color: #8b949e; margin: 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        .pb-add-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .pb-inp {
+            background: #0d1117; border: 1px solid #30363d; border-radius: 5px;
+            color: #e6edf3; padding: 7px 12px; font-size: 0.85rem; font-family: inherit;
+            flex: 1; min-width: 180px;
+        }
+        .pb-inp:focus { outline: none; border-color: #58a6ff; }
+        .pb-sel {
+            background: #0d1117; border: 1px solid #30363d; border-radius: 5px;
+            color: #e6edf3; padding: 7px 12px; font-size: 0.85rem; font-family: inherit;
+        }
+        .pb-sel:focus { outline: none; border-color: #58a6ff; }
+        .pb-btn {
+            background: #1f6feb; color: #fff; border: none; border-radius: 5px;
+            padding: 7px 18px; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: inherit;
+            white-space: nowrap;
+        }
+        .pb-btn:hover { background: #388bfd; }
+        .pb-btn-ghost {
+            background: #21262d; color: #e6edf3; border: 1px solid #30363d; border-radius: 5px;
+            padding: 5px 12px; font-size: 0.8rem; cursor: pointer; font-family: inherit;
+        }
+        .pb-btn-ghost:hover { background: #30363d; }
+        .pb-btn-danger {
+            background: none; color: #f87171; border: 1px solid #5a2323; border-radius: 5px;
+            padding: 5px 10px; font-size: 0.78rem; cursor: pointer; font-family: inherit;
+        }
+        .pb-btn-danger:hover { background: #3d1a1a; }
+        /* list table */
+        .pb-table-wrap {
+            background: #161b22; border: 1px solid #30363d; border-radius: 8px; overflow: hidden;
+        }
+        .pb-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+        .pb-table th {
+            text-align: left; padding: 10px 14px; color: #8b949e; font-weight: 600;
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;
+            background: #1c2128; border-bottom: 1px solid #30363d;
+        }
+        .pb-table td { padding: 9px 14px; border-bottom: 1px solid #21262d; vertical-align: middle; }
+        .pb-table tr:last-child td { border-bottom: none; }
+        .pb-table tr:hover td { background: #1c2128; }
+        .pb-badge {
+            display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 600;
+        }
+        .pb-badge.pub  { background: #1a4a1a; color: #7ee787; }
+        .pb-badge.draft { background: #2d2000; color: #e3b341; }
+        .pb-badge.topic { background: #1a2a4a; color: #79c0ff; }
+        /* inline edit row */
+        .pb-edit-row td { background: #1c2128 !important; }
+        .pb-edit-inp {
+            background: #0d1117; border: 1px solid #58a6ff; border-radius: 4px;
+            color: #e6edf3; padding: 5px 9px; font-size: 0.84rem; font-family: inherit; width: 100%;
+        }
+        .pb-edit-inp:focus { outline: none; }
+        /* question detail */
+        .pb-q-detail {
+            background: #1c2128; border: 1px solid #30363d; border-radius: 8px; padding: 14px 16px;
+            font-size: 0.82rem; color: #c9d1d9;
+        }
+        .pb-q-detail pre { background: #0d1117; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 0.78rem; white-space: pre-wrap; word-break: break-all; }
+        /* filter row */
+        .pb-filter-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .pb-filter-row label { font-size: 0.78rem; color: #8b949e; }
+        /* empty state */
+        .pb-empty { padding: 48px 24px; text-align: center; color: #8b949e; font-size: 0.9rem; }
+        .pb-msg { font-size: 0.82rem; padding: 6px 12px; border-radius: 5px; display: inline-block; margin-top: 4px; }
+        .pb-msg.ok  { background: #1a4a1a; color: #7ee787; }
+        .pb-msg.err { background: #4a1a1a; color: #f87171; }
     </style>
 
     <!-- Ace Editor (uses window.ace — no conflict with Replit's CodeMirror global) -->
@@ -571,6 +677,11 @@
         <button class="tool-nav-item" data-tool="data-sculptor" title="Data Sculptor — MS Access Tool">
             <span class="tn-icon">&#x1F5C3;</span>
             Data Sculptor
+        </button>
+        <hr class="tool-nav-sep">
+        <button class="tool-nav-item" data-tool="paper-builder" title="Paper Builder — Manage Questions, Papers &amp; Assignments">
+            <span class="tn-icon">&#x1F4DD;</span>
+            Paper Builder
         </button>
     </nav>
 
@@ -686,6 +797,23 @@
         <iframe data-src="/data-sculptor/" title="Data Sculptor" style="width:100%;flex:1;border:none;background:#f9fafb"></iframe>
     </div>
 
+    <!-- Paper Builder -->
+    <div class="pb-panel" id="pbPanel" style="display:none;">
+        <div class="pb-toolbar">
+            <div class="pb-course-toggle">
+                <button class="pb-course-btn active" data-course="higher">Higher</button>
+                <button class="pb-course-btn" data-course="n5">National 5</button>
+            </div>
+            <div class="pb-tabs">
+                <button class="pb-tab active" data-pbtab="papers">&#x1F4C4; Papers</button>
+                <button class="pb-tab" data-pbtab="questions">&#x2753; Questions</button>
+                <button class="pb-tab" data-pbtab="assignments">&#x1F4CB; Assignments</button>
+            </div>
+        </div>
+        <div class="pb-content" id="pbContent">
+            <div style="padding:40px;color:#8b949e;font-size:0.9rem;">Loading…</div>
+        </div>
+    </div>
 
 </div>
 
@@ -751,12 +879,15 @@
     var iframePanelProgress      = document.getElementById('iframePanelProgress');
     var iframePanelDataSculptor  = document.getElementById('iframePanelDataSculptor');
 
+    var pbPanelEl = document.getElementById('pbPanel');
+
     var allIframePanels = [iframePanelProgress, iframePanelDataSculptor];
 
     function hideAllPanels() {
         allIframePanels.forEach(function (p) { p.classList.remove('active'); });
         sidebar.style.display = 'none';
         editorPaneEl.style.display = 'none';
+        pbPanelEl.style.display = 'none';
     }
 
     /* Return which Higher/N5 sub-tab is currently active in a given iframe-panel */
@@ -825,6 +956,9 @@
                 activateToolPanel(iframePanelProgress, 'progress');
             } else if (tool === 'data-sculptor') {
                 activateToolPanel(iframePanelDataSculptor, 'data-sculptor');
+            } else if (tool === 'paper-builder') {
+                pbPanelEl.style.display = '';
+                PB.open();
             }
         });
     });
@@ -1822,6 +1956,371 @@
 <!-- NP module removed; Past Papers panel retired -->
 <script>
 /* stub */ var NP = {};
+</script>
+
+<!-- Paper Builder module -->
+<script>
+(function () {
+    'use strict';
+
+    var PB = window.PB = {
+        course:    'higher',
+        activeTab: 'papers',
+        papers:    [],
+        questions: [],
+        assignments: [],
+        questionFilter: { year: '', topic: '' },
+        expandedQuestion: null,
+    };
+
+    /* ── helpers ── */
+    function api(method, path, body) {
+        var opts = { method: method, headers: { 'X-Teacher-Password': window.password || '' } };
+        if (body !== undefined) {
+            opts.headers['Content-Type'] = 'application/json';
+            opts.body = JSON.stringify(body);
+        }
+        return fetch(path, opts).then(function (r) {
+            return r.json().then(function (d) {
+                if (!r.ok) throw new Error(d.error || r.statusText);
+                return d;
+            });
+        });
+    }
+
+    function esc(s) {
+        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function fmtDate(iso) {
+        if (!iso) return '—';
+        try { return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }); }
+        catch (e) { return iso; }
+    }
+
+    var pbContent = document.getElementById('pbContent');
+
+    function setContent(html) { pbContent.innerHTML = html; }
+    function setLoading() { setContent('<div class="pb-empty">Loading…</div>'); }
+    function setError(msg) { setContent('<div class="pb-empty" style="color:#f87171;">' + esc(msg) + '</div>'); }
+
+    function showMsg(container, text, isErr) {
+        var el = container.querySelector('.pb-msg');
+        if (!el) return;
+        el.textContent = text;
+        el.className = 'pb-msg ' + (isErr ? 'err' : 'ok');
+        el.style.display = 'inline-block';
+        setTimeout(function () { el.style.display = 'none'; }, 3000);
+    }
+
+    /* ── course toggle & tab wiring ── */
+    PB.open = function () {
+        /* Course toggle */
+        document.querySelectorAll('.pb-course-btn').forEach(function (btn) {
+            btn.classList.toggle('active', btn.dataset.course === PB.course);
+            btn.onclick = function () {
+                PB.course = btn.dataset.course;
+                document.querySelectorAll('.pb-course-btn').forEach(function (b) {
+                    b.classList.toggle('active', b.dataset.course === PB.course);
+                });
+                PB.loadTab();
+            };
+        });
+        /* Tab btns */
+        document.querySelectorAll('.pb-tab').forEach(function (btn) {
+            btn.classList.toggle('active', btn.dataset.pbtab === PB.activeTab);
+            btn.onclick = function () {
+                PB.activeTab = btn.dataset.pbtab;
+                document.querySelectorAll('.pb-tab').forEach(function (b) {
+                    b.classList.toggle('active', b.dataset.pbtab === PB.activeTab);
+                });
+                PB.loadTab();
+            };
+        });
+        PB.loadTab();
+    };
+
+    PB.loadTab = function () {
+        if (PB.activeTab === 'papers')      PB.loadPapers();
+        else if (PB.activeTab === 'questions')   PB.loadQuestions();
+        else if (PB.activeTab === 'assignments') PB.loadAssignments();
+    };
+
+    /* ════════════════════════════════ PAPERS ═══════════════════════════════ */
+    PB.loadPapers = function () {
+        setLoading();
+        api('GET', '/api/content/papers?course=' + PB.course)
+            .then(function (rows) { PB.papers = rows; PB.renderPapers(); })
+            .catch(function (e) { setError('Failed to load papers: ' + e.message); });
+    };
+
+    PB.renderPapers = function () {
+        var course = PB.course === 'higher' ? 'Higher' : 'National 5';
+        var rows = PB.papers;
+        var html = '<div class="pb-add-card">'
+            + '<h3>New ' + esc(course) + ' Paper</h3>'
+            + '<div class="pb-add-row">'
+            + '<input class="pb-inp" id="newPaperTitle" placeholder="Paper title, e.g. 2024 Paper 1">'
+            + '<button class="pb-btn" id="addPaperBtn">Add Paper</button>'
+            + '<span class="pb-msg" style="display:none;"></span>'
+            + '</div></div>';
+
+        if (rows.length === 0) {
+            html += '<div class="pb-empty">No papers yet. Create one above.</div>';
+        } else {
+            html += '<div class="pb-table-wrap"><table class="pb-table">'
+                + '<thead><tr><th>Title</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>'
+                + '<tbody id="papersBody">';
+            rows.forEach(function (p) {
+                html += '<tr id="pr-' + esc(p.id) + '">'
+                    + '<td>' + esc(p.title) + '</td>'
+                    + '<td><span class="pb-badge ' + (p.isPublished ? 'pub' : 'draft') + '">'
+                    + (p.isPublished ? 'Published' : 'Draft') + '</span></td>'
+                    + '<td>' + fmtDate(p.createdAt) + '</td>'
+                    + '<td style="display:flex;gap:6px;flex-wrap:wrap;">'
+                    + '<button class="pb-btn-ghost" onclick="PB.editPaperInline(\'' + esc(p.id) + '\')">Edit</button>'
+                    + '<button class="pb-btn-ghost" onclick="PB.togglePublish(\'' + esc(p.id) + '\',' + !p.isPublished + ')">'
+                    + (p.isPublished ? 'Unpublish' : 'Publish') + '</button>'
+                    + '<button class="pb-btn-danger" onclick="PB.deletePaper(\'' + esc(p.id) + '\')">Delete</button>'
+                    + '</td></tr>';
+            });
+            html += '</tbody></table></div>';
+        }
+        setContent(html);
+        document.getElementById('addPaperBtn').onclick = function () { PB.addPaper(); };
+    };
+
+    PB.addPaper = function () {
+        var inp = document.getElementById('newPaperTitle');
+        var title = inp ? inp.value.trim() : '';
+        if (!title) return;
+        api('POST', '/api/content/papers?course=' + PB.course, { title: title, course: PB.course })
+            .then(function () { inp.value = ''; PB.loadPapers(); })
+            .catch(function (e) { showMsg(pbContent, e.message, true); });
+    };
+
+    PB.editPaperInline = function (id) {
+        var row = document.getElementById('pr-' + id);
+        if (!row) return;
+        var paper = PB.papers.find(function (p) { return p.id === id; });
+        if (!paper) return;
+        row.className = 'pb-edit-row';
+        row.innerHTML = '<td colspan="3"><input class="pb-edit-inp" id="editPaperInp" value="' + esc(paper.title) + '"></td>'
+            + '<td style="display:flex;gap:6px;"><button class="pb-btn" onclick="PB.saveEditPaper(\'' + esc(id) + '\')">Save</button>'
+            + '<button class="pb-btn-ghost" onclick="PB.renderPapers()">Cancel</button></td>';
+    };
+
+    PB.saveEditPaper = function (id) {
+        var inp = document.getElementById('editPaperInp');
+        var title = inp ? inp.value.trim() : '';
+        if (!title) return;
+        api('PUT', '/api/content/papers/' + id + '?course=' + PB.course, { title: title })
+            .then(function () { PB.loadPapers(); })
+            .catch(function (e) { alert(e.message); });
+    };
+
+    PB.togglePublish = function (id, val) {
+        api('PUT', '/api/content/papers/' + id + '?course=' + PB.course, { isPublished: val })
+            .then(function () { PB.loadPapers(); })
+            .catch(function (e) { alert(e.message); });
+    };
+
+    PB.deletePaper = function (id) {
+        var paper = PB.papers.find(function (p) { return p.id === id; });
+        var name = paper ? paper.title : id;
+        if (!confirm('Delete paper "' + name + '"? Questions assigned to it will be unlinked.')) return;
+        api('DELETE', '/api/content/papers/' + id + '?course=' + PB.course)
+            .then(function () { PB.loadPapers(); })
+            .catch(function (e) { alert(e.message); });
+    };
+
+    /* ════════════════════════════════ QUESTIONS ════════════════════════════ */
+    PB.loadQuestions = function () {
+        setLoading();
+        api('GET', '/api/content/questions?course=' + PB.course)
+            .then(function (rows) { PB.questions = rows; PB.renderQuestions(); })
+            .catch(function (e) { setError('Failed to load questions: ' + e.message); });
+    };
+
+    PB.renderQuestions = function () {
+        var rows = PB.questions;
+        /* build unique years + topics for filters */
+        var years = [], topics = [], seenY = {}, seenT = {};
+        rows.forEach(function (q) {
+            if (q.year && !seenY[q.year]) { years.push(q.year); seenY[q.year] = 1; }
+            if (q.topic && !seenT[q.topic]) { topics.push(q.topic); seenT[q.topic] = 1; }
+        });
+        years.sort(); topics.sort();
+
+        var filterYear  = PB.questionFilter.year;
+        var filterTopic = PB.questionFilter.topic;
+
+        var filtered = rows.filter(function (q) {
+            return (!filterYear || String(q.year) === filterYear)
+                && (!filterTopic || q.topic === filterTopic);
+        });
+
+        var yearOpts = '<option value="">All years</option>'
+            + years.map(function (y) { return '<option' + (filterYear === String(y) ? ' selected' : '') + '>' + esc(y) + '</option>'; }).join('');
+        var topicOpts = '<option value="">All topics</option>'
+            + topics.map(function (t) { return '<option value="' + esc(t) + '"' + (filterTopic === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('');
+
+        var html = '<div class="pb-add-card">'
+            + '<h3>Filter</h3>'
+            + '<div class="pb-filter-row">'
+            + '<label>Year</label><select class="pb-sel" id="qfYear">' + yearOpts + '</select>'
+            + '<label>Topic</label><select class="pb-sel" id="qfTopic">' + topicOpts + '</select>'
+            + '<span style="color:#8b949e;font-size:0.82rem;">' + filtered.length + ' of ' + rows.length + ' questions</span>'
+            + '</div></div>';
+
+        if (filtered.length === 0) {
+            html += '<div class="pb-empty">No questions match the current filter.</div>';
+        } else {
+            html += '<div class="pb-table-wrap"><table class="pb-table">'
+                + '<thead><tr><th style="width:70px;">Year</th><th>Topic</th><th>Title</th><th>Type</th><th>Sub-Qs</th><th>Paper</th></tr></thead>'
+                + '<tbody>';
+            filtered.forEach(function (q) {
+                var expanded = PB.expandedQuestion === q.id;
+                var type = q.isAdditionalExam ? 'Exam' : (q.isQuizOnly ? 'Quiz-only' : q.isPractice ? 'Practice' : 'Regular');
+                var subCount = Array.isArray(q.subQuestions) ? q.subQuestions.length : 0;
+                html += '<tr style="cursor:pointer;" onclick="PB.toggleQuestion(\'' + esc(q.id) + '\')">'
+                    + '<td>' + esc(q.year) + '</td>'
+                    + '<td><span class="pb-badge topic">' + esc(q.topic) + '</span></td>'
+                    + '<td>' + esc(q.title || '—') + '</td>'
+                    + '<td><span style="font-size:0.78rem;color:#8b949e;">' + esc(type) + '</span></td>'
+                    + '<td style="text-align:center;">' + subCount + '</td>'
+                    + '<td style="font-size:0.78rem;color:#8b949e;">' + esc(q.additionalPaperId ? '✓' : '—') + '</td>'
+                    + '</tr>';
+                if (expanded) {
+                    html += '<tr><td colspan="6" style="padding:0 14px 12px;">'
+                        + '<div class="pb-q-detail"><pre>'
+                        + esc(JSON.stringify(q.subQuestions, null, 2))
+                        + '</pre></div></td></tr>';
+                }
+            });
+            html += '</tbody></table></div>';
+        }
+        setContent(html);
+
+        var qfYear  = document.getElementById('qfYear');
+        var qfTopic = document.getElementById('qfTopic');
+        if (qfYear)  qfYear.onchange  = function () { PB.questionFilter.year  = qfYear.value;  PB.renderQuestions(); };
+        if (qfTopic) qfTopic.onchange = function () { PB.questionFilter.topic = qfTopic.value; PB.renderQuestions(); };
+    };
+
+    PB.toggleQuestion = function (id) {
+        PB.expandedQuestion = (PB.expandedQuestion === id) ? null : id;
+        PB.renderQuestions();
+    };
+
+    /* ════════════════════════════════ ASSIGNMENTS ══════════════════════════ */
+    PB.loadAssignments = function () {
+        setLoading();
+        api('GET', '/api/content/assignments?course=' + PB.course)
+            .then(function (rows) { PB.assignments = rows; PB.renderAssignments(); })
+            .catch(function (e) { setError('Failed to load assignments: ' + e.message); });
+    };
+
+    PB.renderAssignments = function () {
+        var course = PB.course === 'higher' ? 'Higher' : 'National 5';
+        var rows = PB.assignments;
+        var html = '<div class="pb-add-card">'
+            + '<h3>New ' + esc(course) + ' Assignment</h3>'
+            + '<div class="pb-add-row">'
+            + '<input class="pb-inp" id="newAsmTitle" placeholder="Assignment title">'
+            + '<select class="pb-sel" id="newAsmUnit">'
+            + '<option value="">— Unit (optional) —</option>'
+            + '<option>Software Design &amp; Development</option>'
+            + '<option>Computer Systems</option>'
+            + '<option>Database Design &amp; Development</option>'
+            + '<option>Web Design &amp; Development</option>'
+            + (PB.course === 'higher' ? '<option>Object-Oriented Programming</option>' : '')
+            + '</select>'
+            + '<button class="pb-btn" id="addAsmBtn">Add Assignment</button>'
+            + '<span class="pb-msg" style="display:none;"></span>'
+            + '</div></div>';
+
+        if (rows.length === 0) {
+            html += '<div class="pb-empty">No assignments yet. Create one above.</div>';
+        } else {
+            html += '<div class="pb-table-wrap"><table class="pb-table">'
+                + '<thead><tr><th>#</th><th>Title</th><th>Unit</th><th>Status</th><th>Actions</th></tr></thead>'
+                + '<tbody id="assignBody">';
+            rows.forEach(function (a, i) {
+                html += '<tr id="ar-' + esc(a.id) + '">'
+                    + '<td style="color:#8b949e;">' + (i + 1) + '</td>'
+                    + '<td>' + esc(a.title) + '</td>'
+                    + '<td style="font-size:0.8rem;color:#8b949e;">' + esc(a.unit || '—') + '</td>'
+                    + '<td><span class="pb-badge ' + (a.isPublished ? 'pub' : 'draft') + '">'
+                    + (a.isPublished ? 'Published' : 'Draft') + '</span></td>'
+                    + '<td style="display:flex;gap:6px;flex-wrap:wrap;">'
+                    + '<button class="pb-btn-ghost" onclick="PB.editAsmInline(\'' + esc(a.id) + '\')">Edit</button>'
+                    + '<button class="pb-btn-ghost" onclick="PB.toggleAsmPublish(\'' + esc(a.id) + '\',' + !a.isPublished + ')">'
+                    + (a.isPublished ? 'Unpublish' : 'Publish') + '</button>'
+                    + '<button class="pb-btn-danger" onclick="PB.deleteAssignment(\'' + esc(a.id) + '\')">Delete</button>'
+                    + '</td></tr>';
+            });
+            html += '</tbody></table></div>';
+        }
+        setContent(html);
+        document.getElementById('addAsmBtn').onclick = function () { PB.addAssignment(); };
+    };
+
+    PB.addAssignment = function () {
+        var titleInp = document.getElementById('newAsmTitle');
+        var unitInp  = document.getElementById('newAsmUnit');
+        var title = titleInp ? titleInp.value.trim() : '';
+        var unit  = unitInp  ? unitInp.value.trim()  : '';
+        if (!title) return;
+        api('POST', '/api/content/assignments?course=' + PB.course, {
+            title: title, unit: unit || null, course: PB.course,
+            isPublished: false, orderIndex: PB.assignments.length,
+        })
+            .then(function () { if (titleInp) titleInp.value = ''; PB.loadAssignments(); })
+            .catch(function (e) { showMsg(pbContent, e.message, true); });
+    };
+
+    PB.editAsmInline = function (id) {
+        var row = document.getElementById('ar-' + id);
+        if (!row) return;
+        var a = PB.assignments.find(function (x) { return x.id === id; });
+        if (!a) return;
+        row.className = 'pb-edit-row';
+        row.innerHTML = '<td colspan="3">'
+            + '<input class="pb-edit-inp" id="editAsmTitle" value="' + esc(a.title) + '" style="margin-bottom:6px;">'
+            + '<input class="pb-edit-inp" id="editAsmUnit" value="' + esc(a.unit || '') + '" placeholder="Unit (optional)">'
+            + '</td><td colspan="2" style="display:flex;gap:6px;">'
+            + '<button class="pb-btn" onclick="PB.saveEditAsm(\'' + esc(id) + '\')">Save</button>'
+            + '<button class="pb-btn-ghost" onclick="PB.renderAssignments()">Cancel</button></td>';
+    };
+
+    PB.saveEditAsm = function (id) {
+        var titleInp = document.getElementById('editAsmTitle');
+        var unitInp  = document.getElementById('editAsmUnit');
+        var title = titleInp ? titleInp.value.trim() : '';
+        var unit  = unitInp  ? unitInp.value.trim()  : '';
+        if (!title) return;
+        api('PUT', '/api/content/assignments/' + id + '?course=' + PB.course, { title: title, unit: unit || null })
+            .then(function () { PB.loadAssignments(); })
+            .catch(function (e) { alert(e.message); });
+    };
+
+    PB.toggleAsmPublish = function (id, val) {
+        api('PUT', '/api/content/assignments/' + id + '?course=' + PB.course, { isPublished: val })
+            .then(function () { PB.loadAssignments(); })
+            .catch(function (e) { alert(e.message); });
+    };
+
+    PB.deleteAssignment = function (id) {
+        var a = PB.assignments.find(function (x) { return x.id === id; });
+        var name = a ? a.title : id;
+        if (!confirm('Delete assignment "' + name + '" and all its sections? This cannot be undone.')) return;
+        api('DELETE', '/api/content/assignments/' + id + '?course=' + PB.course)
+            .then(function () { PB.loadAssignments(); })
+            .catch(function (e) { alert(e.message); });
+    };
+
+})();
 </script>
 
 </body>

@@ -17,6 +17,12 @@ The platform utilizes a Node.js/Express server to serve static content. TypeScri
 ### Unified Student & Class Database
 A unified database schema (`bhs_students`, `bhs_classes`) manages student and class data across different course levels (National 5, Higher) using a `course` column for separation. A unique constraint on `(username, course)` allows shared usernames.
 
+### Unified Content Tables
+All exam content (questions, papers, custom quizzes, assignments, sections, parts, resources) is stored in shared `bhs_*` tables with a `course` column (`'higher'` or `'n5'`). Both `revision-storage.ts` (Higher) and `n5-storage.ts` (N5) read/write these tables with appropriate `WHERE course=` filters. A shared `content-routes.ts` exposes `/api/content/*` CRUD endpoints (papers, questions, assignments, sections, parts) guarded by `requireTeacher`, consumed by the Paper Builder panel.
+
+### Paper Builder (Sandbox Builder → Paper Builder tab)
+A native panel in `tools/sandbox-builder.html` reachable via the "Paper Builder" nav item. Features a Higher/N5 course toggle and three sub-tabs: Papers (list, create, edit title, publish/unpublish, delete), Questions (read-only list with year/topic filters and expandable sub-question view), and Assignments (list, create with title+unit, edit, publish/unpublish, delete with cascade).
+
 ### Revision Sub-Apps
 Separate React + TypeScript SPAs are provided for Higher CS Revision and N5 CS Revision, located at `/revision/` and `/revision-n5/` respectively. These apps include student accounts, teacher dashboards, AI marking, class management, and assignment tracking. Authentication for these apps uses Bearer tokens and is separate from the main site's authentication. A unified teacher dashboard login system allows single sign-on across all revision and data sculptor apps, with token exchange mechanisms.
 

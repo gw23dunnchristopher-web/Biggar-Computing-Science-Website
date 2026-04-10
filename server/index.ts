@@ -8,6 +8,7 @@ import { registerRoutes as registerRevisionRoutes } from './revision-routes';
 import { registerN5Routes, n5Sessions, n5AddSession } from './n5-routes';
 import { registerDsRoutes } from './ds-routes';
 import { registerProgressRoutes } from './progress-routes';
+import { registerContentRoutes } from './content-routes';
 import { eq } from 'drizzle-orm';
 import { sessions as revSessionsTable, users as revUsersTable } from '@shared/revision-schema';
 
@@ -1148,6 +1149,11 @@ if (fs.existsSync(progressBuildDir)) {
     res.status(503).send('Progress app not built yet. Run: npm run build:progress');
   });
 }
+
+// ---------------------------------------------------------------------------
+// Shared content routes — papers, questions, assignments for both courses
+// ---------------------------------------------------------------------------
+registerContentRoutes(app, requireTeacher);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
