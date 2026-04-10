@@ -52,6 +52,7 @@ export const bhsPapers = pgTable("bhs_papers", {
   id:          varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   course:      text("course").notNull(),            // "higher" | "n5"
   title:       text("title").notNull(),             // N5 "name" field maps here
+  year:        integer("year"),                     // e.g. 2022 — null for custom papers
   isPublished: boolean("is_published").default(false),
   createdAt:   timestamp("created_at").defaultNow(),
 });

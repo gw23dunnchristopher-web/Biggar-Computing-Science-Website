@@ -2053,9 +2053,19 @@
     PB.loadPapers = function () {
         var seq = PB._loadSeq;
         setLoading();
-        api('GET', '/api/content/papers?course=' + PB.course)
-            .then(function (rows) { if (PB._loadSeq !== seq) return; PB.papers = rows; PB.renderPapers(); })
-            .catch(function (e) { if (PB._loadSeq !== seq) return; setError('Failed to load papers: ' + e.message); });
+        /* fetch papers + questions in parallel so we can show question counts */
+        Promise.all([
+            api('GET', '/api/content/papers?course=' + PB.course),
+            api('GET', '/api/content/questions?course=' + PB.course),
+        ]).then(function (results) {
+            if (PB._loadSeq !== seq) return;
+            PB.papers    = results[0];
+            PB.questions = results[1];
+            PB.renderPapers();
+        }).catch(function (e) {
+            if (PB._loadSeq !== seq) return;
+            setError('Failed to load papers: ' + e.message);
+        });
     };
 
     PB.renderPapers = function () {
@@ -2064,25 +2074,35 @@
         var html = '<div class="pb-add-card">'
             + '<h3>New ' + esc(course) + ' Paper</h3>'
             + '<div class="pb-add-row">'
-            + '<input class="pb-inp" id="newPaperTitle" placeholder="Paper title, e.g. 2024 Paper 1">'
-            + '<button class="pb-btn" id="addPaperBtn">Add Paper</button>'
+            + '<input class="pb-inp pb-inp-sm" id="newPaperYear" placeholder="Year e.g. 2026" style="width:110px;">'
+            + '<input class="pb-inp" id="newPaperTitle" placeholder="Title e.g. 2026 Higher Past Paper">'
+            + '<button class="pb-btn" id="addPaperBtn">Add</button>'
             + '<span class="pb-msg" style="display:none;"></span>'
             + '</div></div>';
 
         if (rows.length === 0) {
             html += '<div class="pb-empty">No ' + esc(course) + ' past papers yet.<br>'
-                + '<span style="font-size:0.8rem;">Use the form above to add a past paper record (e.g. "2024 Paper 1"). '
+                + '<span style="font-size:0.8rem;">Use the form above to add a past paper record. '
                 + 'Questions are managed separately in the Questions tab.</span></div>';
         } else {
             html += '<div class="pb-table-wrap"><table class="pb-table">'
-                + '<thead><tr><th>Title</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>'
+                + '<thead><tr><th>Year</th><th>Title</th><th>Questions</th><th>Status</th><th>Actions</th></tr></thead>'
                 + '<tbody id="papersBody">';
             rows.forEach(function (p) {
+                var qCount = p.year
+                    ? PB.questions.filter(function (q) { return q.year === p.year; }).length
+                    : '—';
                 html += '<tr id="pr-' + esc(p.id) + '">'
+                    + '<td style="font-weight:600;color:#58a6ff;">' + (p.year || '—') + '</td>'
                     + '<td>' + esc(p.title) + '</td>'
+                    + '<td style="text-align:center;">'
+                    + (p.year
+                        ? '<button class="pb-btn-ghost" style="font-size:0.75rem;padding:2px 8px;" '
+                          + 'onclick="PB.viewPaperQuestions(' + p.year + ')">' + qCount + ' Qs</button>'
+                        : '—')
+                    + '</td>'
                     + '<td><span class="pb-badge ' + (p.isPublished ? 'pub' : 'draft') + '">'
                     + (p.isPublished ? 'Published' : 'Draft') + '</span></td>'
-                    + '<td>' + fmtDate(p.createdAt) + '</td>'
                     + '<td style="display:flex;gap:6px;flex-wrap:wrap;">'
                     + '<button class="pb-btn-ghost" onclick="PB.editPaperInline(\'' + esc(p.id) + '\')">Edit</button>'
                     + '<button class="pb-btn-ghost" onclick="PB.togglePublish(\'' + esc(p.id) + '\',' + !p.isPublished + ')">'
@@ -2094,14 +2114,43 @@
         }
         setContent(html);
         document.getElementById('addPaperBtn').onclick = function () { PB.addPaper(); };
+        /* auto-fill title when year is entered */
+        var yearInp = document.getElementById('newPaperYear');
+        if (yearInp) {
+            yearInp.oninput = function () {
+                var yr = yearInp.value.trim();
+                var titleInp = document.getElementById('newPaperTitle');
+                if (titleInp && yr.length === 4 && /^\d{4}$/.test(yr)) {
+                    titleInp.value = yr + ' ' + course + ' Past Paper';
+                }
+            };
+        }
+    };
+
+    /* Switch to Questions tab filtered to a specific year */
+    PB.viewPaperQuestions = function (year) {
+        PB.questionFilter.year = String(year);
+        PB.activeTab = 'questions';
+        document.querySelectorAll('.pb-tab').forEach(function (b) {
+            b.classList.toggle('active', b.dataset.pbtab === 'questions');
+        });
+        PB.loadTab();
     };
 
     PB.addPaper = function () {
-        var inp = document.getElementById('newPaperTitle');
-        var title = inp ? inp.value.trim() : '';
+        var yearInp  = document.getElementById('newPaperYear');
+        var titleInp = document.getElementById('newPaperTitle');
+        var title = titleInp ? titleInp.value.trim() : '';
+        var year  = yearInp  ? parseInt(yearInp.value.trim(), 10) : null;
         if (!title) return;
-        api('POST', '/api/content/papers?course=' + PB.course, { title: title, course: PB.course })
-            .then(function () { inp.value = ''; PB.loadPapers(); })
+        var body = { title: title, course: PB.course, isPublished: false };
+        if (year && year > 1990 && year < 2100) body.year = year;
+        api('POST', '/api/content/papers?course=' + PB.course, body)
+            .then(function () {
+                if (titleInp) titleInp.value = '';
+                if (yearInp)  yearInp.value  = '';
+                PB.loadPapers();
+            })
             .catch(function (e) { showMsg(pbContent, e.message, true); });
     };
 

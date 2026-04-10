@@ -1,6 +1,6 @@
 import type { Express, Request, Response, NextFunction } from 'express';
 import { db } from './db';
-import { eq, and, asc } from 'drizzle-orm';
+import { eq, and, asc, desc } from 'drizzle-orm';
 import {
   bhsPapers, bhsQuestions, bhsAssignments,
   bhsAssignmentSections, bhsAssignmentParts,
@@ -31,7 +31,7 @@ export function registerContentRoutes(
       const course = getCourse(req, res); if (!course) return;
       const rows = await db!.select().from(bhsPapers)
         .where(eq(bhsPapers.course, course))
-        .orderBy(asc(bhsPapers.createdAt));
+        .orderBy(desc(bhsPapers.year), asc(bhsPapers.createdAt));
       console.log(`[content] GET papers course=${course} → ${rows.length} rows`);
       res.json(rows);
     } catch (e: any) { console.error('[content] GET papers error:', e.message); res.status(500).json({ error: e.message }); }
@@ -40,10 +40,10 @@ export function registerContentRoutes(
   app.post('/api/content/papers', requireTeacher, async (req, res) => {
     try {
       const course = getCourse(req, res); if (!course) return;
-      const { title, isPublished = false } = req.body;
+      const { title, year, isPublished = false } = req.body;
       if (!title) return res.status(400).json({ error: 'title is required' });
       const [row] = await db!.insert(bhsPapers)
-        .values({ course, title, isPublished })
+        .values({ course, title, year: year ?? null, isPublished })
         .returning();
       res.json(row);
     } catch (e: any) { res.status(500).json({ error: e.message }); }
