@@ -13,6 +13,13 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DesignViewIcon, DatasheetViewIcon } from '@/components/ui/design-view-icon';
 import {
+  DsFilterIcon, DsAscendingIcon, DsDescendingIcon, DsAdvancedFilterIcon,
+  DsSelectionIcon, DsRemoveSortIcon, DsToggleFilterIcon,
+  DsRefreshAllIcon, DsRecordsNewIcon, DsRecordsSaveIcon, DsRecordsSpellingIcon,
+  DsRecordsDeleteIcon, DsRecordsMoreIcon, DsRecordsTotalsIcon,
+  DsFindIcon, DsFindReplaceIcon, DsFindGoToIcon, DsFindSelectIcon,
+} from '@/components/ui/ds-icons';
+import {
   Grid3X3, Trash2, RefreshCw, SortAsc, SortDesc, Search,
   Download, Filter, FilterX, ChevronFirst, ChevronLast, ChevronLeft,
   ChevronRight as ChevronRightIcon, Copy, Scissors, ClipboardPaste,
@@ -611,36 +618,36 @@ export function TableDataView({
 
               {/* ── Sort & Filter ── */}
               <RibbonGroup name="Sort &amp; Filter">
-                <RibbonButton icon={<Filter size={22} />} label="Filter"
+                <RibbonButton icon={<DsFilterIcon size={22} />} label="Filter"
                   active={!!fieldFilter || filterMenuOpen}
                   onClick={() => { if (fieldFilter) { setFieldFilter(null); setCurrentPage(1); } else if (filterMenuOpen) { setFilterMenuOpen(false); } else if (selectedFieldName) { setFilterMenuOpen(true); } }}
                   disabled={!fieldFilter && !selectedFieldName} />
                 <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
-                  <RibbonButton size="small" icon={<SortAsc size={14} />} label="Ascending"
+                  <RibbonButton size="small" icon={<DsAscendingIcon size={14} />} label="Ascending"
                     onClick={() => { const f = selectedFieldName || sortState?.field; if (f) setSortState({ field: f, dir: 'asc' }); }}
                     active={sortState?.dir === 'asc'}
                     disabled={!selectedFieldName && !sortState} />
-                  <RibbonButton size="small" icon={<SortDesc size={14} />} label="Descending"
+                  <RibbonButton size="small" icon={<DsDescendingIcon size={14} />} label="Descending"
                     onClick={() => { const f = selectedFieldName || sortState?.field; if (f) setSortState({ field: f, dir: 'desc' }); }}
                     active={sortState?.dir === 'desc'}
                     disabled={!selectedFieldName && !sortState} />
-                  <RibbonDropdownButton compact icon={<CheckSquare size={14} />} label="Advanced">
-                    <RibbonButton icon={<Filter size={14} />} label="Advanced Filter/Sort" disabled />
-                    <RibbonButton icon={<Filter size={14} />} label="Apply Filter/Sort" disabled />
-                    <RibbonButton icon={<FilterX size={14} />} label="Clear All Filters" onClick={() => { setFieldFilter(null); setCurrentPage(1); }} disabled={!fieldFilter} />
+                  <RibbonDropdownButton compact icon={<DsAdvancedFilterIcon size={14} />} label="Advanced">
+                    <RibbonButton icon={<DsAdvancedFilterIcon size={14} />} label="Advanced Filter/Sort" disabled />
+                    <RibbonButton icon={<DsFilterIcon size={14} />} label="Apply Filter/Sort" disabled />
+                    <RibbonButton icon={<DsFilterIcon size={14} />} label="Clear All Filters" onClick={() => { setFieldFilter(null); setCurrentPage(1); }} disabled={!fieldFilter} />
                   </RibbonDropdownButton>
                 </div>
                 <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
-                  <RibbonDropdownButton compact icon={<CheckSquare size={14} />} label="Selection">
-                    <RibbonButton icon={<CheckSquare size={14} />} label="Equals" onClick={() => { if (selectedFieldName && selectedRowId) { const rec = filteredRecords.find(r => r.id === selectedRowId); if (rec) handleFilterBySelection(selectedFieldName, rec.data[selectedFieldName]); } }} disabled={!selectedFieldName || !selectedRowId} />
-                    <RibbonButton icon={<CheckSquare size={14} />} label="Does Not Equal" disabled />
-                    <RibbonButton icon={<CheckSquare size={14} />} label="Contains" disabled />
-                    <RibbonButton icon={<CheckSquare size={14} />} label="Does Not Contain" disabled />
+                  <RibbonDropdownButton compact icon={<DsSelectionIcon size={14} />} label="Selection">
+                    <RibbonButton icon={<DsSelectionIcon size={14} />} label="Equals" onClick={() => { if (selectedFieldName && selectedRowId) { const rec = filteredRecords.find(r => r.id === selectedRowId); if (rec) handleFilterBySelection(selectedFieldName, rec.data[selectedFieldName]); } }} disabled={!selectedFieldName || !selectedRowId} />
+                    <RibbonButton icon={<DsSelectionIcon size={14} />} label="Does Not Equal" disabled />
+                    <RibbonButton icon={<DsSelectionIcon size={14} />} label="Contains" disabled />
+                    <RibbonButton icon={<DsSelectionIcon size={14} />} label="Does Not Contain" disabled />
                   </RibbonDropdownButton>
-                  <RibbonButton size="small" icon={<FilterX size={14} />} label="Remove Sort"
+                  <RibbonButton size="small" icon={<DsRemoveSortIcon size={14} />} label="Remove Sort"
                     onClick={() => setSortState(null)}
                     disabled={!sortState} />
-                  <RibbonButton size="small" icon={<Filter size={14} />} label="Toggle Filter"
+                  <RibbonButton size="small" icon={<DsToggleFilterIcon size={14} />} label="Toggle Filter"
                     active={!!fieldFilter}
                     onClick={() => { setFieldFilter(null); setCurrentPage(1); }}
                     disabled={!fieldFilter} />
@@ -649,22 +656,22 @@ export function TableDataView({
 
               {/* ── Records ── */}
               <RibbonGroup name="Records">
-                <RibbonDropdownButton icon={<RefreshCw size={22} />} label="Refresh All">
-                  <RibbonButton icon={<RefreshCw size={14} />} label="Refresh" onClick={refreshData} />
-                  <RibbonButton icon={<RefreshCw size={14} />} label="Refresh All" onClick={refreshData} />
+                <RibbonDropdownButton icon={<DsRefreshAllIcon size={22} />} label="Refresh All">
+                  <RibbonButton icon={<DsRefreshAllIcon size={14} />} label="Refresh" onClick={refreshData} />
+                  <RibbonButton icon={<DsRefreshAllIcon size={14} />} label="Refresh All" onClick={refreshData} />
                 </RibbonDropdownButton>
                 <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
-                  <RibbonButton size="small" icon={<PlusCircle size={14} />} label="New" onClick={() => focusNewRowRef.current?.()} />
-                  <RibbonButton size="small" icon={<Save size={14} />} label="Save" disabled />
-                  <RibbonButton size="small" icon={<SpellCheck size={14} />} label="Spelling" disabled />
+                  <RibbonButton size="small" icon={<DsRecordsNewIcon size={14} />} label="New" onClick={() => focusNewRowRef.current?.()} />
+                  <RibbonButton size="small" icon={<DsRecordsSaveIcon size={14} />} label="Save" disabled />
+                  <RibbonButton size="small" icon={<DsRecordsSpellingIcon size={14} />} label="Spelling" disabled />
                 </div>
                 <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
-                  <RibbonDropdownButton compact icon={<Trash2 size={14} />} label="Delete">
-                    <RibbonButton icon={<Trash2 size={14} />} label="Delete Record" onClick={handleDeleteSelectedRecord} disabled={!selectedRowId || deleteRecord.isPending} />
-                    <RibbonButton icon={<Columns3 size={14} />} label="Delete Column" disabled />
+                  <RibbonDropdownButton compact icon={<DsRecordsDeleteIcon size={14} />} label="Delete">
+                    <RibbonButton icon={<DsRecordsDeleteIcon size={14} />} label="Delete Record" onClick={handleDeleteSelectedRecord} disabled={!selectedRowId || deleteRecord.isPending} />
+                    <RibbonButton icon={<DsRecordsDeleteIcon size={14} />} label="Delete Column" disabled />
                   </RibbonDropdownButton>
-                  <RibbonDropdownButton compact icon={<ChevronDown size={14} />} label="More">
-                    <RibbonButton icon={<Sigma size={14} />} label="Totals" active={showTotals} onClick={() => setShowTotals(v => !v)} />
+                  <RibbonDropdownButton compact icon={<DsRecordsMoreIcon size={14} />} label="More">
+                    <RibbonButton icon={<DsRecordsTotalsIcon size={14} />} label="Totals" active={showTotals} onClick={() => setShowTotals(v => !v)} />
                     {hiddenFields.length > 0 && (
                       <RibbonButton icon={<EyeIcon size={14} />} label={`Unhide ${hiddenFields.length} Fields`} onClick={() => setHiddenFields([])} />
                     )}
@@ -681,15 +688,15 @@ export function TableDataView({
 
               {/* ── Find ── */}
               <RibbonGroup name="Find">
-                <RibbonButton icon={<Search size={22} />} label="Find" onClick={() => setFindOpen(true)} />
+                <RibbonButton icon={<DsFindIcon size={22} />} label="Find" onClick={() => setFindOpen(true)} />
                 <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
-                  <RibbonButton size="small" icon={<Replace size={14} />} label="Replace" disabled />
-                  <RibbonDropdownButton compact icon={<ChevronDown size={14} />} label="Go To">
+                  <RibbonButton size="small" icon={<DsFindReplaceIcon size={14} />} label="Replace" disabled />
+                  <RibbonDropdownButton compact icon={<DsFindGoToIcon size={14} />} label="Go To">
                     <RibbonButton icon={<ChevronFirst size={14} />} label="First" onClick={() => setCurrentPage(1)} />
                     <RibbonButton icon={<ChevronLast size={14} />} label="Last" onClick={() => { const lastPage = Math.ceil(filteredRecords.length / pageSize); setCurrentPage(lastPage || 1); }} />
                     <RibbonButton icon={<PlusCircle size={14} />} label="New" onClick={() => focusNewRowRef.current?.()} />
                   </RibbonDropdownButton>
-                  <RibbonDropdownButton compact icon={<MousePointer size={14} />} label="Select">
+                  <RibbonDropdownButton compact icon={<DsFindSelectIcon size={14} />} label="Select">
                     <RibbonButton icon={<Rows3 size={14} />} label="Select All" disabled />
                     <RibbonButton icon={<Rows3 size={14} />} label="Select Row" disabled />
                     <RibbonButton icon={<Columns3 size={14} />} label="Select Column" disabled />
