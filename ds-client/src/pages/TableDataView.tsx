@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { useLocation } from 'wouter';
 import {
   Database, Table as TableType,
@@ -16,7 +16,10 @@ import {
   Grid3X3, Trash2, RefreshCw, SortAsc, SortDesc, Search,
   Download, Filter, FilterX, ChevronFirst, ChevronLast, ChevronLeft,
   ChevronRight as ChevronRightIcon, Copy, Scissors, ClipboardPaste,
-  PlusCircle, Save, Sigma, CheckSquare, AlignLeft, ChevronDown, EyeOff, RotateCcw
+  PlusCircle, Save, Sigma, CheckSquare, AlignLeft, AlignCenter, AlignRight,
+  ChevronDown, EyeOff, RotateCcw, Bold, Italic, Underline, Paintbrush,
+  Highlighter, Replace, MousePointer, ArrowLeftRight, Rows3, Columns3,
+  EyeIcon, Lock, Maximize2, SpellCheck
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -134,6 +137,14 @@ export function TableDataView({
   // Filter menu state
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [filterInputState, setFilterInputState] = useState<{ op: string; label: string; fieldType: string; val: string; val2: string } | null>(null);
+
+  // Text formatting state (visual ribbon controls)
+  const [fmtFont, setFmtFont] = useState('Aptos (Detail)');
+  const [fmtSize, setFmtSize] = useState('11');
+  const [fmtBold, setFmtBold] = useState(false);
+  const [fmtItalic, setFmtItalic] = useState(false);
+  const [fmtUnderline, setFmtUnderline] = useState(false);
+  const [fmtAlign, setFmtAlign] = useState<'left' | 'center' | 'right'>('left');
 
   const { data: table, isLoading: tableLoading } = useGetTable(databaseId, tableId);
   const { data: allRecords, isLoading: recordsLoading } = useListRecords(databaseId, tableId, {});
@@ -588,15 +599,19 @@ export function TableDataView({
           name: 'Home',
           content: (
             <>
+              {/* ── Clipboard ── */}
               <RibbonGroup name="Clipboard">
-                <RibbonDropdownButton icon={<ClipboardPaste size={22} />} label="Clipboard">
-                  <RibbonButton icon={<ClipboardPaste size={22} />} label="Paste" disabled />
-                  <RibbonButton icon={<Scissors size={22} />} label="Cut" disabled />
-                  <RibbonButton icon={<Copy size={22} />} label="Copy" onClick={handleCopy} disabled={!selectedRowId} />
-                </RibbonDropdownButton>
+                <RibbonButton icon={<ClipboardPaste size={26} />} label="Paste" disabled />
+                <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
+                  <RibbonButton size="small" icon={<Scissors size={14} />} label="Cut" disabled />
+                  <RibbonButton size="small" icon={<Copy size={14} />} label="Copy" onClick={handleCopy} disabled={!selectedRowId} />
+                  <RibbonButton size="small" icon={<Paintbrush size={14} />} label="Format Painter" disabled />
+                </div>
               </RibbonGroup>
+
+              {/* ── Sort & Filter ── */}
               <RibbonGroup name="Sort &amp; Filter">
-                <RibbonButton icon={<Filter size={22} />} label="Filter"
+                <RibbonButton icon={<Filter size={26} />} label="Filter"
                   active={!!fieldFilter || filterMenuOpen}
                   onClick={() => { if (fieldFilter) { setFieldFilter(null); setCurrentPage(1); } else if (filterMenuOpen) { setFilterMenuOpen(false); } else if (selectedFieldName) { setFilterMenuOpen(true); } }}
                   disabled={!fieldFilter && !selectedFieldName} />
@@ -609,40 +624,155 @@ export function TableDataView({
                     onClick={() => { const f = selectedFieldName || sortState?.field; if (f) setSortState({ field: f, dir: 'desc' }); }}
                     active={sortState?.dir === 'desc'}
                     disabled={!selectedFieldName && !sortState} />
+                  <RibbonDropdownButton icon={<CheckSquare size={14} />} label="Advanced">
+                    <RibbonButton icon={<Filter size={14} />} label="Advanced Filter/Sort" disabled />
+                    <RibbonButton icon={<Filter size={14} />} label="Apply Filter/Sort" disabled />
+                    <RibbonButton icon={<FilterX size={14} />} label="Clear All Filters" onClick={() => { setFieldFilter(null); setCurrentPage(1); }} disabled={!fieldFilter} />
+                  </RibbonDropdownButton>
+                </div>
+                <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
+                  <RibbonDropdownButton icon={<CheckSquare size={14} />} label="Selection">
+                    <RibbonButton icon={<CheckSquare size={14} />} label="Equals" onClick={() => { if (selectedFieldName && selectedRowId) { const rec = filteredRecords.find(r => r.id === selectedRowId); if (rec) handleFilterBySelection(selectedFieldName, rec.data[selectedFieldName]); } }} disabled={!selectedFieldName || !selectedRowId} />
+                    <RibbonButton icon={<CheckSquare size={14} />} label="Does Not Equal" disabled />
+                    <RibbonButton icon={<CheckSquare size={14} />} label="Contains" disabled />
+                    <RibbonButton icon={<CheckSquare size={14} />} label="Does Not Contain" disabled />
+                  </RibbonDropdownButton>
                   <RibbonButton size="small" icon={<FilterX size={14} />} label="Remove Sort"
                     onClick={() => setSortState(null)}
                     disabled={!sortState} />
-                </div>
-                <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
-                  <RibbonButton size="small" icon={<CheckSquare size={14} />} label="Selection"
-                    onClick={() => { if (selectedFieldName && selectedRowId) { const rec = filteredRecords.find(r => r.id === selectedRowId); if (rec) handleFilterBySelection(selectedFieldName, rec.data[selectedFieldName]); } }}
-                    disabled={!selectedFieldName || !selectedRowId} />
-                  <RibbonButton size="small" icon={<AlignLeft size={14} />} label="Advanced"
-                    disabled />
                   <RibbonButton size="small" icon={<Filter size={14} />} label="Toggle Filter"
                     active={!!fieldFilter}
                     onClick={() => { setFieldFilter(null); setCurrentPage(1); }}
                     disabled={!fieldFilter} />
                 </div>
               </RibbonGroup>
+
+              {/* ── Records ── */}
               <RibbonGroup name="Records">
-                <RibbonButton icon={<PlusCircle size={22} />} label="New" onClick={() => focusNewRowRef.current?.()} />
-                <RibbonButton icon={<Trash2 size={22} />} label="Delete" onClick={handleDeleteSelectedRecord} disabled={!selectedRowId || deleteRecord.isPending} />
-                <RibbonDropdownButton icon={<RefreshCw size={22} />} label="More">
-                  <RibbonButton icon={<Save size={22} />} label="Save" disabled />
-                  <RibbonButton icon={<RefreshCw size={22} />} label="Refresh All" onClick={refreshData} />
-                  <RibbonButton icon={<Sigma size={22} />} label="Totals" active={showTotals} onClick={() => setShowTotals(v => !v)} />
-                  {hiddenFields.length > 0 && (
-                    <RibbonButton icon={<EyeOff size={22} />} label={`Show ${hiddenFields.length} Hidden`}
-                      onClick={() => setHiddenFields([])} title="Click to show all hidden fields" />
-                  )}
+                <RibbonDropdownButton icon={<RefreshCw size={26} />} label="Refresh All">
+                  <RibbonButton icon={<RefreshCw size={14} />} label="Refresh" onClick={refreshData} />
+                  <RibbonButton icon={<RefreshCw size={14} />} label="Refresh All" onClick={refreshData} />
                 </RibbonDropdownButton>
+                <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
+                  <RibbonButton size="small" icon={<PlusCircle size={14} />} label="New" onClick={() => focusNewRowRef.current?.()} />
+                  <RibbonButton size="small" icon={<Save size={14} />} label="Save" disabled />
+                  <RibbonButton size="small" icon={<SpellCheck size={14} />} label="Spelling" disabled />
+                </div>
+                <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
+                  <RibbonDropdownButton icon={<Trash2 size={14} />} label="Delete">
+                    <RibbonButton icon={<Trash2 size={14} />} label="Delete Record" onClick={handleDeleteSelectedRecord} disabled={!selectedRowId || deleteRecord.isPending} />
+                    <RibbonButton icon={<Columns3 size={14} />} label="Delete Column" disabled />
+                  </RibbonDropdownButton>
+                  <RibbonDropdownButton icon={<ChevronDown size={14} />} label="More">
+                    <RibbonButton icon={<Sigma size={14} />} label="Totals" active={showTotals} onClick={() => setShowTotals(v => !v)} />
+                    {hiddenFields.length > 0 && (
+                      <RibbonButton icon={<EyeIcon size={14} />} label={`Unhide ${hiddenFields.length} Fields`} onClick={() => setHiddenFields([])} />
+                    )}
+                    <RibbonButton icon={<Rows3 size={14} />} label="Row Height…" disabled />
+                    <RibbonButton icon={<EyeOff size={14} />} label="Hide Fields" disabled />
+                    <RibbonButton icon={<EyeIcon size={14} />} label="Unhide Fields" disabled />
+                    <RibbonButton icon={<Lock size={14} />} label="Freeze Fields" disabled />
+                    <RibbonButton icon={<Lock size={14} />} label="Unfreeze All Fields" disabled />
+                    <RibbonButton icon={<ArrowLeftRight size={14} />} label="Field Width" disabled />
+                    <RibbonButton icon={<Download size={14} />} label="Export CSV" onClick={handleExportCSV} />
+                  </RibbonDropdownButton>
+                </div>
               </RibbonGroup>
+
+              {/* ── Find ── */}
               <RibbonGroup name="Find">
-                <RibbonButton icon={<Search size={22} />} label="Find" onClick={() => setFindOpen(true)} />
+                <RibbonButton icon={<Search size={26} />} label="Find" onClick={() => setFindOpen(true)} />
+                <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
+                  <RibbonButton size="small" icon={<Replace size={14} />} label="Replace" disabled />
+                  <RibbonDropdownButton icon={<ChevronDown size={14} />} label="Go To">
+                    <RibbonButton icon={<ChevronFirst size={14} />} label="First" onClick={() => setCurrentPage(1)} />
+                    <RibbonButton icon={<ChevronLast size={14} />} label="Last" onClick={() => { const lastPage = Math.ceil(filteredRecords.length / pageSize); setCurrentPage(lastPage || 1); }} />
+                    <RibbonButton icon={<PlusCircle size={14} />} label="New" onClick={() => focusNewRowRef.current?.()} />
+                  </RibbonDropdownButton>
+                  <RibbonDropdownButton icon={<MousePointer size={14} />} label="Select">
+                    <RibbonButton icon={<Rows3 size={14} />} label="Select All" disabled />
+                    <RibbonButton icon={<Rows3 size={14} />} label="Select Row" disabled />
+                    <RibbonButton icon={<Columns3 size={14} />} label="Select Column" disabled />
+                  </RibbonDropdownButton>
+                </div>
               </RibbonGroup>
-              <RibbonGroup name="Export">
-                <RibbonButton icon={<Download size={22} />} label="Export CSV" onClick={handleExportCSV} />
+
+              {/* ── Text Formatting ── */}
+              <RibbonGroup name="Text Formatting">
+                <div className="flex flex-col gap-1 pt-0.5">
+                  {/* Row 1: font + size */}
+                  <div className="flex items-center gap-1">
+                    <select
+                      value={fmtFont}
+                      onChange={e => setFmtFont(e.target.value)}
+                      className="h-5 text-[11px] border border-gray-300 rounded px-1 cursor-pointer bg-white min-w-[110px]"
+                    >
+                      {['Aptos (Detail)', 'Arial', 'Calibri', 'Courier New', 'Georgia', 'Times New Roman', 'Trebuchet MS', 'Verdana'].map(f => (
+                        <option key={f} value={f}>{f}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={fmtSize}
+                      onChange={e => setFmtSize(e.target.value)}
+                      className="h-5 text-[11px] border border-gray-300 rounded px-1 cursor-pointer bg-white w-10"
+                    >
+                      {['8','9','10','11','12','14','16','18','20','24','28','36','48','72'].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* Row 2: B I U | color | highlight | alignment */}
+                  <div className="flex items-center gap-0.5">
+                    <button
+                      onClick={() => setFmtBold(v => !v)}
+                      className={`w-5 h-5 flex items-center justify-center rounded text-xs font-bold transition-colors cursor-pointer ${fmtBold ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+                      title="Bold"
+                    ><Bold size={12} /></button>
+                    <button
+                      onClick={() => setFmtItalic(v => !v)}
+                      className={`w-5 h-5 flex items-center justify-center rounded text-xs italic transition-colors cursor-pointer ${fmtItalic ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+                      title="Italic"
+                    ><Italic size={12} /></button>
+                    <button
+                      onClick={() => setFmtUnderline(v => !v)}
+                      className={`w-5 h-5 flex items-center justify-center rounded text-xs underline transition-colors cursor-pointer ${fmtUnderline ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+                      title="Underline"
+                    ><Underline size={12} /></button>
+                    <span className="w-px h-4 bg-gray-200 mx-0.5" />
+                    <button className="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Font Color">
+                      <div className="flex flex-col items-center gap-px">
+                        <span className="text-[9px] font-bold text-gray-700 leading-none">A</span>
+                        <span className="w-3.5 h-0.5 rounded-full bg-[#C42B1C]" />
+                      </div>
+                    </button>
+                    <button className="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Highlight Color">
+                      <Highlighter size={12} className="text-yellow-500" />
+                    </button>
+                    <span className="w-px h-4 bg-gray-200 mx-0.5" />
+                    <button
+                      onClick={() => setFmtAlign('left')}
+                      className={`w-5 h-5 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'left' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+                      title="Align Left"
+                    ><AlignLeft size={12} /></button>
+                    <button
+                      onClick={() => setFmtAlign('center')}
+                      className={`w-5 h-5 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'center' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+                      title="Center"
+                    ><AlignCenter size={12} /></button>
+                    <button
+                      onClick={() => setFmtAlign('right')}
+                      className={`w-5 h-5 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'right' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+                      title="Align Right"
+                    ><AlignRight size={12} /></button>
+                    <span className="w-px h-4 bg-gray-200 mx-0.5" />
+                    <button className="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Background Color">
+                      <Paintbrush size={12} className="text-gray-600" />
+                    </button>
+                    <button className="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Gridlines">
+                      <Grid3X3 size={12} className="text-gray-600" />
+                    </button>
+                  </div>
+                </div>
               </RibbonGroup>
             </>
           )
