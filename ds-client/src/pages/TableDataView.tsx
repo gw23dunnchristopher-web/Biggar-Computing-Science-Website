@@ -514,10 +514,7 @@ export function TableDataView({
       pinnedContent={
         <>
           <RibbonGroup name="View">
-            <RibbonDropdownButton icon={<DatasheetViewIcon size={22} />} label="Datasheet">
-              <RibbonButton icon={<DatasheetViewIcon size={22} />} label="Datasheet" active />
-              <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" onClick={() => onSwitchToDesign ? onSwitchToDesign() : setLocation(`/databases/${databaseId}/tables/${tableId}/design`)} />
-            </RibbonDropdownButton>
+            <RibbonButton icon={<DesignViewIcon size={22} />} label="View" onClick={() => onSwitchToDesign ? onSwitchToDesign() : setLocation(`/databases/${databaseId}/tables/${tableId}/design`)} />
           </RibbonGroup>
           {onReset && (
             <RibbonGroup name="Sandbox">

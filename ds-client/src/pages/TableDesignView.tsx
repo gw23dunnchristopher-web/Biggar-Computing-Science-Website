@@ -325,10 +325,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
       pinnedContent={
         <>
           <RibbonGroup name="View">
-            <RibbonDropdownButton icon={<DesignViewIcon size={22} />} label="Design">
-              <RibbonButton icon={<DatasheetViewIcon size={22} />} label="Datasheet" onClick={() => onSwitchToDatasheet ? onSwitchToDatasheet() : setLocation(`/databases/${databaseId}/tables/${tableId}/data`)} />
-              <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" active />
-            </RibbonDropdownButton>
+            <RibbonButton icon={<DatasheetViewIcon size={22} />} label="View" onClick={() => onSwitchToDatasheet ? onSwitchToDatasheet() : setLocation(`/databases/${databaseId}/tables/${tableId}/data`)} />
           </RibbonGroup>
           {onReset && (
             <RibbonGroup name="Sandbox">
