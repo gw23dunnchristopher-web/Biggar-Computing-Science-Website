@@ -532,6 +532,14 @@ table.pseudocode td:first-child {
     max-width: 1000px;
 }
 
+.accessTutorial {
+    margin:auto;
+    max-width: 1000px;
+    border: 1px dashed black;
+    background-color: #c5e3ed;
+    padding:15px;
+}
+
 .trinket {
     width: 75%;
     height: 400px;

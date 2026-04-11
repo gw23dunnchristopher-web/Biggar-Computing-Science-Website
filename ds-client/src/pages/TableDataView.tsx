@@ -11,7 +11,7 @@ import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonContextS
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DataGrid } from '@/components/ui/data-grid';
-import { DesignViewIcon } from '@/components/ui/design-view-icon';
+import { DesignViewIcon, DatasheetViewIcon } from '@/components/ui/design-view-icon';
 import {
   Grid3X3, Trash2, RefreshCw, SortAsc, SortDesc, Search,
   Download, Filter, FilterX, ChevronFirst, ChevronLast, ChevronLeft,
@@ -514,8 +514,8 @@ export function TableDataView({
       pinnedContent={
         <>
           <RibbonGroup name="View">
-            <RibbonDropdownButton icon={<Grid3X3 size={22} />} label="Datasheet">
-              <RibbonButton icon={<Grid3X3 size={22} />} label="Datasheet" active />
+            <RibbonDropdownButton icon={<DatasheetViewIcon size={22} />} label="Datasheet">
+              <RibbonButton icon={<DatasheetViewIcon size={22} />} label="Datasheet" active />
               <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" onClick={() => onSwitchToDesign ? onSwitchToDesign() : setLocation(`/databases/${databaseId}/tables/${tableId}/design`)} />
             </RibbonDropdownButton>
           </RibbonGroup>
@@ -624,7 +624,7 @@ export function TableDataView({
       <span className="flex-1" />
       <div className="flex items-center gap-1">
         <button title="Datasheet View" className="w-5 h-4 flex items-center justify-center bg-white border border-gray-400 rounded-sm text-[#C42B1C]">
-          <Grid3X3 className="w-3 h-3" />
+          <DatasheetViewIcon size={12} />
         </button>
         <button
           title="Design View"

@@ -7,7 +7,7 @@ import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonContextS
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
 import { DesignGrid } from '@/components/ui/design-grid';
 import { Save, Grid3X3, Key, PlusSquare, MinusSquare, Eye, List, Settings2, AlertTriangle, RotateCcw } from 'lucide-react';
-import { DesignViewIcon } from '@/components/ui/design-view-icon';
+import { DesignViewIcon, DatasheetViewIcon } from '@/components/ui/design-view-icon';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
@@ -326,7 +326,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
         <>
           <RibbonGroup name="View">
             <RibbonDropdownButton icon={<DesignViewIcon size={22} />} label="Design">
-              <RibbonButton icon={<Grid3X3 size={22} />} label="Datasheet" onClick={() => onSwitchToDatasheet ? onSwitchToDatasheet() : setLocation(`/databases/${databaseId}/tables/${tableId}/data`)} />
+              <RibbonButton icon={<DatasheetViewIcon size={22} />} label="Datasheet" onClick={() => onSwitchToDatasheet ? onSwitchToDatasheet() : setLocation(`/databases/${databaseId}/tables/${tableId}/data`)} />
               <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" active />
             </RibbonDropdownButton>
           </RibbonGroup>
@@ -373,13 +373,13 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
           onClick={() => onSwitchToDatasheet ? onSwitchToDatasheet() : setLocation(`/databases/${databaseId}/tables/${tableId}/data`)}
           className="p-0.5 rounded hover:bg-gray-200 text-gray-500 hover:text-gray-700"
         >
-          <Grid3X3 size={13} />
+          <DatasheetViewIcon size={13} />
         </button>
         <button
           title="Design View"
           className="p-0.5 rounded bg-[#C42B1C] text-white"
         >
-          <Settings2 size={13} />
+          <DesignViewIcon size={13} />
         </button>
       </div>
     </div>
