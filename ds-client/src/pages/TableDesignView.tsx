@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { Database, Table as TableType, UpdateFieldRequest, useGetTable, useUpdateTable, getGetTableQueryKey, getListRecordsQueryKey } from '@/api';
 import { Shell } from '@/components/layout/Shell';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonContextSection } from '@/components/layout/Ribbon';
+import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonViewSplitButton } from '@/components/layout/Ribbon';
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
 import { DesignGrid } from '@/components/ui/design-grid';
 import { Save, Grid3X3, Key, PlusSquare, MinusSquare, Eye, List, Settings2, AlertTriangle, RotateCcw } from 'lucide-react';
@@ -325,7 +325,14 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
       pinnedContent={
         <>
           <RibbonGroup name="View">
-            <RibbonButton icon={<DatasheetViewIcon size={22} />} label="View" onClick={() => onSwitchToDatasheet ? onSwitchToDatasheet() : setLocation(`/databases/${databaseId}/tables/${tableId}/data`)} />
+            <RibbonViewSplitButton
+              icon={<DatasheetViewIcon size={22} />}
+              onIconClick={() => onSwitchToDatasheet ? onSwitchToDatasheet() : setLocation(`/databases/${databaseId}/tables/${tableId}/data`)}
+              options={[
+                { icon: <DatasheetViewIcon size={16} />, label: 'Datasheet View', onClick: () => onSwitchToDatasheet ? onSwitchToDatasheet() : setLocation(`/databases/${databaseId}/tables/${tableId}/data`) },
+                { icon: <DesignViewIcon size={16} />, label: 'Design View', active: true },
+              ]}
+            />
           </RibbonGroup>
           {onReset && (
             <RibbonGroup name="Sandbox">

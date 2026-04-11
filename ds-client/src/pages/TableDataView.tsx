@@ -7,7 +7,7 @@ import {
 } from '@/api';
 import { Shell } from '@/components/layout/Shell';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonContextSection } from '@/components/layout/Ribbon';
+import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonViewSplitButton } from '@/components/layout/Ribbon';
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DataGrid } from '@/components/ui/data-grid';
@@ -514,7 +514,14 @@ export function TableDataView({
       pinnedContent={
         <>
           <RibbonGroup name="View">
-            <RibbonButton icon={<DesignViewIcon size={22} />} label="View" onClick={() => onSwitchToDesign ? onSwitchToDesign() : setLocation(`/databases/${databaseId}/tables/${tableId}/design`)} />
+            <RibbonViewSplitButton
+              icon={<DesignViewIcon size={22} />}
+              onIconClick={() => onSwitchToDesign ? onSwitchToDesign() : setLocation(`/databases/${databaseId}/tables/${tableId}/design`)}
+              options={[
+                { icon: <DatasheetViewIcon size={16} />, label: 'Datasheet View', active: true },
+                { icon: <DesignViewIcon size={16} />, label: 'Design View', onClick: () => onSwitchToDesign ? onSwitchToDesign() : setLocation(`/databases/${databaseId}/tables/${tableId}/design`) },
+              ]}
+            />
           </RibbonGroup>
           {onReset && (
             <RibbonGroup name="Sandbox">

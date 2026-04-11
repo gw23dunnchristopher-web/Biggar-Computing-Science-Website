@@ -414,6 +414,113 @@ export function RibbonButton({
   );
 }
 
+// ── RibbonViewSplitButton ─────────────────────────────────────────────────────
+// Icon area = direct navigation; label area = dropdown with all view options.
+export interface RibbonViewOption {
+  icon: React.ReactNode;
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+}
+
+export function RibbonViewSplitButton({
+  icon,
+  onIconClick,
+  options,
+  disabled,
+}: {
+  icon: React.ReactNode;
+  onIconClick?: () => void;
+  options: RibbonViewOption[];
+  disabled?: boolean;
+}) {
+  const ribbonSize = useRibbonSize();
+  const inDropdown = useContext(RibbonInDropdownContext);
+
+  if (inDropdown || ribbonSize === 'medium') {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger disabled={disabled} asChild>
+          <button
+            disabled={disabled}
+            className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-all duration-150 w-full
+              ${disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-red-50 active:bg-red-100 cursor-pointer'} text-gray-700`}
+          >
+            <span className="flex-none text-[#C42B1C]">{icon}</span>
+            <span className="truncate">View</span>
+            <ChevronDown className="w-3 h-3 ml-auto text-gray-400 flex-none" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="p-1 min-w-[160px]">
+          <RibbonInDropdownContext.Provider value={true}>
+            {options.map((opt, i) => (
+              <button
+                key={i}
+                onClick={opt.onClick}
+                className={`flex items-center gap-2 px-2 py-1.5 w-full text-left text-xs rounded transition-colors
+                  hover:bg-red-50 cursor-pointer ${opt.active ? 'bg-red-100 text-[#9B2118]' : 'text-gray-700'}`}
+              >
+                <span className={`text-base flex-none ${opt.active ? 'text-[#9B2118]' : 'text-[#C42B1C]'}`}>{opt.icon}</span>
+                <span className="truncate">{opt.label}</span>
+                {opt.active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#C42B1C] flex-none" />}
+              </button>
+            ))}
+          </RibbonInDropdownContext.Provider>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
+  // Large: icon half is a direct action button; label half opens dropdown
+  return (
+    <div
+      className={`flex flex-col items-center w-[68px] h-[68px] rounded border border-transparent overflow-hidden
+        ${disabled ? 'opacity-35 cursor-not-allowed grayscale' : ''}`}
+    >
+      {/* Icon — direct navigation */}
+      <button
+        disabled={disabled}
+        onClick={onIconClick}
+        title="Switch view"
+        className={`flex items-center justify-center w-full flex-1 transition-all duration-150
+          ${disabled ? 'cursor-not-allowed' : 'hover:bg-red-50 active:bg-red-100 cursor-pointer'}
+          text-[#C42B1C]`}
+      >
+        {icon}
+      </button>
+
+      {/* Label + chevron — opens dropdown */}
+      <DropdownMenu>
+        <DropdownMenuTrigger disabled={disabled} asChild>
+          <button
+            disabled={disabled}
+            className={`flex items-center justify-center gap-0.5 w-full px-1 py-0.5 transition-all duration-150
+              ${disabled ? 'cursor-not-allowed' : 'hover:bg-red-50 active:bg-red-100 cursor-pointer'}
+              text-gray-700`}
+          >
+            <span className="text-[10px] leading-none">View</span>
+            <ChevronDown className="w-2.5 h-2.5 text-gray-400 flex-none" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="p-1 min-w-[160px]">
+          {options.map((opt, i) => (
+            <button
+              key={i}
+              onClick={opt.onClick}
+              className={`flex items-center gap-2 px-2 py-1.5 w-full text-left text-xs rounded transition-colors
+                hover:bg-red-50 cursor-pointer ${opt.active ? 'bg-red-100 text-[#9B2118]' : 'text-gray-700'}`}
+            >
+              <span className={`text-base flex-none ${opt.active ? 'text-[#9B2118]' : 'text-[#C42B1C]'}`}>{opt.icon}</span>
+              <span className="truncate">{opt.label}</span>
+              {opt.active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#C42B1C] flex-none" />}
+            </button>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
+
 // ── RibbonSeparator ───────────────────────────────────────────────────────────
 export function RibbonSeparator() {
   const ribbonSize = useRibbonSize();
