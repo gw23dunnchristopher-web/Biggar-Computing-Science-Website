@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -115,6 +115,7 @@ export function TableDataView({
   const [deleteRecordConfirm, setDeleteRecordConfirm] = useState(false);
   const [deleteFieldConfirm, setDeleteFieldConfirm] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
+  const [designNameDialog, setDesignNameDialog] = useState<{ open: boolean; name: string; busy: boolean }>({ open: false, name: '', busy: false });
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
   const [hiddenFields, setHiddenFields] = useState<string[]>([]);
   const [showTotals, setShowTotals] = useState(false);
@@ -143,6 +144,52 @@ export function TableDataView({
     if (!table) return [];
     return [...table.fields].sort((a, b) => a.sortOrder - b.sortOrder);
   }, [table]);
+
+  const goToDesign = () => {
+    if (onSwitchToDesign) onSwitchToDesign();
+    else setLocation(`/databases/${databaseId}/tables/${tableId}/design`);
+  };
+
+  const handleDesignIconClick = () => {
+    setDesignNameDialog({ open: true, name: table?.name ?? '', busy: false });
+  };
+
+  const confirmDesignSwitch = async () => {
+    const newName = designNameDialog.name.trim();
+    if (!newName) return;
+    if (newName !== table?.name) {
+      setDesignNameDialog(d => ({ ...d, busy: true }));
+      try {
+        await updateTable.mutateAsync({
+          databaseId,
+          tableId,
+          data: {
+            name: newName,
+            fields: fields.map(f => ({
+              id: f.id,
+              name: f.name,
+              fieldType: f.fieldType as UpdateFieldRequest['fieldType'],
+              isRequired: f.isRequired,
+              isPrimaryKey: f.isPrimaryKey,
+              sortOrder: f.sortOrder,
+              caption: f.caption ?? null,
+              defaultValue: f.defaultValue ?? null,
+              fieldSize: f.fieldSize ?? null,
+              description: f.description ?? null,
+            })),
+          },
+        });
+        queryClient.invalidateQueries({ queryKey: getGetTableQueryKey(databaseId, tableId) });
+        queryClient.invalidateQueries({ queryKey: getListTablesQueryKey(databaseId) });
+      } catch {
+        toast({ title: 'Failed to rename table', variant: 'destructive' });
+        setDesignNameDialog(d => ({ ...d, busy: false }));
+        return;
+      }
+    }
+    setDesignNameDialog({ open: false, name: '', busy: false });
+    goToDesign();
+  };
 
   const selectedField = useMemo(() =>
     fields.find(f => f.name === selectedFieldName) ?? null
@@ -516,10 +563,10 @@ export function TableDataView({
           <RibbonGroup name="View">
             <RibbonViewSplitButton
               icon={<DesignViewIcon size={22} />}
-              onIconClick={() => onSwitchToDesign ? onSwitchToDesign() : setLocation(`/databases/${databaseId}/tables/${tableId}/design`)}
+              onIconClick={handleDesignIconClick}
               options={[
                 { icon: <DatasheetViewIcon size={16} />, label: 'Datasheet View', active: true },
-                { icon: <DesignViewIcon size={16} />, label: 'Design View', onClick: () => onSwitchToDesign ? onSwitchToDesign() : setLocation(`/databases/${databaseId}/tables/${tableId}/design`) },
+                { icon: <DesignViewIcon size={16} />, label: 'Design View', onClick: handleDesignIconClick },
               ]}
             />
           </RibbonGroup>
@@ -632,7 +679,7 @@ export function TableDataView({
         </button>
         <button
           title="Design View"
-          onClick={() => onSwitchToDesign ? onSwitchToDesign() : setLocation(`/databases/${databaseId}/tables/${tableId}/design`)}
+          onClick={handleDesignIconClick}
           className="w-5 h-4 flex items-center justify-center hover:bg-gray-200 border border-transparent rounded-sm text-gray-500"
         >
           <DesignViewIcon size={12} />
@@ -1061,6 +1108,33 @@ export function TableDataView({
           onConfirm={onReset}
         />
       )}
+
+      {/* ── Design View — Save / Name Table ── */}
+      <Dialog open={designNameDialog.open} onOpenChange={open => !open && setDesignNameDialog({ open: false, name: '', busy: false })}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Save Table</DialogTitle>
+            <DialogDescription>You must save the table before switching to Design view. Confirm or update the table name below.</DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            <Label className="text-xs font-medium text-gray-600 mb-1 block">Table Name</Label>
+            <Input
+              value={designNameDialog.name}
+              onChange={e => setDesignNameDialog(d => ({ ...d, name: e.target.value }))}
+              onKeyDown={e => e.key === 'Enter' && confirmDesignSwitch()}
+              autoFocus
+              className="border-gray-300 focus-visible:ring-[#C42B1C]"
+              placeholder="Table name"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDesignNameDialog({ open: false, name: '', busy: false })} disabled={designNameDialog.busy}>Cancel</Button>
+            <Button onClick={confirmDesignSwitch} disabled={designNameDialog.busy || !designNameDialog.name.trim()} className="bg-[#C42B1C] hover:bg-[#9B2118]">
+              {designNameDialog.busy ? 'Saving…' : 'OK'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Shell>
   );
 }

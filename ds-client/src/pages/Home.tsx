@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { useLocalUser } from '@/hooks/use-local-user';
-import { useListDatabases, useCreateDatabase, getListDatabasesQueryKey } from '@/api';
+import { useListDatabases, useCreateDatabase, useCreateTable, getListDatabasesQueryKey } from '@/api';
 import { format } from 'date-fns';
 import { Database, PlusCircle, DatabaseBackup, Trash2, FlaskConical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -37,13 +37,24 @@ export function Home() {
   });
 
   const createDb = useCreateDatabase();
+  const createTable = useCreateTable();
 
   const handleCreate = async () => {
     if (!userId || !newDbName.trim()) return;
     try {
-      const res = await createDb.mutateAsync({ data: { name: newDbName, userId } });
+      const db = await createDb.mutateAsync({ data: { name: newDbName, userId } });
+      const tbl = await createTable.mutateAsync({
+        databaseId: db.id,
+        data: {
+          name: 'Table1',
+          fields: [
+            { name: 'ID', fieldType: 'autonumber', isPrimaryKey: true, isRequired: true, sortOrder: 0 },
+            { name: 'Field1', fieldType: 'text', isPrimaryKey: false, isRequired: false, sortOrder: 1 },
+          ],
+        },
+      });
       toast({ title: 'Database created successfully' });
-      setLocation(`/databases/${res.id}`);
+      setLocation(`/databases/${db.id}/tables/${tbl.id}/data`);
     } catch (e) {
       toast({ title: 'Failed to create database', variant: 'destructive' });
     }
