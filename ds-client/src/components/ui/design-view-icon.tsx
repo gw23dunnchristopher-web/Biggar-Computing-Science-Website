@@ -7,31 +7,32 @@ export const DesignViewIcon = ({ size = 22, className }: ViewIconProps) => (
   <svg
     width={size}
     height={size}
-    viewBox="0 0 22 22"
+    viewBox="1096 493 375 341"
     fill="none"
-    stroke="currentColor"
-    strokeWidth="1.35"
-    strokeLinecap="round"
-    strokeLinejoin="round"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
   >
-    {/* Set square body — right-angle triangle */}
-    <path d="M3 19 L3 3 L17 19 Z" />
-
-    {/* Right-angle indicator at the corner */}
-    <path d="M3 17 L5 17 L5 19" strokeWidth="1" />
-
-    {/* Pencil lying along the hypotenuse */}
-    <line x1="18" y1="2" x2="20" y2="4" />
-    <line x1="17" y1="19" x2="20" y2="4" strokeWidth="1" />
-    <line x1="17" y1="19" x2="18" y2="2" strokeWidth="1" />
-
-    {/* Ruler tick marks along bottom edge */}
-    <line x1="6"  y1="19" x2="6"  y2="17.2" strokeWidth="0.9" />
-    <line x1="9"  y1="19" x2="9"  y2="17.2" strokeWidth="0.9" />
-    <line x1="12" y1="19" x2="12" y2="17.2" strokeWidth="0.9" />
-    <line x1="15" y1="19" x2="15" y2="17.2" strokeWidth="0.9" />
+    <path
+      d="M1376.5 500.5 1465.5 500.5 1465.5 829.5 1460.93 829.5 1376.5 752.41Z"
+      stroke="currentColor"
+      strokeWidth="6.875"
+      strokeMiterlimit="8"
+      fill="#FFFFFF"
+      fillRule="evenodd"
+    />
+    <path d="M1376.5 546.5 1427.46 546.5" stroke="currentColor" strokeWidth="6.875" strokeMiterlimit="8" fill="none" fillRule="evenodd"/>
+    <path d="M1376.5 601.5 1427.46 601.5" stroke="currentColor" strokeWidth="6.875" strokeMiterlimit="8" fill="none" fillRule="evenodd"/>
+    <path d="M1376.5 655.5 1436.11 655.684" stroke="currentColor" strokeWidth="6.875" strokeMiterlimit="8" fill="none" fillRule="evenodd"/>
+    <path d="M1376.5 709.5 1427.46 709.5" stroke="currentColor" strokeWidth="6.875" strokeMiterlimit="8" fill="none" fillRule="evenodd"/>
+    <path d="M1389.5 763.5 1422.66 763.5" stroke="currentColor" strokeWidth="6.875" strokeMiterlimit="8" fill="none" fillRule="evenodd"/>
+    <path
+      d="M1166.63 638.869 1166.63 772.672 1313.85 772.672ZM1099.5 501.5 1461.5 830.5 1099.5 830.5Z"
+      stroke="currentColor"
+      strokeWidth="6.875"
+      strokeMiterlimit="8"
+      fill="none"
+      fillRule="evenodd"
+    />
   </svg>
 );
 
@@ -39,30 +40,20 @@ export const DatasheetViewIcon = ({ size = 22, className }: ViewIconProps) => (
   <svg
     width={size}
     height={size}
-    viewBox="0 0 22 22"
+    viewBox="1595 497 383 337"
     fill="none"
-    stroke="currentColor"
-    strokeWidth="1.3"
-    strokeLinecap="round"
-    strokeLinejoin="round"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
   >
-    {/* Outer table border */}
-    <rect x="2" y="3" width="18" height="16" rx="0.5" />
-
-    {/* Column dividers */}
-    <line x1="8.5"  y1="3"  x2="8.5"  y2="19" />
-    <line x1="14.5" y1="3"  x2="14.5" y2="19" />
-
-    {/* Row dividers */}
-    <line x1="2" y1="8"  x2="20" y2="8" />
-    <line x1="2" y1="13" x2="20" y2="13" />
-
-    {/* Header row — small filled sort triangles (one per column, pointing down) */}
-    <path d="M4.5 5 L6 7 L7.5 5 Z" fill="currentColor" stroke="none" />
-    <path d="M10.5 5 L12 7 L13.5 5 Z" fill="currentColor" stroke="none" />
-    <path d="M16 5 L17.5 7 L19 5 Z" fill="currentColor" stroke="none" />
+    <rect x="1598.5" y="500.5" width="375" height="329" stroke="currentColor" strokeWidth="6.875" strokeMiterlimit="8" fill="none"/>
+    <path d="M1598.5 574.5 1974.05 574.5" stroke="currentColor" strokeWidth="6.875" strokeMiterlimit="8" fill="none" fillRule="evenodd"/>
+    <path d="M1598.5 655.5 1974.05 655.5" stroke="currentColor" strokeWidth="6.875" strokeMiterlimit="8" fill="none" fillRule="evenodd"/>
+    <path d="M1598.5 743.5 1974.05 743.5" stroke="currentColor" strokeWidth="6.875" strokeMiterlimit="8" fill="none" fillRule="evenodd"/>
+    <path d="M1721.5 574.5 1721.5 830.224" stroke="currentColor" strokeWidth="6.875" strokeMiterlimit="8" fill="none" fillRule="evenodd"/>
+    <path d="M1849.5 574.5 1849.5 830.224" stroke="currentColor" strokeWidth="6.875" strokeMiterlimit="8" fill="none" fillRule="evenodd"/>
+    <path d="M1703 520 1667 554 1631 520Z" fill="currentColor" fillRule="evenodd"/>
+    <path d="M1821 520 1785 554 1749 520Z" fill="currentColor" fillRule="evenodd"/>
+    <path d="M1940 520 1904 554 1868 520Z" fill="currentColor" fillRule="evenodd"/>
   </svg>
 );
 
