@@ -552,7 +552,7 @@ export function TableDataView({
 
   const contextSection: RibbonContextSection | undefined = isStudentMode ? undefined : {
     color: '#c55a11',
-    defaultTab: 'Table Fields',
+    defaultTab: 'Home',
     tabs: [
       {
         name: 'Table Fields',
@@ -706,13 +706,13 @@ export function TableDataView({
 
               {/* ── Text Formatting ── */}
               <RibbonGroup name="Text Formatting">
-                <div className="flex flex-col gap-1 pt-0.5">
-                  {/* Row 1: font + size */}
+                <div className="flex flex-col gap-1.5 pt-0.5">
+                  {/* Row 1: font + size + B I U */}
                   <div className="flex items-center gap-1">
                     <select
                       value={fmtFont}
                       onChange={e => setFmtFont(e.target.value)}
-                      className="h-5 text-[11px] border border-gray-300 rounded px-1 cursor-pointer bg-white min-w-[110px]"
+                      className="h-7 text-[12px] border border-gray-300 rounded px-1 cursor-pointer bg-white min-w-[120px]"
                     >
                       {['Aptos (Detail)', 'Arial', 'Calibri', 'Courier New', 'Georgia', 'Times New Roman', 'Trebuchet MS', 'Verdana'].map(f => (
                         <option key={f} value={f}>{f}</option>
@@ -721,62 +721,62 @@ export function TableDataView({
                     <select
                       value={fmtSize}
                       onChange={e => setFmtSize(e.target.value)}
-                      className="h-5 text-[11px] border border-gray-300 rounded px-1 cursor-pointer bg-white w-10"
+                      className="h-7 text-[12px] border border-gray-300 rounded px-1 cursor-pointer bg-white w-12"
                     >
                       {['8','9','10','11','12','14','16','18','20','24','28','36','48','72'].map(s => (
                         <option key={s} value={s}>{s}</option>
                       ))}
                     </select>
-                  </div>
-                  {/* Row 2: B I U | color | highlight | alignment */}
-                  <div className="flex items-center gap-0.5">
+                    <span className="w-px h-5 bg-gray-200 mx-0.5" />
                     <button
                       onClick={() => setFmtBold(v => !v)}
-                      className={`w-5 h-5 flex items-center justify-center rounded text-xs font-bold transition-colors cursor-pointer ${fmtBold ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+                      className={`w-7 h-7 flex items-center justify-center rounded font-bold transition-colors cursor-pointer ${fmtBold ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
                       title="Bold"
-                    ><Bold size={12} /></button>
+                    ><Bold size={14} /></button>
                     <button
                       onClick={() => setFmtItalic(v => !v)}
-                      className={`w-5 h-5 flex items-center justify-center rounded text-xs italic transition-colors cursor-pointer ${fmtItalic ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+                      className={`w-7 h-7 flex items-center justify-center rounded italic transition-colors cursor-pointer ${fmtItalic ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
                       title="Italic"
-                    ><Italic size={12} /></button>
+                    ><Italic size={14} /></button>
                     <button
                       onClick={() => setFmtUnderline(v => !v)}
-                      className={`w-5 h-5 flex items-center justify-center rounded text-xs underline transition-colors cursor-pointer ${fmtUnderline ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+                      className={`w-7 h-7 flex items-center justify-center rounded underline transition-colors cursor-pointer ${fmtUnderline ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
                       title="Underline"
-                    ><Underline size={12} /></button>
-                    <span className="w-px h-4 bg-gray-200 mx-0.5" />
-                    <button className="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Font Color">
+                    ><Underline size={14} /></button>
+                  </div>
+                  {/* Row 2: color | highlight | alignment | bg | gridlines */}
+                  <div className="flex items-center gap-1">
+                    <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Font Color">
                       <div className="flex flex-col items-center gap-px">
-                        <span className="text-[9px] font-bold text-gray-700 leading-none">A</span>
-                        <span className="w-3.5 h-0.5 rounded-full bg-[#C42B1C]" />
+                        <span className="text-[11px] font-bold text-gray-700 leading-none">A</span>
+                        <span className="w-4 h-0.5 rounded-full bg-[#C42B1C]" />
                       </div>
                     </button>
-                    <button className="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Highlight Color">
-                      <Highlighter size={12} className="text-yellow-500" />
+                    <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Highlight Color">
+                      <Highlighter size={14} className="text-yellow-500" />
                     </button>
-                    <span className="w-px h-4 bg-gray-200 mx-0.5" />
+                    <span className="w-px h-5 bg-gray-200 mx-0.5" />
                     <button
                       onClick={() => setFmtAlign('left')}
-                      className={`w-5 h-5 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'left' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+                      className={`w-7 h-7 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'left' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
                       title="Align Left"
-                    ><AlignLeft size={12} /></button>
+                    ><AlignLeft size={14} /></button>
                     <button
                       onClick={() => setFmtAlign('center')}
-                      className={`w-5 h-5 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'center' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+                      className={`w-7 h-7 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'center' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
                       title="Center"
-                    ><AlignCenter size={12} /></button>
+                    ><AlignCenter size={14} /></button>
                     <button
                       onClick={() => setFmtAlign('right')}
-                      className={`w-5 h-5 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'right' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+                      className={`w-7 h-7 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'right' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
                       title="Align Right"
-                    ><AlignRight size={12} /></button>
-                    <span className="w-px h-4 bg-gray-200 mx-0.5" />
-                    <button className="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Background Color">
-                      <Paintbrush size={12} className="text-gray-600" />
+                    ><AlignRight size={14} /></button>
+                    <span className="w-px h-5 bg-gray-200 mx-0.5" />
+                    <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Background Color">
+                      <Paintbrush size={14} className="text-gray-600" />
                     </button>
-                    <button className="w-5 h-5 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Gridlines">
-                      <Grid3X3 size={12} className="text-gray-600" />
+                    <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Gridlines">
+                      <Grid3X3 size={14} className="text-gray-600" />
                     </button>
                   </div>
                 </div>
