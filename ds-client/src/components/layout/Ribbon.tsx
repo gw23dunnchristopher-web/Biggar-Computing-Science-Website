@@ -533,12 +533,14 @@ export function RibbonSeparator() {
 // as menu items. When already inside a dropdown (e.g. collapsed group) it
 // renders as a sub-menu instead.
 export function RibbonDropdownButton({
-  icon, label, disabled, children,
+  icon, label, disabled, children, compact,
 }: {
   icon: React.ReactNode;
   label: string;
   disabled?: boolean;
   children: React.ReactNode;
+  /** Force the compact (small-row) style even in large ribbon mode */
+  compact?: boolean;
 }) {
   const ribbonSize = useRibbonSize();
   const inDropdown = useContext(RibbonInDropdownContext);
@@ -563,7 +565,7 @@ export function RibbonDropdownButton({
     );
   }
 
-  if (ribbonSize === 'medium') {
+  if (ribbonSize === 'medium' || compact) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger disabled={disabled} asChild>
