@@ -1,5 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRoute, useLocation, Switch, Route } from 'wouter';
+import { ObjectTabBar, ObjectTab } from '@/components/ui/object-tab-bar';
+import { TabBarProvider } from '@/contexts/tab-bar-context';
 import { useGetDatabase, useListTables, useDeleteTable, getListTablesQueryKey, useCreateTable, useUpdateDatabase } from '@/api';
 import { Shell } from '@/components/layout/Shell';
 import { Sidebar } from '@/components/layout/Sidebar';
@@ -42,7 +44,7 @@ type ItemRow = { id: number; name: string; databaseId: number };
 export function DatabaseView() {
   const [, params] = useRoute('/databases/:id/*?');
   const databaseId = params?.id ? parseInt(params.id) : 0;
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -121,6 +123,65 @@ export function DatabaseView() {
     loadData();
   }, [loadData]);
 
+  // ── Object tabs ─────────────────────────────────────────────
+  const [openTabs, setOpenTabs] = useState<ObjectTab[]>([]);
+
+  const parseLocation = (loc: string): { key: string; objectType: ObjectTab['objectType']; objectId?: number } | null => {
+    let m = loc.match(/\/databases\/\d+\/tables\/(\d+)\/(data|design)/);
+    if (m) return { key: `table-${m[1]}`, objectType: 'table', objectId: parseInt(m[1]) };
+    m = loc.match(/\/databases\/\d+\/queries\/(\d+)/);
+    if (m) return { key: `query-${m[1]}`, objectType: 'query', objectId: parseInt(m[1]) };
+    m = loc.match(/\/databases\/\d+\/forms\/(\d+)/);
+    if (m) return { key: `form-${m[1]}`, objectType: 'form', objectId: parseInt(m[1]) };
+    m = loc.match(/\/databases\/\d+\/reports\/(\d+)/);
+    if (m) return { key: `report-${m[1]}`, objectType: 'report', objectId: parseInt(m[1]) };
+    if (/\/databases\/\d+\/sql/.test(loc)) return { key: 'sql', objectType: 'sql' };
+    return null;
+  };
+
+  const getTabLabel = (objectType: string, objectId?: number): string => {
+    switch (objectType) {
+      case 'table':  return tables?.find(t => t.id === objectId)?.name ?? 'Table';
+      case 'query':  return queries.find(q => q.id === objectId)?.name ?? 'Query';
+      case 'form':   return forms.find(f => f.id === objectId)?.name ?? 'Form';
+      case 'report': return reports.find(r => r.id === objectId)?.name ?? 'Report';
+      case 'sql':    return 'SQL View';
+      default:       return 'Object';
+    }
+  };
+
+  useEffect(() => {
+    const parsed = parseLocation(location);
+    if (!parsed) return;
+    const { key, objectType, objectId } = parsed;
+    const label = getTabLabel(objectType, objectId);
+    setOpenTabs(prev => {
+      const idx = prev.findIndex(t => t.key === key);
+      if (idx >= 0) {
+        const updated = [...prev];
+        updated[idx] = { ...updated[idx], url: location, label };
+        return updated;
+      }
+      return [...prev, { key, url: location, label, objectType }];
+    });
+  }, [location, tables, queries, forms, reports]);
+
+  const activeTabKey = useMemo(() => parseLocation(location)?.key ?? null, [location]);
+
+  const handleTabSelect = (tab: ObjectTab) => setLocation(tab.url);
+
+  const handleTabClose = (key: string) => {
+    setOpenTabs(prev => {
+      const idx = prev.findIndex(t => t.key === key);
+      const next = prev.filter(t => t.key !== key);
+      if (key === activeTabKey) {
+        if (next.length > 0) setLocation(next[Math.min(idx, next.length - 1)].url);
+        else setLocation(`/databases/${databaseId}`);
+      }
+      return next;
+    });
+  };
+
   // ── Table handlers ──────────────────────────────────────────
   const handleDeleteTable = (tableId: number) => {
     const table = tables?.find(t => t.id === tableId);
@@ -131,7 +192,7 @@ export function DatabaseView() {
     try {
       await deleteTable.mutateAsync({ databaseId, tableId: deleteTableConfirm.tableId });
       queryClient.invalidateQueries({ queryKey: getListTablesQueryKey(databaseId) });
-      setLocation(`/databases/${databaseId}`);
+      handleTabClose(`table-${deleteTableConfirm.tableId}`);
     } catch { toast({ title: 'Failed to delete table', variant: 'destructive' }); }
   };
 
@@ -165,7 +226,7 @@ export function DatabaseView() {
     try {
       await apiFetch(`/api/ds/databases/${databaseId}/queries/${deleteQueryConfirm.queryId}`, { method: 'DELETE' });
       await loadQueries();
-      setLocation(`/databases/${databaseId}`);
+      handleTabClose(`query-${deleteQueryConfirm.queryId}`);
     } catch { toast({ title: 'Failed to delete query', variant: 'destructive' }); }
   };
 
@@ -206,7 +267,7 @@ export function DatabaseView() {
     try {
       await apiFetch(`/api/ds/databases/${databaseId}/forms/${deleteFormConfirm.formId}`, { method: 'DELETE' });
       await loadForms();
-      setLocation(`/databases/${databaseId}`);
+      handleTabClose(`form-${deleteFormConfirm.formId}`);
     } catch { toast({ title: 'Failed to delete form', variant: 'destructive' }); }
   };
 
@@ -234,7 +295,7 @@ export function DatabaseView() {
     try {
       await apiFetch(`/api/ds/databases/${databaseId}/reports/${deleteReportConfirm.reportId}`, { method: 'DELETE' });
       await loadReports();
-      setLocation(`/databases/${databaseId}`);
+      handleTabClose(`report-${deleteReportConfirm.reportId}`);
     } catch { toast({ title: 'Failed to delete report', variant: 'destructive' }); }
   };
 
@@ -413,7 +474,17 @@ export function DatabaseView() {
     onRefresh: loadData,
   };
 
+  const tabBarEl = (
+    <ObjectTabBar
+      tabs={openTabs}
+      activeKey={activeTabKey}
+      onSelect={handleTabSelect}
+      onClose={handleTabClose}
+    />
+  );
+
   return (
+    <TabBarProvider value={tabBarEl}>
     <>
       <Switch>
         <Route path="/databases/:id">
@@ -752,5 +823,6 @@ export function DatabaseView() {
 
 
     </>
+    </TabBarProvider>
   );
 }
