@@ -150,8 +150,14 @@ export function TableDataView({
     else setLocation(`/databases/${databaseId}/tables/${tableId}/design`);
   };
 
+  const isAutoName = (name: string) => /^Table\d+$/i.test(name);
+
   const handleDesignIconClick = () => {
-    setDesignNameDialog({ open: true, name: table?.name ?? '', busy: false });
+    if (table && isAutoName(table.name)) {
+      setDesignNameDialog({ open: true, name: table.name, busy: false });
+    } else {
+      goToDesign();
+    }
   };
 
   const confirmDesignSwitch = async () => {

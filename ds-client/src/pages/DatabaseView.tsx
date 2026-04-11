@@ -84,7 +84,6 @@ export function DatabaseView() {
   } | null>(null);
 
   // Create naming dialogs
-  const [createTableDialog, setCreateTableDialog] = useState<{ open: boolean; name: string; busy: boolean }>({ open: false, name: '', busy: false });
 
   // Query Wizard
   const [queryWizardOpen, setQueryWizardOpen] = useState(false);
@@ -136,13 +135,8 @@ export function DatabaseView() {
     } catch { toast({ title: 'Failed to delete table', variant: 'destructive' }); }
   };
 
-  const handleCreateTable = () => {
-    setCreateTableDialog({ open: true, name: `Table${(tables?.length || 0) + 1}`, busy: false });
-  };
-  const doCreateTable = async () => {
-    const name = createTableDialog.name.trim();
-    if (!name) return;
-    setCreateTableDialog(d => ({ ...d, busy: true }));
+  const handleCreateTable = async () => {
+    const name = `Table${(tables?.length || 0) + 1}`;
     try {
       const res = await createTable.mutateAsync({
         databaseId,
@@ -155,11 +149,9 @@ export function DatabaseView() {
         }
       });
       queryClient.invalidateQueries({ queryKey: getListTablesQueryKey(databaseId) });
-      setCreateTableDialog({ open: false, name: '', busy: false });
-      setLocation(`/databases/${databaseId}/tables/${res.id}/design`);
+      setLocation(`/databases/${databaseId}/tables/${res.id}/data`);
     } catch {
       toast({ title: 'Failed to create table', variant: 'destructive' });
-      setCreateTableDialog(d => ({ ...d, busy: false }));
     }
   };
 
@@ -758,31 +750,6 @@ export function DatabaseView() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Create Table naming dialog ── */}
-      <Dialog open={createTableDialog.open} onOpenChange={open => !open && setCreateTableDialog({ open: false, name: '', busy: false })}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Create Table</DialogTitle>
-            <DialogDescription>Enter a name for the new table.</DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <Input
-              value={createTableDialog.name}
-              onChange={e => setCreateTableDialog(d => ({ ...d, name: e.target.value }))}
-              autoFocus
-              onKeyDown={e => e.key === 'Enter' && doCreateTable()}
-              className="border-gray-300 focus-visible:ring-[#C42B1C]"
-              placeholder="Table name"
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateTableDialog({ open: false, name: '', busy: false })} disabled={createTableDialog.busy}>Cancel</Button>
-            <Button onClick={doCreateTable} disabled={createTableDialog.busy || !createTableDialog.name.trim()} className="bg-[#C42B1C] hover:bg-[#9B2118]">
-              {createTableDialog.busy ? 'Creating…' : 'Create'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
     </>
   );
