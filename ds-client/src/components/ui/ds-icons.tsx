@@ -7,7 +7,7 @@ function icon(file: string) {
   return function DsIcon({ size = 22, className }: DsIconProps) {
     return (
       <img
-        src={`/icons/${file}`}
+        src={`${import.meta.env.BASE_URL}icons/${file}`}
         width={size}
         height={size}
         className={className}
