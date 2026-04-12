@@ -47,7 +47,7 @@ export interface CommonTabsProps {
   onObjectDependencies?: () => void;
 }
 
-/** CREATE tab — Tables, Queries, Forms, Reports, Macros */
+/** CREATE tab — Tables, Queries, Forms, Reports */
 export function CreateTabContent({
   onCreateTable, onCreateQuery, onQueryWizard, onCreateSqlQuery,
   onCreateForm, onCreateBlankForm, onCreateAutoForm,
@@ -56,31 +56,31 @@ export function CreateTabContent({
   return (
     <>
       <RibbonGroup name="Tables">
-        <RibbonButton icon={<DsTableIcon size={32} />} label="Table" onClick={onCreateTable} />
-        <RibbonButton icon={<DsTablesTableDesignIcon size={22} />} label="Table Design" onClick={onCreateTable} />
+        <RibbonButton icon={<DsTableIcon size={40} />} label="Table" onClick={onCreateTable} />
+        <RibbonButton icon={<DsTablesTableDesignIcon size={32} />} label="Table Design" onClick={onCreateTable} />
       </RibbonGroup>
       <RibbonGroup name="Queries">
-        <RibbonButton icon={<DsQueriesQueryWizardIcon size={22} />} label="Query Wizard" onClick={onQueryWizard} disabled={!onQueryWizard} />
-        <RibbonButton icon={<DsQueriesQueryWizardIcon size={22} />} label="Query Design" onClick={onCreateQuery} />
-        <RibbonButton icon={<DsQueriesSQLQueryIcon size={22} />} label="SQL Query" onClick={onCreateSqlQuery} disabled={!onCreateSqlQuery} title="Open a blank SQL query editor" />
+        <RibbonButton icon={<DsQueriesQueryWizardIcon size={32} />} label="Query Wizard" onClick={onQueryWizard} disabled={!onQueryWizard} />
+        <RibbonButton icon={<DsQueriesQueryWizardIcon size={32} />} label="Query Design" onClick={onCreateQuery} />
+        <RibbonButton icon={<DsQueriesSQLQueryIcon size={32} />} label="SQL Query" onClick={onCreateSqlQuery} disabled={!onCreateSqlQuery} title="Open a blank SQL query editor" />
       </RibbonGroup>
       <RibbonGroup name="Forms">
         <RibbonButton
-          icon={<DsFormsFormWizardIcon size={22} />}
+          icon={<DsFormsFormWizardIcon size={32} />}
           label="Form Wizard"
           onClick={onCreateForm}
           disabled={!onCreateForm}
           title="Guided step-by-step form creation — choose table, fields and layout"
         />
         <RibbonButton
-          icon={<DsFormsBlankFormIcon size={22} />}
+          icon={<DsFormsBlankFormIcon size={32} />}
           label="Blank Form"
           onClick={onCreateBlankForm}
           disabled={!onCreateBlankForm}
           title="Create an empty form with no fields — add them in Design View"
         />
         <RibbonButton
-          icon={<DsFormsFormIcon size={22} />}
+          icon={<DsFormsFormIcon size={32} />}
           label="Auto Form"
           onClick={onCreateAutoForm}
           disabled={!onCreateAutoForm}
@@ -89,21 +89,21 @@ export function CreateTabContent({
       </RibbonGroup>
       <RibbonGroup name="Reports">
         <RibbonButton
-          icon={<DsReportsReportWizardIcon size={22} />}
+          icon={<DsReportsReportWizardIcon size={32} />}
           label="Report Wizard"
           onClick={onCreateReport}
           disabled={!onCreateReport}
           title="Guided step-by-step report creation — choose fields, grouping and sorting"
         />
         <RibbonButton
-          icon={<DsReportsReportDesignIcon size={22} />}
+          icon={<DsReportsReportDesignIcon size={32} />}
           label="Report Design"
           onClick={onCreateBlankReport}
           disabled={!onCreateBlankReport}
           title="Create an empty report with no fields — add them in Design View"
         />
         <RibbonButton
-          icon={<DsReportsReportIcon size={22} />}
+          icon={<DsReportsReportIcon size={32} />}
           label="Auto Report"
           onClick={onCreateAutoReport}
           disabled={!onCreateAutoReport}
@@ -119,19 +119,19 @@ export function ExternalDataTabContent({ onImportCSV, onExportData, onShare }: C
   return (
     <>
       <RibbonGroup name="Import &amp; Link">
-        <RibbonButton icon={<FileUp size={32} />} label="Excel" onClick={onImportCSV} disabled={!onImportCSV} />
-        <RibbonButton icon={<DsTableIcon size={32} />} label="Access" disabled />
-        <RibbonButton icon={<FileUp size={22} />} label="Import CSV" onClick={onImportCSV} disabled={!onImportCSV} />
-        <RibbonButton icon={<PlugZap size={22} />} label="ODBC Database" disabled />
+        <RibbonButton icon={<FileUp size={40} />} label="Excel" onClick={onImportCSV} disabled={!onImportCSV} />
+        <RibbonButton icon={<DsTableIcon size={40} />} label="Access" disabled />
+        <RibbonButton icon={<FileUp size={32} />} label="Import CSV" onClick={onImportCSV} disabled={!onImportCSV} />
+        <RibbonButton icon={<PlugZap size={32} />} label="ODBC Database" disabled />
       </RibbonGroup>
       <RibbonGroup name="Export">
-        <RibbonButton icon={<FileDown size={32} />} label="Excel" onClick={onExportData} disabled={!onExportData} />
-        <RibbonButton icon={<FileDown size={22} />} label="Text File (CSV)" onClick={onExportData} disabled={!onExportData} />
-        <RibbonButton icon={<Mail size={32} />} label="Email" disabled />
-        <RibbonButton icon={<Upload size={22} />} label="Embed / Share" onClick={onShare} disabled={!onShare} />
+        <RibbonButton icon={<FileDown size={40} />} label="Excel" onClick={onExportData} disabled={!onExportData} />
+        <RibbonButton icon={<FileDown size={32} />} label="Text File (CSV)" onClick={onExportData} disabled={!onExportData} />
+        <RibbonButton icon={<Mail size={40} />} label="Email" disabled />
+        <RibbonButton icon={<Upload size={32} />} label="Embed / Share" onClick={onShare} disabled={!onShare} />
       </RibbonGroup>
       <RibbonGroup name="Collect Data">
-        <RibbonButton icon={<Mail size={22} />} label="Create Email" disabled />
+        <RibbonButton icon={<Mail size={32} />} label="Create Email" disabled />
       </RibbonGroup>
     </>
   );
@@ -145,19 +145,19 @@ export function DatabaseToolsTabContent({
   return (
     <>
       <RibbonGroup name="Tools">
-        <RibbonButton icon={<DsCompactAndRepairIcon size={22} />} label="Compact and Repair Database" onClick={onCompact} disabled={!onCompact} />
+        <RibbonButton icon={<DsCompactAndRepairIcon size={32} />} label="Compact and Repair Database" onClick={onCompact} disabled={!onCompact} />
       </RibbonGroup>
       <RibbonGroup name="Relationships">
-        <RibbonButton icon={<DsRelationshipsIcon size={32} />} label="Relationships" onClick={onOpenRelationships} disabled={!onOpenRelationships} />
-        <RibbonButton icon={<DsObjectDependenciesIcon size={22} />} label="Object Dependencies" onClick={onObjectDependencies} disabled={!onObjectDependencies} />
+        <RibbonButton icon={<DsRelationshipsIcon size={40} />} label="Relationships" onClick={onOpenRelationships} disabled={!onOpenRelationships} />
+        <RibbonButton icon={<DsObjectDependenciesIcon size={32} />} label="Object Dependencies" onClick={onObjectDependencies} disabled={!onObjectDependencies} />
       </RibbonGroup>
       <RibbonGroup name="Analyse">
-        <RibbonButton icon={<DsAnalyzeDatabaseDocumenterIcon size={22} />} label="Database Documenter" onClick={onDocumenter} disabled={!onDocumenter} />
-        <RibbonButton icon={<DsAnalyzePerformanceIcon size={22} />} label="Analyze Performance" disabled />
-        <RibbonButton icon={<DsAnalyzeTableIcon size={22} />} label="Analyse Table" onClick={onAnalyse} disabled={!onAnalyse} />
+        <RibbonButton icon={<DsAnalyzeDatabaseDocumenterIcon size={32} />} label="Database Documenter" onClick={onDocumenter} disabled={!onDocumenter} />
+        <RibbonButton icon={<DsAnalyzePerformanceIcon size={32} />} label="Analyze Performance" disabled />
+        <RibbonButton icon={<DsAnalyzeTableIcon size={32} />} label="Analyse Table" onClick={onAnalyse} disabled={!onAnalyse} />
       </RibbonGroup>
       <RibbonGroup name="Database Settings">
-        <RibbonButton icon={<Settings size={32} />} label="Settings" onClick={onSettings} disabled={!onSettings} />
+        <RibbonButton icon={<Settings size={40} />} label="Settings" onClick={onSettings} disabled={!onSettings} />
       </RibbonGroup>
     </>
   );
