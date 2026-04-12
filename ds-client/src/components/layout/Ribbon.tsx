@@ -330,9 +330,9 @@ export function RibbonGroup({ name, children }: { name: string; children: React.
 
   // Large: existing side-by-side button layout
   return (
-    <div className="flex gap-0.5 pr-3 border-r border-gray-200 last:border-r-0 relative pt-1 pb-5 h-full min-w-fit justify-start items-start">
+    <div className="flex gap-0 pr-2 border-r border-gray-200 last:border-r-0 relative pt-1 pb-5 h-full min-w-fit justify-start items-start">
       {children}
-      <span className="absolute bottom-0 left-0 right-3 text-center text-[10px] text-gray-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+      <span className="absolute bottom-0 left-0 right-2 text-center text-[10px] text-gray-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
         {name}
       </span>
     </div>
@@ -403,12 +403,12 @@ export function RibbonButton({
       disabled={disabled}
       onClick={onClick}
       title={titleProp || label}
-      className={`flex flex-col items-center justify-start w-[96px] h-[76px] p-1 rounded transition-all duration-150
+      className={`flex flex-col items-center justify-start w-[96px] h-[76px] p-0.5 rounded transition-all duration-150
         ${disabled ? 'opacity-35 cursor-not-allowed grayscale' : 'hover:bg-red-50 hover:border-red-200 active:bg-red-100 cursor-pointer'}
         ${active ? 'bg-red-100 border border-red-300' : 'border border-transparent'}
         text-gray-700`}
     >
-      <div className={`text-[22px] mb-0.5 mt-1 ${active ? 'text-[#9B2118]' : 'text-[#C42B1C]'}`}>{icon}</div>
+      <div className={`text-[22px] mb-0.5 mt-0.5 ${active ? 'text-[#9B2118]' : 'text-[#C42B1C]'}`}>{icon}</div>
       <span className="text-[10px] leading-[1.2] text-center w-full line-clamp-3 px-0.5">{label}</span>
     </button>
   );
@@ -594,11 +594,11 @@ export function RibbonDropdownButton({
       <DropdownMenuTrigger disabled={disabled} asChild>
         <button
           disabled={disabled}
-          className={`flex flex-col items-center justify-start w-[96px] h-[76px] p-1 rounded transition-all duration-150
+          className={`flex flex-col items-center justify-start w-[96px] h-[76px] p-0.5 rounded transition-all duration-150
             ${disabled ? 'opacity-35 cursor-not-allowed grayscale' : 'hover:bg-red-50 hover:border-red-200 active:bg-red-100 cursor-pointer'}
             border border-transparent text-gray-700`}
         >
-          <div className="text-[22px] mb-0.5 mt-1 text-[#C42B1C]">{icon}</div>
+          <div className="text-[22px] mb-0.5 mt-0.5 text-[#C42B1C]">{icon}</div>
           <span className="text-[10px] leading-[1.2] text-center w-full line-clamp-3 px-0.5">{label}</span>
           <ChevronDown className="w-3 h-3 text-gray-400 mt-auto mb-0.5" />
         </button>

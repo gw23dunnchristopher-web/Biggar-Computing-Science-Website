@@ -110,10 +110,6 @@ export function CreateTabContent({
           title="Instantly create a report with all fields from a table — no wizard needed"
         />
       </RibbonGroup>
-      <RibbonGroup name="Macros &amp; Code">
-        <RibbonButton icon={<PlugZap size={32} />} label="Macro" disabled />
-        <RibbonButton icon={<PlugZap size={32} />} label="Module" disabled />
-      </RibbonGroup>
     </>
   );
 }

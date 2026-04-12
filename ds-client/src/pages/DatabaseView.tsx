@@ -524,6 +524,7 @@ export function DatabaseView() {
     onShare: handleShare,
     onSettings: openSettings,
     onOpenSql: () => setLocation(`/databases/${databaseId}/sql`),
+    onCreateSqlQuery: () => setLocation(`/databases/${databaseId}/sql`),
     onImportCSV: () => setCsvImportOpen(true),
     onOpenRelationships: () => setLocation(`/databases/${databaseId}/relationships`),
     onCompact: handleCompact,
