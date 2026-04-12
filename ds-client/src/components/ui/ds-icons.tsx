@@ -60,3 +60,29 @@ export const DsSelectionIcon        = icon('Selection.svg');
 export const DsTableIcon            = icon('table.svg');
 export const DsTablesTableDesignIcon = icon('tablesTableDesign.svg');
 export const DsToggleFilterIcon     = icon('toggleFilter.svg');
+
+// ── Query Type icons ──────────────────────────────────────────────────────────
+export const DsQueryTypeSelectIcon         = icon('queryTypeSelect.svg');
+export const DsQueryTypeMakeTableIcon      = icon('queryTypeMakeTable.svg');
+export const DsQueryTypeAppendIcon         = icon('QueryTypeAppend.svg');
+export const DsQueryTypeUpdateIcon         = icon('queryTypeUpdate.svg');
+export const DsQueryTypeDeleteIcon         = icon('queryTypeDelete.svg');
+export const DsQueryTypeCrosstabIcon       = icon('queryTypeCrosstab.svg');
+export const DsQueryTypeUnionIcon          = icon('queryTypeUnion.svg');
+export const DsQueryTypePassThroughIcon    = icon('queryTypePass-Through.svg');
+export const DsQueryTypeDataDefinitionIcon = icon('queryTypeDataDefinition.svg');
+
+// ── Query Setup icons ─────────────────────────────────────────────────────────
+export const DsQuerySetupAddTablesIcon      = icon('querySetupAddTables.svg');
+export const DsQuerySetupBuilderIcon        = icon('querySetupBuilder.svg');
+export const DsQuerySetupDeleteColumnsIcon  = icon('querySetupDeleteColumns.svg');
+export const DsQuerySetupDeleteReturnIcon   = icon('querySetupDeleteReturn.svg');
+export const DsQuerySetupDeleteRowsIcon     = icon('querySetupDeleteRows.svg');
+export const DsQuerySetupInsertColumnsIcon  = icon('querySetupInsertColumns.svg');
+export const DsQuerySetupInsertRowsIcon     = icon('querySetupInsertRows.svg');
+
+// ── Show/Hide icons ───────────────────────────────────────────────────────────
+export const DsShowHideParametersIcon    = icon('showHideParameters.svg');
+export const DsShowHidePropertySheetIcon = icon('showHidePropertySheet.svg');
+export const DsShowHideTableNamesIcon    = icon('showHideTableNames.svg');
+export const DsShowHideTotalsIcon        = icon('showHideTotals.svg');

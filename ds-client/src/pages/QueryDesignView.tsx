@@ -6,11 +6,23 @@ import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonContextS
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
 import { Database, Table as TableType } from '@/api';
 import {
-  Play, Grid3X3, Plus, Trash2, ChevronLeft, ChevronRight,
-  Save, Table, Eye, List, Sigma, Code2
+  Play, Plus, ChevronLeft, ChevronRight, Save
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DesignViewIcon } from '@/components/ui/design-view-icon';
+import {
+  DsDatasheetIcon, DsQueriesSQLQueryIcon,
+  DsQueryTypeSelectIcon, DsQueryTypeMakeTableIcon, DsQueryTypeAppendIcon,
+  DsQueryTypeUpdateIcon, DsQueryTypeDeleteIcon, DsQueryTypeCrosstabIcon,
+  DsQueryTypeUnionIcon, DsQueryTypePassThroughIcon, DsQueryTypeDataDefinitionIcon,
+  DsQuerySetupAddTablesIcon, DsQuerySetupBuilderIcon,
+  DsQuerySetupDeleteColumnsIcon, DsQuerySetupDeleteRowsIcon,
+  DsQuerySetupInsertColumnsIcon, DsQuerySetupInsertRowsIcon,
+  DsQuerySetupDeleteReturnIcon,
+  DsShowHideParametersIcon, DsShowHidePropertySheetIcon,
+  DsShowHideTableNamesIcon, DsShowHideTotalsIcon,
+  DsRecordsSaveIcon,
+} from '@/components/ui/ds-icons';
 
 interface QueryColumn {
   tableId: number;
@@ -415,33 +427,40 @@ export function QueryDesignView({
           <>
             <RibbonGroup name="Results">
               <RibbonButton
-                icon={<Play size={22} />}
+                icon={<Play size={32} />}
                 label="Run"
                 onClick={view === 'sql' ? handleRunSql : handleRun}
                 disabled={view === 'sql' ? (!sqlText.trim() || isSqlRunning) : (isRunning || definition.tables.length === 0)}
-                active
               />
             </RibbonGroup>
             <RibbonGroup name="Query Type">
-              <RibbonButton icon={<Table size={22} />} label="Select" active />
-              <RibbonButton icon={<Table size={22} />} label="Make Table" disabled />
-              <RibbonButton icon={<Table size={22} />} label="Append" disabled />
-              <RibbonButton icon={<Table size={22} />} label="Update" disabled />
-              <RibbonButton icon={<Trash2 size={22} />} label="Delete" disabled />
-              <RibbonButton icon={<Grid3X3 size={22} />} label="Crosstab" disabled />
+              <RibbonButton icon={<DsQueryTypeSelectIcon size={32} />} label="Select" active />
+              <RibbonButton icon={<DsQueryTypeMakeTableIcon size={32} />} label="Make Table" disabled />
+              <RibbonButton icon={<DsQueryTypeAppendIcon size={32} />} label="Append" disabled />
+              <RibbonButton icon={<DsQueryTypeUpdateIcon size={32} />} label="Update" disabled />
+              <RibbonButton icon={<DsQueryTypeDeleteIcon size={32} />} label="Delete" disabled />
+              <RibbonButton icon={<DsQueryTypeCrosstabIcon size={32} />} label="Crosstab" disabled />
+              <RibbonButton icon={<DsQueryTypeUnionIcon size={32} />} label="Union" disabled />
+              <RibbonButton icon={<DsQueryTypePassThroughIcon size={32} />} label="Pass-Through" disabled />
+              <RibbonButton icon={<DsQueryTypeDataDefinitionIcon size={32} />} label="Data Definition" disabled />
             </RibbonGroup>
             <RibbonGroup name="Query Setup">
-              <RibbonButton icon={<Plus size={22} />} label="Show Table" onClick={() => {}} disabled={tables.filter(t => !definition.tables.find(dt => dt.tableId === t.id)).length === 0} />
-              <RibbonButton icon={<List size={22} />} label="Return: All" disabled />
-              <RibbonButton icon={<List size={22} />} label="Parameters" disabled />
+              <RibbonButton icon={<DsQuerySetupAddTablesIcon size={32} />} label="Add Tables" onClick={() => {}} disabled={tables.filter(t => !definition.tables.find(dt => dt.tableId === t.id)).length === 0} />
+              <RibbonButton icon={<DsQuerySetupDeleteReturnIcon size={32} />} label="Return: All" disabled />
+              <RibbonButton icon={<DsQuerySetupInsertRowsIcon size={32} />} label="Insert Rows" disabled />
+              <RibbonButton icon={<DsQuerySetupDeleteRowsIcon size={32} />} label="Delete Rows" disabled />
+              <RibbonButton icon={<DsQuerySetupInsertColumnsIcon size={32} />} label="Insert Columns" disabled />
+              <RibbonButton icon={<DsQuerySetupDeleteColumnsIcon size={32} />} label="Delete Columns" disabled />
+              <RibbonButton icon={<DsQuerySetupBuilderIcon size={32} />} label="Builder" disabled />
             </RibbonGroup>
             <RibbonGroup name="Show/Hide">
-              <RibbonButton icon={<Eye size={22} />} label="Table Names" active />
-              <RibbonButton icon={<Sigma size={22} />} label="Totals" onClick={() => setShowTotals(!showTotals)} active={showTotals} />
-              <RibbonButton icon={<Eye size={22} />} label="Property Sheet" disabled />
+              <RibbonButton icon={<DsShowHideTableNamesIcon size={32} />} label="Table Names" active />
+              <RibbonButton icon={<DsShowHideTotalsIcon size={32} />} label="Totals" onClick={() => setShowTotals(!showTotals)} active={showTotals} />
+              <RibbonButton icon={<DsShowHideParametersIcon size={32} />} label="Parameters" disabled />
+              <RibbonButton icon={<DsShowHidePropertySheetIcon size={32} />} label="Property Sheet" disabled />
             </RibbonGroup>
             <RibbonGroup name="Save">
-              <RibbonButton icon={<Save size={22} />} label="Save" onClick={handleSave} disabled={isSaving} />
+              <RibbonButton icon={<DsRecordsSaveIcon size={32} />} label="Save" onClick={handleSave} disabled={isSaving} />
             </RibbonGroup>
           </>
         )
@@ -458,12 +477,12 @@ export function QueryDesignView({
       pinnedContent={
         <RibbonGroup name="View">
           <RibbonDropdownButton
-            icon={view === 'datasheet' ? <Grid3X3 size={22} /> : view === 'sql' ? <Code2 size={22} /> : <DesignViewIcon size={22} />}
+            icon={view === 'datasheet' ? <DsDatasheetIcon size={22} /> : view === 'sql' ? <DsQueriesSQLQueryIcon size={22} /> : <DesignViewIcon size={22} />}
             label={view === 'sql' ? 'SQL' : view === 'datasheet' ? 'Datasheet' : 'Design'}
           >
             <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" onClick={() => switchView('design')} active={view === 'design'} />
-            <RibbonButton icon={<Grid3X3 size={22} />} label="Datasheet" onClick={() => switchView('datasheet')} active={view === 'datasheet'} />
-            <RibbonButton icon={<Code2 size={22} />} label="SQL" onClick={() => switchView('sql')} active={view === 'sql'} />
+            <RibbonButton icon={<DsDatasheetIcon size={22} />} label="Datasheet" onClick={() => switchView('datasheet')} active={view === 'datasheet'} />
+            <RibbonButton icon={<DsQueriesSQLQueryIcon size={22} />} label="SQL" onClick={() => switchView('sql')} active={view === 'sql'} />
           </RibbonDropdownButton>
         </RibbonGroup>
       }
