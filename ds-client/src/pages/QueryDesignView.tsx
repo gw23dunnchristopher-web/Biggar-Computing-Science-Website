@@ -6,7 +6,7 @@ import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonContextS
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
 import { Database, Table as TableType } from '@/api';
 import {
-  Play, Plus, ChevronLeft, ChevronRight, Save
+  Play, Plus, Trash2, ChevronLeft, ChevronRight, Save
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { DesignViewIcon } from '@/components/ui/design-view-icon';
@@ -194,6 +194,12 @@ export function QueryDesignView({
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [showTotals, setShowTotals] = useState(false);
+  const [showTableRow, setShowTableRow] = useState(true);
+  const [showAddTablesSidebar, setShowAddTablesSidebar] = useState(true);
+  const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
+  const [tablePositions, setTablePositions] = useState<Record<number, { x: number; y: number }>>({});
+  const [returnLimit, setReturnLimit] = useState('All');
+  const dragRef = useRef<{ tableId: number; startX: number; startY: number; origX: number; origY: number } | null>(null);
 
   // SQL view state
   const [sqlText, setSqlText] = useState('');
@@ -251,6 +257,25 @@ export function QueryDesignView({
       columns: [...prev.columns, { tableId, tableName, fieldName, alias: '', show: true, sort: null, criteria: '' }]
     }));
   };
+
+  const handleTableDragStart = useCallback((tableId: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    const pos = tablePositions[tableId] || { x: 0, y: 0 };
+    dragRef.current = { tableId, startX: e.clientX, startY: e.clientY, origX: pos.x, origY: pos.y };
+    const handleMove = (me: MouseEvent) => {
+      if (!dragRef.current) return;
+      const dx = me.clientX - dragRef.current.startX;
+      const dy = me.clientY - dragRef.current.startY;
+      setTablePositions(prev => ({ ...prev, [dragRef.current!.tableId]: { x: dragRef.current!.origX + dx, y: dragRef.current!.origY + dy } }));
+    };
+    const handleUp = () => {
+      dragRef.current = null;
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+    };
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+  }, [tablePositions]);
 
   const handleAddAllFields = (tableId: number, tableName: string) => {
     const td = tableDetails[tableId];
@@ -427,7 +452,7 @@ export function QueryDesignView({
           <>
             <RibbonGroup name="Results">
               <RibbonButton
-                icon={<Play size={32} />}
+                icon={<span className="text-[#C42B1C] font-black text-[28px] leading-none">!</span>}
                 label="Run"
                 onClick={view === 'sql' ? handleRunSql : handleRun}
                 disabled={view === 'sql' ? (!sqlText.trim() || isSqlRunning) : (isRunning || definition.tables.length === 0)}
@@ -440,24 +465,44 @@ export function QueryDesignView({
               <RibbonButton icon={<DsQueryTypeUpdateIcon size={32} />} label="Update" disabled />
               <RibbonButton icon={<DsQueryTypeDeleteIcon size={32} />} label="Delete" disabled />
               <RibbonButton icon={<DsQueryTypeCrosstabIcon size={32} />} label="Crosstab" disabled />
-              <RibbonButton icon={<DsQueryTypeUnionIcon size={32} />} label="Union" disabled />
-              <RibbonButton icon={<DsQueryTypePassThroughIcon size={32} />} label="Pass-Through" disabled />
-              <RibbonButton icon={<DsQueryTypeDataDefinitionIcon size={32} />} label="Data Definition" disabled />
+              <div className="flex flex-col justify-around h-full pb-5 pt-1">
+                <RibbonButton size="small" icon={<DsQueryTypeUnionIcon size={16} />} label="Union" disabled />
+                <RibbonButton size="small" icon={<DsQueryTypePassThroughIcon size={16} />} label="Pass-Through" disabled />
+                <RibbonButton size="small" icon={<DsQueryTypeDataDefinitionIcon size={16} />} label="Data Definition" disabled />
+              </div>
             </RibbonGroup>
             <RibbonGroup name="Query Setup">
-              <RibbonButton icon={<DsQuerySetupAddTablesIcon size={32} />} label="Add Tables" onClick={() => {}} disabled={tables.filter(t => !definition.tables.find(dt => dt.tableId === t.id)).length === 0} />
-              <RibbonButton icon={<DsQuerySetupDeleteReturnIcon size={32} />} label="Return: All" disabled />
-              <RibbonButton icon={<DsQuerySetupInsertRowsIcon size={32} />} label="Insert Rows" disabled />
-              <RibbonButton icon={<DsQuerySetupDeleteRowsIcon size={32} />} label="Delete Rows" disabled />
-              <RibbonButton icon={<DsQuerySetupInsertColumnsIcon size={32} />} label="Insert Columns" disabled />
-              <RibbonButton icon={<DsQuerySetupDeleteColumnsIcon size={32} />} label="Delete Columns" disabled />
-              <RibbonButton icon={<DsQuerySetupBuilderIcon size={32} />} label="Builder" disabled />
+              <RibbonButton icon={<DsQuerySetupAddTablesIcon size={32} />} label="Add Tables" onClick={() => setShowAddTablesSidebar(s => !s)} active={showAddTablesSidebar} />
+              <div className="flex flex-col justify-around h-full pb-5 pt-1">
+                <RibbonButton size="small" icon={<DsQuerySetupInsertRowsIcon size={16} />} label="Insert Rows" disabled />
+                <RibbonButton size="small" icon={<DsQuerySetupDeleteRowsIcon size={16} />} label="Delete Rows" disabled />
+              </div>
+              <div className="flex flex-col justify-around h-full pb-5 pt-1">
+                <RibbonButton size="small" icon={<DsQuerySetupInsertColumnsIcon size={16} />} label="Insert Columns" disabled />
+                <RibbonButton size="small" icon={<DsQuerySetupDeleteColumnsIcon size={16} />} label="Delete Columns" disabled />
+              </div>
+              <div className="flex flex-col justify-around h-full pb-5 pt-1">
+                <RibbonButton size="small" icon={<DsQuerySetupBuilderIcon size={16} />} label="Builder" disabled />
+                <div className="flex items-center gap-1 px-2 py-1 text-xs text-gray-700">
+                  <span>Return:</span>
+                  <select value={returnLimit} onChange={e => setReturnLimit(e.target.value)} className="text-xs border border-gray-300 rounded px-1 py-0.5 bg-white outline-none cursor-pointer">
+                    <option value="5">5</option>
+                    <option value="25">25</option>
+                    <option value="100">100</option>
+                    <option value="5%">5%</option>
+                    <option value="25%">25%</option>
+                    <option value="All">All</option>
+                  </select>
+                </div>
+              </div>
             </RibbonGroup>
             <RibbonGroup name="Show/Hide">
-              <RibbonButton icon={<DsShowHideTableNamesIcon size={32} />} label="Table Names" active />
               <RibbonButton icon={<DsShowHideTotalsIcon size={32} />} label="Totals" onClick={() => setShowTotals(!showTotals)} active={showTotals} />
               <RibbonButton icon={<DsShowHideParametersIcon size={32} />} label="Parameters" disabled />
-              <RibbonButton icon={<DsShowHidePropertySheetIcon size={32} />} label="Property Sheet" disabled />
+              <div className="flex flex-col justify-around h-full pb-5 pt-1">
+                <RibbonButton size="small" icon={<DsShowHidePropertySheetIcon size={16} />} label="Property Sheet" disabled />
+                <RibbonButton size="small" icon={<DsShowHideTableNamesIcon size={16} />} label="Table Names" onClick={() => setShowTableRow(s => !s)} active={showTableRow} />
+              </div>
             </RibbonGroup>
             <RibbonGroup name="Save">
               <RibbonButton icon={<DsRecordsSaveIcon size={32} />} label="Save" onClick={handleSave} disabled={isSaving} />
@@ -477,12 +522,12 @@ export function QueryDesignView({
       pinnedContent={
         <RibbonGroup name="View">
           <RibbonDropdownButton
-            icon={view === 'datasheet' ? <DsDatasheetIcon size={22} /> : view === 'sql' ? <DsQueriesSQLQueryIcon size={22} /> : <DesignViewIcon size={22} />}
+            icon={view === 'datasheet' ? <DsDatasheetIcon size={32} /> : view === 'sql' ? <DsQueriesSQLQueryIcon size={32} /> : <DesignViewIcon size={32} />}
             label={view === 'sql' ? 'SQL' : view === 'datasheet' ? 'Datasheet' : 'Design'}
           >
-            <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" onClick={() => switchView('design')} active={view === 'design'} />
-            <RibbonButton icon={<DsDatasheetIcon size={22} />} label="Datasheet" onClick={() => switchView('datasheet')} active={view === 'datasheet'} />
-            <RibbonButton icon={<DsQueriesSQLQueryIcon size={22} />} label="SQL" onClick={() => switchView('sql')} active={view === 'sql'} />
+            <RibbonButton icon={<DesignViewIcon size={16} />} label="Design" onClick={() => switchView('design')} active={view === 'design'} />
+            <RibbonButton icon={<DsDatasheetIcon size={16} />} label="Datasheet" onClick={() => switchView('datasheet')} active={view === 'datasheet'} />
+            <RibbonButton icon={<DsQueriesSQLQueryIcon size={16} />} label="SQL" onClick={() => switchView('sql')} active={view === 'sql'} />
           </RibbonDropdownButton>
         </RibbonGroup>
       }
@@ -562,50 +607,86 @@ export function QueryDesignView({
 
         {view === 'design' && (
           <div className="flex flex-col flex-1 overflow-hidden">
-            {/* Table pane */}
-            <div className="flex-none h-52 border-b-2 border-gray-400 bg-[#f9f9f9] flex gap-3 p-3 overflow-x-auto">
-              {/* Add Table box */}
-              <div className="flex-none w-40 border border-gray-300 rounded bg-white shadow-sm flex flex-col">
-                <div className="text-xs font-bold text-gray-500 px-2 py-1.5 bg-gray-100 border-b border-gray-300 rounded-t">Add Table</div>
-                <div className="flex-1 overflow-y-auto py-1">
-                  {tables.filter(t => !definition.tables.find(dt => dt.tableId === t.id)).map(t => (
-                    <button key={t.id} onClick={() => handleAddTable(t.id, t.name)} className="w-full text-left px-2 py-1 text-xs hover:bg-red-50 flex items-center gap-1">
-                      <Plus size={10} className="text-[#C42B1C]" />{t.name}
-                    </button>
-                  ))}
-                  {tables.filter(t => !definition.tables.find(dt => dt.tableId === t.id)).length === 0 && (
-                    <div className="text-xs text-gray-400 italic px-2 py-1">All tables added</div>
-                  )}
-                </div>
-              </div>
-
-              {/* Table boxes */}
-              {definition.tables.map(dt => {
-                const td = tableDetails[dt.tableId];
-                return (
-                  <div key={dt.tableId} className="flex-none w-44 border border-gray-400 rounded bg-white shadow flex flex-col">
-                    <div className="flex items-center justify-between bg-[#6c3eb5] text-white px-2 py-1 rounded-t text-xs font-semibold">
-                      <span className="truncate">{dt.tableName}</span>
-                      <button onClick={() => handleRemoveTable(dt.tableId)} className="hover:opacity-70 ml-1 flex-none"><Trash2 size={10} /></button>
-                    </div>
-                    <div className="flex-1 overflow-y-auto">
-                      {td ? (
-                        <>
-                          <button onClick={() => handleAddAllFields(dt.tableId, dt.tableName)} className="w-full text-left px-2 py-1 text-xs italic text-[#6c3eb5] hover:bg-purple-50 border-b border-gray-100">
-                            * (All Fields)
-                          </button>
-                          {[...td.fields].sort((a, b) => a.sortOrder - b.sortOrder).map(f => (
-                            <button key={f.id} onClick={() => handleAddField(dt.tableId, dt.tableName, f.name)} className="w-full text-left px-2 py-1 text-xs hover:bg-purple-50 flex items-center gap-1">
-                              {f.isPrimaryKey && <span className="text-[8px]">🔑</span>}
-                              {f.name}
+            {/* Table pane + Add Tables sidebar */}
+            <div className="flex flex-none h-72 border-b-2 border-gray-400">
+              <div className="flex-1 bg-[#e8e8e8] relative overflow-auto" onClick={() => setSelectedTableId(null)}>
+                {definition.tables.map((dt, idx) => {
+                  const td = tableDetails[dt.tableId];
+                  const pos = tablePositions[dt.tableId] || { x: 16 + idx * 180, y: 16 };
+                  const isSelected = selectedTableId === dt.tableId;
+                  return (
+                    <div
+                      key={dt.tableId}
+                      className={`absolute w-44 border bg-white shadow-sm flex flex-col ${isSelected ? 'border-[#E8A317] ring-2 ring-[#E8A317]/40' : 'border-gray-400'}`}
+                      style={{ left: pos.x, top: pos.y }}
+                      onClick={e => { e.stopPropagation(); setSelectedTableId(dt.tableId); }}
+                    >
+                      <div
+                        className="flex items-center justify-between bg-white border-b border-gray-300 px-2 py-1 text-xs font-semibold text-gray-800 cursor-move select-none"
+                        onMouseDown={e => handleTableDragStart(dt.tableId, e)}
+                      >
+                        <span className="truncate">{dt.tableName}</span>
+                        <button onClick={e => { e.stopPropagation(); handleRemoveTable(dt.tableId); }} className="hover:text-red-500 ml-1 flex-none"><Trash2 size={10} /></button>
+                      </div>
+                      <div className="max-h-36 overflow-y-auto">
+                        {td ? (
+                          <>
+                            <button onClick={() => handleAddAllFields(dt.tableId, dt.tableName)} className="w-full text-left px-2 py-1 text-xs italic text-gray-500 hover:bg-blue-50 border-b border-gray-100 bg-red-50/40">
+                              *
                             </button>
-                          ))}
-                        </>
-                      ) : <div className="text-xs text-gray-400 p-2">Loading...</div>}
+                            {[...td.fields].sort((a, b) => a.sortOrder - b.sortOrder).map(f => (
+                              <button key={f.id} onClick={() => handleAddField(dt.tableId, dt.tableName, f.name)} className="w-full text-left px-2 py-1 text-xs hover:bg-blue-50 flex items-center gap-1">
+                                {f.isPrimaryKey && <span className="text-[8px]">🔑</span>}
+                                {f.name}
+                              </button>
+                            ))}
+                          </>
+                        ) : <div className="text-xs text-gray-400 p-2">Loading...</div>}
+                      </div>
                     </div>
+                  );
+                })}
+                {definition.tables.length === 0 && (
+                  <div className="flex items-center justify-center h-full text-sm text-gray-400 italic">Add tables using the sidebar or the "Add Tables" button</div>
+                )}
+              </div>
+              {showAddTablesSidebar && (
+                <div className="w-48 border-l border-gray-400 bg-white flex flex-col flex-none">
+                  <div className="flex items-center justify-between px-2 py-1.5 bg-gray-50 border-b border-gray-300 text-xs font-semibold text-gray-700">
+                    <span>Add Tables</span>
+                    <button onClick={() => setShowAddTablesSidebar(false)} className="text-gray-400 hover:text-gray-600">✕</button>
                   </div>
-                );
-              })}
+                  <div className="flex items-center gap-1 px-2 py-1 border-b border-gray-200 text-[10px] text-gray-500">
+                    <span className="font-semibold text-gray-700 border-b border-[#C42B1C] pb-0.5">Tables</span>
+                  </div>
+                  <div className="flex-1 overflow-y-auto py-0.5">
+                    {tables.map(t => {
+                      const alreadyAdded = !!definition.tables.find(dt => dt.tableId === t.id);
+                      return (
+                        <button
+                          key={t.id}
+                          onClick={() => !alreadyAdded && handleAddTable(t.id, t.name)}
+                          className={`w-full text-left px-2 py-1 text-xs ${alreadyAdded ? 'bg-[#C42B1C] text-white' : 'hover:bg-red-50 text-gray-700'}`}
+                        >
+                          {t.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="px-2 py-1.5 border-t border-gray-200">
+                    <button
+                      onClick={() => {
+                        const available = tables.filter(t => !definition.tables.find(dt => dt.tableId === t.id));
+                        if (available.length > 0) handleAddTable(available[0].id, available[0].name);
+                      }}
+                      disabled={tables.filter(t => !definition.tables.find(dt => dt.tableId === t.id)).length === 0}
+                      className="w-full text-xs py-1 px-2 border border-gray-300 rounded bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Add Selected Tables
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* QBE Grid */}
@@ -658,13 +739,14 @@ export function QueryDesignView({
                         </td>
                       ))}
                     </tr>
-                    {/* Table row */}
+                    {showTableRow && (
                     <tr>
                       <td className="bg-[#eee] border border-gray-300 px-2 py-1 font-semibold text-gray-600 sticky left-0 z-10">Table:</td>
                       {definition.columns.map((col, idx) => (
                         <td key={idx} className="border border-gray-300 px-1 py-0.5 text-gray-500">{col.tableName}</td>
                       ))}
                     </tr>
+                    )}
                     {/* Sort row */}
                     <tr>
                       <td className="bg-[#eee] border border-gray-300 px-2 py-1 font-semibold text-gray-600 sticky left-0 z-10">Sort:</td>

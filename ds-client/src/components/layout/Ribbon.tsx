@@ -403,7 +403,7 @@ export function RibbonButton({
       disabled={disabled}
       onClick={onClick}
       title={titleProp || label}
-      className={`flex flex-col items-center justify-start w-[96px] h-[76px] p-0.5 rounded transition-all duration-150
+      className={`flex flex-col items-center justify-start w-[72px] h-[76px] p-0.5 rounded transition-all duration-150
         ${disabled ? 'opacity-35 cursor-not-allowed grayscale' : 'hover:bg-red-50 hover:border-red-200 active:bg-red-100 cursor-pointer'}
         ${active ? 'bg-red-100 border border-red-300' : 'border border-transparent'}
         text-gray-700`}
@@ -474,7 +474,7 @@ export function RibbonViewSplitButton({
   // Large: icon half is a direct action button; label half opens dropdown
   return (
     <div
-      className={`flex flex-col items-center w-[96px] h-[76px] rounded border border-transparent overflow-hidden
+      className={`flex flex-col items-center w-[72px] h-[76px] rounded border border-transparent overflow-hidden
         ${disabled ? 'opacity-35 cursor-not-allowed grayscale' : ''}`}
     >
       {/* Icon — direct navigation */}
@@ -594,7 +594,7 @@ export function RibbonDropdownButton({
       <DropdownMenuTrigger disabled={disabled} asChild>
         <button
           disabled={disabled}
-          className={`flex flex-col items-center justify-start w-[96px] h-[76px] p-0.5 rounded transition-all duration-150
+          className={`flex flex-col items-center justify-start w-[72px] h-[76px] p-0.5 rounded transition-all duration-150
             ${disabled ? 'opacity-35 cursor-not-allowed grayscale' : 'hover:bg-red-50 hover:border-red-200 active:bg-red-100 cursor-pointer'}
             border border-transparent text-gray-700`}
         >
