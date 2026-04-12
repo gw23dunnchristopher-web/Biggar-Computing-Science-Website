@@ -403,13 +403,13 @@ export function RibbonButton({
       disabled={disabled}
       onClick={onClick}
       title={titleProp || label}
-      className={`flex flex-col items-center justify-start w-[68px] h-[68px] p-1 rounded transition-all duration-150
+      className={`flex flex-col items-center justify-start w-[80px] h-[76px] p-1 rounded transition-all duration-150
         ${disabled ? 'opacity-35 cursor-not-allowed grayscale' : 'hover:bg-red-50 hover:border-red-200 active:bg-red-100 cursor-pointer'}
         ${active ? 'bg-red-100 border border-red-300' : 'border border-transparent'}
         text-gray-700`}
     >
       <div className={`text-[22px] mb-0.5 mt-1 ${active ? 'text-[#9B2118]' : 'text-[#C42B1C]'}`}>{icon}</div>
-      <span className="text-[10px] leading-[1.2] text-center w-full line-clamp-2 px-0.5">{label}</span>
+      <span className="text-[10px] leading-[1.2] text-center w-full line-clamp-3 px-0.5">{label}</span>
     </button>
   );
 }
@@ -474,7 +474,7 @@ export function RibbonViewSplitButton({
   // Large: icon half is a direct action button; label half opens dropdown
   return (
     <div
-      className={`flex flex-col items-center w-[68px] h-[68px] rounded border border-transparent overflow-hidden
+      className={`flex flex-col items-center w-[80px] h-[76px] rounded border border-transparent overflow-hidden
         ${disabled ? 'opacity-35 cursor-not-allowed grayscale' : ''}`}
     >
       {/* Icon — direct navigation */}
@@ -594,12 +594,12 @@ export function RibbonDropdownButton({
       <DropdownMenuTrigger disabled={disabled} asChild>
         <button
           disabled={disabled}
-          className={`flex flex-col items-center justify-start w-[68px] h-[68px] p-1 rounded transition-all duration-150
+          className={`flex flex-col items-center justify-start w-[80px] h-[76px] p-1 rounded transition-all duration-150
             ${disabled ? 'opacity-35 cursor-not-allowed grayscale' : 'hover:bg-red-50 hover:border-red-200 active:bg-red-100 cursor-pointer'}
             border border-transparent text-gray-700`}
         >
           <div className="text-[22px] mb-0.5 mt-1 text-[#C42B1C]">{icon}</div>
-          <span className="text-[10px] leading-[1.2] text-center w-full line-clamp-2 px-0.5">{label}</span>
+          <span className="text-[10px] leading-[1.2] text-center w-full line-clamp-3 px-0.5">{label}</span>
           <ChevronDown className="w-3 h-3 text-gray-400 mt-auto mb-0.5" />
         </button>
       </DropdownMenuTrigger>
