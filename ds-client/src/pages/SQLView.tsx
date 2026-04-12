@@ -525,36 +525,6 @@ export function SQLView({
               Clear
             </button>
             <span className="text-xs text-gray-400 ml-1">Ctrl+Enter or F5 to run</span>
-            {/* SQL keyword helpers */}
-            <div className="ml-3 flex items-center gap-1 flex-wrap">
-              {[
-                { kw: 'SELECT', color: 'text-blue-700' },
-                { kw: 'FROM', color: 'text-blue-700' },
-                { kw: 'WHERE', color: 'text-blue-700' },
-                { kw: 'ORDER BY', color: 'text-blue-700' },
-                { kw: 'GROUP BY', color: 'text-blue-700' },
-                { kw: 'HAVING', color: 'text-blue-700' },
-                { kw: 'JOIN', color: 'text-blue-700' },
-                { kw: 'AND', color: 'text-blue-700' },
-                { kw: 'OR', color: 'text-blue-700' },
-                { kw: 'LIKE', color: 'text-blue-700' },
-                { kw: 'IN', color: 'text-blue-700' },
-                { kw: 'COUNT(*)', color: 'text-blue-700' },
-                { kw: 'INSERT INTO', color: 'text-green-700' },
-                { kw: 'VALUES', color: 'text-green-700' },
-                { kw: 'UPDATE', color: 'text-amber-700' },
-                { kw: 'SET', color: 'text-amber-700' },
-                { kw: 'DELETE FROM', color: 'text-red-700' },
-              ].map(({ kw, color }) => (
-                <button
-                  key={kw}
-                  onClick={() => insertText(kw + ' ')}
-                  className={`text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-100 border border-gray-300 ${color} hover:bg-gray-200 transition-colors`}
-                >
-                  {kw}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* AI Marking feedback panel */}
