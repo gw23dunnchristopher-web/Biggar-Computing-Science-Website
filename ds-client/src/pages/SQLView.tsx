@@ -8,7 +8,6 @@ import { Shell } from '@/components/layout/Shell';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Ribbon, RibbonGroup, RibbonButton, RibbonContextSection } from '@/components/layout/Ribbon';
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import {
   Play, Square, Code2, Trash2, ChevronRight, ChevronDown,
@@ -19,7 +18,7 @@ import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
 
 
-/** Syntax-highlight an SQL string, returning an HTML string (dark theme). */
+/** Syntax-highlight an SQL string, returning an HTML string (light theme). */
 function highlightSQL(text: string): string {
   const KEYWORDS = new Set([
     'SELECT','FROM','WHERE','AND','OR','NOT','ORDER','BY','ASC','DESC',
@@ -39,9 +38,9 @@ function highlightSQL(text: string): string {
       if (m === '&') return '&amp;';
       if (m === '<') return '&lt;';
       if (m === '>') return '&gt;';
-      if (/^\d/.test(m)) return `<span style="color:#b5cea8">${m}</span>`;
-      if (KEYWORDS.has(m.toUpperCase())) return `<span style="color:#569cd6;font-weight:500">${m.toUpperCase()}</span>`;
-      return `<span style="color:#9cdcfe">${esc(m)}</span>`;
+      if (/^\d/.test(m)) return `<span style="color:#098658">${m}</span>`;
+      if (KEYWORDS.has(m.toUpperCase())) return `<span style="color:#0000ff;font-weight:600">${m.toUpperCase()}</span>`;
+      return `<span style="color:#1e1e1e">${esc(m)}</span>`;
     });
   }
 
@@ -51,7 +50,7 @@ function highlightSQL(text: string): string {
     if (text[i] === '-' && text[i + 1] === '-') {
       const end = text.indexOf('\n', i);
       const chunk = end === -1 ? text.slice(i) : text.slice(i, end);
-      result += `<span style="color:#6a9955">${esc(chunk)}</span>`;
+      result += `<span style="color:#008000">${esc(chunk)}</span>`;
       i = end === -1 ? text.length : end;
     } else if (text[i] === "'") {
       let j = i + 1;
@@ -60,7 +59,7 @@ function highlightSQL(text: string): string {
         if (text[j] === "'") { j++; break; }
         j++;
       }
-      result += `<span style="color:#ce9178">${esc(text.slice(i, j))}</span>`;
+      result += `<span style="color:#a31515">${esc(text.slice(i, j))}</span>`;
       i = j;
     } else {
       let j = i;
@@ -316,7 +315,7 @@ export function SQLView({
   };
 
   const contextSection: RibbonContextSection = {
-    color: '#1a237e',
+    color: '#C42B1C',
     defaultTab: 'SQL View',
     tabs: [
       {
@@ -371,7 +370,7 @@ export function SQLView({
 
   return (
     <Shell title={db.name} ribbon={ribbonEl} sidebar={sidebarEl}>
-      <div className="flex h-full bg-[#f3f2f1] overflow-hidden">
+      <div className="flex h-full bg-white overflow-hidden">
 
         {/* ── Schema Browser ─────────────────────────────────────── */}
         <div className="w-52 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col overflow-hidden">
@@ -462,34 +461,20 @@ export function SQLView({
             </div>
           )}
 
-          {/* Editor header */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1a237e] text-white text-xs">
-            <Code2 size={14} />
-            <span className="font-medium">SQL Query Editor</span>
-            <span className="text-red-300 ml-1">· SELECT · INSERT · UPDATE · DELETE</span>
-            <div className="ml-auto flex items-center gap-2 text-red-200 text-[11px]">
-              <span>Ctrl+Enter to run</span>
-              <span>·</span>
-              <span>F5 to run</span>
-              <span>·</span>
-              <span>Click schema fields to insert</span>
-            </div>
-          </div>
-
           {/* Editor area */}
-          <div className="flex bg-[#1e1e1e] border-b border-gray-700 overflow-y-auto" style={{ minHeight: '180px', maxHeight: '320px' }}>
+          <div className="flex bg-white border-b border-gray-300 overflow-y-auto" style={{ minHeight: '180px', maxHeight: '320px' }}>
             {/* Line numbers */}
-            <div className="flex-shrink-0 select-none bg-[#1e1e1e] text-gray-500 text-xs font-mono py-3 pl-3 pr-2 text-right leading-[22px]" style={{ minWidth: '36px' }}>
+            <div className="flex-shrink-0 select-none bg-[#f5f5f5] border-r border-gray-300 text-gray-400 text-xs font-mono py-3 pl-3 pr-2 text-right leading-[22px]" style={{ minWidth: '36px' }}>
               {lines.map((_, i) => (
                 <div key={i}>{i + 1}</div>
               ))}
             </div>
             {/* Editor wrapper: syntax highlight overlay + transparent textarea */}
             <div className="flex-1 relative">
-              {/* Syntax highlight backdrop (dark theme) */}
+              {/* Syntax highlight backdrop (light theme) */}
               <div
                 ref={highlightRef}
-                className="absolute inset-0 text-sm font-mono py-3 pr-3 leading-[22px] whitespace-pre-wrap break-words pointer-events-none overflow-hidden text-gray-100"
+                className="absolute inset-0 text-sm font-mono py-3 px-2 leading-[22px] whitespace-pre-wrap break-words pointer-events-none overflow-hidden text-gray-900 bg-white"
                 dangerouslySetInnerHTML={{ __html: highlightSQL(sql) + '\u200b' }}
                 aria-hidden
               />
@@ -506,68 +491,65 @@ export function SQLView({
                   }
                 }}
                 spellCheck={false}
-                className="absolute inset-0 w-full h-full bg-transparent text-sm font-mono resize-none outline-none py-3 pr-3 leading-[22px]"
-                style={{ color: 'transparent', caretColor: '#7dd3fc' }}
+                className="absolute inset-0 w-full h-full bg-transparent text-sm font-mono resize-none outline-none py-3 px-2 leading-[22px]"
+                style={{ color: 'transparent', caretColor: '#333' }}
               />
             </div>
           </div>
 
           {/* Run toolbar */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#2d2d2d] border-b border-gray-700">
-            <Button
-              size="sm"
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#f3f2f1] border-b border-gray-300 flex-wrap">
+            <button
               onClick={runQuery}
               disabled={running || !sql.trim()}
-              className="bg-[#388e3c] hover:bg-[#2e7d32] text-white h-7 px-3 text-xs gap-1.5"
+              className="flex items-center gap-1.5 px-3 py-1 bg-[#e1dfdd] border border-gray-400 text-gray-700 text-xs rounded hover:bg-[#d2d0ce] disabled:opacity-50"
             >
-              <Play size={13} />
-              {running ? 'Running…' : 'Run Query'}
-            </Button>
+              <Play size={12} />
+              {running ? 'Running…' : 'Run'}
+            </button>
             {isStudentMode && hasRun && (
-              <Button
-                size="sm"
+              <button
                 onClick={gradeQuery}
                 disabled={grading || !sql.trim()}
-                className="bg-[#6a1b9a] hover:bg-[#4a148c] text-white h-7 px-3 text-xs gap-1.5"
+                className="flex items-center gap-1.5 px-3 py-1 bg-[#e8d5f5] border border-purple-300 text-purple-700 text-xs rounded hover:bg-[#d9bfee] disabled:opacity-50"
               >
-                <Sparkles size={13} />
+                <Sparkles size={12} />
                 {grading ? 'Marking…' : 'Submit for Marking'}
-              </Button>
+              </button>
             )}
-            <Button
-              size="sm"
-              variant="outline"
+            <button
               onClick={() => { setSql(''); setResult(null); setError(null); setHasRun(false); setGradingFeedback(null); editorRef.current?.focus(); }}
-              className="h-7 px-3 text-xs border-gray-600 text-gray-300 hover:text-white hover:bg-gray-700 bg-transparent gap-1.5"
+              className="flex items-center gap-1.5 px-3 py-1 bg-[#e1dfdd] border border-gray-400 text-gray-700 text-xs rounded hover:bg-[#d2d0ce]"
             >
               <Trash2 size={12} />
               Clear
-            </Button>
+            </button>
+            <span className="text-xs text-gray-400 ml-1">Ctrl+Enter or F5 to run</span>
             {/* SQL keyword helpers */}
             <div className="ml-3 flex items-center gap-1 flex-wrap">
               {[
-                { kw: 'SELECT', color: 'text-cyan-300' },
-                { kw: 'FROM', color: 'text-cyan-300' },
-                { kw: 'WHERE', color: 'text-cyan-300' },
-                { kw: 'ORDER BY', color: 'text-cyan-300' },
-                { kw: 'GROUP BY', color: 'text-cyan-300' },
-                { kw: 'HAVING', color: 'text-cyan-300' },
-                { kw: 'JOIN', color: 'text-cyan-300' },
-                { kw: 'AND', color: 'text-cyan-300' },
-                { kw: 'OR', color: 'text-cyan-300' },
-                { kw: 'LIKE', color: 'text-cyan-300' },
-                { kw: 'IN', color: 'text-cyan-300' },
-                { kw: 'COUNT(*)', color: 'text-cyan-300' },
-                { kw: 'INSERT INTO', color: 'text-emerald-300' },
-                { kw: 'VALUES', color: 'text-emerald-300' },
-                { kw: 'UPDATE', color: 'text-yellow-300' },
-                { kw: 'SET', color: 'text-yellow-300' },
-                { kw: 'DELETE FROM', color: 'text-red-300' },
+                { kw: 'SELECT', color: 'text-blue-700' },
+                { kw: 'FROM', color: 'text-blue-700' },
+                { kw: 'WHERE', color: 'text-blue-700' },
+                { kw: 'ORDER BY', color: 'text-blue-700' },
+                { kw: 'GROUP BY', color: 'text-blue-700' },
+                { kw: 'HAVING', color: 'text-blue-700' },
+                { kw: 'JOIN', color: 'text-blue-700' },
+                { kw: 'AND', color: 'text-blue-700' },
+                { kw: 'OR', color: 'text-blue-700' },
+                { kw: 'LIKE', color: 'text-blue-700' },
+                { kw: 'IN', color: 'text-blue-700' },
+                { kw: 'COUNT(*)', color: 'text-blue-700' },
+                { kw: 'INSERT INTO', color: 'text-green-700' },
+                { kw: 'VALUES', color: 'text-green-700' },
+                { kw: 'UPDATE', color: 'text-amber-700' },
+                { kw: 'SET', color: 'text-amber-700' },
+                { kw: 'DELETE FROM', color: 'text-red-700' },
               ].map(({ kw, color }) => (
                 <button
                   key={kw}
                   onClick={() => insertText(kw + ' ')}
-                  className={`text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-700 ${color} hover:bg-gray-600 transition-colors`}
+                  className={`text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-100 border border-gray-300 ${color} hover:bg-gray-200 transition-colors`}
                 >
                   {kw}
                 </button>
@@ -598,7 +580,7 @@ export function SQLView({
             {!hasRun && (
               <div className="flex-1 flex items-center justify-center text-gray-400 flex-col gap-2">
                 <Code2 size={32} className="text-gray-300" />
-                <p className="text-sm">Write a SQL query and click <strong className="text-[#1a237e]">Run Query</strong> to see results.</p>
+                <p className="text-sm">Write a SQL query and click <strong className="text-gray-700">Run</strong> to see results.</p>
                 <p className="text-xs text-gray-400">Try: <code className="bg-gray-100 px-1 rounded">SELECT * FROM TableName</code> — use <code className="bg-gray-100 px-1 rounded">"double quotes"</code> for names with spaces</p>
               </div>
             )}
@@ -606,7 +588,7 @@ export function SQLView({
             {running && (
               <div className="flex-1 flex items-center justify-center text-gray-400">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-[#1a237e] border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
                   <span className="text-sm">Executing query…</span>
                 </div>
               </div>
@@ -680,7 +662,7 @@ export function SQLView({
                             <tr>
                               <th className="w-8 text-center bg-gray-100 border border-gray-300 px-1 py-1 text-xs text-gray-400 font-normal">#</th>
                               {(result.columns ?? []).map(col => (
-                                <th key={col} className="bg-[#e8eaf6] border border-gray-300 px-3 py-1.5 text-left text-xs font-semibold text-[#1a237e] whitespace-nowrap">
+                                <th key={col} className="bg-[#eee] border border-gray-300 px-3 py-1.5 text-left text-xs font-semibold text-gray-800 whitespace-nowrap">
                                   {col}
                                 </th>
                               ))}
