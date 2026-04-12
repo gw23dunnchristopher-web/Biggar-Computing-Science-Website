@@ -199,7 +199,9 @@ export function QueryDesignView({
   const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
   const [tablePositions, setTablePositions] = useState<Record<number, { x: number; y: number }>>({});
   const [returnLimit, setReturnLimit] = useState('All');
+  const [tablePaneHeight, setTablePaneHeight] = useState(280);
   const dragRef = useRef<{ tableId: number; startX: number; startY: number; origX: number; origY: number } | null>(null);
+  const resizeRef = useRef<{ startY: number; origHeight: number } | null>(null);
 
   // SQL view state
   const [sqlText, setSqlText] = useState('');
@@ -276,6 +278,23 @@ export function QueryDesignView({
     window.addEventListener('mousemove', handleMove);
     window.addEventListener('mouseup', handleUp);
   }, [tablePositions]);
+
+  const handleQbeResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    resizeRef.current = { startY: e.clientY, origHeight: tablePaneHeight };
+    const handleMove = (me: MouseEvent) => {
+      if (!resizeRef.current) return;
+      const next = resizeRef.current.origHeight + (me.clientY - resizeRef.current.startY);
+      setTablePaneHeight(Math.max(180, Math.min(520, next)));
+    };
+    const handleUp = () => {
+      resizeRef.current = null;
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+    };
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+  }, [tablePaneHeight]);
 
   const handleAddAllFields = (tableId: number, tableName: string) => {
     const td = tableDetails[tableId];
@@ -608,7 +627,7 @@ export function QueryDesignView({
         {view === 'design' && (
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* Table pane + Add Tables sidebar */}
-            <div className="flex flex-none h-72 border-b-2 border-gray-400">
+            <div className="flex flex-none border-b-2 border-gray-400" style={{ height: tablePaneHeight }}>
               <div className="flex-1 bg-[#e8e8e8] relative overflow-auto" onClick={() => setSelectedTableId(null)}>
                 {definition.tables.map((dt, idx) => {
                   const td = tableDetails[dt.tableId];
@@ -688,6 +707,10 @@ export function QueryDesignView({
                 </div>
               )}
             </div>
+            <div
+              className="h-2 bg-gray-300 hover:bg-[#C42B1C] cursor-row-resize flex-none"
+              onMouseDown={handleQbeResizeStart}
+            />
 
             {/* QBE Grid */}
             <div className="flex-1 overflow-auto">
@@ -740,12 +763,12 @@ export function QueryDesignView({
                       ))}
                     </tr>
                     {showTableRow && (
-                    <tr>
-                      <td className="bg-[#eee] border border-gray-300 px-2 py-1 font-semibold text-gray-600 sticky left-0 z-10">Table:</td>
-                      {definition.columns.map((col, idx) => (
-                        <td key={idx} className="border border-gray-300 px-1 py-0.5 text-gray-500">{col.tableName}</td>
-                      ))}
-                    </tr>
+                      <tr>
+                        <td className="bg-[#eee] border border-gray-300 px-2 py-1 font-semibold text-gray-600 sticky left-0 z-10">Table:</td>
+                        {definition.columns.map((col, idx) => (
+                          <td key={idx} className="border border-gray-300 px-1 py-0.5 text-gray-500">{col.tableName}</td>
+                        ))}
+                      </tr>
                     )}
                     {/* Sort row */}
                     <tr>
