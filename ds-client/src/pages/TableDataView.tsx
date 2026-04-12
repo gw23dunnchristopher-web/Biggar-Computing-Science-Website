@@ -143,6 +143,8 @@ export function TableDataView({
 
   // Filter menu state
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+  const [filterMenuPos, setFilterMenuPos] = useState({ top: 90, left: 200 });
+  const filterBtnRef = useRef<HTMLDivElement>(null);
   const [filterInputState, setFilterInputState] = useState<{ op: string; label: string; fieldType: string; val: string; val2: string } | null>(null);
 
   // Text formatting state (visual ribbon controls)
@@ -618,10 +620,25 @@ export function TableDataView({
 
               {/* ── Sort & Filter ── */}
               <RibbonGroup name="Sort &amp; Filter">
+                <div ref={filterBtnRef}>
                 <RibbonButton icon={<DsFilterIcon size={32} />} label="Filter"
                   active={!!fieldFilter || filterMenuOpen}
-                  onClick={() => { if (fieldFilter) { setFieldFilter(null); setCurrentPage(1); } else if (filterMenuOpen) { setFilterMenuOpen(false); } else if (selectedFieldName) { setFilterMenuOpen(true); } }}
+                  onClick={() => {
+                    if (fieldFilter) { setFieldFilter(null); setCurrentPage(1); }
+                    else if (filterMenuOpen) { setFilterMenuOpen(false); }
+                    else if (selectedFieldName) {
+                      const rect = filterBtnRef.current?.getBoundingClientRect();
+                      if (rect) {
+                        const dropW = 224;
+                        const left = Math.min(rect.left, window.innerWidth - dropW - 8);
+                        setFilterMenuPos({ top: rect.bottom + 4, left: Math.max(4, left) });
+                      }
+                      setFilterMenuOpen(true);
+                    }
+                  }}
                   disabled={!fieldFilter && !selectedFieldName} />
+              </div>
+
                 <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
                   <RibbonButton size="small" icon={<DsAscendingIcon size={16} />} label="Ascending"
                     onClick={() => { const f = selectedFieldName || sortState?.field; if (f) setSortState({ field: f, dir: 'asc' }); }}
@@ -1005,10 +1022,10 @@ export function TableDataView({
 
       {/* ── Filter Menu Panel ── */}
       {filterMenuOpen && (
-        <div className="fixed inset-0 z-[150]" onClick={() => setFilterMenuOpen(false)}>
+        <div className="fixed inset-0 z-[9999]" onClick={() => setFilterMenuOpen(false)}>
           <div
             className="absolute bg-white border border-gray-300 shadow-xl rounded w-56 text-sm overflow-hidden"
-            style={{ top: 90, left: 200 }}
+            style={{ top: filterMenuPos.top, left: filterMenuPos.left }}
             onClick={e => e.stopPropagation()}
           >
             {(() => {
