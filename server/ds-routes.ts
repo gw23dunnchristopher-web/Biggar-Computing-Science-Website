@@ -102,8 +102,20 @@ function stmtType(sql: string): "select"|"insert"|"update"|"delete"|"other" {
 }
 function safeIdent(name: string) { return name.replace(/[^a-zA-Z0-9_]/g, "_"); }
 function preprocessSql(sql: string, aliasMap: Record<string, string>) {
+  const aliasPlaceholders: string[] = [];
+  sql = sql.replace(/\bAS\s+"([^"]+)"/gi, (_, name) => {
+    aliasPlaceholders.push(name);
+    return `AS __ALIAS_${aliasPlaceholders.length - 1}__`;
+  });
+  sql = sql.replace(/\bAS\s+\[([^\]]+)\]/gi, (_, name) => {
+    aliasPlaceholders.push(name);
+    return `AS __ALIAS_${aliasPlaceholders.length - 1}__`;
+  });
   sql = sql.replace(/"([^"]+)"/g, (_, i) => { const k = i.toLowerCase(); return aliasMap[k] ?? safeIdent(i); });
   sql = sql.replace(/\[([^\]]+)\]/g, (_, i) => { const k = i.toLowerCase(); return aliasMap[k] ?? safeIdent(i); });
+  for (let idx = 0; idx < aliasPlaceholders.length; idx++) {
+    sql = sql.replace(`__ALIAS_${idx}__`, `[${aliasPlaceholders[idx]}]`);
+  }
   return sql;
 }
 
