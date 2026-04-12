@@ -242,8 +242,8 @@ export function TableDataView({
     const strVal = (r: any) => String(r.data[f.field] ?? '');
     const numVal = (r: any) => Number(r.data[f.field]);
     const raw = (r: any) => r.data[(f as any).field];
-    if (f.type === 'eq') return sortedRecords.filter(r => String(raw(r) ?? '') === String(f.value ?? ''));
-    if (f.type === 'ne') return sortedRecords.filter(r => String(raw(r) ?? '') !== String(f.value ?? ''));
+    if (f.type === 'eq') return sortedRecords.filter(r => String(raw(r) ?? '').toLowerCase() === String(f.value ?? '').toLowerCase());
+    if (f.type === 'ne') return sortedRecords.filter(r => String(raw(r) ?? '').toLowerCase() !== String(f.value ?? '').toLowerCase());
     if (f.type === 'lt') return sortedRecords.filter(r => numVal(r) < Number(f.value));
     if (f.type === 'lte') return sortedRecords.filter(r => numVal(r) <= Number(f.value));
     if (f.type === 'gt') return sortedRecords.filter(r => numVal(r) > Number(f.value));
@@ -445,7 +445,18 @@ export function TableDataView({
   const applyFilterInput = () => {
     if (!filterInputState || !selectedFieldName) return;
     const { op, fieldType, val, val2 } = filterInputState;
-    const coerce = (v: string) => (fieldType === 'number' || fieldType === 'currency') ? Number(v) : v;
+    const isNumericField = fieldType === 'number' || fieldType === 'currency';
+    const coerce = (v: string) => {
+      if (isNumericField) {
+        if (!v.trim()) return null;
+        return Number(v);
+      }
+      return v;
+    };
+    // Don't apply numeric comparison filters when the value field is blank
+    const numericComparisonOps = ['eq', 'ne', 'lt', 'lte', 'gt', 'gte'];
+    if (isNumericField && numericComparisonOps.includes(op) && !val.trim()) return;
+    if (op === 'between' && isNumericField && (!val.trim() || !val2.trim())) return;
     let filter: FieldFilter = null;
     if (op === 'eq') filter = { type: 'eq', field: selectedFieldName, value: coerce(val) };
     else if (op === 'ne') filter = { type: 'ne', field: selectedFieldName, value: coerce(val) };

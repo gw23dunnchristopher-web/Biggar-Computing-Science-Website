@@ -225,6 +225,13 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
   const handleSave = async () => {
     if (!tableName.trim()) return toast({ title: 'Table name required', variant: 'destructive' });
     if (fields.length === 0) return toast({ title: 'At least one field required', variant: 'destructive' });
+    const trimmedNames = fields.map(f => f.name.trim().toLowerCase()).filter(n => n);
+    if (trimmedNames.length !== new Set(trimmedNames).size) {
+      return toast({ title: 'Duplicate field names', description: 'Each field must have a unique name.', variant: 'destructive' });
+    }
+    if (!fields.some(f => f.isPrimaryKey)) {
+      toast({ title: 'No primary key set', description: 'Consider setting a primary key field. Your table was saved without one.' });
+    }
     try {
       await updateTable.mutateAsync({ databaseId, tableId, data: { name: tableName, fields } });
       toast({ title: 'Table saved' });
@@ -434,19 +441,23 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
                 const toTable = tables.find((t: any) => t.id === toTableId);
                 const fromField = fromTable?.fields?.find((f: any) => f.name === fromFieldName);
                 const toField = toTable?.fields?.find((f: any) => f.name === toFieldName);
-                if (fromField && toField) {
-                  await apiFetch(`/api/ds/databases/${databaseId}/relationships`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                      fromTableId,
-                      fromFieldId: fromField.id,
-                      toTableId,
-                      toFieldId: toField.id,
-                      relationshipType: relType,
-                    }),
-                  });
+                if (!fromField?.id || !toField?.id) {
+                  toast({ title: 'Save the table first', description: 'Please save the table before creating a lookup relationship.', variant: 'destructive' });
+                  return;
                 }
-              } catch {}
+                await apiFetch(`/api/ds/databases/${databaseId}/relationships`, {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    fromTableId,
+                    fromFieldId: fromField.id,
+                    toTableId,
+                    toFieldId: toField.id,
+                    relationshipType: relType,
+                  }),
+                });
+              } catch {
+                toast({ title: 'Failed to create relationship', description: 'The lookup relationship could not be saved.', variant: 'destructive' });
+              }
             }}
           />
         </div>

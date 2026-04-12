@@ -24,6 +24,7 @@ import {
   DsRecordsSaveIcon,
 } from '@/components/ui/ds-icons';
 
+type TotalFn = 'Group By' | 'Sum' | 'Avg' | 'Min' | 'Max' | 'Count' | 'Where' | '';
 interface QueryColumn {
   tableId: number;
   tableName: string;
@@ -32,6 +33,7 @@ interface QueryColumn {
   show: boolean;
   sort: 'asc' | 'desc' | null;
   criteria: string;
+  totalFn?: TotalFn;
 }
 
 interface QueryDefinition {
@@ -144,29 +146,60 @@ function sqlName(name: string): string {
   return /[^a-zA-Z0-9_]/.test(name) ? `"${name}"` : name;
 }
 
+function applyAggregate(fn: TotalFn | undefined, expr: string): string {
+  if (!fn || fn === 'Group By' || fn === '') return expr;
+  const upper = fn.toUpperCase();
+  return `${upper}(${expr})`;
+}
+
 function buildQuerySql(definition: QueryDefinition): string {
   if (definition.tables.length === 0) return '';
   const multiTable = definition.tables.length > 1;
-  const showCols = definition.columns.filter(c => c.show);
+  const hasTotals = definition.columns.some(c => c.totalFn && c.totalFn !== 'Group By' && c.totalFn !== '');
+
+  const fieldRef = (c: QueryColumn) =>
+    multiTable ? `${sqlName(c.tableName)}.${sqlName(c.fieldName)}` : sqlName(c.fieldName);
+
+  // Columns that participate in SELECT (shown, or with an aggregate function that isn't 'Where')
+  const showCols = definition.columns.filter(c => c.show && c.totalFn !== 'Where');
   const selectParts = showCols.length > 0
     ? showCols.map(c => {
-        const field = multiTable ? `${sqlName(c.tableName)}.${sqlName(c.fieldName)}` : sqlName(c.fieldName);
-        return c.alias ? `${field} AS ${sqlName(c.alias)}` : field;
+        const expr = hasTotals ? applyAggregate(c.totalFn, fieldRef(c)) : fieldRef(c);
+        const label = c.alias || (hasTotals && c.totalFn && c.totalFn !== 'Group By' && c.totalFn !== '' ? `${c.totalFn}_${c.fieldName}` : null);
+        return label ? `${expr} AS ${sqlName(label)}` : expr;
       })
     : ['*'];
+
   let sql = `SELECT ${selectParts.join(', ')}\nFROM ${definition.tables.map(t => sqlName(t.tableName)).join(', ')}`;
-  const criteriaCols = definition.columns.filter(c => c.criteria.trim());
-  if (criteriaCols.length > 0) {
-    sql += '\nWHERE ' + criteriaCols.map(c => {
-      const ref = multiTable ? `${sqlName(c.tableName)}.${sqlName(c.fieldName)}` : sqlName(c.fieldName);
-      return `${ref} = ${c.criteria}`;
+
+  // WHERE: criteria columns + 'Where'-totalFn columns
+  const whereCols = definition.columns.filter(c => c.criteria.trim());
+  if (whereCols.length > 0) {
+    sql += '\nWHERE ' + whereCols.map(c => {
+      const ref = fieldRef(c);
+      const crit = c.criteria.trim();
+      // If criteria is a bare word/number without operator prefix, wrap in quotes for string comparison
+      if (/^[=<>!]/.test(crit)) return `${ref} ${crit}`;
+      if (/^".*"$/.test(crit) || /^'.*'$/.test(crit)) return `${ref} = ${crit}`;
+      if (/^\d+(\.\d+)?$/.test(crit)) return `${ref} = ${crit}`;
+      return `${ref} = '${crit.replace(/'/g, "''")}'`;
     }).join('\n  AND ');
   }
+
+  // GROUP BY: columns with 'Group By' totalFn (only when totals are active)
+  if (hasTotals) {
+    const groupByCols = definition.columns.filter(c => !c.totalFn || c.totalFn === 'Group By' || c.totalFn === '');
+    if (groupByCols.length > 0) {
+      sql += '\nGROUP BY ' + groupByCols.map(c => fieldRef(c)).join(', ');
+    }
+  }
+
+  // ORDER BY
   const sortCols = definition.columns.filter(c => c.sort);
   if (sortCols.length > 0) {
     sql += '\nORDER BY ' + sortCols.map(c => {
-      const ref = multiTable ? `${sqlName(c.tableName)}.${sqlName(c.fieldName)}` : sqlName(c.fieldName);
-      return `${ref} ${c.sort === 'asc' ? 'ASC' : 'DESC'}`;
+      const expr = hasTotals ? applyAggregate(c.totalFn, fieldRef(c)) : fieldRef(c);
+      return `${expr} ${c.sort === 'asc' ? 'ASC' : 'DESC'}`;
     }).join(', ');
   }
   return sql;
@@ -838,17 +871,27 @@ export function QueryDesignView({
                     {showTotals && (
                       <tr>
                         <td className="bg-[#eee] border border-gray-300 px-2 py-1 font-semibold text-gray-600 sticky left-0 z-10">Total:</td>
-                        {blankColumns.map((_, idx) => (
+                        {blankColumns.map((col, idx) => (
                           <td key={idx} className="border border-gray-300 px-1 py-0.5">
-                            <select className="w-full text-xs outline-none bg-white border border-gray-200 rounded px-1">
-                              <option>Group By</option>
-                              <option>Sum</option>
-                              <option>Avg</option>
-                              <option>Min</option>
-                              <option>Max</option>
-                              <option>Count</option>
-                              <option>Where</option>
-                            </select>
+                            {col ? (
+                              <select
+                                className="w-full text-xs outline-none bg-white border border-gray-200 rounded px-1"
+                                value={col.totalFn ?? 'Group By'}
+                                onChange={e => updateColumn(idx, { totalFn: e.target.value as TotalFn })}
+                              >
+                                <option value="Group By">Group By</option>
+                                <option value="Sum">Sum</option>
+                                <option value="Avg">Avg</option>
+                                <option value="Min">Min</option>
+                                <option value="Max">Max</option>
+                                <option value="Count">Count</option>
+                                <option value="Where">Where</option>
+                              </select>
+                            ) : (
+                              <select className="w-full text-xs outline-none bg-white border border-gray-200 rounded px-1" disabled>
+                                <option>Group By</option>
+                              </select>
+                            )}
                           </td>
                         ))}
                       </tr>

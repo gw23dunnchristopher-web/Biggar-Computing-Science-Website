@@ -4,7 +4,7 @@ import {
   dsDatabases, dsTables, dsFields, dsRecords,
   dsEmbeds, dsStudentSessions, dsQueries, dsForms, dsReports, dsRelationships
 } from "@shared/ds-schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import crypto from "crypto";
 import alasql from "alasql";
 import { GoogleGenAI } from "@google/genai";
@@ -26,22 +26,58 @@ async function deepCopyDatabase(sourceDatabaseId: number, newUserId: string): Pr
 
   const [newDb] = await db.insert(dsDatabases).values({ name: `[Student Copy] ${sourceDb.name}`, userId: newUserId }).returning();
 
+  // Copy tables, fields, records — track old→new ID mappings for relationships
+  const tableIdMap: Record<number, number> = {};
+  const fieldIdMap: Record<number, number> = {};
+
   const sourceTables = await db.select().from(dsTables).where(eq(dsTables.databaseId, sourceDatabaseId));
   for (const t of sourceTables) {
     const [newTable] = await db.insert(dsTables).values({ name: t.name, databaseId: newDb.id }).returning();
+    tableIdMap[t.id] = newTable.id;
     const fields = await db.select().from(dsFields).where(eq(dsFields.tableId, t.id));
-    if (fields.length > 0) {
-      await db.insert(dsFields).values(fields.map(f => ({
+    for (const f of fields) {
+      const [newField] = await db.insert(dsFields).values({
         name: f.name, fieldType: f.fieldType, isRequired: f.isRequired,
         isPrimaryKey: f.isPrimaryKey, sortOrder: f.sortOrder, tableId: newTable.id,
         caption: f.caption, defaultValue: f.defaultValue, fieldSize: f.fieldSize, description: f.description,
-      })));
+      }).returning();
+      fieldIdMap[f.id] = newField.id;
     }
     const records = await db.select().from(dsRecords).where(eq(dsRecords.tableId, t.id));
     if (records.length > 0) {
       await db.insert(dsRecords).values(records.map(r => ({ tableId: newTable.id, databaseId: newDb.id, data: r.data })));
     }
   }
+
+  // Copy relationships with remapped table/field IDs
+  const sourceRels = await db.select().from(dsRelationships).where(eq(dsRelationships.databaseId, sourceDatabaseId));
+  for (const rel of sourceRels) {
+    const newFromTableId = tableIdMap[rel.fromTableId];
+    const newToTableId = tableIdMap[rel.toTableId];
+    const newFromFieldId = fieldIdMap[rel.fromFieldId];
+    const newToFieldId = fieldIdMap[rel.toFieldId];
+    if (newFromTableId && newToTableId && newFromFieldId && newToFieldId) {
+      await db.insert(dsRelationships).values({
+        databaseId: newDb.id, fromTableId: newFromTableId, fromFieldId: newFromFieldId,
+        toTableId: newToTableId, toFieldId: newToFieldId, relationshipType: rel.relationshipType,
+      });
+    }
+  }
+
+  // Copy queries, forms, reports (definitions reference table/field names, which stay the same)
+  const sourceQueries = await db.select().from(dsQueries).where(eq(dsQueries.databaseId, sourceDatabaseId));
+  for (const q of sourceQueries) {
+    await db.insert(dsQueries).values({ name: q.name, databaseId: newDb.id, definition: q.definition });
+  }
+  const sourceForms = await db.select().from(dsForms).where(eq(dsForms.databaseId, sourceDatabaseId));
+  for (const f of sourceForms) {
+    await db.insert(dsForms).values({ name: f.name, databaseId: newDb.id, definition: f.definition });
+  }
+  const sourceReports = await db.select().from(dsReports).where(eq(dsReports.databaseId, sourceDatabaseId));
+  for (const r of sourceReports) {
+    await db.insert(dsReports).values({ name: r.name, databaseId: newDb.id, definition: r.definition });
+  }
+
   return newDb.id;
 }
 
@@ -203,6 +239,13 @@ export function registerDsRoutes(app: Express) {
   app.delete("/api/ds/databases/:dbId/tables/:tableId", async (req, res) => {
     const databaseId = parseInt(req.params.dbId);
     const tableId = parseInt(req.params.tableId);
+    // Clean up any relationships that reference this table before deleting it
+    await db!.delete(dsRelationships).where(
+      and(
+        eq(dsRelationships.databaseId, databaseId),
+        or(eq(dsRelationships.fromTableId, tableId), eq(dsRelationships.toTableId, tableId))
+      )
+    );
     await db!.delete(dsRecords).where(eq(dsRecords.tableId, tableId));
     await db!.delete(dsFields).where(eq(dsFields.tableId, tableId));
     await db!.delete(dsTables).where(and(eq(dsTables.id, tableId), eq(dsTables.databaseId, databaseId)));
