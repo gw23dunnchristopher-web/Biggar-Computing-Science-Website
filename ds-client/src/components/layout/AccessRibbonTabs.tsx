@@ -62,7 +62,7 @@ export function CreateTabContent({
       <RibbonGroup name="Queries">
         <RibbonButton icon={<DsQueriesQueryWizardIcon size={32} />} label="Query Wizard" onClick={onQueryWizard} disabled={!onQueryWizard} />
         <RibbonButton icon={<DsQueriesQueryWizardIcon size={32} />} label="Query Design" onClick={onCreateQuery} />
-        <RibbonButton icon={<DsQueriesSQLQueryIcon size={32} />} label="SQL Query" onClick={onCreateSqlQuery} disabled={!onCreateSqlQuery} title="Open a blank SQL query editor" />
+        <RibbonButton icon={<DsQueriesSQLQueryIcon size={32} />} label="SQL Query" onClick={onCreateSqlQuery} disabled={!onCreateSqlQuery} title="Open SQL view" />
       </RibbonGroup>
       <RibbonGroup name="Forms">
         <RibbonButton

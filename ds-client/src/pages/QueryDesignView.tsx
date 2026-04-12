@@ -545,14 +545,14 @@ export function QueryDesignView({
       allDatabasesLink={isStudentMode ? undefined : '/'}
       contextSection={isStudentMode ? undefined : contextSection}
       pinnedContent={
-        <RibbonGroup name="View">
+            <RibbonGroup name="View">
           <RibbonDropdownButton
-            icon={view === 'datasheet' ? <DsDatasheetIcon size={32} /> : view === 'sql' ? <DsQueriesSQLQueryIcon size={32} /> : <DesignViewIcon size={32} />}
+            icon={view === 'datasheet' ? <DsDatasheetIcon size={32} /> : view === 'sql' ? <span className="text-[18px] font-semibold leading-none">SQL</span> : <DesignViewIcon size={32} />}
             label={view === 'sql' ? 'SQL' : view === 'datasheet' ? 'Datasheet' : 'Design'}
           >
             <RibbonButton icon={<DesignViewIcon size={16} />} label="Design" onClick={() => switchView('design')} active={view === 'design'} />
             <RibbonButton icon={<DsDatasheetIcon size={16} />} label="Datasheet" onClick={() => switchView('datasheet')} active={view === 'datasheet'} />
-            <RibbonButton icon={<DsQueriesSQLQueryIcon size={16} />} label="SQL" onClick={() => switchView('sql')} active={view === 'sql'} />
+            <RibbonButton icon={<span className="text-[14px] font-semibold leading-none">SQL</span>} label="SQL" onClick={() => switchView('sql')} active={view === 'sql'} />
           </RibbonDropdownButton>
         </RibbonGroup>
       }
