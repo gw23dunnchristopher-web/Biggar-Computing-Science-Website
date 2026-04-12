@@ -18,7 +18,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   tables: { id: number; name: string }[];
   databaseId: number;
-  onFinish: (name: string, definition: any) => void;
+  onFinish: (name: string, definition: any, openMode: 'view' | 'modify') => void;
   apiFetch: (path: string, opts?: RequestInit) => Promise<any>;
 }
 
@@ -114,7 +114,7 @@ export function QueryWizard({ open, onOpenChange, tables, databaseId, onFinish, 
         criteria: ''
       }))
     };
-    onFinish(queryName.trim() || 'Query1', definition);
+    onFinish(queryName.trim() || 'Query1', definition, openMode);
     onOpenChange(false);
   };
 

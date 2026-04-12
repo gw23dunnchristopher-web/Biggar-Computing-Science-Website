@@ -354,14 +354,15 @@ export function DatabaseView() {
     }
   };
 
-  const handleQueryWizardFinish = async (name: string, definition: any) => {
+  const handleQueryWizardFinish = async (name: string, definition: any, openMode: 'view' | 'modify') => {
     try {
       const q = await apiFetch(`/api/ds/databases/${databaseId}/queries`, {
         method: 'POST',
         body: JSON.stringify({ name, definition })
       });
       await loadQueries();
-      setLocation(`/databases/${databaseId}/queries/${q.id}`);
+      const path = `/databases/${databaseId}/queries/${q.id}`;
+      setLocation(openMode === 'view' ? `${path}?view=datasheet` : path);
     } catch { toast({ title: 'Failed to create query from wizard', variant: 'destructive' }); }
   };
 

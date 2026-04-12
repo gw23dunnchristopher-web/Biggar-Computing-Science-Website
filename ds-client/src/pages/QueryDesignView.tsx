@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, useSearch } from 'wouter';
 import { Shell } from '@/components/layout/Shell';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonContextSection } from '@/components/layout/Ribbon';
@@ -54,7 +54,7 @@ interface Props {
   tables: TableType[];
   onDeleteTable?: (id: number) => void;
   isStudentMode?: boolean;
-  initialView?: 'design' | 'sql';
+  initialView?: 'design' | 'sql' | 'datasheet';
   queries?: ItemRow[];
   forms?: ItemRow[];
   reports?: ItemRow[];
@@ -215,9 +215,14 @@ export function QueryDesignView({
   onShare, onSettings
 }: Props) {
   const [, setLocation] = useLocation();
+  const search = useSearch();
   const { toast } = useToast();
 
-  const [view, setView] = useState<'design' | 'datasheet' | 'sql'>(initialView ?? 'design');
+  const urlView = new URLSearchParams(search).get('view');
+  const resolvedInitialView: 'design' | 'datasheet' | 'sql' =
+    urlView === 'datasheet' ? 'datasheet' : (initialView ?? 'design');
+
+  const [view, setView] = useState<'design' | 'datasheet' | 'sql'>(resolvedInitialView);
   const [queryName, setQueryName] = useState('');
   const [definition, setDefinition] = useState<QueryDefinition>({ tables: [], columns: [] });
   const [tableDetails, setTableDetails] = useState<Record<number, TableWithFields>>({});
@@ -253,9 +258,16 @@ export function QueryDesignView({
         setNameInput(q.name);
         const def = q.definition && typeof q.definition === 'object' ? q.definition as QueryDefinition : { tables: [], columns: [] };
         setDefinition({ tables: def.tables || [], columns: def.columns || [] });
-        if (initialView === 'sql') {
+        if (resolvedInitialView === 'sql') {
           const sql = def.tables && def.tables.length > 0 ? buildQuerySql({ tables: def.tables || [], columns: def.columns || [] }) : 'SELECT;';
           setSqlText(sql);
+        } else if (resolvedInitialView === 'datasheet') {
+          // Auto-run the query to show results immediately
+          setIsRunning(true);
+          apiFetch(`/api/ds/databases/${databaseId}/queries/${queryId}/run`, { method: 'POST' })
+            .then(data => { setResults(data); setView('datasheet'); })
+            .catch(() => toast({ title: 'Failed to run query', variant: 'destructive' }))
+            .finally(() => setIsRunning(false));
         }
       })
       .catch(() => toast({ title: 'Failed to load query', variant: 'destructive' }));
