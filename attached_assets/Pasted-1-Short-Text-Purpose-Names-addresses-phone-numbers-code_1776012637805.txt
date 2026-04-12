@@ -1,0 +1,167 @@
+1. Short Text
+Purpose: Names, addresses, phone numbers, codes
+Max size: Up to 255 characters
+
+Key Properties
+
+Field Size — max number of characters allowed
+
+Format — display formatting (e.g., > to force uppercase)
+
+Input Mask — structured input (e.g., phone numbers)
+
+Caption — label shown in forms/reports
+
+Default Value — auto-filled value
+
+Validation Rule / Text — restrict allowed entries
+
+Required — must contain a value
+
+Allow Zero Length — allow ""
+
+Indexed — Yes/No/Duplicates OK
+
+2. Long Text (Memo)
+Purpose: Notes, descriptions, long comments
+Max size: Up to 63,999 characters
+
+Key Properties
+
+Append Only — keeps history of changes
+
+Text Format — Plain Text or Rich Text
+
+Allow Zero Length
+
+Format, Caption, Default Value, Validation Rule, Required
+
+3. Number
+Purpose: Numeric values used in calculations
+Size: 1, 2, 4, or 8 bytes depending on subtype
+
+Key Properties
+
+Field Size — Byte, Integer, Long Integer, Single, Double, Replication ID
+
+Format — General, Fixed, Standard, Scientific
+
+Decimal Places — number of decimal digits
+
+Default Value
+
+Validation Rule / Text
+
+Required
+
+Indexed
+
+4. Large Number
+Purpose: Very large integers (compatible with SQL Server bigint)
+
+Key Properties
+
+Field Size — Large Number (fixed)
+
+Format, Indexed, Required
+
+5. Date/Time
+Purpose: Dates and times
+Size: 8 bytes
+
+Key Properties
+
+Format — Short Date, Long Date, Medium Date, Time formats
+
+Input Mask
+
+Default Value — e.g., Date()
+
+Required
+
+Indexed
+
+6. Currency
+Purpose: Money values, avoids rounding errors
+Size: 8 bytes
+
+Key Properties
+
+Format — Currency, Euro, etc.
+
+Decimal Places
+
+Default Value
+
+Validation Rule
+
+Indexed
+
+7. AutoNumber
+Purpose: Unique record identifiers
+Size: 4 bytes (16 bytes for GUID)
+
+Key Properties
+
+New Values — Increment or Random
+
+Field Size — Long Integer or Replication ID
+
+Indexed — Always Yes (No Duplicates)
+
+8. Yes/No
+Purpose: Boolean values (True/False)
+Size: 1 bit
+
+Key Properties
+
+Format — Yes/No, True/False, On/Off
+
+Default Value
+
+Required
+
+9. OLE Object
+Purpose: Embedded files (Word docs, images, etc.)
+Size: Up to 1 GB (practically limited by disk)
+
+Key Properties
+
+Caption
+
+Required
+
+10. Hyperlink
+Purpose: URLs, UNC paths
+Size: Up to 64,000 characters
+
+Key Properties
+
+Text Format
+
+Required
+
+Allow Zero Length
+
+11. Attachment
+Purpose: Attach multiple files to a record
+
+Key Properties
+
+Display Control — Attachment
+
+Required
+
+12. Lookup Wizard
+Purpose: Creates dropdown lists from tables or value lists
+
+Key Properties
+
+Row Source Type — Table/Query or Value List
+
+Row Source — the list or query
+
+Bound Column
+
+Column Count / Widths
+

@@ -53,6 +53,51 @@ export function encodeValidation(rule: string, text: string): string | null {
   return '__validation__:' + JSON.stringify({ rule, text });
 }
 
+interface FieldMeta {
+  format?: string;
+  inputMask?: string;
+  numberFieldSize?: string;
+  numberFormat?: string;
+  decimalPlaces?: string;
+  currencyFormat?: string;
+  dateFormat?: string;
+  yesNoFormat?: string;
+  textFormat?: string;
+  appendOnly?: boolean;
+  newValues?: string;
+  autoFieldSize?: string;
+  allowZeroLength?: boolean;
+  indexed?: string;
+  unicodeCompression?: boolean;
+}
+
+export function parseFieldMeta(description: string | null | undefined): FieldMeta {
+  if (!description) return {};
+  if (description.startsWith('__meta__:')) {
+    try { return JSON.parse(description.slice('__meta__:'.length)); } catch { return {}; }
+  }
+  if (description.startsWith('__validation__:')) {
+    try { return (JSON.parse(description.slice('__validation__:'.length))._meta ?? {}); } catch { return {}; }
+  }
+  return {};
+}
+export function encodeFieldMeta(meta: FieldMeta, currentDescription: string | null | undefined): string | null {
+  const cleaned: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(meta)) {
+    if (v !== undefined && v !== '' && v !== false) cleaned[k] = v;
+  }
+  if (currentDescription?.startsWith('__validation__:')) {
+    try {
+      const parsed = JSON.parse(currentDescription.slice('__validation__:'.length));
+      if (Object.keys(cleaned).length === 0) delete parsed._meta;
+      else parsed._meta = cleaned;
+      return '__validation__:' + JSON.stringify(parsed);
+    } catch { /* fall through */ }
+  }
+  if (Object.keys(cleaned).length === 0) return null;
+  return '__meta__:' + JSON.stringify(cleaned);
+}
+
 interface DesignGridProps {
   fields: UpdateFieldRequest[];
   onChange: (fields: UpdateFieldRequest[]) => void;
@@ -281,9 +326,24 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
   const lookupConfig = selectedField ? parseLookupConfig(selectedField.description) : null;
   const calcExpr = selectedField ? parseCalculatedExpr(selectedField.description) : '';
   const validation = selectedField ? parseValidation(selectedField.description) : { rule: '', text: '' };
+  const fieldMeta = selectedField ? parseFieldMeta(selectedField.description) : {};
 
   const updateValidation = (rule: string, text: string) => {
-    updateSelected('description', encodeValidation(rule, text));
+    const encoded = encodeValidation(rule, text);
+    if (encoded && Object.keys(fieldMeta).length > 0) {
+      try {
+        const parsed = JSON.parse(encoded.slice('__validation__:'.length));
+        parsed._meta = fieldMeta;
+        updateSelected('description', '__validation__:' + JSON.stringify(parsed));
+        return;
+      } catch { /* fall through */ }
+    }
+    updateSelected('description', encoded);
+  };
+
+  const updateMeta = (patch: Partial<typeof fieldMeta>) => {
+    const next = { ...fieldMeta, ...patch };
+    updateSelected('description', encodeFieldMeta(next, selectedField?.description));
   };
 
   return (
@@ -863,9 +923,9 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
           <div className="flex-1 overflow-auto">
             <table className="w-full border-collapse text-xs">
               <tbody>
-                {/* Primary Key */}
+                {/* ── Primary Key (all types) ── */}
                 <tr className="border-b border-gray-300 hover:bg-gray-100 bg-yellow-50">
-                  <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-yellow-100 border-r border-gray-300 select-none">
+                  <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-yellow-100 border-r border-gray-300 select-none whitespace-nowrap">
                     <img src={keyIconSrc} alt="Key" className="w-3.5 h-3.5 inline-block mr-1.5 object-contain" />Primary Key
                   </td>
                   <td className="px-2 py-0.5">
@@ -883,64 +943,276 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
                   </td>
                 </tr>
 
-                {/* Field Size — text and longtext */}
-                {(selectedField.fieldType === 'text' || selectedField.fieldType === 'longtext') && (
+                {/* ── SHORT TEXT ── */}
+                {selectedField.fieldType === 'text' && (<>
                   <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Field Size</td>
-                    <td className="px-2 py-0.5">
-                      {selectedField.fieldType === 'text' ? (
-                        <>
-                          <input
-                            type="number" min={1} max={255}
-                            value={selectedField.fieldSize ?? ''}
-                            onChange={e => updateSelected('fieldSize', e.target.value ? parseInt(e.target.value) : null)}
-                            className="w-24 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm"
-                            placeholder="255"
-                          />
-                          <span className="ml-2 text-gray-400">characters (max 255)</span>
-                        </>
-                      ) : (
-                        <span className="text-gray-400 italic">Unlimited (up to 65,535 characters)</span>
-                      )}
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Field Size</td>
+                    <td className="px-2 py-0.5 flex items-center gap-2">
+                      <input type="number" min={1} max={255}
+                        value={selectedField.fieldSize ?? ''}
+                        onChange={e => updateSelected('fieldSize', e.target.value ? parseInt(e.target.value) : null)}
+                        className="w-20 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm"
+                        placeholder="255" />
+                      <span className="text-gray-400">max characters (1–255)</span>
                     </td>
                   </tr>
-                )}
-
-                {/* Field Size — number */}
-                {selectedField.fieldType === 'number' && (
                   <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Field Size</td>
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Format</td>
                     <td className="px-2 py-0.5">
-                      <select className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                      <input value={fieldMeta.format ?? ''} onChange={e => updateMeta({ format: e.target.value })}
+                        className="w-40 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm font-mono"
+                        placeholder='e.g. > for uppercase' />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Input Mask</td>
+                    <td className="px-2 py-0.5">
+                      <input value={fieldMeta.inputMask ?? ''} onChange={e => updateMeta({ inputMask: e.target.value })}
+                        className="w-48 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm font-mono"
+                        placeholder='e.g. 00/00/0000 or (999) 000-0000' />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Caption</td>
+                    <td className="px-2 py-0.5">
+                      <input value={selectedField.caption ?? ''} onChange={e => updateSelected('caption', e.target.value || null)}
+                        className="w-48 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm"
+                        placeholder={selectedField.name} />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Default Value</td>
+                    <td className="px-2 py-0.5">
+                      <input value={selectedField.defaultValue ?? ''} onChange={e => updateSelected('defaultValue', e.target.value || null)}
+                        className="w-48 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm" />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Validation Rule</td>
+                    <td className="px-2 py-0.5">
+                      <input value={validation.rule} onChange={e => updateValidation(e.target.value, validation.text)}
+                        className="w-full max-w-sm bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm font-mono"
+                        placeholder='e.g. "A" Or "B" Or "C"' />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Validation Text</td>
+                    <td className="px-2 py-0.5">
+                      <input value={validation.text} onChange={e => updateValidation(validation.rule, e.target.value)}
+                        disabled={!validation.rule}
+                        className="w-full max-w-sm bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm disabled:opacity-50"
+                        placeholder="Message shown when validation fails" />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Required</td>
+                    <td className="px-2 py-0.5">
+                      <select value={selectedField.isRequired ? 'Yes' : 'No'} onChange={e => updateSelected('isRequired', e.target.value === 'Yes')}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option value="No">No</option><option value="Yes">Yes</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Allow Zero Length</td>
+                    <td className="px-2 py-0.5">
+                      <select value={fieldMeta.allowZeroLength ? 'Yes' : 'No'} onChange={e => updateMeta({ allowZeroLength: e.target.value === 'Yes' })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option value="Yes">Yes</option><option value="No">No</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Indexed</td>
+                    <td className="px-2 py-0.5">
+                      <select value={selectedField.isPrimaryKey ? 'Yes (No Duplicates)' : (fieldMeta.indexed ?? 'No')}
+                        onChange={e => updateMeta({ indexed: e.target.value })}
+                        disabled={selectedField.isPrimaryKey}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm disabled:opacity-50">
+                        <option>No</option>
+                        <option>Yes (Duplicates OK)</option>
+                        <option>Yes (No Duplicates)</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Unicode Compression</td>
+                    <td className="px-2 py-0.5">
+                      <select disabled className="bg-white border border-gray-300 px-2 py-0.5 outline-none text-xs rounded-sm opacity-70"><option>Yes</option></select>
+                    </td>
+                  </tr>
+                </>)}
+
+                {/* ── LONG TEXT ── */}
+                {selectedField.fieldType === 'longtext' && (<>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Append Only</td>
+                    <td className="px-2 py-0.5">
+                      <select value={fieldMeta.appendOnly ? 'Yes' : 'No'} onChange={e => updateMeta({ appendOnly: e.target.value === 'Yes' })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option value="No">No</option><option value="Yes">Yes</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Text Format</td>
+                    <td className="px-2 py-0.5">
+                      <select value={fieldMeta.textFormat ?? 'Plain Text'} onChange={e => updateMeta({ textFormat: e.target.value })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option>Plain Text</option><option>Rich Text</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Allow Zero Length</td>
+                    <td className="px-2 py-0.5">
+                      <select value={fieldMeta.allowZeroLength ? 'Yes' : 'No'} onChange={e => updateMeta({ allowZeroLength: e.target.value === 'Yes' })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option value="Yes">Yes</option><option value="No">No</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Format</td>
+                    <td className="px-2 py-0.5">
+                      <input value={fieldMeta.format ?? ''} onChange={e => updateMeta({ format: e.target.value })}
+                        className="w-48 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm font-mono" placeholder='e.g. > for uppercase' />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Caption</td>
+                    <td className="px-2 py-0.5">
+                      <input value={selectedField.caption ?? ''} onChange={e => updateSelected('caption', e.target.value || null)}
+                        className="w-48 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm" placeholder={selectedField.name} />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Default Value</td>
+                    <td className="px-2 py-0.5">
+                      <input value={selectedField.defaultValue ?? ''} onChange={e => updateSelected('defaultValue', e.target.value || null)}
+                        className="w-48 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm" />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Validation Rule</td>
+                    <td className="px-2 py-0.5">
+                      <input value={validation.rule} onChange={e => updateValidation(e.target.value, validation.text)}
+                        className="w-full max-w-sm bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm font-mono" placeholder='e.g. Is Not Null' />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Validation Text</td>
+                    <td className="px-2 py-0.5">
+                      <input value={validation.text} onChange={e => updateValidation(validation.rule, e.target.value)}
+                        disabled={!validation.rule}
+                        className="w-full max-w-sm bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm disabled:opacity-50"
+                        placeholder="Message shown when validation fails" />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Required</td>
+                    <td className="px-2 py-0.5">
+                      <select value={selectedField.isRequired ? 'Yes' : 'No'} onChange={e => updateSelected('isRequired', e.target.value === 'Yes')}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option value="No">No</option><option value="Yes">Yes</option>
+                      </select>
+                    </td>
+                  </tr>
+                </>)}
+
+                {/* ── NUMBER ── */}
+                {selectedField.fieldType === 'number' && (<>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Field Size</td>
+                    <td className="px-2 py-0.5">
+                      <select value={fieldMeta.numberFieldSize ?? 'Long Integer'} onChange={e => updateMeta({ numberFieldSize: e.target.value })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option>Byte</option>
+                        <option>Integer</option>
                         <option>Long Integer</option>
                         <option>Single</option>
                         <option>Double</option>
-                        <option>Decimal</option>
+                        <option>Replication ID</option>
                       </select>
                     </td>
                   </tr>
-                )}
-
-                {/* Currency format */}
-                {selectedField.fieldType === 'currency' && (
                   <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Format</td>
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Format</td>
                     <td className="px-2 py-0.5">
-                      <select className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
-                        <option>Pound (£ 1,234.56)</option>
-                        <option>Euro (€ 1,234.56)</option>
-                        <option>Dollar ($ 1,234.56)</option>
+                      <select value={fieldMeta.numberFormat ?? 'General Number'} onChange={e => updateMeta({ numberFormat: e.target.value })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option>General Number</option>
+                        <option>Fixed</option>
+                        <option>Standard</option>
+                        <option>Scientific</option>
+                        <option>Percent</option>
                       </select>
                     </td>
                   </tr>
-                )}
-
-                {/* Date/Time format */}
-                {selectedField.fieldType === 'date' && (
                   <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Format</td>
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Decimal Places</td>
                     <td className="px-2 py-0.5">
-                      <select className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                      <select value={fieldMeta.decimalPlaces ?? 'Auto'} onChange={e => updateMeta({ decimalPlaces: e.target.value })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option>Auto</option>
+                        {[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].map(n => <option key={n}>{n}</option>)}
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Default Value</td>
+                    <td className="px-2 py-0.5">
+                      <input value={selectedField.defaultValue ?? ''} onChange={e => updateSelected('defaultValue', e.target.value || null)}
+                        className="w-40 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm" placeholder="0" />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Validation Rule</td>
+                    <td className="px-2 py-0.5">
+                      <input value={validation.rule} onChange={e => updateValidation(e.target.value, validation.text)}
+                        className="w-full max-w-sm bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm font-mono" placeholder='e.g. >0' />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Validation Text</td>
+                    <td className="px-2 py-0.5">
+                      <input value={validation.text} onChange={e => updateValidation(validation.rule, e.target.value)}
+                        disabled={!validation.rule}
+                        className="w-full max-w-sm bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm disabled:opacity-50"
+                        placeholder="Message shown when validation fails" />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Required</td>
+                    <td className="px-2 py-0.5">
+                      <select value={selectedField.isRequired ? 'Yes' : 'No'} onChange={e => updateSelected('isRequired', e.target.value === 'Yes')}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option value="No">No</option><option value="Yes">Yes</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Indexed</td>
+                    <td className="px-2 py-0.5">
+                      <select value={selectedField.isPrimaryKey ? 'Yes (No Duplicates)' : (fieldMeta.indexed ?? 'No')}
+                        onChange={e => updateMeta({ indexed: e.target.value })}
+                        disabled={selectedField.isPrimaryKey}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm disabled:opacity-50">
+                        <option>No</option>
+                        <option>Yes (Duplicates OK)</option>
+                        <option>Yes (No Duplicates)</option>
+                      </select>
+                    </td>
+                  </tr>
+                </>)}
+
+                {/* ── DATE/TIME ── */}
+                {selectedField.fieldType === 'date' && (<>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Format</td>
+                    <td className="px-2 py-0.5">
+                      <select value={fieldMeta.dateFormat ?? ''} onChange={e => updateMeta({ dateFormat: e.target.value })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
                         <option value="">General Date (16/04/2025 15:24:00)</option>
                         <option value="longdate">Long Date (16 April 2025)</option>
                         <option value="mediumdate">Medium Date (16-Apr-25)</option>
@@ -951,183 +1223,309 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
                       </select>
                     </td>
                   </tr>
-                )}
-
-                {/* Yes/No format */}
-                {selectedField.fieldType === 'boolean' && (
                   <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Format</td>
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Input Mask</td>
                     <td className="px-2 py-0.5">
-                      <select className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                      <input value={fieldMeta.inputMask ?? ''} onChange={e => updateMeta({ inputMask: e.target.value })}
+                        className="w-48 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm font-mono"
+                        placeholder='e.g. 00/00/0000' />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Default Value</td>
+                    <td className="px-2 py-0.5">
+                      <input value={selectedField.defaultValue ?? ''} onChange={e => updateSelected('defaultValue', e.target.value || null)}
+                        className="w-48 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm font-mono"
+                        placeholder='e.g. Date()' />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Required</td>
+                    <td className="px-2 py-0.5">
+                      <select value={selectedField.isRequired ? 'Yes' : 'No'} onChange={e => updateSelected('isRequired', e.target.value === 'Yes')}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option value="No">No</option><option value="Yes">Yes</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Indexed</td>
+                    <td className="px-2 py-0.5">
+                      <select value={selectedField.isPrimaryKey ? 'Yes (No Duplicates)' : (fieldMeta.indexed ?? 'No')}
+                        onChange={e => updateMeta({ indexed: e.target.value })}
+                        disabled={selectedField.isPrimaryKey}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm disabled:opacity-50">
+                        <option>No</option>
+                        <option>Yes (Duplicates OK)</option>
+                        <option>Yes (No Duplicates)</option>
+                      </select>
+                    </td>
+                  </tr>
+                </>)}
+
+                {/* ── CURRENCY ── */}
+                {selectedField.fieldType === 'currency' && (<>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Format</td>
+                    <td className="px-2 py-0.5">
+                      <select value={fieldMeta.currencyFormat ?? 'Currency'} onChange={e => updateMeta({ currencyFormat: e.target.value })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option>Currency</option>
+                        <option>Euro</option>
+                        <option>Fixed</option>
+                        <option>Standard</option>
+                        <option>Percent</option>
+                        <option>Scientific</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Decimal Places</td>
+                    <td className="px-2 py-0.5">
+                      <select value={fieldMeta.decimalPlaces ?? 'Auto'} onChange={e => updateMeta({ decimalPlaces: e.target.value })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option>Auto</option>
+                        {[0,1,2,3,4].map(n => <option key={n}>{n}</option>)}
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Default Value</td>
+                    <td className="px-2 py-0.5">
+                      <input value={selectedField.defaultValue ?? ''} onChange={e => updateSelected('defaultValue', e.target.value || null)}
+                        className="w-40 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm" placeholder="0.00" />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Validation Rule</td>
+                    <td className="px-2 py-0.5">
+                      <input value={validation.rule} onChange={e => updateValidation(e.target.value, validation.text)}
+                        className="w-full max-w-sm bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm font-mono" placeholder='e.g. >=0' />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Validation Text</td>
+                    <td className="px-2 py-0.5">
+                      <input value={validation.text} onChange={e => updateValidation(validation.rule, e.target.value)}
+                        disabled={!validation.rule}
+                        className="w-full max-w-sm bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm disabled:opacity-50"
+                        placeholder="Message shown when validation fails" />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Indexed</td>
+                    <td className="px-2 py-0.5">
+                      <select value={selectedField.isPrimaryKey ? 'Yes (No Duplicates)' : (fieldMeta.indexed ?? 'No')}
+                        onChange={e => updateMeta({ indexed: e.target.value })}
+                        disabled={selectedField.isPrimaryKey}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm disabled:opacity-50">
+                        <option>No</option>
+                        <option>Yes (Duplicates OK)</option>
+                        <option>Yes (No Duplicates)</option>
+                      </select>
+                    </td>
+                  </tr>
+                </>)}
+
+                {/* ── AUTONUMBER ── */}
+                {selectedField.fieldType === 'autonumber' && (<>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">New Values</td>
+                    <td className="px-2 py-0.5">
+                      <select value={fieldMeta.newValues ?? 'Increment'} onChange={e => updateMeta({ newValues: e.target.value })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option>Increment</option>
+                        <option>Random</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Field Size</td>
+                    <td className="px-2 py-0.5">
+                      <select value={fieldMeta.autoFieldSize ?? 'Long Integer'} onChange={e => updateMeta({ autoFieldSize: e.target.value })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option>Long Integer</option>
+                        <option>Replication ID</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Caption</td>
+                    <td className="px-2 py-0.5">
+                      <input value={selectedField.caption ?? ''} onChange={e => updateSelected('caption', e.target.value || null)}
+                        className="w-48 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm" placeholder={selectedField.name} />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Indexed</td>
+                    <td className="px-2 py-0.5">
+                      <select disabled className="bg-white border border-gray-300 px-2 py-0.5 outline-none text-xs rounded-sm opacity-50 cursor-not-allowed">
+                        <option>Yes (No Duplicates)</option>
+                      </select>
+                      <span className="ml-2 text-gray-400 italic">Always indexed, no duplicates</span>
+                    </td>
+                  </tr>
+                </>)}
+
+                {/* ── YES/NO ── */}
+                {selectedField.fieldType === 'boolean' && (<>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Format</td>
+                    <td className="px-2 py-0.5">
+                      <select value={fieldMeta.yesNoFormat ?? 'Yes/No'} onChange={e => updateMeta({ yesNoFormat: e.target.value })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
                         <option>Yes/No</option>
                         <option>True/False</option>
                         <option>On/Off</option>
                       </select>
                     </td>
                   </tr>
-                )}
-
-                {/* Number decimal places */}
-                {(selectedField.fieldType === 'number' || selectedField.fieldType === 'currency') && (
                   <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Decimal Places</td>
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Default Value</td>
                     <td className="px-2 py-0.5">
-                      <select className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
-                        <option value="auto">Auto</option>
-                        {[0,1,2,3,4].map(n => <option key={n} value={n}>{n}</option>)}
+                      <select value={selectedField.defaultValue ?? 'No'} onChange={e => updateSelected('defaultValue', e.target.value)}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
                       </select>
                     </td>
                   </tr>
-                )}
-
-                {/* Caption */}
-                <tr className="border-b border-gray-300 hover:bg-gray-100">
-                  <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Caption</td>
-                  <td className="px-2 py-0.5">
-                    <input
-                      value={selectedField.caption ?? ''}
-                      onChange={e => updateSelected('caption', e.target.value || null)}
-                      className="w-full max-w-xs bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm"
-                      placeholder={selectedField.name}
-                    />
-                  </td>
-                </tr>
-
-                {/* Default Value — not for autonumber/calculated/attachment */}
-                {!['autonumber', 'calculated', 'attachment'].includes(selectedField.fieldType) && (
                   <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Default Value</td>
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Required</td>
                     <td className="px-2 py-0.5">
-                      <input
-                        value={selectedField.defaultValue ?? ''}
-                        onChange={e => updateSelected('defaultValue', e.target.value || null)}
-                        className="w-full max-w-xs bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm"
-                        placeholder={selectedField.fieldType === 'boolean' ? 'No' : selectedField.fieldType === 'currency' ? '0.00' : ''}
-                      />
+                      <select value={selectedField.isRequired ? 'Yes' : 'No'} onChange={e => updateSelected('isRequired', e.target.value === 'Yes')}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option value="No">No</option><option value="Yes">Yes</option>
+                      </select>
                     </td>
                   </tr>
-                )}
+                </>)}
 
-                {/* Calculated Expression */}
-                {selectedField.fieldType === 'calculated' && (
+                {/* ── HYPERLINK ── */}
+                {selectedField.fieldType === 'hyperlink' && (<>
                   <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-purple-100 border-r border-gray-300 select-none">Expression</td>
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Caption</td>
                     <td className="px-2 py-0.5">
-                      <input
-                        value={calcExpr}
-                        onChange={e => updateSelected('description', encodeCalculatedExpr(e.target.value))}
-                        className="w-full max-w-lg bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm font-mono"
-                        placeholder='=[FirstName] & " " & [LastName]'
-                      />
-                      <span className="ml-2 text-gray-400">Use =[FieldName] to reference other fields</span>
+                      <input value={selectedField.caption ?? ''} onChange={e => updateSelected('caption', e.target.value || null)}
+                        className="w-48 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm" placeholder={selectedField.name} />
                     </td>
                   </tr>
-                )}
-
-                {/* Lookup config */}
-                {selectedField.fieldType === 'lookup' && (
                   <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-red-100 border-r border-gray-300 select-none">Lookup Source</td>
-                    <td className="px-2 py-0.5 flex items-center gap-2">
-                      <span className="text-xs text-gray-600">
-                        {lookupConfig?.type === 'valuelist'
-                          ? `Value list (${lookupConfig.values?.length ?? 0} items)`
-                          : lookupConfig?.type === 'table'
-                          ? `Table → ${tables.find(t => t.id === lookupConfig.tableId)?.name ?? lookupConfig.tableId}`
-                          : 'Not configured'}
-                      </span>
-                      <button
-                        onClick={() => selectedIndex !== null && openLookupWizard(selectedIndex)}
-                        className="text-xs text-[#C42B1C] underline hover:no-underline"
-                      >
-                        Edit Lookup Wizard…
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Required</td>
+                    <td className="px-2 py-0.5">
+                      <select value={selectedField.isRequired ? 'Yes' : 'No'} onChange={e => updateSelected('isRequired', e.target.value === 'Yes')}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option value="No">No</option><option value="Yes">Yes</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Allow Zero Length</td>
+                    <td className="px-2 py-0.5">
+                      <select value={fieldMeta.allowZeroLength ? 'Yes' : 'No'} onChange={e => updateMeta({ allowZeroLength: e.target.value === 'Yes' })}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option value="Yes">Yes</option><option value="No">No</option>
+                      </select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Unicode Compression</td>
+                    <td className="px-2 py-0.5">
+                      <select disabled className="bg-white border border-gray-300 px-2 py-0.5 outline-none text-xs rounded-sm opacity-70"><option>Yes</option></select>
+                    </td>
+                  </tr>
+                </>)}
+
+                {/* ── ATTACHMENT ── */}
+                {selectedField.fieldType === 'attachment' && (<>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Display Control</td>
+                    <td className="px-2 py-0.5">
+                      <select disabled className="bg-white border border-gray-300 px-2 py-0.5 outline-none text-xs rounded-sm opacity-70"><option>Attachment</option></select>
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Caption</td>
+                    <td className="px-2 py-0.5">
+                      <input value={selectedField.caption ?? ''} onChange={e => updateSelected('caption', e.target.value || null)}
+                        className="w-48 bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm" placeholder={selectedField.name} />
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Required</td>
+                    <td className="px-2 py-0.5">
+                      <select value={selectedField.isRequired ? 'Yes' : 'No'} onChange={e => updateSelected('isRequired', e.target.value === 'Yes')}
+                        className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm">
+                        <option value="No">No</option><option value="Yes">Yes</option>
+                      </select>
+                    </td>
+                  </tr>
+                </>)}
+
+                {/* ── LOOKUP WIZARD ── */}
+                {selectedField.fieldType === 'lookup' && (<>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Row Source Type</td>
+                    <td className="px-2 py-0.5 text-gray-600">
+                      {lookupConfig?.type === 'valuelist' ? 'Value List' : lookupConfig?.type === 'table' ? 'Table/Query' : '—'}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Row Source</td>
+                    <td className="px-2 py-0.5 text-gray-600 truncate max-w-xs">
+                      {lookupConfig?.type === 'valuelist'
+                        ? (lookupConfig.values?.join('; ') || '—')
+                        : lookupConfig?.type === 'table'
+                        ? (tables.find(t => t.id === lookupConfig.tableId)?.name ?? lookupConfig.tableId ?? '—')
+                        : '—'}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Bound Column</td>
+                    <td className="px-2 py-0.5 text-gray-600">
+                      {lookupConfig?.type === 'table' ? (lookupConfig.valueField || '—') : '1'}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Column Count</td>
+                    <td className="px-2 py-0.5 text-gray-600">
+                      {lookupConfig?.type === 'table'
+                        ? (lookupConfig.selectedFields?.length ?? 1)
+                        : lookupConfig?.type === 'valuelist'
+                        ? (lookupConfig.values && lookupConfig.values.length > 0 ? 1 : '—')
+                        : '—'}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none whitespace-nowrap">Allow Multiple Values</td>
+                    <td className="px-2 py-0.5 text-gray-600">
+                      {lookupConfig?.allowMultipleValues ? 'Yes' : 'No'}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300 hover:bg-gray-100">
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-red-100 border-r border-gray-300 select-none whitespace-nowrap">Edit Wizard</td>
+                    <td className="px-2 py-0.5">
+                      <button onClick={() => selectedIndex !== null && openLookupWizard(selectedIndex)}
+                        className="text-xs text-[#C42B1C] underline hover:no-underline">
+                        Open Lookup Wizard…
                       </button>
                     </td>
                   </tr>
-                )}
+                </>)}
 
-                {/* Required */}
-                <tr className="border-b border-gray-300 hover:bg-gray-100">
-                  <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Required</td>
-                  <td className="px-2 py-0.5">
-                    <select
-                      value={selectedField.isRequired ? 'Yes' : 'No'}
-                      onChange={e => updateSelected('isRequired', e.target.value === 'Yes')}
-                      disabled={selectedField.fieldType === 'autonumber' || selectedField.isPrimaryKey}
-                      className="bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <option value="No">No</option>
-                      <option value="Yes">Yes</option>
-                    </select>
-                  </td>
-                </tr>
-
-                {/* Validation Rule */}
-                {!['autonumber', 'calculated', 'attachment', 'lookup'].includes(selectedField.fieldType) && (
+                {/* ── CALCULATED ── */}
+                {selectedField.fieldType === 'calculated' && (<>
                   <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Validation Rule</td>
+                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-purple-100 border-r border-gray-300 select-none whitespace-nowrap">Expression</td>
                     <td className="px-2 py-0.5">
-                      <input
-                        value={validation.rule}
-                        onChange={e => updateValidation(e.target.value, validation.text)}
+                      <input value={calcExpr} onChange={e => updateSelected('description', encodeCalculatedExpr(e.target.value))}
                         className="w-full max-w-lg bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm font-mono"
-                        placeholder='e.g. >0 or "A" Or "B" Or "C"'
-                      />
+                        placeholder='=[FirstName] & " " & [LastName]' />
+                      <span className="ml-2 text-gray-400">Use =[FieldName] to reference other fields</span>
                     </td>
                   </tr>
-                )}
+                </>)}
 
-                {/* Validation Text */}
-                {!['autonumber', 'calculated', 'attachment', 'lookup'].includes(selectedField.fieldType) && (
-                  <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Validation Text</td>
-                    <td className="px-2 py-0.5">
-                      <input
-                        value={validation.text}
-                        onChange={e => updateValidation(validation.rule, e.target.value)}
-                        className="w-full max-w-lg bg-white border border-gray-300 px-2 py-0.5 outline-none focus:border-[#C42B1C] text-xs rounded-sm"
-                        placeholder="Message shown when validation fails"
-                        disabled={!validation.rule}
-                        title={!validation.rule ? 'Enter a Validation Rule first' : ''}
-                      />
-                    </td>
-                  </tr>
-                )}
-
-                {/* Allow Zero Length */}
-                {(selectedField.fieldType === 'text' || selectedField.fieldType === 'longtext') && (
-                  <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Allow Zero Length</td>
-                    <td className="px-2 py-0.5">
-                      <select className="bg-white border border-gray-300 px-2 py-0.5 outline-none text-xs rounded-sm">
-                        <option>Yes</option>
-                        <option>No</option>
-                      </select>
-                    </td>
-                  </tr>
-                )}
-
-                {/* Indexed */}
-                <tr className="border-b border-gray-300 hover:bg-gray-100">
-                  <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Indexed</td>
-                  <td className="px-2 py-0.5">
-                    <select disabled className="bg-white border border-gray-300 px-2 py-0.5 outline-none text-xs rounded-sm opacity-50 cursor-not-allowed">
-                      <option>{selectedField.isPrimaryKey ? 'Yes (No Duplicates)' : 'No'}</option>
-                    </select>
-                  </td>
-                </tr>
-
-                {/* Unicode Compression (text types) */}
-                {['text', 'longtext', 'hyperlink'].includes(selectedField.fieldType) && (
-                  <tr className="border-b border-gray-300 hover:bg-gray-100">
-                    <td className="w-48 px-4 py-1.5 font-medium text-gray-700 bg-gray-200 border-r border-gray-300 select-none">Unicode Compression</td>
-                    <td className="px-2 py-0.5">
-                      <select disabled className="bg-white border border-gray-300 px-2 py-0.5 outline-none text-xs rounded-sm opacity-70">
-                        <option>Yes</option>
-                      </select>
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
