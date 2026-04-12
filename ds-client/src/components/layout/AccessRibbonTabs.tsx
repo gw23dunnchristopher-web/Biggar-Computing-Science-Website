@@ -5,8 +5,8 @@
 import React from 'react';
 import { RibbonGroup, RibbonButton } from './Ribbon';
 import {
-  Settings, GitBranch, BarChart2, Wrench, Upload,
-  PlugZap, FileDown, FileUp, Mail, Download
+  Settings, Upload,
+  PlugZap, FileDown, FileUp, Mail,
 } from 'lucide-react';
 import {
   DsTableIcon, DsTablesTableDesignIcon,
@@ -14,6 +14,8 @@ import {
   DsFormsFormWizardIcon, DsFormsBlankFormIcon, DsFormsFormIcon,
   DsReportsReportWizardIcon, DsReportsReportDesignIcon, DsReportsReportIcon,
   DsRelationshipsIcon,
+  DsAnalyzePerformanceIcon, DsAnalyzeTableIcon, DsAnalyzeDatabaseDocumenterIcon,
+  DsObjectDependenciesIcon, DsCompactAndRepairIcon,
 } from '@/components/ui/ds-icons';
 
 export interface CommonTabsProps {
@@ -147,17 +149,18 @@ export function DatabaseToolsTabContent({
   return (
     <>
       <RibbonGroup name="Tools">
-        <RibbonButton icon={<Wrench size={22} />} label="Compact &amp; Repair" onClick={onCompact} disabled={!onCompact} />
+        <RibbonButton icon={<DsCompactAndRepairIcon size={22} />} label="Compact and Repair Database" onClick={onCompact} disabled={!onCompact} />
         <RibbonButton icon={<PlugZap size={22} />} label="Visual Basic" disabled />
         <RibbonButton icon={<PlugZap size={22} />} label="Run Macro" disabled />
       </RibbonGroup>
       <RibbonGroup name="Relationships">
         <RibbonButton icon={<DsRelationshipsIcon size={32} />} label="Relationships" onClick={onOpenRelationships} disabled={!onOpenRelationships} />
-        <RibbonButton icon={<GitBranch size={22} />} label="Object Dependencies" onClick={onObjectDependencies} disabled={!onObjectDependencies} />
+        <RibbonButton icon={<DsObjectDependenciesIcon size={22} />} label="Object Dependencies" onClick={onObjectDependencies} disabled={!onObjectDependencies} />
       </RibbonGroup>
       <RibbonGroup name="Analyse">
-        <RibbonButton icon={<BarChart2 size={22} />} label="Analyse Table" onClick={onAnalyse} disabled={!onAnalyse} />
-        <RibbonButton icon={<BarChart2 size={22} />} label="Database Documenter" onClick={onDocumenter} disabled={!onDocumenter} />
+        <RibbonButton icon={<DsAnalyzeDatabaseDocumenterIcon size={22} />} label="Database Documenter" onClick={onDocumenter} disabled={!onDocumenter} />
+        <RibbonButton icon={<DsAnalyzePerformanceIcon size={22} />} label="Analyze Performance" disabled />
+        <RibbonButton icon={<DsAnalyzeTableIcon size={22} />} label="Analyse Table" onClick={onAnalyse} disabled={!onAnalyse} />
       </RibbonGroup>
       <RibbonGroup name="Database Settings">
         <RibbonButton icon={<Settings size={32} />} label="Settings" onClick={onSettings} disabled={!onSettings} />
