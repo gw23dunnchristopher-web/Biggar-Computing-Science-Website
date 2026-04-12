@@ -316,9 +316,15 @@ export function QueryDesignView({
     });
   };
 
+  const qbeSlots = 8;
+  const blankColumns = Array.from({ length: qbeSlots }, (_, idx) => definition.columns[idx] ?? null);
+
   const updateColumn = (idx: number, patch: Partial<QueryColumn>) => {
     setDefinition(prev => {
       const cols = [...prev.columns];
+      if (!cols[idx]) {
+        cols[idx] = { tableId: 0, tableName: '', fieldName: '', alias: '', show: true, sort: null, criteria: '' };
+      }
       cols[idx] = { ...cols[idx], ...patch };
       return { ...prev, columns: cols };
     });
@@ -723,14 +729,18 @@ export function QueryDesignView({
                   <thead>
                     <tr>
                       <th className="w-24 bg-[#f3f2f1] border border-gray-300 px-2 py-1 text-left text-gray-600 font-semibold sticky left-0 z-10"></th>
-                      {definition.columns.map((col, idx) => (
-                        <th key={idx} className="min-w-[130px] bg-[#f3f2f1] border border-gray-300 px-1 py-1">
+                      {blankColumns.map((col, idx) => (
+                        <th key={idx} className="min-w-[130px] w-[130px] bg-[#f3f2f1] border border-gray-300 px-1 py-1">
                           <div className="flex items-center gap-0.5 justify-between">
-                            <span className="font-semibold text-gray-700 truncate">{col.alias || col.fieldName}</span>
+                            <span className="font-semibold text-gray-700 truncate">{col ? (col.alias || col.fieldName) : ''}</span>
                             <div className="flex gap-0.5 flex-none">
-                              <button onClick={() => handleMoveColumn(idx, -1)} disabled={idx === 0} className="p-0.5 hover:bg-gray-200 rounded disabled:opacity-30"><ChevronLeft size={10} /></button>
-                              <button onClick={() => handleMoveColumn(idx, 1)} disabled={idx === definition.columns.length - 1} className="p-0.5 hover:bg-gray-200 rounded disabled:opacity-30"><ChevronRight size={10} /></button>
-                              <button onClick={() => handleRemoveColumn(idx)} className="p-0.5 hover:bg-red-100 rounded text-red-400"><Trash2 size={10} /></button>
+                              {col && (
+                                <>
+                                  <button onClick={() => handleMoveColumn(idx, -1)} disabled={idx === 0} className="p-0.5 hover:bg-gray-200 rounded disabled:opacity-30"><ChevronLeft size={10} /></button>
+                                  <button onClick={() => handleMoveColumn(idx, 1)} disabled={idx === definition.columns.length - 1} className="p-0.5 hover:bg-gray-200 rounded disabled:opacity-30"><ChevronRight size={10} /></button>
+                                  <button onClick={() => handleRemoveColumn(idx)} className="p-0.5 hover:bg-red-100 rounded text-red-400"><Trash2 size={10} /></button>
+                                </>
+                              )}
                             </div>
                           </div>
                         </th>
@@ -741,70 +751,80 @@ export function QueryDesignView({
                     {/* Field row */}
                     <tr>
                       <td className="bg-[#eee] border border-gray-300 px-2 py-1 font-semibold text-gray-600 sticky left-0 z-10">Field:</td>
-                      {definition.columns.map((col, idx) => (
+                      {blankColumns.map((col, idx) => (
                         <td key={idx} className="border border-gray-300 px-1 py-0.5">
-                          <select
-                            value={`${col.tableId}::${col.fieldName}`}
-                            onChange={e => {
-                              const [tid, fname] = e.target.value.split('::');
-                              const tableId = parseInt(tid);
-                              const t = definition.tables.find(t => t.tableId === tableId);
-                              if (t) updateColumn(idx, { tableId, tableName: t.tableName, fieldName: fname });
-                            }}
-                            className="w-full text-xs outline-none bg-white border border-gray-200 rounded px-1"
-                          >
-                            {definition.tables.map(dt =>
-                              (tableDetails[dt.tableId]?.fields || []).sort((a, b) => a.sortOrder - b.sortOrder).map(f => (
-                                <option key={`${dt.tableId}::${f.name}`} value={`${dt.tableId}::${f.name}`}>{f.name} ({dt.tableName})</option>
-                              ))
-                            )}
-                          </select>
+                          {col ? (
+                            <select
+                              value={`${col.tableId}::${col.fieldName}`}
+                              onChange={e => {
+                                const [tid, fname] = e.target.value.split('::');
+                                const tableId = parseInt(tid);
+                                const t = definition.tables.find(t => t.tableId === tableId);
+                                if (t) updateColumn(idx, { tableId, tableName: t.tableName, fieldName: fname });
+                              }}
+                              className="w-full text-xs outline-none bg-white border border-gray-200 rounded px-1"
+                            >
+                              {definition.tables.map(dt =>
+                                (tableDetails[dt.tableId]?.fields || []).sort((a, b) => a.sortOrder - b.sortOrder).map(f => (
+                                  <option key={`${dt.tableId}::${f.name}`} value={`${dt.tableId}::${f.name}`}>{f.name} ({dt.tableName})</option>
+                                ))
+                              )}
+                            </select>
+                          ) : (
+                            <input
+                              type="text"
+                              className="w-full text-xs outline-none bg-white border border-gray-200 rounded px-1 py-0.5"
+                              placeholder=""
+                            />
+                          )}
                         </td>
                       ))}
                     </tr>
                     {showTableRow && (
                       <tr>
                         <td className="bg-[#eee] border border-gray-300 px-2 py-1 font-semibold text-gray-600 sticky left-0 z-10">Table:</td>
-                        {definition.columns.map((col, idx) => (
-                          <td key={idx} className="border border-gray-300 px-1 py-0.5 text-gray-500">{col.tableName}</td>
+                        {blankColumns.map((col, idx) => (
+                          <td key={idx} className="border border-gray-300 px-1 py-0.5 text-gray-500">{col?.tableName || ''}</td>
                         ))}
                       </tr>
                     )}
                     {/* Sort row */}
                     <tr>
                       <td className="bg-[#eee] border border-gray-300 px-2 py-1 font-semibold text-gray-600 sticky left-0 z-10">Sort:</td>
-                      {definition.columns.map((col, idx) => (
+                      {blankColumns.map((col, idx) => (
                         <td key={idx} className="border border-gray-300 px-1 py-0.5">
-                          <select value={col.sort || ''} onChange={e => updateColumn(idx, { sort: (e.target.value as any) || null })} className="w-full text-xs outline-none bg-white border border-gray-200 rounded px-1">
-                            <option value="">(not sorted)</option>
-                            <option value="asc">Ascending</option>
-                            <option value="desc">Descending</option>
-                          </select>
+                          {col ? (
+                            <select value={col.sort || ''} onChange={e => updateColumn(idx, { sort: (e.target.value as any) || null })} className="w-full text-xs outline-none bg-white border border-gray-200 rounded px-1">
+                              <option value="">(not sorted)</option>
+                              <option value="asc">Ascending</option>
+                              <option value="desc">Descending</option>
+                            </select>
+                          ) : null}
                         </td>
                       ))}
                     </tr>
                     {/* Show row */}
                     <tr>
                       <td className="bg-[#eee] border border-gray-300 px-2 py-1 font-semibold text-gray-600 sticky left-0 z-10">Show:</td>
-                      {definition.columns.map((col, idx) => (
+                      {blankColumns.map((col, idx) => (
                         <td key={idx} className="border border-gray-300 px-1 py-0.5 text-center">
-                          <input type="checkbox" checked={col.show} onChange={e => updateColumn(idx, { show: e.target.checked })} className="w-3.5 h-3.5 text-red-600" />
+                          {col ? <input type="checkbox" checked={col.show} onChange={e => updateColumn(idx, { show: e.target.checked })} className="w-3.5 h-3.5 text-red-600" /> : null}
                         </td>
                       ))}
                     </tr>
                     {/* Criteria row */}
                     <tr>
                       <td className="bg-[#eee] border border-gray-300 px-2 py-1 font-semibold text-gray-600 sticky left-0 z-10">Criteria:</td>
-                      {definition.columns.map((col, idx) => (
+                      {blankColumns.map((col, idx) => (
                         <td key={idx} className="border border-gray-300 px-0.5 py-0.5">
-                          <input type="text" value={col.criteria} onChange={e => updateColumn(idx, { criteria: e.target.value })} placeholder='e.g. "Smith" or >5' className="w-full text-xs outline-none px-1 py-0.5 bg-white focus:bg-purple-50 border-0" />
+                          {col ? <input type="text" value={col.criteria} onChange={e => updateColumn(idx, { criteria: e.target.value })} placeholder='e.g. "Smith" or >5' className="w-full text-xs outline-none px-1 py-0.5 bg-white focus:bg-purple-50 border-0" /> : <input type="text" className="w-full text-xs outline-none px-1 py-0.5 bg-white border-0" />}
                         </td>
                       ))}
                     </tr>
                     {/* Or row */}
                     <tr>
                       <td className="bg-[#eee] border border-gray-300 px-2 py-1 font-semibold text-gray-400 sticky left-0 z-10">Or:</td>
-                      {definition.columns.map((_, idx) => (
+                      {blankColumns.map((_, idx) => (
                         <td key={idx} className="border border-gray-300 px-0.5 py-0.5">
                           <input type="text" readOnly className="w-full text-xs outline-none px-1 py-0.5 bg-white border-0 text-gray-300" />
                         </td>
@@ -813,9 +833,9 @@ export function QueryDesignView({
                     {/* Alias row */}
                     <tr>
                       <td className="bg-[#eee] border border-gray-300 px-2 py-1 font-semibold text-gray-600 sticky left-0 z-10">Alias:</td>
-                      {definition.columns.map((col, idx) => (
+                      {blankColumns.map((col, idx) => (
                         <td key={idx} className="border border-gray-300 px-0.5 py-0.5">
-                          <input type="text" value={col.alias} onChange={e => updateColumn(idx, { alias: e.target.value })} placeholder={col.fieldName} className="w-full text-xs outline-none px-1 py-0.5 bg-white focus:bg-purple-50 border-0" />
+                          {col ? <input type="text" value={col.alias} onChange={e => updateColumn(idx, { alias: e.target.value })} placeholder={col.fieldName} className="w-full text-xs outline-none px-1 py-0.5 bg-white focus:bg-purple-50 border-0" /> : <input type="text" className="w-full text-xs outline-none px-1 py-0.5 bg-white border-0" />}
                         </td>
                       ))}
                     </tr>
@@ -823,7 +843,7 @@ export function QueryDesignView({
                     {showTotals && (
                       <tr>
                         <td className="bg-[#eee] border border-gray-300 px-2 py-1 font-semibold text-gray-600 sticky left-0 z-10">Total:</td>
-                        {definition.columns.map((_, idx) => (
+                        {blankColumns.map((_, idx) => (
                           <td key={idx} className="border border-gray-300 px-1 py-0.5">
                             <select className="w-full text-xs outline-none bg-white border border-gray-200 rounded px-1">
                               <option>Group By</option>
