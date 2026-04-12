@@ -5,7 +5,7 @@ import { TabBarProvider } from '@/contexts/tab-bar-context';
 import { useGetDatabase, useListTables, useDeleteTable, getListTablesQueryKey, useCreateTable, useUpdateDatabase } from '@/api';
 import { Shell } from '@/components/layout/Shell';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { Ribbon, RibbonGroup, RibbonButton } from '@/components/layout/Ribbon';
+import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton } from '@/components/layout/Ribbon';
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
 import { TableDesignView } from './TableDesignView';
 import { TableDataView } from './TableDataView';
@@ -26,8 +26,118 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useCreateEmbed } from '@/api';
-import { Table, List, LayoutTemplate, FileText } from 'lucide-react';
+import {
+  Table, List, LayoutTemplate, FileText,
+  ClipboardPaste, Scissors, Copy, Paintbrush,
+  Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight,
+  Highlighter, Grid3X3,
+} from 'lucide-react';
+import {
+  DsFilterIcon, DsAscendingIcon, DsDescendingIcon, DsAdvancedFilterIcon,
+  DsSelectionIcon, DsRemoveSortIcon, DsToggleFilterIcon,
+  DsRefreshAllIcon,
+  DsRecordsNewIcon, DsRecordsSaveIcon, DsRecordsSpellingIcon,
+  DsRecordsDeleteIcon, DsRecordsMoreIcon, DsRecordsTotalsIcon,
+  DsFindIcon, DsFindReplaceIcon, DsFindGoToIcon, DsFindSelectIcon,
+} from '@/components/ui/ds-icons';
 
+function BlankHomeTab() {
+  return (
+    <>
+      <RibbonGroup name="Clipboard">
+        <RibbonButton icon={<ClipboardPaste size={32} />} label="Paste" disabled />
+        <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
+          <RibbonButton size="small" icon={<Scissors size={16} />} label="Cut" disabled />
+          <RibbonButton size="small" icon={<Copy size={16} />} label="Copy" disabled />
+          <RibbonButton size="small" icon={<Paintbrush size={16} />} label="Format Painter" disabled />
+        </div>
+      </RibbonGroup>
+
+      <RibbonGroup name="Sort &amp; Filter">
+        <RibbonButton icon={<DsFilterIcon size={32} />} label="Filter" disabled />
+        <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
+          <RibbonButton size="small" icon={<DsAscendingIcon size={16} />} label="Ascending" disabled />
+          <RibbonButton size="small" icon={<DsDescendingIcon size={16} />} label="Descending" disabled />
+          <RibbonDropdownButton compact icon={<DsAdvancedFilterIcon size={16} />} label="Advanced" disabled>
+            <RibbonButton icon={<DsAdvancedFilterIcon size={16} />} label="Advanced Filter/Sort" disabled />
+          </RibbonDropdownButton>
+        </div>
+        <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
+          <RibbonDropdownButton compact icon={<DsSelectionIcon size={16} />} label="Selection" disabled>
+            <RibbonButton icon={<DsSelectionIcon size={16} />} label="Equals" disabled />
+          </RibbonDropdownButton>
+          <RibbonButton size="small" icon={<DsRemoveSortIcon size={16} />} label="Remove Sort" disabled />
+          <RibbonButton size="small" icon={<DsToggleFilterIcon size={16} />} label="Toggle Filter" disabled />
+        </div>
+      </RibbonGroup>
+
+      <RibbonGroup name="Records">
+        <RibbonDropdownButton icon={<DsRefreshAllIcon size={32} />} label="Refresh All" disabled>
+          <RibbonButton icon={<DsRefreshAllIcon size={16} />} label="Refresh" disabled />
+        </RibbonDropdownButton>
+        <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
+          <RibbonButton size="small" icon={<DsRecordsNewIcon size={16} />} label="New" disabled />
+          <RibbonButton size="small" icon={<DsRecordsSaveIcon size={16} />} label="Save" disabled />
+          <RibbonButton size="small" icon={<DsRecordsSpellingIcon size={16} />} label="Spelling" disabled />
+        </div>
+        <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
+          <RibbonDropdownButton compact icon={<DsRecordsDeleteIcon size={16} />} label="Delete" disabled>
+            <RibbonButton icon={<DsRecordsDeleteIcon size={16} />} label="Delete Record" disabled />
+          </RibbonDropdownButton>
+          <RibbonDropdownButton compact icon={<DsRecordsMoreIcon size={16} />} label="More" disabled>
+            <RibbonButton icon={<DsRecordsTotalsIcon size={16} />} label="Totals" disabled />
+          </RibbonDropdownButton>
+        </div>
+      </RibbonGroup>
+
+      <RibbonGroup name="Find">
+        <RibbonButton icon={<DsFindIcon size={32} />} label="Find" disabled />
+        <div className="flex flex-col justify-start gap-0 h-full pt-0.5">
+          <RibbonButton size="small" icon={<DsFindReplaceIcon size={16} />} label="Replace" disabled />
+          <RibbonDropdownButton compact icon={<DsFindGoToIcon size={16} />} label="Go To" disabled>
+            <RibbonButton icon={<DsFindGoToIcon size={16} />} label="First" disabled />
+          </RibbonDropdownButton>
+          <RibbonDropdownButton compact icon={<DsFindSelectIcon size={16} />} label="Select" disabled>
+            <RibbonButton icon={<DsFindSelectIcon size={16} />} label="Select All" disabled />
+          </RibbonDropdownButton>
+        </div>
+      </RibbonGroup>
+
+      <RibbonGroup name="Text Formatting">
+        <div className="flex flex-col gap-1.5 pt-0.5 opacity-40 pointer-events-none">
+          <div className="flex items-center gap-1">
+            <select disabled className="h-7 text-[12px] border border-gray-300 rounded px-1 bg-white min-w-[120px]">
+              <option>Aptos (Detail)</option>
+            </select>
+            <select disabled className="h-7 text-[12px] border border-gray-300 rounded px-1 bg-white w-12">
+              <option>11</option>
+            </select>
+            <span className="w-px h-5 bg-gray-200 mx-0.5" />
+            <button disabled className="w-7 h-7 flex items-center justify-center rounded text-gray-700"><Bold size={14} /></button>
+            <button disabled className="w-7 h-7 flex items-center justify-center rounded italic text-gray-700"><Italic size={14} /></button>
+            <button disabled className="w-7 h-7 flex items-center justify-center rounded underline text-gray-700"><Underline size={14} /></button>
+          </div>
+          <div className="flex items-center gap-1">
+            <button disabled className="w-7 h-7 flex items-center justify-center rounded">
+              <div className="flex flex-col items-center gap-px">
+                <span className="text-[11px] font-bold text-gray-700 leading-none">A</span>
+                <span className="w-4 h-0.5 rounded-full bg-[#C42B1C]" />
+              </div>
+            </button>
+            <button disabled className="w-7 h-7 flex items-center justify-center rounded"><Highlighter size={14} className="text-yellow-500" /></button>
+            <span className="w-px h-5 bg-gray-200 mx-0.5" />
+            <button disabled className="w-7 h-7 flex items-center justify-center rounded text-gray-700"><AlignLeft size={14} /></button>
+            <button disabled className="w-7 h-7 flex items-center justify-center rounded text-gray-700"><AlignCenter size={14} /></button>
+            <button disabled className="w-7 h-7 flex items-center justify-center rounded text-gray-700"><AlignRight size={14} /></button>
+            <span className="w-px h-5 bg-gray-200 mx-0.5" />
+            <button disabled className="w-7 h-7 flex items-center justify-center rounded"><Paintbrush size={14} className="text-gray-600" /></button>
+            <button disabled className="w-7 h-7 flex items-center justify-center rounded"><Grid3X3 size={14} className="text-gray-600" /></button>
+          </div>
+        </div>
+      </RibbonGroup>
+    </>
+  );
+}
 
 async function apiFetch(path: string, opts?: RequestInit) {
   const res = await fetch(path, {
@@ -445,14 +555,7 @@ export function DatabaseView() {
       tabs={[
         {
           name: 'Home',
-          content: (
-            <RibbonGroup name="Create">
-              <RibbonButton icon={<Table size={22} />} label="Table" onClick={handleCreateTable} />
-              <RibbonButton icon={<List size={22} />} label="Query" onClick={handleCreateQuery} />
-              <RibbonButton icon={<LayoutTemplate size={22} />} label="Form" onClick={openCreateForm} />
-              <RibbonButton icon={<FileText size={22} />} label="Report" onClick={openCreateReport} />
-            </RibbonGroup>
-          )
+          content: <BlankHomeTab />,
         },
         { name: 'Create', content: <CreateTabContent {...commonRibbonProps} /> },
         { name: 'External Data', content: <ExternalDataTabContent {...commonRibbonProps} onShare={handleShare} /> },
