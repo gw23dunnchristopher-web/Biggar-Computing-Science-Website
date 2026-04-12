@@ -720,12 +720,7 @@ export function QueryDesignView({
 
             {/* QBE Grid */}
             <div className="flex-1 overflow-auto">
-              {definition.columns.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-sm text-gray-400 italic">
-                  Click a field in the table above, or click "Add Table" to get started
-                </div>
-              ) : (
-                <table className="border-collapse text-xs min-w-full">
+              <table className="border-collapse text-xs min-w-full">
                   <thead>
                     <tr>
                       <th className="w-24 bg-[#f3f2f1] border border-gray-300 px-2 py-1 text-left text-gray-600 font-semibold sticky left-0 z-10"></th>
@@ -860,7 +855,7 @@ export function QueryDesignView({
                     )}
                   </tbody>
                 </table>
-              )}
+              <div className="h-4" />
             </div>
           </div>
         )}
