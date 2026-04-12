@@ -343,7 +343,6 @@ export function RelationshipsView({
                 const fromY = getFieldY(fromTable, rel.fromFieldId, fromPos.y);
                 const toY = getFieldY(toTable, rel.toFieldId, toPos.y);
 
-                // Connect right edge of from-table to left edge of to-table (or vice versa)
                 const fromRight = fromPos.x + TABLE_BOX_WIDTH;
                 const toLeft = toPos.x;
                 const fromLeft = fromPos.x;
@@ -361,43 +360,47 @@ export function RelationshipsView({
                 const isSelected = selectedRel === rel.id;
                 const color = isSelected ? '#e91e63' : '#7b1fa2';
 
+                const relType = rel.relationshipType || 'one-to-many';
+                const fromSymbol = relType === 'many-to-many' ? '∞' : '1';
+                const toSymbol = relType === 'one-to-one' ? '1' : relType === 'many-to-many' ? '∞' : '∞';
+
+                const fromLabelX = x1 + (x1 < x2 ? 8 : -8);
+                const toLabelX = x2 + (x1 < x2 ? -8 : 8);
+
                 return (
                   <g key={rel.id} className="cursor-pointer" style={{ pointerEvents: 'all' }}
                     onClick={() => setSelectedRel(isSelected ? null : rel.id)}>
-                    {/* Invisible thick hit area */}
                     <path
                       d={`M ${x1} ${fromY} C ${cx1} ${fromY}, ${cx2} ${toY}, ${x2} ${toY}`}
                       fill="none" stroke="transparent" strokeWidth="16"
                     />
-                    {/* Visible path */}
                     <path
                       d={`M ${x1} ${fromY} C ${cx1} ${fromY}, ${cx2} ${toY}, ${x2} ${toY}`}
                       fill="none"
                       stroke={color}
                       strokeWidth={isSelected ? 2.5 : 1.5}
-                      strokeDasharray={isSelected ? undefined : undefined}
-                      markerEnd={`url(#arrow-many${isSelected ? '-sel' : ''})`}
                     />
-                    {/* Relationship type label */}
                     <text
-                      x={(x1 + x2) / 2}
-                      y={((fromY + toY) / 2) - 6}
-                      textAnchor="middle"
-                      fontSize="10"
+                      x={fromLabelX}
+                      y={fromY - 6}
+                      textAnchor={x1 < x2 ? 'start' : 'end'}
+                      fontSize="13"
                       fill={color}
-                      fontWeight="600"
+                      fontWeight="700"
                       className="select-none"
                     >
-                      {REL_TYPE_LABELS[rel.relationshipType] || rel.relationshipType}
+                      {fromSymbol}
                     </text>
-                    {/* Field labels */}
-                    <text x={x1 + (x1 < x2 ? 6 : -6)} y={fromY - 3}
-                      fontSize="9" fill={color} textAnchor={x1 < x2 ? 'start' : 'end'} className="select-none">
-                      {fromTable.fields.find(f => f.id === rel.fromFieldId)?.name}
-                    </text>
-                    <text x={x2 + (x1 < x2 ? -6 : 6)} y={toY - 3}
-                      fontSize="9" fill={color} textAnchor={x1 < x2 ? 'end' : 'start'} className="select-none">
-                      {toTable.fields.find(f => f.id === rel.toFieldId)?.name}
+                    <text
+                      x={toLabelX}
+                      y={toY - 6}
+                      textAnchor={x1 < x2 ? 'end' : 'start'}
+                      fontSize="13"
+                      fill={color}
+                      fontWeight="700"
+                      className="select-none"
+                    >
+                      {toSymbol}
                     </text>
                   </g>
                 );

@@ -3,7 +3,7 @@ import { TableWithFields, Record as DbRecord, useCreateRecord, useUpdateRecord, 
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowUp, ArrowDown, Pencil, ChevronDown, Paperclip, ExternalLink, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { parseLookupConfig, parseCalculatedExpr } from '@/components/ui/design-grid';
+import { parseLookupConfig, parseCalculatedExpr, type LookupConfig } from '@/components/ui/design-grid';
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -130,6 +130,42 @@ export function DataGrid({
       };
     }
   }, [focusNewRowRef]);
+
+  const [lookupRecords, setLookupRecords] = useState<Record<number, any[]>>({});
+
+  useEffect(() => {
+    const lookupFields = table.fields.filter(f => f.fieldType === 'lookup');
+    lookupFields.forEach(f => {
+      const cfg = parseLookupConfig(f.description);
+      if (cfg?.type === 'table' && cfg.tableId && !lookupRecords[cfg.tableId]) {
+        fetch(`/api/ds/databases/${databaseId}/tables/${cfg.tableId}/records`)
+          .then(r => r.json())
+          .then(data => {
+            if (Array.isArray(data)) {
+              setLookupRecords(prev => ({ ...prev, [cfg.tableId!]: data }));
+            }
+          })
+          .catch(() => {});
+      }
+    });
+  }, [table.fields, databaseId]);
+
+  const getLookupOptions = (cfg: LookupConfig | null): { value: string; display: string }[] => {
+    if (!cfg) return [];
+    if (cfg.type === 'valuelist') {
+      return (cfg.values || []).map(v => ({ value: v, display: v }));
+    }
+    if (cfg.type === 'table' && cfg.tableId) {
+      const recs = lookupRecords[cfg.tableId] || [];
+      const valField = cfg.valueField || '';
+      const dispField = cfg.displayField || valField;
+      return recs.map(r => ({
+        value: String(r.data?.[valField] ?? ''),
+        display: String(r.data?.[dispField] ?? r.data?.[valField] ?? ''),
+      })).filter(o => o.value);
+    }
+    return [];
+  };
 
   const allFieldsSorted = [...table.fields].sort((a, b) => a.sortOrder - b.sortOrder);
   const fields = allFieldsSorted.filter(f => !hiddenFields.includes(f.name));
@@ -356,6 +392,11 @@ export function DataGrid({
       const field = table.fields.find(f => f.name === fieldName);
       const cfg = parseLookupConfig(field?.description);
       if (cfg?.type === 'valuelist') return String(value);
+      if (cfg?.type === 'table' && cfg.tableId) {
+        const options = getLookupOptions(cfg);
+        const match = options.find(o => o.value === String(value));
+        return match ? match.display : String(value);
+      }
       return String(value);
     }
     return String(value);
@@ -418,7 +459,8 @@ export function DataGrid({
     if (type === 'lookup') {
       const field = table.fields.find(f => f.name === fieldName);
       const cfg = parseLookupConfig(field?.description);
-      if (cfg?.type === 'valuelist' && cfg.values && cfg.values.length > 0) {
+      const options = getLookupOptions(cfg);
+      if (options.length > 0) {
         return (
           <select autoFocus value={value ?? ''}
             onChange={e => { onChange(e.target.value); onCommit(); }}
@@ -426,7 +468,7 @@ export function DataGrid({
             onKeyDown={onKeyDown}
             className={baseInput + ' cursor-pointer'}>
             <option value="">(none)</option>
-            {cfg.values.map((v: string) => <option key={v} value={v}>{v}</option>)}
+            {options.map(o => <option key={o.value} value={o.value}>{o.display}</option>)}
           </select>
         );
       }
@@ -477,14 +519,15 @@ export function DataGrid({
     if (type === 'lookup') {
       const field = table.fields.find(f => f.name === fieldName);
       const cfg = parseLookupConfig(field?.description);
-      if (cfg?.type === 'valuelist' && cfg.values && cfg.values.length > 0) {
+      const options = getLookupOptions(cfg);
+      if (options.length > 0) {
         return (
           <select value={newRowData[fieldName] ?? ''}
             onChange={e => setNewRowData(p => ({ ...p, [fieldName]: e.target.value }))}
             onBlur={handleNewRowSave}
             className="w-full bg-transparent outline-none px-1 text-sm cursor-pointer">
             <option value="">(none)</option>
-            {cfg.values.map((v: string) => <option key={v} value={v}>{v}</option>)}
+            {options.map(o => <option key={o.value} value={o.value}>{o.display}</option>)}
           </select>
         );
       }

@@ -425,8 +425,29 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
             onSelectedIndexChange={setSelectedFieldIndex}
             tables={tables.map((t: any) => ({ id: t.id, name: t.name, fields: t.fields ?? [] }))}
             databaseId={databaseId}
+            tableId={tableId}
             onBeforeTypeChange={onBeforeTypeChange}
             showPropertySheet={showPropertySheet}
+            onCreateRelationship={async (fromTableId, fromFieldName, toTableId, toFieldName, relType) => {
+              try {
+                const fromTable = tables.find((t: any) => t.id === fromTableId);
+                const toTable = tables.find((t: any) => t.id === toTableId);
+                const fromField = fromTable?.fields?.find((f: any) => f.name === fromFieldName);
+                const toField = toTable?.fields?.find((f: any) => f.name === toFieldName);
+                if (fromField && toField) {
+                  await apiFetch(`/api/ds/databases/${databaseId}/relationships`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                      fromTableId,
+                      fromFieldId: fromField.id,
+                      toTableId,
+                      toFieldId: toField.id,
+                      relationshipType: relType,
+                    }),
+                  });
+                }
+              } catch {}
+            }}
           />
         </div>
       </div>

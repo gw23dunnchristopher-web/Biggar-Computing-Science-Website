@@ -12,12 +12,19 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 
-interface LookupConfig {
+export interface LookupConfig {
   type: 'valuelist' | 'table';
   values?: string[];
   tableId?: number;
   valueField?: string;
   displayField?: string;
+  selectedFields?: string[];
+  sortFields?: { field: string; dir: 'asc' | 'desc' }[];
+  label?: string;
+  enableIntegrity?: boolean;
+  cascadeDelete?: boolean;
+  limitToList?: boolean;
+  allowMultipleValues?: boolean;
 }
 
 export function parseLookupConfig(description: string | null | undefined): LookupConfig | null {
@@ -51,10 +58,12 @@ interface DesignGridProps {
   onChange: (fields: UpdateFieldRequest[]) => void;
   selectedIndex?: number | null;
   onSelectedIndexChange?: (i: number | null) => void;
-  tables?: { id: number; name: string; fields?: { name: string }[] }[];
+  tables?: { id: number; name: string; fields?: { id?: number; name: string }[] }[];
   databaseId?: number;
+  tableId?: number;
   onBeforeTypeChange?: (fieldIdx: number, oldType: string, newType: string) => Promise<boolean>;
   showPropertySheet?: boolean;
+  onCreateRelationship?: (fromTableId: number, fromFieldName: string, toTableId: number, toFieldName: string, relType: string) => void;
 }
 
 type FieldTypeInfo = {
@@ -83,7 +92,7 @@ const FIELD_TYPE_LABELS: Record<string, string> = Object.fromEntries(
   FIELD_TYPES.map(t => [t.value, t.label])
 );
 
-export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onSelectedIndexChange, tables = [], databaseId, onBeforeTypeChange, showPropertySheet = true }: DesignGridProps) {
+export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onSelectedIndexChange, tables = [], databaseId, tableId, onBeforeTypeChange, showPropertySheet = true, onCreateRelationship }: DesignGridProps) {
   const [localIdx, setLocalIdx] = useState<number | null>(null);
   const selectedIndex = controlledIdx !== undefined ? controlledIdx : localIdx;
   const setSelectedIndex = (i: number | null) => { setLocalIdx(i); onSelectedIndexChange?.(i); };
@@ -110,37 +119,66 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
   const [lookupWizardOpen, setLookupWizardOpen] = useState(false);
   const [lwStep, setLwStep] = useState(1);
   const [lwFieldIdx, setLwFieldIdx] = useState<number | null>(null);
-  const [lwSourceType, setLwSourceType] = useState<'valuelist' | 'table'>('valuelist');
-  const [lwValues, setLwValues] = useState<string[]>(['', '', '']);
+  const [lwSourceType, setLwSourceType] = useState<'table' | 'valuelist'>('table');
+  const [lwValues, setLwValues] = useState<string[][]>([['']]);
+  const [lwNumCols, setLwNumCols] = useState(1);
   const [lwTableId, setLwTableId] = useState<number | null>(null);
   const [lwValueField, setLwValueField] = useState('');
   const [lwDisplayField, setLwDisplayField] = useState('');
+  const [lwSelectedFields, setLwSelectedFields] = useState<string[]>([]);
+  const [lwSortFields, setLwSortFields] = useState<{ field: string; dir: 'asc' | 'desc' }[]>([
+    { field: '', dir: 'asc' }, { field: '', dir: 'asc' }, { field: '', dir: 'asc' }, { field: '', dir: 'asc' }
+  ]);
   const [lwEnforceIntegrity, setLwEnforceIntegrity] = useState(false);
-  const [lwSortField, setLwSortField] = useState('');
-  const [lwSortDir, setLwSortDir] = useState<'asc' | 'desc'>('asc');
+  const [lwCascadeDelete, setLwCascadeDelete] = useState(false);
+  const [lwLabel, setLwLabel] = useState('');
+  const [lwLimitToList, setLwLimitToList] = useState(false);
+  const [lwAllowMultiple, setLwAllowMultiple] = useState(false);
+  const [lwViewFilter, setLwViewFilter] = useState<'tables' | 'queries' | 'both'>('tables');
 
   const openLookupWizard = useCallback((fieldIdx: number) => {
     setLwFieldIdx(fieldIdx);
     const existing = parseLookupConfig(fields[fieldIdx]?.description);
+    const fieldName = fields[fieldIdx]?.name || '';
     if (existing?.type === 'valuelist') {
       setLwSourceType('valuelist');
-      setLwValues(existing.values && existing.values.length > 0 ? existing.values : ['', '', '']);
+      const vals = existing.values && existing.values.length > 0 ? existing.values : [''];
+      setLwValues(vals.map(v => [v]));
+      setLwNumCols(1);
+      setLwLabel(existing.label ?? fieldName);
+      setLwLimitToList(existing.limitToList ?? false);
+      setLwAllowMultiple(existing.allowMultipleValues ?? false);
     } else if (existing?.type === 'table') {
       setLwSourceType('table');
       setLwTableId(existing.tableId ?? null);
       setLwValueField(existing.valueField ?? '');
       setLwDisplayField(existing.displayField ?? '');
+      setLwSelectedFields(existing.selectedFields ?? []);
+      setLwSortFields(existing.sortFields && existing.sortFields.length > 0
+        ? [...existing.sortFields, ...Array(4 - existing.sortFields.length).fill({ field: '', dir: 'asc' })].slice(0, 4)
+        : [{ field: '', dir: 'asc' }, { field: '', dir: 'asc' }, { field: '', dir: 'asc' }, { field: '', dir: 'asc' }]
+      );
+      setLwEnforceIntegrity(existing.enableIntegrity ?? false);
+      setLwCascadeDelete(existing.cascadeDelete ?? false);
+      setLwLabel(existing.label ?? fieldName);
+      setLwAllowMultiple(existing.allowMultipleValues ?? false);
     } else {
-      setLwSourceType('valuelist');
-      setLwValues(['', '', '']);
+      setLwSourceType('table');
+      setLwValues([['']]);
+      setLwNumCols(1);
       setLwTableId(null);
       setLwValueField('');
       setLwDisplayField('');
+      setLwSelectedFields([]);
+      setLwSortFields([{ field: '', dir: 'asc' }, { field: '', dir: 'asc' }, { field: '', dir: 'asc' }, { field: '', dir: 'asc' }]);
+      setLwEnforceIntegrity(false);
+      setLwCascadeDelete(false);
+      setLwLabel(fieldName);
+      setLwLimitToList(false);
+      setLwAllowMultiple(false);
     }
     setLwStep(1);
-    setLwEnforceIntegrity(false);
-    setLwSortField('');
-    setLwSortDir('asc');
+    setLwViewFilter('tables');
     setLookupWizardOpen(true);
   }, [fields]);
 
@@ -148,18 +186,49 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
     if (lwFieldIdx === null) return;
     let cfg: LookupConfig;
     if (lwSourceType === 'valuelist') {
-      cfg = { type: 'valuelist', values: lwValues.filter(v => v.trim() !== '') };
+      const flatValues = lwValues.map(row => row[0] || '').filter(v => v.trim() !== '');
+      cfg = {
+        type: 'valuelist',
+        values: flatValues,
+        label: lwLabel,
+        limitToList: lwLimitToList,
+        allowMultipleValues: lwAllowMultiple,
+      };
     } else {
-      cfg = { type: 'table', tableId: lwTableId!, valueField: lwValueField, displayField: lwDisplayField || lwValueField };
+      const selFields = lwSelectedFields.length > 0 ? lwSelectedFields : (lwValueField ? [lwValueField] : []);
+      const primaryField = selFields[0] || lwValueField;
+      cfg = {
+        type: 'table',
+        tableId: lwTableId!,
+        valueField: primaryField,
+        displayField: selFields.length > 1 ? selFields[1] : primaryField,
+        selectedFields: selFields,
+        sortFields: lwSortFields.filter(s => s.field),
+        label: lwLabel,
+        enableIntegrity: lwEnforceIntegrity,
+        cascadeDelete: lwCascadeDelete,
+        allowMultipleValues: lwAllowMultiple,
+      };
+      if (lwEnforceIntegrity && lwTableId && primaryField && tableId && onCreateRelationship) {
+        const currentFieldName = fields[lwFieldIdx]?.name || lwLabel;
+        onCreateRelationship(lwTableId, primaryField, tableId, currentFieldName, 'one-to-many');
+      }
     }
     const newFields = [...fields];
     newFields[lwFieldIdx] = { ...newFields[lwFieldIdx], fieldType: 'lookup', description: encodeLookupConfig(cfg) };
+    if (lwLabel && lwLabel !== newFields[lwFieldIdx].name) {
+      newFields[lwFieldIdx] = { ...newFields[lwFieldIdx], caption: lwLabel };
+    }
     onChange(newFields);
     setLookupWizardOpen(false);
   };
 
   const lwSelectedTable = tables.find(t => t.id === lwTableId);
-  const lwTableFields = lwSelectedTable?.fields ?? [];
+  const lwTableFields: any[] = lwSelectedTable?.fields ?? [];
+  const lwAvailableFields = lwTableFields.filter((f: any) => !lwSelectedFields.includes(f.name));
+
+  const lwTotalStepsTable = 6;
+  const lwTotalStepsValueList = 3;
 
   // ── Field mutation ──
   const updateField = (index: number, key: keyof UpdateFieldRequest, value: any) => {
@@ -222,223 +291,389 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
       {/* ── Lookup Wizard Modal ── */}
       {lookupWizardOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-          <div className="bg-white border border-gray-400 shadow-2xl w-[520px] flex flex-col" style={{ fontFamily: 'Segoe UI, sans-serif' }}>
-            {/* Title bar */}
-            <div className="flex items-center justify-between bg-[#C42B1C] text-white px-3 py-1.5 select-none">
+          <div className="bg-[#f0f0f0] border border-gray-500 shadow-2xl w-[520px] flex flex-col" style={{ fontFamily: 'Segoe UI, sans-serif' }}>
+            <div className="flex items-center justify-between bg-[#7b5b3a] text-white px-3 py-1.5 select-none">
               <span className="font-semibold text-sm">Lookup Wizard</span>
               <button onClick={() => setLookupWizardOpen(false)} className="hover:bg-white/20 rounded p-0.5"><X size={14} /></button>
             </div>
 
-            {/* Wizard graphic stripe */}
             <div className="flex">
-              <div className="w-28 bg-[#cce5ff] flex flex-col items-center justify-start pt-6 border-r border-gray-300 flex-none">
-                <div className="text-4xl mb-2">🧙</div>
-                <div className="text-[10px] text-center text-gray-600 px-2 leading-tight">Lookup Wizard</div>
+              <div className="w-[110px] flex-none flex items-start justify-center pt-4 pb-4 bg-[#f0f0f0]">
+                <svg width="90" height="110" viewBox="0 0 90 110">
+                  <rect x="5" y="10" width="70" height="85" rx="3" fill="#f5d98e" stroke="#c9a84c" strokeWidth="1.5" />
+                  <rect x="12" y="18" width="56" height="10" rx="1" fill="#edc64b" stroke="#c9a84c" strokeWidth="0.5" />
+                  <rect x="12" y="32" width="56" height="10" rx="1" fill="#edc64b" stroke="#c9a84c" strokeWidth="0.5" />
+                  <rect x="12" y="46" width="56" height="10" rx="1" fill="#edc64b" stroke="#c9a84c" strokeWidth="0.5" />
+                  <rect x="12" y="60" width="56" height="10" rx="1" fill="#edc64b" stroke="#c9a84c" strokeWidth="0.5" />
+                  <polygon points="60,72 72,82 60,92" fill="#c9a84c" />
+                  {lwStep >= (lwSourceType === 'table' ? lwTotalStepsTable : lwTotalStepsValueList) && (
+                    <>
+                      <rect x="50" y="65" width="28" height="28" rx="3" fill="#f5d98e" stroke="#c9a84c" strokeWidth="1.5" />
+                      <polyline points="56,79 63,86 76,71" fill="none" stroke="#7b5b3a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                    </>
+                  )}
+                </svg>
               </div>
 
-              <div className="flex-1 p-4 min-h-[260px]">
+              <div className="flex-1 p-4 min-h-[280px] bg-[#f0f0f0]">
+                {/* Step 1: Source type */}
                 {lwStep === 1 && (
                   <>
-                    <p className="text-sm text-gray-700 mb-3 leading-relaxed">
+                    <p className="text-sm text-gray-800 mb-1 font-semibold leading-relaxed">
                       This wizard creates a lookup field, which displays a list of values you can choose from. How do you want your lookup field to get its values?
                     </p>
-                    <div className="space-y-2">
+                    <div className="space-y-3 mt-4">
                       <label className="flex items-start gap-2 cursor-pointer">
-                        <input type="radio" className="mt-0.5" checked={lwSourceType === 'table'} onChange={() => setLwSourceType('table')} />
-                        <div>
-                          <div className="text-sm font-medium">I want the lookup field to get the values from another table or query.</div>
-                          <div className="text-xs text-gray-500">Creates a foreign key relationship to another table.</div>
-                        </div>
+                        <input type="radio" className="mt-0.5 accent-[#316AC5]" checked={lwSourceType === 'table'} onChange={() => setLwSourceType('table')} />
+                        <span className="text-sm">I want the lookup field to get the values from another table or query.</span>
                       </label>
                       <label className="flex items-start gap-2 cursor-pointer">
-                        <input type="radio" className="mt-0.5" checked={lwSourceType === 'valuelist'} onChange={() => setLwSourceType('valuelist')} />
-                        <div>
-                          <div className="text-sm font-medium">I will type in the values that I want.</div>
-                          <div className="text-xs text-gray-500">Creates a fixed list of choices (e.g., Small, Medium, Large).</div>
-                        </div>
+                        <input type="radio" className="mt-0.5 accent-[#316AC5]" checked={lwSourceType === 'valuelist'} onChange={() => setLwSourceType('valuelist')} />
+                        <span className="text-sm">I will type in the values that I want.</span>
                       </label>
                     </div>
                   </>
                 )}
 
-                {lwStep === 2 && lwSourceType === 'valuelist' && (
+                {/* Table path — Step 2: Choose table */}
+                {lwStep === 2 && lwSourceType === 'table' && (
                   <>
-                    <p className="text-sm text-gray-700 mb-3">What values do you want to see in your lookup field? Enter each value on a separate row.</p>
-                    <div className="space-y-1 max-h-36 overflow-y-auto">
-                      {lwValues.map((v, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                          <span className="w-5 text-right text-xs text-gray-400 flex-none">{i + 1}</span>
-                          <input
-                            value={v}
-                            onChange={e => { const next = [...lwValues]; next[i] = e.target.value; setLwValues(next); }}
-                            placeholder="Enter value..."
-                            className="flex-1 border border-gray-300 px-2 py-0.5 text-sm outline-none focus:border-[#C42B1C] rounded-sm"
-                          />
-                          {lwValues.length > 1 && (
-                            <button onClick={() => setLwValues(lwValues.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500">
-                              <X size={12} />
-                            </button>
-                          )}
+                    <p className="text-sm text-gray-800 font-semibold mb-3">
+                      Which table or query should provide the values for your lookup field?
+                    </p>
+                    <div className="border border-gray-400 bg-white h-[140px] overflow-y-auto mb-3">
+                      {tables.map(t => (
+                        <div
+                          key={t.id}
+                          onClick={() => { setLwTableId(t.id); setLwSelectedFields([]); setLwValueField(''); setLwDisplayField(''); }}
+                          className={`px-2 py-1 text-sm cursor-pointer ${lwTableId === t.id ? 'bg-[#316AC5] text-white' : 'hover:bg-blue-50'}`}
+                        >
+                          Table: {t.name}
                         </div>
                       ))}
                     </div>
-                    <button
-                      onClick={() => setLwValues([...lwValues, ''])}
-                      className="mt-2 text-xs text-[#C42B1C] hover:underline flex items-center gap-1"
-                    >
-                      <Plus size={12} /> Add another value
-                    </button>
-                  </>
-                )}
-
-                {lwStep === 2 && lwSourceType === 'table' && (
-                  <>
-                    <p className="text-sm text-gray-700 mb-3">Which table or query should provide the values for your lookup field?</p>
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-xs font-medium text-gray-600 block mb-1">Source Table</label>
-                        <select
-                          value={lwTableId ?? ''}
-                          onChange={e => { setLwTableId(Number(e.target.value)); setLwValueField(''); setLwDisplayField(''); }}
-                          className="w-full border border-gray-300 px-2 py-1 text-sm outline-none focus:border-[#C42B1C] rounded-sm"
-                        >
-                          <option value="">— Choose a table —</option>
-                          {tables.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                        </select>
-                      </div>
-                      {lwSelectedTable && (
-                        <>
-                          <div>
-                            <label className="text-xs font-medium text-gray-600 block mb-1">Value Field (stored in this field)</label>
-                            <select
-                              value={lwValueField}
-                              onChange={e => setLwValueField(e.target.value)}
-                              className="w-full border border-gray-300 px-2 py-1 text-sm outline-none focus:border-[#C42B1C] rounded-sm"
-                            >
-                              <option value="">— Choose a field —</option>
-                              {lwTableFields.map((f: any) => <option key={f.name} value={f.name}>{f.name}</option>)}
-                            </select>
-                          </div>
-                          <div>
-                            <label className="text-xs font-medium text-gray-600 block mb-1">Display Field (shown to users)</label>
-                            <select
-                              value={lwDisplayField}
-                              onChange={e => setLwDisplayField(e.target.value)}
-                              className="w-full border border-gray-300 px-2 py-1 text-sm outline-none focus:border-[#C42B1C] rounded-sm"
-                            >
-                              <option value="">— Same as value field —</option>
-                              {lwTableFields.map((f: any) => <option key={f.name} value={f.name}>{f.name}</option>)}
-                            </select>
-                          </div>
-                        </>
-                      )}
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="font-medium text-gray-700">View</span>
+                      <label className="flex items-center gap-1 cursor-pointer">
+                        <input type="radio" className="accent-[#316AC5]" checked={lwViewFilter === 'tables'} onChange={() => setLwViewFilter('tables')} />
+                        <span>Tables</span>
+                      </label>
+                      <label className="flex items-center gap-1 cursor-pointer">
+                        <input type="radio" className="accent-[#316AC5]" checked={lwViewFilter === 'queries'} onChange={() => setLwViewFilter('queries')} />
+                        <span>Queries</span>
+                      </label>
+                      <label className="flex items-center gap-1 cursor-pointer">
+                        <input type="radio" className="accent-[#316AC5]" checked={lwViewFilter === 'both'} onChange={() => setLwViewFilter('both')} />
+                        <span>Both</span>
+                      </label>
                     </div>
                   </>
                 )}
 
+                {/* Table path — Step 3: Choose fields */}
                 {lwStep === 3 && lwSourceType === 'table' && (
                   <>
-                    <p className="text-sm text-gray-700 mb-4 leading-relaxed">
-                      What sort order do you want for the items in your lookup list?
+                    <p className="text-sm text-gray-800 font-semibold mb-3">
+                      Which fields of {lwSelectedTable?.name || 'the table'} contain the values you want included in your lookup field? The fields you select become columns in your lookup field.
                     </p>
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-xs font-medium text-gray-600 block mb-1">Sort Field</label>
-                        <select
-                          value={lwSortField}
-                          onChange={e => setLwSortField(e.target.value)}
-                          className="w-full border border-gray-300 px-2 py-1 text-sm outline-none focus:border-[#C42B1C] rounded-sm"
-                        >
-                          <option value="">(none)</option>
-                          {lwTableFields.map((f: any) => <option key={f.name} value={f.name}>{f.name}</option>)}
-                        </select>
+                    <div className="flex gap-2 items-stretch">
+                      <div className="flex-1">
+                        <div className="text-xs font-medium text-gray-700 mb-1">Available Fields:</div>
+                        <div className="border border-gray-400 bg-white h-[160px] overflow-y-auto">
+                          {lwAvailableFields.map((f: any) => (
+                            <div
+                              key={f.name}
+                              className="px-2 py-1 text-sm cursor-pointer hover:bg-blue-50"
+                              onDoubleClick={() => setLwSelectedFields([...lwSelectedFields, f.name])}
+                            >
+                              {f.name}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <div>
-                        <label className="text-xs font-medium text-gray-600 block mb-1">Sort Order</label>
-                        <select
-                          value={lwSortDir}
-                          onChange={e => setLwSortDir(e.target.value as 'asc' | 'desc')}
-                          className="w-full border border-gray-300 px-2 py-1 text-sm outline-none focus:border-[#C42B1C] rounded-sm"
-                          disabled={!lwSortField}
-                        >
-                          <option value="asc">Ascending</option>
-                          <option value="desc">Descending</option>
-                        </select>
+                      <div className="flex flex-col justify-center gap-1">
+                        <button
+                          onClick={() => {
+                            const first = lwAvailableFields[0];
+                            if (first) setLwSelectedFields([...lwSelectedFields, first.name]);
+                          }}
+                          disabled={lwAvailableFields.length === 0}
+                          className="w-8 h-7 border border-gray-400 bg-white hover:bg-gray-100 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+                        >&gt;</button>
+                        <button
+                          onClick={() => setLwSelectedFields(lwTableFields.map((f: any) => f.name))}
+                          disabled={lwAvailableFields.length === 0}
+                          className="w-8 h-7 border border-gray-400 bg-white hover:bg-gray-100 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+                        >&gt;&gt;</button>
+                        <button
+                          onClick={() => setLwSelectedFields(lwSelectedFields.slice(0, -1))}
+                          disabled={lwSelectedFields.length === 0}
+                          className="w-8 h-7 border border-gray-400 bg-white hover:bg-gray-100 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+                        >&lt;</button>
+                        <button
+                          onClick={() => setLwSelectedFields([])}
+                          disabled={lwSelectedFields.length === 0}
+                          className="w-8 h-7 border border-gray-400 bg-white hover:bg-gray-100 text-sm font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+                        >&lt;&lt;</button>
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-xs font-medium text-gray-700 mb-1">Selected Fields:</div>
+                        <div className="border border-gray-400 bg-white h-[160px] overflow-y-auto">
+                          {lwSelectedFields.map((fname, i) => (
+                            <div key={i} className="px-2 py-1 text-sm cursor-pointer hover:bg-blue-50"
+                              onDoubleClick={() => setLwSelectedFields(lwSelectedFields.filter((_, j) => j !== i))}
+                            >
+                              {fname}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </>
                 )}
 
+                {/* Table path — Step 4: Sort order */}
                 {lwStep === 4 && lwSourceType === 'table' && (
                   <>
-                    <p className="text-sm text-gray-700 mb-4 leading-relaxed">
-                      Do you want to enable data integrity between these tables?
+                    <p className="text-sm text-gray-800 font-semibold mb-2">
+                      What sort order do you want for the items in your list box?
                     </p>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 accent-[#C42B1C]"
-                        checked={lwEnforceIntegrity}
-                        onChange={e => setLwEnforceIntegrity(e.target.checked)}
-                      />
-                      <div>
-                        <div className="text-sm font-medium">Enable Data Integrity</div>
-                        <div className="text-xs text-gray-500 mt-0.5 leading-relaxed">
-                          Prevents invalid links between tables. You cannot enter a value in this lookup field unless a matching record exists in the source table.
+                    <p className="text-xs text-gray-600 mb-3">
+                      You can sort records by up to four fields, in either ascending or descending order.
+                    </p>
+                    <div className="space-y-2">
+                      {lwSortFields.map((sf, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <span className="w-4 text-sm font-medium text-gray-600">{i + 1}</span>
+                          <select
+                            value={sf.field}
+                            onChange={e => {
+                              const next = [...lwSortFields];
+                              next[i] = { ...next[i], field: e.target.value };
+                              setLwSortFields(next);
+                            }}
+                            className="flex-1 border border-gray-400 bg-white px-2 py-1 text-sm outline-none"
+                          >
+                            <option value=""></option>
+                            {(lwSelectedFields.length > 0 ? lwSelectedFields : lwTableFields.map((f: any) => f.name)).map(fname => (
+                              <option key={fname} value={fname}>{fname}</option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() => {
+                              const next = [...lwSortFields];
+                              next[i] = { ...next[i], dir: next[i].dir === 'asc' ? 'desc' : 'asc' };
+                              setLwSortFields(next);
+                            }}
+                            disabled={!sf.field}
+                            className="border border-gray-400 bg-white px-3 py-1 text-sm disabled:opacity-40 hover:bg-gray-100 min-w-[90px]"
+                          >
+                            {sf.dir === 'asc' ? 'Ascending' : 'Descending'}
+                          </button>
                         </div>
-                      </div>
-                    </label>
-                    <p className="text-xs text-gray-400 mt-4">
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* Table path — Step 5: Column width preview */}
+                {lwStep === 5 && lwSourceType === 'table' && (
+                  <>
+                    <p className="text-sm text-gray-800 font-semibold mb-2">
+                      How wide would you like the columns in your lookup field?
+                    </p>
+                    <p className="text-xs text-gray-600 mb-3">
+                      To adjust the width of a column, drag its right edge to the width you want, or double-click the right edge of the column heading to get the best fit.
+                    </p>
+                    <div className="border border-gray-400 bg-white h-[160px] overflow-auto">
+                      <table className="text-sm border-collapse w-full">
+                        <thead>
+                          <tr>
+                            {(lwSelectedFields.length > 0 ? lwSelectedFields : ['(field)']).map((fname, i) => (
+                              <th key={i} className="border-b border-r border-gray-300 bg-[#f3f2f1] px-2 py-1 text-left text-xs font-medium text-gray-700">{fname}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[0,1,2,3,4,5].map(r => (
+                            <tr key={r}>
+                              {(lwSelectedFields.length > 0 ? lwSelectedFields : ['(field)']).map((_, ci) => (
+                                <td key={ci} className="border-b border-r border-gray-200 px-2 py-1 text-gray-300 text-xs">&nbsp;</td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
+
+                {/* Table path — Step 6: Label + integrity */}
+                {lwStep === 6 && lwSourceType === 'table' && (
+                  <>
+                    <p className="text-sm text-gray-800 font-semibold mb-2">
                       What label would you like for your lookup field?
                     </p>
                     <input
-                      defaultValue={lwValueField}
-                      className="mt-1 w-full border border-gray-300 px-2 py-1 text-sm outline-none focus:border-[#C42B1C] rounded-sm"
-                      placeholder="Label for the lookup column..."
+                      value={lwLabel}
+                      onChange={e => setLwLabel(e.target.value)}
+                      className="w-full border border-gray-400 bg-white px-2 py-1 text-sm outline-none mb-3"
                     />
+                    <p className="text-sm text-gray-700 mb-2">Do you want to enable data integrity between these tables?</p>
+                    <label className="flex items-center gap-2 cursor-pointer mb-1">
+                      <input type="checkbox" className="accent-[#316AC5]" checked={lwEnforceIntegrity} onChange={e => { setLwEnforceIntegrity(e.target.checked); if (!e.target.checked) setLwCascadeDelete(false); }} />
+                      <span className="text-sm font-medium">Enable Data Integrity</span>
+                    </label>
+                    {lwEnforceIntegrity && (
+                      <div className="ml-6 space-y-1 mb-3">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="radio" className="accent-[#316AC5]" checked={lwCascadeDelete} onChange={() => setLwCascadeDelete(true)} />
+                          <span className="text-sm">Cascade Delete</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="radio" className="accent-[#316AC5]" checked={!lwCascadeDelete} onChange={() => setLwCascadeDelete(false)} />
+                          <span className="text-sm">Restrict Delete</span>
+                        </label>
+                      </div>
+                    )}
+                    <p className="text-sm text-gray-700 mb-2">Do you want to store multiple values for this lookup?</p>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" className="accent-[#316AC5]" checked={lwAllowMultiple} onChange={e => setLwAllowMultiple(e.target.checked)} />
+                      <span className="text-sm">Allow Multiple Values</span>
+                    </label>
+                    <p className="text-xs text-gray-500 mt-4">Those are all the answers the wizard needs to create your lookup field.</p>
+                  </>
+                )}
+
+                {/* Value list — Step 2: Enter values in grid */}
+                {lwStep === 2 && lwSourceType === 'valuelist' && (
+                  <>
+                    <p className="text-sm text-gray-800 font-semibold mb-1">
+                      What values do you want to see in your lookup field? Enter the number of columns you want in the list, and then type the values you want in each cell.
+                    </p>
+                    <p className="text-xs text-gray-600 mb-2">
+                      To adjust the width of a column, drag its right edge to the width you want, or double-click the right edge of the column heading to get the best fit.
+                    </p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm text-gray-700">Number of columns:</span>
+                      <input
+                        type="number" min={1} max={10} value={lwNumCols}
+                        onChange={e => {
+                          const n = Math.max(1, Math.min(10, parseInt(e.target.value) || 1));
+                          setLwNumCols(n);
+                          setLwValues(prev => prev.map(row => {
+                            const newRow = [...row];
+                            while (newRow.length < n) newRow.push('');
+                            return newRow.slice(0, n);
+                          }));
+                        }}
+                        className="w-12 border border-gray-400 bg-white px-1 py-0.5 text-sm text-center outline-none"
+                      />
+                    </div>
+                    <div className="border border-gray-400 bg-white max-h-[150px] overflow-auto">
+                      <table className="text-sm border-collapse w-full">
+                        <thead>
+                          <tr>
+                            <th className="w-6 border-b border-r border-gray-300 bg-[#f3f2f1]"></th>
+                            {Array.from({ length: lwNumCols }, (_, ci) => (
+                              <th key={ci} className="border-b border-r border-gray-300 bg-[#f3f2f1] px-2 py-1 text-left text-xs font-medium text-gray-700">Col{ci + 1}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {lwValues.map((row, ri) => (
+                            <tr key={ri}>
+                              <td className="border-b border-r border-gray-200 bg-[#f3f2f1] text-center text-xs text-gray-400 w-6">
+                                {ri < lwValues.length - 1 || row.some(v => v) ? '✎' : '✱'}
+                              </td>
+                              {row.map((cell, ci) => (
+                                <td key={ci} className="border-b border-r border-gray-200 p-0">
+                                  <input
+                                    value={cell}
+                                    onChange={e => {
+                                      const next = lwValues.map(r => [...r]);
+                                      next[ri][ci] = e.target.value;
+                                      if (ri === lwValues.length - 1 && e.target.value) {
+                                        next.push(Array(lwNumCols).fill(''));
+                                      }
+                                      setLwValues(next);
+                                    }}
+                                    className="w-full px-1 py-0.5 text-sm outline-none bg-transparent"
+                                  />
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
+
+                {/* Value list — Step 3: Label + options */}
+                {lwStep === 3 && lwSourceType === 'valuelist' && (
+                  <>
+                    <p className="text-sm text-gray-800 font-semibold mb-2">
+                      What label would you like for your lookup field?
+                    </p>
+                    <input
+                      value={lwLabel}
+                      onChange={e => setLwLabel(e.target.value)}
+                      className="w-full border border-gray-400 bg-white px-2 py-1 text-sm outline-none mb-3"
+                    />
+                    <p className="text-sm text-gray-700 mb-2">Do you want to limit entries to the choices?</p>
+                    <label className="flex items-center gap-2 cursor-pointer mb-3">
+                      <input type="checkbox" className="accent-[#316AC5]" checked={lwLimitToList} onChange={e => setLwLimitToList(e.target.checked)} />
+                      <span className="text-sm">Limit To List</span>
+                    </label>
+                    <p className="text-sm text-gray-700 mb-2">Do you want to store multiple values for this lookup?</p>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" className="accent-[#316AC5]" checked={lwAllowMultiple} onChange={e => setLwAllowMultiple(e.target.checked)} />
+                      <span className="text-sm">Allow Multiple Values</span>
+                    </label>
+                    <p className="text-xs text-gray-500 mt-4">Those are all the answers the wizard needs to create your lookup field.</p>
                   </>
                 )}
               </div>
             </div>
 
-            {/* Wizard nav buttons */}
-            <div className="flex items-center justify-between px-4 py-2 border-t border-gray-300 bg-[#f3f2f1]">
-              <Button variant="outline" size="sm" onClick={() => setLookupWizardOpen(false)}>Cancel</Button>
+            <div className="flex items-center justify-between px-4 py-2 border-t border-gray-400 bg-[#f0f0f0]">
+              <button onClick={() => setLookupWizardOpen(false)} className="px-4 py-1 border border-gray-400 bg-white hover:bg-gray-100 text-sm">Cancel</button>
               <div className="flex gap-2">
                 {lwStep > 1 && (
-                  <Button variant="outline" size="sm" onClick={() => setLwStep(s => s - 1)}>← Back</Button>
+                  <button onClick={() => setLwStep(s => s - 1)} className="px-4 py-1 border border-gray-400 bg-white hover:bg-gray-100 text-sm">
+                    &lt; Back
+                  </button>
                 )}
-                {lwStep === 1 ? (
-                  <Button size="sm" className="bg-[#C42B1C] hover:bg-[#9B2118]" onClick={() => setLwStep(2)}>
-                    Next <ChevronRight size={14} className="ml-1" />
-                  </Button>
-                ) : lwStep === 2 && lwSourceType === 'table' ? (
-                  <Button
-                    size="sm"
-                    className="bg-[#C42B1C] hover:bg-[#9B2118]"
-                    disabled={!lwTableId || !lwValueField}
-                    onClick={() => setLwStep(3)}
-                  >
-                    Next <ChevronRight size={14} className="ml-1" />
-                  </Button>
-                ) : lwStep === 3 && lwSourceType === 'table' ? (
-                  <Button
-                    size="sm"
-                    className="bg-[#C42B1C] hover:bg-[#9B2118]"
-                    onClick={() => setLwStep(4)}
-                  >
-                    Next <ChevronRight size={14} className="ml-1" />
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    className="bg-[#C42B1C] hover:bg-[#9B2118]"
-                    disabled={lwSourceType === 'valuelist' ? lwValues.filter(v => v.trim()).length === 0 : false}
-                    onClick={finishLookupWizard}
-                  >
-                    Finish
-                  </Button>
-                )}
+                {(() => {
+                  const isLastStep = lwSourceType === 'table'
+                    ? lwStep === lwTotalStepsTable
+                    : lwStep === lwTotalStepsValueList;
+                  const canNext = lwStep === 1 ? true
+                    : lwStep === 2 && lwSourceType === 'table' ? !!lwTableId
+                    : lwStep === 3 && lwSourceType === 'table' ? lwSelectedFields.length > 0
+                    : lwStep === 2 && lwSourceType === 'valuelist' ? lwValues.some(r => r.some(v => v.trim()))
+                    : true;
+                  return isLastStep ? (
+                    <button
+                      onClick={finishLookupWizard}
+                      className="px-4 py-1 border border-gray-400 bg-white hover:bg-gray-100 text-sm font-medium"
+                    >
+                      Finish
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setLwStep(s => s + 1)}
+                        disabled={!canNext}
+                        className="px-4 py-1 border border-gray-400 bg-white hover:bg-gray-100 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        Next &gt;
+                      </button>
+                      <button disabled className="px-4 py-1 border border-gray-400 bg-white text-sm opacity-40 cursor-not-allowed">Finish</button>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>
