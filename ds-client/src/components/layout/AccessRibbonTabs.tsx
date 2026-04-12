@@ -150,8 +150,6 @@ export function DatabaseToolsTabContent({
     <>
       <RibbonGroup name="Tools">
         <RibbonButton icon={<DsCompactAndRepairIcon size={22} />} label="Compact and Repair Database" onClick={onCompact} disabled={!onCompact} />
-        <RibbonButton icon={<PlugZap size={22} />} label="Visual Basic" disabled />
-        <RibbonButton icon={<PlugZap size={22} />} label="Run Macro" disabled />
       </RibbonGroup>
       <RibbonGroup name="Relationships">
         <RibbonButton icon={<DsRelationshipsIcon size={32} />} label="Relationships" onClick={onOpenRelationships} disabled={!onOpenRelationships} />
