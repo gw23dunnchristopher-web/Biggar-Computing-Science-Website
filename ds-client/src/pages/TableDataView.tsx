@@ -599,7 +599,7 @@ export function TableDataView({
         <>
           <RibbonGroup name="View">
             <RibbonViewSplitButton
-              icon={<DesignViewIcon size={32} />}
+              icon={<DesignViewIcon size={40} />}
               onIconClick={handleDesignIconClick}
               options={[
                 { icon: <DatasheetViewIcon size={16} />, label: 'Datasheet View', active: true },

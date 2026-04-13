@@ -270,11 +270,11 @@ export function ReportView({
       pinnedContent={
         <RibbonGroup name="View">
           <RibbonDropdownButton
-            icon={view === 'report' ? <FileText size={22} /> : <DesignViewIcon size={22} />}
+            icon={view === 'report' ? <FileText size={40} /> : <DesignViewIcon size={40} />}
             label={view === 'report' ? 'Report' : 'Design'}
           >
-            <RibbonButton icon={<FileText size={22} />} label="Report" active={view === 'report'} onClick={() => setView('report')} />
-            <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" active={view === 'design'} onClick={() => setView('design')} />
+            <RibbonButton icon={<FileText size={16} />} label="Report" active={view === 'report'} onClick={() => setView('report')} />
+            <RibbonButton icon={<DesignViewIcon size={16} />} label="Design" active={view === 'design'} onClick={() => setView('design')} />
           </RibbonDropdownButton>
         </RibbonGroup>
       }

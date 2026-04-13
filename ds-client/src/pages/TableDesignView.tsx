@@ -367,7 +367,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
         <>
           <RibbonGroup name="View">
             <RibbonViewSplitButton
-              icon={<DatasheetViewIcon size={22} />}
+              icon={<DatasheetViewIcon size={40} />}
               onIconClick={switchToDatasheet}
               options={[
                 { icon: <DatasheetViewIcon size={16} />, label: 'Datasheet View', onClick: switchToDatasheet },

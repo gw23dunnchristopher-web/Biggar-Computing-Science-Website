@@ -312,11 +312,11 @@ export function FormView({
       pinnedContent={
         <RibbonGroup name="View">
           <RibbonDropdownButton
-            icon={view === 'form' ? <LayoutTemplate size={22} /> : <DesignViewIcon size={22} />}
+            icon={view === 'form' ? <LayoutTemplate size={40} /> : <DesignViewIcon size={40} />}
             label={view === 'form' ? 'Form' : 'Design'}
           >
-            <RibbonButton icon={<LayoutTemplate size={22} />} label="Form" active={view === 'form'} onClick={() => setView('form')} />
-            <RibbonButton icon={<DesignViewIcon size={22} />} label="Design" active={view === 'design'} onClick={() => setView('design')} />
+            <RibbonButton icon={<LayoutTemplate size={16} />} label="Form" active={view === 'form'} onClick={() => setView('form')} />
+            <RibbonButton icon={<DesignViewIcon size={16} />} label="Design" active={view === 'design'} onClick={() => setView('design')} />
           </RibbonDropdownButton>
         </RibbonGroup>
       }

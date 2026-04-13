@@ -666,7 +666,7 @@ export function QueryDesignView({
       pinnedContent={
             <RibbonGroup name="View">
           <RibbonDropdownButton
-            icon={view === 'datasheet' ? <DsDatasheetIcon size={32} /> : view === 'sql' ? <span className="text-[18px] font-semibold leading-none">SQL</span> : <DesignViewIcon size={32} />}
+            icon={view === 'datasheet' ? <DsDatasheetIcon size={40} /> : view === 'sql' ? <span className="text-[28px] font-semibold leading-none">SQL</span> : <DesignViewIcon size={40} />}
             label={view === 'sql' ? 'SQL' : view === 'datasheet' ? 'Datasheet' : 'Design'}
           >
             <RibbonButton icon={<DesignViewIcon size={16} />} label="Design" onClick={() => switchView('design')} active={view === 'design'} />
