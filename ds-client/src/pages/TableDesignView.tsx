@@ -6,7 +6,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonViewSplitButton } from '@/components/layout/Ribbon';
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
 import { DesignGrid, DesignGridHandle } from '@/components/ui/design-grid';
-import { Save, Code2, AlertTriangle, RotateCcw } from 'lucide-react';
+import { Save, AlertTriangle, RotateCcw } from 'lucide-react';
 import {
   DsToolsPrimaryKeyIcon, DsToolsTestValidationRulesIcon, DsToolsModifyLookupsIcon,
   DsQuerySetupBuilderIcon, DsQuerySetupInsertRowsIcon, DsQuerySetupDeleteRowsIcon,
@@ -344,10 +344,6 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
                 onClick={() => setShowPropertySheet(v => !v)}
               />
               <RibbonButton icon={<DsShowHideTotalsIcon size={40} />} label="Indexes" disabled />
-            </RibbonGroup>
-            <RibbonGroup name="Field, Record &amp; Table Events">
-              <RibbonButton icon={<Code2 size={40} />} label="Create Data Macros" disabled wide />
-              <RibbonButton icon={<Code2 size={32} />} label="Rename/ Delete Macro" disabled wide />
             </RibbonGroup>
             <RibbonGroup name="Relationships">
               <RibbonButton icon={<DsRelationshipsIcon size={40} />} label="Relationships" onClick={onOpenRelationships} disabled={!onOpenRelationships} />
