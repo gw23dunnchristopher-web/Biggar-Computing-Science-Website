@@ -280,6 +280,16 @@ export function QueryDesignView({
     urlView === 'datasheet' ? 'datasheet' : urlView === 'sql' ? 'sql' : (initialView ?? 'design');
 
   const [view, setView] = useState<'design' | 'datasheet' | 'sql'>(resolvedInitialView);
+
+  // Belt-and-suspenders: sync view from URL search on mount (in case useState
+  // initialiser ran before wouter propagated the search string)
+  useEffect(() => {
+    const v = new URLSearchParams(search).get('view');
+    if (v === 'sql' || v === 'datasheet' || v === 'design') {
+      setView(v as 'sql' | 'datasheet' | 'design');
+    }
+  }, []);   // eslint-disable-line react-hooks/exhaustive-deps
+
   const [queryName, setQueryName] = useState('');
   const [definition, setDefinition] = useState<QueryDefinition>({ tables: [], columns: [] });
   const [tableDetails, setTableDetails] = useState<Record<number, TableWithFields>>({});

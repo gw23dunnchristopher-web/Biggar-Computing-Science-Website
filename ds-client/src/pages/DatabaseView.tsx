@@ -656,6 +656,7 @@ export function DatabaseView() {
         <Route path="/databases/:id/queries/:queryId">
           {(p) => (
             <QueryDesignView
+              key={parseInt(p.queryId)}
               databaseId={databaseId}
               queryId={parseInt(p.queryId)}
               db={db}
