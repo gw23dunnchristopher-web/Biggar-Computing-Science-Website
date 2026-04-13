@@ -171,6 +171,9 @@ export function DatabaseView() {
   const [forms, setForms] = useState<ItemRow[]>([]);
   const [reports, setReports] = useState<ItemRow[]>([]);
 
+  // Track tables created in this session that haven't been explicitly named yet
+  const [newlyCreatedTableId, setNewlyCreatedTableId] = useState<number | null>(null);
+
   // Dialogs
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -320,6 +323,7 @@ export function DatabaseView() {
         }
       });
       queryClient.invalidateQueries({ queryKey: getListTablesQueryKey(databaseId) });
+      setNewlyCreatedTableId(res.id);
       setLocation(`/databases/${databaseId}/tables/${res.id}/data`);
     } catch {
       toast({ title: 'Failed to create table', variant: 'destructive' });
@@ -648,6 +652,8 @@ export function DatabaseView() {
               tableId={parseInt(p.tableId)}
               db={db}
               tables={tables || []}
+              isNewTable={newlyCreatedTableId === parseInt(p.tableId)}
+              onNameConfirmed={() => setNewlyCreatedTableId(null)}
               {...sharedProps}
             />
           )}

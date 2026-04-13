@@ -74,6 +74,8 @@ interface Props {
   onObjectDependencies?: () => void;
   onReset?: () => void;
   onSwitchToDesign?: () => void;
+  isNewTable?: boolean;
+  onNameConfirmed?: () => void;
 }
 
 type FieldFilter =
@@ -107,6 +109,7 @@ export function TableDataView({
   onShare, onSettings,
   onImportCSV, onExportData, onOpenRelationships, onCompact, onAnalyse, onDocumenter, onObjectDependencies,
   onReset, onSwitchToDesign,
+  isNewTable, onNameConfirmed,
 }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -173,7 +176,11 @@ export function TableDataView({
   const isAutoName = (name: string) => /^Table\d+$/i.test(name);
 
   const handleDesignIconClick = () => {
-    goToDesign();
+    if (isNewTable && table) {
+      setDesignNameDialog({ open: true, name: table.name, busy: false });
+    } else {
+      goToDesign();
+    }
   };
 
   const confirmDesignSwitch = async () => {
@@ -210,6 +217,7 @@ export function TableDataView({
       }
     }
     setDesignNameDialog({ open: false, name: '', busy: false });
+    onNameConfirmed?.();
     goToDesign();
   };
 
