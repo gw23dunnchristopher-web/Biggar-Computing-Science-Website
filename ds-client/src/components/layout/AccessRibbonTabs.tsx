@@ -6,7 +6,6 @@ import React from 'react';
 import { RibbonGroup, RibbonButton } from './Ribbon';
 import {
   Settings, Upload,
-  PlugZap, FileDown, FileUp, Mail,
 } from 'lucide-react';
 import {
   DsTableIcon, DsTablesTableDesignIcon,
@@ -16,6 +15,8 @@ import {
   DsRelationshipsIcon,
   DsAnalyzePerformanceIcon, DsAnalyzeTableIcon, DsAnalyzeDatabaseDocumenterIcon,
   DsObjectDependenciesIcon, DsCompactAndRepairIcon,
+  DsImportLinkNewDataSourceIcon, DsImportLinkSavedImportsIcon, DsImportLinkLinkedTableManagerIcon,
+  DsExportsSavedExportsIcon, DsExportsExcelIcon, DsExportsTextFileIcon,
 } from '@/components/ui/ds-icons';
 
 export interface CommonTabsProps {
@@ -119,19 +120,15 @@ export function ExternalDataTabContent({ onImportCSV, onExportData, onShare }: C
   return (
     <>
       <RibbonGroup name="Import &amp; Link">
-        <RibbonButton icon={<FileUp size={40} />} label="Excel" onClick={onImportCSV} disabled={!onImportCSV} />
-        <RibbonButton icon={<DsTableIcon size={40} />} label="Access" disabled />
-        <RibbonButton icon={<FileUp size={32} />} label="Import CSV" onClick={onImportCSV} disabled={!onImportCSV} />
-        <RibbonButton icon={<PlugZap size={32} />} label="ODBC Database" disabled />
+        <RibbonButton icon={<DsImportLinkNewDataSourceIcon size={40} />} label="New Data Source" onClick={onImportCSV} disabled={!onImportCSV} />
+        <RibbonButton icon={<DsImportLinkSavedImportsIcon size={32} />} label="Saved Imports" disabled />
+        <RibbonButton icon={<DsImportLinkLinkedTableManagerIcon size={32} />} label="Linked Table Manager" disabled />
       </RibbonGroup>
       <RibbonGroup name="Export">
-        <RibbonButton icon={<FileDown size={40} />} label="Excel" onClick={onExportData} disabled={!onExportData} />
-        <RibbonButton icon={<FileDown size={32} />} label="Text File (CSV)" onClick={onExportData} disabled={!onExportData} />
-        <RibbonButton icon={<Mail size={40} />} label="Email" disabled />
+        <RibbonButton icon={<DsExportsSavedExportsIcon size={32} />} label="Saved Exports" disabled />
+        <RibbonButton icon={<DsExportsExcelIcon size={40} />} label="Excel" onClick={onExportData} disabled={!onExportData} />
+        <RibbonButton icon={<DsExportsTextFileIcon size={40} />} label="Text File" onClick={onExportData} disabled={!onExportData} />
         <RibbonButton icon={<Upload size={32} />} label="Embed / Share" onClick={onShare} disabled={!onShare} />
-      </RibbonGroup>
-      <RibbonGroup name="Collect Data">
-        <RibbonButton icon={<Mail size={32} />} label="Create Email" disabled />
       </RibbonGroup>
     </>
   );
