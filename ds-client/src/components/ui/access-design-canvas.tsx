@@ -182,6 +182,36 @@ export const AccessDesignCanvas = forwardRef<DesignCanvasHandle, Props>(function
     }
   }, [editingLabelId]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedId) return;
+      if (editingLabelId) return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        if (selectedId.startsWith('flbl-')) {
+          const id = selectedId.slice(5);
+          setDesignLabels(prev => prev.filter(l => l.id !== id));
+          setSelectedId(null);
+        } else if (selectedId.startsWith('img-')) {
+          const id = selectedId.slice(4);
+          setDesignImages(prev => prev.filter(i => i.id !== id));
+          setSelectedId(null);
+        } else if (selectedId.startsWith('lbl-') || selectedId.startsWith('ctl-')) {
+          const fn = selectedId.slice(4);
+          setDesignFields(prev => prev.map(f =>
+            f.fieldName === fn ? { ...f, visible: false } : f
+          ));
+          setSelectedId(null);
+        }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId, editingLabelId]);
+
   const startInteraction = useCallback((id: string, dragMode: DragMode, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
