@@ -36,9 +36,66 @@ interface QueryColumn {
   totalFn?: TotalFn;
 }
 
+interface QueryProperties {
+  description: string;
+  defaultView: 'Datasheet' | 'PivotTable' | 'PivotChart';
+  outputAllFields: 'Yes' | 'No';
+  topValues: string;
+  uniqueValues: 'Yes' | 'No';
+  uniqueRecords: 'Yes' | 'No';
+  sourceDatabase: string;
+  sourceConnectStr: string;
+  recordLocks: 'No Locks' | 'All Records' | 'Edited Record';
+  recordsetType: 'Dynaset' | 'Dynaset (Inconsistent Updates)' | 'Snapshot';
+  odbcTimeout: string;
+  filter: string;
+  orderBy: string;
+  maxRecords: string;
+  orientation: 'Left-to-Right' | 'Right-to-Left';
+  subdatasheetName: string;
+  linkChildFields: string;
+  linkMasterFields: string;
+  subdatasheetHeight: string;
+  subdatasheetExpanded: 'Yes' | 'No';
+  filterOnLoad: 'Yes' | 'No';
+  orderByOnLoad: 'Yes' | 'No';
+}
+
+interface QueryParameter {
+  name: string;
+  dataType: string;
+}
+
+const DEFAULT_QUERY_PROPERTIES: QueryProperties = {
+  description: '',
+  defaultView: 'Datasheet',
+  outputAllFields: 'No',
+  topValues: 'All',
+  uniqueValues: 'No',
+  uniqueRecords: 'No',
+  sourceDatabase: '(current)',
+  sourceConnectStr: '',
+  recordLocks: 'No Locks',
+  recordsetType: 'Dynaset',
+  odbcTimeout: '60',
+  filter: '',
+  orderBy: '',
+  maxRecords: '',
+  orientation: 'Left-to-Right',
+  subdatasheetName: '',
+  linkChildFields: '',
+  linkMasterFields: '',
+  subdatasheetHeight: '0cm',
+  subdatasheetExpanded: 'No',
+  filterOnLoad: 'No',
+  orderByOnLoad: 'Yes',
+};
+
 interface QueryDefinition {
   tables: { tableId: number; tableName: string }[];
   columns: QueryColumn[];
+  properties?: Partial<QueryProperties>;
+  parameters?: QueryParameter[];
 }
 
 interface QueryRow { id: number; name: string; databaseId: number; definition: any; }
@@ -234,6 +291,10 @@ export function QueryDesignView({
   const [showTotals, setShowTotals] = useState(false);
   const [showTableRow, setShowTableRow] = useState(true);
   const [showAddTablesSidebar, setShowAddTablesSidebar] = useState(true);
+  const [showPropertySheet, setShowPropertySheet] = useState(false);
+  const [showParametersModal, setShowParametersModal] = useState(false);
+  const [queryProperties, setQueryProperties] = useState<QueryProperties>({ ...DEFAULT_QUERY_PROPERTIES });
+  const [queryParameters, setQueryParameters] = useState<QueryParameter[]>([]);
   const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
   const [tablePositions, setTablePositions] = useState<Record<number, { x: number; y: number }>>({});
   const [returnLimit, setReturnLimit] = useState('All');
@@ -257,7 +318,9 @@ export function QueryDesignView({
         setQueryName(q.name);
         setNameInput(q.name);
         const def = q.definition && typeof q.definition === 'object' ? q.definition as QueryDefinition : { tables: [], columns: [] };
-        setDefinition({ tables: def.tables || [], columns: def.columns || [] });
+        setDefinition({ tables: def.tables || [], columns: def.columns || [], properties: def.properties, parameters: def.parameters });
+        if (def.properties) setQueryProperties({ ...DEFAULT_QUERY_PROPERTIES, ...def.properties });
+        if (def.parameters) setQueryParameters(def.parameters);
         if (resolvedInitialView === 'sql') {
           const sql = def.tables && def.tables.length > 0 ? buildQuerySql({ tables: def.tables || [], columns: def.columns || [] }) : 'SELECT;';
           setSqlText(sql);
@@ -378,9 +441,10 @@ export function QueryDesignView({
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      const defToSave = { ...definition, properties: queryProperties, parameters: queryParameters };
       await apiFetch(`/api/ds/databases/${databaseId}/queries/${queryId}`, {
         method: 'PUT',
-        body: JSON.stringify({ name: queryName, definition })
+        body: JSON.stringify({ name: queryName, definition: defToSave })
       });
       toast({ title: 'Query saved' });
     } catch {
@@ -568,9 +632,9 @@ export function QueryDesignView({
             </RibbonGroup>
             <RibbonGroup name="Show/Hide">
               <RibbonButton icon={<DsShowHideTotalsIcon size={32} />} label="Totals" onClick={() => setShowTotals(!showTotals)} active={showTotals} />
-              <RibbonButton icon={<DsShowHideParametersIcon size={32} />} label="Parameters" disabled />
+              <RibbonButton icon={<DsShowHideParametersIcon size={32} />} label="Parameters" onClick={() => setShowParametersModal(true)} />
               <div className="flex flex-col justify-around h-full pb-5 pt-1">
-                <RibbonButton size="small" icon={<DsShowHidePropertySheetIcon size={16} />} label="Property Sheet" disabled />
+                <RibbonButton size="small" icon={<DsShowHidePropertySheetIcon size={16} />} label="Property Sheet" onClick={() => setShowPropertySheet(s => !s)} active={showPropertySheet} />
                 <RibbonButton size="small" icon={<DsShowHideTableNamesIcon size={16} />} label="Table Names" onClick={() => setShowTableRow(s => !s)} active={showTableRow} />
               </div>
             </RibbonGroup>
@@ -676,6 +740,7 @@ export function QueryDesignView({
         </div>
 
         {view === 'design' && (
+          <div className="flex flex-1 overflow-hidden">
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* Table pane + Add Tables sidebar */}
             <div className="flex flex-none border-b-2 border-gray-400" style={{ height: tablePaneHeight }}>
@@ -913,6 +978,77 @@ export function QueryDesignView({
               <div className="h-4" />
             </div>
           </div>
+
+          {/* ── Property Sheet Sidebar ── */}
+          {showPropertySheet && (
+            <div className="w-64 flex-shrink-0 border-l border-gray-400 bg-white flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between px-3 py-2 bg-[#f3f2f1] border-b border-gray-300">
+                <span className="text-xs font-bold text-gray-800">Property Sheet</span>
+                <button onClick={() => setShowPropertySheet(false)} className="text-gray-400 hover:text-gray-600 text-sm leading-none">✕</button>
+              </div>
+              <div className="px-3 py-1 border-b border-gray-200 text-[10px] text-gray-500">
+                Selection type: <span className="font-semibold text-gray-700">Query Properties</span>
+              </div>
+              <div className="px-3 py-1 border-b border-gray-200">
+                <span className="text-xs font-bold text-gray-700">General</span>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                <table className="w-full text-xs border-collapse">
+                  <tbody>
+                    {([
+                      ['description', 'Description', 'text'],
+                      ['defaultView', 'Default View', 'select:Datasheet,PivotTable,PivotChart'],
+                      ['outputAllFields', 'Output All Fields', 'select:Yes,No'],
+                      ['topValues', 'Top Values', 'select:All,5,25,100,5%,25%'],
+                      ['uniqueValues', 'Unique Values', 'select:Yes,No'],
+                      ['uniqueRecords', 'Unique Records', 'select:Yes,No'],
+                      ['sourceDatabase', 'Source Database', 'text'],
+                      ['sourceConnectStr', 'Source Connect Str', 'text'],
+                      ['recordLocks', 'Record Locks', 'select:No Locks,All Records,Edited Record'],
+                      ['recordsetType', 'Recordset Type', 'select:Dynaset,Dynaset (Inconsistent Updates),Snapshot'],
+                      ['odbcTimeout', 'ODBC Timeout', 'text'],
+                      ['filter', 'Filter', 'text'],
+                      ['orderBy', 'Order By', 'text'],
+                      ['maxRecords', 'Max Records', 'text'],
+                      ['orientation', 'Orientation', 'select:Left-to-Right,Right-to-Left'],
+                      ['subdatasheetName', 'Subdatasheet Name', 'text'],
+                      ['linkChildFields', 'Link Child Fields', 'text'],
+                      ['linkMasterFields', 'Link Master Fields', 'text'],
+                      ['subdatasheetHeight', 'Subdatasheet Height', 'text'],
+                      ['subdatasheetExpanded', 'Subdatasheet Expanded', 'select:Yes,No'],
+                      ['filterOnLoad', 'Filter On Load', 'select:Yes,No'],
+                      ['orderByOnLoad', 'Order By On Load', 'select:Yes,No'],
+                    ] as [keyof QueryProperties, string, string][]).map(([key, label, type]) => (
+                      <tr key={key} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="px-2 py-1 text-gray-700 whitespace-nowrap border-r border-gray-200">{label}</td>
+                        <td className="px-1 py-0.5">
+                          {type.startsWith('select:') ? (
+                            <select
+                              value={queryProperties[key]}
+                              onChange={e => setQueryProperties(prev => ({ ...prev, [key]: e.target.value }))}
+                              className="w-full text-xs border-0 outline-none bg-transparent py-0.5 cursor-pointer"
+                            >
+                              {type.slice(7).split(',').map(opt => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              type="text"
+                              value={queryProperties[key]}
+                              onChange={e => setQueryProperties(prev => ({ ...prev, [key]: e.target.value }))}
+                              className="w-full text-xs border-0 outline-none bg-transparent py-0.5"
+                            />
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          </div>
         )}
 
         {/* ── Datasheet View ── */}
@@ -1070,6 +1206,103 @@ export function QueryDesignView({
           </div>
         )}
       </div>
+
+      {/* ── Query Parameters Modal ── */}
+      {showParametersModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-[#f3f2f1] border border-gray-400 shadow-xl flex flex-col" style={{ width: 480, maxHeight: '80vh' }}>
+            <div className="flex items-center justify-between px-3 py-2 bg-[#8b6914] text-white">
+              <span className="text-sm font-semibold">Query Parameters</span>
+              <div className="flex items-center gap-2">
+                <button className="text-white/70 hover:text-white text-sm" title="Help">?</button>
+                <button onClick={() => setShowParametersModal(false)} className="text-white/70 hover:text-white text-sm">✕</button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-auto p-2">
+              <table className="w-full border-collapse bg-white border border-gray-400">
+                <thead>
+                  <tr>
+                    <th className="border border-gray-300 px-3 py-1.5 text-left text-xs font-semibold text-gray-800 bg-white w-3/5">Parameter</th>
+                    <th className="border border-gray-300 px-3 py-1.5 text-left text-xs font-semibold text-gray-800 bg-white w-2/5">Data Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...queryParameters, { name: '', dataType: '' }].map((param, idx) => (
+                    <tr key={idx}>
+                      <td className="border border-gray-300 p-0">
+                        <input
+                          type="text"
+                          value={param.name}
+                          onChange={e => {
+                            const val = e.target.value;
+                            setQueryParameters(prev => {
+                              const updated = [...prev];
+                              if (idx < updated.length) {
+                                updated[idx] = { ...updated[idx], name: val };
+                              } else if (val) {
+                                updated.push({ name: val, dataType: '' });
+                              }
+                              return updated;
+                            });
+                          }}
+                          className="w-full text-xs px-2 py-1 border-0 outline-none bg-transparent"
+                          placeholder=""
+                        />
+                      </td>
+                      <td className="border border-gray-300 p-0">
+                        <select
+                          value={param.dataType}
+                          onChange={e => {
+                            const val = e.target.value;
+                            setQueryParameters(prev => {
+                              const updated = [...prev];
+                              if (idx < updated.length) {
+                                updated[idx] = { ...updated[idx], dataType: val };
+                              } else if (val) {
+                                updated.push({ name: '', dataType: val });
+                              }
+                              return updated;
+                            });
+                          }}
+                          className="w-full text-xs px-1 py-1 border-0 outline-none bg-transparent cursor-pointer"
+                        >
+                          <option value=""></option>
+                          <option value="Text">Text</option>
+                          <option value="Byte">Byte</option>
+                          <option value="Integer">Integer</option>
+                          <option value="Long Integer">Long Integer</option>
+                          <option value="Single">Single</option>
+                          <option value="Double">Double</option>
+                          <option value="Currency">Currency</option>
+                          <option value="Date/Time">Date/Time</option>
+                          <option value="Yes/No">Yes/No</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                  {Array.from({ length: Math.max(0, 8 - queryParameters.length) }).map((_, i) => (
+                    <tr key={`empty-${i}`}>
+                      <td className="border border-gray-300 px-2 py-1 text-xs">&nbsp;</td>
+                      <td className="border border-gray-300 px-2 py-1 text-xs">&nbsp;</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex justify-end px-3 py-2 border-t border-gray-300">
+              <button
+                onClick={() => {
+                  setQueryParameters(prev => prev.filter(p => p.name.trim() !== ''));
+                  setShowParametersModal(false);
+                }}
+                className="px-4 py-1 text-xs border border-gray-400 bg-white hover:bg-gray-50 rounded-sm"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Shell>
   );
 }
