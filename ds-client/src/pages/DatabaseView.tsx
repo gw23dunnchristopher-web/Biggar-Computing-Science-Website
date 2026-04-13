@@ -466,7 +466,7 @@ export function DatabaseView() {
           const td = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}`);
           const rawFields = [...(td.fields || [])].sort((a: any, b: any) => a.sortOrder - b.sortOrder);
           fields = rawFields.map((f: any, i: number) => ({
-            id: f.id, name: f.name, label: f.name, visible: true, sortOrder: i
+            id: f.id, fieldName: f.name, name: f.name, label: f.name, visible: true, sortOrder: i
           }));
         } catch { /* keep fields empty on error */ }
       }

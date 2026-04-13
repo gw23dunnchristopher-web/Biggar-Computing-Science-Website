@@ -83,6 +83,7 @@ interface Props {
   onSave: (fields: DesignFieldDef[], images: DesignImageDef[], freeLabels: DesignLabelDef[]) => void;
   isSaving: boolean;
   showPropertySheet?: boolean;
+  autoSave?: boolean;
 }
 
 const GRID = 8;
@@ -141,11 +142,16 @@ function getDefaultSections(mode: 'form' | 'report'): SectionDef[] {
 
 function migrateField(f: DesignFieldDef, i: number): DesignFieldDef {
   const baseY = i * ROW_GAP + 8;
-  if (f.labelX !== undefined && f.section !== undefined) return f;
+  const fn = f.fieldName || (f as any).name || '';
+  if (f.labelX !== undefined && f.section !== undefined && f.fieldName) {
+    return { ...f, fieldName: fn };
+  }
   const lw = f.labelWidth ?? DEFAULT_LBL_W;
   const h = f.height ?? DEFAULT_H;
   return {
     ...f,
+    fieldName: fn,
+    label: f.label || fn,
     section: f.section ?? 'detail',
     labelX: f.labelX ?? 8,
     labelY: f.labelY ?? baseY,
@@ -158,7 +164,7 @@ function migrateField(f: DesignFieldDef, i: number): DesignFieldDef {
   };
 }
 
-export const AccessDesignCanvas = forwardRef<DesignCanvasHandle, Props>(function AccessDesignCanvas({ mode, objectName, fields, images = [], freeLabels = [], accentColor = '#5d4037', onSave, isSaving, showPropertySheet: showPropSheetProp }, ref) {
+export const AccessDesignCanvas = forwardRef<DesignCanvasHandle, Props>(function AccessDesignCanvas({ mode, objectName, fields, images = [], freeLabels = [], accentColor = '#5d4037', onSave, isSaving, showPropertySheet: showPropSheetProp, autoSave }, ref) {
   const [sections, setSections] = useState<SectionDef[]>(() => getDefaultSections(mode));
   const [designFields, setDesignFields] = useState<DesignFieldDef[]>(() =>
     fields.map((f, i) => migrateField(f, i))
@@ -426,6 +432,16 @@ export const AccessDesignCanvas = forwardRef<DesignCanvasHandle, Props>(function
   const handleSave = () => {
     onSave(designFields, designImages, designLabels);
   };
+
+  const autoSaveRef = useRef(false);
+  useEffect(() => {
+    if (!autoSave || isSaving) return;
+    if (!autoSaveRef.current) { autoSaveRef.current = true; return; }
+    const t = setTimeout(() => {
+      onSave(designFields, designImages, designLabels);
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [designFields, designImages, designLabels, autoSave]);
 
   const renderHandles = (id: string) => (
     <>
