@@ -679,11 +679,28 @@ export function FormView({
                         (f.labelX !== undefined ? (f.labelY ?? 0) + (f.labelHeight ?? 28) : (f.y ?? 0) + (f.height ?? 28)),
                         (f.y ?? 0) + (f.height ?? 28),
                       ]).map(v => v + 60),
-                      ...formImages.map(i => i.y + i.height + 40)
+                      ...formImages.map(i => i.y + i.height + 40),
+                      ...formFreeLabels.map(l => l.y + l.height + 40)
                     ),
                     backgroundColor: formBgColor,
                   }}
                 >
+                  {/* Free labels from design */}
+                  {formFreeLabels.map(fl => (
+                    <div key={fl.id} style={{
+                      position: 'absolute', left: fl.x, top: fl.y, width: fl.width, height: fl.height,
+                      display: 'flex', alignItems: 'center',
+                      fontSize: fl.style?.fontSize ?? 13,
+                      color: fl.style?.color ?? '#333',
+                      backgroundColor: fl.style?.bgColor ?? 'transparent',
+                      border: fl.style?.borderColor ? `1px solid ${fl.style.borderColor}` : 'none',
+                      fontWeight: fl.style?.bold ? 'bold' : 'normal',
+                      fontStyle: fl.style?.italic ? 'italic' : 'normal',
+                      boxSizing: 'border-box',
+                    }}>
+                      {fl.text}
+                    </div>
+                  ))}
                   {/* Static images */}
                   {formImages.map(img => (
                     <div key={img.id} style={{ position: 'absolute', left: img.x, top: img.y, width: img.width, height: img.height }}>

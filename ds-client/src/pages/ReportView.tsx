@@ -198,6 +198,8 @@ export function ReportView({
   })();
 
   const visibleFields = definition?.fields.filter(f => f.visible).sort((a, b) => a.sortOrder - b.sortOrder) || [];
+  const allFields = (definition?.fields || []) as (ReportFieldDef & DesignFieldDef)[];
+  const hasDesignLayout = allFields.some(f => f.x !== undefined && f.y !== undefined);
   const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
 
   // Group records if groupField is set
@@ -428,6 +430,132 @@ export function ReportView({
               {/* Data body — layout-aware */}
               {visibleFields.length === 0 ? (
                 <div className="p-8 text-center text-gray-400 text-sm">No fields visible. Open Design View to configure fields.</div>
+              ) : hasDesignLayout ? (
+                /* ── Design-aware layout: positions match Design View ── */
+                <div className="px-4 py-4">
+                  {(() => {
+                    const designFields = allFields.filter(f => f.visible) as (ReportFieldDef & DesignFieldDef)[];
+                    const headerFields = designFields.filter(f => f.section === 'reportHeader' || f.section === 'header');
+                    const detailFields = designFields.filter(f => !f.section || f.section === 'detail');
+                    const footerFields = designFields.filter(f => f.section === 'reportFooter' || f.section === 'footer');
+
+                    const headerLabels = (definition.designLabels || []).filter(l => l.section === 'reportHeader' || l.section === 'header');
+                    const detailLabels = (definition.designLabels || []).filter(l => !l.section || l.section === 'detail');
+                    const footerLabels = (definition.designLabels || []).filter(l => l.section === 'reportFooter' || l.section === 'footer');
+                    const headerImages = (definition.designImages || []).filter(i => i.section === 'reportHeader' || i.section === 'header');
+                    const detailImages = (definition.designImages || []).filter(i => !i.section || i.section === 'detail');
+
+                    const detailH = Math.max(
+                      36,
+                      ...detailFields.flatMap(f => [(f.y ?? 0) + (f.height ?? 24), (f.labelY ?? f.y ?? 0) + (f.labelHeight ?? 24)]),
+                      ...detailLabels.map(l => l.y + l.height),
+                      ...detailImages.map(i => i.y + i.height)
+                    ) + 4;
+                    const headerH = headerFields.length > 0 || headerLabels.length > 0 || headerImages.length > 0
+                      ? Math.max(36, ...headerFields.flatMap(f => [(f.y ?? 0) + (f.height ?? 24)]),
+                          ...headerLabels.map(l => l.y + l.height), ...headerImages.map(i => i.y + i.height)) + 4
+                      : 0;
+
+                    const renderDesignElements = (
+                      fields: (ReportFieldDef & DesignFieldDef)[],
+                      labels: DesignLabelDef[],
+                      images: DesignImageDef[],
+                      record?: any,
+                    ) => (
+                      <>
+                        {images.map(img => (
+                          <div key={img.id} style={{ position: 'absolute', left: img.x, top: img.y, width: img.width, height: img.height }}>
+                            <img src={img.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                          </div>
+                        ))}
+                        {labels.map(fl => (
+                          <div key={fl.id} style={{
+                            position: 'absolute', left: fl.x, top: fl.y, width: fl.width, height: fl.height,
+                            display: 'flex', alignItems: 'center',
+                            fontSize: fl.style?.fontSize ?? 12, color: fl.style?.color ?? '#333',
+                            backgroundColor: fl.style?.bgColor ?? 'transparent',
+                            border: fl.style?.borderColor ? `1px solid ${fl.style.borderColor}` : 'none',
+                            fontWeight: fl.style?.bold ? 'bold' : 'normal',
+                            fontStyle: fl.style?.italic ? 'italic' : 'normal',
+                            boxSizing: 'border-box',
+                          }}>
+                            {fl.text}
+                          </div>
+                        ))}
+                        {fields.map(fd => {
+                          const ls = fd.labelStyle ?? {};
+                          const cs = fd.controlStyle ?? {};
+                          const isNew = fd.labelX !== undefined;
+                          const lx = isNew ? (fd.labelX ?? 0) : (fd.x ?? 0);
+                          const ly = isNew ? (fd.labelY ?? fd.y ?? 0) : (fd.y ?? 0);
+                          const lw = fd.labelWidth ?? 100;
+                          const lh = fd.labelHeight ?? (fd.height ?? 24);
+                          const cx = isNew ? (fd.x ?? 0) : ((fd.x ?? 0) + lw + 4);
+                          const cy = fd.y ?? 0;
+                          const cw = fd.width ?? 180;
+                          const ch = fd.height ?? 24;
+                          const val = record ? record.data?.[fd.fieldName] : '';
+                          return (
+                            <React.Fragment key={fd.fieldName}>
+                              <div style={{
+                                position: 'absolute', left: lx, top: ly, width: lw, height: lh,
+                                display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+                                paddingRight: 4, boxSizing: 'border-box',
+                                fontWeight: ls.bold ? 'bold' : 'normal', fontStyle: ls.italic ? 'italic' : 'normal',
+                                fontSize: ls.fontSize ?? 12, color: ls.color ?? '#333',
+                                backgroundColor: ls.bgColor ?? 'transparent',
+                              }}>
+                                {fd.label}
+                              </div>
+                              <div style={{
+                                position: 'absolute', left: cx, top: cy, width: cw, height: ch,
+                                display: 'flex', alignItems: 'center',
+                                fontSize: cs.fontSize ?? 12, color: cs.color ?? '#000',
+                                backgroundColor: cs.bgColor ?? 'transparent',
+                                border: '1px solid #d0d0d0', padding: '0 4px', boxSizing: 'border-box',
+                                fontWeight: cs.bold ? 'bold' : 'normal', fontStyle: cs.italic ? 'italic' : 'normal',
+                                overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
+                              }}>
+                                {fd.fieldType === 'boolean' ? (
+                                  <span className={`inline-block w-3 h-3 rounded-sm border ${val ? 'bg-[#5d4037] border-[#5d4037]' : 'border-gray-400'}`} />
+                                ) : fd.fieldType === 'attachment' && isImageUrl(val) ? (
+                                  <img src={String(val)} alt={fd.label} style={{ height: ch - 4, width: 'auto', objectFit: 'contain' }} />
+                                ) : String(val ?? '')}
+                              </div>
+                            </React.Fragment>
+                          );
+                        })}
+                      </>
+                    );
+
+                    return (
+                      <>
+                        {headerH > 0 && (
+                          <div className="relative border-b border-gray-200 mb-2" style={{ height: headerH, width: 700 }}>
+                            {renderDesignElements(headerFields, headerLabels, headerImages)}
+                          </div>
+                        )}
+                        {processedRecords.map((rec, ri) => (
+                          <div key={rec.id} className="relative" style={{
+                            height: detailH, width: 700,
+                            borderBottom: '1px solid #eee',
+                            backgroundColor: ri % 2 === 0 ? '#fff' : '#fafaf8',
+                          }}>
+                            {renderDesignElements(detailFields, detailLabels, detailImages, rec)}
+                          </div>
+                        ))}
+                        {footerFields.length > 0 && (
+                          <div className="relative border-t border-gray-200 mt-2" style={{
+                            height: Math.max(36, ...footerFields.flatMap(f => [(f.y ?? 0) + (f.height ?? 24)])) + 4,
+                            width: 700,
+                          }}>
+                            {renderDesignElements(footerFields, footerLabels, [])}
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
               ) : (
                 <div className="px-8 py-4">
                   {grouped.map((group, gi) => {
