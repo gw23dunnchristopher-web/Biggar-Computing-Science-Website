@@ -5,7 +5,7 @@
  * Attachment fields that hold image URLs are displayed as images.
  * Both teachers and students can customise the layout of their own sandboxed copy.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearch } from 'wouter';
 import { Shell } from '@/components/layout/Shell';
 import { Sidebar } from '@/components/layout/Sidebar';
@@ -17,13 +17,27 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { DesignViewIcon } from '@/components/ui/design-view-icon';
 import { AccessDesignCanvas } from '@/components/ui/access-design-canvas';
-import type { DesignFieldDef, DesignImageDef, DesignLabelDef } from '@/components/ui/access-design-canvas';
+import type { DesignFieldDef, DesignImageDef, DesignLabelDef, DesignCanvasHandle } from '@/components/ui/access-design-canvas';
 import { parseLookupConfig } from '@/components/ui/design-grid';
 import {
-  LayoutTemplate, Printer, Eye,
+  LayoutTemplate,
   ChevronFirst, ChevronLast, ChevronLeft, ChevronRight,
-  Plus, Trash2, Save, X, Type, TextCursorInput, ImageIcon,
+  Plus, Trash2, Save, X,
 } from 'lucide-react';
+import {
+  DsRptLayoutViewIcon,
+  DsRptThemesIcon, DsRptColorsIcon, DsRptFontsIcon,
+  DsRptSelectIcon, DsRptLabelIcon, DsRptTextBoxIcon, DsRptButtonIcon,
+  DsRptInsertImageIcon, DsRptAttachmentIcon, DsRptLinkIcon,
+  DsRptLineIcon, DsRptRectangleIcon, DsRptCheckBoxIcon,
+  DsRptOptionButtonIcon, DsRptToggleButtonIcon, DsRptComboBoxIcon,
+  DsRptListBoxIcon, DsRptSubFormSubReportIcon, DsRptInsertModernChartIcon,
+  DsRptInsertPageBreakIcon, DsRptOptionGroupIcon,
+  DsRptBoundObjectFrameIcon, DsRptUnboundObjectFrameIcon,
+  DsRptTabControlIcon, DsRptEdgeBrowserIcon,
+  DsRptLogoIcon, DsRptTitleIcon, DsRptDateAndTimeIcon,
+  DsRptAddExistingFieldsIcon, DsRptPropertySheetIcon, DsRptTabOrderIcon,
+} from '@/components/ui/ds-icons';
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
 
@@ -92,6 +106,7 @@ export function FormView({
 }: Props) {
   const search = useSearch();
   const { toast } = useToast();
+  const canvasRef = useRef<DesignCanvasHandle>(null);
 
   const [view, setView] = useState<'form' | 'design'>(
     new URLSearchParams(search).get('design') === '1' ? 'design' : 'form'
@@ -279,6 +294,8 @@ export function FormView({
     onCreateReport, onCreateBlankReport, onCreateAutoReport, onShare, onSettings,
   };
 
+  const noop = () => {};
+
   const contextSection: RibbonContextSection = {
     color: '#2e7d32',
     defaultTab: view === 'form' ? 'Form View' : 'Form Design',
@@ -298,10 +315,48 @@ export function FormView({
         name: 'Form Design',
         content: (
           <>
+            <RibbonGroup name="Views">
+              <RibbonButton icon={<LayoutTemplate size={22} />} label="Form View" onClick={() => setView('form')} />
+              <RibbonButton icon={<DsRptLayoutViewIcon />} label="Layout View" onClick={() => setView('form')} />
+            </RibbonGroup>
+            <RibbonGroup name="Themes">
+              <RibbonButton icon={<DsRptThemesIcon />} label="Themes" onClick={noop} />
+              <RibbonButton icon={<DsRptColorsIcon />} label="Colors" onClick={noop} />
+              <RibbonButton icon={<DsRptFontsIcon />} label="Fonts" onClick={noop} />
+            </RibbonGroup>
             <RibbonGroup name="Controls">
-              <RibbonButton icon={<Type size={18} />} label="Label" onClick={() => {}} />
-              <RibbonButton icon={<TextCursorInput size={18} />} label="Text Box" onClick={() => {}} />
-              <RibbonButton icon={<ImageIcon size={18} />} label="Image" onClick={() => {}} />
+              <RibbonButton icon={<DsRptSelectIcon />} label="Select" onClick={noop} />
+              <RibbonButton icon={<DsRptLabelIcon />} label="Label" onClick={() => canvasRef.current?.addLabel()} />
+              <RibbonButton icon={<DsRptTextBoxIcon />} label="Text Box" onClick={() => canvasRef.current?.addTextBox()} />
+              <RibbonButton icon={<DsRptButtonIcon />} label="Button" onClick={noop} />
+              <RibbonButton icon={<DsRptInsertImageIcon />} label="Image" onClick={() => canvasRef.current?.addImage()} />
+              <RibbonButton icon={<DsRptAttachmentIcon />} label="Attachment" onClick={noop} />
+              <RibbonButton icon={<DsRptLinkIcon />} label="Hyperlink" onClick={noop} />
+              <RibbonButton icon={<DsRptLineIcon />} label="Line" onClick={() => canvasRef.current?.addLine()} />
+              <RibbonButton icon={<DsRptRectangleIcon />} label="Rectangle" onClick={() => canvasRef.current?.addRectangle()} />
+              <RibbonButton icon={<DsRptCheckBoxIcon />} label="Check Box" onClick={() => canvasRef.current?.addCheckBox()} />
+              <RibbonButton icon={<DsRptOptionButtonIcon />} label="Option Button" onClick={noop} />
+              <RibbonButton icon={<DsRptToggleButtonIcon />} label="Toggle Button" onClick={noop} />
+              <RibbonButton icon={<DsRptComboBoxIcon />} label="Combo Box" onClick={noop} />
+              <RibbonButton icon={<DsRptListBoxIcon />} label="List Box" onClick={noop} />
+              <RibbonButton icon={<DsRptSubFormSubReportIcon />} label="Subform" onClick={noop} />
+              <RibbonButton icon={<DsRptInsertModernChartIcon />} label="Chart" onClick={noop} />
+              <RibbonButton icon={<DsRptInsertPageBreakIcon />} label="Page Break" onClick={() => canvasRef.current?.addPageBreak()} />
+              <RibbonButton icon={<DsRptOptionGroupIcon />} label="Option Group" onClick={noop} />
+              <RibbonButton icon={<DsRptBoundObjectFrameIcon />} label="Bound Frame" onClick={noop} />
+              <RibbonButton icon={<DsRptUnboundObjectFrameIcon />} label="Unbound Frame" onClick={noop} />
+              <RibbonButton icon={<DsRptTabControlIcon />} label="Tab Control" onClick={noop} />
+              <RibbonButton icon={<DsRptEdgeBrowserIcon />} label="Web Browser" onClick={noop} />
+            </RibbonGroup>
+            <RibbonGroup name="Header / Footer">
+              <RibbonButton icon={<DsRptLogoIcon />} label="Logo" onClick={noop} />
+              <RibbonButton icon={<DsRptTitleIcon />} label="Title" onClick={noop} />
+              <RibbonButton icon={<DsRptDateAndTimeIcon />} label="Date & Time" onClick={noop} />
+            </RibbonGroup>
+            <RibbonGroup name="Tools">
+              <RibbonButton icon={<DsRptAddExistingFieldsIcon />} label="Existing Fields" onClick={noop} />
+              <RibbonButton icon={<DsRptPropertySheetIcon />} label="Property Sheet" onClick={() => canvasRef.current?.togglePropertySheet()} />
+              <RibbonButton icon={<DsRptTabOrderIcon />} label="Tab Order" onClick={noop} />
             </RibbonGroup>
           </>
         )
@@ -317,10 +372,10 @@ export function FormView({
         <RibbonGroup name="Views">
           <RibbonDropdownButton
             icon={view === 'form' ? <LayoutTemplate size={40} /> : <DesignViewIcon size={40} />}
-            label={view === 'form' ? 'View' : 'View'}
+            label="View"
           >
             <RibbonButton icon={<LayoutTemplate size={16} />} label="Form View" active={view === 'form'} onClick={() => setView('form')} />
-            <RibbonButton icon={<Eye size={16} />} label="Layout View" active={false} onClick={() => setView('form')} />
+            <RibbonButton icon={<DsRptLayoutViewIcon size={16} />} label="Layout View" active={false} onClick={() => setView('form')} />
             <RibbonButton icon={<DesignViewIcon size={16} />} label="Design View" active={view === 'design'} onClick={() => setView('design')} />
           </RibbonDropdownButton>
         </RibbonGroup>
@@ -542,6 +597,7 @@ export function FormView({
         {view === 'design' && (
           <div className="flex-1 overflow-hidden">
             <AccessDesignCanvas
+              ref={canvasRef}
               mode="form"
               objectName={formMeta?.name || 'Form'}
               fields={definition.fields.sort((a, b) => a.sortOrder - b.sortOrder)}

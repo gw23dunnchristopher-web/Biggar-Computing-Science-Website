@@ -1,0 +1,61 @@
+🧾 Controls Group (used to add items to a report)
+Label (Aa) → Adds text labels (titles, headings)
+Text Box (ab|) → Displays data from fields
+Button → Adds a clickable button (rare in reports)
+Image → Inserts a picture/logo
+Attachment → Displays attached files/images
+Hyperlink → Adds a clickable link
+Line → Draws a straight line
+Rectangle → Draws a box/shape
+Check Box → Yes/No field display
+Option Button (Radio Button) → Choice selection (rare in reports)
+Toggle Button → On/off display control
+Combo Box → Dropdown list
+List Box → List of values
+Subform/Subreport → Embeds another report or form
+Chart → Adds a graph/chart
+Page Break → Forces content onto a new page
+🎨 Formatting Group
+Quick Styles → Apply preset designs
+Shape Fill → Change background colour
+Shape Outline → Change border colour
+Shape Effects → Add shadows/glow
+Font / Text Formatting (B, I, U, size, colour) → Style text
+📏 Position & Size
+Align (Left, Right, Top, Bottom) → Line up controls neatly
+Size (Same Width/Height) → Make objects equal size
+Spacing (Equal spacing) → Distribute evenly
+Margins & Padding → Adjust spacing inside/outside controls
+🔧 Tools Group
+Add Existing Fields → Opens field list to drag data into report
+Property Sheet → Edit detailed settings of objects
+Field List Pane → Shows available data fields
+Tab Order → Set order of navigation
+📊 2. Arrange Tab (Layout Control)
+Bring to Front / Send to Back → Change layering of objects
+Group / Ungroup → Combine controls
+Stacked / Tabular Layout → Organise fields automatically
+Remove Layout → Freely move controls
+📄 3. Page Setup Tab
+Margins → Set page margins
+Orientation (Portrait/Landscape) → Change page direction
+Size → Select paper size
+Columns → Split report into columns
+Page Setup Dialog → Advanced settings
+📊 4. Group, Sort & Total
+Group & Sort → Organise data into categories
+Add Group → Group by a field (e.g., by class)
+Add Sort → Sort within groups
+Totals (Σ) → Add calculations (sum, average, count)
+🧮 5. Tools for Calculations
+Expression Builder (fx) → Create formulas
+Totals in Controls → Add calculated fields directly
+🧩 6. Report Sections (Design Surface)
+
+These aren’t icons, but are essential in Design View:
+
+Report Header → Appears once at start
+Page Header → Appears at top of every page
+Detail Section → Main data rows
+Page Footer → Bottom of each page
+Report Footer → End summary

@@ -14,11 +14,25 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { DesignViewIcon } from '@/components/ui/design-view-icon';
 import { AccessDesignCanvas } from '@/components/ui/access-design-canvas';
-import type { DesignFieldDef, DesignImageDef, DesignLabelDef } from '@/components/ui/access-design-canvas';
+import type { DesignFieldDef, DesignImageDef, DesignLabelDef, DesignCanvasHandle } from '@/components/ui/access-design-canvas';
 import {
-  FileText, Printer, Save, Eye,
-  Type, TextCursorInput, ImageIcon,
+  FileText, Printer, Save,
 } from 'lucide-react';
+import {
+  DsRptReportViewIcon, DsRptPrintPreviewIcon, DsRptLayoutViewIcon,
+  DsRptThemesIcon, DsRptColorsIcon, DsRptFontsIcon,
+  DsRptGroupSortIcon, DsRptTotalsIcon, DsRptHideDetailsIcon,
+  DsRptSelectIcon, DsRptLabelIcon, DsRptTextBoxIcon, DsRptButtonIcon,
+  DsRptInsertImageIcon, DsRptAttachmentIcon, DsRptLinkIcon,
+  DsRptLineIcon, DsRptRectangleIcon, DsRptCheckBoxIcon,
+  DsRptOptionButtonIcon, DsRptToggleButtonIcon, DsRptComboBoxIcon,
+  DsRptListBoxIcon, DsRptSubFormSubReportIcon, DsRptInsertModernChartIcon,
+  DsRptInsertPageBreakIcon, DsRptOptionGroupIcon,
+  DsRptBoundObjectFrameIcon, DsRptUnboundObjectFrameIcon,
+  DsRptTabControlIcon, DsRptEdgeBrowserIcon,
+  DsRptLogoIcon, DsRptTitleIcon, DsRptDateAndTimeIcon,
+  DsRptAddExistingFieldsIcon, DsRptPropertySheetIcon, DsRptTabOrderIcon,
+} from '@/components/ui/ds-icons';
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
 
@@ -104,6 +118,7 @@ export function ReportView({
   const { toast } = useToast();
   const search = useSearch();
   const printRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<DesignCanvasHandle>(null);
 
   const [view, setView] = useState<'report' | 'design'>(
     new URLSearchParams(search).get('design') === '1' ? 'design' : 'report'
@@ -212,6 +227,8 @@ export function ReportView({
     onSettings,
   };
 
+  const noop = () => {};
+
   const contextSection: RibbonContextSection = {
     color: '#5d4037',
     defaultTab: view === 'report' ? 'Report View' : 'Report Design',
@@ -228,10 +245,54 @@ export function ReportView({
         name: 'Report Design',
         content: (
           <>
+            <RibbonGroup name="Views">
+              <RibbonButton icon={<DsRptReportViewIcon />} label="Report View" onClick={() => setView('report')} />
+              <RibbonButton icon={<DsRptPrintPreviewIcon />} label="Print Preview" onClick={handlePrint} />
+              <RibbonButton icon={<DsRptLayoutViewIcon />} label="Layout View" onClick={() => setView('report')} />
+            </RibbonGroup>
+            <RibbonGroup name="Themes">
+              <RibbonButton icon={<DsRptThemesIcon />} label="Themes" onClick={noop} />
+              <RibbonButton icon={<DsRptColorsIcon />} label="Colors" onClick={noop} />
+              <RibbonButton icon={<DsRptFontsIcon />} label="Fonts" onClick={noop} />
+            </RibbonGroup>
+            <RibbonGroup name="Grouping & Totals">
+              <RibbonButton icon={<DsRptGroupSortIcon />} label="Group & Sort" onClick={noop} />
+              <RibbonButton icon={<DsRptTotalsIcon />} label="Totals" onClick={noop} />
+              <RibbonButton icon={<DsRptHideDetailsIcon />} label="Hide Details" onClick={noop} />
+            </RibbonGroup>
             <RibbonGroup name="Controls">
-              <RibbonButton icon={<Type size={18} />} label="Label" onClick={() => {}} />
-              <RibbonButton icon={<TextCursorInput size={18} />} label="Text Box" onClick={() => {}} />
-              <RibbonButton icon={<ImageIcon size={18} />} label="Image" onClick={() => {}} />
+              <RibbonButton icon={<DsRptSelectIcon />} label="Select" onClick={noop} />
+              <RibbonButton icon={<DsRptLabelIcon />} label="Label" onClick={() => canvasRef.current?.addLabel()} />
+              <RibbonButton icon={<DsRptTextBoxIcon />} label="Text Box" onClick={() => canvasRef.current?.addTextBox()} />
+              <RibbonButton icon={<DsRptButtonIcon />} label="Button" onClick={noop} />
+              <RibbonButton icon={<DsRptInsertImageIcon />} label="Image" onClick={() => canvasRef.current?.addImage()} />
+              <RibbonButton icon={<DsRptAttachmentIcon />} label="Attachment" onClick={noop} />
+              <RibbonButton icon={<DsRptLinkIcon />} label="Hyperlink" onClick={noop} />
+              <RibbonButton icon={<DsRptLineIcon />} label="Line" onClick={() => canvasRef.current?.addLine()} />
+              <RibbonButton icon={<DsRptRectangleIcon />} label="Rectangle" onClick={() => canvasRef.current?.addRectangle()} />
+              <RibbonButton icon={<DsRptCheckBoxIcon />} label="Check Box" onClick={() => canvasRef.current?.addCheckBox()} />
+              <RibbonButton icon={<DsRptOptionButtonIcon />} label="Option Button" onClick={noop} />
+              <RibbonButton icon={<DsRptToggleButtonIcon />} label="Toggle Button" onClick={noop} />
+              <RibbonButton icon={<DsRptComboBoxIcon />} label="Combo Box" onClick={noop} />
+              <RibbonButton icon={<DsRptListBoxIcon />} label="List Box" onClick={noop} />
+              <RibbonButton icon={<DsRptSubFormSubReportIcon />} label="Subreport" onClick={noop} />
+              <RibbonButton icon={<DsRptInsertModernChartIcon />} label="Chart" onClick={noop} />
+              <RibbonButton icon={<DsRptInsertPageBreakIcon />} label="Page Break" onClick={() => canvasRef.current?.addPageBreak()} />
+              <RibbonButton icon={<DsRptOptionGroupIcon />} label="Option Group" onClick={noop} />
+              <RibbonButton icon={<DsRptBoundObjectFrameIcon />} label="Bound Frame" onClick={noop} />
+              <RibbonButton icon={<DsRptUnboundObjectFrameIcon />} label="Unbound Frame" onClick={noop} />
+              <RibbonButton icon={<DsRptTabControlIcon />} label="Tab Control" onClick={noop} />
+              <RibbonButton icon={<DsRptEdgeBrowserIcon />} label="Web Browser" onClick={noop} />
+            </RibbonGroup>
+            <RibbonGroup name="Header / Footer">
+              <RibbonButton icon={<DsRptLogoIcon />} label="Logo" onClick={noop} />
+              <RibbonButton icon={<DsRptTitleIcon />} label="Title" onClick={noop} />
+              <RibbonButton icon={<DsRptDateAndTimeIcon />} label="Date & Time" onClick={noop} />
+            </RibbonGroup>
+            <RibbonGroup name="Tools">
+              <RibbonButton icon={<DsRptAddExistingFieldsIcon />} label="Existing Fields" onClick={noop} />
+              <RibbonButton icon={<DsRptPropertySheetIcon />} label="Property Sheet" onClick={() => canvasRef.current?.togglePropertySheet()} />
+              <RibbonButton icon={<DsRptTabOrderIcon />} label="Tab Order" onClick={noop} />
             </RibbonGroup>
           </>
         )
@@ -246,12 +307,12 @@ export function ReportView({
       pinnedContent={
         <RibbonGroup name="Views">
           <RibbonDropdownButton
-            icon={view === 'report' ? <FileText size={40} /> : <DesignViewIcon size={40} />}
+            icon={view === 'report' ? <DsRptReportViewIcon size={40} /> : <DesignViewIcon size={40} />}
             label="View"
           >
-            <RibbonButton icon={<FileText size={16} />} label="Report View" active={view === 'report'} onClick={() => setView('report')} />
-            <RibbonButton icon={<Printer size={16} />} label="Print Preview" active={false} onClick={handlePrint} />
-            <RibbonButton icon={<Eye size={16} />} label="Layout View" active={false} onClick={() => setView('report')} />
+            <RibbonButton icon={<DsRptReportViewIcon size={16} />} label="Report View" active={view === 'report'} onClick={() => setView('report')} />
+            <RibbonButton icon={<DsRptPrintPreviewIcon size={16} />} label="Print Preview" active={false} onClick={handlePrint} />
+            <RibbonButton icon={<DsRptLayoutViewIcon size={16} />} label="Layout View" active={false} onClick={() => setView('report')} />
             <RibbonButton icon={<DesignViewIcon size={16} />} label="Design View" active={view === 'design'} onClick={() => setView('design')} />
           </RibbonDropdownButton>
         </RibbonGroup>
@@ -495,6 +556,7 @@ export function ReportView({
       ) : (
         <div className="flex-1 overflow-hidden">
           <AccessDesignCanvas
+            ref={canvasRef}
             mode="report"
             objectName={reportMeta?.name || 'Report'}
             fields={definition.fields as DesignFieldDef[]}

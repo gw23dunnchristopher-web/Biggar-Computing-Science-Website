@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 
 export interface FieldStyle {
   bold?: boolean;
@@ -46,7 +46,12 @@ export interface DesignLabelDef {
   y: number;
   width: number;
   height: number;
-  style?: FieldStyle;
+  style?: FieldStyle & {
+    fontSize?: number;
+    color?: string;
+    bgColor?: string;
+    borderColor?: string;
+  };
 }
 
 interface SectionDef {
@@ -54,6 +59,18 @@ interface SectionDef {
   name: string;
   height: number;
   collapsed: boolean;
+}
+
+export interface DesignCanvasHandle {
+  addLabel: () => void;
+  addTextBox: () => void;
+  addImage: (src?: string) => void;
+  addLine: () => void;
+  addRectangle: () => void;
+  addCheckBox: () => void;
+  addPageBreak: () => void;
+  save: () => void;
+  togglePropertySheet: () => void;
 }
 
 interface Props {
@@ -65,6 +82,7 @@ interface Props {
   accentColor?: string;
   onSave: (fields: DesignFieldDef[], images: DesignImageDef[], freeLabels: DesignLabelDef[]) => void;
   isSaving: boolean;
+  showPropertySheet?: boolean;
 }
 
 const GRID = 8;
@@ -140,7 +158,7 @@ function migrateField(f: DesignFieldDef, i: number): DesignFieldDef {
   };
 }
 
-export function AccessDesignCanvas({ mode, objectName, fields, images = [], freeLabels = [], accentColor = '#5d4037', onSave, isSaving }: Props) {
+export const AccessDesignCanvas = forwardRef<DesignCanvasHandle, Props>(function AccessDesignCanvas({ mode, objectName, fields, images = [], freeLabels = [], accentColor = '#5d4037', onSave, isSaving, showPropertySheet: showPropSheetProp }, ref) {
   const [sections, setSections] = useState<SectionDef[]>(() => getDefaultSections(mode));
   const [designFields, setDesignFields] = useState<DesignFieldDef[]>(() =>
     fields.map((f, i) => migrateField(f, i))
@@ -152,6 +170,7 @@ export function AccessDesignCanvas({ mode, objectName, fields, images = [], free
   const [editingLabelId, setEditingLabelId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
   const [sectionResize, setSectionResize] = useState<{ sectionId: string; startY: number; startH: number } | null>(null);
+  const [propSheetVisible, setPropSheetVisible] = useState(showPropSheetProp !== false);
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
@@ -311,6 +330,68 @@ export function AccessDesignCanvas({ mode, objectName, fields, images = [], free
     }]);
     setSelectedId(`ctl-${name}`);
   };
+
+  const addImageElement = (src?: string) => {
+    const id = `im${Date.now()}`;
+    setDesignImages(prev => [...prev, {
+      id, src: src || '', section: 'detail',
+      x: 8, y: 8, width: 120, height: 80,
+    }]);
+    setSelectedId(`img-${id}`);
+  };
+
+  const addLine = () => {
+    const id = `fl${Date.now()}`;
+    setDesignLabels(prev => [...prev, {
+      id, text: '', section: 'detail',
+      x: 8, y: 8, width: 200, height: 2,
+      style: { bgColor: '#000000' },
+    }]);
+    setSelectedId(`flbl-${id}`);
+  };
+
+  const addRectangle = () => {
+    const id = `fl${Date.now()}`;
+    setDesignLabels(prev => [...prev, {
+      id, text: '', section: 'detail',
+      x: 8, y: 8, width: 120, height: 80,
+      style: { bgColor: 'transparent', borderColor: '#000000' },
+    }]);
+    setSelectedId(`flbl-${id}`);
+  };
+
+  const addCheckBox = () => {
+    const name = `CheckBox${Date.now()}`;
+    setDesignFields(prev => [...prev, {
+      fieldName: name, label: name, visible: true,
+      sortOrder: prev.length, fieldType: 'boolean', section: 'detail',
+      x: DEFAULT_LBL_W + 16, y: 8, width: 20, height: DEFAULT_H,
+      labelX: 8, labelY: 8, labelWidth: DEFAULT_LBL_W, labelHeight: DEFAULT_H,
+    }]);
+    setSelectedId(`ctl-${name}`);
+  };
+
+  const addPageBreak = () => {
+    const id = `fl${Date.now()}`;
+    setDesignLabels(prev => [...prev, {
+      id, text: '····· Page Break ·····', section: 'detail',
+      x: 0, y: 8, width: CANVAS_W, height: 16,
+      style: { fontSize: 9, color: '#999', bgColor: '#f8f8f8' },
+    }]);
+    setSelectedId(`flbl-${id}`);
+  };
+
+  useImperativeHandle(ref, () => ({
+    addLabel: addFreeLabel,
+    addTextBox,
+    addImage: addImageElement,
+    addLine,
+    addRectangle,
+    addCheckBox,
+    addPageBreak,
+    save: () => onSave(designFields, designImages, designLabels),
+    togglePropertySheet: () => setPropSheetVisible(v => !v),
+  }));
 
   const handleSave = () => {
     onSave(designFields, designImages, designLabels);
@@ -571,7 +652,7 @@ export function AccessDesignCanvas({ mode, objectName, fields, images = [], free
         </div>
       </div>
 
-      <div className="w-56 flex-none bg-[#f0efe9] border-l border-gray-400 overflow-y-auto flex flex-col text-xs">
+      {propSheetVisible && <div className="w-56 flex-none bg-[#f0efe9] border-l border-gray-400 overflow-y-auto flex flex-col text-xs">
         <div style={{ backgroundColor: '#d4d0c8', borderBottom: '1px solid #808080', padding: '4px 8px', fontSize: 11, fontWeight: 600, color: '#000' }}>
           Property Sheet
         </div>
@@ -837,7 +918,7 @@ export function AccessDesignCanvas({ mode, objectName, fields, images = [], free
             {isSaving ? 'Saving…' : 'Save'}
           </button>
         </div>
-      </div>
+      </div>}
 
       <style>{`
         .prop-input {
@@ -855,7 +936,7 @@ export function AccessDesignCanvas({ mode, objectName, fields, images = [], free
       `}</style>
     </div>
   );
-}
+});
 
 function PropRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
