@@ -5,10 +5,7 @@
  * Step 3: Name the form + finish options
  */
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './dialog';
-import { Button } from './button';
 import { Input } from './input';
-import { ChevronRight, ChevronLeft, ArrowRight, ArrowLeft, ChevronsRight, ChevronsLeft, Check, LayoutTemplate } from 'lucide-react';
 
 interface Field { id: number; name: string; fieldType: string; sortOrder: number; isPrimaryKey: boolean; }
 interface SelectedField { tableId: number; tableName: string; fieldName: string; fieldType: string; }
@@ -24,80 +21,170 @@ interface Props {
   apiFetch: (path: string, opts?: RequestInit) => Promise<any>;
 }
 
-const TOTAL_STEPS = 3;
+// ── Left-panel SVG illustrations ────────────────────────────────────────────
 
-const LAYOUTS: { id: LayoutOption; label: string; preview: React.ReactNode }[] = [
-  {
-    id: 'columnar',
-    label: 'Columnar',
-    preview: (
-      <div className="w-full h-24 border border-gray-300 bg-white p-1.5 rounded text-[7px] space-y-1 overflow-hidden">
-        {['Field 1', 'Field 2', 'Field 3'].map(f => (
-          <div key={f} className="flex gap-1 items-center">
-            <div className="bg-[#cce0ff] rounded-sm px-1 py-px w-10 flex-shrink-0 text-[6px] text-red-800 font-medium truncate">{f}</div>
-            <div className="border border-gray-300 rounded-sm flex-1 h-3 bg-white" />
-          </div>
-        ))}
-      </div>
-    )
-  },
-  {
-    id: 'tabular',
-    label: 'Tabular',
-    preview: (
-      <div className="w-full h-24 border border-gray-300 bg-white p-1 rounded overflow-hidden">
-        <div className="flex gap-0.5 mb-0.5">
-          {['F1', 'F2', 'F3'].map(f => <div key={f} className="flex-1 bg-[#cce0ff] text-[6px] text-red-800 font-medium px-0.5 py-px rounded-sm text-center">{f}</div>)}
-        </div>
-        {[0,1,2,3].map(r => (
-          <div key={r} className={`flex gap-0.5 mb-0.5 ${r % 2 === 1 ? 'bg-gray-50' : ''}`}>
-            {[0,1,2].map(c => <div key={c} className="flex-1 border border-gray-200 h-3 bg-white rounded-sm" />)}
-          </div>
-        ))}
-      </div>
-    )
-  },
-  {
-    id: 'datasheet',
-    label: 'Datasheet',
-    preview: (
-      <div className="w-full h-24 border border-gray-300 bg-white rounded overflow-hidden">
-        <div className="flex border-b border-gray-300 bg-[#f0f0f0]">
-          {['F1','F2','F3'].map(f => <div key={f} className="flex-1 text-[6px] font-medium text-gray-600 border-r border-gray-300 px-1 py-0.5">{f}</div>)}
-        </div>
-        {[0,1,2,3,4].map(r => (
-          <div key={r} className="flex border-b border-gray-200">
-            {[0,1,2].map(c => <div key={c} className="flex-1 border-r border-gray-200 h-3" />)}
-          </div>
-        ))}
-      </div>
-    )
-  },
-  {
-    id: 'justified',
-    label: 'Justified',
-    preview: (
-      <div className="w-full h-24 border border-gray-300 bg-white p-1.5 rounded overflow-hidden">
-        <div className="flex gap-1 mb-1">
-          {['Field 1','Field 2'].map(f => (
-            <div key={f} className="flex-1 space-y-0.5">
-              <div className="bg-[#cce0ff] rounded-sm px-1 py-px text-[6px] text-red-800 font-medium truncate">{f}</div>
-              <div className="border border-gray-300 rounded-sm h-3 bg-white" />
-            </div>
+function Step1Art() {
+  return (
+    <svg viewBox="0 0 130 220" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <defs>
+        <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f5c842" />
+          <stop offset="100%" stopColor="#e08a00" />
+        </linearGradient>
+      </defs>
+      <rect width="130" height="220" fill="url(#bg1)" />
+      {/* Left table */}
+      <rect x="8" y="30" width="44" height="8" rx="1" fill="#fff" opacity="0.85" />
+      <rect x="8" y="42" width="44" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="8" y="52" width="44" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="8" y="62" width="44" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="8" y="72" width="44" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="8" y="82" width="44" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="8" y="92" width="44" height="6" rx="1" fill="#fff" opacity="0.6" />
+      {/* Arrows */}
+      <text x="62" y="56" fontSize="18" fill="#7a3800" fontWeight="bold" fontFamily="Arial">→</text>
+      <text x="62" y="78" fontSize="18" fill="#7a3800" fontWeight="bold" fontFamily="Arial">→</text>
+      <text x="62" y="100" fontSize="18" fill="#7a3800" fontWeight="bold" fontFamily="Arial">→</text>
+      {/* Right form */}
+      <rect x="86" y="30" width="38" height="8" rx="1" fill="#fff" opacity="0.85" />
+      <rect x="86" y="48" width="38" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="86" y="58" width="38" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="86" y="68" width="38" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="86" y="78" width="38" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="86" y="88" width="38" height="6" rx="1" fill="#fff" opacity="0.6" />
+      {/* Table grid lower */}
+      <rect x="8" y="120" width="60" height="8" rx="1" fill="#fff" opacity="0.7" />
+      {[0,1,2,3,4].map(i => (
+        <g key={i}>
+          <rect x="8" y={133 + i * 10} width="28" height="6" rx="1" fill="#fff" opacity="0.5" />
+          <rect x="40" y={133 + i * 10} width="28" height="6" rx="1" fill="#fff" opacity="0.5" />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+function Step2Art({ layout }: { layout: LayoutOption }) {
+  return (
+    <svg viewBox="0 0 220 190" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <defs>
+        <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f5c842" />
+          <stop offset="100%" stopColor="#e08a00" />
+        </linearGradient>
+      </defs>
+      <rect width="220" height="190" fill="url(#bg2)" />
+      <rect x="10" y="10" width="200" height="170" rx="3" fill="#fff" opacity="0.15" />
+      {layout === 'columnar' && (
+        <g>
+          {[0,1,2,3,4].map(i => (
+            <g key={i}>
+              <rect x="20" y={25 + i * 28} width="55" height="16" rx="2" fill="#e08a00" opacity="0.7" />
+              <rect x="82" y={25 + i * 28} width="120" height="16" rx="2" fill="#fff" opacity="0.8" />
+            </g>
           ))}
-        </div>
-        <div className="flex gap-1">
-          {['Field 3','Field 4','Field 5'].map(f => (
-            <div key={f} className="flex-1 space-y-0.5">
-              <div className="bg-[#cce0ff] rounded-sm px-1 py-px text-[6px] text-red-800 font-medium truncate">{f}</div>
-              <div className="border border-gray-300 rounded-sm h-3 bg-white" />
-            </div>
+          <rect x="82" y={25 + 3 * 28} width="80" height="30" rx="2" fill="#fff" opacity="0.8" />
+        </g>
+      )}
+      {layout === 'tabular' && (
+        <g>
+          {[0,1,2].map(c => (
+            <rect key={c} x={20 + c * 65} y="20" width="58" height="14" rx="2" fill="#e08a00" opacity="0.7" />
           ))}
-        </div>
-      </div>
-    )
-  }
-];
+          {[0,1,2,3,4].map(r => [0,1,2].map(c => (
+            <rect key={`${r}-${c}`} x={20 + c * 65} y={40 + r * 24} width="58" height="16" rx="1" fill="#fff" opacity={r % 2 === 0 ? 0.8 : 0.55} />
+          )))}
+        </g>
+      )}
+      {layout === 'datasheet' && (
+        <g>
+          <rect x="15" y="18" width="190" height="14" fill="#e08a00" opacity="0.7" />
+          {[0,1,2,3].map(c => (
+            <text key={c} x={22 + c * 47} y="29" fontSize="9" fill="#fff" fontFamily="Arial">F{c+1}</text>
+          ))}
+          {[0,1,2,3,4,5,6].map(r => (
+            <g key={r}>
+              <rect x="15" y={36 + r * 18} width="190" height="16" fill={r % 2 === 0 ? '#ffffff' : '#f5f5f5'} opacity="0.75" />
+              {[0,1,2,3].map(c => (
+                <rect key={c} x={20 + c * 47} y={40 + r * 18} width="38" height="8" rx="1" fill="#ccc" opacity="0.5" />
+              ))}
+            </g>
+          ))}
+        </g>
+      )}
+      {layout === 'justified' && (
+        <g>
+          {[0,1,2].map(i => (
+            <g key={i}>
+              <rect x={20 + i * 65} y="25" width="58" height="12" rx="2" fill="#e08a00" opacity="0.7" />
+              <rect x={20 + i * 65} y="41" width="58" height="14" rx="2" fill="#fff" opacity="0.8" />
+            </g>
+          ))}
+          {[0,1].map(i => (
+            <g key={i}>
+              <rect x={20 + i * 100} y="68" width="90" height="12" rx="2" fill="#e08a00" opacity="0.7" />
+              <rect x={20 + i * 100} y="84" width="90" height="14" rx="2" fill="#fff" opacity="0.8" />
+            </g>
+          ))}
+          {[0,1,2].map(i => (
+            <g key={i}>
+              <rect x={20 + i * 65} y="112" width="58" height="12" rx="2" fill="#e08a00" opacity="0.7" />
+              <rect x={20 + i * 65} y="128" width="58" height="14" rx="2" fill="#fff" opacity="0.8" />
+            </g>
+          ))}
+        </g>
+      )}
+    </svg>
+  );
+}
+
+function Step3Art() {
+  return (
+    <svg viewBox="0 0 130 220" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <defs>
+        <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f5c842" />
+          <stop offset="100%" stopColor="#e08a00" />
+        </linearGradient>
+      </defs>
+      <rect width="130" height="220" fill="url(#bg3)" />
+      {/* Form card */}
+      <rect x="14" y="20" width="102" height="130" rx="4" fill="#fff" opacity="0.88" />
+      <rect x="14" y="20" width="102" height="16" rx="4" fill="#e08a00" opacity="0.8" />
+      {[0,1,2,3,4].map(i => (
+        <g key={i}>
+          <rect x="22" y={48 + i * 20} width="32" height="8" rx="1" fill="#f5c842" opacity="0.8" />
+          <rect x="60" y={48 + i * 20} width="48" height="8" rx="1" fill="#ddd" opacity="0.9" />
+        </g>
+      ))}
+      {/* Checkmark circle */}
+      <circle cx="65" cy="175" r="26" fill="#fff" opacity="0.9" />
+      <circle cx="65" cy="175" r="22" fill="#e08a00" opacity="0.7" />
+      <text x="65" y="183" textAnchor="middle" fontSize="28" fill="#fff" fontWeight="bold" fontFamily="Arial">✓</text>
+    </svg>
+  );
+}
+
+// ── Wizard button ────────────────────────────────────────────────────────────
+
+function WizBtn({ onClick, disabled = false, primary = false, children }: { onClick: () => void; disabled?: boolean; primary?: boolean; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-4 py-1 text-sm border min-w-[72px] ${
+        primary
+          ? 'border-[#0066cc] bg-white text-black font-semibold shadow-[inset_1px_1px_0_#fff,inset_-1px_-1px_0_#999] hover:bg-[#f0f0f0]'
+          : 'border-gray-400 bg-[#f0f0f0] text-black hover:bg-[#e0e0e0] shadow-[inset_1px_1px_0_#fff,inset_-1px_-1px_0_#aaa]'
+      } disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none active:shadow-[inset_1px_1px_0_#aaa,inset_-1px_-1px_0_#fff]`}
+      style={{ fontFamily: 'Segoe UI, Tahoma, sans-serif' }}
+    >
+      {children}
+    </button>
+  );
+}
+
+// ── Main component ───────────────────────────────────────────────────────────
 
 export function FormWizard({ open, onOpenChange, tables, databaseId, onFinish, apiFetch }: Props) {
   const [step, setStep] = useState(1);
@@ -113,19 +200,14 @@ export function FormWizard({ open, onOpenChange, tables, databaseId, onFinish, a
 
   useEffect(() => {
     if (!open) {
-      setStep(1);
-      setSelectedTableId(null);
-      setSelectedFields([]);
-      setHighlightAvail(null);
-      setHighlightSel(null);
-      setLayout('columnar');
-      setFormName('');
-      setOpenMode('view');
+      setStep(1); setSelectedTableId(null); setSelectedFields([]);
+      setHighlightAvail(null); setHighlightSel(null);
+      setLayout('columnar'); setFormName(''); setOpenMode('view');
     }
   }, [open]);
 
   useEffect(() => {
-    if (!open && tables.length > 0) setSelectedTableId(tables[0].id);
+    if (open && tables.length > 0 && !selectedTableId) setSelectedTableId(tables[0].id);
   }, [open, tables]);
 
   useEffect(() => {
@@ -146,257 +228,231 @@ export function FormWizard({ open, onOpenChange, tables, databaseId, onFinish, a
   useEffect(() => {
     if (selectedTableId && tables.length > 0) {
       const tbl = tables.find(t => t.id === selectedTableId);
-      if (tbl) setFormName(prev => prev || `${tbl.name} Form`);
+      if (tbl) setFormName(tbl.name);
     }
   }, [selectedTableId]);
 
   const currentTable = tables.find(t => t.id === selectedTableId);
-
-  const alreadySelected = (f: Field) =>
-    !!selectedFields.find(sf => sf.tableId === selectedTableId && sf.fieldName === f.name);
+  const alreadySelected = (f: Field) => !!selectedFields.find(sf => sf.tableId === selectedTableId && sf.fieldName === f.name);
 
   const addField = (f: Field) => {
     if (!currentTable || alreadySelected(f)) return;
     setSelectedFields(prev => [...prev, { tableId: selectedTableId!, tableName: currentTable.name, fieldName: f.name, fieldType: f.fieldType }]);
     setHighlightAvail(null);
   };
-
   const addAll = () => {
     if (!currentTable) return;
-    availableFields.forEach(f => {
-      if (!alreadySelected(f)) {
-        setSelectedFields(prev => [...prev, { tableId: selectedTableId!, tableName: currentTable.name, fieldName: f.name, fieldType: f.fieldType }]);
-      }
-    });
+    const toAdd = availableFields.filter(f => !alreadySelected(f));
+    setSelectedFields(prev => [...prev, ...toAdd.map(f => ({ tableId: selectedTableId!, tableName: currentTable.name, fieldName: f.name, fieldType: f.fieldType }))]);
   };
-
   const removeField = (idx: number) => { setSelectedFields(prev => prev.filter((_, i) => i !== idx)); setHighlightSel(null); };
   const removeAll = () => { setSelectedFields([]); setHighlightSel(null); };
 
-  const moveUp = (idx: number) => {
-    if (idx === 0) return;
-    setSelectedFields(prev => { const a = [...prev]; [a[idx-1], a[idx]] = [a[idx], a[idx-1]]; return a; });
-    setHighlightSel(idx - 1);
-  };
-  const moveDown = (idx: number) => {
-    if (idx >= selectedFields.length - 1) return;
-    setSelectedFields(prev => { const a = [...prev]; [a[idx], a[idx+1]] = [a[idx+1], a[idx]]; return a; });
-    setHighlightSel(idx + 1);
-  };
-
   const handleFinish = () => {
     const tbl = tables.find(t => t.id === selectedTableId);
-    const name = formName.trim() || (tbl ? `${tbl.name} Form` : 'Form1');
-
-    // Compute independent canvas positions for label and control based on layout type.
-    // Canvas is 700px wide. Label (labelX/Y/W/H) and control (x/y/width/height) are separate.
+    const name = formName.trim() || (tbl ? tbl.name : 'Form1');
     const fieldsWithPositions = selectedFields.map((sf, i) => {
       let labelX: number, labelY: number, labelWidth: number, labelHeight: number;
       let x: number, y: number, width: number, height: number;
-
       if (layout === 'columnar') {
-        // Single column: label on left, control on right
         labelX = 10; labelY = 20 + i * 38; labelWidth = 120; labelHeight = 28;
         x = 134;    y = 20 + i * 38;       width = 320;      height = 28;
       } else if (layout === 'tabular') {
-        // Two-column grid: pairs alternate left/right
         const col = i % 2, row = Math.floor(i / 2);
         labelX = 10 + col * 350; labelY = 20 + row * 38; labelWidth = 100; labelHeight = 28;
         x = 114 + col * 350;     y = 20 + row * 38;      width = 220;      height = 28;
       } else if (layout === 'datasheet') {
-        // Two-column grid, compact 22px row height
         const col = i % 2, row = Math.floor(i / 2);
         labelX = 10 + col * 350; labelY = 10 + row * 30; labelWidth = 100; labelHeight = 22;
         x = 114 + col * 350;     y = 10 + row * 30;      width = 220;      height = 22;
       } else {
-        // Justified: three-column grid, controls fill width
         const col = i % 3, row = Math.floor(i / 3);
         labelX = 10 + col * 233;  labelY = 20 + row * 38; labelWidth = 80; labelHeight = 28;
         x = 94 + col * 233;       y = 20 + row * 38;      width = 130;     height = 28;
       }
-      return {
-        fieldName: sf.fieldName,
-        label: sf.fieldName,
-        visible: true,
-        sortOrder: i,
-        fieldType: sf.fieldType,
-        x, y, width, height,
-        labelX, labelY, labelWidth, labelHeight,
-      };
+      return { fieldName: sf.fieldName, label: sf.fieldName, visible: true, sortOrder: i, fieldType: sf.fieldType, x, y, width, height, labelX, labelY, labelWidth, labelHeight };
     });
-
-    const definition = {
-      tableId: selectedTableId!,
-      tableName: tbl?.name || '',
-      layout,
-      fields: fieldsWithPositions,
-    };
+    const definition = { tableId: selectedTableId!, tableName: tbl?.name || '', layout, fields: fieldsWithPositions };
     onFinish(name, definition, openMode);
     onOpenChange(false);
   };
 
   const canNext1 = selectedFields.length > 0;
 
-  const stepTitle = ['Which fields do you want on your form?', 'What layout would you like for your form?', 'What title do you want for your form?'];
+  if (!open) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <LayoutTemplate size={18} className="text-[#2e7d32]" />
-            <DialogTitle className="text-base">
-              <span className="text-[#2e7d32]">Form Wizard</span>
-              <span className="text-gray-400 text-sm font-normal ml-2">— Step {step} of {TOTAL_STEPS}</span>
-            </DialogTitle>
-          </div>
-          <DialogDescription>{stepTitle[step - 1]}</DialogDescription>
-        </DialogHeader>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div
+        className="bg-[#f0f0f0] border border-gray-500 shadow-2xl flex flex-col"
+        style={{ width: 500, fontFamily: 'Segoe UI, Tahoma, Geneva, sans-serif', fontSize: 13 }}
+      >
+        {/* Title bar */}
+        <div className="flex items-center px-3 py-1.5 bg-[#f0f0f0] border-b border-gray-300 select-none">
+          <span className="font-semibold text-[13px] text-black">Form Wizard</span>
+        </div>
 
-        {/* Step 1 — Field picker */}
-        {step === 1 && (
-          <div className="space-y-4 py-2">
-            <div>
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1 block">Tables/Queries:</label>
-              <select
-                value={selectedTableId ?? ''}
-                onChange={e => { setSelectedTableId(Number(e.target.value)); setHighlightAvail(null); setSelectedFields([]); setFormName(''); }}
-                className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-[#2e7d32] bg-white"
-              >
-                <option value="" disabled>— Select a table —</option>
-                {tables.map(t => <option key={t.id} value={t.id}>Table: {t.name}</option>)}
-              </select>
-            </div>
+        {/* Body */}
+        <div className="flex flex-1 min-h-0" style={{ minHeight: 260 }}>
 
-            <div className="flex gap-3 items-center">
-              {/* Available */}
-              <div className="flex-1">
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Available Fields:</label>
-                <div className="border border-gray-300 rounded h-48 overflow-y-auto bg-white">
-                  {availableFields.map(f => (
-                    <div
-                      key={f.name}
-                      onDoubleClick={() => addField(f)}
-                      onClick={() => setHighlightAvail(f.name)}
-                      className={`px-3 py-1 text-sm cursor-default select-none hover:bg-green-50 ${highlightAvail === f.name ? 'bg-[#2e7d32] text-white' : ''} ${alreadySelected(f) ? 'text-gray-300' : ''}`}
-                    >
-                      {f.isPrimaryKey && '🔑 '}{f.name}
-                    </div>
-                  ))}
-                  {!selectedTableId && <div className="text-xs text-gray-400 italic p-3">Select a table first</div>}
-                  {selectedTableId && availableFields.length === 0 && <div className="text-xs text-gray-400 italic p-3">No fields</div>}
+          {/* ── Step 1 ── */}
+          {step === 1 && (
+            <>
+              {/* Left art panel */}
+              <div className="flex-none w-[130px]" style={{ background: 'linear-gradient(135deg,#f5c842,#e08a00)' }}>
+                <Step1Art />
+              </div>
+              {/* Right content */}
+              <div className="flex-1 flex flex-col px-5 pt-4 pb-3 overflow-hidden">
+                <p className="text-[13px] font-semibold text-black mb-0.5">Which fields do you want on your form?</p>
+                <p className="text-[12px] text-black mb-3">You can choose from more than one table or query.</p>
+
+                <div className="mb-2">
+                  <div className="text-[12px] mb-0.5 underline">Tables/Queries</div>
+                  <select
+                    value={selectedTableId ?? ''}
+                    onChange={e => { setSelectedTableId(Number(e.target.value)); setHighlightAvail(null); setSelectedFields([]); setFormName(''); }}
+                    className="w-full border border-gray-500 px-1 py-0.5 text-[12px] bg-white focus:outline-none"
+                    style={{ height: 22 }}
+                  >
+                    {tables.map(t => <option key={t.id} value={t.id}>Table: {t.name}</option>)}
+                  </select>
                 </div>
-              </div>
 
-              {/* Shuttle buttons */}
-              <div className="flex flex-col gap-1.5 items-center flex-none">
-                <button onClick={() => highlightAvail && addField(availableFields.find(f => f.name === highlightAvail)!)} disabled={!highlightAvail || alreadySelected(availableFields.find(f => f.name === highlightAvail)!)} className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" title="Add"><ArrowRight size={14} /></button>
-                <button onClick={addAll} disabled={!selectedTableId} className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" title="Add all"><ChevronsRight size={14} /></button>
-                <button onClick={() => highlightSel !== null && removeField(highlightSel)} disabled={highlightSel === null} className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" title="Remove"><ArrowLeft size={14} /></button>
-                <button onClick={removeAll} disabled={selectedFields.length === 0} className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" title="Remove all"><ChevronsLeft size={14} /></button>
-                <div className="w-px h-2" />
-                <button onClick={() => highlightSel !== null && moveUp(highlightSel)} disabled={highlightSel === null || highlightSel === 0} className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" title="Move up"><ChevronLeft size={14} className="rotate-90" /></button>
-                <button onClick={() => highlightSel !== null && moveDown(highlightSel)} disabled={highlightSel === null || highlightSel >= selectedFields.length - 1} className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" title="Move down"><ChevronRight size={14} className="rotate-90" /></button>
-              </div>
-
-              {/* Selected */}
-              <div className="flex-1">
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Selected Fields:</label>
-                <div className="border border-gray-300 rounded h-48 overflow-y-auto bg-white">
-                  {selectedFields.map((sf, i) => (
-                    <div
-                      key={i}
-                      onDoubleClick={() => removeField(i)}
-                      onClick={() => setHighlightSel(i)}
-                      className={`px-3 py-1 text-sm cursor-default select-none hover:bg-green-50 ${highlightSel === i ? 'bg-[#2e7d32] text-white' : ''}`}
-                    >
-                      {sf.fieldName}
+                <div className="flex gap-1 flex-1 min-h-0">
+                  {/* Available */}
+                  <div className="flex-1 flex flex-col min-h-0">
+                    <div className="text-[12px] underline mb-0.5">Available Fields:</div>
+                    <div className="flex-1 border border-gray-500 bg-white overflow-y-auto" style={{ minHeight: 100 }}>
+                      {availableFields.map(f => (
+                        <div
+                          key={f.name}
+                          onDoubleClick={() => addField(f)}
+                          onClick={() => setHighlightAvail(f.name)}
+                          className="px-2 py-px text-[12px] cursor-default select-none leading-5"
+                          style={{ background: highlightAvail === f.name ? '#000080' : 'transparent', color: highlightAvail === f.name ? '#fff' : (alreadySelected(f) ? '#aaa' : '#000') }}
+                        >
+                          {f.name}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                  {selectedFields.length === 0 && <div className="text-xs text-gray-400 italic p-3">No fields selected</div>}
-                </div>
-              </div>
-            </div>
-            <p className="text-xs text-gray-400">Tip: Double-click a field to move it. Use the arrow buttons to reorder.</p>
-          </div>
-        )}
-
-        {/* Step 2 — Layout picker */}
-        {step === 2 && (
-          <div className="py-3">
-            <div className="grid grid-cols-4 gap-3">
-              {LAYOUTS.map(l => (
-                <button
-                  key={l.id}
-                  onClick={() => setLayout(l.id)}
-                  className={`flex flex-col gap-2 p-2 rounded border-2 text-center transition-all ${layout === l.id ? 'border-[#2e7d32] bg-green-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
-                >
-                  {l.preview}
-                  <div className="flex items-center gap-1 justify-center">
-                    <div className={`w-3 h-3 rounded-full border-2 flex-shrink-0 ${layout === l.id ? 'border-[#2e7d32] bg-[#2e7d32]' : 'border-gray-400'}`}>
-                      {layout === l.id && <div className="w-1.5 h-1.5 bg-white rounded-full m-auto" />}
-                    </div>
-                    <span className="text-xs font-medium text-gray-700">{l.label}</span>
                   </div>
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-gray-400 mt-3">The layout controls how fields are arranged on the form.</p>
-          </div>
-        )}
 
-        {/* Step 3 — Name + finish */}
-        {step === 3 && (
-          <div className="space-y-5 py-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">What title do you want for your form?</label>
-              <Input
-                value={formName}
-                onChange={e => setFormName(e.target.value)}
-                autoFocus
-                onKeyDown={e => e.key === 'Enter' && handleFinish()}
-                className="max-w-xs"
-              />
-              <p className="text-xs text-gray-400 mt-1">This title will appear at the top of the form.</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-3 block">Do you want to open the form or modify its design?</label>
-              <div className="space-y-2">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="radio" name="formOpenMode" value="view" checked={openMode === 'view'} onChange={() => setOpenMode('view')} className="accent-[#2e7d32]" />
-                  <span className="text-sm text-gray-700">Open the form to view or enter information</span>
-                </label>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="radio" name="formOpenMode" value="modify" checked={openMode === 'modify'} onChange={() => setOpenMode('modify')} className="accent-[#2e7d32]" />
-                  <span className="text-sm text-gray-700">Modify the form's design</span>
-                </label>
+                  {/* Shuttle buttons */}
+                  <div className="flex flex-col gap-1 justify-center flex-none px-1">
+                    <WizBtn onClick={() => { const f = availableFields.find(f => f.name === highlightAvail); if (f) addField(f); }} disabled={!highlightAvail || alreadySelected(availableFields.find(f => f.name === highlightAvail)!)}>
+                      &gt;
+                    </WizBtn>
+                    <WizBtn onClick={addAll} disabled={!selectedTableId || availableFields.every(f => alreadySelected(f))}>
+                      &gt;&gt;
+                    </WizBtn>
+                    <WizBtn onClick={() => highlightSel !== null && removeField(highlightSel)} disabled={highlightSel === null}>
+                      &lt;
+                    </WizBtn>
+                    <WizBtn onClick={removeAll} disabled={selectedFields.length === 0}>
+                      &lt;&lt;
+                    </WizBtn>
+                  </div>
+
+                  {/* Selected */}
+                  <div className="flex-1 flex flex-col min-h-0">
+                    <div className="text-[12px] underline mb-0.5">Selected Fields:</div>
+                    <div className="flex-1 border border-gray-500 bg-white overflow-y-auto" style={{ minHeight: 100 }}>
+                      {selectedFields.map((sf, i) => (
+                        <div
+                          key={i}
+                          onDoubleClick={() => removeField(i)}
+                          onClick={() => setHighlightSel(i)}
+                          className="px-2 py-px text-[12px] cursor-default select-none leading-5"
+                          style={{ background: highlightSel === i ? '#000080' : 'transparent', color: highlightSel === i ? '#fff' : '#000' }}
+                        >
+                          {sf.fieldName}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ── Step 2 ── */}
+          {step === 2 && (
+            <div className="flex flex-col flex-1">
+              <p className="text-[13px] font-semibold text-black px-5 pt-4 pb-2">What layout would you like for your form?</p>
+              <div className="flex flex-1 min-h-0">
+                {/* Left: layout preview */}
+                <div className="flex-none px-4 pb-4" style={{ width: 260 }}>
+                  <div style={{ background: 'linear-gradient(135deg,#f5c842,#e08a00)', border: '2px solid #c87800', height: '100%', minHeight: 150 }}>
+                    <Step2Art layout={layout} />
+                  </div>
+                </div>
+                {/* Right: radio options */}
+                <div className="flex-1 flex flex-col justify-center px-4 pb-4 gap-3">
+                  {(['columnar', 'tabular', 'datasheet', 'justified'] as LayoutOption[]).map(l => (
+                    <label key={l} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="formLayout"
+                        value={l}
+                        checked={layout === l}
+                        onChange={() => setLayout(l)}
+                        className="cursor-pointer"
+                        style={{ accentColor: '#000080' }}
+                      />
+                      <span className="text-[13px] text-black">{l.charAt(0).toUpperCase() + l.slice(1)}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
-            <div className="bg-gray-50 border border-gray-200 rounded p-3 text-xs text-gray-600 space-y-0.5">
-              <div><strong>Fields:</strong> {selectedFields.length} field{selectedFields.length !== 1 ? 's' : ''} from {currentTable?.name || '—'}</div>
-              <div><strong>Layout:</strong> {LAYOUTS.find(l => l.id === layout)?.label}</div>
-            </div>
-          </div>
-        )}
+          )}
 
-        <DialogFooter className="gap-2 border-t pt-4 mt-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          {step > 1 && (
-            <Button variant="outline" onClick={() => setStep(s => s - 1)}>
-              <ChevronLeft size={16} className="mr-1" /> Back
-            </Button>
+          {/* ── Step 3 ── */}
+          {step === 3 && (
+            <>
+              {/* Left art */}
+              <div className="flex-none w-[130px]" style={{ background: 'linear-gradient(135deg,#f5c842,#e08a00)' }}>
+                <Step3Art />
+              </div>
+              {/* Right content */}
+              <div className="flex-1 flex flex-col px-5 pt-4 pb-3">
+                <p className="text-[13px] font-semibold text-black mb-2">What title do you want for your form?</p>
+                <input
+                  type="text"
+                  value={formName}
+                  onChange={e => setFormName(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleFinish()}
+                  autoFocus
+                  className="border border-gray-500 px-1.5 py-0.5 text-[13px] bg-white focus:outline-none w-full mb-4"
+                  style={{ height: 22 }}
+                />
+                <p className="text-[12px] text-black mb-3">
+                  That's all the information the wizard needs to create your form.
+                  <br /><br />
+                  Do you want to open the form or modify the form's design?
+                </p>
+                <label className="flex items-center gap-2 mb-2 cursor-pointer">
+                  <input type="radio" name="formOpenMode" value="view" checked={openMode === 'view'} onChange={() => setOpenMode('view')} style={{ accentColor: '#000080' }} />
+                  <span className="text-[13px] text-black">Open the form to view or enter information.</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="formOpenMode" value="modify" checked={openMode === 'modify'} onChange={() => setOpenMode('modify')} style={{ accentColor: '#000080' }} />
+                  <span className="text-[13px] text-black">Modify the form's design.</span>
+                </label>
+              </div>
+            </>
           )}
-          {step < TOTAL_STEPS ? (
-            <Button disabled={step === 1 && !canNext1} onClick={() => setStep(s => s + 1)} className="bg-[#2e7d32] hover:bg-[#1b5e20]">
-              Next <ChevronRight size={16} className="ml-1" />
-            </Button>
-          ) : (
-            <Button onClick={handleFinish} disabled={!selectedTableId} className="bg-[#2e7d32] hover:bg-[#1b5e20]">
-              <Check size={16} className="mr-1" /> Finish
-            </Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-gray-400 bg-[#f0f0f0] px-3 py-2 flex items-center justify-end gap-2">
+          <WizBtn onClick={() => onOpenChange(false)}>Cancel</WizBtn>
+          <WizBtn onClick={() => setStep(s => s - 1)} disabled={step === 1}>&lt; Back</WizBtn>
+          <WizBtn onClick={() => setStep(s => s + 1)} disabled={step === 3 || (step === 1 && !canNext1)} primary={step < 3}>Next &gt;</WizBtn>
+          <WizBtn onClick={handleFinish} disabled={!selectedTableId || selectedFields.length === 0} primary={step === 3}>Finish</WizBtn>
+        </div>
+      </div>
+    </div>
   );
 }
