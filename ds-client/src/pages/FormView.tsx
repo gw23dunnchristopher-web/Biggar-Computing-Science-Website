@@ -297,6 +297,27 @@ export function FormView({
 
   const noop = () => {};
 
+  const tinyBtn = (icon: React.ReactNode, label: string, onClick: () => void) => (
+    <button
+      onClick={onClick}
+      title={label}
+      className="flex items-center justify-center w-[22px] h-[22px] rounded hover:bg-[#e8e6e3] active:bg-[#d6d3ce] cursor-pointer border border-transparent hover:border-gray-300"
+    >
+      {icon}
+    </button>
+  );
+
+  const smallBtn = (icon: React.ReactNode, label: string, onClick: () => void) => (
+    <button
+      onClick={onClick}
+      title={label}
+      className="flex items-center gap-1 px-1.5 h-[22px] rounded hover:bg-[#e8e6e3] active:bg-[#d6d3ce] cursor-pointer text-[10px] text-gray-700 whitespace-nowrap border border-transparent hover:border-gray-300"
+    >
+      <span className="flex-none">{icon}</span>
+      <span>{label}</span>
+    </button>
+  );
+
   const contextSection: RibbonContextSection = {
     color: '#2e7d32',
     defaultTab: view === 'form' ? 'Form View' : 'Form Design',
@@ -317,45 +338,63 @@ export function FormView({
         content: (
           <>
             <RibbonGroup name="Themes">
-              <RibbonButton icon={<DsRptThemesIcon />} label="Themes" onClick={noop} />
-              <RibbonButton icon={<DsRptColorsIcon />} label="Colors" onClick={noop} />
-              <RibbonButton icon={<DsRptFontsIcon />} label="Fonts" onClick={noop} />
+              <div className="flex items-start gap-0.5">
+                <RibbonButton icon={<DsRptThemesIcon />} label="Themes" onClick={noop} />
+                <div className="flex flex-col gap-0.5 pt-1">
+                  {smallBtn(<DsRptColorsIcon size={14} />, 'Colors', noop)}
+                  {smallBtn(<DsRptFontsIcon size={14} />, 'Fonts', noop)}
+                </div>
+              </div>
             </RibbonGroup>
             <RibbonGroup name="Controls">
-              <RibbonButton icon={<DsRptSelectIcon />} label="Select" onClick={noop} />
-              <RibbonButton icon={<DsRptTextBoxIcon />} label="Text Box" onClick={() => canvasRef.current?.addTextBox()} />
-              <RibbonButton icon={<DsRptLabelIcon />} label="Label" onClick={() => canvasRef.current?.addLabel()} />
-              <RibbonButton icon={<DsRptButtonIcon />} label="Button" onClick={noop} />
-              <RibbonButton icon={<DsRptComboBoxIcon />} label="Combo Box" onClick={noop} />
-              <RibbonButton icon={<DsRptListBoxIcon />} label="List Box" onClick={noop} />
-              <RibbonButton icon={<DsRptCheckBoxIcon />} label="Check Box" onClick={() => canvasRef.current?.addCheckBox()} />
-              <RibbonButton icon={<DsRptOptionButtonIcon />} label="Option Button" onClick={noop} />
-              <RibbonButton icon={<DsRptToggleButtonIcon />} label="Toggle Button" onClick={noop} />
-              <RibbonButton icon={<DsRptTabControlIcon />} label="Tab Control" onClick={noop} />
-              <RibbonButton icon={<DsRptSubFormSubReportIcon />} label="Subform" onClick={noop} />
-              <RibbonButton icon={<DsRptInsertImageIcon />} label="Image" onClick={() => canvasRef.current?.addImage()} />
-              <RibbonButton icon={<DsRptAttachmentIcon />} label="Attachment" onClick={noop} />
-              <RibbonButton icon={<DsRptLinkIcon />} label="Hyperlink" onClick={noop} />
-              <RibbonButton icon={<DsRptLineIcon />} label="Line" onClick={() => canvasRef.current?.addLine()} />
-              <RibbonButton icon={<DsRptRectangleIcon />} label="Rectangle" onClick={() => canvasRef.current?.addRectangle()} />
-              <RibbonButton icon={<DsRptInsertModernChartIcon />} label="Chart" onClick={noop} />
-              <RibbonButton icon={<DsRptEdgeBrowserIcon />} label="Web Browser" onClick={noop} />
-              <RibbonButton icon={<DsFrmNavigationIcon />} label="Navigation" onClick={noop} />
-              <RibbonButton icon={<DsRptInsertPageBreakIcon />} label="Page Break" onClick={() => canvasRef.current?.addPageBreak()} />
-              <RibbonButton icon={<DsRptOptionGroupIcon />} label="Option Group" onClick={noop} />
-              <RibbonButton icon={<DsRptBoundObjectFrameIcon />} label="Bound Frame" onClick={noop} />
-              <RibbonButton icon={<DsRptUnboundObjectFrameIcon />} label="Unbound Frame" onClick={noop} />
+              <div className="flex items-start gap-1">
+                <div className="grid grid-cols-10 gap-[2px] pt-1">
+                  {tinyBtn(<DsRptSelectIcon size={16} />, 'Select', noop)}
+                  {tinyBtn(<DsRptTextBoxIcon size={16} />, 'Text Box', () => canvasRef.current?.addTextBox())}
+                  {tinyBtn(<DsRptLabelIcon size={16} />, 'Label', () => canvasRef.current?.addLabel())}
+                  {tinyBtn(<DsRptButtonIcon size={16} />, 'Button', noop)}
+                  {tinyBtn(<DsRptComboBoxIcon size={16} />, 'Combo Box', noop)}
+                  {tinyBtn(<DsRptListBoxIcon size={16} />, 'List Box', noop)}
+                  {tinyBtn(<DsRptCheckBoxIcon size={16} />, 'Check Box', () => canvasRef.current?.addCheckBox())}
+                  {tinyBtn(<DsRptOptionButtonIcon size={16} />, 'Option Button', noop)}
+                  {tinyBtn(<DsRptToggleButtonIcon size={16} />, 'Toggle Button', noop)}
+                  {tinyBtn(<DsRptTabControlIcon size={16} />, 'Tab Control', noop)}
+                  {tinyBtn(<DsRptSubFormSubReportIcon size={16} />, 'Subform', noop)}
+                  {tinyBtn(<DsRptAttachmentIcon size={16} />, 'Attachment', noop)}
+                  {tinyBtn(<DsRptLinkIcon size={16} />, 'Hyperlink', noop)}
+                  {tinyBtn(<DsRptLineIcon size={16} />, 'Line', () => canvasRef.current?.addLine())}
+                  {tinyBtn(<DsRptRectangleIcon size={16} />, 'Rectangle', () => canvasRef.current?.addRectangle())}
+                  {tinyBtn(<DsRptEdgeBrowserIcon size={16} />, 'Web Browser', noop)}
+                  {tinyBtn(<DsFrmNavigationIcon size={16} />, 'Navigation', noop)}
+                  {tinyBtn(<DsRptInsertPageBreakIcon size={16} />, 'Page Break', () => canvasRef.current?.addPageBreak())}
+                  {tinyBtn(<DsRptOptionGroupIcon size={16} />, 'Option Group', noop)}
+                  {tinyBtn(<DsRptBoundObjectFrameIcon size={16} />, 'Bound Frame', noop)}
+                  {tinyBtn(<DsRptUnboundObjectFrameIcon size={16} />, 'Unbound Frame', noop)}
+                </div>
+                <div className="flex items-start gap-0.5 pl-1 border-l border-gray-200">
+                  <RibbonButton icon={<DsRptInsertImageIcon />} label="Insert Image" onClick={() => canvasRef.current?.addImage()} />
+                  <RibbonButton icon={<DsRptInsertModernChartIcon />} label="Insert Modern Chart" onClick={noop} wide />
+                </div>
+              </div>
             </RibbonGroup>
             <RibbonGroup name="Header / Footer">
-              <RibbonButton icon={<DsRptLogoIcon />} label="Logo" onClick={noop} />
-              <RibbonButton icon={<DsRptTitleIcon />} label="Title" onClick={noop} />
-              <RibbonButton icon={<DsRptDateAndTimeIcon />} label="Date & Time" onClick={noop} />
+              <div className="flex items-start gap-0.5">
+                <RibbonButton icon={<DsRptLogoIcon />} label="Logo" onClick={noop} />
+                <div className="flex flex-col gap-0.5 pt-1">
+                  {smallBtn(<DsRptTitleIcon size={14} />, 'Title', noop)}
+                  {smallBtn(<DsRptDateAndTimeIcon size={14} />, 'Date and Time', noop)}
+                </div>
+              </div>
             </RibbonGroup>
             <RibbonGroup name="Tools">
-              <RibbonButton icon={<DsRptAddExistingFieldsIcon />} label="Existing Fields" onClick={noop} />
-              <RibbonButton icon={<DsRptPropertySheetIcon />} label="Property Sheet" onClick={() => canvasRef.current?.togglePropertySheet()} />
-              <RibbonButton icon={<DsRptTabOrderIcon />} label="Tab Order" onClick={noop} />
-              <RibbonButton icon={<DsRptChartSettingsIcon />} label="Chart Settings" onClick={noop} />
+              <div className="flex items-start gap-0.5">
+                <RibbonButton icon={<DsRptAddExistingFieldsIcon />} label="Add Existing Fields" onClick={noop} />
+                <RibbonButton icon={<DsRptPropertySheetIcon />} label="Property Sheet" onClick={() => canvasRef.current?.togglePropertySheet()} />
+                <div className="flex flex-col gap-0.5 pt-1">
+                  {smallBtn(<DsRptTabOrderIcon size={14} />, 'Tab Order', noop)}
+                  {smallBtn(<DsRptChartSettingsIcon size={14} />, 'Chart Settings', noop)}
+                </div>
+              </div>
             </RibbonGroup>
           </>
         )
