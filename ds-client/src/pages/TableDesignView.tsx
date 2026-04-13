@@ -5,8 +5,14 @@ import { Shell } from '@/components/layout/Shell';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonViewSplitButton } from '@/components/layout/Ribbon';
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
-import { DesignGrid } from '@/components/ui/design-grid';
-import { Save, Grid3X3, Key, PlusSquare, MinusSquare, Eye, List, Settings2, AlertTriangle, RotateCcw } from 'lucide-react';
+import { DesignGrid, DesignGridHandle } from '@/components/ui/design-grid';
+import { Save, Code2, AlertTriangle, RotateCcw } from 'lucide-react';
+import {
+  DsToolsPrimaryKeyIcon, DsToolsTestValidationRulesIcon, DsToolsModifyLookupsIcon,
+  DsQuerySetupBuilderIcon, DsQuerySetupInsertRowsIcon, DsQuerySetupDeleteRowsIcon,
+  DsShowHidePropertySheetIcon, DsShowHideTotalsIcon,
+  DsRelationshipsIcon, DsObjectDependenciesIcon,
+} from '@/components/ui/ds-icons';
 import { DesignViewIcon, DatasheetViewIcon } from '@/components/ui/design-view-icon';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -115,6 +121,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
   const [selectedFieldIndex, setSelectedFieldIndex] = useState<number | null>(null);
   const [resetConfirm, setResetConfirm] = useState(false);
   const [showPropertySheet, setShowPropertySheet] = useState(true);
+  const designGridRef = useRef<DesignGridHandle>(null);
 
   // ── Type-change warning ──
   const [typeChangeDialog, setTypeChangeDialog] = useState<TypeChangePending | null>(null);
@@ -307,26 +314,44 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
           <>
             <RibbonGroup name="Tools">
               <RibbonButton
-                icon={<Key size={22} />}
+                icon={<DsToolsPrimaryKeyIcon size={40} />}
                 label="Primary Key"
                 active={selectedFieldIndex !== null && fields[selectedFieldIndex]?.isPrimaryKey}
                 onClick={handleSetPrimaryKey}
                 disabled={selectedFieldIndex === null || fields[selectedFieldIndex]?.isPrimaryKey}
               />
-              <RibbonButton icon={<Save size={22} />} label="Save" onClick={handleSave} disabled={updateTable.isPending} />
+              <RibbonButton icon={<DsQuerySetupBuilderIcon size={40} />} label="Builder" disabled />
+              <RibbonButton icon={<DsToolsTestValidationRulesIcon size={40} />} label="Test Validation Rules" disabled wide />
             </RibbonGroup>
-            <RibbonGroup name="Field Rows">
-              <RibbonButton icon={<PlusSquare size={22} />} label="Insert Rows" onClick={handleInsertRow} />
-              <RibbonButton icon={<MinusSquare size={22} />} label="Delete Rows" onClick={handleDeleteRow} />
+            <RibbonGroup name="">
+              <RibbonButton icon={<DsQuerySetupInsertRowsIcon size={22} />} label="Insert Rows" size="small" onClick={handleInsertRow} />
+              <RibbonButton icon={<DsQuerySetupDeleteRowsIcon size={22} />} label="Delete Rows" size="small" onClick={handleDeleteRow} />
+              <RibbonButton
+                icon={<DsToolsModifyLookupsIcon size={22} />}
+                label="Modify Lookups"
+                size="small"
+                disabled={selectedFieldIndex === null}
+                onClick={() => {
+                  if (selectedFieldIndex !== null) designGridRef.current?.openLookupWizard(selectedFieldIndex);
+                }}
+              />
             </RibbonGroup>
             <RibbonGroup name="Show/Hide">
               <RibbonButton
-                icon={<Eye size={22} />}
+                icon={<DsShowHidePropertySheetIcon size={40} />}
                 label="Property Sheet"
                 active={showPropertySheet}
                 onClick={() => setShowPropertySheet(v => !v)}
               />
-              <RibbonButton icon={<List size={22} />} label="Indexes" disabled />
+              <RibbonButton icon={<DsShowHideTotalsIcon size={40} />} label="Indexes" disabled />
+            </RibbonGroup>
+            <RibbonGroup name="Field, Record &amp; Table Events">
+              <RibbonButton icon={<Code2 size={40} />} label="Create Data Macros" disabled wide />
+              <RibbonButton icon={<Code2 size={32} />} label="Rename/ Delete Macro" disabled wide />
+            </RibbonGroup>
+            <RibbonGroup name="Relationships">
+              <RibbonButton icon={<DsRelationshipsIcon size={40} />} label="Relationships" onClick={onOpenRelationships} disabled={!onOpenRelationships} />
+              <RibbonButton icon={<DsObjectDependenciesIcon size={32} />} label="Object Dependencies" disabled wide />
             </RibbonGroup>
           </>
         )
@@ -437,6 +462,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
         </div>
         <div className="flex-1 overflow-hidden">
           <DesignGrid
+            ref={designGridRef}
             fields={fields}
             onChange={setFields}
             selectedIndex={selectedFieldIndex}

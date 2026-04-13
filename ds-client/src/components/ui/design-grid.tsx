@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { UpdateFieldRequest } from '@/api';
 import { Trash2, ChevronRight, X, Plus } from 'lucide-react';
 import keyIconSrc from '@assets/key-icon-2_1773991711720.jpg';
@@ -111,6 +111,10 @@ interface DesignGridProps {
   onCreateRelationship?: (fromTableId: number, fromFieldName: string, toTableId: number, toFieldName: string, relType: string) => void;
 }
 
+export interface DesignGridHandle {
+  openLookupWizard: (fieldIdx: number) => void;
+}
+
 type FieldTypeInfo = {
   value: string;
   label: string;
@@ -137,7 +141,7 @@ const FIELD_TYPE_LABELS: Record<string, string> = Object.fromEntries(
   FIELD_TYPES.map(t => [t.value, t.label])
 );
 
-export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onSelectedIndexChange, tables = [], databaseId, tableId, onBeforeTypeChange, showPropertySheet = true, onCreateRelationship }: DesignGridProps) {
+export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onSelectedIndexChange, tables = [], databaseId, tableId, onBeforeTypeChange, showPropertySheet = true, onCreateRelationship }: DesignGridProps, ref) {
   const [localIdx, setLocalIdx] = useState<number | null>(null);
   const selectedIndex = controlledIdx !== undefined ? controlledIdx : localIdx;
   const setSelectedIndex = (i: number | null) => { setLocalIdx(i); onSelectedIndexChange?.(i); };
@@ -226,6 +230,8 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
     setLwViewFilter('tables');
     setLookupWizardOpen(true);
   }, [fields]);
+
+  useImperativeHandle(ref, () => ({ openLookupWizard }), [openLookupWizard]);
 
   const finishLookupWizard = () => {
     if (lwFieldIdx === null) return;
@@ -1533,4 +1539,4 @@ export function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onS
       </div>}
     </div>
   );
-}
+});
