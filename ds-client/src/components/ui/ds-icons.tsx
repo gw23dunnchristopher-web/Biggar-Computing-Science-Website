@@ -63,6 +63,7 @@ export const DsImportLinkLinkedTableManagerIcon = icon('importLinkLinkedTableMan
 export const DsExportsSavedExportsIcon        = icon('exportsSavedExports.svg');
 export const DsExportsExcelIcon               = icon('exportsExcel.svg');
 export const DsExportsTextFileIcon            = icon('exportsTextFile.svg');
+export const DsExportsPDFOrXPSIcon            = icon('exportsPDForXPS.svg');
 export const DsReportsReportDesignIcon = icon('reportsReportDesign.svg');
 export const DsReportsReportWizardIcon = icon('reportsReportWizard.svg');
 export const DsSelectionIcon        = icon('Selection.svg');

@@ -16,7 +16,7 @@ import {
   DsAnalyzePerformanceIcon, DsAnalyzeTableIcon, DsAnalyzeDatabaseDocumenterIcon,
   DsObjectDependenciesIcon, DsCompactAndRepairIcon,
   DsImportLinkNewDataSourceIcon, DsImportLinkSavedImportsIcon, DsImportLinkLinkedTableManagerIcon,
-  DsExportsSavedExportsIcon, DsExportsExcelIcon, DsExportsTextFileIcon,
+  DsExportsSavedExportsIcon, DsExportsExcelIcon, DsExportsTextFileIcon, DsExportsPDFOrXPSIcon,
 } from '@/components/ui/ds-icons';
 
 export interface CommonTabsProps {
@@ -128,6 +128,7 @@ export function ExternalDataTabContent({ onImportCSV, onExportData, onShare }: C
         <RibbonButton icon={<DsExportsSavedExportsIcon size={32} />} label="Saved Exports" disabled />
         <RibbonButton icon={<DsExportsExcelIcon size={40} />} label="Excel" onClick={onExportData} disabled={!onExportData} />
         <RibbonButton icon={<DsExportsTextFileIcon size={40} />} label="Text File" onClick={onExportData} disabled={!onExportData} />
+        <RibbonButton icon={<DsExportsPDFOrXPSIcon size={40} />} label="PDF or XPS" disabled />
         <RibbonButton icon={<Upload size={32} />} label="Embed / Share" onClick={onShare} disabled={!onShare} />
       </RibbonGroup>
     </>
