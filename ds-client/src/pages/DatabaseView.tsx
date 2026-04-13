@@ -354,6 +354,20 @@ export function DatabaseView() {
     }
   };
 
+  const handleCreateSqlQuery = async () => {
+    const name = `Query${queries.length + 1}`;
+    try {
+      const q = await apiFetch(`/api/ds/databases/${databaseId}/queries`, {
+        method: 'POST',
+        body: JSON.stringify({ name, definition: { tables: [], columns: [] } })
+      });
+      await loadQueries();
+      setLocation(`/databases/${databaseId}/queries/${q.id}?view=sql`);
+    } catch {
+      toast({ title: 'Failed to create SQL query', variant: 'destructive' });
+    }
+  };
+
   const handleQueryWizardFinish = async (name: string, definition: any, openMode: 'view' | 'modify') => {
     try {
       const q = await apiFetch(`/api/ds/databases/${databaseId}/queries`, {
@@ -525,7 +539,7 @@ export function DatabaseView() {
     onShare: handleShare,
     onSettings: openSettings,
     onOpenSql: () => setLocation(`/databases/${databaseId}/sql`),
-    onCreateSqlQuery: () => setLocation(`/databases/${databaseId}/sql`),
+    onCreateSqlQuery: handleCreateSqlQuery,
     onImportCSV: () => setCsvImportOpen(true),
     onOpenRelationships: () => setLocation(`/databases/${databaseId}/relationships`),
     onCompact: handleCompact,
