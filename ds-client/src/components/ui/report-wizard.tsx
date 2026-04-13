@@ -7,15 +7,11 @@
  * Step 5: Name + finish options
  */
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './dialog';
-import { Button } from './button';
-import { Input } from './input';
-import { ChevronRight, ChevronLeft, ArrowRight, ArrowLeft, ChevronsRight, ChevronsLeft, Check, FileText, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface Field { id: number; name: string; fieldType: string; sortOrder: number; isPrimaryKey: boolean; }
 interface SelectedField { tableId: number; tableName: string; fieldName: string; fieldType: string; }
 
-type LayoutOption = 'columnar' | 'tabular' | 'justified' | 'outline';
+type LayoutOption = 'columnar' | 'tabular' | 'justified';
 type Orientation = 'portrait' | 'landscape';
 type SortDir = 'asc' | 'desc';
 
@@ -31,82 +27,155 @@ interface Props {
 }
 
 const TOTAL_STEPS = 5;
-
-const REPORT_LAYOUTS: { id: LayoutOption; label: string; preview: React.ReactNode }[] = [
-  {
-    id: 'columnar',
-    label: 'Columnar',
-    preview: (
-      <div className="w-full h-20 border border-gray-300 bg-white p-1.5 rounded text-[7px] space-y-1 overflow-hidden">
-        {['Field 1', 'Field 2', 'Field 3'].map(f => (
-          <div key={f} className="flex gap-1 items-center">
-            <div className="bg-[#d4c5e8] rounded-sm px-1 py-px w-10 flex-shrink-0 text-[6px] text-purple-900 font-medium truncate">{f}</div>
-            <div className="border border-gray-300 rounded-sm flex-1 h-3 bg-white" />
-          </div>
-        ))}
-      </div>
-    )
-  },
-  {
-    id: 'tabular',
-    label: 'Tabular',
-    preview: (
-      <div className="w-full h-20 border border-gray-300 bg-white p-1 rounded overflow-hidden">
-        <div className="flex gap-0.5 mb-0.5">
-          {['F1','F2','F3'].map(f => <div key={f} className="flex-1 bg-[#c8b4a0] text-[6px] text-amber-900 font-medium px-0.5 py-px rounded-sm text-center">{f}</div>)}
-        </div>
-        {[0,1,2,3].map(r => (
-          <div key={r} className={`flex gap-0.5 mb-0.5 ${r % 2 === 1 ? 'bg-amber-50' : ''}`}>
-            {[0,1,2].map(c => <div key={c} className="flex-1 border border-gray-200 h-3 bg-white rounded-sm" />)}
-          </div>
-        ))}
-      </div>
-    )
-  },
-  {
-    id: 'justified',
-    label: 'Justified',
-    preview: (
-      <div className="w-full h-20 border border-gray-300 bg-white p-1.5 rounded overflow-hidden">
-        <div className="flex gap-1 mb-1">
-          {['F1','F2'].map(f => (
-            <div key={f} className="flex-1 space-y-0.5">
-              <div className="bg-[#d4c5e8] rounded-sm px-1 py-px text-[6px] text-purple-900 font-medium">{f}</div>
-              <div className="border border-gray-300 rounded-sm h-3 bg-white" />
-            </div>
-          ))}
-        </div>
-        <div className="flex gap-1">
-          {['F3','F4','F5'].map(f => (
-            <div key={f} className="flex-1 space-y-0.5">
-              <div className="bg-[#d4c5e8] rounded-sm px-1 py-px text-[6px] text-purple-900 font-medium">{f}</div>
-              <div className="border border-gray-300 rounded-sm h-3 bg-white" />
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  },
-  {
-    id: 'outline',
-    label: 'Outline',
-    preview: (
-      <div className="w-full h-20 border border-gray-300 bg-white p-1.5 rounded overflow-hidden">
-        <div className="bg-[#c8b4a0] rounded-sm px-1 py-0.5 text-[6px] text-amber-900 font-bold mb-1">Group Value</div>
-        <div className="pl-2 space-y-0.5">
-          {['F1','F2','F3'].map(f => (
-            <div key={f} className="flex gap-1 items-center">
-              <div className="bg-gray-100 rounded-sm px-1 py-px w-6 text-[5px] text-gray-500 font-medium">{f}</div>
-              <div className="border border-gray-200 rounded-sm flex-1 h-2.5 bg-white" />
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-];
-
 const EMPTY_SORT: SortRow = { fieldName: '', dir: 'asc' };
+
+function Step1Art() {
+  return (
+    <svg viewBox="0 0 130 220" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <defs>
+        <linearGradient id="rw-bg1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f5c842" />
+          <stop offset="100%" stopColor="#e08a00" />
+        </linearGradient>
+      </defs>
+      <rect width="130" height="220" fill="url(#rw-bg1)" />
+      <rect x="10" y="25" width="50" height="8" rx="1" fill="#fff" opacity="0.85" />
+      <rect x="10" y="37" width="50" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="10" y="47" width="50" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="10" y="57" width="50" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="10" y="67" width="50" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="10" y="77" width="50" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <text x="68" y="50" fontSize="16" fill="#7a3800" fontWeight="bold" fontFamily="Arial">&#x2192;</text>
+      <text x="68" y="70" fontSize="16" fill="#7a3800" fontWeight="bold" fontFamily="Arial">&#x2192;</text>
+      <rect x="86" y="25" width="36" height="8" rx="1" fill="#fff" opacity="0.85" />
+      <rect x="86" y="42" width="36" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="86" y="52" width="36" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="86" y="62" width="36" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="10" y="100" width="112" height="8" rx="1" fill="#fff" opacity="0.7" />
+      {[0,1,2,3,4].map(i => (
+        <g key={i}>
+          <rect x="10" y={113 + i * 10} width="50" height="6" rx="1" fill="#fff" opacity="0.5" />
+          <rect x="64" y={113 + i * 10} width="58" height="6" rx="1" fill="#fff" opacity="0.5" />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+function Step3Art() {
+  return (
+    <svg viewBox="0 0 130 220" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <defs>
+        <linearGradient id="rw-bg3" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f5c842" />
+          <stop offset="100%" stopColor="#e08a00" />
+        </linearGradient>
+      </defs>
+      <rect width="130" height="220" fill="url(#rw-bg3)" />
+      <rect x="15" y="20" width="100" height="8" rx="1" fill="#fff" opacity="0.8" />
+      {[0,1,2,3,4,5,6].map(i => (
+        <g key={i}>
+          <rect x="15" y={35 + i * 12} width="45" height="7" rx="1" fill="#fff" opacity="0.5" />
+          <rect x="64" y={35 + i * 12} width="51" height="7" rx="1" fill="#fff" opacity="0.5" />
+        </g>
+      ))}
+      <text x="30" y="145" fontSize="20" fill="#7a3800" fontFamily="Arial">&#x2195;</text>
+      <text x="55" y="145" fontSize="20" fill="#7a3800" fontFamily="Arial">&#x2195;</text>
+      <text x="80" y="145" fontSize="20" fill="#7a3800" fontFamily="Arial">&#x2195;</text>
+    </svg>
+  );
+}
+
+function Step4Art({ layout, orientation }: { layout: LayoutOption; orientation: Orientation }) {
+  const isLandscape = orientation === 'landscape';
+  const vw = isLandscape ? 220 : 160;
+  const vh = isLandscape ? 160 : 220;
+  return (
+    <svg viewBox={`0 0 ${vw} ${vh}`} xmlns="http://www.w3.org/2000/svg" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="rw-bg4" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f5c842" />
+          <stop offset="100%" stopColor="#e08a00" />
+        </linearGradient>
+      </defs>
+      <rect width={vw} height={vh} fill="url(#rw-bg4)" />
+      <rect x="8" y="8" width={vw - 16} height={vh - 16} rx="2" fill="#fff" opacity="0.2" />
+      {layout === 'columnar' && (
+        <g>
+          {[0,1,2,3,4].map(i => (
+            <g key={i}>
+              <rect x="16" y={20 + i * 28} width={isLandscape ? 50 : 40} height="8" rx="1" fill="#fff" opacity="0.9" />
+              <rect x={isLandscape ? 72 : 62} y={20 + i * 28} width={isLandscape ? 120 : 80} height="8" rx="1" fill="#fff" opacity="0.6" />
+            </g>
+          ))}
+        </g>
+      )}
+      {layout === 'tabular' && (
+        <g>
+          <g>
+            {[0,1,2].map(c => (
+              <rect key={c} x={16 + c * (isLandscape ? 62 : 42)} y="20" width={isLandscape ? 56 : 36} height="8" rx="1" fill="#fff" opacity="0.9" />
+            ))}
+          </g>
+          {[0,1,2,3,4,5].map(r => (
+            <g key={r}>
+              {[0,1,2].map(c => (
+                <rect key={c} x={16 + c * (isLandscape ? 62 : 42)} y={34 + r * 14} width={isLandscape ? 56 : 36} height="7" rx="1" fill="#fff" opacity="0.5" />
+              ))}
+            </g>
+          ))}
+        </g>
+      )}
+      {layout === 'justified' && (
+        <g>
+          {[0,1,2,3].map(i => (
+            <g key={i}>
+              <rect x="16" y={20 + i * 40} width={isLandscape ? 50 : 35} height="7" rx="1" fill="#fff" opacity="0.9" />
+              <rect x="16" y={30 + i * 40} width={vw - 32} height="8" rx="1" fill="#fff" opacity="0.5" />
+            </g>
+          ))}
+        </g>
+      )}
+    </svg>
+  );
+}
+
+function Step5Art() {
+  return (
+    <svg viewBox="0 0 130 220" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+      <defs>
+        <linearGradient id="rw-bg5" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f5c842" />
+          <stop offset="100%" stopColor="#e08a00" />
+        </linearGradient>
+      </defs>
+      <rect width="130" height="220" fill="url(#rw-bg5)" />
+      <rect x="20" y="30" width="90" height="70" rx="3" fill="#fff" opacity="0.3" />
+      <rect x="30" y="42" width="70" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="30" y="54" width="70" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="30" y="66" width="70" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="30" y="78" width="70" height="6" rx="1" fill="#fff" opacity="0.6" />
+      <rect x="35" y="115" width="60" height="60" rx="5" fill="none" stroke="#7a3800" strokeWidth="3" />
+      <polyline points="45,148 58,162 85,130" fill="none" stroke="#7a3800" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function WizBtn({ onClick, disabled, children, primary }: { onClick?: () => void; disabled?: boolean; children: React.ReactNode; primary?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-3 py-1 border text-[12px] select-none min-w-[70px]
+        ${disabled ? 'text-gray-400 border-gray-300 bg-[#f0f0f0] cursor-default'
+          : primary ? 'text-black border-[#0078d7] bg-[#e1ecf7] hover:bg-[#cde0f7] focus:outline-none focus:ring-1 focus:ring-[#0078d7]'
+          : 'text-black border-gray-400 bg-[#e1e1e1] hover:bg-[#d5d5d5] active:bg-[#c8c8c8] focus:outline-none focus:ring-1 focus:ring-gray-500'}`}
+      style={{ fontFamily: 'Segoe UI, Tahoma, sans-serif' }}
+    >
+      {children}
+    </button>
+  );
+}
 
 export function ReportWizard({ open, onOpenChange, tables, databaseId, onFinish, apiFetch }: Props) {
   const [step, setStep] = useState(1);
@@ -117,19 +186,16 @@ export function ReportWizard({ open, onOpenChange, tables, databaseId, onFinish,
   const [highlightAvail, setHighlightAvail] = useState<string | null>(null);
   const [highlightSel, setHighlightSel] = useState<number | null>(null);
 
-  // Step 2 — grouping
   const [groupFields, setGroupFields] = useState<string[]>([]);
+  const [highlightAvailGroup, setHighlightAvailGroup] = useState<string | null>(null);
   const [highlightGroup, setHighlightGroup] = useState<string | null>(null);
 
-  // Step 3 — sort
   const [sortRows, setSortRows] = useState<SortRow[]>([EMPTY_SORT, EMPTY_SORT, EMPTY_SORT, EMPTY_SORT]);
 
-  // Step 4 — layout
   const [layout, setLayout] = useState<LayoutOption>('tabular');
   const [orientation, setOrientation] = useState<Orientation>('portrait');
   const [fitToPage, setFitToPage] = useState(true);
 
-  // Step 5
   const [reportName, setReportName] = useState('');
   const [openMode, setOpenMode] = useState<'preview' | 'modify'>('preview');
 
@@ -141,6 +207,7 @@ export function ReportWizard({ open, onOpenChange, tables, databaseId, onFinish,
       setHighlightAvail(null);
       setHighlightSel(null);
       setGroupFields([]);
+      setHighlightAvailGroup(null);
       setHighlightGroup(null);
       setSortRows([EMPTY_SORT, EMPTY_SORT, EMPTY_SORT, EMPTY_SORT]);
       setLayout('tabular');
@@ -150,6 +217,10 @@ export function ReportWizard({ open, onOpenChange, tables, databaseId, onFinish,
       setOpenMode('preview');
     }
   }, [open]);
+
+  useEffect(() => {
+    if (open && tables.length > 0 && !selectedTableId) setSelectedTableId(tables[0].id);
+  }, [open, tables]);
 
   useEffect(() => {
     if (!selectedTableId) return setAvailableFields([]);
@@ -169,16 +240,13 @@ export function ReportWizard({ open, onOpenChange, tables, databaseId, onFinish,
   useEffect(() => {
     if (selectedTableId && tables.length > 0) {
       const tbl = tables.find(t => t.id === selectedTableId);
-      if (tbl) setReportName(prev => prev || `${tbl.name} Report`);
+      if (tbl) setReportName(tbl.name);
     }
   }, [selectedTableId]);
 
   const currentTable = tables.find(t => t.id === selectedTableId);
+  const alreadySelected = (f: Field) => !!selectedFields.find(sf => sf.tableId === selectedTableId && sf.fieldName === f.name);
 
-  const alreadySelected = (f: Field) =>
-    !!selectedFields.find(sf => sf.tableId === selectedTableId && sf.fieldName === f.name);
-
-  // Step 1 actions
   const addField = (f: Field) => {
     if (!currentTable || alreadySelected(f)) return;
     setSelectedFields(prev => [...prev, { tableId: selectedTableId!, tableName: currentTable.name, fieldName: f.name, fieldType: f.fieldType }]);
@@ -186,45 +254,25 @@ export function ReportWizard({ open, onOpenChange, tables, databaseId, onFinish,
   };
   const addAll = () => {
     if (!currentTable) return;
-    availableFields.forEach(f => {
-      if (!alreadySelected(f))
-        setSelectedFields(prev => [...prev, { tableId: selectedTableId!, tableName: currentTable.name, fieldName: f.name, fieldType: f.fieldType }]);
-    });
+    const toAdd = availableFields.filter(f => !alreadySelected(f));
+    setSelectedFields(prev => [...prev, ...toAdd.map(f => ({ tableId: selectedTableId!, tableName: currentTable.name, fieldName: f.name, fieldType: f.fieldType }))]);
   };
   const removeField = (idx: number) => { setSelectedFields(prev => prev.filter((_, i) => i !== idx)); setHighlightSel(null); };
   const removeAll = () => { setSelectedFields([]); setHighlightSel(null); };
-  const moveUp = (idx: number) => {
-    if (idx === 0) return;
-    setSelectedFields(prev => { const a = [...prev]; [a[idx-1], a[idx]] = [a[idx], a[idx-1]]; return a; });
-    setHighlightSel(idx - 1);
-  };
-  const moveDown = (idx: number) => {
-    if (idx >= selectedFields.length - 1) return;
-    setSelectedFields(prev => { const a = [...prev]; [a[idx], a[idx+1]] = [a[idx+1], a[idx]]; return a; });
-    setHighlightSel(idx + 1);
-  };
 
-  // Step 2 — grouping
   const availableToGroup = selectedFields.filter(sf => !groupFields.includes(sf.fieldName));
-  const [highlightAvailGroup, setHighlightAvailGroup] = useState<string | null>(null);
 
-  const addGroupField = (name: string) => {
-    setGroupFields(prev => [...prev, name]);
-    setHighlightAvailGroup(null);
-  };
-  const removeGroupField = (name: string) => setGroupFields(prev => prev.filter(g => g !== name));
+  const addGroupField = (name: string) => { setGroupFields(prev => [...prev, name]); setHighlightAvailGroup(null); };
+  const removeGroupField = (name: string) => { setGroupFields(prev => prev.filter(g => g !== name)); setHighlightGroup(null); };
   const moveGroupUp = (i: number) => {
     if (i === 0) return;
     setGroupFields(prev => { const a = [...prev]; [a[i-1], a[i]] = [a[i], a[i-1]]; return a; });
-    setHighlightGroup(groupFields[i - 1]);
   };
   const moveGroupDown = (i: number) => {
     if (i >= groupFields.length - 1) return;
     setGroupFields(prev => { const a = [...prev]; [a[i], a[i+1]] = [a[i+1], a[i]]; return a; });
-    setHighlightGroup(groupFields[i + 1]);
   };
 
-  // Step 3 — sort
   const sortableFields = selectedFields.map(sf => sf.fieldName);
   const toggleSortDir = (i: number) =>
     setSortRows(prev => prev.map((r, idx) => idx === i ? { ...r, dir: r.dir === 'asc' ? 'desc' : 'asc' } : r));
@@ -244,7 +292,6 @@ export function ReportWizard({ open, onOpenChange, tables, databaseId, onFinish,
       fitToPage,
       groupFields,
       sortRows: activeSorts,
-      // Backwards compat single sort
       sortField: activeSorts[0]?.fieldName || undefined,
       sortDir: activeSorts[0]?.dir || undefined,
       groupField: groupFields[0] || undefined,
@@ -260,288 +307,322 @@ export function ReportWizard({ open, onOpenChange, tables, databaseId, onFinish,
     onOpenChange(false);
   };
 
-  const stepTitles = [
-    'Which fields do you want on your report?',
-    'Do you want to add any grouping levels?',
-    'What sort order do you want for your records?',
-    'How would you like to lay out your report?',
-    'What title do you want for your report?'
-  ];
-
   const canNext1 = selectedFields.length > 0;
 
+  const nonGroupedFields = selectedFields.filter(sf => !groupFields.includes(sf.fieldName));
+  const groupingPreviewText = nonGroupedFields.map(sf => sf.fieldName).join(', ');
+
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <FileText size={18} className="text-[#5d4037]" />
-            <DialogTitle className="text-base">
-              <span className="text-[#5d4037]">Report Wizard</span>
-              <span className="text-gray-400 text-sm font-normal ml-2">— Step {step} of {TOTAL_STEPS}</span>
-            </DialogTitle>
-          </div>
-          <DialogDescription>{stepTitles[step - 1]}</DialogDescription>
-        </DialogHeader>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div
+        className="bg-[#f0f0f0] border border-gray-500 shadow-2xl flex flex-col"
+        style={{ width: 520, fontFamily: 'Segoe UI, Tahoma, Geneva, sans-serif', fontSize: 13 }}
+      >
+        {/* Title bar */}
+        <div className="flex items-center px-3 py-1.5 bg-[#f0f0f0] border-b border-gray-300 select-none">
+          <span className="font-semibold text-[13px] text-black">Report Wizard</span>
+        </div>
 
-        {/* ── Step 1: Field picker ─────────────────────────────────── */}
-        {step === 1 && (
-          <div className="space-y-4 py-2">
-            <div>
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1 block">Tables/Queries:</label>
-              <select
-                value={selectedTableId ?? ''}
-                onChange={e => { setSelectedTableId(Number(e.target.value)); setHighlightAvail(null); setSelectedFields([]); setGroupFields([]); setReportName(''); }}
-                className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-[#5d4037] bg-white"
-              >
-                <option value="" disabled>— Select a table —</option>
-                {tables.map(t => <option key={t.id} value={t.id}>Table: {t.name}</option>)}
-              </select>
-            </div>
+        {/* Body */}
+        <div className="flex flex-1 min-h-0" style={{ minHeight: 300 }}>
 
-            <div className="flex gap-3 items-center">
-              <div className="flex-1">
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Available Fields:</label>
-                <div className="border border-gray-300 rounded h-48 overflow-y-auto bg-white">
-                  {availableFields.map(f => (
-                    <div key={f.name} onDoubleClick={() => addField(f)} onClick={() => setHighlightAvail(f.name)}
-                      className={`px-3 py-1 text-sm cursor-default select-none hover:bg-amber-50 ${highlightAvail === f.name ? 'bg-[#5d4037] text-white' : ''} ${alreadySelected(f) ? 'text-gray-300' : ''}`}>
-                      {f.isPrimaryKey && '🔑 '}{f.name}
-                    </div>
-                  ))}
-                  {!selectedTableId && <div className="text-xs text-gray-400 italic p-3">Select a table first</div>}
-                  {selectedTableId && availableFields.length === 0 && <div className="text-xs text-gray-400 italic p-3">No fields</div>}
+          {/* ── Step 1: Field picker ── */}
+          {step === 1 && (
+            <>
+              <div className="flex-none w-[130px]" style={{ background: 'linear-gradient(135deg,#f5c842,#e08a00)' }}>
+                <Step1Art />
+              </div>
+              <div className="flex-1 flex flex-col px-5 pt-4 pb-3 overflow-hidden">
+                <p className="text-[13px] font-semibold text-black mb-0.5">Which fields do you want on your report?</p>
+                <p className="text-[12px] text-black mb-3">You can choose from more than one table or query.</p>
+
+                <div className="mb-2">
+                  <div className="text-[12px] mb-0.5 underline">Tables/Queries</div>
+                  <select
+                    value={selectedTableId ?? ''}
+                    onChange={e => { setSelectedTableId(Number(e.target.value)); setHighlightAvail(null); setSelectedFields([]); setGroupFields([]); setReportName(''); }}
+                    className="w-full border border-gray-500 px-1 py-0.5 text-[12px] bg-white focus:outline-none"
+                    style={{ height: 22 }}
+                  >
+                    {tables.map(t => <option key={t.id} value={t.id}>Table: {t.name}</option>)}
+                  </select>
                 </div>
-              </div>
 
-              <div className="flex flex-col gap-1.5 items-center flex-none">
-                <button onClick={() => highlightAvail && addField(availableFields.find(f => f.name === highlightAvail)!)} disabled={!highlightAvail || alreadySelected(availableFields.find(f => f.name === highlightAvail)!)} className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40"><ArrowRight size={14} /></button>
-                <button onClick={addAll} disabled={!selectedTableId} className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40"><ChevronsRight size={14} /></button>
-                <button onClick={() => highlightSel !== null && removeField(highlightSel)} disabled={highlightSel === null} className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40"><ArrowLeft size={14} /></button>
-                <button onClick={removeAll} disabled={selectedFields.length === 0} className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40"><ChevronsLeft size={14} /></button>
-                <div className="w-px h-2" />
-                <button onClick={() => highlightSel !== null && moveUp(highlightSel)} disabled={highlightSel === null || highlightSel === 0} className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40"><ChevronLeft size={14} className="rotate-90" /></button>
-                <button onClick={() => highlightSel !== null && moveDown(highlightSel)} disabled={highlightSel === null || highlightSel >= selectedFields.length - 1} className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40"><ChevronRight size={14} className="rotate-90" /></button>
-              </div>
-
-              <div className="flex-1">
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Selected Fields:</label>
-                <div className="border border-gray-300 rounded h-48 overflow-y-auto bg-white">
-                  {selectedFields.map((sf, i) => (
-                    <div key={i} onDoubleClick={() => removeField(i)} onClick={() => setHighlightSel(i)}
-                      className={`px-3 py-1 text-sm cursor-default select-none hover:bg-amber-50 ${highlightSel === i ? 'bg-[#5d4037] text-white' : ''}`}>
-                      {sf.fieldName}
+                <div className="flex gap-1 flex-1 min-h-0">
+                  <div className="flex-1 flex flex-col min-h-0">
+                    <div className="text-[12px] underline mb-0.5">Available Fields:</div>
+                    <div className="flex-1 border border-gray-500 bg-white overflow-y-auto" style={{ minHeight: 100 }}>
+                      {availableFields.map(f => (
+                        <div
+                          key={f.name}
+                          onDoubleClick={() => addField(f)}
+                          onClick={() => setHighlightAvail(f.name)}
+                          className="px-2 py-px text-[12px] cursor-default select-none leading-5"
+                          style={{ background: highlightAvail === f.name ? '#000080' : 'transparent', color: highlightAvail === f.name ? '#fff' : (alreadySelected(f) ? '#aaa' : '#000') }}
+                        >
+                          {f.name}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                  {selectedFields.length === 0 && <div className="text-xs text-gray-400 italic p-3">No fields selected</div>}
-                </div>
-              </div>
-            </div>
-            <p className="text-xs text-gray-400">Tip: Double-click a field to move it. Use the arrow buttons to reorder.</p>
-          </div>
-        )}
+                  </div>
 
-        {/* ── Step 2: Grouping ──────────────────────────────────────── */}
-        {step === 2 && (
-          <div className="py-3 space-y-4">
-            <div className="flex gap-3">
-              {/* Available to group */}
-              <div className="flex-1">
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Available fields:</label>
-                <div className="border border-gray-300 rounded h-40 overflow-y-auto bg-white">
-                  {availableToGroup.map(sf => (
-                    <div key={sf.fieldName} onDoubleClick={() => addGroupField(sf.fieldName)} onClick={() => setHighlightAvailGroup(sf.fieldName)}
-                      className={`px-3 py-1 text-sm cursor-default select-none hover:bg-amber-50 ${highlightAvailGroup === sf.fieldName ? 'bg-[#5d4037] text-white' : ''}`}>
-                      {sf.fieldName}
+                  <div className="flex flex-col gap-1 justify-center flex-none px-1">
+                    <WizBtn onClick={() => { const f = availableFields.find(f => f.name === highlightAvail); if (f) addField(f); }} disabled={!highlightAvail || alreadySelected(availableFields.find(f => f.name === highlightAvail)!)}>
+                      &gt;
+                    </WizBtn>
+                    <WizBtn onClick={addAll} disabled={!selectedTableId || availableFields.every(f => alreadySelected(f))}>
+                      &gt;&gt;
+                    </WizBtn>
+                    <WizBtn onClick={() => highlightSel !== null && removeField(highlightSel)} disabled={highlightSel === null}>
+                      &lt;
+                    </WizBtn>
+                    <WizBtn onClick={removeAll} disabled={selectedFields.length === 0}>
+                      &lt;&lt;
+                    </WizBtn>
+                  </div>
+
+                  <div className="flex-1 flex flex-col min-h-0">
+                    <div className="text-[12px] underline mb-0.5">Selected Fields:</div>
+                    <div className="flex-1 border border-gray-500 bg-white overflow-y-auto" style={{ minHeight: 100 }}>
+                      {selectedFields.map((sf, i) => (
+                        <div
+                          key={i}
+                          onDoubleClick={() => removeField(i)}
+                          onClick={() => setHighlightSel(i)}
+                          className="px-2 py-px text-[12px] cursor-default select-none leading-5"
+                          style={{ background: highlightSel === i ? '#000080' : 'transparent', color: highlightSel === i ? '#fff' : '#000' }}
+                        >
+                          {sf.fieldName}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                  {availableToGroup.length === 0 && <div className="text-xs text-gray-400 italic p-3">{groupFields.length > 0 ? 'All fields grouped' : 'No fields available'}</div>}
-                </div>
-              </div>
-
-              {/* Add/remove buttons */}
-              <div className="flex flex-col gap-1.5 items-center justify-center flex-none">
-                <button onClick={() => highlightAvailGroup && addGroupField(highlightAvailGroup)} disabled={!highlightAvailGroup}
-                  className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40"><ArrowRight size={14} /></button>
-                <button onClick={() => highlightGroup && removeGroupField(highlightGroup)} disabled={!highlightGroup}
-                  className="w-8 h-8 border border-gray-300 rounded bg-white hover:bg-gray-50 flex items-center justify-center disabled:opacity-40"><ArrowLeft size={14} /></button>
-              </div>
-
-              {/* Grouping preview box */}
-              <div className="flex-1">
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Grouping levels:</label>
-                <div className="border border-gray-300 rounded h-40 overflow-y-auto bg-white">
-                  {groupFields.map((g, i) => (
-                    <div key={g} onClick={() => setHighlightGroup(g)}
-                      className={`px-3 py-1 text-sm cursor-default select-none flex items-center justify-between hover:bg-amber-50 ${highlightGroup === g ? 'bg-[#5d4037] text-white' : ''}`}>
-                      <span>{g}</span>
-                      <div className="flex gap-0.5 ml-2">
-                        <button onClick={e => { e.stopPropagation(); moveGroupUp(i); }} disabled={i === 0}
-                          className="p-0.5 hover:bg-black/10 rounded disabled:opacity-30"><ChevronLeft size={12} className="rotate-90" /></button>
-                        <button onClick={e => { e.stopPropagation(); moveGroupDown(i); }} disabled={i >= groupFields.length - 1}
-                          className="p-0.5 hover:bg-black/10 rounded disabled:opacity-30"><ChevronRight size={12} className="rotate-90" /></button>
-                      </div>
-                    </div>
-                  ))}
-                  {groupFields.length === 0 && <div className="text-xs text-gray-400 italic p-3">No grouping (double-click a field to add)</div>}
-                </div>
-              </div>
-            </div>
-
-            {/* Grouping preview panel */}
-            {groupFields.length > 0 && (
-              <div className="border border-gray-300 rounded p-3 bg-[#faf9f8]">
-                <p className="text-xs font-semibold text-gray-500 mb-2">Grouping preview:</p>
-                <div className="space-y-1">
-                  {groupFields.map((g, i) => (
-                    <div key={g} style={{ paddingLeft: `${i * 12}px` }}>
-                      <div className="inline-block bg-[#c8b4a0] text-[#3e2723] text-xs font-medium rounded px-2 py-0.5">{g}</div>
-                    </div>
-                  ))}
-                  <div style={{ paddingLeft: `${groupFields.length * 12}px` }}>
-                    <div className="text-xs text-gray-400 italic">(data rows)</div>
                   </div>
                 </div>
               </div>
-            )}
-            <p className="text-xs text-gray-400">Grouping organises records together by a common field value. Double-click a field to add it as a grouping level.</p>
-          </div>
-        )}
+            </>
+          )}
 
-        {/* ── Step 3: Sort order ──────────────────────────────────── */}
-        {step === 3 && (
-          <div className="py-3 space-y-3">
-            <p className="text-sm text-gray-600">You can sort records by up to four fields, in either ascending or descending order.</p>
-            <div className="space-y-2">
-              {sortRows.map((row, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500 w-4 flex-shrink-0">{i + 1}</span>
-                  <select
-                    value={row.fieldName}
-                    onChange={e => setSortField(i, e.target.value)}
-                    className="flex-1 border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-[#5d4037] bg-white"
-                    disabled={i > 0 && !sortRows[i - 1].fieldName}
-                  >
-                    <option value="">(none)</option>
-                    {sortableFields
-                      .filter(fn => fn === row.fieldName || !sortRows.some((r, ri) => ri !== i && r.fieldName === fn))
-                      .map(fn => <option key={fn} value={fn}>{fn}</option>)}
-                  </select>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={!row.fieldName}
-                    onClick={() => toggleSortDir(i)}
-                    className={`w-28 flex-shrink-0 gap-1 text-xs ${!row.fieldName ? 'opacity-40 cursor-not-allowed' : ''}`}
-                  >
-                    {row.dir === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-                    {row.dir === 'asc' ? 'Ascending' : 'Descending'}
-                  </Button>
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-gray-400">Click the Ascending / Descending button to toggle the sort direction for each field.</p>
-          </div>
-        )}
-
-        {/* ── Step 4: Layout + orientation ────────────────────────── */}
-        {step === 4 && (
-          <div className="py-3 flex gap-6">
-            {/* Layout */}
-            <div className="flex-1">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2 block">Layout</label>
-              <div className="grid grid-cols-2 gap-2">
-                {REPORT_LAYOUTS.map(l => (
-                  <button key={l.id} onClick={() => setLayout(l.id)}
-                    className={`flex flex-col gap-1.5 p-1.5 rounded border-2 text-center transition-all ${layout === l.id ? 'border-[#5d4037] bg-amber-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
-                    {l.preview}
-                    <div className="flex items-center gap-1 justify-center">
-                      <div className={`w-3 h-3 rounded-full border-2 flex-shrink-0 ${layout === l.id ? 'border-[#5d4037] bg-[#5d4037]' : 'border-gray-400'}`}>
-                        {layout === l.id && <div className="w-1.5 h-1.5 bg-white rounded-full m-auto" />}
+          {/* ── Step 2: Grouping ── */}
+          {step === 2 && (
+            <div className="flex-1 flex flex-col px-5 pt-4 pb-3">
+              <p className="text-[13px] font-semibold text-black mb-3">Do you want to add any grouping levels?</p>
+              <div className="flex gap-2 flex-1 min-h-0">
+                <div className="flex flex-col min-h-0" style={{ width: 120 }}>
+                  <div className="flex-1 border border-gray-500 bg-white overflow-y-auto">
+                    {availableToGroup.map(sf => (
+                      <div
+                        key={sf.fieldName}
+                        onDoubleClick={() => addGroupField(sf.fieldName)}
+                        onClick={() => setHighlightAvailGroup(sf.fieldName)}
+                        className="px-2 py-px text-[12px] cursor-default select-none leading-5"
+                        style={{ background: highlightAvailGroup === sf.fieldName ? '#000080' : 'transparent', color: highlightAvailGroup === sf.fieldName ? '#fff' : '#000' }}
+                      >
+                        {sf.fieldName}
                       </div>
-                      <span className="text-xs font-medium text-gray-700">{l.label}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1 items-center justify-center flex-none">
+                  <WizBtn onClick={() => highlightAvailGroup && addGroupField(highlightAvailGroup)} disabled={!highlightAvailGroup}>
+                    &gt;
+                  </WizBtn>
+                  <WizBtn onClick={() => highlightGroup && removeGroupField(highlightGroup)} disabled={!highlightGroup}>
+                    &lt;
+                  </WizBtn>
+                  <div className="my-1">
+                    <WizBtn onClick={() => { const i = groupFields.indexOf(highlightGroup || ''); if (i >= 0) moveGroupUp(i); }} disabled={!highlightGroup || groupFields.indexOf(highlightGroup || '') <= 0}>
+                      &#x25B2;
+                    </WizBtn>
+                  </div>
+                  <div className="text-[11px] text-black font-semibold">Priority</div>
+                  <WizBtn onClick={() => { const i = groupFields.indexOf(highlightGroup || ''); if (i >= 0) moveGroupDown(i); }} disabled={!highlightGroup || groupFields.indexOf(highlightGroup || '') >= groupFields.length - 1}>
+                    &#x25BC;
+                  </WizBtn>
+                </div>
+
+                <div className="flex-1 flex flex-col min-h-0">
+                  <div className="flex-1 border-2 border-[#e0a800] bg-white overflow-y-auto p-2">
+                    {groupFields.length > 0 ? (
+                      <div className="space-y-1">
+                        {groupFields.map((g, i) => (
+                          <div
+                            key={g}
+                            onClick={() => setHighlightGroup(g)}
+                            className="px-2 py-0.5 text-[12px] cursor-default select-none"
+                            style={{
+                              marginLeft: i * 16,
+                              background: highlightGroup === g ? '#000080' : 'transparent',
+                              color: highlightGroup === g ? '#fff' : '#000',
+                              fontWeight: 'bold'
+                            }}
+                          >
+                            {g}
+                          </div>
+                        ))}
+                        <div
+                          className="text-[12px] text-black px-2 py-0.5"
+                          style={{ marginLeft: groupFields.length * 16 }}
+                        >
+                          {groupingPreviewText}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-[12px] text-black px-2 py-0.5">
+                        {selectedFields.map(sf => sf.fieldName).join(', ')}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <WizBtn disabled>Grouping Options ...</WizBtn>
+              </div>
+            </div>
+          )}
+
+          {/* ── Step 3: Sort order ── */}
+          {step === 3 && (
+            <>
+              <div className="flex-none w-[130px]" style={{ background: 'linear-gradient(135deg,#f5c842,#e08a00)' }}>
+                <Step3Art />
+              </div>
+              <div className="flex-1 flex flex-col px-5 pt-4 pb-3">
+                <p className="text-[13px] font-semibold text-black mb-1">What sort order do you want for your records?</p>
+                <p className="text-[12px] text-black mb-4">You can sort records by up to four fields, in either ascending or descending order.</p>
+                <div className="space-y-3">
+                  {sortRows.map((row, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="text-[13px] text-black w-4 flex-shrink-0 font-semibold">{i + 1}</span>
+                      <select
+                        value={row.fieldName}
+                        onChange={e => setSortField(i, e.target.value)}
+                        className="flex-1 border border-gray-500 px-1 py-0.5 text-[12px] bg-white focus:outline-none"
+                        style={{ height: 22 }}
+                        disabled={i > 0 && !sortRows[i - 1].fieldName}
+                      >
+                        <option value=""></option>
+                        {sortableFields
+                          .filter(fn => fn === row.fieldName || !sortRows.some((r, ri) => ri !== i && r.fieldName === fn))
+                          .map(fn => <option key={fn} value={fn}>{fn}</option>)}
+                      </select>
+                      <button
+                        onClick={() => toggleSortDir(i)}
+                        disabled={!row.fieldName}
+                        className="border border-gray-400 bg-[#e1e1e1] hover:bg-[#d5d5d5] px-2 py-0.5 text-[12px] min-w-[80px] disabled:text-gray-400 disabled:bg-[#f0f0f0] disabled:cursor-default select-none"
+                        style={{ fontFamily: 'Segoe UI, Tahoma, sans-serif' }}
+                      >
+                        {row.dir === 'asc' ? 'Ascending' : 'Descending'}
+                      </button>
                     </div>
-                  </button>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            </>
+          )}
 
-            {/* Orientation */}
-            <div className="w-36 flex-shrink-0">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2 block">Orientation</label>
-              <div className="space-y-3">
-                {(['portrait', 'landscape'] as Orientation[]).map(o => (
-                  <label key={o} onClick={() => setOrientation(o)}
-                    className={`flex items-center gap-2 p-2 border-2 rounded cursor-pointer transition-all ${orientation === o ? 'border-[#5d4037] bg-amber-50' : 'border-gray-200 hover:border-gray-300'}`}>
-                    <input type="radio" name="orientation" value={o} checked={orientation === o} onChange={() => setOrientation(o)} className="accent-[#5d4037]" />
-                    <span className="flex flex-col items-center gap-1">
-                      {o === 'portrait'
-                        ? <span className="inline-block w-6 h-8 border-2 border-current rounded-sm bg-white" />
-                        : <span className="inline-block w-8 h-6 border-2 border-current rounded-sm bg-white" />}
-                      <span className="text-xs font-medium capitalize">{o}</span>
-                    </span>
-                  </label>
-                ))}
+          {/* ── Step 4: Layout + orientation ── */}
+          {step === 4 && (
+            <div className="flex-1 flex flex-col px-5 pt-4 pb-3">
+              <p className="text-[13px] font-semibold text-black mb-3">How would you like to lay out your report?</p>
+              <div className="flex gap-4 flex-1 min-h-0">
+                <div className="flex-none" style={{ width: 170, height: 190, background: 'linear-gradient(135deg,#f5c842,#e08a00)', border: '2px solid #c87800' }}>
+                  <Step4Art layout={layout} orientation={orientation} />
+                </div>
+
+                <div className="flex-1 flex flex-col gap-3">
+                  <div>
+                    <div className="text-[12px] font-semibold text-black mb-1 border-b border-gray-400 pb-0.5">Layout</div>
+                    <div className="space-y-1 mt-1">
+                      {(['columnar', 'tabular', 'justified'] as LayoutOption[]).map(l => (
+                        <label key={l} className="flex items-center gap-2 cursor-pointer">
+                          <input type="radio" name="rptLayout" value={l} checked={layout === l} onChange={() => setLayout(l)} style={{ accentColor: '#000080' }} />
+                          <span className="text-[13px] text-black">{l.charAt(0).toUpperCase() + l.slice(1)}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-[12px] font-semibold text-black mb-1 border-b border-gray-400 pb-0.5">Orientation</div>
+                    <div className="flex items-start gap-3 mt-1">
+                      <div className="space-y-1">
+                        {(['portrait', 'landscape'] as Orientation[]).map(o => (
+                          <label key={o} className="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="rptOrientation" value={o} checked={orientation === o} onChange={() => setOrientation(o)} style={{ accentColor: '#000080' }} />
+                            <span className="text-[13px] text-black">{o.charAt(0).toUpperCase() + o.slice(1)}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <div className="ml-2 flex-shrink-0">
+                        {orientation === 'portrait' ? (
+                          <div className="border-2 border-gray-500 bg-white flex items-center justify-center" style={{ width: 28, height: 36 }}>
+                            <span className="text-[14px] font-serif text-gray-600">A</span>
+                          </div>
+                        ) : (
+                          <div className="border-2 border-gray-500 bg-white flex items-center justify-center" style={{ width: 36, height: 28 }}>
+                            <span className="text-[14px] font-serif text-gray-600">A</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <label className="flex items-center gap-2 cursor-pointer mt-3">
+                <input type="checkbox" checked={fitToPage} onChange={e => setFitToPage(e.target.checked)} style={{ accentColor: '#000080' }} />
+                <span className="text-[12px] text-black">Adjust the field width so all fields fit on a page.</span>
+              </label>
+            </div>
+          )}
+
+          {/* ── Step 5: Name + finish ── */}
+          {step === 5 && (
+            <>
+              <div className="flex-none w-[130px]" style={{ background: 'linear-gradient(135deg,#f5c842,#e08a00)' }}>
+                <Step5Art />
+              </div>
+              <div className="flex-1 flex flex-col px-5 pt-4 pb-3">
+                <p className="text-[13px] font-semibold text-black mb-2">What title do you want for your report?</p>
+                <input
+                  type="text"
+                  value={reportName}
+                  onChange={e => setReportName(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleFinish()}
+                  autoFocus
+                  className="border border-gray-500 px-1.5 py-0.5 text-[13px] bg-white focus:outline-none w-full mb-4"
+                  style={{ height: 22 }}
+                />
+                <p className="text-[12px] text-black mb-3">
+                  That's all the information the wizard needs to create your report.
+                  <br /><br />
+                  Do you want to preview the report or modify the report's design?
+                </p>
+                <label className="flex items-center gap-2 mb-2 cursor-pointer">
+                  <input type="radio" name="reportOpenMode" value="preview" checked={openMode === 'preview'} onChange={() => setOpenMode('preview')} style={{ accentColor: '#000080' }} />
+                  <span className="text-[13px] text-black">Preview the report.</span>
+                </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={fitToPage} onChange={e => setFitToPage(e.target.checked)} className="accent-[#5d4037]" />
-                  <span className="text-xs text-gray-600">Adjust field widths to fit all on one page</span>
+                  <input type="radio" name="reportOpenMode" value="modify" checked={openMode === 'modify'} onChange={() => setOpenMode('modify')} style={{ accentColor: '#000080' }} />
+                  <span className="text-[13px] text-black">Modify the report's design.</span>
                 </label>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Step 5: Name + finish ────────────────────────────────── */}
-        {step === 5 && (
-          <div className="space-y-5 py-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">What title do you want for your report?</label>
-              <Input value={reportName} onChange={e => setReportName(e.target.value)} autoFocus onKeyDown={e => e.key === 'Enter' && handleFinish()} className="max-w-xs" />
-              <p className="text-xs text-gray-400 mt-1">This title will appear at the top of the report.</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-3 block">Do you want to preview the report or modify its design?</label>
-              <div className="space-y-2">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="radio" name="reportOpenMode" value="preview" checked={openMode === 'preview'} onChange={() => setOpenMode('preview')} className="accent-[#5d4037]" />
-                  <span className="text-sm text-gray-700">Preview the report</span>
-                </label>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input type="radio" name="reportOpenMode" value="modify" checked={openMode === 'modify'} onChange={() => setOpenMode('modify')} className="accent-[#5d4037]" />
-                  <span className="text-sm text-gray-700">Modify the report's design</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 border border-gray-200 rounded p-3 text-xs text-gray-600 space-y-0.5">
-              <div><strong>Fields:</strong> {selectedFields.length} from {currentTable?.name || '—'}</div>
-              {groupFields.length > 0 && <div><strong>Grouping:</strong> {groupFields.join(' → ')}</div>}
-              {sortRows.filter(r => r.fieldName).length > 0 && (
-                <div><strong>Sort:</strong> {sortRows.filter(r => r.fieldName).map(r => `${r.fieldName} (${r.dir})`).join(', ')}</div>
-              )}
-              <div><strong>Layout:</strong> {REPORT_LAYOUTS.find(l => l.id === layout)?.label} · {orientation}</div>
-            </div>
-          </div>
-        )}
-
-        <DialogFooter className="gap-2 border-t pt-4 mt-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          {step > 1 && (
-            <Button variant="outline" onClick={() => setStep(s => s - 1)}>
-              <ChevronLeft size={16} className="mr-1" /> Back
-            </Button>
+            </>
           )}
-          {step < TOTAL_STEPS ? (
-            <Button disabled={step === 1 && !canNext1} onClick={() => setStep(s => s + 1)} className="bg-[#5d4037] hover:bg-[#4e342e]">
-              Next <ChevronRight size={16} className="ml-1" />
-            </Button>
-          ) : (
-            <Button onClick={handleFinish} disabled={!selectedTableId} className="bg-[#5d4037] hover:bg-[#4e342e]">
-              <Check size={16} className="mr-1" /> Finish
-            </Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-gray-400 bg-[#f0f0f0] px-3 py-2 flex items-center justify-end gap-2">
+          <WizBtn onClick={() => onOpenChange(false)}>Cancel</WizBtn>
+          <WizBtn onClick={() => setStep(s => s - 1)} disabled={step === 1}>&lt; Back</WizBtn>
+          <WizBtn onClick={() => setStep(s => s + 1)} disabled={step === TOTAL_STEPS || (step === 1 && !canNext1)} primary={step < TOTAL_STEPS}>Next &gt;</WizBtn>
+          <WizBtn onClick={handleFinish} disabled={!selectedTableId || selectedFields.length === 0} primary={step === TOTAL_STEPS}>Finish</WizBtn>
+        </div>
+      </div>
+    </div>
   );
 }
