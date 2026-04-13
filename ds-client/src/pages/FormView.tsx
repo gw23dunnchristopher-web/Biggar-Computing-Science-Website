@@ -20,7 +20,6 @@ import { AccessDesignCanvas } from '@/components/ui/access-design-canvas';
 import type { DesignFieldDef, DesignImageDef, DesignLabelDef, DesignCanvasHandle } from '@/components/ui/access-design-canvas';
 import { parseLookupConfig } from '@/components/ui/design-grid';
 import {
-  LayoutTemplate,
   ChevronFirst, ChevronLast, ChevronLeft, ChevronRight,
   Plus, Trash2, Save, X,
 } from 'lucide-react';
@@ -37,6 +36,8 @@ import {
   DsRptTabControlIcon, DsRptEdgeBrowserIcon,
   DsRptLogoIcon, DsRptTitleIcon, DsRptDateAndTimeIcon,
   DsRptAddExistingFieldsIcon, DsRptPropertySheetIcon, DsRptTabOrderIcon,
+  DsRptChartSettingsIcon,
+  DsFrmFormViewIcon, DsFrmNavigationIcon, DsFrmDatasheetIcon,
 } from '@/components/ui/ds-icons';
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
@@ -315,10 +316,6 @@ export function FormView({
         name: 'Form Design',
         content: (
           <>
-            <RibbonGroup name="Views">
-              <RibbonButton icon={<LayoutTemplate size={22} />} label="Form View" onClick={() => setView('form')} />
-              <RibbonButton icon={<DsRptLayoutViewIcon />} label="Layout View" onClick={() => setView('form')} />
-            </RibbonGroup>
             <RibbonGroup name="Themes">
               <RibbonButton icon={<DsRptThemesIcon />} label="Themes" onClick={noop} />
               <RibbonButton icon={<DsRptColorsIcon />} label="Colors" onClick={noop} />
@@ -326,27 +323,28 @@ export function FormView({
             </RibbonGroup>
             <RibbonGroup name="Controls">
               <RibbonButton icon={<DsRptSelectIcon />} label="Select" onClick={noop} />
-              <RibbonButton icon={<DsRptLabelIcon />} label="Label" onClick={() => canvasRef.current?.addLabel()} />
               <RibbonButton icon={<DsRptTextBoxIcon />} label="Text Box" onClick={() => canvasRef.current?.addTextBox()} />
+              <RibbonButton icon={<DsRptLabelIcon />} label="Label" onClick={() => canvasRef.current?.addLabel()} />
               <RibbonButton icon={<DsRptButtonIcon />} label="Button" onClick={noop} />
+              <RibbonButton icon={<DsRptComboBoxIcon />} label="Combo Box" onClick={noop} />
+              <RibbonButton icon={<DsRptListBoxIcon />} label="List Box" onClick={noop} />
+              <RibbonButton icon={<DsRptCheckBoxIcon />} label="Check Box" onClick={() => canvasRef.current?.addCheckBox()} />
+              <RibbonButton icon={<DsRptOptionButtonIcon />} label="Option Button" onClick={noop} />
+              <RibbonButton icon={<DsRptToggleButtonIcon />} label="Toggle Button" onClick={noop} />
+              <RibbonButton icon={<DsRptTabControlIcon />} label="Tab Control" onClick={noop} />
+              <RibbonButton icon={<DsRptSubFormSubReportIcon />} label="Subform" onClick={noop} />
               <RibbonButton icon={<DsRptInsertImageIcon />} label="Image" onClick={() => canvasRef.current?.addImage()} />
               <RibbonButton icon={<DsRptAttachmentIcon />} label="Attachment" onClick={noop} />
               <RibbonButton icon={<DsRptLinkIcon />} label="Hyperlink" onClick={noop} />
               <RibbonButton icon={<DsRptLineIcon />} label="Line" onClick={() => canvasRef.current?.addLine()} />
               <RibbonButton icon={<DsRptRectangleIcon />} label="Rectangle" onClick={() => canvasRef.current?.addRectangle()} />
-              <RibbonButton icon={<DsRptCheckBoxIcon />} label="Check Box" onClick={() => canvasRef.current?.addCheckBox()} />
-              <RibbonButton icon={<DsRptOptionButtonIcon />} label="Option Button" onClick={noop} />
-              <RibbonButton icon={<DsRptToggleButtonIcon />} label="Toggle Button" onClick={noop} />
-              <RibbonButton icon={<DsRptComboBoxIcon />} label="Combo Box" onClick={noop} />
-              <RibbonButton icon={<DsRptListBoxIcon />} label="List Box" onClick={noop} />
-              <RibbonButton icon={<DsRptSubFormSubReportIcon />} label="Subform" onClick={noop} />
               <RibbonButton icon={<DsRptInsertModernChartIcon />} label="Chart" onClick={noop} />
+              <RibbonButton icon={<DsRptEdgeBrowserIcon />} label="Web Browser" onClick={noop} />
+              <RibbonButton icon={<DsFrmNavigationIcon />} label="Navigation" onClick={noop} />
               <RibbonButton icon={<DsRptInsertPageBreakIcon />} label="Page Break" onClick={() => canvasRef.current?.addPageBreak()} />
               <RibbonButton icon={<DsRptOptionGroupIcon />} label="Option Group" onClick={noop} />
               <RibbonButton icon={<DsRptBoundObjectFrameIcon />} label="Bound Frame" onClick={noop} />
               <RibbonButton icon={<DsRptUnboundObjectFrameIcon />} label="Unbound Frame" onClick={noop} />
-              <RibbonButton icon={<DsRptTabControlIcon />} label="Tab Control" onClick={noop} />
-              <RibbonButton icon={<DsRptEdgeBrowserIcon />} label="Web Browser" onClick={noop} />
             </RibbonGroup>
             <RibbonGroup name="Header / Footer">
               <RibbonButton icon={<DsRptLogoIcon />} label="Logo" onClick={noop} />
@@ -357,6 +355,7 @@ export function FormView({
               <RibbonButton icon={<DsRptAddExistingFieldsIcon />} label="Existing Fields" onClick={noop} />
               <RibbonButton icon={<DsRptPropertySheetIcon />} label="Property Sheet" onClick={() => canvasRef.current?.togglePropertySheet()} />
               <RibbonButton icon={<DsRptTabOrderIcon />} label="Tab Order" onClick={noop} />
+              <RibbonButton icon={<DsRptChartSettingsIcon />} label="Chart Settings" onClick={noop} />
             </RibbonGroup>
           </>
         )
@@ -371,10 +370,11 @@ export function FormView({
       pinnedContent={
         <RibbonGroup name="Views">
           <RibbonDropdownButton
-            icon={view === 'form' ? <LayoutTemplate size={40} /> : <DesignViewIcon size={40} />}
+            icon={view === 'form' ? <DsFrmFormViewIcon size={40} /> : <DesignViewIcon size={40} />}
             label="View"
           >
-            <RibbonButton icon={<LayoutTemplate size={16} />} label="Form View" active={view === 'form'} onClick={() => setView('form')} />
+            <RibbonButton icon={<DsFrmFormViewIcon size={16} />} label="Form View" active={view === 'form'} onClick={() => setView('form')} />
+            <RibbonButton icon={<DsFrmDatasheetIcon size={16} />} label="Datasheet View" active={false} onClick={() => setView('form')} />
             <RibbonButton icon={<DsRptLayoutViewIcon size={16} />} label="Layout View" active={false} onClick={() => setView('form')} />
             <RibbonButton icon={<DesignViewIcon size={16} />} label="Design View" active={view === 'design'} onClick={() => setView('design')} />
           </RibbonDropdownButton>

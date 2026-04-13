@@ -1,0 +1,126 @@
+🧱 1. DESIGN TAB
+Controls Group
+Select — Allows you to select controls on the form.
+
+Text Box — Inserts a text box for entering or displaying data.
+
+Label — Adds a label for headings or descriptions.
+
+Button — Adds a command button (e.g., save, open form).
+
+Combo Box — Adds a dropdown list.
+
+List Box — Adds a list of selectable items.
+
+Check Box — Adds a tick box.
+
+Option Button — Adds a radio button.
+
+Toggle Button — Adds a switch-style button.
+
+Tab Control — Adds tabbed pages to the form.
+
+Subform/Subreport — Inserts another form or report inside the form.
+
+Image — Inserts an image.
+
+Attachment — Allows file attachments.
+
+Hyperlink — Adds a clickable link.
+
+Line — Draws a straight line.
+
+Rectangle — Draws a rectangle shape.
+
+Chart — Inserts a chart control.
+
+Web Browser Control — Embeds a web browser window.
+
+Navigation Control — Adds navigation buttons/pages.
+
+Header/Footer Group
+Form Header/Footer — Adds or removes the header and footer sections.
+
+Page Header/Footer — Adds or removes page headers/footers (rarely used in forms).
+
+Tools Group
+Add Existing Fields — Opens the field list to drag fields onto the form.
+
+Property Sheet — Opens the property sheet for detailed settings.
+
+Field List — Shows available fields from the table or query.
+
+Tab Order — Sets the order the cursor moves through controls.
+
+Align — Aligns selected controls.
+
+Size/Space — Adjusts spacing and size of controls.
+
+Bring to Front / Send to Back — Changes layering of controls.
+
+Anchoring — Controls how objects resize with the form.
+
+🧩 2. ARRANGE TAB
+Table Group
+Stacked Layout — Groups controls vertically.
+
+Tabular Layout — Groups controls horizontally.
+
+Remove Layout — Ungroups controls.
+
+Control Alignment & Positioning
+Align Left/Right/Top/Bottom — Aligns selected controls.
+
+Size to Fit / Size to Widest / Size to Tallest — Adjusts control sizes.
+
+Equal Horizontal / Vertical Spacing — Makes spacing consistent.
+
+Increase/Decrease Horizontal/Vertical Spacing — Adjusts gaps.
+
+Move Up/Down/Left/Right — Nudges controls.
+
+Merge/Split
+Merge Cells — Combines layout cells.
+
+Split Horizontally/Vertically — Splits layout cells.
+
+🎛️ 3. FORMAT TAB
+Control Formatting
+Font Type / Size / Colour — Changes text appearance.
+
+Bold / Italic / Underline — Text styling.
+
+Background Colour — Fills the control background.
+
+Border Style / Colour / Width — Edits control borders.
+
+Quick Styles — Applies preset formatting.
+
+Control Behaviour
+Anchoring — Controls how objects resize with the form.
+
+Padding — Adjusts internal spacing inside controls.
+
+🧰 4. PROPERTY SHEET ICONS (Right‑hand panel)
+These aren’t ribbon icons but are essential:
+
+Format Tab — Appearance settings (colours, fonts, borders).
+
+Data Tab — Control source, default value, validation.
+
+Event Tab — Macros and event triggers (On Click, On Load).
+
+Other Tab — Misc settings (name, description).
+
+All Tab — Shows every property at once.
+
+🧪 5. FORM DESIGN TOOLS (Bottom toolbar)
+View — Switch between Form View, Layout View, and Design View.
+
+Property Sheet — Toggle visibility.
+
+Field List — Toggle visibility.
+
+Ruler/Grid — Show/hide layout guides.
+
+Zoom — Change zoom level.

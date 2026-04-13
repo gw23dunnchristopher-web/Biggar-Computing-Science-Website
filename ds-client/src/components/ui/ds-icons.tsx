@@ -136,3 +136,9 @@ export const DsRptChartSettingsIcon      = icon('chartSettings.svg');
 export const DsRptReportViewIcon         = icon('reportView.svg');
 export const DsRptPrintPreviewIcon       = icon('printPreview.svg');
 export const DsRptLayoutViewIcon         = icon('layoutView.svg');
+
+export const DsFrmFormViewIcon           = icon('formsForm.svg');
+export const DsFrmFormDesignIcon         = icon('formsFormDesign.svg');
+export const DsFrmNavigationIcon         = icon('formsNavigation.svg');
+export const DsFrmDatasheetIcon          = icon('Datasheet.svg');
+export const DsFrmDesignIcon             = icon('Design.svg');
