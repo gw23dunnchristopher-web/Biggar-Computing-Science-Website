@@ -63,6 +63,12 @@ export function Ribbon({
   const [localActive, setLocalActive] = useState(defaultActive);
   const active = activeTab ?? localActive;
 
+  useEffect(() => {
+    if (contextSection?.defaultTab) {
+      setLocalActive(contextSection.defaultTab);
+    }
+  }, [contextSection?.defaultTab]);
+
   const handleTabClick = (name: string) => {
     setLocalActive(name);
     onTabChange?.(name);
