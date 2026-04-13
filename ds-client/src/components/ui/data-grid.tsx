@@ -3,7 +3,7 @@ import { TableWithFields, Record as DbRecord, useCreateRecord, useUpdateRecord, 
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowUp, ArrowDown, Pencil, ChevronDown, Paperclip, ExternalLink, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { parseLookupConfig, parseCalculatedExpr, type LookupConfig } from '@/components/ui/design-grid';
+import { parseLookupConfig, parseCalculatedExpr, parseValidation, type LookupConfig } from '@/components/ui/design-grid';
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -45,6 +45,70 @@ type FocusedCell = { rowIdx: number; colIdx: number } | null;
 
 const TOTAL_FN_OPTIONS = ['None', 'Count', 'Sum', 'Average', 'Minimum', 'Maximum'] as const;
 type TotalFn = typeof TOTAL_FN_OPTIONS[number];
+
+export function evaluateValidationRule(rule: string, value: any, fieldName: string, recordData: Record<string, any>): boolean {
+  if (!rule) return true;
+  const trimmed = rule.trim();
+  if (!trimmed) return true;
+
+  const lenMatch = trimmed.match(/^Len\(\[([^\]]+)\]\)\s*(=|>=|<=|>|<)\s*(\d+)$/i);
+  if (lenMatch) {
+    const refField = lenMatch[1];
+    const op = lenMatch[2];
+    const target = parseInt(lenMatch[3], 10);
+    const refVal = refField === fieldName ? value : recordData[refField];
+    const len = String(refVal ?? '').length;
+    if (op === '=') return len === target;
+    if (op === '>=') return len >= target;
+    if (op === '<=') return len <= target;
+    if (op === '>') return len > target;
+    if (op === '<') return len < target;
+    return true;
+  }
+
+  const betweenMatch = trimmed.match(/^Between\s+(-?\d+(?:\.\d+)?)\s+And\s+(-?\d+(?:\.\d+)?)$/i);
+  if (betweenMatch) {
+    const low = parseFloat(betweenMatch[1]);
+    const high = parseFloat(betweenMatch[2]);
+    const num = Number(value);
+    if (isNaN(num)) return false;
+    return num >= low && num <= high;
+  }
+
+  const rangeMatch = trimmed.match(/^(>=|<=|>|<|=)\s*(-?\d+(?:\.\d+)?)$/);
+  if (rangeMatch) {
+    const op = rangeMatch[1];
+    const target = parseFloat(rangeMatch[2]);
+    const num = Number(value);
+    if (isNaN(num)) return false;
+    if (op === '>=') return num >= target;
+    if (op === '<=') return num <= target;
+    if (op === '>') return num > target;
+    if (op === '<') return num < target;
+    if (op === '=') return num === target;
+  }
+
+  return true;
+}
+
+function validateField(
+  field: { name: string; fieldType: string; isRequired: boolean; description: string | null },
+  value: any,
+  recordData: Record<string, any>
+): string | null {
+  if (field.isRequired && (value === null || value === undefined || value === '')) {
+    return `${field.name} is required.`;
+  }
+
+  const { rule, text } = parseValidation(field.description);
+  if (rule && value !== null && value !== undefined && value !== '') {
+    if (!evaluateValidationRule(rule, value, field.name, recordData)) {
+      return text || `Validation failed for ${field.name}: ${rule}`;
+    }
+  }
+
+  return null;
+}
 
 const DEFAULT_COL_WIDTHS: Record<string, number> = {
   autonumber:  75,
@@ -323,6 +387,17 @@ export function DataGrid({
     const originalVal = record.data[fieldName];
     const coerced = value === '' ? null : value;
     if (originalVal === coerced) { setEditingCell(null); return; }
+
+    const field = fields.find(f => f.name === fieldName);
+    if (field) {
+      const updatedData = { ...record.data, [fieldName]: coerced };
+      const error = validateField(field as any, coerced, updatedData);
+      if (error) {
+        toast({ title: error, variant: "destructive" });
+        return;
+      }
+    }
+
     try {
       await updateRecord.mutateAsync({
         databaseId,
@@ -354,6 +429,17 @@ export function DataGrid({
     if (isCreatingRef.current) return;
     const hasData = Object.values(newRowData).some(v => v !== '' && v !== null && v !== undefined);
     if (!hasData) return;
+
+    for (const f of fields) {
+      const val = newRowData[f.name] ?? null;
+      const coerced = val === '' ? null : val;
+      const error = validateField(f as any, coerced, newRowData);
+      if (error) {
+        toast({ title: error, variant: "destructive" });
+        return;
+      }
+    }
+
     isCreatingRef.current = true;
     try {
       await createRecord.mutateAsync({ databaseId, tableId: table.id, data: { data: newRowData } });
@@ -364,7 +450,7 @@ export function DataGrid({
     } finally {
       isCreatingRef.current = false;
     }
-  }, [newRowData, databaseId, table.id]);
+  }, [newRowData, databaseId, table.id, fields]);
 
   const renderCellValue = (type: string, value: any, fieldName?: string, record?: DbRecord) => {
     if (type === 'boolean') return null; // rendered as checkbox

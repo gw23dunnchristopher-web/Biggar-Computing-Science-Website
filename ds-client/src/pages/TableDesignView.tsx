@@ -5,7 +5,7 @@ import { Shell } from '@/components/layout/Shell';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonViewSplitButton } from '@/components/layout/Ribbon';
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
-import { DesignGrid, DesignGridHandle } from '@/components/ui/design-grid';
+import { DesignGrid, DesignGridHandle, parseValidation } from '@/components/ui/design-grid';
 import { Save, AlertTriangle, RotateCcw } from 'lucide-react';
 import {
   DsToolsPrimaryKeyIcon, DsToolsTestValidationRulesIcon, DsToolsModifyLookupsIcon,
@@ -282,6 +282,40 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
     toast({ title: `"${fields[selectedFieldIndex]?.name || 'Field'}" set as Primary Key` });
   };
 
+  const handleTestValidationRules = async () => {
+    try {
+      const data = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}/records`);
+      const recs: { id: number; data: Record<string, any> }[] = data.records ?? data ?? [];
+      const fieldsWithValidation = fields.filter(f => {
+        const v = parseValidation(f.description ?? null);
+        return v.rule || f.isRequired;
+      });
+      if (fieldsWithValidation.length === 0) {
+        toast({ title: 'No validation rules are set for any field in this table.' });
+        return;
+      }
+      let violations = 0;
+      for (const rec of recs) {
+        for (const f of fieldsWithValidation) {
+          const val = rec.data[f.name] ?? null;
+          if (f.isRequired && (val === null || val === undefined || val === '')) { violations++; continue; }
+          const { rule } = parseValidation(f.description ?? null);
+          if (rule && val !== null && val !== undefined && val !== '') {
+            const { evaluateValidationRule } = await import('@/components/ui/data-grid');
+            if (!evaluateValidationRule(rule, val, f.name, rec.data)) violations++;
+          }
+        }
+      }
+      if (violations === 0) {
+        toast({ title: 'All existing data is valid.' });
+      } else {
+        toast({ title: `${violations} record value${violations > 1 ? 's' : ''} failed validation.`, variant: 'destructive' });
+      }
+    } catch {
+      toast({ title: 'Could not test validation rules.', variant: 'destructive' });
+    }
+  };
+
   const commonTabProps = {
     onCreateTable: onCreateTable || (() => {}),
     onCreateQuery: onCreateQuery || (() => {}),
@@ -321,7 +355,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
                 disabled={selectedFieldIndex === null || fields[selectedFieldIndex]?.isPrimaryKey}
               />
               <RibbonButton icon={<DsQuerySetupBuilderIcon size={40} />} label="Builder" disabled />
-              <RibbonButton icon={<DsToolsTestValidationRulesIcon size={40} />} label="Test Validation Rules" disabled wide />
+              <RibbonButton icon={<DsToolsTestValidationRulesIcon size={40} />} label="Test Validation Rules" onClick={handleTestValidationRules} wide />
             </RibbonGroup>
             <RibbonGroup name="">
               <div className="flex flex-col justify-around h-full py-0.5">
