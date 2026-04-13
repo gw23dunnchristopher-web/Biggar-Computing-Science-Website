@@ -44,6 +44,11 @@ import {
 } from '@/components/ui/ds-icons';
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
+import {
+  ThemePickerModal, ColorPickerModal, FontPickerModal,
+  getDefaultTheme,
+} from '@/components/ui/theme-modals';
+import type { DatabaseTheme, ThemeColors, ThemeFonts } from '@/components/ui/theme-modals';
 
 
 async function apiFetch(path: string, opts?: RequestInit) {
@@ -126,6 +131,10 @@ export function FormView({
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [isDesignSaving, setIsDesignSaving] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [dbTheme, setDbTheme] = useState<DatabaseTheme | null>(null);
+  const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showColorModal, setShowColorModal] = useState(false);
+  const [showFontModal, setShowFontModal] = useState(false);
 
   const loadForm = useCallback(async () => {
     const f = await apiFetch(`/api/ds/databases/${databaseId}/forms/${formId}`);
@@ -150,6 +159,32 @@ export function FormView({
   useEffect(() => {
     if (definition?.tableId) loadRecords(definition).catch(() => {});
   }, [definition, loadRecords]);
+
+  useEffect(() => {
+    apiFetch(`/api/ds/databases/${databaseId}/theme`).then(t => {
+      if (t) setDbTheme(t as DatabaseTheme);
+    }).catch(() => {});
+  }, [databaseId]);
+
+  const saveTheme = async (theme: DatabaseTheme) => {
+    setDbTheme(theme);
+    try {
+      await apiFetch(`/api/ds/databases/${databaseId}/theme`, {
+        method: 'PUT', body: JSON.stringify(theme),
+      });
+      toast({ title: `Theme updated to "${theme.themeName}"` });
+    } catch { toast({ title: 'Failed to save theme', variant: 'destructive' }); }
+  };
+
+  const handleThemeApply = (theme: DatabaseTheme) => saveTheme(theme);
+  const handleColorsApply = (colors: ThemeColors) => {
+    const cur = dbTheme || getDefaultTheme();
+    saveTheme({ ...cur, colors });
+  };
+  const handleFontsApply = (fonts: ThemeFonts) => {
+    const cur = dbTheme || getDefaultTheme();
+    saveTheme({ ...cur, fonts });
+  };
 
   const currentRecord = records[cursor] ?? null;
 
@@ -342,10 +377,10 @@ export function FormView({
           <>
             <RibbonGroup name="Themes">
               <div className="flex items-start gap-0.5">
-                <RibbonButton icon={<DsRptThemesIcon />} label="Themes" onClick={noop} />
+                <RibbonButton icon={<DsRptThemesIcon />} label="Themes" onClick={() => setShowThemeModal(true)} />
                 <div className="flex flex-col gap-0.5 pt-1">
-                  {smallBtn(<DsRptColorsIcon size={14} />, 'Colors', noop)}
-                  {smallBtn(<DsRptFontsIcon size={14} />, 'Fonts', noop)}
+                  {smallBtn(<DsRptColorsIcon size={14} />, 'Colors', () => setShowColorModal(true))}
+                  {smallBtn(<DsRptFontsIcon size={14} />, 'Fonts', () => setShowFontModal(true))}
                 </div>
               </div>
             </RibbonGroup>
@@ -467,17 +502,21 @@ export function FormView({
     const h = fd.height ?? 28;
     const isRequired = tf?.isRequired;
 
+    const themeColors = dbTheme?.colors;
+    const themeFonts = dbTheme?.fonts;
     const baseStyle: React.CSSProperties = {
       fontWeight: cs?.bold ? 'bold' : 'normal',
       fontStyle: cs?.italic ? 'italic' : 'normal',
       fontSize: cs?.fontSize ?? 13,
-      color: cs?.color,
-      backgroundColor: cs?.bgColor,
-      borderColor: cs?.borderColor,
+      color: cs?.color ?? themeColors?.text,
+      backgroundColor: cs?.bgColor ?? themeColors?.controlBg,
+      borderColor: cs?.borderColor ?? themeColors?.controlBorder,
+      fontFamily: themeFonts?.body,
       height: h,
       ...(w ? { width: w } : {}),
     };
-    const cls = `rounded border px-2 focus:outline-none focus:ring-1 focus:ring-[#2e7d32] focus:border-[#2e7d32]${isRequired && (val === '' || val === null || val === undefined) ? ' border-orange-300' : ''}`;
+    const ringColor = themeColors?.primary || '#2e7d32';
+    const cls = `rounded border px-2 focus:outline-none focus:ring-1${isRequired && (val === '' || val === null || val === undefined) ? ' border-orange-300' : ''}`;
     const flexOrWidth = w ? {} : { flex: 1 as any };
 
     // ── Read-only: AutoNumber / Primary Key ──────────────────────────
@@ -669,9 +708,9 @@ export function FormView({
         {view === 'form' && (
           <div className="flex flex-col h-full bg-[#f3f2f1]">
             {/* Header */}
-            <div className="bg-[#2e7d32] text-white px-4 py-2 flex items-center gap-2 flex-none">
+            <div style={{ backgroundColor: dbTheme?.colors?.primary || '#2e7d32', color: dbTheme?.colors?.headerText || '#ffffff' }} className="px-4 py-2 flex items-center gap-2 flex-none">
               <LayoutTemplate size={16} />
-              <span className="font-semibold text-sm">{formMeta?.name}</span>
+              <span className="font-semibold text-sm" style={{ fontFamily: dbTheme?.fonts?.heading }}>{formMeta?.name}</span>
               {isDirty && <span className="ml-2 text-xs bg-white/20 rounded px-2 py-0.5">Unsaved changes</span>}
             </div>
 
@@ -691,7 +730,7 @@ export function FormView({
                       ...formImages.map(i => i.y + i.height + 40),
                       ...formFreeLabels.map(l => l.y + l.height + 40)
                     ),
-                    backgroundColor: formBgColor,
+                    backgroundColor: dbTheme?.colors?.background || formBgColor,
                   }}
                 >
                   {/* Free labels from design */}
@@ -700,7 +739,8 @@ export function FormView({
                       position: 'absolute', left: fl.x, top: fl.y, width: fl.width, height: fl.height,
                       display: 'flex', alignItems: 'center',
                       fontSize: fl.style?.fontSize ?? 13,
-                      color: fl.style?.color ?? '#333',
+                      color: fl.style?.color ?? dbTheme?.colors?.text ?? '#333',
+                      fontFamily: dbTheme?.fonts?.body,
                       backgroundColor: fl.style?.bgColor ?? 'transparent',
                       border: fl.style?.borderColor ? `1px solid ${fl.style.borderColor}` : 'none',
                       fontWeight: fl.style?.bold ? 'bold' : 'normal',
@@ -738,7 +778,8 @@ export function FormView({
                           display: 'flex', alignItems: 'center',
                           justifyContent: 'flex-end', paddingRight: 4, boxSizing: 'border-box',
                           fontWeight: ls.bold ? 'bold' : 'normal', fontStyle: ls.italic ? 'italic' : 'normal',
-                          fontSize: ls.fontSize ?? 13, color: ls.color ?? '#333',
+                          fontSize: ls.fontSize ?? 13, color: ls.color ?? dbTheme?.colors?.text ?? '#333',
+                          fontFamily: ls.fontFamily ?? dbTheme?.fonts?.body,
                           backgroundColor: ls.bgColor ?? 'transparent',
                         }}>
                           {fd.label}:
@@ -753,8 +794,8 @@ export function FormView({
                 </div>
               ) : (
                 /* ── Vertical list fallback (no positions set yet) ── */
-                <div className="bg-white rounded shadow-md w-full max-w-xl border border-gray-200">
-                  <div className="bg-[#e8f5e9] border-b border-gray-200 px-4 py-2 text-sm font-medium text-[#2e7d32] rounded-t">
+                <div className="rounded shadow-md w-full max-w-xl border border-gray-200" style={{ backgroundColor: dbTheme?.colors?.background || '#ffffff' }}>
+                  <div className="border-b border-gray-200 px-4 py-2 text-sm font-medium rounded-t" style={{ backgroundColor: dbTheme?.colors?.primary ? `${dbTheme.colors.primary}20` : '#e8f5e9', color: dbTheme?.colors?.primary || '#2e7d32', fontFamily: dbTheme?.fonts?.heading }}>
                     {definition.tableName}
                   </div>
                   <div className="p-5 space-y-3">
@@ -826,6 +867,10 @@ export function FormView({
           confirmLabel="Delete Record"
           onConfirm={doDeleteRecord}
         />
+
+        <ThemePickerModal open={showThemeModal} onOpenChange={setShowThemeModal} currentTheme={dbTheme} onApply={handleThemeApply} />
+        <ColorPickerModal open={showColorModal} onOpenChange={setShowColorModal} currentTheme={dbTheme} onApply={handleColorsApply} />
+        <FontPickerModal open={showFontModal} onOpenChange={setShowFontModal} currentTheme={dbTheme} onApply={handleFontsApply} />
       </Shell>
     </>
   );

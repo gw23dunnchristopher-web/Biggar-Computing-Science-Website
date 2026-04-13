@@ -39,6 +39,11 @@ import {
 } from '@/components/ui/ds-icons';
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
+import {
+  ThemePickerModal, ColorPickerModal, FontPickerModal,
+  getDefaultTheme,
+} from '@/components/ui/theme-modals';
+import type { DatabaseTheme, ThemeColors, ThemeFonts } from '@/components/ui/theme-modals';
 
 
 async function apiFetch(path: string, opts?: RequestInit) {
@@ -131,6 +136,10 @@ export function ReportView({
   const [definition, setDefinition] = useState<ReportDefinition | null>(null);
   const [records, setRecords] = useState<any[]>([]);
   const [isDesignSaving, setIsDesignSaving] = useState(false);
+  const [dbTheme, setDbTheme] = useState<DatabaseTheme | null>(null);
+  const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showColorModal, setShowColorModal] = useState(false);
+  const [showFontModal, setShowFontModal] = useState(false);
 
   const loadReport = useCallback(async () => {
     const r = await apiFetch(`/api/ds/databases/${databaseId}/reports/${reportId}`);
@@ -165,6 +174,32 @@ export function ReportView({
       loadRecords(definition).catch(() => {});
     }
   }, [definition, loadRecords]);
+
+  useEffect(() => {
+    apiFetch(`/api/ds/databases/${databaseId}/theme`).then(t => {
+      if (t) setDbTheme(t as DatabaseTheme);
+    }).catch(() => {});
+  }, [databaseId]);
+
+  const saveTheme = async (theme: DatabaseTheme) => {
+    setDbTheme(theme);
+    try {
+      await apiFetch(`/api/ds/databases/${databaseId}/theme`, {
+        method: 'PUT', body: JSON.stringify(theme),
+      });
+      toast({ title: `Theme updated to "${theme.themeName}"` });
+    } catch { toast({ title: 'Failed to save theme', variant: 'destructive' }); }
+  };
+
+  const handleThemeApply = (theme: DatabaseTheme) => saveTheme(theme);
+  const handleColorsApply = (colors: ThemeColors) => {
+    const cur = dbTheme || getDefaultTheme();
+    saveTheme({ ...cur, colors });
+  };
+  const handleFontsApply = (fonts: ThemeFonts) => {
+    const cur = dbTheme || getDefaultTheme();
+    saveTheme({ ...cur, fonts });
+  };
 
   const handlePrint = () => {
     window.print();
@@ -272,10 +307,10 @@ export function ReportView({
     <>
       <RibbonGroup name="Themes">
         <div className="flex items-start gap-0.5">
-          <RibbonButton icon={<DsRptThemesIcon />} label="Themes" onClick={noop} />
+          <RibbonButton icon={<DsRptThemesIcon />} label="Themes" onClick={() => setShowThemeModal(true)} />
           <div className="flex flex-col gap-0.5 pt-1">
-            {smallBtn(<DsRptColorsIcon size={14} />, 'Colors', noop)}
-            {smallBtn(<DsRptFontsIcon size={14} />, 'Fonts', noop)}
+            {smallBtn(<DsRptColorsIcon size={14} />, 'Colors', () => setShowColorModal(true))}
+            {smallBtn(<DsRptFontsIcon size={14} />, 'Fonts', () => setShowFontModal(true))}
           </div>
         </div>
       </RibbonGroup>
@@ -457,7 +492,8 @@ export function ReportView({
           <div key={fl.id} style={{
             position: 'absolute', left: fl.x, top: fl.y, width: fl.width, height: fl.height,
             display: 'flex', alignItems: 'center',
-            fontSize: fl.style?.fontSize ?? 12, color: fl.style?.color ?? '#333',
+            fontSize: fl.style?.fontSize ?? 12, color: fl.style?.color ?? dbTheme?.colors?.text ?? '#333',
+            fontFamily: dbTheme?.fonts?.body,
             backgroundColor: fl.style?.bgColor ?? 'transparent',
             border: fl.style?.borderColor ? `1px solid ${fl.style.borderColor}` : 'none',
             fontWeight: fl.style?.bold ? 'bold' : 'normal',
@@ -487,7 +523,8 @@ export function ReportView({
                 display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
                 paddingRight: 4, boxSizing: 'border-box',
                 fontWeight: ls.bold ? 'bold' : 'normal', fontStyle: ls.italic ? 'italic' : 'normal',
-                fontSize: ls.fontSize ?? 12, color: ls.color ?? '#333',
+                fontSize: ls.fontSize ?? 12, color: ls.color ?? dbTheme?.colors?.text ?? '#333',
+                fontFamily: dbTheme?.fonts?.body,
                 backgroundColor: ls.bgColor ?? 'transparent',
               }}>
                 {fd.label}
@@ -495,7 +532,8 @@ export function ReportView({
               <div style={{
                 position: 'absolute', left: cx, top: cy, width: cw, height: ch,
                 display: 'flex', alignItems: 'center',
-                fontSize: cs.fontSize ?? 12, color: cs.color ?? '#000',
+                fontSize: cs.fontSize ?? 12, color: cs.color ?? dbTheme?.colors?.text ?? '#000',
+                fontFamily: dbTheme?.fonts?.body,
                 backgroundColor: cs.bgColor ?? 'transparent',
                 border: isLayout ? '1px solid #b0b0b0' : 'none',
                 padding: '0 4px', boxSizing: 'border-box',
@@ -521,7 +559,7 @@ export function ReportView({
           minHeight: visibleFields.length * 24 + 8,
           width: reportWidth,
           borderBottom: '1px solid #e0e0e0',
-          backgroundColor: ri % 2 === 0 ? '#fff' : '#fafaf8',
+          backgroundColor: ri % 2 === 0 ? (dbTheme?.colors?.background || '#fff') : (dbTheme?.colors?.background ? `${dbTheme.colors.background}ee` : '#fafaf8'),
         }}>
           {visibleFields.map((fd, fi) => {
             const y = fi * 24 + 4;
@@ -531,14 +569,16 @@ export function ReportView({
                 <div style={{
                   position: 'absolute', left: 4, top: y, width: 120, height: 22,
                   display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-                  paddingRight: 6, fontSize: 12, color: '#333', fontWeight: 500,
+                  paddingRight: 6, fontSize: 12, color: dbTheme?.colors?.text || '#333', fontWeight: 500,
+                  fontFamily: dbTheme?.fonts?.body,
                 }}>
                   {fd.label}
                 </div>
                 <div style={{
                   position: 'absolute', left: 130, top: y, width: 200, height: 22,
                   display: 'flex', alignItems: 'center',
-                  fontSize: 12, color: '#000',
+                  fontSize: 12, color: dbTheme?.colors?.text || '#000',
+                  fontFamily: dbTheme?.fonts?.body,
                   border: isLayout ? '1px solid #b0b0b0' : 'none',
                   padding: '0 4px', boxSizing: 'border-box',
                   overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
@@ -588,16 +628,16 @@ export function ReportView({
           {hasDesign && hasHeaderContent ? (
             <div className="relative" style={{
               height: headerH, width: reportWidth,
-              backgroundColor: '#d6e4f0',
+              backgroundColor: dbTheme?.colors?.primary ? `${dbTheme.colors.primary}30` : '#d6e4f0',
             }}>
               {renderDesignElements(headerFields, headerLabels, headerImages)}
             </div>
           ) : !hasDesign ? (
             <div style={{
               width: reportWidth, padding: '12px 16px',
-              backgroundColor: '#d6e4f0',
+              backgroundColor: dbTheme?.colors?.primary ? `${dbTheme.colors.primary}30` : '#d6e4f0',
             }}>
-              <div style={{ fontSize: 18, fontWeight: 'bold', fontStyle: 'italic', color: '#333' }}>
+              <div style={{ fontSize: 18, fontWeight: 'bold', fontStyle: 'italic', color: dbTheme?.colors?.text || '#333', fontFamily: dbTheme?.fonts?.heading }}>
                 {titleName}
               </div>
             </div>
@@ -648,9 +688,9 @@ export function ReportView({
       {(view === 'report' || view === 'layout') ? (
         <div className="flex flex-col h-full bg-[#f3f2f1]">
           {view === 'report' && (
-            <div className="bg-[#5d4037] text-white px-4 py-2 flex items-center gap-2 flex-none print:hidden">
+            <div style={{ backgroundColor: dbTheme?.colors?.primary || '#5d4037', color: dbTheme?.colors?.headerText || '#ffffff' }} className="px-4 py-2 flex items-center gap-2 flex-none print:hidden">
               <FileText size={16} />
-              <span className="font-semibold text-sm">{definition.title || reportMeta?.name}</span>
+              <span className="font-semibold text-sm" style={{ fontFamily: dbTheme?.fonts?.heading }}>{definition.title || reportMeta?.name}</span>
               <span className="ml-auto text-xs text-white/60">{processedRecords.length} record{processedRecords.length !== 1 ? 's' : ''}</span>
               <Button onClick={handlePrint} size="sm" variant="ghost" className="text-white hover:bg-white/20 h-7 text-xs">
                 <Printer size={13} className="mr-1" /> Print
@@ -675,6 +715,9 @@ export function ReportView({
           />
         </div>
       )}
+      <ThemePickerModal open={showThemeModal} onOpenChange={setShowThemeModal} currentTheme={dbTheme} onApply={handleThemeApply} />
+      <ColorPickerModal open={showColorModal} onOpenChange={setShowColorModal} currentTheme={dbTheme} onApply={handleColorsApply} />
+      <FontPickerModal open={showFontModal} onOpenChange={setShowFontModal} currentTheme={dbTheme} onApply={handleFontsApply} />
     </Shell>
   );
 }

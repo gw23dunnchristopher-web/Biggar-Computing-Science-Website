@@ -182,6 +182,22 @@ export function registerDsRoutes(app: Express) {
     res.json(tsFmt(d, "createdAt", "updatedAt"));
   });
 
+  app.get("/api/ds/databases/:dbId/theme", async (req, res) => {
+    const id = parseInt(req.params.dbId);
+    const [d] = await db!.select().from(dsDatabases).where(eq(dsDatabases.id, id));
+    if (!d) return res.status(404).json({ error: "Database not found" });
+    res.json(d.theme || null);
+  });
+
+  app.put("/api/ds/databases/:dbId/theme", async (req, res) => {
+    const id = parseInt(req.params.dbId);
+    const theme = req.body;
+    const [d] = await db!.update(dsDatabases).set({ theme, updatedAt: new Date() })
+      .where(eq(dsDatabases.id, id)).returning();
+    if (!d) return res.status(404).json({ error: "Database not found" });
+    res.json(d.theme);
+  });
+
   app.delete("/api/ds/databases/:dbId", async (req, res) => {
     const id = parseInt(req.params.dbId);
     await db!.delete(dsRecords).where(eq(dsRecords.databaseId, id));
