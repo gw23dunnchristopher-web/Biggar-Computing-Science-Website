@@ -576,18 +576,23 @@ export function ReportView({
 
     const titleName = definition.title || reportMeta?.name || 'Report';
 
+    const hasHeaderContent = headerFields.length > 0 || headerLabels.length > 0 || headerImages.length > 0;
+    const detailRows = processedRecords.length > 0
+      ? processedRecords
+      : [{ id: '__empty__', data: {} }];
+
     return (
       <div className="flex-1 overflow-y-auto p-4" ref={printRef}>
         <div style={{ width: reportWidth, margin: '0 auto' }}>
-          {/* Report Header */}
-          {hasDesign && headerH > 0 ? (
+          {/* Report Header — only if the design actually has header content */}
+          {hasDesign && hasHeaderContent ? (
             <div className="relative" style={{
               height: headerH, width: reportWidth,
               backgroundColor: '#d6e4f0',
             }}>
               {renderDesignElements(headerFields, headerLabels, headerImages)}
             </div>
-          ) : (
+          ) : !hasDesign ? (
             <div style={{
               width: reportWidth, padding: '12px 16px',
               backgroundColor: '#d6e4f0',
@@ -596,12 +601,12 @@ export function ReportView({
                 {titleName}
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Detail rows */}
           {visibleFields.length === 0 ? (
             <div className="p-8 text-center text-gray-400 text-sm">No fields visible. Open Design View to configure fields.</div>
-          ) : processedRecords.map((rec, ri) => (
+          ) : detailRows.map((rec, ri) => (
             hasDesign ? (
               <div key={rec.id} className="relative" style={{
                 height: detailH, width: reportWidth,
@@ -622,7 +627,7 @@ export function ReportView({
             }}>
               {renderDesignElements(footerFields, footerLabels, [])}
             </div>
-          ) : (
+          ) : !hasDesign ? (
             <div style={{
               width: reportWidth, padding: '8px 16px',
               borderTop: '1px solid #ccc',
@@ -632,7 +637,7 @@ export function ReportView({
               <span>{today}</span>
               <span>Page 1 of 1</span>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     );
