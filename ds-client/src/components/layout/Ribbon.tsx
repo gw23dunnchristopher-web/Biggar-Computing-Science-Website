@@ -348,6 +348,7 @@ export function RibbonButton({
   active,
   size = 'large',
   title: titleProp,
+  wide = false,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -356,6 +357,7 @@ export function RibbonButton({
   active?: boolean;
   size?: 'large' | 'small';
   title?: string;
+  wide?: boolean;
 }) {
   const ribbonSize = useRibbonSize();
   const inDropdown = useContext(RibbonInDropdownContext);
@@ -403,7 +405,7 @@ export function RibbonButton({
       disabled={disabled}
       onClick={onClick}
       title={titleProp || label}
-      className={`flex flex-col items-center justify-start w-[72px] h-[76px] p-0.5 rounded transition-all duration-150
+      className={`flex flex-col items-center justify-start ${wide ? 'w-[90px]' : 'w-[72px]'} h-[76px] p-0.5 rounded transition-all duration-150
         ${disabled ? 'opacity-35 cursor-not-allowed grayscale' : 'hover:bg-red-50 hover:border-red-200 active:bg-red-100 cursor-pointer'}
         ${active ? 'bg-red-100 border border-red-300' : 'border border-transparent'}
         text-gray-700`}

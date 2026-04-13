@@ -145,15 +145,15 @@ export function DatabaseToolsTabContent({
   return (
     <>
       <RibbonGroup name="Tools">
-        <RibbonButton icon={<DsCompactAndRepairIcon size={32} />} label="Compact and Repair Database" onClick={onCompact} disabled={!onCompact} />
+        <RibbonButton icon={<DsCompactAndRepairIcon size={32} />} label="Compact and Repair Database" onClick={onCompact} disabled={!onCompact} wide />
       </RibbonGroup>
       <RibbonGroup name="Relationships">
         <RibbonButton icon={<DsRelationshipsIcon size={40} />} label="Relationships" onClick={onOpenRelationships} disabled={!onOpenRelationships} />
-        <RibbonButton icon={<DsObjectDependenciesIcon size={32} />} label="Object Dependencies" onClick={onObjectDependencies} disabled={!onObjectDependencies} />
+        <RibbonButton icon={<DsObjectDependenciesIcon size={32} />} label="Object Dependencies" onClick={onObjectDependencies} disabled={!onObjectDependencies} wide />
       </RibbonGroup>
       <RibbonGroup name="Analyse">
-        <RibbonButton icon={<DsAnalyzeDatabaseDocumenterIcon size={32} />} label="Database Documenter" onClick={onDocumenter} disabled={!onDocumenter} />
-        <RibbonButton icon={<DsAnalyzePerformanceIcon size={32} />} label="Analyze Performance" disabled />
+        <RibbonButton icon={<DsAnalyzeDatabaseDocumenterIcon size={32} />} label="Database Documenter" onClick={onDocumenter} disabled={!onDocumenter} wide />
+        <RibbonButton icon={<DsAnalyzePerformanceIcon size={32} />} label="Analyze Performance" disabled wide />
         <RibbonButton icon={<DsAnalyzeTableIcon size={32} />} label="Analyse Table" onClick={onAnalyse} disabled={!onAnalyse} />
       </RibbonGroup>
       <RibbonGroup name="Database Settings">
