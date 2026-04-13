@@ -222,24 +222,35 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
     }
   }, [table]);
 
-  const handleSave = async () => {
-    if (!tableName.trim()) return toast({ title: 'Table name required', variant: 'destructive' });
-    if (fields.length === 0) return toast({ title: 'At least one field required', variant: 'destructive' });
+  const doSave = async (quiet = false): Promise<boolean> => {
+    if (!tableName.trim()) { toast({ title: 'Table name required', variant: 'destructive' }); return false; }
+    if (fields.length === 0) { toast({ title: 'At least one field required', variant: 'destructive' }); return false; }
     const trimmedNames = fields.map(f => f.name.trim().toLowerCase()).filter(n => n);
     if (trimmedNames.length !== new Set(trimmedNames).size) {
-      return toast({ title: 'Duplicate field names', description: 'Each field must have a unique name.', variant: 'destructive' });
+      toast({ title: 'Duplicate field names', description: 'Each field must have a unique name.', variant: 'destructive' });
+      return false;
     }
-    if (!fields.some(f => f.isPrimaryKey)) {
+    if (!fields.some(f => f.isPrimaryKey) && !quiet) {
       toast({ title: 'No primary key set', description: 'Consider setting a primary key field. Your table was saved without one.' });
     }
     try {
       await updateTable.mutateAsync({ databaseId, tableId, data: { name: tableName, fields } });
-      toast({ title: 'Table saved' });
+      if (!quiet) toast({ title: 'Table saved' });
       queryClient.invalidateQueries({ queryKey: getGetTableQueryKey(databaseId, tableId) });
       queryClient.invalidateQueries({ queryKey: ['/api/databases', databaseId, 'tables'] });
+      return true;
     } catch {
       toast({ title: 'Failed to save table', variant: 'destructive' });
+      return false;
     }
+  };
+
+  const handleSave = () => doSave(false);
+
+  const switchToDatasheet = async () => {
+    await doSave(true);
+    if (onSwitchToDatasheet) onSwitchToDatasheet();
+    else setLocation(`/databases/${databaseId}/tables/${tableId}/data`);
   };
 
   const handleInsertRow = () => {
@@ -334,9 +345,9 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
           <RibbonGroup name="View">
             <RibbonViewSplitButton
               icon={<DatasheetViewIcon size={22} />}
-              onIconClick={() => onSwitchToDatasheet ? onSwitchToDatasheet() : setLocation(`/databases/${databaseId}/tables/${tableId}/data`)}
+              onIconClick={switchToDatasheet}
               options={[
-                { icon: <DatasheetViewIcon size={16} />, label: 'Datasheet View', onClick: () => onSwitchToDatasheet ? onSwitchToDatasheet() : setLocation(`/databases/${databaseId}/tables/${tableId}/data`) },
+                { icon: <DatasheetViewIcon size={16} />, label: 'Datasheet View', onClick: switchToDatasheet },
                 { icon: <DesignViewIcon size={16} />, label: 'Design View', active: true },
               ]}
             />
@@ -381,7 +392,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
       <div className="flex items-center gap-1">
         <button
           title="Datasheet View"
-          onClick={() => onSwitchToDatasheet ? onSwitchToDatasheet() : setLocation(`/databases/${databaseId}/tables/${tableId}/data`)}
+          onClick={switchToDatasheet}
           className="p-0.5 rounded hover:bg-gray-200 text-gray-500 hover:text-gray-700"
         >
           <DatasheetViewIcon size={13} />
@@ -437,12 +448,15 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
             showPropertySheet={showPropertySheet}
             onCreateRelationship={async (fromTableId, fromFieldName, toTableId, toFieldName, relType) => {
               try {
-                const fromTable = tables.find((t: any) => t.id === fromTableId);
-                const toTable = tables.find((t: any) => t.id === toTableId);
+                await doSave(true);
+                const freshTable = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}`);
+                const allTables = [freshTable, ...tables.filter((t: any) => t.id !== tableId)];
+                const fromTable = allTables.find((t: any) => t.id === fromTableId);
+                const toTable = allTables.find((t: any) => t.id === toTableId);
                 const fromField = fromTable?.fields?.find((f: any) => f.name === fromFieldName);
                 const toField = toTable?.fields?.find((f: any) => f.name === toFieldName);
                 if (!fromField?.id || !toField?.id) {
-                  toast({ title: 'Save the table first', description: 'Please save the table before creating a lookup relationship.', variant: 'destructive' });
+                  toast({ title: 'Could not create relationship', description: 'Field IDs not found. Please save and try again.', variant: 'destructive' });
                   return;
                 }
                 await apiFetch(`/api/ds/databases/${databaseId}/relationships`, {

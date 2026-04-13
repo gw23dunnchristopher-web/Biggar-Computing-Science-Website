@@ -41,6 +41,13 @@ export const FieldDefinitionFieldType = {
   date: "date",
   boolean: "boolean",
   autonumber: "autonumber",
+  lookup: "lookup",
+  currency: "currency",
+  longtext: "longtext",
+  hyperlink: "hyperlink",
+  attachment: "attachment",
+  calculated: "calculated",
+  ole: "ole",
 } as const;
 
 export interface FieldDefinition {
@@ -106,6 +113,13 @@ export const UpdateFieldRequestFieldType = {
   date: "date",
   boolean: "boolean",
   autonumber: "autonumber",
+  lookup: "lookup",
+  currency: "currency",
+  longtext: "longtext",
+  hyperlink: "hyperlink",
+  attachment: "attachment",
+  calculated: "calculated",
+  ole: "ole",
 } as const;
 
 export interface UpdateFieldRequest {
