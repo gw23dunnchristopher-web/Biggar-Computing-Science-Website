@@ -324,17 +324,19 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
               <RibbonButton icon={<DsToolsTestValidationRulesIcon size={40} />} label="Test Validation Rules" disabled wide />
             </RibbonGroup>
             <RibbonGroup name="">
-              <RibbonButton icon={<DsQuerySetupInsertRowsIcon size={22} />} label="Insert Rows" size="small" onClick={handleInsertRow} />
-              <RibbonButton icon={<DsQuerySetupDeleteRowsIcon size={22} />} label="Delete Rows" size="small" onClick={handleDeleteRow} />
-              <RibbonButton
-                icon={<DsToolsModifyLookupsIcon size={22} />}
-                label="Modify Lookups"
-                size="small"
-                disabled={selectedFieldIndex === null}
-                onClick={() => {
-                  if (selectedFieldIndex !== null) designGridRef.current?.openLookupWizard(selectedFieldIndex);
-                }}
-              />
+              <div className="flex flex-col justify-around h-full py-0.5">
+                <RibbonButton icon={<DsQuerySetupInsertRowsIcon size={22} />} label="Insert Rows" size="small" onClick={handleInsertRow} />
+                <RibbonButton icon={<DsQuerySetupDeleteRowsIcon size={22} />} label="Delete Rows" size="small" onClick={handleDeleteRow} />
+                <RibbonButton
+                  icon={<DsToolsModifyLookupsIcon size={22} />}
+                  label="Modify Lookups"
+                  size="small"
+                  disabled={selectedFieldIndex === null}
+                  onClick={() => {
+                    if (selectedFieldIndex !== null) designGridRef.current?.openLookupWizard(selectedFieldIndex);
+                  }}
+                />
+              </div>
             </RibbonGroup>
             <RibbonGroup name="Show/Hide">
               <RibbonButton
