@@ -32,6 +32,7 @@ import {
   DsRptTabControlIcon, DsRptEdgeBrowserIcon,
   DsRptLogoIcon, DsRptTitleIcon, DsRptDateAndTimeIcon,
   DsRptAddExistingFieldsIcon, DsRptPropertySheetIcon, DsRptTabOrderIcon,
+  DsRptChartSettingsIcon,
 } from '@/components/ui/ds-icons';
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
