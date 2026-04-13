@@ -21,8 +21,11 @@ import type { DesignFieldDef, DesignImageDef, DesignLabelDef, DesignCanvasHandle
 import { parseLookupConfig } from '@/components/ui/design-grid';
 import {
   ChevronFirst, ChevronLast, ChevronLeft, ChevronRight,
-  Plus, Trash2, Save, X,
+  Plus, Trash2, Save, X, ChevronDown,
 } from 'lucide-react';
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
+} from '@/components/ui/dropdown-menu';
 import {
   DsRptLayoutViewIcon,
   DsRptThemesIcon, DsRptColorsIcon, DsRptFontsIcon,
@@ -347,35 +350,48 @@ export function FormView({
               </div>
             </RibbonGroup>
             <RibbonGroup name="Controls">
-              <div className="flex items-start gap-1">
-                <div className="grid grid-cols-10 gap-[2px] pt-1">
-                  {tinyBtn(<DsRptSelectIcon size={16} />, 'Select', noop)}
-                  {tinyBtn(<DsRptTextBoxIcon size={16} />, 'Text Box', () => canvasRef.current?.addTextBox())}
-                  {tinyBtn(<DsRptLabelIcon size={16} />, 'Label', () => canvasRef.current?.addLabel())}
-                  {tinyBtn(<DsRptButtonIcon size={16} />, 'Button', noop)}
-                  {tinyBtn(<DsRptComboBoxIcon size={16} />, 'Combo Box', noop)}
-                  {tinyBtn(<DsRptListBoxIcon size={16} />, 'List Box', noop)}
-                  {tinyBtn(<DsRptCheckBoxIcon size={16} />, 'Check Box', () => canvasRef.current?.addCheckBox())}
-                  {tinyBtn(<DsRptOptionButtonIcon size={16} />, 'Option Button', noop)}
-                  {tinyBtn(<DsRptToggleButtonIcon size={16} />, 'Toggle Button', noop)}
-                  {tinyBtn(<DsRptTabControlIcon size={16} />, 'Tab Control', noop)}
-                  {tinyBtn(<DsRptSubFormSubReportIcon size={16} />, 'Subform', noop)}
-                  {tinyBtn(<DsRptAttachmentIcon size={16} />, 'Attachment', noop)}
-                  {tinyBtn(<DsRptLinkIcon size={16} />, 'Hyperlink', noop)}
-                  {tinyBtn(<DsRptLineIcon size={16} />, 'Line', () => canvasRef.current?.addLine())}
-                  {tinyBtn(<DsRptRectangleIcon size={16} />, 'Rectangle', () => canvasRef.current?.addRectangle())}
-                  {tinyBtn(<DsRptEdgeBrowserIcon size={16} />, 'Web Browser', noop)}
-                  {tinyBtn(<DsFrmNavigationIcon size={16} />, 'Navigation', noop)}
-                  {tinyBtn(<DsRptInsertPageBreakIcon size={16} />, 'Page Break', () => canvasRef.current?.addPageBreak())}
-                  {tinyBtn(<DsRptOptionGroupIcon size={16} />, 'Option Group', noop)}
-                  {tinyBtn(<DsRptBoundObjectFrameIcon size={16} />, 'Bound Frame', noop)}
-                  {tinyBtn(<DsRptUnboundObjectFrameIcon size={16} />, 'Unbound Frame', noop)}
-                </div>
-                <div className="flex items-start gap-[2px] pl-1 border-l border-gray-200 pt-1">
-                  {tinyBtn(<DsRptInsertImageIcon size={16} />, 'Insert Image', () => canvasRef.current?.addImage())}
-                  {tinyBtn(<DsRptInsertModernChartIcon size={16} />, 'Insert Modern Chart', noop)}
-                </div>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-1 px-2 py-1 rounded hover:bg-[#e8e6e3] active:bg-[#d6d3ce] cursor-pointer border border-transparent hover:border-gray-300 h-[60px]">
+                    <div className="grid grid-cols-4 gap-[3px]">
+                      {[
+                        <DsRptSelectIcon size={18} />, <DsRptTextBoxIcon size={18} />,
+                        <DsRptLabelIcon size={18} />, <DsRptButtonIcon size={18} />,
+                        <DsRptComboBoxIcon size={18} />, <DsRptCheckBoxIcon size={18} />,
+                        <DsRptInsertImageIcon size={18} />, <DsRptLineIcon size={18} />,
+                      ].map((icon, i) => <span key={i} className="w-[20px] h-[20px] flex items-center justify-center">{icon}</span>)}
+                    </div>
+                    <ChevronDown size={12} className="text-gray-500 ml-0.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="p-2 w-auto">
+                  <div className="grid grid-cols-8 gap-1">
+                    {tinyBtn(<DsRptSelectIcon size={20} />, 'Select', noop)}
+                    {tinyBtn(<DsRptTextBoxIcon size={20} />, 'Text Box', () => canvasRef.current?.addTextBox())}
+                    {tinyBtn(<DsRptLabelIcon size={20} />, 'Label', () => canvasRef.current?.addLabel())}
+                    {tinyBtn(<DsRptButtonIcon size={20} />, 'Button', noop)}
+                    {tinyBtn(<DsRptComboBoxIcon size={20} />, 'Combo Box', noop)}
+                    {tinyBtn(<DsRptCheckBoxIcon size={20} />, 'Check Box', () => canvasRef.current?.addCheckBox())}
+                    {tinyBtn(<DsRptOptionButtonIcon size={20} />, 'Option Button', noop)}
+                    {tinyBtn(<DsRptToggleButtonIcon size={20} />, 'Toggle Button', noop)}
+                    {tinyBtn(<DsRptListBoxIcon size={20} />, 'List Box', noop)}
+                    {tinyBtn(<DsRptTabControlIcon size={20} />, 'Tab Control', noop)}
+                    {tinyBtn(<DsRptSubFormSubReportIcon size={20} />, 'Subform', noop)}
+                    {tinyBtn(<DsRptAttachmentIcon size={20} />, 'Attachment', noop)}
+                    {tinyBtn(<DsRptLinkIcon size={20} />, 'Hyperlink', noop)}
+                    {tinyBtn(<DsRptLineIcon size={20} />, 'Line', () => canvasRef.current?.addLine())}
+                    {tinyBtn(<DsRptRectangleIcon size={20} />, 'Rectangle', () => canvasRef.current?.addRectangle())}
+                    {tinyBtn(<DsRptOptionGroupIcon size={20} />, 'Option Group', noop)}
+                    {tinyBtn(<DsRptBoundObjectFrameIcon size={20} />, 'Bound Frame', noop)}
+                    {tinyBtn(<DsRptUnboundObjectFrameIcon size={20} />, 'Unbound Frame', noop)}
+                    {tinyBtn(<DsRptEdgeBrowserIcon size={20} />, 'Web Browser', noop)}
+                    {tinyBtn(<DsFrmNavigationIcon size={20} />, 'Navigation', noop)}
+                    {tinyBtn(<DsRptInsertPageBreakIcon size={20} />, 'Page Break', () => canvasRef.current?.addPageBreak())}
+                    {tinyBtn(<DsRptInsertImageIcon size={20} />, 'Insert Image', () => canvasRef.current?.addImage())}
+                    {tinyBtn(<DsRptInsertModernChartIcon size={20} />, 'Insert Modern Chart', noop)}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </RibbonGroup>
             <RibbonGroup name="Header / Footer">
               <div className="flex items-start gap-0.5">
@@ -661,14 +677,7 @@ export function FormView({
 
             {/* Body */}
             <div className="flex-1 overflow-y-auto p-6 flex justify-center">
-              {records.length === 0 ? (
-                <div className="text-center text-gray-400 py-12">
-                  <p className="mb-4">No records yet.</p>
-                  <Button onClick={handleNewRecord} className="bg-[#2e7d32] hover:bg-[#1b5e20]">
-                    <Plus size={16} className="mr-2" /> Add First Record
-                  </Button>
-                </div>
-              ) : hasAbsoluteLayout ? (
+              {hasAbsoluteLayout ? (
                 /* ── Absolute-positioned canvas layout (label & control independent) ── */
                 <div className="relative border border-gray-200 shadow-md"
                   style={{
