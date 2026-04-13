@@ -173,11 +173,7 @@ export function TableDataView({
   const isAutoName = (name: string) => /^Table\d+$/i.test(name);
 
   const handleDesignIconClick = () => {
-    if (table && isAutoName(table.name)) {
-      setDesignNameDialog({ open: true, name: table.name, busy: false });
-    } else {
-      goToDesign();
-    }
+    goToDesign();
   };
 
   const confirmDesignSwitch = async () => {

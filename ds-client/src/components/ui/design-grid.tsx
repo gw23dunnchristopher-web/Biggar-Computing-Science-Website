@@ -838,16 +838,7 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
                     </select>
                   </td>
                   <td className="border-r border-gray-300 p-0 overflow-hidden">
-                    {f.fieldType === 'lookup' ? (
-                      <div className="px-3 py-1.5 text-xs text-[#C42B1C] italic truncate flex items-center gap-1">
-                        <span>▼</span>
-                        <span className="truncate">{descDisplay || 'Not configured'}</span>
-                        <button
-                          onClick={e => { e.stopPropagation(); setSelectedIndex(i); openLookupWizard(i); }}
-                          className="ml-auto flex-none text-[10px] underline hover:no-underline"
-                        >Edit</button>
-                      </div>
-                    ) : f.fieldType === 'calculated' ? (
+                    {f.fieldType === 'calculated' ? (
                       <div className="px-3 py-1.5 text-xs text-purple-600 italic truncate">ƒ {descDisplay || 'Enter expression in Field Properties'}</div>
                     ) : (
                       <input
