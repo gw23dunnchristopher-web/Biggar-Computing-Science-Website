@@ -371,9 +371,9 @@ export function FormView({
                   {tinyBtn(<DsRptBoundObjectFrameIcon size={16} />, 'Bound Frame', noop)}
                   {tinyBtn(<DsRptUnboundObjectFrameIcon size={16} />, 'Unbound Frame', noop)}
                 </div>
-                <div className="flex items-start gap-0.5 pl-1 border-l border-gray-200">
-                  <RibbonButton icon={<DsRptInsertImageIcon />} label="Insert Image" onClick={() => canvasRef.current?.addImage()} />
-                  <RibbonButton icon={<DsRptInsertModernChartIcon />} label="Insert Modern Chart" onClick={noop} wide />
+                <div className="flex items-start gap-[2px] pl-1 border-l border-gray-200 pt-1">
+                  {tinyBtn(<DsRptInsertImageIcon size={16} />, 'Insert Image', () => canvasRef.current?.addImage())}
+                  {tinyBtn(<DsRptInsertModernChartIcon size={16} />, 'Insert Modern Chart', noop)}
                 </div>
               </div>
             </RibbonGroup>
