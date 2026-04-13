@@ -13,10 +13,11 @@ import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } fro
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { DesignViewIcon } from '@/components/ui/design-view-icon';
+import { AccessDesignCanvas } from '@/components/ui/access-design-canvas';
+import type { DesignFieldDef, DesignImageDef, DesignLabelDef } from '@/components/ui/access-design-canvas';
 import {
-  FileText, Printer, Save,
-  Eye, EyeOff, ArrowUp, ArrowDown, GripVertical,
-  ChevronsUpDown, ChevronUp, ChevronDown
+  FileText, Printer, Save, Eye,
+  Type, TextCursorInput, ImageIcon,
 } from 'lucide-react';
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
@@ -60,6 +61,8 @@ interface ReportDefinition {
   groupField?: string;
   groupFields?: string[];
   headerImageUrl?: string;
+  designImages?: DesignImageDef[];
+  designLabels?: DesignLabelDef[];
 }
 
 interface Props {
@@ -108,12 +111,6 @@ export function ReportView({
   const [reportMeta, setReportMeta] = useState<{ id: number; name: string; definition: any } | null>(null);
   const [definition, setDefinition] = useState<ReportDefinition | null>(null);
   const [records, setRecords] = useState<any[]>([]);
-  const [designFields, setDesignFields] = useState<ReportFieldDef[]>([]);
-  const [designSortField, setDesignSortField] = useState('');
-  const [designSortDir, setDesignSortDir] = useState<'asc' | 'desc'>('asc');
-  const [designGroupField, setDesignGroupField] = useState('');
-  const [designTitle, setDesignTitle] = useState('');
-  const [designHeaderImage, setDesignHeaderImage] = useState('');
   const [isDesignSaving, setIsDesignSaving] = useState(false);
 
   const loadReport = useCallback(async () => {
@@ -121,12 +118,6 @@ export function ReportView({
     setReportMeta(r);
     const def: ReportDefinition = r.definition as ReportDefinition;
     setDefinition(def);
-    setDesignFields(def?.fields ? [...def.fields].sort((a, b) => a.sortOrder - b.sortOrder) : []);
-    setDesignSortField(def?.sortField || '');
-    setDesignSortDir(def?.sortDir || 'asc');
-    setDesignGroupField(def?.groupField || '');
-    setDesignTitle(def?.title || r.name);
-    setDesignHeaderImage(def?.headerImageUrl || '');
   }, [databaseId, reportId]);
 
   const loadRecords = useCallback(async (def: ReportDefinition) => {
@@ -148,36 +139,18 @@ export function ReportView({
     window.print();
   };
 
-  const handleToggleField = (idx: number) => {
-    setDesignFields(prev => prev.map((f, i) => i === idx ? { ...f, visible: !f.visible } : f));
-  };
-  const handleLabelChange = (idx: number, label: string) => {
-    setDesignFields(prev => prev.map((f, i) => i === idx ? { ...f, label } : f));
-  };
-  const handleColWidthChange = (idx: number, colWidth: number | undefined) => {
-    setDesignFields(prev => prev.map((f, i) => i === idx ? { ...f, colWidth } : f));
-  };
-  const handleMoveField = (idx: number, dir: -1 | 1) => {
-    const newIdx = idx + dir;
-    if (newIdx < 0 || newIdx >= designFields.length) return;
-    setDesignFields(prev => {
-      const a = [...prev];
-      [a[idx], a[newIdx]] = [a[newIdx], a[idx]];
-      return a.map((f, i) => ({ ...f, sortOrder: i }));
-    });
-  };
-
-  const handleSaveDesign = async () => {
+  const handleSaveDesign = async (
+    newFields: DesignFieldDef[],
+    newImages: DesignImageDef[],
+    newFreeLabels: DesignLabelDef[]
+  ) => {
     if (!definition || !reportMeta) return;
     setIsDesignSaving(true);
     const newDef: ReportDefinition = {
       ...definition,
-      title: designTitle,
-      fields: designFields.map((f, i) => ({ ...f, sortOrder: i })),
-      sortField: designSortField || undefined,
-      sortDir: designSortDir,
-      groupField: designGroupField || undefined,
-      headerImageUrl: designHeaderImage || undefined,
+      fields: newFields.map((f, i) => ({ ...f, sortOrder: i })) as ReportFieldDef[],
+      designImages: newImages,
+      designLabels: newFreeLabels,
     };
     try {
       await apiFetch(`/api/ds/databases/${databaseId}/reports/${reportId}`, {
@@ -241,7 +214,7 @@ export function ReportView({
 
   const contextSection: RibbonContextSection = {
     color: '#5d4037',
-    defaultTab: view === 'report' ? 'Report View' : 'Design View',
+    defaultTab: view === 'report' ? 'Report View' : 'Report Design',
     tabs: [
       {
         name: 'Report View',
@@ -252,12 +225,15 @@ export function ReportView({
         )
       },
       {
-        name: 'Design View',
+        name: 'Report Design',
         content: (
-          <RibbonGroup name="Design">
-            <RibbonButton icon={<Save size={22} />} label="Save Design" onClick={handleSaveDesign} disabled={isDesignSaving} />
-            <RibbonButton icon={<Printer size={22} />} label="Print Preview" onClick={() => setView('report')} />
-          </RibbonGroup>
+          <>
+            <RibbonGroup name="Controls">
+              <RibbonButton icon={<Type size={18} />} label="Label" onClick={() => {}} />
+              <RibbonButton icon={<TextCursorInput size={18} />} label="Text Box" onClick={() => {}} />
+              <RibbonButton icon={<ImageIcon size={18} />} label="Image" onClick={() => {}} />
+            </RibbonGroup>
+          </>
         )
       }
     ]
@@ -268,13 +244,15 @@ export function ReportView({
       title={reportMeta?.name || 'Report'}
       allDatabasesLink="/"
       pinnedContent={
-        <RibbonGroup name="View">
+        <RibbonGroup name="Views">
           <RibbonDropdownButton
             icon={view === 'report' ? <FileText size={40} /> : <DesignViewIcon size={40} />}
-            label={view === 'report' ? 'Report' : 'Design'}
+            label="View"
           >
-            <RibbonButton icon={<FileText size={16} />} label="Report" active={view === 'report'} onClick={() => setView('report')} />
-            <RibbonButton icon={<DesignViewIcon size={16} />} label="Design" active={view === 'design'} onClick={() => setView('design')} />
+            <RibbonButton icon={<FileText size={16} />} label="Report View" active={view === 'report'} onClick={() => setView('report')} />
+            <RibbonButton icon={<Printer size={16} />} label="Print Preview" active={false} onClick={handlePrint} />
+            <RibbonButton icon={<Eye size={16} />} label="Layout View" active={false} onClick={() => setView('report')} />
+            <RibbonButton icon={<DesignViewIcon size={16} />} label="Design View" active={view === 'design'} onClick={() => setView('design')} />
           </RibbonDropdownButton>
         </RibbonGroup>
       }
@@ -515,128 +493,17 @@ export function ReportView({
           </div>
         </div>
       ) : (
-        /* Design View */
-        <div className="flex flex-col h-full bg-[#f3f2f1]">
-          <div className="bg-[#5d4037] text-white px-4 py-2 flex items-center gap-2 flex-none">
-            <DesignViewIcon size={16} />
-            <span className="font-semibold text-sm">{reportMeta?.name} — Design View</span>
-          </div>
-          <div className="flex-1 overflow-y-auto p-6 flex gap-6 justify-center">
-            {/* Fields panel */}
-            <div className="bg-white rounded shadow-md border border-gray-200 w-80 flex-none">
-              <div className="bg-[#efebe9] border-b border-gray-200 px-4 py-2 text-sm font-medium text-[#5d4037] rounded-t flex items-center justify-between">
-                <span>Fields</span>
-                <span className="text-xs text-gray-500">{designFields.filter(f => f.visible).length} visible</span>
-              </div>
-              <div className="divide-y divide-gray-100">
-                {designFields.map((fd, i) => (
-                  <div key={fd.fieldName} className="px-3 py-1.5 hover:bg-gray-50 border-b border-gray-50 last:border-0">
-                    <div className="flex items-center gap-1.5">
-                      <GripVertical size={13} className="text-gray-300 flex-none" />
-                      <button onClick={() => handleMoveField(i, -1)} disabled={i === 0} className="p-0.5 rounded hover:bg-gray-200 disabled:opacity-30 flex-none">
-                        <ArrowUp size={12} />
-                      </button>
-                      <button onClick={() => handleMoveField(i, 1)} disabled={i === designFields.length - 1} className="p-0.5 rounded hover:bg-gray-200 disabled:opacity-30 flex-none">
-                        <ArrowDown size={12} />
-                      </button>
-                      <span className="text-[10px] text-gray-400 w-16 flex-none font-mono truncate">{fd.fieldName}</span>
-                      <input
-                        type="text"
-                        value={fd.label}
-                        onChange={e => handleLabelChange(i, e.target.value)}
-                        className="flex-1 text-xs border border-gray-200 rounded px-1.5 py-0.5 focus:outline-none focus:border-[#5d4037] min-w-0"
-                        title="Column heading"
-                      />
-                      <button onClick={() => handleToggleField(i)} className={`flex-none p-1 rounded ${fd.visible ? 'text-[#5d4037]' : 'text-gray-300'} hover:bg-gray-100`}>
-                        {fd.visible ? <Eye size={14} /> : <EyeOff size={14} />}
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-1 mt-0.5 pl-12">
-                      <span className="text-[10px] text-gray-400">Col width:</span>
-                      <input
-                        type="number"
-                        min={40} max={600} step={10}
-                        value={fd.colWidth ?? ''}
-                        onChange={e => handleColWidthChange(i, e.target.value ? Number(e.target.value) : undefined)}
-                        placeholder="auto"
-                        className="w-16 border border-gray-200 rounded px-1 py-0.5 text-[10px] focus:outline-none focus:border-[#5d4037]"
-                        title="Fixed column width in px (leave blank for auto)"
-                      />
-                      <span className="text-[10px] text-gray-400">px</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Options panel */}
-            <div className="bg-white rounded shadow-md border border-gray-200 flex-1 max-w-xs">
-              <div className="bg-[#efebe9] border-b border-gray-200 px-4 py-2 text-sm font-medium text-[#5d4037] rounded-t">
-                Report Options
-              </div>
-              <div className="p-4 space-y-4">
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Report Title</label>
-                  <input
-                    type="text"
-                    value={designTitle}
-                    onChange={e => setDesignTitle(e.target.value)}
-                    className="w-full text-sm border border-gray-300 rounded px-2 py-1.5 focus:outline-none focus:border-[#5d4037]"
-                    placeholder={reportMeta?.name}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Header Image URL</label>
-                  <input
-                    type="url"
-                    value={designHeaderImage}
-                    onChange={e => setDesignHeaderImage(e.target.value)}
-                    className="w-full text-sm border border-gray-300 rounded px-2 py-1.5 focus:outline-none focus:border-[#5d4037]"
-                    placeholder="https://…"
-                  />
-                  {designHeaderImage && isImageUrl(designHeaderImage) && (
-                    <img src={designHeaderImage} alt="Preview" className="mt-1.5 h-10 w-auto object-contain rounded border border-gray-200" />
-                  )}
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Sort By</label>
-                  <div className="flex gap-2">
-                    <select
-                      value={designSortField}
-                      onChange={e => setDesignSortField(e.target.value)}
-                      className="flex-1 text-sm border border-gray-300 rounded px-2 py-1.5 focus:outline-none focus:border-[#5d4037] bg-white"
-                    >
-                      <option value="">(none)</option>
-                      {designFields.map(f => <option key={f.fieldName} value={f.fieldName}>{f.label}</option>)}
-                    </select>
-                    <button
-                      onClick={() => setDesignSortDir(d => d === 'asc' ? 'desc' : 'asc')}
-                      className="p-1.5 border border-gray-300 rounded hover:bg-gray-50"
-                      title={designSortDir === 'asc' ? 'Ascending' : 'Descending'}
-                    >
-                      {designSortDir === 'asc' ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-                    </button>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Group By</label>
-                  <select
-                    value={designGroupField}
-                    onChange={e => setDesignGroupField(e.target.value)}
-                    className="w-full text-sm border border-gray-300 rounded px-2 py-1.5 focus:outline-none focus:border-[#5d4037] bg-white"
-                  >
-                    <option value="">(none)</option>
-                    {designFields.map(f => <option key={f.fieldName} value={f.fieldName}>{f.label}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div className="px-4 pb-4">
-                <Button onClick={handleSaveDesign} disabled={isDesignSaving} className="bg-[#5d4037] hover:bg-[#4e342e] w-full">
-                  <Save size={14} className="mr-2" /> Save Design
-                </Button>
-              </div>
-            </div>
-          </div>
+        <div className="flex-1 overflow-hidden">
+          <AccessDesignCanvas
+            mode="report"
+            objectName={reportMeta?.name || 'Report'}
+            fields={definition.fields as DesignFieldDef[]}
+            images={definition.designImages}
+            freeLabels={definition.designLabels}
+            accentColor="#5d4037"
+            onSave={handleSaveDesign}
+            isSaving={isDesignSaving}
+          />
         </div>
       )}
     </Shell>

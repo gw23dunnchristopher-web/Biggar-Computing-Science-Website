@@ -16,13 +16,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { DesignViewIcon } from '@/components/ui/design-view-icon';
-import { FormDesignCanvas } from '@/components/ui/form-design-canvas';
-import type { FormFieldDef, FormImageDef } from '@/components/ui/form-design-canvas';
+import { AccessDesignCanvas } from '@/components/ui/access-design-canvas';
+import type { DesignFieldDef, DesignImageDef, DesignLabelDef } from '@/components/ui/access-design-canvas';
 import { parseLookupConfig } from '@/components/ui/design-grid';
 import {
-  LayoutTemplate,
+  LayoutTemplate, Printer, Eye,
   ChevronFirst, ChevronLast, ChevronLeft, ChevronRight,
-  Plus, Trash2, Save, X,
+  Plus, Trash2, Save, X, Type, TextCursorInput, ImageIcon,
 } from 'lucide-react';
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
@@ -41,8 +41,9 @@ async function apiFetch(path: string, opts?: RequestInit) {
 interface FormDefinition {
   tableId: number;
   tableName: string;
-  fields: FormFieldDef[];
-  images?: FormImageDef[];
+  fields: DesignFieldDef[];
+  images?: DesignImageDef[];
+  freeLabels?: DesignLabelDef[];
   formBgColor?: string;
 }
 
@@ -237,11 +238,10 @@ export function FormView({
     || definition?.fields.find(f => f.fieldName === fieldName)?.fieldType
     || 'text';
 
-  /** Save design from canvas — called with new fields/images/bgColor */
   const handleSaveDesign = async (
-    newFields: FormFieldDef[],
-    newImages: FormImageDef[],
-    bgColor: string
+    newFields: DesignFieldDef[],
+    newImages: DesignImageDef[],
+    newFreeLabels: DesignLabelDef[]
   ) => {
     if (!definition || !formMeta) return;
     setIsDesignSaving(true);
@@ -249,7 +249,7 @@ export function FormView({
       ...definition,
       fields: newFields.map((f, i) => ({ ...f, sortOrder: i })),
       images: newImages,
-      formBgColor: bgColor,
+      freeLabels: newFreeLabels,
     };
     try {
       await apiFetch(`/api/ds/databases/${databaseId}/forms/${formId}`, {
@@ -268,10 +268,10 @@ export function FormView({
     .sort((a, b) => a.sortOrder - b.sortOrder) || [];
 
   const hasAbsoluteLayout = visibleFields.some(f => f.x !== undefined || f.y !== undefined);
-  const formImages: FormImageDef[] = definition?.images ?? [];
+  const formImages: DesignImageDef[] = definition?.images ?? [];
+  const formFreeLabels: DesignLabelDef[] = definition?.freeLabels ?? [];
   const formBgColor = definition?.formBgColor || '#ffffff';
 
-  // ── Ribbon ─────────────────────────────────────────────────────────
   const commonTabProps = {
     onCreateTable: onCreateTable || (() => {}),
     onCreateQuery: onCreateQuery || (() => {}),
@@ -281,7 +281,7 @@ export function FormView({
 
   const contextSection: RibbonContextSection = {
     color: '#2e7d32',
-    defaultTab: view === 'form' ? 'Form View' : 'Design View',
+    defaultTab: view === 'form' ? 'Form View' : 'Form Design',
     tabs: [
       {
         name: 'Form View',
@@ -295,11 +295,15 @@ export function FormView({
         )
       },
       {
-        name: 'Design View',
+        name: 'Form Design',
         content: (
-          <RibbonGroup name="Design">
-            <RibbonButton icon={<Save size={22} />} label="Save Design" onClick={() => {}} disabled={isDesignSaving} />
-          </RibbonGroup>
+          <>
+            <RibbonGroup name="Controls">
+              <RibbonButton icon={<Type size={18} />} label="Label" onClick={() => {}} />
+              <RibbonButton icon={<TextCursorInput size={18} />} label="Text Box" onClick={() => {}} />
+              <RibbonButton icon={<ImageIcon size={18} />} label="Image" onClick={() => {}} />
+            </RibbonGroup>
+          </>
         )
       }
     ]
@@ -310,13 +314,14 @@ export function FormView({
       title={formMeta?.name || 'Form'}
       allDatabasesLink="/"
       pinnedContent={
-        <RibbonGroup name="View">
+        <RibbonGroup name="Views">
           <RibbonDropdownButton
             icon={view === 'form' ? <LayoutTemplate size={40} /> : <DesignViewIcon size={40} />}
-            label={view === 'form' ? 'Form' : 'Design'}
+            label={view === 'form' ? 'View' : 'View'}
           >
-            <RibbonButton icon={<LayoutTemplate size={16} />} label="Form" active={view === 'form'} onClick={() => setView('form')} />
-            <RibbonButton icon={<DesignViewIcon size={16} />} label="Design" active={view === 'design'} onClick={() => setView('design')} />
+            <RibbonButton icon={<LayoutTemplate size={16} />} label="Form View" active={view === 'form'} onClick={() => setView('form')} />
+            <RibbonButton icon={<Eye size={16} />} label="Layout View" active={false} onClick={() => setView('form')} />
+            <RibbonButton icon={<DesignViewIcon size={16} />} label="Design View" active={view === 'design'} onClick={() => setView('design')} />
           </RibbonDropdownButton>
         </RibbonGroup>
       }
@@ -534,24 +539,18 @@ export function FormView({
     <>
       <Shell title={formMeta?.name || 'Form'} ribbon={ribbon} sidebar={sidebar}>
 
-        {/* ── Design View ──────────────────────────────────────────────── */}
         {view === 'design' && (
-          <div className="flex flex-col h-full">
-            <div className="bg-[#2e7d32] text-white px-4 py-2 flex items-center gap-2 flex-none">
-              <DesignViewIcon size={16} />
-              <span className="font-semibold text-sm">{formMeta?.name} — Design View</span>
-              <span className="ml-2 text-xs bg-white/15 rounded px-2 py-0.5">Drag fields to reposition • Click to select • Use the panel to style</span>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <FormDesignCanvas
-                fields={definition.fields.sort((a, b) => a.sortOrder - b.sortOrder)}
-                images={formImages}
-                formBgColor={formBgColor}
-                accentColor="#2e7d32"
-                onSave={handleSaveDesign}
-                isSaving={isDesignSaving}
-              />
-            </div>
+          <div className="flex-1 overflow-hidden">
+            <AccessDesignCanvas
+              mode="form"
+              objectName={formMeta?.name || 'Form'}
+              fields={definition.fields.sort((a, b) => a.sortOrder - b.sortOrder)}
+              images={formImages}
+              freeLabels={formFreeLabels}
+              accentColor="#2e7d32"
+              onSave={handleSaveDesign}
+              isSaving={isDesignSaving}
+            />
           </div>
         )}
 
