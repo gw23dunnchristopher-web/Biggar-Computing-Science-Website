@@ -6,6 +6,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonViewSplitButton } from '@/components/layout/Ribbon';
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
 import { DesignGrid, DesignGridHandle, parseValidation } from '@/components/ui/design-grid';
+import { evaluateValidationRule } from '@/components/ui/data-grid';
 import { Save, AlertTriangle, RotateCcw } from 'lucide-react';
 import {
   DsToolsPrimaryKeyIcon, DsToolsTestValidationRulesIcon, DsToolsModifyLookupsIcon,
@@ -301,7 +302,6 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
           if (f.isRequired && (val === null || val === undefined || val === '')) { violations++; continue; }
           const { rule } = parseValidation(f.description ?? null);
           if (rule && val !== null && val !== undefined && val !== '') {
-            const { evaluateValidationRule } = await import('@/components/ui/data-grid');
             if (!evaluateValidationRule(rule, val, f.name, rec.data)) violations++;
           }
         }
