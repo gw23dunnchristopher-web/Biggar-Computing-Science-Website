@@ -101,8 +101,19 @@ function stmtType(sql: string): "select"|"insert"|"update"|"delete"|"other" {
   return "other";
 }
 function safeIdent(name: string) { return name.replace(/[^a-zA-Z0-9_]/g, "_"); }
+
+/** Strip Access date-hash notation: #12/12/2023# → the inner string */
+function stripDateHash(s: string) { return s.replace(/^#(.+)#$/, "$1"); }
+
+/** Convert an Access LIKE pattern string to a JS RegExp-ready pattern (not a SQL pattern) */
+function accessLikeToRegex(pattern: string) {
+  return pattern.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".");
+}
+
 function preprocessSql(sql: string, aliasMap: Record<string, string>) {
   const aliasPlaceholders: string[] = [];
+
+  // ── 1. Extract AS "alias" and AS [alias] placeholders ──
   sql = sql.replace(/\bAS\s+"([^"]+)"/gi, (_, name) => {
     aliasPlaceholders.push(name);
     return `AS __ALIAS_${aliasPlaceholders.length - 1}__`;
@@ -111,39 +122,100 @@ function preprocessSql(sql: string, aliasMap: Record<string, string>) {
     aliasPlaceholders.push(name);
     return `AS __ALIAS_${aliasPlaceholders.length - 1}__`;
   });
+
+  // ── 2. Access date literals: #dd/mm/yyyy# → 'dd/mm/yyyy' ──
+  sql = sql.replace(/#([^#\n]+)#/g, "'$1'");
+
+  // ── 3. Convert LIKE wildcards: Access * → %, ? → _ (in string literals) ──
+  //    Must run BEFORE "..." identifier conversion so double-quoted patterns are caught
+  sql = sql.replace(/\bLIKE\s+'([^']*)'/gi, (_, pat) =>
+    `LIKE '${pat.replace(/\*/g, "%").replace(/\?/g, "_")}'`
+  );
+  sql = sql.replace(/\bLIKE\s+"([^"]*)"/gi, (_, pat) =>
+    `LIKE '${pat.replace(/\*/g, "%").replace(/\?/g, "_")}'`
+  );
+
+  // ── 4. Convert double-quoted string values in comparison/IN contexts → single-quoted ──
+  //    Matches: = "val", <> "val", > "val", < "val", >= "val", <= "val"
+  sql = sql.replace(/((?:=|<>|>=|<=|>|<)\s*)"([^"]+)"/g, (_, op, val) => `${op}'${val}'`);
+  //    Matches: IN ("a", "b") or IN ("a")
+  sql = sql.replace(/\bIN\s*\(\s*"([^"]+)"(\s*,\s*"([^"]+)")*\s*\)/gi, (match) =>
+    match.replace(/"([^"]+)"/g, "'$1'")
+  );
+
+  // ── 5. Convert remaining "identifier" and [identifier] to safe names ──
   sql = sql.replace(/"([^"]+)"/g, (_, i) => { const k = i.toLowerCase(); return aliasMap[k] ?? safeIdent(i); });
   sql = sql.replace(/\[([^\]]+)\]/g, (_, i) => { const k = i.toLowerCase(); return aliasMap[k] ?? safeIdent(i); });
+
+  // ── 6. Restore AS alias placeholders ──
   for (let idx = 0; idx < aliasPlaceholders.length; idx++) {
     sql = sql.replace(`__ALIAS_${idx}__`, `[${aliasPlaceholders[idx]}]`);
   }
   return sql;
 }
 
-/* ── Query criteria matching ── */
+/* ── Query Design criteria matching (Access syntax) ── */
 function matchesCriteria(value: any, criteria: string): boolean {
   if (!criteria.trim()) return true;
   const c = criteria.trim();
+  const sv = String(value ?? "");
+
+  // Like "pattern" (Access wildcards * and ?)
   const likeM = c.match(/^Like\s+"(.*)"\s*$/i);
-  if (likeM) { const p = likeM[1].replace(/\*/g,".*").replace(/\?/g,"."); return new RegExp(`^${p}$`,"i").test(String(value??"")); }
-  const notLikeM = c.match(/^Not Like\s+"(.*)"\s*$/i);
-  if (notLikeM) { const p = notLikeM[1].replace(/\*/g,".*").replace(/\?/g,"."); return !new RegExp(`^${p}$`,"i").test(String(value??"")); }
-  const betweenM = c.match(/^Between\s+(.+)\s+And\s+(.+)$/i);
-  if (betweenM) { return Number(value) >= Number(betweenM[1]) && Number(value) <= Number(betweenM[2]); }
+  if (likeM) { return new RegExp(`^${accessLikeToRegex(likeM[1])}$`, "i").test(sv); }
+
+  // Not Like "pattern"
+  const notLikeM = c.match(/^Not\s+Like\s+"(.*)"\s*$/i);
+  if (notLikeM) { return !new RegExp(`^${accessLikeToRegex(notLikeM[1])}$`, "i").test(sv); }
+
+  // Not "value" or Not value
+  const notValM = c.match(/^Not\s+"?([^"]+)"?\s*$/i);
+  if (notValM) {
+    const raw = stripDateHash(notValM[1]);
+    return sv.toLowerCase() !== raw.toLowerCase() && String(value) !== raw;
+  }
+
+  // Between X And Y  (supports #date# literals)
+  const betweenM = c.match(/^Between\s+(.+?)\s+And\s+(.+)$/i);
+  if (betweenM) {
+    const lo = stripDateHash(betweenM[1].trim().replace(/^"(.*)"$/, "$1"));
+    const hi = stripDateHash(betweenM[2].trim().replace(/^"(.*)"$/, "$1"));
+    const nv = Number(value); const nlo = Number(lo); const nhi = Number(hi);
+    if (!isNaN(nv) && !isNaN(nlo) && !isNaN(nhi)) return nv >= nlo && nv <= nhi;
+    return sv >= lo && sv <= hi;
+  }
+
+  // In(val1, val2, ...) — Access In() function
+  const inM = c.match(/^In\s*\((.+)\)$/i);
+  if (inM) {
+    const items = inM[1].split(",").map(s => stripDateHash(s.trim().replace(/^"(.*)"$/, "$1").replace(/^#(.*)#$/, "$1")));
+    return items.some(item => sv.toLowerCase() === item.toLowerCase() || sv === item);
+  }
+
   if (/^Is Null$/i.test(c)) return value === null || value === undefined || value === "";
   if (/^Is Not Null$/i.test(c)) return value !== null && value !== undefined && value !== "";
+
+  // Comparison operators: =, <>, <, >, <=, >= (supports #date# literals)
   const cmpM = c.match(/^(>=|<=|<>|>|<|=)\s*(.+)$/);
   if (cmpM) {
-    const op = cmpM[1]; const raw = cmpM[2].replace(/^"(.*)"$/,"$1");
+    const op = cmpM[1];
+    const raw = stripDateHash(cmpM[2].trim().replace(/^"(.*)"$/, "$1"));
     const nv = Number(value); const nc = Number(raw);
     if (!isNaN(nv) && !isNaN(nc)) {
-      if (op === ">") return nv > nc; if (op === "<") return nv < nc; if (op === ">=") return nv >= nc;
-      if (op === "<=") return nv <= nc; if (op === "<>") return nv !== nc; if (op === "=") return nv === nc;
-    } else {
-      const sv = String(value??"").toLowerCase(); const sc = raw.toLowerCase();
-      if (op === "<>") return sv !== sc; if (op === "=") return sv === sc;
+      if (op === ">") return nv > nc; if (op === "<") return nv < nc;
+      if (op === ">=") return nv >= nc; if (op === "<=") return nv <= nc;
+      if (op === "<>") return nv !== nc; if (op === "=") return nv === nc;
     }
+    const sraw = raw.toLowerCase();
+    if (op === "<>") return sv.toLowerCase() !== sraw;
+    if (op === "=") return sv.toLowerCase() === sraw;
+    if (op === "<") return sv < raw; if (op === ">") return sv > raw;
+    if (op === "<=") return sv <= raw; if (op === ">=") return sv >= raw;
   }
-  return String(value??"").toLowerCase() === c.replace(/^"(.*)"$/,"$1").toLowerCase();
+
+  // Plain value: exact match (strips quotes and date hashes)
+  const plain = stripDateHash(c.replace(/^"(.*)"$/, "$1"));
+  return sv.toLowerCase() === plain.toLowerCase();
 }
 
 export function registerDsRoutes(app: Express) {
