@@ -11,6 +11,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { DS_ICON_SIZE_LARGE, DS_ICON_SIZE_SMALL } from '@/components/ui/ds-icons';
 
 // ── Ribbon size context ───────────────────────────────────────────────────────
 // 'large'  = normal tall buttons (≥600px)
@@ -174,19 +175,19 @@ export function Ribbon({
             className="flex items-center gap-1 opacity-70 hover:opacity-100 transition-opacity mr-1 text-white flex-none"
             title="All Databases"
           >
-            <Home className="w-3.5 h-3.5" />
+            <Home className="w-4 h-4" />
           </Link>
         )}
         <div className="flex items-center gap-0.5 mr-2 border-r border-white/30 pr-2 flex-none">
-          {qatBtn(<Save className="w-3 h-3" />, 'Save (Ctrl+S)', onSave)}
-          {qatBtn(<Undo2 className="w-3 h-3" />, 'Undo (Ctrl+Z)', onUndo, !onUndo)}
-          {qatBtn(<Redo2 className="w-3 h-3" />, 'Redo (Ctrl+Y)', onRedo, !onRedo)}
-          {qatBtn(<Printer className="w-3 h-3" />, 'Quick Print', () => window.print())}
+          {qatBtn(<Save className={`w-${DS_ICON_SIZE_SMALL / 8} h-${DS_ICON_SIZE_SMALL / 8}`} />, 'Save (Ctrl+S)', onSave)}
+          {qatBtn(<Undo2 className={`w-${DS_ICON_SIZE_SMALL / 8} h-${DS_ICON_SIZE_SMALL / 8}`} />, 'Undo (Ctrl+Z)', onUndo, !onUndo)}
+          {qatBtn(<Redo2 className={`w-${DS_ICON_SIZE_SMALL / 8} h-${DS_ICON_SIZE_SMALL / 8}`} />, 'Redo (Ctrl+Y)', onRedo, !onRedo)}
+          {qatBtn(<Printer className={`w-${DS_ICON_SIZE_SMALL / 8} h-${DS_ICON_SIZE_SMALL / 8}`} />, 'Quick Print', () => window.print())}
           <button title="Customize Quick Access Toolbar" className="w-4 h-5 flex items-center justify-center rounded hover:bg-white/20 cursor-pointer">
-            <ChevronDown className="w-2.5 h-2.5" />
+            <ChevronDown className="w-3 h-3" />
           </button>
         </div>
-        <Database className="w-4 h-4 opacity-80 flex-none" />
+        <Database className="w-5 h-5 opacity-80 flex-none" />
         <span className="opacity-90 font-semibold truncate min-w-0">{title}</span>
         <span className="opacity-50 mx-1 flex-none">-</span>
         <span className="opacity-80 flex-none hidden sm:inline">Access Learning Tool</span>
@@ -262,8 +263,8 @@ export function Ribbon({
                     ? 'bg-white border-gray-300 border-b-white text-[#C42B1C] font-semibold -mb-px relative z-10'
                     : 'text-gray-600 hover:bg-gray-200'}`}
               >
-                <MoreHorizontal className="w-4 h-4" />
-                <ChevronDown className="w-3 h-3" />
+                <MoreHorizontal className="w-5 h-5" />
+                <ChevronDown className="w-4 h-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-[140px]">

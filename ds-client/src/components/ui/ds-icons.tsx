@@ -4,7 +4,7 @@ interface DsIconProps {
 }
 
 function icon(file: string) {
-  return function DsIcon({ size = 22, className }: DsIconProps) {
+  return function DsIcon({ size = 32, className }: DsIconProps) {
     return (
       <img
         src={`${import.meta.env.BASE_URL}icons/${file}`}
@@ -18,6 +18,9 @@ function icon(file: string) {
     );
   };
 }
+
+export const DS_ICON_SIZE_SMALL = 32;
+export const DS_ICON_SIZE_LARGE = 40;
 
 export const DsAdvancedFilterIcon   = icon('AdvancedFilter.svg');
 export const DsAscendingIcon        = icon('ascending.svg');
