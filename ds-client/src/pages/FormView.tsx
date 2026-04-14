@@ -96,6 +96,10 @@ interface Props {
   onCreateAutoReport?: () => void;
   onShare?: () => void;
   onSettings?: () => void;
+  onSelectTable?: (id: number) => void;
+  onSelectForm?: (id: number) => void;
+  onSelectReport?: (id: number) => void;
+  onSelectQuery?: (id: number) => void;
 }
 
 /** True if the value looks like an image URL or data-URI */
@@ -111,7 +115,8 @@ export function FormView({
   isStudentMode, onCreateTable, onCreateQuery, onQueryWizard, onCreateSqlQuery,
   onCreateForm, onCreateBlankForm, onCreateAutoForm,
   onCreateReport, onCreateBlankReport, onCreateAutoReport,
-  onShare, onSettings
+  onShare, onSettings,
+  onSelectTable, onSelectForm, onSelectReport, onSelectQuery
 }: Props) {
   const search = useSearch();
   const { toast } = useToast();
@@ -486,6 +491,8 @@ export function FormView({
       onDeleteTable={onDeleteTable} queries={queries} onDeleteQuery={onDeleteQuery}
       forms={forms} onDeleteForm={onDeleteForm} reports={reports} onDeleteReport={onDeleteReport}
       onRefresh={onRefresh}
+      onSelectTable={onSelectTable} onSelectForm={onSelectForm} onSelectReport={onSelectReport} onSelectQuery={onSelectQuery}
+      activeFormId={formId}
     />
   );
 

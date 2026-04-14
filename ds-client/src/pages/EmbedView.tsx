@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Shell } from '@/components/layout/Shell';
 import { Ribbon } from '@/components/layout/Ribbon';
 import { Sidebar } from '@/components/layout/Sidebar';
@@ -12,6 +12,8 @@ import { FormWizard } from '@/components/ui/form-wizard';
 import { ReportWizard } from '@/components/ui/report-wizard';
 import { QueryWizard } from '@/components/ui/query-wizard';
 import { CSVImportModal } from '@/components/ui/csv-import-modal';
+import { ObjectTabBar, ObjectTab } from '@/components/ui/object-tab-bar';
+import { TabBarProvider } from '@/contexts/tab-bar-context';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,7 +45,7 @@ interface EmbedSnapshot {
   }>;
 }
 
-type ActiveView = 'datasheet' | 'design' | 'sql' | 'form' | 'report' | 'relationships';
+type ActiveView = 'datasheet' | 'design' | 'sql' | 'form' | 'report' | 'relationships' | 'query';
 
 function getOrCreateSessionKey(): string {
   let key = sessionStorage.getItem(SESSION_KEY_STORAGE);
@@ -102,7 +104,116 @@ export function EmbedView({ token, initialMode }: Props) {
   // When inside SQL mode, navigate between the query editor, a table's datasheet, and design view
   const [sqlSubView, setSqlSubView] = useState<'query' | 'table' | 'design'>('query');
 
+  // Active query for query design view (non-SQL mode)
+  const [activeQueryId, setActiveQueryId] = useState<number | null>(null);
+
+  // Object tabs
+  const [openTabs, setOpenTabs] = useState<ObjectTab[]>([]);
+
   const dbId = snapshot?.database.id;
+
+  const getActiveTabKey = useCallback((): string | null => {
+    if (activeView === 'form' && activeFormId) return `form-${activeFormId}`;
+    if (activeView === 'report' && activeReportId) return `report-${activeReportId}`;
+    if (activeView === 'sql') return 'sql';
+    if (activeView === 'relationships') return 'relationships';
+    if (activeView === 'query' && activeQueryId) return `query-${activeQueryId}`;
+    if (activeTableId) return `table-${activeTableId}`;
+    return null;
+  }, [activeView, activeTableId, activeFormId, activeReportId, activeQueryId]);
+
+  const activeTabKey = useMemo(() => getActiveTabKey(), [getActiveTabKey]);
+
+  const addTab = useCallback((key: string, label: string, objectType: ObjectTab['objectType']) => {
+    setOpenTabs(prev => {
+      const idx = prev.findIndex(t => t.key === key);
+      if (idx >= 0) {
+        const updated = [...prev];
+        updated[idx] = { ...updated[idx], label };
+        return updated;
+      }
+      return [...prev, { key, url: '', label, objectType }];
+    });
+  }, []);
+
+  const navigateToObject = useCallback((key: string, objectType: ObjectTab['objectType'], objectId?: number) => {
+    switch (objectType) {
+      case 'table':
+        if (objectId) { setActiveTableId(objectId); setActiveView('datasheet'); }
+        break;
+      case 'query':
+        if (objectId) { setActiveQueryId(objectId); setActiveView('query'); }
+        break;
+      case 'form':
+        if (objectId) { setActiveFormId(objectId); setActiveView('form'); }
+        break;
+      case 'report':
+        if (objectId) { setActiveReportId(objectId); setActiveView('report'); }
+        break;
+      case 'sql':
+        setActiveView('sql');
+        break;
+    }
+  }, []);
+
+  const handleTabSelect = useCallback((tab: ObjectTab) => {
+    const parts = tab.key.split('-');
+    const objectType = parts[0] as ObjectTab['objectType'];
+    const objectId = parts.length > 1 ? parseInt(parts[1]) : undefined;
+    navigateToObject(tab.key, objectType, objectId);
+  }, [navigateToObject]);
+
+  const handleTabClose = useCallback((key: string) => {
+    setOpenTabs(prev => {
+      const idx = prev.findIndex(t => t.key === key);
+      const next = prev.filter(t => t.key !== key);
+      if (key === getActiveTabKey()) {
+        if (next.length > 0) {
+          const switchTo = next[Math.min(idx, next.length - 1)];
+          const parts = switchTo.key.split('-');
+          const objectType = parts[0] as ObjectTab['objectType'];
+          const objectId = parts.length > 1 ? parseInt(parts[1]) : undefined;
+          navigateToObject(switchTo.key, objectType, objectId);
+        } else {
+          setActiveTableId(null);
+          setActiveFormId(null);
+          setActiveReportId(null);
+          setActiveQueryId(null);
+          setActiveView('datasheet');
+        }
+      }
+      return next;
+    });
+  }, [getActiveTabKey, navigateToObject]);
+
+  const selectTable = useCallback((id: number) => {
+    const tbl = snapshot?.tables.find(t => t.id === id);
+    const label = tbl?.name ?? 'Table';
+    addTab(`table-${id}`, label, 'table');
+    setActiveTableId(id);
+    if (activeView !== 'design') setActiveView('datasheet');
+  }, [snapshot, addTab, activeView]);
+
+  const selectForm = useCallback((id: number) => {
+    const f = forms.find(f => f.id === id);
+    addTab(`form-${id}`, f?.name ?? 'Form', 'form');
+    setActiveFormId(id);
+    setActiveView('form');
+  }, [forms, addTab]);
+
+  const selectReport = useCallback((id: number) => {
+    const r = reports.find(r => r.id === id);
+    addTab(`report-${id}`, r?.name ?? 'Report', 'report');
+    setActiveReportId(id);
+    setActiveView('report');
+  }, [reports, addTab]);
+
+  const selectQuery = useCallback((id: number) => {
+    const q = queries.find(q => q.id === id);
+    addTab(`query-${id}`, q?.name ?? 'Query', 'query');
+    setActiveQueryId(id);
+    setActiveView('query');
+  }, [queries, addTab]);
 
   async function loadForms(id: number) {
     try { const r = await apiFetch(`/api/ds/databases/${id}/forms`); setForms(r || []); } catch {}
@@ -171,12 +282,12 @@ export function EmbedView({ token, initialMode }: Props) {
         const created = await apiFetch(`/api/ds/databases/${dbId}/forms`, { method: 'POST', body: JSON.stringify({ name, definition }) });
         await loadForms(dbId);
         setQuickCreate(null);
-        if (created?.id) { setActiveFormId(created.id); setActiveView('form'); }
+        if (created?.id) { addTab(`form-${created.id}`, name, 'form'); setActiveFormId(created.id); setActiveView('form'); }
       } else {
         const created = await apiFetch(`/api/ds/databases/${dbId}/reports`, { method: 'POST', body: JSON.stringify({ name, definition }) });
         await loadReports(dbId);
         setQuickCreate(null);
-        if (created?.id) { setActiveReportId(created.id); setActiveView('report'); }
+        if (created?.id) { addTab(`report-${created.id}`, name, 'report'); setActiveReportId(created.id); setActiveView('report'); }
       }
     } catch {
       toast({ title: 'Failed to create', variant: 'destructive' });
@@ -216,7 +327,8 @@ export function EmbedView({ token, initialMode }: Props) {
       });
       await loadForms(dbId);
       setFormWizardOpen(false);
-      if (openMode === 'view' && form?.id) {
+      if (form?.id) {
+        addTab(`form-${form.id}`, name, 'form');
         setActiveFormId(form.id);
         setActiveView('form');
       }
@@ -225,7 +337,7 @@ export function EmbedView({ token, initialMode }: Props) {
     }
   }
 
-  async function handleReportWizardFinish(name: string, definition: any, openMode: 'view' | 'modify') {
+  async function handleReportWizardFinish(name: string, definition: any, openMode: 'preview' | 'modify') {
     if (!dbId) return;
     try {
       const report = await apiFetch(`/api/ds/databases/${dbId}/reports`, {
@@ -234,7 +346,8 @@ export function EmbedView({ token, initialMode }: Props) {
       });
       await loadReports(dbId);
       setReportWizardOpen(false);
-      if (openMode === 'view' && report?.id) {
+      if (report?.id) {
+        addTab(`report-${report.id}`, name, 'report');
         setActiveReportId(report.id);
         setActiveView('report');
       }
@@ -243,15 +356,20 @@ export function EmbedView({ token, initialMode }: Props) {
     }
   }
 
-  async function handleQueryWizardFinish(name: string, definition: any) {
+  async function handleQueryWizardFinish(name: string, definition: any, openMode: 'view' | 'modify') {
     if (!dbId) return;
     try {
-      await apiFetch(`/api/ds/databases/${dbId}/queries`, {
+      const q = await apiFetch(`/api/ds/databases/${dbId}/queries`, {
         method: 'POST',
         body: JSON.stringify({ name, definition })
       });
       await loadQueries(dbId);
       setQueryWizardOpen(false);
+      if (q?.id) {
+        addTab(`query-${q.id}`, name, 'query');
+        setActiveQueryId(q.id);
+        setActiveView('query');
+      }
     } catch {
       toast({ title: 'Failed to create query', variant: 'destructive' });
     }
@@ -260,8 +378,8 @@ export function EmbedView({ token, initialMode }: Props) {
   // ── Create SQL query and switch to SQL editor ───────────────────────────
   async function handleCreateSqlQuery() {
     if (!dbId) return;
-    // If already have a temp query, just switch to it
     if (tempQueryId) {
+      addTab('sql', 'SQL View', 'sql');
       setSqlSubView('query');
       setActiveView('sql');
       return;
@@ -275,6 +393,7 @@ export function EmbedView({ token, initialMode }: Props) {
       if (res.ok) {
         const q = await res.json();
         setTempQueryId(q.id);
+        addTab('sql', 'SQL View', 'sql');
         setSqlSubView('query');
         setActiveView('sql');
       }
@@ -455,10 +574,19 @@ export function EmbedView({ token, initialMode }: Props) {
     </>
   );
 
-  // ── Form view ──────────────────────────────────────────────────────────────
-  if (activeView === 'form' && activeFormId) {
-    return (
-      <>
+  const tabBarEl = (
+    <ObjectTabBar
+      tabs={openTabs}
+      activeKey={activeTabKey}
+      onSelect={handleTabSelect}
+      onClose={handleTabClose}
+    />
+  );
+
+  const renderContent = () => {
+    // ── Form view ──────────────────────────────────────────────────────────
+    if (activeView === 'form' && activeFormId) {
+      return (
         <FormView
           databaseId={snapshot.database.id}
           formId={activeFormId}
@@ -468,18 +596,19 @@ export function EmbedView({ token, initialMode }: Props) {
           reports={reports}
           queries={queries}
           isStudentMode={true}
-          onDeleteForm={() => { setActiveFormId(null); setActiveView('datasheet'); loadForms(snapshot.database.id); }}
+          onSelectTable={selectTable}
+          onSelectForm={selectForm}
+          onSelectReport={selectReport}
+          onSelectQuery={selectQuery}
+          onDeleteForm={() => { handleTabClose(`form-${activeFormId}`); loadForms(snapshot.database.id); }}
           {...wizardProps}
         />
-        {wizardDialogs}
-      </>
-    );
-  }
+      );
+    }
 
-  // ── Report view ────────────────────────────────────────────────────────────
-  if (activeView === 'report' && activeReportId) {
-    return (
-      <>
+    // ── Report view ────────────────────────────────────────────────────────
+    if (activeView === 'report' && activeReportId) {
+      return (
         <ReportView
           databaseId={snapshot.database.id}
           reportId={activeReportId}
@@ -489,28 +618,47 @@ export function EmbedView({ token, initialMode }: Props) {
           reports={reports}
           queries={queries}
           isStudentMode={true}
-          onDeleteReport={() => { setActiveReportId(null); setActiveView('datasheet'); loadReports(snapshot.database.id); }}
+          onSelectTable={selectTable}
+          onSelectForm={selectForm}
+          onSelectReport={selectReport}
+          onSelectQuery={selectQuery}
+          onDeleteReport={() => { handleTabClose(`report-${activeReportId}`); loadReports(snapshot.database.id); }}
           {...wizardProps}
         />
-        {wizardDialogs}
-      </>
-    );
-  }
-
-  // ── SQL mode ──────────────────────────────────────────────────────────────
-  if (activeView === 'sql') {
-    if (!tempQueryId) {
-      return (
-        <div className="h-screen w-screen flex items-center justify-center bg-[#f3f2f1] font-bold text-gray-500">
-          Loading query editor...
-        </div>
       );
     }
 
-    // Student clicked "Design View" from a table in SQL mode
-    if (sqlSubView === 'design' && activeTableId) {
+    // ── Query design view (non-SQL mode) ────────────────────────────────────
+    if (activeView === 'query' && activeQueryId) {
       return (
-        <>
+        <QueryDesignView
+          databaseId={snapshot.database.id}
+          queryId={activeQueryId}
+          db={snapshot.database as any}
+          tables={snapshot.tables as any}
+          isStudentMode={true}
+          queries={queries}
+          forms={forms}
+          reports={reports}
+          onSelectTable={selectTable}
+          onSelectQuery={selectQuery}
+          {...wizardProps}
+        />
+      );
+    }
+
+    // ── SQL mode ──────────────────────────────────────────────────────────
+    if (activeView === 'sql') {
+      if (!tempQueryId) {
+        return (
+          <div className="h-screen w-screen flex items-center justify-center bg-[#f3f2f1] font-bold text-gray-500">
+            Loading query editor...
+          </div>
+        );
+      }
+
+      if (sqlSubView === 'design' && activeTableId) {
+        return (
           <TableDesignView
             databaseId={snapshot.database.id}
             tableId={activeTableId}
@@ -520,17 +668,17 @@ export function EmbedView({ token, initialMode }: Props) {
             isStudentMode={true}
             onSwitchToDatasheet={() => setSqlSubView('table')}
             onReset={handleReset}
+            onSelectTable={selectTable}
+            queries={queries}
+            forms={forms}
+            reports={reports}
             {...wizardProps}
           />
-          {wizardDialogs}
-        </>
-      );
-    }
+        );
+      }
 
-    // Student clicked a table from the SQL view — show its datasheet
-    if (sqlSubView === 'table' && activeTableId) {
-      return (
-        <>
+      if (sqlSubView === 'table' && activeTableId) {
+        return (
           <TableDataView
             databaseId={snapshot.database.id}
             tableId={activeTableId}
@@ -546,14 +694,10 @@ export function EmbedView({ token, initialMode }: Props) {
             onSwitchToDesign={() => setSqlSubView('design')}
             {...wizardProps}
           />
-          {wizardDialogs}
-        </>
-      );
-    }
+        );
+      }
 
-    // Default SQL sub-view: the Query Design View in SQL mode
-    return (
-      <>
+      return (
         <QueryDesignView
           databaseId={snapshot.database.id}
           queryId={tempQueryId}
@@ -568,15 +712,12 @@ export function EmbedView({ token, initialMode }: Props) {
           onSelectQuery={() => setSqlSubView('query')}
           {...wizardProps}
         />
-        {wizardDialogs}
-      </>
-    );
-  }
+      );
+    }
 
-  // ── Relationships view ────────────────────────────────────────────────────
-  if (activeView === 'relationships') {
-    return (
-      <>
+    // ── Relationships view ──────────────────────────────────────────────────
+    if (activeView === 'relationships') {
+      return (
         <RelationshipsView
           databaseId={snapshot.database.id}
           db={snapshot.database}
@@ -585,19 +726,16 @@ export function EmbedView({ token, initialMode }: Props) {
           reports={reports}
           queries={queries}
           isStudentMode={true}
-          onSelectTable={(id) => { setActiveTableId(id); setActiveView('datasheet'); }}
+          onSelectTable={selectTable}
           {...wizardProps}
         />
-        {wizardDialogs}
-      </>
-    );
-  }
+      );
+    }
 
-  // ── Table datasheet / design mode ─────────────────────────────────────────
-  if (activeTableId) {
-    if (activeView === 'design') {
-      return (
-        <>
+    // ── Table datasheet / design mode ────────────────────────────────────────
+    if (activeTableId) {
+      if (activeView === 'design') {
+        return (
           <TableDesignView
             databaseId={snapshot.database.id}
             tableId={activeTableId}
@@ -607,50 +745,51 @@ export function EmbedView({ token, initialMode }: Props) {
             isStudentMode={true}
             onSwitchToDatasheet={() => setActiveView('datasheet')}
             onReset={handleReset}
+            onSelectTable={selectTable}
+            queries={queries}
+            forms={forms}
+            reports={reports}
             {...wizardProps}
           />
-          {wizardDialogs}
-        </>
-      );
-    }
-    return (
-      <>
+        );
+      }
+      return (
         <TableDataView
           databaseId={snapshot.database.id}
           tableId={activeTableId}
           db={snapshot.database}
           tables={snapshot.tables}
           isStudentMode={true}
-          onSelectTable={(id) => { setActiveTableId(id); setActiveView('datasheet'); }}
+          onSelectTable={selectTable}
+          onSelectQuery={selectQuery}
           forms={forms}
           reports={reports}
           queries={queries}
           onReset={handleReset}
           onSwitchToDesign={() => setActiveView('design')}
+          onSelectForm={selectForm}
+          onSelectReport={selectReport}
           {...wizardProps}
         />
-        {wizardDialogs}
-      </>
+      );
+    }
+
+    // ── No table selected — default landing ─────────────────────────────────
+    const ribbon = (
+      <Ribbon
+        title={snapshot.database.name}
+        tabs={[{
+          name: 'Home',
+          content: (
+            <div className="text-gray-400 p-2 italic text-sm">
+              Select a table from the left panel to begin
+            </div>
+          )
+        }]}
+      />
     );
-  }
 
-  // ── No table selected — default landing ───────────────────────────────────
-  const ribbon = (
-    <Ribbon
-      title={snapshot.database.name}
-      tabs={[{
-        name: 'Home',
-        content: (
-          <div className="text-gray-400 p-2 italic text-sm">
-            Select a table from the left panel to begin
-          </div>
-        )
-      }]}
-    />
-  );
-
-  return (
-    <>
+    return (
       <Shell
         title={snapshot.database.name}
         ribbon={ribbon}
@@ -660,12 +799,13 @@ export function EmbedView({ token, initialMode }: Props) {
             tables={snapshot.tables}
             databaseId={snapshot.database.id}
             isStudentMode={true}
-            onSelectTable={setActiveTableId}
+            onSelectTable={selectTable}
             forms={forms}
             reports={reports}
             queries={queries}
-            onSelectForm={(id) => { setActiveFormId(id); setActiveView('form'); }}
-            onSelectReport={(id) => { setActiveReportId(id); setActiveView('report'); }}
+            onSelectForm={selectForm}
+            onSelectReport={selectReport}
+            onSelectQuery={selectQuery}
           />
         }
       >
@@ -676,7 +816,13 @@ export function EmbedView({ token, initialMode }: Props) {
           </p>
         </div>
       </Shell>
+    );
+  };
+
+  return (
+    <TabBarProvider value={tabBarEl}>
+      {renderContent()}
       {wizardDialogs}
-    </>
+    </TabBarProvider>
   );
 }

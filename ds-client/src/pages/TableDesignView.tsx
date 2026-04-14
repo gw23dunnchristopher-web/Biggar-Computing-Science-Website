@@ -107,9 +107,13 @@ interface Props {
   isStudentMode?: boolean;
   onSwitchToDatasheet?: () => void;
   onReset?: () => void;
+  onSelectTable?: (id: number) => void;
+  onSelectForm?: (id: number) => void;
+  onSelectReport?: (id: number) => void;
+  onSelectQuery?: (id: number) => void;
 }
 
-export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable, queries = [], forms = [], reports = [], onDeleteQuery, onDeleteForm, onDeleteReport, onRefresh, onCreateTable, onCreateQuery, onQueryWizard, onCreateSqlQuery, onCreateForm, onCreateBlankForm, onCreateAutoForm, onCreateReport, onCreateBlankReport, onCreateAutoReport, onShare, onSettings, onImportCSV, onExportData, onOpenRelationships, onCompact, onAnalyse, onDocumenter, onObjectDependencies, isStudentMode, onSwitchToDatasheet, onReset }: Props) {
+export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable, queries = [], forms = [], reports = [], onDeleteQuery, onDeleteForm, onDeleteReport, onRefresh, onCreateTable, onCreateQuery, onQueryWizard, onCreateSqlQuery, onCreateForm, onCreateBlankForm, onCreateAutoForm, onCreateReport, onCreateBlankReport, onCreateAutoReport, onShare, onSettings, onImportCSV, onExportData, onOpenRelationships, onCompact, onAnalyse, onDocumenter, onObjectDependencies, isStudentMode, onSwitchToDatasheet, onReset, onSelectTable, onSelectForm, onSelectReport, onSelectQuery }: Props) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -450,15 +454,15 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
         <button
           title="Datasheet View"
           onClick={switchToDatasheet}
-          className="p-0.5 rounded hover:bg-gray-200 text-gray-500 hover:text-gray-700"
+          className="p-1 rounded hover:bg-gray-200 text-gray-500 hover:text-gray-700"
         >
-          <DatasheetViewIcon size={13} />
+          <DatasheetViewIcon size={18} />
         </button>
         <button
           title="Design View"
-          className="p-0.5 rounded bg-[#C42B1C] text-white"
+          className="p-1 rounded bg-[#C42B1C] text-white"
         >
-          <DesignViewIcon size={13} />
+          <DesignViewIcon size={18} />
         </button>
       </div>
     </div>
@@ -474,6 +478,12 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
           tables={tables}
           databaseId={databaseId}
           onDeleteTable={onDeleteTable}
+          isStudentMode={isStudentMode}
+          activeTableId={tableId}
+          onSelectTable={onSelectTable}
+          onSelectForm={onSelectForm}
+          onSelectReport={onSelectReport}
+          onSelectQuery={onSelectQuery}
           queries={queries}
           onDeleteQuery={onDeleteQuery}
           forms={forms}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTabBar } from '@/contexts/tab-bar-context';
 
 interface ShellProps {
   title: string;
@@ -10,9 +11,11 @@ interface ShellProps {
 }
 
 export function Shell({ title, ribbon, sidebar, children, isEmbed, statusBar }: ShellProps) {
+  const tabBar = useTabBar();
   return (
     <div className="flex flex-col h-screen w-full bg-white overflow-hidden text-sm">
       {ribbon}
+      {tabBar}
       <div className="flex flex-1 overflow-hidden">
         {sidebar}
         <div className="flex flex-col flex-1 overflow-hidden">

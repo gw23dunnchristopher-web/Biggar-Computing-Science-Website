@@ -114,6 +114,10 @@ interface Props {
   onCreateAutoReport?: () => void;
   onShare?: () => void;
   onSettings?: () => void;
+  onSelectTable?: (id: number) => void;
+  onSelectForm?: (id: number) => void;
+  onSelectReport?: (id: number) => void;
+  onSelectQuery?: (id: number) => void;
 }
 
 export function ReportView({
@@ -122,7 +126,8 @@ export function ReportView({
   isStudentMode, onCreateTable, onCreateQuery, onQueryWizard, onCreateSqlQuery,
   onCreateForm, onCreateBlankForm, onCreateAutoForm,
   onCreateReport, onCreateBlankReport, onCreateAutoReport,
-  onShare, onSettings
+  onShare, onSettings,
+  onSelectTable, onSelectForm, onSelectReport, onSelectQuery
 }: Props) {
   const { toast } = useToast();
   const search = useSearch();
@@ -453,6 +458,11 @@ export function ReportView({
       reports={reports}
       onDeleteReport={onDeleteReport}
       onRefresh={onRefresh}
+      onSelectTable={onSelectTable}
+      onSelectForm={onSelectForm}
+      onSelectReport={onSelectReport}
+      onSelectQuery={onSelectQuery}
+      activeReportId={reportId}
     />
   );
 
