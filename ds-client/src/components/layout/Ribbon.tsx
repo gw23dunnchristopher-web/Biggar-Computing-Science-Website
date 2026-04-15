@@ -283,11 +283,11 @@ export function Ribbon({
         )}
       </div>
 
-      {/* Tab Content — size-aware, no scrollbar */}
+      {/* Tab Content — size-aware, scrollable when groups overflow */}
       <RibbonSizeContext.Provider value={ribbonSize}>
         <div
           ref={contentRef}
-          className={`bg-white px-2 py-1 flex items-start gap-1 overflow-hidden ${contentMinH}`}
+          className={`bg-white px-2 py-1 flex items-start gap-1 overflow-x-auto overflow-y-hidden ${contentMinH} ribbon-content-scroll`}
         >
           {pinnedContent}
           {activeContent}
