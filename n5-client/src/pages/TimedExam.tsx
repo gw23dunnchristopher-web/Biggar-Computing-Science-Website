@@ -2813,7 +2813,7 @@ function renderInput(
 
                 {activeMode === "pseudocode" ? (
                     <Textarea 
-                        placeholder="Write your pseudocode here..."
+                        placeholder="Write your SQL code here..."
                         className="min-h-[200px] text-base font-mono p-4 bg-neutral-900 text-neutral-100 border-neutral-800"
                         value={currentInput["main"] || ""}
                         onChange={(e) => onChange("main", e.target.value)}
