@@ -7,7 +7,7 @@ import {
 } from '@/api';
 import { Shell } from '@/components/layout/Shell';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonViewSplitButton } from '@/components/layout/Ribbon';
+import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonViewSplitButton, useRibbonSize } from '@/components/layout/Ribbon';
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { DataGrid } from '@/components/ui/data-grid';
@@ -36,6 +36,139 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
 interface ItemRow { id: number; name: string; databaseId: number; }
+
+const FONT_OPTIONS = ['Aptos (Detail)', 'Arial', 'Calibri', 'Courier New', 'Georgia', 'Times New Roman', 'Trebuchet MS', 'Verdana'];
+const SIZE_OPTIONS = ['8','9','10','11','12','14','16','18','20','24','28','36','48','72'];
+
+function TextFormattingGroup({
+  fmtFont, setFmtFont, fmtSize, setFmtSize,
+  fmtBold, setFmtBold, fmtItalic, setFmtItalic,
+  fmtUnderline, setFmtUnderline, fmtAlign, setFmtAlign,
+}: {
+  fmtFont: string; setFmtFont: (v: string) => void;
+  fmtSize: string; setFmtSize: (v: string) => void;
+  fmtBold: boolean; setFmtBold: (fn: (v: boolean) => boolean) => void;
+  fmtItalic: boolean; setFmtItalic: (fn: (v: boolean) => boolean) => void;
+  fmtUnderline: boolean; setFmtUnderline: (fn: (v: boolean) => boolean) => void;
+  fmtAlign: string; setFmtAlign: (v: string) => void;
+}) {
+  const ribbonSize = useRibbonSize();
+
+  const fontSelect = (compact?: boolean) => (
+    <select
+      value={fmtFont}
+      onChange={e => setFmtFont(e.target.value)}
+      className={`h-7 text-[12px] border border-gray-300 rounded px-1 cursor-pointer bg-white ${compact ? 'min-w-[80px] max-w-[100px]' : 'min-w-[120px]'}`}
+    >
+      {FONT_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}
+    </select>
+  );
+
+  const sizeSelect = (
+    <select
+      value={fmtSize}
+      onChange={e => setFmtSize(e.target.value)}
+      className="h-7 text-[12px] border border-gray-300 rounded px-1 cursor-pointer bg-white w-12"
+    >
+      {SIZE_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+    </select>
+  );
+
+  const biuButtons = (
+    <>
+      <button onClick={() => setFmtBold(v => !v)}
+        className={`w-7 h-7 flex items-center justify-center rounded font-bold transition-colors cursor-pointer ${fmtBold ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+        title="Bold"><Bold size={14} /></button>
+      <button onClick={() => setFmtItalic(v => !v)}
+        className={`w-7 h-7 flex items-center justify-center rounded italic transition-colors cursor-pointer ${fmtItalic ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+        title="Italic"><Italic size={14} /></button>
+      <button onClick={() => setFmtUnderline(v => !v)}
+        className={`w-7 h-7 flex items-center justify-center rounded underline transition-colors cursor-pointer ${fmtUnderline ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+        title="Underline"><Underline size={14} /></button>
+    </>
+  );
+
+  const colorButtons = (
+    <>
+      <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Font Color">
+        <div className="flex flex-col items-center gap-px">
+          <span className="text-[11px] font-bold text-gray-700 leading-none">A</span>
+          <span className="w-4 h-0.5 rounded-full bg-[#C42B1C]" />
+        </div>
+      </button>
+      <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Highlight Color">
+        <Highlighter size={14} className="text-yellow-500" />
+      </button>
+    </>
+  );
+
+  const alignButtons = (
+    <>
+      <button onClick={() => setFmtAlign('left')}
+        className={`w-7 h-7 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'left' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+        title="Align Left"><AlignLeft size={14} /></button>
+      <button onClick={() => setFmtAlign('center')}
+        className={`w-7 h-7 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'center' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+        title="Center"><AlignCenter size={14} /></button>
+      <button onClick={() => setFmtAlign('right')}
+        className={`w-7 h-7 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'right' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
+        title="Align Right"><AlignRight size={14} /></button>
+    </>
+  );
+
+  const miscButtons = (
+    <>
+      <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Background Color">
+        <Paintbrush size={14} className="text-gray-600" />
+      </button>
+      <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Gridlines">
+        <Grid3X3 size={14} className="text-gray-600" />
+      </button>
+    </>
+  );
+
+  if (ribbonSize === 'medium') {
+    return (
+      <RibbonGroup name="Text Formatting">
+        <div className="flex flex-col gap-1 pt-0.5">
+          <div className="flex items-center gap-1 flex-wrap">
+            {fontSelect(true)}
+            {sizeSelect}
+            <span className="w-px h-5 bg-gray-200 mx-0.5" />
+            {biuButtons}
+          </div>
+          <div className="flex items-center gap-1 flex-wrap">
+            {colorButtons}
+            <span className="w-px h-5 bg-gray-200 mx-0.5" />
+            {alignButtons}
+            <span className="w-px h-5 bg-gray-200 mx-0.5" />
+            {miscButtons}
+          </div>
+        </div>
+      </RibbonGroup>
+    );
+  }
+
+  return (
+    <RibbonGroup name="Text Formatting">
+      <div className="flex flex-col gap-1.5 pt-0.5">
+        <div className="flex items-center gap-1">
+          {fontSelect()}
+          {sizeSelect}
+          <span className="w-px h-5 bg-gray-200 mx-0.5" />
+          {biuButtons}
+        </div>
+        <div className="flex items-center gap-1">
+          {colorButtons}
+          <span className="w-px h-5 bg-gray-200 mx-0.5" />
+          {alignButtons}
+          <span className="w-px h-5 bg-gray-200 mx-0.5" />
+          {miscButtons}
+        </div>
+      </div>
+    </RibbonGroup>
+  );
+}
 
 interface Props {
   databaseId: number;
@@ -737,82 +870,14 @@ export function TableDataView({
               </RibbonGroup>
 
               {/* ── Text Formatting ── */}
-              <RibbonGroup name="Text Formatting">
-                <div className="flex flex-col gap-1.5 pt-0.5">
-                  {/* Row 1: font + size + B I U */}
-                  <div className="flex items-center gap-1">
-                    <select
-                      value={fmtFont}
-                      onChange={e => setFmtFont(e.target.value)}
-                      className="h-7 text-[12px] border border-gray-300 rounded px-1 cursor-pointer bg-white min-w-[120px]"
-                    >
-                      {['Aptos (Detail)', 'Arial', 'Calibri', 'Courier New', 'Georgia', 'Times New Roman', 'Trebuchet MS', 'Verdana'].map(f => (
-                        <option key={f} value={f}>{f}</option>
-                      ))}
-                    </select>
-                    <select
-                      value={fmtSize}
-                      onChange={e => setFmtSize(e.target.value)}
-                      className="h-7 text-[12px] border border-gray-300 rounded px-1 cursor-pointer bg-white w-12"
-                    >
-                      {['8','9','10','11','12','14','16','18','20','24','28','36','48','72'].map(s => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                    <span className="w-px h-5 bg-gray-200 mx-0.5" />
-                    <button
-                      onClick={() => setFmtBold(v => !v)}
-                      className={`w-7 h-7 flex items-center justify-center rounded font-bold transition-colors cursor-pointer ${fmtBold ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
-                      title="Bold"
-                    ><Bold size={14} /></button>
-                    <button
-                      onClick={() => setFmtItalic(v => !v)}
-                      className={`w-7 h-7 flex items-center justify-center rounded italic transition-colors cursor-pointer ${fmtItalic ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
-                      title="Italic"
-                    ><Italic size={14} /></button>
-                    <button
-                      onClick={() => setFmtUnderline(v => !v)}
-                      className={`w-7 h-7 flex items-center justify-center rounded underline transition-colors cursor-pointer ${fmtUnderline ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
-                      title="Underline"
-                    ><Underline size={14} /></button>
-                  </div>
-                  {/* Row 2: color | highlight | alignment | bg | gridlines */}
-                  <div className="flex items-center gap-1">
-                    <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Font Color">
-                      <div className="flex flex-col items-center gap-px">
-                        <span className="text-[11px] font-bold text-gray-700 leading-none">A</span>
-                        <span className="w-4 h-0.5 rounded-full bg-[#C42B1C]" />
-                      </div>
-                    </button>
-                    <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Highlight Color">
-                      <Highlighter size={14} className="text-yellow-500" />
-                    </button>
-                    <span className="w-px h-5 bg-gray-200 mx-0.5" />
-                    <button
-                      onClick={() => setFmtAlign('left')}
-                      className={`w-7 h-7 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'left' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
-                      title="Align Left"
-                    ><AlignLeft size={14} /></button>
-                    <button
-                      onClick={() => setFmtAlign('center')}
-                      className={`w-7 h-7 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'center' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
-                      title="Center"
-                    ><AlignCenter size={14} /></button>
-                    <button
-                      onClick={() => setFmtAlign('right')}
-                      className={`w-7 h-7 flex items-center justify-center rounded transition-colors cursor-pointer ${fmtAlign === 'right' ? 'bg-red-100 text-[#C42B1C]' : 'hover:bg-gray-100 text-gray-700'}`}
-                      title="Align Right"
-                    ><AlignRight size={14} /></button>
-                    <span className="w-px h-5 bg-gray-200 mx-0.5" />
-                    <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Background Color">
-                      <Paintbrush size={14} className="text-gray-600" />
-                    </button>
-                    <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Gridlines">
-                      <Grid3X3 size={14} className="text-gray-600" />
-                    </button>
-                  </div>
-                </div>
-              </RibbonGroup>
+              <TextFormattingGroup
+                fmtFont={fmtFont} setFmtFont={setFmtFont}
+                fmtSize={fmtSize} setFmtSize={setFmtSize}
+                fmtBold={fmtBold} setFmtBold={setFmtBold}
+                fmtItalic={fmtItalic} setFmtItalic={setFmtItalic}
+                fmtUnderline={fmtUnderline} setFmtUnderline={setFmtUnderline}
+                fmtAlign={fmtAlign} setFmtAlign={setFmtAlign}
+              />
             </>
           )
         },
