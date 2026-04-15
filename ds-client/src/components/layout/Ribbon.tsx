@@ -144,7 +144,7 @@ export function Ribbon({
     if (!el) return;
     const ro = new ResizeObserver(() => {
       const w = el.clientWidth;
-      setRibbonSize(w < 340 ? 'small' : w < 580 ? 'medium' : 'large');
+      setRibbonSize(w < 400 ? 'small' : w < 780 ? 'medium' : 'large');
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -324,7 +324,6 @@ export function RibbonGroup({ name, children }: { name: string; children: React.
   }
 
   if (size === 'medium') {
-    // Compact: buttons stacked in a column, group label at bottom
     return (
       <div className="flex flex-col gap-0.5 pr-2 border-r border-gray-200 last:border-r-0 relative pt-1 pb-5 min-w-fit">
         {children}
@@ -335,7 +334,6 @@ export function RibbonGroup({ name, children }: { name: string; children: React.
     );
   }
 
-  // Large: existing side-by-side button layout
   return (
     <div className="flex gap-0 pr-2 border-r border-gray-200 last:border-r-0 relative pt-1 pb-5 h-full min-w-fit justify-start items-start">
       {children}
