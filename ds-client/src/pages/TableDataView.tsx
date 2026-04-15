@@ -151,16 +151,17 @@ function TextFormattingGroup({
 
   return (
     <RibbonGroup name="Text Formatting">
-      <div className="flex flex-col gap-1.5 pt-0.5">
+      <div className="flex flex-col gap-0.5 pt-0.5">
         <div className="flex items-center gap-1">
           {fontSelect()}
           {sizeSelect}
-          <span className="w-px h-5 bg-gray-200 mx-0.5" />
-          {biuButtons}
         </div>
-        <div className="flex items-center gap-1">
-          {colorButtons}
+        <div className="flex items-center gap-0.5">
+          {biuButtons}
           <span className="w-px h-5 bg-gray-200 mx-0.5" />
+          {colorButtons}
+        </div>
+        <div className="flex items-center gap-0.5">
           {alignButtons}
           <span className="w-px h-5 bg-gray-200 mx-0.5" />
           {miscButtons}

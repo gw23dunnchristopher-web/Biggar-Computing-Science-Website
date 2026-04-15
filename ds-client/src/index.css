@@ -151,23 +151,6 @@
   @apply bg-red-50 border border-red-200;
 }
 
-.ribbon-content-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: #d1d5db transparent;
-}
-.ribbon-content-scroll::-webkit-scrollbar {
-  height: 4px;
-}
-.ribbon-content-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-.ribbon-content-scroll::-webkit-scrollbar-thumb {
-  background-color: #d1d5db;
-  border-radius: 2px;
-}
-.ribbon-content-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: #9ca3af;
-}
 
 @media print {
   /* Hide all chrome, show only the report body */

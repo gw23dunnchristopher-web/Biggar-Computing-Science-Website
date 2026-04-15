@@ -5,7 +5,7 @@ import { TabBarProvider } from '@/contexts/tab-bar-context';
 import { useGetDatabase, useListTables, useDeleteTable, getListTablesQueryKey, useCreateTable, useUpdateDatabase } from '@/api';
 import { Shell } from '@/components/layout/Shell';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, useRibbonSize } from '@/components/layout/Ribbon';
+import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton } from '@/components/layout/Ribbon';
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
 import { TableDesignView } from './TableDesignView';
 import { TableDataView } from './TableDataView';
@@ -42,24 +42,22 @@ import {
 } from '@/components/ui/ds-icons';
 
 function DisabledTextFormattingGroup() {
-  const ribbonSize = useRibbonSize();
-  const compact = ribbonSize === 'medium';
   return (
     <RibbonGroup name="Text Formatting">
-      <div className="flex flex-col gap-1.5 pt-0.5 opacity-40 pointer-events-none">
+      <div className="flex flex-col gap-0.5 pt-0.5 opacity-40 pointer-events-none">
         <div className="flex items-center gap-1">
-          <select disabled className={`h-7 text-[12px] border border-gray-300 rounded px-1 bg-white ${compact ? 'min-w-[80px] max-w-[100px]' : 'min-w-[120px]'}`}>
+          <select disabled className="h-7 text-[12px] border border-gray-300 rounded px-1 bg-white min-w-[120px]">
             <option>Aptos (Detail)</option>
           </select>
           <select disabled className="h-7 text-[12px] border border-gray-300 rounded px-1 bg-white w-12">
             <option>11</option>
           </select>
-          <span className="w-px h-5 bg-gray-200 mx-0.5" />
+        </div>
+        <div className="flex items-center gap-0.5">
           <button disabled className="w-7 h-7 flex items-center justify-center rounded text-gray-700"><Bold size={14} /></button>
           <button disabled className="w-7 h-7 flex items-center justify-center rounded italic text-gray-700"><Italic size={14} /></button>
           <button disabled className="w-7 h-7 flex items-center justify-center rounded underline text-gray-700"><Underline size={14} /></button>
-        </div>
-        <div className="flex items-center gap-1">
+          <span className="w-px h-5 bg-gray-200 mx-0.5" />
           <button disabled className="w-7 h-7 flex items-center justify-center rounded">
             <div className="flex flex-col items-center gap-px">
               <span className="text-[11px] font-bold text-gray-700 leading-none">A</span>
@@ -67,7 +65,8 @@ function DisabledTextFormattingGroup() {
             </div>
           </button>
           <button disabled className="w-7 h-7 flex items-center justify-center rounded"><Highlighter size={14} className="text-yellow-500" /></button>
-          <span className="w-px h-5 bg-gray-200 mx-0.5" />
+        </div>
+        <div className="flex items-center gap-0.5">
           <button disabled className="w-7 h-7 flex items-center justify-center rounded text-gray-700"><AlignLeft size={14} /></button>
           <button disabled className="w-7 h-7 flex items-center justify-center rounded text-gray-700"><AlignCenter size={14} /></button>
           <button disabled className="w-7 h-7 flex items-center justify-center rounded text-gray-700"><AlignRight size={14} /></button>
