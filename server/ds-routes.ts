@@ -4,7 +4,7 @@ import {
   dsDatabases, dsTables, dsFields, dsRecords,
   dsEmbeds, dsStudentSessions, dsQueries, dsForms, dsReports, dsRelationships
 } from "@shared/ds-schema";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and, or, inArray } from "drizzle-orm";
 import crypto from "crypto";
 import alasql from "alasql";
 import { GoogleGenAI } from "@google/genai";
@@ -21,62 +21,92 @@ function tsFmt(obj: any, ...keys: string[]) {
 /* ── Deep copy a teacher database for a student sandbox ── */
 async function deepCopyDatabase(sourceDatabaseId: number, newUserId: string): Promise<number> {
   if (!db) throw new Error("Database not available");
-  const [sourceDb] = await db.select().from(dsDatabases).where(eq(dsDatabases.id, sourceDatabaseId));
+
+  // ── Step 1: Fetch all source data in parallel ──
+  const [
+    [sourceDb], sourceTables, sourceRels, sourceQueries, sourceForms, sourceReports, sourceRecordsAll
+  ] = await Promise.all([
+    db.select().from(dsDatabases).where(eq(dsDatabases.id, sourceDatabaseId)),
+    db.select().from(dsTables).where(eq(dsTables.databaseId, sourceDatabaseId)),
+    db.select().from(dsRelationships).where(eq(dsRelationships.databaseId, sourceDatabaseId)),
+    db.select().from(dsQueries).where(eq(dsQueries.databaseId, sourceDatabaseId)),
+    db.select().from(dsForms).where(eq(dsForms.databaseId, sourceDatabaseId)),
+    db.select().from(dsReports).where(eq(dsReports.databaseId, sourceDatabaseId)),
+    db.select().from(dsRecords).where(eq(dsRecords.databaseId, sourceDatabaseId)),
+  ]);
   if (!sourceDb) throw new Error("Source database not found");
 
+  // ── Step 2: Fetch all fields for all source tables in one query ──
+  const sourceTableIds = sourceTables.map(t => t.id);
+  const sourceFieldsAll = sourceTableIds.length > 0
+    ? await db.select().from(dsFields).where(inArray(dsFields.tableId, sourceTableIds))
+    : [];
+
+  // Group fields and records by tableId for O(1) lookup
+  const fieldsByTable = new Map<number, typeof sourceFieldsAll>();
+  for (const f of sourceFieldsAll) {
+    if (!fieldsByTable.has(f.tableId)) fieldsByTable.set(f.tableId, []);
+    fieldsByTable.get(f.tableId)!.push(f);
+  }
+  const recordsByTable = new Map<number, typeof sourceRecordsAll>();
+  for (const r of sourceRecordsAll) {
+    if (!recordsByTable.has(r.tableId)) recordsByTable.set(r.tableId, []);
+    recordsByTable.get(r.tableId)!.push(r);
+  }
+
+  // ── Step 3: Create the new sandbox database ──
   const [newDb] = await db.insert(dsDatabases).values({ name: `[Student Copy] ${sourceDb.name}`, userId: newUserId }).returning();
 
-  // Copy tables, fields, records — track old→new ID mappings for relationships
+  // ── Step 4: Copy all tables in parallel, batch-inserting their fields and records ──
   const tableIdMap: Record<number, number> = {};
   const fieldIdMap: Record<number, number> = {};
 
-  const sourceTables = await db.select().from(dsTables).where(eq(dsTables.databaseId, sourceDatabaseId));
-  for (const t of sourceTables) {
-    const [newTable] = await db.insert(dsTables).values({ name: t.name, databaseId: newDb.id }).returning();
+  await Promise.all(sourceTables.map(async (t) => {
+    const [newTable] = await db!.insert(dsTables).values({ name: t.name, databaseId: newDb.id }).returning();
     tableIdMap[t.id] = newTable.id;
-    const fields = await db.select().from(dsFields).where(eq(dsFields.tableId, t.id));
-    for (const f of fields) {
-      const [newField] = await db.insert(dsFields).values({
-        name: f.name, fieldType: f.fieldType, isRequired: f.isRequired,
-        isPrimaryKey: f.isPrimaryKey, sortOrder: f.sortOrder, tableId: newTable.id,
-        caption: f.caption, defaultValue: f.defaultValue, fieldSize: f.fieldSize, description: f.description,
-      }).returning();
-      fieldIdMap[f.id] = newField.id;
-    }
-    const records = await db.select().from(dsRecords).where(eq(dsRecords.tableId, t.id));
-    if (records.length > 0) {
-      await db.insert(dsRecords).values(records.map(r => ({ tableId: newTable.id, databaseId: newDb.id, data: r.data })));
-    }
-  }
 
-  // Copy relationships with remapped table/field IDs
-  const sourceRels = await db.select().from(dsRelationships).where(eq(dsRelationships.databaseId, sourceDatabaseId));
-  for (const rel of sourceRels) {
-    const newFromTableId = tableIdMap[rel.fromTableId];
-    const newToTableId = tableIdMap[rel.toTableId];
-    const newFromFieldId = fieldIdMap[rel.fromFieldId];
-    const newToFieldId = fieldIdMap[rel.toFieldId];
-    if (newFromTableId && newToTableId && newFromFieldId && newToFieldId) {
-      await db.insert(dsRelationships).values({
-        databaseId: newDb.id, fromTableId: newFromTableId, fromFieldId: newFromFieldId,
-        toTableId: newToTableId, toFieldId: newToFieldId, relationshipType: rel.relationshipType,
-      });
-    }
-  }
+    const fields = fieldsByTable.get(t.id) ?? [];
+    const records = recordsByTable.get(t.id) ?? [];
 
-  // Copy queries, forms, reports (definitions reference table/field names, which stay the same)
-  const sourceQueries = await db.select().from(dsQueries).where(eq(dsQueries.databaseId, sourceDatabaseId));
-  for (const q of sourceQueries) {
-    await db.insert(dsQueries).values({ name: q.name, databaseId: newDb.id, definition: q.definition });
-  }
-  const sourceForms = await db.select().from(dsForms).where(eq(dsForms.databaseId, sourceDatabaseId));
-  for (const f of sourceForms) {
-    await db.insert(dsForms).values({ name: f.name, databaseId: newDb.id, definition: f.definition });
-  }
-  const sourceReports = await db.select().from(dsReports).where(eq(dsReports.databaseId, sourceDatabaseId));
-  for (const r of sourceReports) {
-    await db.insert(dsReports).values({ name: r.name, databaseId: newDb.id, definition: r.definition });
-  }
+    await Promise.all([
+      // Batch-insert all fields for this table at once
+      (async () => {
+        if (fields.length > 0) {
+          const newFields = await db!.insert(dsFields).values(
+            fields.map(f => ({
+              name: f.name, fieldType: f.fieldType, isRequired: f.isRequired,
+              isPrimaryKey: f.isPrimaryKey, sortOrder: f.sortOrder, tableId: newTable.id,
+              caption: f.caption, defaultValue: f.defaultValue, fieldSize: f.fieldSize, description: f.description,
+            }))
+          ).returning();
+          // Map old→new field IDs (returning() preserves insert order)
+          fields.forEach((oldF, i) => { fieldIdMap[oldF.id] = newFields[i].id; });
+        }
+      })(),
+      // Batch-insert all records for this table at once
+      records.length > 0
+        ? db!.insert(dsRecords).values(records.map(r => ({ tableId: newTable.id, databaseId: newDb.id, data: r.data })))
+        : Promise.resolve(),
+    ]);
+  }));
+
+  // ── Step 5: Batch-insert relationships, queries, forms, reports in parallel ──
+  const validRels = sourceRels.filter(rel =>
+    tableIdMap[rel.fromTableId] && tableIdMap[rel.toTableId] &&
+    fieldIdMap[rel.fromFieldId] && fieldIdMap[rel.toFieldId]
+  );
+
+  await Promise.all([
+    validRels.length > 0 ? db!.insert(dsRelationships).values(validRels.map(rel => ({
+      databaseId: newDb.id,
+      fromTableId: tableIdMap[rel.fromTableId], fromFieldId: fieldIdMap[rel.fromFieldId],
+      toTableId: tableIdMap[rel.toTableId],     toFieldId: fieldIdMap[rel.toFieldId],
+      relationshipType: rel.relationshipType,
+    }))) : Promise.resolve(),
+    sourceQueries.length > 0 ? db!.insert(dsQueries).values(sourceQueries.map(q => ({ name: q.name, databaseId: newDb.id, definition: q.definition }))) : Promise.resolve(),
+    sourceForms.length > 0   ? db!.insert(dsForms).values(sourceForms.map(f => ({ name: f.name, databaseId: newDb.id, definition: f.definition })))     : Promise.resolve(),
+    sourceReports.length > 0 ? db!.insert(dsReports).values(sourceReports.map(r => ({ name: r.name, databaseId: newDb.id, definition: r.definition })))  : Promise.resolve(),
+  ]);
 
   return newDb.id;
 }
@@ -485,13 +515,23 @@ export function registerDsRoutes(app: Express) {
     } else {
       sandboxDatabaseId = await deepCopyDatabase(embed.databaseId, `student-anon-${Date.now()}`);
     }
-    const [database] = await db!.select().from(dsDatabases).where(eq(dsDatabases.id, sandboxDatabaseId));
+    const [[database], [originalDb], tables] = await Promise.all([
+      db!.select().from(dsDatabases).where(eq(dsDatabases.id, sandboxDatabaseId)),
+      db!.select({ taskDescription: dsDatabases.taskDescription }).from(dsDatabases).where(eq(dsDatabases.id, embed.databaseId)),
+      db!.select().from(dsTables).where(eq(dsTables.databaseId, sandboxDatabaseId)).orderBy(dsTables.createdAt),
+    ]);
     if (!database) return res.status(404).json({ error: "Sandbox database not found" });
-    const [originalDb] = await db!.select({ taskDescription: dsDatabases.taskDescription }).from(dsDatabases).where(eq(dsDatabases.id, embed.databaseId));
-    const tables = await db!.select().from(dsTables).where(eq(dsTables.databaseId, sandboxDatabaseId)).orderBy(dsTables.createdAt);
-    const tablesWithFields = await Promise.all(tables.map(async (table) => {
-      const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, table.id)).orderBy(dsFields.sortOrder);
-      return { ...tsFmt(table, "createdAt", "updatedAt"), fields: fields.map(f => tsFmt(f, "createdAt", "updatedAt")) };
+    const allFields = tables.length > 0
+      ? await db!.select().from(dsFields).where(inArray(dsFields.tableId, tables.map(t => t.id))).orderBy(dsFields.sortOrder)
+      : [];
+    const fieldsByTable = new Map<number, typeof allFields>();
+    for (const f of allFields) {
+      if (!fieldsByTable.has(f.tableId)) fieldsByTable.set(f.tableId, []);
+      fieldsByTable.get(f.tableId)!.push(f);
+    }
+    const tablesWithFields = tables.map(table => ({
+      ...tsFmt(table, "createdAt", "updatedAt"),
+      fields: (fieldsByTable.get(table.id) ?? []).map(f => tsFmt(f, "createdAt", "updatedAt")),
     }));
     res.json({
       database: { ...tsFmt(database, "createdAt", "updatedAt"), taskDescription: originalDb?.taskDescription ?? null },
@@ -506,15 +546,17 @@ export function registerDsRoutes(app: Express) {
     const [session] = await db!.select().from(dsStudentSessions).where(and(eq(dsStudentSessions.sessionKey, sessionKey), eq(dsStudentSessions.token, token)));
     if (!session) return res.status(404).json({ error: "Session not found" });
     const dbId = session.sandboxDatabaseId;
-    await db!.delete(dsStudentSessions).where(and(eq(dsStudentSessions.sessionKey, sessionKey), eq(dsStudentSessions.token, token)));
-    await db!.delete(dsRecords).where(eq(dsRecords.databaseId, dbId));
-    const tables = await db!.select({ id: dsTables.id }).from(dsTables).where(eq(dsTables.databaseId, dbId));
-    for (const t of tables) await db!.delete(dsFields).where(eq(dsFields.tableId, t.id));
+    const tableIds = await db!.select({ id: dsTables.id }).from(dsTables).where(eq(dsTables.databaseId, dbId));
+    await Promise.all([
+      db!.delete(dsStudentSessions).where(and(eq(dsStudentSessions.sessionKey, sessionKey), eq(dsStudentSessions.token, token))),
+      db!.delete(dsRecords).where(eq(dsRecords.databaseId, dbId)),
+      tableIds.length > 0 ? db!.delete(dsFields).where(inArray(dsFields.tableId, tableIds.map(t => t.id))) : Promise.resolve(),
+      db!.delete(dsQueries).where(eq(dsQueries.databaseId, dbId)),
+      db!.delete(dsForms).where(eq(dsForms.databaseId, dbId)),
+      db!.delete(dsReports).where(eq(dsReports.databaseId, dbId)),
+      db!.delete(dsRelationships).where(eq(dsRelationships.databaseId, dbId)),
+    ]);
     await db!.delete(dsTables).where(eq(dsTables.databaseId, dbId));
-    await db!.delete(dsQueries).where(eq(dsQueries.databaseId, dbId));
-    await db!.delete(dsForms).where(eq(dsForms.databaseId, dbId));
-    await db!.delete(dsReports).where(eq(dsReports.databaseId, dbId));
-    await db!.delete(dsRelationships).where(eq(dsRelationships.databaseId, dbId));
     await db!.delete(dsDatabases).where(eq(dsDatabases.id, dbId));
     res.json({ ok: true });
   });
