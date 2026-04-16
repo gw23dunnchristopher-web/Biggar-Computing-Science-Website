@@ -128,6 +128,12 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
   const [showPropertySheet, setShowPropertySheet] = useState(true);
   const designGridRef = useRef<DesignGridHandle>(null);
 
+  // Saved snapshot — the last state successfully persisted to the server
+  const [savedFields, setSavedFields] = useState<UpdateFieldRequest[]>([]);
+  const [savedTableName, setSavedTableName] = useState('');
+  // "Save changes?" dialog state (shown when switching to Datasheet View with unsaved changes)
+  const [switchConfirm, setSwitchConfirm] = useState(false);
+
   // ── Type-change warning ──
   const [typeChangeDialog, setTypeChangeDialog] = useState<TypeChangePending | null>(null);
   const [typeChangeBusy, setTypeChangeBusy] = useState(false);
@@ -229,8 +235,11 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
 
   useEffect(() => {
     if (table) {
-      setFields(table.fields.map(f => ({ ...f })));
+      const mapped = table.fields.map(f => ({ ...f }));
+      setFields(mapped);
       setTableName(table.name);
+      setSavedFields(mapped);
+      setSavedTableName(table.name);
     }
   }, [table]);
 
@@ -247,6 +256,9 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
     }
     try {
       await updateTable.mutateAsync({ databaseId, tableId, data: { name: tableName, fields } });
+      // Sync saved snapshot so isDirty becomes false immediately after saving
+      setSavedFields(fields.map(f => ({ ...f })));
+      setSavedTableName(tableName);
       if (!quiet) toast({ title: 'Table saved' });
       queryClient.invalidateQueries({ queryKey: getGetTableQueryKey(databaseId, tableId) });
       queryClient.invalidateQueries({ queryKey: ['/api/databases', databaseId, 'tables'] });
@@ -259,10 +271,43 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
 
   const handleSave = () => doSave(false);
 
-  const switchToDatasheet = async () => {
-    await doSave(true);
+  // isDirty: true whenever fields or tableName differ from the last server-saved state
+  const isDirty = React.useMemo(() => {
+    if (tableName !== savedTableName) return true;
+    if (fields.length !== savedFields.length) return true;
+    return JSON.stringify(fields) !== JSON.stringify(savedFields);
+  }, [fields, savedFields, tableName, savedTableName]);
+
+  // Navigate to Datasheet View without any saving/reverting
+  const doNavigateToDatasheet = () => {
     if (onSwitchToDatasheet) onSwitchToDatasheet();
     else setLocation(`/databases/${databaseId}/tables/${tableId}/data`);
+  };
+
+  // Called from the View button / status bar — checks dirty first
+  const switchToDatasheet = () => {
+    if (isDirty) {
+      setSwitchConfirm(true);
+    } else {
+      doNavigateToDatasheet();
+    }
+  };
+
+  // User clicked "Yes" in the save dialog
+  const handleSwitchYes = async () => {
+    const ok = await doSave(false);
+    if (ok) {
+      setSwitchConfirm(false);
+      doNavigateToDatasheet();
+    }
+  };
+
+  // User clicked "No" in the save dialog — revert and switch
+  const handleSwitchNo = () => {
+    setFields(savedFields.map(f => ({ ...f })));
+    setTableName(savedTableName);
+    setSwitchConfirm(false);
+    doNavigateToDatasheet();
   };
 
   const handleInsertRow = () => {
@@ -584,6 +629,44 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
                 >
                   {typeChangeBusy ? <span className="animate-spin">⏳</span> : null}
                   Yes, Delete Data &amp; Change Type
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── "Save changes?" dialog (switching to Datasheet View with unsaved changes) ── */}
+      {switchConfirm && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40">
+          <div className="bg-white border border-gray-300 shadow-2xl w-[420px] rounded-sm" style={{ fontFamily: 'Segoe UI, sans-serif' }}>
+            <div className="flex items-center gap-2 bg-[#2b579a] text-white px-4 py-2.5 rounded-t-sm">
+              <span className="font-semibold text-sm">Microsoft Access</span>
+            </div>
+            <div className="p-5">
+              <div className="flex gap-3 items-start mb-5">
+                <div className="text-sm text-gray-800 leading-relaxed">
+                  Do you want to save changes to the design of table <strong>'{tableName || 'Table'}'</strong>?
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={handleSwitchYes}
+                  className="px-6 py-1.5 text-sm border border-gray-400 rounded bg-[#f0f0f0] hover:bg-[#e0e0e0] min-w-[70px]"
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={handleSwitchNo}
+                  className="px-6 py-1.5 text-sm border border-gray-400 rounded bg-[#f0f0f0] hover:bg-[#e0e0e0] min-w-[70px]"
+                >
+                  No
+                </button>
+                <button
+                  onClick={() => setSwitchConfirm(false)}
+                  className="px-6 py-1.5 text-sm border border-gray-400 rounded bg-[#f0f0f0] hover:bg-[#e0e0e0] min-w-[70px]"
+                >
+                  Cancel
                 </button>
               </div>
             </div>
