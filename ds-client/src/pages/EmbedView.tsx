@@ -241,7 +241,13 @@ export function EmbedView({ token, initialMode }: Props) {
         setSnapshot(data);
         // Load forms/reports/queries for the database
         await Promise.all([loadForms(data.database.id), loadReports(data.database.id), loadQueries(data.database.id)]);
-        setActiveTableId(data.tables?.[0]?.id ?? null);
+        // Auto-open the first table in Datasheet View (mimics Access opening Table1 automatically)
+        const firstTable = data.tables?.[0];
+        if (firstTable) {
+          setActiveTableId(firstTable.id);
+          setActiveView('datasheet');
+          setOpenTabs([{ key: `table-${firstTable.id}`, url: '', label: firstTable.name, objectType: 'table' }]);
+        }
         setIsLoading(false);
       })
       .catch(e => {
@@ -339,12 +345,49 @@ export function EmbedView({ token, initialMode }: Props) {
       if (tbl) {
         addTab(`table-${tbl.id}`, tbl.name, 'table');
         setActiveTableId(tbl.id);
-        setActiveView('design');
+        setActiveView('datasheet');
       }
     } catch {
       toast({ title: 'Could not create table', variant: 'destructive' });
     } finally {
       setIsCreatingTable(false);
+    }
+  }
+
+  // ── "Name this table" dialog (shown when switching to Design View for the
+  //    first time on an auto-named Table, mimicking Access behaviour) ────────
+  const [nameTableDialog, setNameTableDialog] = useState<{ tableId: number } | null>(null);
+  const [nameTableInput, setNameTableInput] = useState('');
+
+  function handleSwitchToDesign() {
+    if (!activeTableId || !snapshot) { setActiveView('design'); return; }
+    const tbl = snapshot.tables.find(t => t.id === activeTableId);
+    if (tbl && /^Table\d+$/i.test(tbl.name)) {
+      setNameTableInput(tbl.name);
+      setNameTableDialog({ tableId: tbl.id });
+    } else {
+      setActiveView('design');
+    }
+  }
+
+  async function confirmNameTable() {
+    if (!nameTableDialog || !dbId) return;
+    const name = nameTableInput.trim();
+    if (!name) return;
+    try {
+      await apiFetch(`/api/ds/databases/${dbId}/tables/${nameTableDialog.tableId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ name }),
+      });
+      setSnapshot(prev => prev ? {
+        ...prev,
+        tables: prev.tables.map(t => t.id === nameTableDialog.tableId ? { ...t, name } : t)
+      } : prev);
+      addTab(`table-${nameTableDialog.tableId}`, name, 'table');
+      setNameTableDialog(null);
+      setActiveView('design');
+    } catch {
+      toast({ title: 'Could not save table name', variant: 'destructive' });
     }
   }
 
@@ -588,6 +631,39 @@ export function EmbedView({ token, initialMode }: Props) {
         );
       })()}
 
+      {/* "Save Table" name prompt — shown on first switch to Design View (mimics Access) */}
+      {nameTableDialog && (
+        <Dialog open onOpenChange={v => { if (!v) setNameTableDialog(null); }}>
+          <DialogContent className="max-w-xs">
+            <DialogHeader>
+              <DialogTitle>Save Table</DialogTitle>
+              <DialogDescription>
+                You must save the table before you can switch to Design View. Enter a name for the table.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-2">
+              <Input
+                value={nameTableInput}
+                onChange={e => setNameTableInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') confirmNameTable(); }}
+                autoFocus
+                placeholder="e.g. Designers"
+              />
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setNameTableDialog(null)}>Cancel</Button>
+              <Button
+                onClick={confirmNameTable}
+                disabled={!nameTableInput.trim()}
+                className="bg-[#C42B1C] hover:bg-[#9B2118]"
+              >
+                OK
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
       {/* CSV Import */}
       {csvImportOpen && dbId && (
         <CSVImportModal
@@ -797,7 +873,7 @@ export function EmbedView({ token, initialMode }: Props) {
           reports={reports}
           queries={queries}
           onReset={handleReset}
-          onSwitchToDesign={() => setActiveView('design')}
+          onSwitchToDesign={handleSwitchToDesign}
           onSelectForm={selectForm}
           onSelectReport={selectReport}
           {...wizardProps}
