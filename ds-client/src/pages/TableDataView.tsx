@@ -1011,6 +1011,7 @@ export function TableDataView({
               showTotals={showTotals}
               totalFns={totalFns}
               onTotalFnChange={handleTotalFnChange}
+              onClickToAdd={handleAddField}
             />
           )}
         </div>

@@ -151,7 +151,23 @@ interface DataGridProps {
   showTotals?: boolean;
   totalFns?: Record<string, TotalFn>;
   onTotalFnChange?: (field: string, fn: TotalFn) => void;
+  onClickToAdd?: (fieldType: string) => void;
 }
+
+const CLICK_TO_ADD_WIDTH = 130;
+
+const CLICK_TO_ADD_TYPES = [
+  { value: 'text',        label: 'Short Text' },
+  { value: 'number',      label: 'Number' },
+  { value: 'currency',    label: 'Currency' },
+  { value: 'date',        label: 'Date & Time' },
+  { value: 'boolean',     label: 'Yes/No' },
+  { value: 'lookup',      label: 'Lookup & Relationship' },
+  { value: 'longtext',    label: 'Long Text' },
+  { value: 'attachment',  label: 'Attachment' },
+  { value: 'hyperlink',   label: 'Hyperlink' },
+  { value: 'calculated',  label: 'Calculated Field' },
+];
 
 export function DataGrid({
   table, records, allRecords, databaseId, focusNewRowRef, sortState, onSortChange,
@@ -161,6 +177,7 @@ export function DataGrid({
   onFilterBySelection, onFilterExcluding, onRemoveFilter, onApplyFilter, onFind, onDeleteRecord, onDeleteField, activeFilter,
   hiddenFields = [], onHideField,
   showTotals = false, totalFns = {}, onTotalFnChange,
+  onClickToAdd,
 }: DataGridProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -177,6 +194,20 @@ export function DataGrid({
   const [resizing, setResizing] = useState<{ field: string; startX: number; startW: number } | null>(null);
   const [colWidthDlg, setColWidthDlg] = useState<{ field: string; width: number } | null>(null);
   const [unhideDlg, setUnhideDlg] = useState(false);
+  const [clickToAddOpen, setClickToAddOpen] = useState(false);
+  const clickToAddRef = useRef<HTMLTableCellElement>(null);
+
+  useEffect(() => {
+    if (!clickToAddOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (clickToAddRef.current && !clickToAddRef.current.contains(e.target as Node)) {
+        setClickToAddOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [clickToAddOpen]);
+
   const isCreatingRef = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const newRowTrRef = useRef<HTMLTableRowElement>(null);
@@ -658,7 +689,7 @@ export function DataGrid({
     return '';
   };
 
-  const getTotalColWidth = () => 15 + fields.reduce((sum, f) => sum + getColWidth(f.name, f.fieldType), 0);
+  const getTotalColWidth = () => 15 + fields.reduce((sum, f) => sum + getColWidth(f.name, f.fieldType), 0) + (onClickToAdd ? CLICK_TO_ADD_WIDTH : 0);
 
   const getFnOptionsForType = (fieldType: string): TotalFn[] => {
     if (fieldType === 'number' || fieldType === 'currency') return ['None', 'Sum', 'Average', 'Count', 'Minimum', 'Maximum'];
@@ -969,6 +1000,7 @@ export function DataGrid({
                 {fields.map(f => (
                   <col key={f.id} style={{ width: getColWidth(f.name, f.fieldType) }} />
                 ))}
+                {onClickToAdd && <col style={{ width: CLICK_TO_ADD_WIDTH, minWidth: CLICK_TO_ADD_WIDTH }} />}
               </colgroup>
               <thead className="sticky top-0 z-10">
                 <tr>
@@ -1002,6 +1034,40 @@ export function DataGrid({
                       </div>
                     </th>
                   ))}
+                  {/* Click to Add column */}
+                  {onClickToAdd && (
+                    <th
+                      ref={clickToAddRef}
+                      className="relative border-r border-b border-gray-300 px-2 py-1.5 font-medium text-[11px] select-none cursor-pointer bg-[#fffacc] hover:bg-[#fff5a0] transition-colors"
+                      style={{ width: CLICK_TO_ADD_WIDTH, minWidth: CLICK_TO_ADD_WIDTH }}
+                      onClick={e => { e.stopPropagation(); setClickToAddOpen(v => !v); }}
+                    >
+                      <div className="flex items-center gap-1">
+                        <span className="text-gray-600">Click to Add</span>
+                        <ChevronDown size={11} className="text-gray-500 flex-none" />
+                      </div>
+                      {clickToAddOpen && (
+                        <div
+                          className="absolute top-full left-0 z-50 bg-white border border-gray-300 shadow-lg min-w-[190px] py-1"
+                          style={{ boxShadow: '2px 4px 12px rgba(0,0,0,0.15)' }}
+                          onClick={e => e.stopPropagation()}
+                        >
+                          {CLICK_TO_ADD_TYPES.map(t => (
+                            <button
+                              key={t.value}
+                              className="w-full text-left px-4 py-1.5 text-xs text-gray-700 hover:bg-[#cce5ff] transition-colors"
+                              onClick={() => {
+                                setClickToAddOpen(false);
+                                onClickToAdd(t.value);
+                              }}
+                            >
+                              {t.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -1096,6 +1162,7 @@ export function DataGrid({
                           </td>
                         );
                       })}
+                      {onClickToAdd && <td className="border-r border-gray-200 h-7" />}
                     </tr>
                   );
                 })}
@@ -1112,6 +1179,7 @@ export function DataGrid({
                       {renderNewRowInput(f.fieldType, f.name, f.isPrimaryKey, f.defaultValue)}
                     </td>
                   ))}
+                  {onClickToAdd && <td className="border-r border-gray-200 h-7" />}
                 </tr>
 
                 {/* Totals Row */}
@@ -1139,6 +1207,7 @@ export function DataGrid({
                         </td>
                       );
                     })}
+                    {onClickToAdd && <td className="border-r border-gray-300 h-7 bg-[#f3f2f1]" />}
                   </tr>
                 )}
               </tbody>

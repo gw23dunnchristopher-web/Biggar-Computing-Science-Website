@@ -333,6 +333,13 @@ export function registerDsRoutes(app: Express) {
         tableId: table.id, caption: f.caption ?? null, defaultValue: f.defaultValue ?? null,
         fieldSize: f.fieldSize ?? null, description: f.description ?? null,
       })));
+    } else {
+      // Access behaviour: every new blank table starts with an ID AutoNumber primary-key field
+      await db!.insert(dsFields).values({
+        name: "ID", fieldType: "autonumber", isRequired: true, isPrimaryKey: true,
+        sortOrder: 0, tableId: table.id,
+        caption: null, defaultValue: null, fieldSize: null, description: null,
+      });
     }
     const tableFields = await db!.select().from(dsFields).where(eq(dsFields.tableId, table.id)).orderBy(dsFields.sortOrder);
     res.status(201).json({ ...tsFmt(table, "createdAt", "updatedAt"), fields: tableFields.map(f => tsFmt(f, "createdAt", "updatedAt")) });
