@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Shell } from '@/components/layout/Shell';
-import { Ribbon } from '@/components/layout/Ribbon';
+import { Ribbon, RibbonGroup, RibbonButton } from '@/components/layout/Ribbon';
 import { Sidebar } from '@/components/layout/Sidebar';
+import { Table as TableIcon } from 'lucide-react';
 import { TableDataView } from './TableDataView';
 import { TableDesignView } from './TableDesignView';
 import { QueryDesignView } from './QueryDesignView';
@@ -315,6 +316,36 @@ export function EmbedView({ token, initialMode }: Props) {
     setActiveFormId(null);
     setActiveReportId(null);
     setResetKey(k => k + 1);
+  }
+
+  // ── Create a new table (for empty-database state) ───────────────────────
+  const [isCreatingTable, setIsCreatingTable] = useState(false);
+  async function handleCreateTable() {
+    if (!dbId || isCreatingTable) return;
+    setIsCreatingTable(true);
+    try {
+      const newTable = await apiFetch(`/api/ds/databases/${dbId}/tables`, {
+        method: 'POST',
+        body: JSON.stringify({ name: 'Table1' }),
+      });
+      // Reload snapshot to pick up the new table
+      const sessionKey = sessionStorage.getItem(SESSION_KEY_STORAGE);
+      const updated: EmbedSnapshot = await fetch(`/api/ds/embeds/${token}`, {
+        headers: { 'Content-Type': 'application/json', ...(sessionKey ? { 'x-session-key': sessionKey } : {}) }
+      }).then(r => r.json());
+      setSnapshot(updated);
+      // Auto-navigate to Design View for the new table
+      const tbl = updated.tables.find((t: any) => t.id === newTable.id) ?? updated.tables[0];
+      if (tbl) {
+        addTab(`table-${tbl.id}`, tbl.name, 'table');
+        setActiveTableId(tbl.id);
+        setActiveView('design');
+      }
+    } catch {
+      toast({ title: 'Could not create table', variant: 'destructive' });
+    } finally {
+      setIsCreatingTable(false);
+    }
   }
 
   // ── Wizard finish handlers ───────────────────────────────────────────────
@@ -775,12 +806,24 @@ export function EmbedView({ token, initialMode }: Props) {
     }
 
     // ── No table selected — default landing ─────────────────────────────────
+    const noTables = snapshot.tables.length === 0;
+
     const ribbon = (
       <Ribbon
         title={snapshot.database.name}
         tabs={[{
           name: 'Home',
-          content: (
+          content: noTables ? (
+            <RibbonGroup name="Tables">
+              <RibbonButton
+                icon={<TableIcon size={32} />}
+                label={isCreatingTable ? 'Creating…' : 'Table Design'}
+                onClick={handleCreateTable}
+                disabled={isCreatingTable}
+                title="Create a new blank table in Design View"
+              />
+            </RibbonGroup>
+          ) : (
             <div className="text-gray-400 p-2 italic text-sm">
               Select a table from the left panel to begin
             </div>
@@ -809,12 +852,29 @@ export function EmbedView({ token, initialMode }: Props) {
           />
         }
       >
-        <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-[#f3f2f1] p-8 text-center">
-          <h2 className="text-2xl text-gray-500 font-light mb-4">Select a table to begin</h2>
-          <p className="max-w-md text-gray-400">
-            Choose a table from the navigation pane on the left to start viewing and editing data.
-          </p>
-        </div>
+        {noTables ? (
+          <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-[#f3f2f1] p-8 text-center">
+            <TableIcon size={48} className="mb-4 text-gray-300" />
+            <h2 className="text-2xl text-gray-500 font-light mb-3">No tables yet</h2>
+            <p className="max-w-sm text-gray-400 mb-6">
+              This database is empty. Click <strong className="text-gray-500">Table Design</strong> in the ribbon above to create your first table.
+            </p>
+            <button
+              onClick={handleCreateTable}
+              disabled={isCreatingTable}
+              className="px-5 py-2 bg-[#C42B1C] text-white rounded text-sm font-medium hover:bg-[#9B2118] disabled:opacity-50 transition-colors"
+            >
+              {isCreatingTable ? 'Creating…' : 'Create Table'}
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center w-full h-full text-gray-400 bg-[#f3f2f1] p-8 text-center">
+            <h2 className="text-2xl text-gray-500 font-light mb-4">Select a table to begin</h2>
+            <p className="max-w-md text-gray-400">
+              Choose a table from the navigation pane on the left to start viewing and editing data.
+            </p>
+          </div>
+        )}
       </Shell>
     );
   };
