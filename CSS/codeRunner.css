@@ -757,7 +757,7 @@
     box-sizing: border-box;
     font-family: 'Courier New', Courier, monospace;
     font-size: 14px;
-    line-height: 1.55;
+    line-height: 22px;     /* explicit px so pre and textarea round identically */
     -moz-tab-size: 4;
     tab-size: 4;
     white-space: pre;
@@ -783,6 +783,9 @@
     border: none;
     flex: none;
     padding: 14px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 14px;
+    line-height: 22px;     /* MUST match .cr-hl-bg exactly to keep caret aligned */
     -moz-tab-size: 4;
     tab-size: 4;
 }
