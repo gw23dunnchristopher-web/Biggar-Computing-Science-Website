@@ -27,18 +27,100 @@
             }
         </script>
         <style>
-            .tool-intro {
-                background: #f8f9fa;
-                border-left: 4px solid #4a90d9;
-                border-radius: 4px;
-                padding: 14px 18px;
-                margin-bottom: 20px;
-                color: #444;
-                font-size: 0.97em;
+            /* Override layout to fill available height */
+            #pageContainer {
+                padding-bottom: 0 !important;
+                overflow: hidden !important;
+                height: calc(100vh - 150px) !important;
+                min-height: unset !important;
             }
-            .tool-intro p { margin: 0 0 6px 0; }
-            .tool-intro p:last-child { margin: 0; }
-            .py-runner { width: 100%; }
+            #content {
+                padding: 0 !important;
+                overflow: hidden !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            /* Slim tool header bar */
+            .tool-header {
+                flex-shrink: 0;
+                background: #1e1e2e;
+                color: #cdd6f4;
+                padding: 8px 16px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                border-bottom: 2px solid #313244;
+                font-family: Arial, sans-serif;
+                font-size: 13px;
+            }
+            .tool-header-icon {
+                font-size: 20px;
+                flex-shrink: 0;
+            }
+            .tool-header-title {
+                font-weight: bold;
+                font-size: 15px;
+                color: #a6e3a1;
+                flex-shrink: 0;
+            }
+            .tool-header-desc {
+                color: #6c7086;
+                font-size: 12px;
+            }
+
+            /* Make the runner container fill the remaining space */
+            .tool-editor-wrap {
+                flex: 1;
+                min-height: 0;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Override code-runner to fill its container */
+            .tool-editor-wrap .code-runner {
+                width: 100% !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                flex: 1 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                min-height: 0 !important;
+                overflow: hidden !important;
+            }
+
+            /* Editor area grows */
+            .tool-editor-wrap .cr-editor-wrap {
+                flex: 2 !important;
+                min-height: 120px !important;
+                resize: none !important;
+                overflow: hidden !important;
+            }
+            .tool-editor-wrap .cr-py-hl-wrap {
+                min-height: 0 !important;
+                height: 100% !important;
+            }
+            .tool-editor-wrap .cr-py-hl-wrap .cr-hl-bg,
+            .tool-editor-wrap .cr-py-hl-wrap .cr-editor {
+                height: 100% !important;
+                min-height: 0 !important;
+            }
+
+            /* Output area grows to fill remaining space */
+            .tool-editor-wrap .cr-output-area {
+                flex: 1 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                min-height: 0 !important;
+            }
+            .tool-editor-wrap .cr-terminal {
+                flex: 1 !important;
+                min-height: 80px !important;
+                max-height: none !important;
+                resize: none !important;
+            }
         </style>
     </head>
     <body onload="loadSidebar(getSidebarForLevel(), 'sidebar')">
@@ -53,28 +135,18 @@
                 <div id="sidebar"></div>
                 <div id="content">
                     <div id="mainHeading"><h1 id="levelLabel">Computing Science</h1></div>
-                    <div class="contentHeading"><h1>Python Editor</h1></div>
-                    <div class="contentContainer">
-                        <div class="tool-intro">
-                            <p><strong>Python Editor</strong> &mdash; A blank coding environment where you can write, run and test Python programs.</p>
-                            <p>Use the <strong>&#9654; Run</strong> button to execute your code. Use <strong>&#x1F4C2; Upload</strong> to load a CSV or TXT data file your program can read. Use <strong>&#8635; Reset</strong> to clear your code back to a blank editor.</p>
-                        </div>
+                    <div class="tool-header">
+                        <span class="tool-header-icon">&#x1F40D;</span>
+                        <span class="tool-header-title">Python Editor</span>
+                        <span class="tool-header-desc">Write and run Python programs &mdash; use <strong>Upload</strong> to load CSV/TXT data files, <strong>Run</strong> to execute, <strong>Reset</strong> to clear.</span>
+                    </div>
+                    <div class="tool-editor-wrap">
                         <div class="py-runner">
                             <textarea class="cr-code" style="display:none"></textarea>
                         </div>
                     </div>
                 </div>
             </div>
-            <footer>
-                <div id="left">
-                    <p>Biggar High School</p>
-                    <p>Market Rd, Biggar</p>
-                    <p>ML12 6AG</p>
-                </div>
-                <div id="right">
-                    <p>Computing Science Department</p>
-                </div>
-            </footer>
         </div>
         <script>
             document.getElementById('levelLabel').textContent = getLevelLabel();

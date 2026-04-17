@@ -25,23 +25,59 @@
             }
         </script>
         <style>
-            .tool-intro {
-                background: #f8f9fa;
-                border-left: 4px solid #27ae60;
-                border-radius: 4px;
-                padding: 14px 18px;
-                margin-bottom: 20px;
-                color: #444;
-                font-size: 0.97em;
+            /* Override layout to fill available height */
+            #pageContainer {
+                padding-bottom: 0 !important;
+                overflow: hidden !important;
+                height: calc(100vh - 150px) !important;
+                min-height: unset !important;
             }
-            .tool-intro p { margin: 0 0 6px 0; }
-            .tool-intro p:last-child { margin: 0; }
+            #content {
+                padding: 0 !important;
+                overflow: hidden !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            /* Slim tool header bar */
+            .tool-header {
+                flex-shrink: 0;
+                background: #0f2518;
+                color: #d4edda;
+                padding: 8px 16px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                border-bottom: 2px solid #27ae60;
+                font-family: Arial, sans-serif;
+                font-size: 13px;
+            }
+            .tool-header-icon {
+                font-size: 20px;
+                flex-shrink: 0;
+            }
+            .tool-header-title {
+                font-weight: bold;
+                font-size: 15px;
+                color: #2ecc71;
+                flex-shrink: 0;
+            }
+            .tool-header-desc {
+                color: #7fbb96;
+                font-size: 12px;
+            }
+
+            /* Iframe fills remaining space */
+            .tool-editor-wrap {
+                flex: 1;
+                min-height: 0;
+                overflow: hidden;
+            }
             .db-sandbox-frame {
                 width: 100%;
-                height: 680px;
-                border: 1px solid #ccc;
-                border-radius: 6px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                height: 100%;
+                border: none;
+                display: block;
             }
         </style>
     </head>
@@ -57,12 +93,12 @@
                 <div id="sidebar"></div>
                 <div id="content">
                     <div id="mainHeading"><h1 id="levelLabel">Computing Science</h1></div>
-                    <div class="contentHeading"><h1>Database Sandbox</h1></div>
-                    <div class="contentContainer">
-                        <div class="tool-intro">
-                            <p><strong>Database Sandbox</strong> &mdash; A blank database environment where you can practise creating tables, adding fields, entering records, and running queries.</p>
-                            <p>Your work is saved automatically to your own personal copy of this sandbox. Use the <strong>View</strong> button (top left) to switch between Datasheet View and Design View. Use the <strong>Reset</strong> button to start fresh if needed.</p>
-                        </div>
+                    <div class="tool-header">
+                        <span class="tool-header-icon">&#x1F4BE;</span>
+                        <span class="tool-header-title">Database Sandbox</span>
+                        <span class="tool-header-desc">Your own blank database &mdash; create tables, add fields, enter records and run queries. Work is saved to your personal copy automatically.</span>
+                    </div>
+                    <div class="tool-editor-wrap">
                         <iframe
                             class="db-sandbox-frame"
                             src="/data-sculptor/?embed=82da55672947124b65f9dad04fb891ec"
@@ -72,16 +108,6 @@
                     </div>
                 </div>
             </div>
-            <footer>
-                <div id="left">
-                    <p>Biggar High School</p>
-                    <p>Market Rd, Biggar</p>
-                    <p>ML12 6AG</p>
-                </div>
-                <div id="right">
-                    <p>Computing Science Department</p>
-                </div>
-            </footer>
         </div>
         <script>
             document.getElementById('levelLabel').textContent = getLevelLabel();

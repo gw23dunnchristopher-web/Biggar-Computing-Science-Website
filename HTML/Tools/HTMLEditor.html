@@ -27,18 +27,103 @@
             }
         </script>
         <style>
-            .tool-intro {
-                background: #f8f9fa;
-                border-left: 4px solid #e67e22;
-                border-radius: 4px;
-                padding: 14px 18px;
-                margin-bottom: 20px;
-                color: #444;
-                font-size: 0.97em;
+            /* Override layout to fill available height */
+            #pageContainer {
+                padding-bottom: 0 !important;
+                overflow: hidden !important;
+                height: calc(100vh - 150px) !important;
+                min-height: unset !important;
             }
-            .tool-intro p { margin: 0 0 6px 0; }
-            .tool-intro p:last-child { margin: 0; }
-            .html-runner { width: 100%; }
+            #content {
+                padding: 0 !important;
+                overflow: hidden !important;
+                display: flex !important;
+                flex-direction: column !important;
+            }
+
+            /* Slim tool header bar */
+            .tool-header {
+                flex-shrink: 0;
+                background: #1e1e2e;
+                color: #cdd6f4;
+                padding: 8px 16px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                border-bottom: 2px solid #313244;
+                font-family: Arial, sans-serif;
+                font-size: 13px;
+            }
+            .tool-header-icon {
+                font-size: 20px;
+                flex-shrink: 0;
+            }
+            .tool-header-title {
+                font-weight: bold;
+                font-size: 15px;
+                color: #fab387;
+                flex-shrink: 0;
+            }
+            .tool-header-desc {
+                color: #6c7086;
+                font-size: 12px;
+            }
+
+            /* Make the runner container fill the remaining space */
+            .tool-editor-wrap {
+                flex: 1;
+                min-height: 0;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Override code-runner to fill its container */
+            .tool-editor-wrap .code-runner {
+                width: 100% !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                flex: 1 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                min-height: 0 !important;
+                overflow: hidden !important;
+            }
+
+            /* Workspace (file tree + editor + preview) fills all remaining space */
+            .tool-editor-wrap .cr-workspace {
+                flex: 1 !important;
+                min-height: 0 !important;
+                height: 100% !important;
+            }
+
+            /* Editor highlight wrapper fills its flex slot */
+            .tool-editor-wrap .cr-workspace .cr-hl-wrap {
+                min-height: 0 !important;
+                flex: 1 !important;
+            }
+            .tool-editor-wrap .cr-workspace .cr-hl-bg,
+            .tool-editor-wrap .cr-workspace .cr-editor {
+                height: 100% !important;
+            }
+
+            /* Preview iframe fills the right panel */
+            .tool-editor-wrap .cr-preview {
+                min-height: 0 !important;
+                height: 100% !important;
+                flex-shrink: 0;
+            }
+
+            /* File tree full height */
+            .tool-editor-wrap .cr-filetree {
+                height: 100% !important;
+                min-height: 0 !important;
+            }
+            .tool-editor-wrap .cr-ft-body {
+                flex: 1 !important;
+                min-height: 0 !important;
+            }
         </style>
     </head>
     <body onload="loadSidebar(getSidebarForLevel(), 'sidebar')">
@@ -53,12 +138,12 @@
                 <div id="sidebar"></div>
                 <div id="content">
                     <div id="mainHeading"><h1 id="levelLabel">Computing Science</h1></div>
-                    <div class="contentHeading"><h1>HTML / CSS Editor</h1></div>
-                    <div class="contentContainer">
-                        <div class="tool-intro">
-                            <p><strong>HTML / CSS Editor</strong> &mdash; A blank web development environment where you can write HTML and CSS and see a live preview.</p>
-                            <p>The editor on the left shows your code. The preview on the right updates when you click <strong>&#9654; Run</strong>. Use the file tree to add new files (e.g. separate CSS files). You can also <strong>&#x1F4C2; Upload</strong> image files to use in your pages.</p>
-                        </div>
+                    <div class="tool-header">
+                        <span class="tool-header-icon">&#x1F310;</span>
+                        <span class="tool-header-title">HTML / CSS Editor</span>
+                        <span class="tool-header-desc">Write HTML and CSS with a live preview &mdash; use the file tree to add files, <strong>Upload</strong> for images, <strong>Run</strong> to refresh the preview.</span>
+                    </div>
+                    <div class="tool-editor-wrap">
                         <div class="html-runner">
                             <textarea class="cr-code" style="display:none"><!DOCTYPE html>
 <html>
@@ -74,16 +159,6 @@
                     </div>
                 </div>
             </div>
-            <footer>
-                <div id="left">
-                    <p>Biggar High School</p>
-                    <p>Market Rd, Biggar</p>
-                    <p>ML12 6AG</p>
-                </div>
-                <div id="right">
-                    <p>Computing Science Department</p>
-                </div>
-            </footer>
         </div>
         <script>
             document.getElementById('levelLabel').textContent = getLevelLabel();
