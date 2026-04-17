@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>BHS Computing Science - HTML Editor</title>
+        <link rel="stylesheet" href="/CSS/styles.css" />
+        <link rel="stylesheet" href="/CSS/frameStyles.css" />
+        <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
+        <link rel="stylesheet" href="/CSS/codeRunner.css" />
+        <script src="/JavaScript/script.js"></script>
+        <script src="/JavaScript/codeRunner.js"></script>
+        <script>
+            function getSidebarForLevel() {
+                var params = new URLSearchParams(window.location.search);
+                var level = (params.get('level') || 'n5').toLowerCase();
+                if (level === 'n4') return '/HTML/N4/N4Sidebar.html';
+                if (level === 'higher') return '/HTML/Higher/HigherSidebar.html';
+                return '/HTML/N5/N5Sidebar.html';
+            }
+            function getLevelLabel() {
+                var params = new URLSearchParams(window.location.search);
+                var level = (params.get('level') || 'n5').toLowerCase();
+                if (level === 'n4') return 'National 4';
+                if (level === 'higher') return 'Higher';
+                return 'National 5';
+            }
+        </script>
+        <style>
+            .tool-intro {
+                background: #f8f9fa;
+                border-left: 4px solid #e67e22;
+                border-radius: 4px;
+                padding: 14px 18px;
+                margin-bottom: 20px;
+                color: #444;
+                font-size: 0.97em;
+            }
+            .tool-intro p { margin: 0 0 6px 0; }
+            .tool-intro p:last-child { margin: 0; }
+            .html-runner { width: 100%; }
+        </style>
+    </head>
+    <body onload="loadSidebar(getSidebarForLevel(), 'sidebar')">
+        <div id="loading"></div>
+        <div id="mainContent" class="content-hidden">
+            <header>
+                <h1>BHS Computing Science</h1>
+                <img src="/Images/Header/banner.png" />
+            </header>
+            <div id="pageContainer">
+                <button class="toggle-btn" onclick="toggleSidebar()">&#9776;</button>
+                <div id="sidebar"></div>
+                <div id="content">
+                    <div id="mainHeading"><h1 id="levelLabel">Computing Science</h1></div>
+                    <div class="contentHeading"><h1>HTML / CSS Editor</h1></div>
+                    <div class="contentContainer">
+                        <div class="tool-intro">
+                            <p><strong>HTML / CSS Editor</strong> &mdash; A blank web development environment where you can write HTML and CSS and see a live preview.</p>
+                            <p>The editor on the left shows your code. The preview on the right updates when you click <strong>&#9654; Run</strong>. Use the file tree to add new files (e.g. separate CSS files). You can also <strong>&#x1F4C2; Upload</strong> image files to use in your pages.</p>
+                        </div>
+                        <div class="html-runner">
+                            <textarea class="cr-code" style="display:none"><!DOCTYPE html>
+<html>
+<head>
+    <title>My Webpage</title>
+</head>
+<body>
+
+</body>
+</html>
+</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div id="left">
+                    <p>Biggar High School</p>
+                    <p>Market Rd, Biggar</p>
+                    <p>ML12 6AG</p>
+                </div>
+                <div id="right">
+                    <p>Computing Science Department</p>
+                </div>
+            </footer>
+        </div>
+        <script>
+            document.getElementById('levelLabel').textContent = getLevelLabel();
+        </script>
+    </body>
+</html>
