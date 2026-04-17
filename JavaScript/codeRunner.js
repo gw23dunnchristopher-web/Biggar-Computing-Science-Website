@@ -2187,12 +2187,68 @@
         }
     }
 
+    /* ── global Tab / Shift+Tab handler for every code-editor textarea ──
+       Inserts 4 spaces on Tab (or indents every selected line); Shift+Tab
+       removes up to 4 leading spaces from each selected line. Fires an
+       `input` event so the syntax-highlight overlay re-renders. */
+    function handleEditorTab(e) {
+        if (e.key !== 'Tab') return;
+        var ta = e.target;
+        if (!(ta instanceof HTMLTextAreaElement)) return;
+        if (!ta.classList.contains('cr-editor') && !ta.classList.contains('cr-code')) return;
+
+        e.preventDefault();
+        var INDENT = '    ';
+        var val = ta.value;
+        var s = ta.selectionStart, en = ta.selectionEnd;
+
+        /* find the start of the first selected line and end of the last */
+        var lineStart = val.lastIndexOf('\n', s - 1) + 1;
+        var lineEnd   = en;
+        var multiLine = val.slice(s, en).indexOf('\n') !== -1;
+
+        if (e.shiftKey) {
+            /* outdent every line in the (expanded) selection */
+            var before = val.slice(0, lineStart);
+            var middle = val.slice(lineStart, lineEnd);
+            var after  = val.slice(lineEnd);
+            var removedFirst = 0, removedTotal = 0;
+            var lines = middle.split('\n').map(function (ln, i) {
+                var m = ln.match(/^ {1,4}/);
+                var n = m ? m[0].length : 0;
+                if (i === 0) removedFirst = n;
+                removedTotal += n;
+                return ln.slice(n);
+            });
+            ta.value = before + lines.join('\n') + after;
+            ta.selectionStart = Math.max(lineStart, s - removedFirst);
+            ta.selectionEnd   = en - removedTotal;
+        } else if (multiLine) {
+            /* indent every line in the selection */
+            var before2 = val.slice(0, lineStart);
+            var middle2 = val.slice(lineStart, lineEnd);
+            var after2  = val.slice(lineEnd);
+            var lineCount = middle2.split('\n').length;
+            ta.value = before2 + INDENT + middle2.split('\n').join('\n' + INDENT) + after2;
+            ta.selectionStart = s + INDENT.length;
+            ta.selectionEnd   = en + INDENT.length * lineCount;
+        } else {
+            /* single caret: insert 4 spaces */
+            ta.value = val.slice(0, s) + INDENT + val.slice(en);
+            ta.selectionStart = ta.selectionEnd = s + INDENT.length;
+        }
+
+        /* let listeners (highlight overlay, line numbers, etc.) update */
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
     /* ── initialise all runners on the page ── */
     function init() {
         document.querySelectorAll('.py-runner').forEach(initPyRunner);
         document.querySelectorAll('.html-runner').forEach(initHtmlRunner);
         document.querySelectorAll('.py-quiz').forEach(initPyQuizRunner);
         document.querySelectorAll('.html-quiz').forEach(initHtmlQuizRunner);
+        document.addEventListener('keydown', handleEditorTab);
     }
 
     if (document.readyState === 'loading') {
