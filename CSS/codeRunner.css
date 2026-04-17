@@ -762,6 +762,7 @@
     tab-size: 4;
     white-space: pre;
     overflow: auto;
+    scrollbar-gutter: stable;     /* reserve gutter so pre & textarea content widths match */
     pointer-events: none;
     border: none;
     color: #cdd6f4;
@@ -788,16 +789,6 @@
     line-height: 22px;     /* MUST match .cr-hl-bg exactly to keep caret aligned */
     -moz-tab-size: 4;
     tab-size: 4;
-}
-
-/* ── hide the textarea scrollbar – the pre overlay is clipped by the parent anyway,
-      so both layers use the same full width; scrolling still works via wheel/trackpad ── */
-.cr-hl-wrap .cr-editor {
-    scrollbar-width: none;          /* Firefox */
-    -ms-overflow-style: none;       /* IE / Edge legacy */
-}
-.cr-hl-wrap .cr-editor::-webkit-scrollbar {
-    display: none;                  /* Chrome / Safari / new Edge */
 }
 
 /* ── wrap mode: toggle both layers together ── */
