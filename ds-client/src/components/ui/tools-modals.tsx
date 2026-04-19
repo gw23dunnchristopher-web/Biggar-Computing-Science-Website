@@ -12,6 +12,7 @@ import {
   Table2, Hash, Type, Calendar, ToggleLeft, KeyRound,
   CheckCircle2, AlertCircle, Loader2, ChevronRight
 } from 'lucide-react';
+import { createZip, downloadBlob } from '@/lib/zipWriter';
 
 async function apiFetch(path: string, opts?: RequestInit) {
   const res = await fetch(path, {
@@ -351,25 +352,45 @@ export function ExportDataModal({ open, onOpenChange, databaseId, tables }: {
     if (open && tables.length > 0) setSelectedTableId(String(tables[0].id));
   }, [open, tables]);
 
+  const ALL_VALUE = '__all__';
+
+  const fetchTableCsv = async (tableId: number, tableName: string) => {
+    const tableData = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}`);
+    const fields: { name: string }[] = tableData?.fields || [];
+    const columns = fields.map(f => f.name);
+    const records = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}/records`);
+    const rows: Record<string, any>[] = (records || []).map((r: any) => r.data || r);
+    return { csv: rowsToCSV(columns, rows), rows: rows.length, name: tableName };
+  };
+
   const handleExport = async () => {
     if (!selectedTableId) return;
     setLoading(true);
     try {
-      const tableId = parseInt(selectedTableId);
-      const tableObj = tables.find(t => t.id === tableId);
-
-      // Fetch fields to get column order
-      const tableData = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}`);
-      const fields: { name: string }[] = tableData?.fields || [];
-      const columns = fields.map(f => f.name);
-
-      // Fetch records
-      const records = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}/records`);
-      const rows: Record<string, any>[] = (records || []).map((r: any) => r.data || r);
-
-      const csv = rowsToCSV(columns, rows);
-      downloadCSV(`${tableObj?.name || 'export'}.csv`, csv);
-      toast({ title: `Exported "${tableObj?.name}" as CSV (${rows.length} rows)` });
+      if (selectedTableId === ALL_VALUE) {
+        let zipName = window.prompt('Save zip as:', 'database-tables.zip');
+        if (zipName === null) { setLoading(false); return; }
+        zipName = (zipName.trim() || 'database-tables.zip');
+        if (!/\.zip$/i.test(zipName)) zipName += '.zip';
+        const results = await Promise.all(
+          tables.map(t => fetchTableCsv(t.id, t.name))
+        );
+        const zip = createZip(results.map(r => ({ name: `${r.name}.csv`, data: r.csv })));
+        downloadBlob(zip, zipName);
+        const totalRows = results.reduce((s, r) => s + r.rows, 0);
+        toast({ title: `Exported ${results.length} table(s) as zip (${totalRows} rows total)` });
+      } else {
+        const tableId = parseInt(selectedTableId);
+        const tableObj = tables.find(t => t.id === tableId);
+        const defName = `${tableObj?.name || 'export'}.csv`;
+        let fileName = window.prompt('Save CSV as:', defName);
+        if (fileName === null) { setLoading(false); return; }
+        fileName = (fileName.trim() || defName);
+        if (!/\.csv$/i.test(fileName)) fileName += '.csv';
+        const { csv, rows } = await fetchTableCsv(tableId, tableObj?.name || 'export');
+        downloadCSV(fileName, csv);
+        toast({ title: `Exported "${tableObj?.name}" as CSV (${rows} rows)` });
+      }
       onOpenChange(false);
     } catch (e: any) {
       toast({ title: `Export failed: ${e.message}`, variant: 'destructive' });
@@ -392,6 +413,9 @@ export function ExportDataModal({ open, onOpenChange, databaseId, tables }: {
             onChange={e => setSelectedTableId(e.target.value)}
             className="w-full text-sm border rounded px-3 py-2"
           >
+            {tables.length > 1 && (
+              <option value={ALL_VALUE}>All tables (.zip of CSVs)</option>
+            )}
             {tables.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
           {tables.length === 0 && <p className="text-xs text-gray-400 mt-1">No tables available.</p>}
@@ -400,7 +424,7 @@ export function ExportDataModal({ open, onOpenChange, databaseId, tables }: {
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button onClick={handleExport} disabled={!selectedTableId || loading} className="bg-green-700 hover:bg-green-800">
             {loading ? <Loader2 size={14} className="animate-spin mr-1" /> : <Download size={14} className="mr-1" />}
-            Download CSV
+            {selectedTableId === ALL_VALUE ? 'Download Zip' : 'Download CSV'}
           </Button>
         </DialogFooter>
       </DialogContent>

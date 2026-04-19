@@ -423,6 +423,7 @@
             '      <input type="file" class="cr-py-file-input" accept=".csv,.txt,.json" multiple style="display:none">' +
             '    </label>' +
             '    <button class="cr-run-btn">&#9654; Run</button>' +
+            '    <button class="cr-download-btn" title="Download your code">&#x2B07;&#xFE0F; Download</button>' +
             '    <button class="cr-reset-btn">&#8635; Reset</button>' +
             '  </div>' +
             '</div>' +
@@ -738,6 +739,39 @@
             runBtn.disabled = false;
             runBtn.textContent = '\u25B6 Run';
         });
+
+        /* ── Download all files (single file → raw, multiple → zip) ── */
+        var pyDownloadBtn = container.querySelector('.cr-download-btn');
+        if (pyDownloadBtn) {
+            pyDownloadBtn.addEventListener('click', function () {
+                if (typeof window.zipWriter === 'undefined') {
+                    alert('Download is unavailable on this page.');
+                    return;
+                }
+                vfs[activeFile] = editor.value;   /* flush current edits */
+
+                var names = Object.keys(vfs);
+                if (names.length === 1) {
+                    var only     = names[0];
+                    var defName  = only.split('/').pop();
+                    var fileName = window.prompt('Save file as:', defName);
+                    if (fileName === null) return;
+                    fileName = (fileName.trim() || defName);
+                    var blob = new Blob([vfs[only]], { type: 'text/plain;charset=utf-8' });
+                    window.zipWriter.download(blob, fileName);
+                    return;
+                }
+
+                var zipName = window.prompt('Save zip as:', 'python-project.zip');
+                if (zipName === null) return;
+                zipName = (zipName.trim() || 'python-project.zip');
+                if (!/\.zip$/i.test(zipName)) zipName += '.zip';
+
+                var entries = names.map(function (n) { return { name: n, data: vfs[n] }; });
+                var zipBlob = window.zipWriter.create(entries);
+                window.zipWriter.download(zipBlob, zipName);
+            });
+        }
     }
 
     /* ── build an HTML runner (multi-file with virtual filesystem) ── */
@@ -823,6 +857,7 @@
             '      <button class="cr-preview-btn cr-btn-active" title="Show preview">&#9654; Preview</button>' +
             '    </div>' +
             '    <button class="cr-run-btn">&#9654; Run</button>' +
+            '    <button class="cr-download-btn" title="Download all files">&#x2B07;&#xFE0F; Download</button>' +
             '    <button class="cr-reset-btn">&#8635; Reset</button>' +
             '  </div>' +
             '</div>' +
@@ -1338,6 +1373,44 @@
             renderFileTree();
             updatePreview();
         });
+
+        /* ── Download all files (single file → raw, multiple → zip) ── */
+        var downloadBtn = container.querySelector('.cr-download-btn');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', function () {
+                if (typeof window.zipWriter === 'undefined') {
+                    alert('Download is unavailable on this page.');
+                    return;
+                }
+                vfs[activeFile] = editor.value;   /* flush current edits */
+
+                var textNames  = Object.keys(vfs);
+                var imageNames = Object.keys(uploadedImages);
+
+                /* single text file with no media → download it raw */
+                if (textNames.length === 1 && imageNames.length === 0) {
+                    var only      = textNames[0];
+                    var defName   = only.split('/').pop();
+                    var fileName  = window.prompt('Save file as:', defName);
+                    if (fileName === null) return;
+                    fileName = (fileName.trim() || defName);
+                    var blob = new Blob([vfs[only]], { type: 'text/plain;charset=utf-8' });
+                    window.zipWriter.download(blob, fileName);
+                    return;
+                }
+
+                var zipName = window.prompt('Save zip as:', 'html-project.zip');
+                if (zipName === null) return;
+                zipName = (zipName.trim() || 'html-project.zip');
+                if (!/\.zip$/i.test(zipName)) zipName += '.zip';
+
+                var entries = [];
+                textNames.forEach(function (n)  { entries.push({ name: n, data: vfs[n] }); });
+                imageNames.forEach(function (n) { entries.push({ name: n, data: uploadedImages[n] }); });
+                var zipBlob = window.zipWriter.create(entries);
+                window.zipWriter.download(zipBlob, zipName);
+            });
+        }
     }
 
     /* ═══════════════════════════════════════════════════════════════
