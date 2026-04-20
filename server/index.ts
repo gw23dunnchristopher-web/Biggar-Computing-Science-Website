@@ -28,13 +28,24 @@ app.disable('x-powered-by');
 app.use(express.json());
 
 app.use((req, res, next) => {
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  // Data Sculptor embeds are designed to be iframed from anywhere (the
+  // production site, the dev workspace, even external pages), so we skip the
+  // SAMEORIGIN restriction for those routes only. Everything else stays locked.
+  const isEmbeddable = req.path.startsWith('/data-sculptor');
+  if (!isEmbeddable) {
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  }
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://static.cloudflareinsights.com blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://texttospeech.googleapis.com https://generativelanguage.googleapis.com https://api.groq.com; frame-src 'self' https://trinket.io; media-src 'self' blob: data: https:; worker-src 'self' blob:;");
+  // frame-src now includes the production domain so pages served from dev /
+  // local hosts can also embed iframes that point at the live data-sculptor.
+  // frame-ancestors '*' on data-sculptor responses lets it be framed anywhere.
+  const frameSrc = "frame-src 'self' https://trinket.io https://www.bhs-computing.co.uk https://bhs-computing.co.uk";
+  const frameAncestors = isEmbeddable ? "frame-ancestors *" : "frame-ancestors 'self'";
+  res.setHeader('Content-Security-Policy', `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://static.cloudflareinsights.com blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://texttospeech.googleapis.com https://generativelanguage.googleapis.com https://api.groq.com; ${frameSrc}; ${frameAncestors}; media-src 'self' blob: data: https:; worker-src 'self' blob:;`);
   res.setHeader('Cache-Control', 'no-cache');
   next();
 });
