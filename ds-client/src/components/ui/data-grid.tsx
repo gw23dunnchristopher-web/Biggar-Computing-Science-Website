@@ -1304,6 +1304,37 @@ export function DataGrid({
                   {onClickToAdd && <td className="border-r border-gray-200" style={{ height: rowHeightPx ?? 28 }} />}
                 </tr>
 
+                {/* Placeholder "*" row — visual cue that another new record can be added */}
+                {Object.values(newRowData).some(v => v !== '' && v !== null && v !== undefined) && (
+                  <tr
+                    className="border-b border-gray-200 bg-white cursor-text"
+                    style={{ background: '#ffffff' }}
+                    onClick={() => {
+                      const firstEditable = newRowTrRef.current?.querySelector('input, select, textarea') as HTMLElement | null;
+                      firstEditable?.focus();
+                    }}
+                  >
+                    <td
+                      className="border-r border-gray-300 bg-[#f3f2f1] text-center overflow-hidden text-gray-500"
+                      style={{ width: 15, minWidth: 15, maxWidth: 15, height: rowHeightPx ?? 28, fontSize: 11, ...(hasFrozen ? { position: 'sticky', left: 0, zIndex: 5 } : {}) }}
+                    >
+                      *
+                    </td>
+                    {fields.map(f => (
+                      <td
+                        key={f.id}
+                        className="border-r border-gray-200 px-1"
+                        style={{ height: rowHeightPx ?? 28, ...stickyTd(f.name) }}
+                      >
+                        {f.fieldType === 'autonumber' ? (
+                          <span className="block text-right text-xs italic text-gray-400 px-1">(New)</span>
+                        ) : null}
+                      </td>
+                    ))}
+                    {onClickToAdd && <td className="border-r border-gray-200" style={{ height: rowHeightPx ?? 28 }} />}
+                  </tr>
+                )}
+
                 {/* Totals Row */}
                 {showTotals && (
                   <tr className="border-t-2 border-gray-400 bg-[#f3f2f1] sticky bottom-0 z-[5]" style={{ background: '#f3f2f1' }}>
