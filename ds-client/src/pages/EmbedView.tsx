@@ -1109,6 +1109,12 @@ export function EmbedView({ token, initialMode }: Props) {
             onSelectForm={selectForm}
             onSelectReport={selectReport}
             onSelectQuery={selectQuery}
+            onRefresh={() => {
+              apiFetch(`/api/ds/embeds/${token}`).then(d => d && setSnapshot(d)).catch(() => {});
+              loadForms(snapshot.database.id);
+              loadReports(snapshot.database.id);
+              loadQueries(snapshot.database.id);
+            }}
           />
         }
       >

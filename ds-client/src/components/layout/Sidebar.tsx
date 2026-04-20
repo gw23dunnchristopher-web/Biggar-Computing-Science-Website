@@ -169,6 +169,7 @@ export function Sidebar({
           },
         });
         queryClient.invalidateQueries({ queryKey: getListTablesQueryKey(databaseId) });
+        onRefresh?.();
       } else if (type === 'query') {
         const full = await apiFetch(`/api/ds/databases/${databaseId}/queries/${id}`);
         await apiFetch(`/api/ds/databases/${databaseId}/queries`, {
