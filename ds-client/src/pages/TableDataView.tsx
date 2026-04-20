@@ -1044,7 +1044,18 @@ export function TableDataView({
               onSelectRow={setSelectedRowId}
               selectedFieldName={selectedFieldName}
               onSelectField={setSelectedFieldName}
-              onRenameField={(fieldName) => { setSelectedFieldName(fieldName); const fld = table.fields.find(f => f.name === fieldName); if (fld) { setFieldOpName(fld.name); setFieldOpCaption(fld.caption ?? ''); setFieldOpDialog('rename'); } }}
+              onRenameField={async (oldName, newName) => {
+                const trimmed = newName.trim();
+                if (!trimmed || trimmed === oldName) return;
+                const newFields = fields.map(f => f.name === oldName ? { ...f, name: trimmed } : f);
+                try {
+                  await saveFields(newFields);
+                  setSelectedFieldName(trimmed);
+                  toast({ title: 'Field renamed' });
+                } catch {
+                  toast({ title: 'Rename failed', variant: 'destructive' });
+                }
+              }}
               onFilterBySelection={handleFilterBySelection}
               onFilterExcluding={handleFilterExcluding}
               onRemoveFilter={handleRemoveFilter}

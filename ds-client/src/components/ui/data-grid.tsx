@@ -146,7 +146,7 @@ interface DataGridProps {
   onSelectRow: (id: number | null) => void;
   selectedFieldName?: string | null;
   onSelectField?: (fieldName: string | null) => void;
-  onRenameField?: (fieldName: string) => void;
+  onRenameField?: (fieldName: string, newName: string) => void;
   onFilterBySelection?: (fieldName: string, value: any) => void;
   onFilterExcluding?: (fieldName: string, value: any) => void;
   onRemoveFilter?: () => void;
@@ -202,6 +202,7 @@ export function DataGrid({
 
   const [newRowData, setNewRowData] = useState<{ [key: string]: any }>({});
   const [editingCell, setEditingCell] = useState<EditingCell>(null);
+  const [editingHeader, setEditingHeader] = useState<{ name: string; value: string } | null>(null);
   const [editingValue, setEditingValue] = useState<any>(null);
   const [ctxTarget, setCtxTarget] = useState<CtxTarget>(null);
   const [filterDlg, setFilterDlg] = useState<FilterDlg>(null);
@@ -1120,14 +1121,40 @@ export function DataGrid({
                     <th
                       key={f.id}
                       className={`relative border-r border-b border-gray-300 px-2 py-1.5 font-medium text-gray-700 text-xs select-none cursor-pointer hover:bg-gray-200 transition-colors ${selectedFieldName === f.name ? 'bg-[#cce5ff]' : sortState?.field === f.name ? 'bg-red-50' : 'bg-[#f3f2f1]'}`}
-                      onClick={() => { onSortChange?.(f.name); onSelectField?.(f.name); }}
-                      onDoubleClick={(e) => { e.stopPropagation(); onSelectField?.(f.name); onRenameField?.(f.name); }}
+                      onClick={() => { if (editingHeader?.name === f.name) return; onSortChange?.(f.name); onSelectField?.(f.name); }}
+                      onDoubleClick={(e) => { e.stopPropagation(); onSelectField?.(f.name); setEditingHeader({ name: f.name, value: f.name }); }}
                       onContextMenu={() => { setCtxTarget({ type: 'header', fieldName: f.name }); onSelectField?.(f.name); }}
                       style={stickyTh(f.name)}
                     >
                       <div className="flex items-center gap-1 pr-2 overflow-hidden">
-                        <span className="truncate">{f.name}</span>
-                        {sortState?.field === f.name && (
+                        {editingHeader?.name === f.name ? (
+                          <input
+                            type="text"
+                            autoFocus
+                            value={editingHeader.value}
+                            onChange={e => setEditingHeader({ name: f.name, value: e.target.value })}
+                            onClick={e => e.stopPropagation()}
+                            onDoubleClick={e => e.stopPropagation()}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') {
+                                const newName = editingHeader.value.trim();
+                                if (newName && newName !== f.name) onRenameField?.(f.name, newName);
+                                setEditingHeader(null);
+                              } else if (e.key === 'Escape') {
+                                setEditingHeader(null);
+                              }
+                            }}
+                            onBlur={() => {
+                              const newName = editingHeader.value.trim();
+                              if (newName && newName !== f.name) onRenameField?.(f.name, newName);
+                              setEditingHeader(null);
+                            }}
+                            className="w-full text-xs px-1 py-0.5 border border-[#C42B1C] outline-none bg-white text-gray-800"
+                          />
+                        ) : (
+                          <span className="truncate">{f.name}</span>
+                        )}
+                        {sortState?.field === f.name && editingHeader?.name !== f.name && (
                           <span className="text-[#C42B1C] flex-none">
                             {sortState?.dir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                           </span>
