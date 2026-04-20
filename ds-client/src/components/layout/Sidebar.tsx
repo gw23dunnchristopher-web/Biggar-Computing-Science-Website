@@ -264,12 +264,19 @@ export function Sidebar({
                       <ContextMenuContent className="w-48 text-sm">
                         <ContextMenuLabel className="text-xs font-normal text-gray-500 px-2 py-1">{t.name}</ContextMenuLabel>
                         <ContextMenuSeparator />
-                        <ContextMenuItem asChild>
-                          <Link href={`/databases/${databaseId}/tables/${t.id}/data`} className="flex items-center cursor-pointer">
+                        {onSelectTable ? (
+                          <ContextMenuItem onClick={() => onSelectTable(t.id)} className="cursor-pointer">
                             <Grid3X3 className="w-3.5 h-3.5 mr-2 text-gray-500" />
                             Open (Datasheet)
-                          </Link>
-                        </ContextMenuItem>
+                          </ContextMenuItem>
+                        ) : (
+                          <ContextMenuItem asChild>
+                            <Link href={`/databases/${databaseId}/tables/${t.id}/data`} className="flex items-center cursor-pointer">
+                              <Grid3X3 className="w-3.5 h-3.5 mr-2 text-gray-500" />
+                              Open (Datasheet)
+                            </Link>
+                          </ContextMenuItem>
+                        )}
                         {onSelectTableDesign ? (
                           <ContextMenuItem onClick={() => onSelectTableDesign(t.id)} className="cursor-pointer">
                             <DesignViewIcon size={14} className="mr-2 flex-shrink-0" />
