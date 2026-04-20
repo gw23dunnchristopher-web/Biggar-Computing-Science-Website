@@ -952,6 +952,86 @@ export function registerDsRoutes(app: Express) {
       `Table: ${t.name} (${t.rowCount} row${t.rowCount !== 1 ? "s" : ""})\n  Fields: ${t.fields.map(f => `${f.name} (${f.type}${f.isPrimaryKey ? ", PK" : ""}${f.isRequired ? ", required" : ""})`).join(", ")}\n  Sample data: ${t.sampleRows.length > 0 ? t.sampleRows.map(r => JSON.stringify(r)).join("; ") : "none"}`
     ).join("\n\n");
 
+    // ── Deterministic data-dictionary audit (done in code, not by the AI) ──
+    // Parse the teacher's data dictionary into expected (table, field) pairs, then
+    // check each against what the student actually built. The result is both fed
+    // into the AI prompt AND used to CAP the final mark so the AI cannot award
+    // marks that are not supported by the schema.
+    function parseDataDictionary(text: string): { table: string; fields: string[] }[] {
+      const lines = text.split(/\r?\n/);
+      const out: { table: string; fields: string[] }[] = [];
+      let current: { table: string; fields: string[] } | null = null;
+      const cleanFieldName = (s: string): string | null => {
+        let t = s.trim().replace(/^[\-*•●·]+\s*/, "").replace(/^\d+\.\s*/, "");
+        // Strip anything after a type marker: "Name (Text)" / "Name: Text" / "Name — Text"
+        t = t.split(/[(:|—–\-]/)[0].trim();
+        // Strip markdown
+        t = t.replace(/[*_`]/g, "").trim();
+        if (!t) return null;
+        if (!/^[A-Za-z][A-Za-z0-9 _]*$/.test(t)) return null;
+        if (/^(table|fields?|data type|type|name|description|primary key|key|required|format|example|notes?|validation|constraints?)$/i.test(t)) return null;
+        return t;
+      };
+      const cleanTableName = (s: string): string | null => {
+        let t = s.trim().replace(/^[\-*•●·]+\s*/, "").replace(/^\d+\.\s*/, "");
+        t = t.replace(/^table\s*[:\-]?\s*/i, "");
+        t = t.replace(/[*_`:]/g, "").trim();
+        if (!t) return null;
+        if (!/^[A-Za-z][A-Za-z0-9 _]*$/.test(t)) return null;
+        return t;
+      };
+      for (const raw of lines) {
+        if (!raw.trim()) continue;
+        const indented = /^(\s{2,}|\t|\s*[-*•●·])/.test(raw);
+        if (indented && current) {
+          const f = cleanFieldName(raw);
+          if (f) current.fields.push(f);
+        } else {
+          const t = cleanTableName(raw);
+          if (t) {
+            current = { table: t, fields: [] };
+            out.push(current);
+          }
+        }
+      }
+      // Drop tables that ended up empty (likely stray headers).
+      return out.filter(t => t.fields.length > 0);
+    }
+
+    const expectedTables = dataDictionary ? parseDataDictionary(dataDictionary) : [];
+    const studentFieldsByTable = new Map<string, Set<string>>();
+    for (const t of tableDetails) {
+      studentFieldsByTable.set(t.name.toLowerCase().trim(), new Set(t.fields.map(f => f.name.toLowerCase().trim())));
+    }
+    type AuditRow = { table: string; field: string; tablePresent: boolean; fieldPresent: boolean };
+    const auditRows: AuditRow[] = [];
+    for (const et of expectedTables) {
+      const studentSet = studentFieldsByTable.get(et.table.toLowerCase().trim());
+      for (const ef of et.fields) {
+        auditRows.push({
+          table: et.table,
+          field: ef,
+          tablePresent: !!studentSet,
+          fieldPresent: !!studentSet?.has(ef.toLowerCase().trim()),
+        });
+      }
+    }
+    const totalExpectedFields = auditRows.length;
+    const presentFields = auditRows.filter(r => r.fieldPresent).length;
+    const completeness = totalExpectedFields > 0 ? presentFields / totalExpectedFields : 1;
+
+    const auditBlock = auditRows.length > 0
+      ? "AUTOMATIC SCHEMA AUDIT (computed by the server — these results are authoritative; do NOT contradict them):\n" +
+        expectedTables.map(et => {
+          const rows = auditRows.filter(r => r.table === et.table);
+          const tablePresent = rows[0]?.tablePresent;
+          const header = `• Table "${et.table}": ${tablePresent ? "PRESENT" : "MISSING"}`;
+          const fieldLines = rows.map(r => `    - ${r.field}: ${r.fieldPresent ? "PRESENT" : "MISSING"}`).join("\n");
+          return `${header}\n${fieldLines}`;
+        }).join("\n") +
+        `\n\nSchema completeness: ${presentFields} / ${totalExpectedFields} expected fields present (${Math.round(completeness * 100)}%).\n`
+      : "";
+
     const taskBlock = numberedBullets
       ? `TASK (each numbered bullet is worth 1 mark, for a total of ${maxMark} mark${maxMark !== 1 ? "s" : ""}):\n${numberedBullets}\n\n`
       : (taskDescription ? `TASK: ${taskDescription}\n\n` : "");
@@ -969,7 +1049,8 @@ ${dataDictionary}
 STUDENT'S ACTUAL DATABASE (what they submitted):
 ${dbSummary}
 
-You MUST work through these steps IN ORDER inside your reply, before giving any mark.
+${auditBlock}
+You MUST work through these steps IN ORDER inside your reply, before giving any mark. The server has already completed an authoritative schema audit above — you must accept its PRESENT/MISSING verdicts and base your marking on them.
 
 STEP A — Extract the expected schema from the data dictionary above. List every expected table, and under each table list every expected field with its expected data type. Use this exact format:
   Expected schema:
@@ -1020,9 +1101,9 @@ Be encouraging but honest. Use British English spelling.`;
         contents: prompt,
         config: { thinkingConfig: { thinkingBudget: 0 } },
       });
-      const feedback = response.text || "";
-      // Prefer an explicit "Mark: X / N" line, otherwise fall back to the LAST X/N pattern in the text
-      // (the audit step may contain other "X / N"-looking ratios that we don't want to capture).
+      let feedback = response.text || "";
+      // Prefer an explicit "Mark: X / N" line, otherwise fall back to the LAST X/N pattern
+      // (earlier "X / N" ratios in the audit section would otherwise be picked up wrongly).
       let mark: number | null = null;
       const explicit = feedback.match(/\*?\*?Mark\*?\*?\s*[:\-]?\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+)/i);
       const allMatches = [...feedback.matchAll(/(\d+(?:\.\d+)?)\s*\/\s*(\d+)/g)];
@@ -1030,6 +1111,15 @@ Be encouraging but honest. Use British English spelling.`;
       if (chosen) {
         const parsed = Math.round(parseFloat(chosen[1]));
         mark = Math.max(0, Math.min(maxMark, parsed));
+      }
+      // Cap the mark based on the deterministic schema audit so the AI cannot
+      // award marks that aren't backed by the student's actual submission.
+      if (totalExpectedFields > 0 && mark !== null) {
+        const cap = Math.ceil(maxMark * completeness);
+        if (mark > cap) {
+          feedback += `\n\n*(Mark automatically capped from ${mark} to ${cap} based on schema completeness: ${presentFields}/${totalExpectedFields} expected fields present.)*`;
+          mark = cap;
+        }
       }
       res.json({ feedback, mark, maxMark });
     } catch (err: any) {
