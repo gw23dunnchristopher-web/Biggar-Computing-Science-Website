@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Shell } from '@/components/layout/Shell';
-import { Ribbon, RibbonGroup, RibbonButton } from '@/components/layout/Ribbon';
+import { Ribbon, RibbonGroup, RibbonButton, ExtraRibbonTabsProvider } from '@/components/layout/Ribbon';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Table as TableIcon } from 'lucide-react';
 import { TableDataView } from './TableDataView';
@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { ClipboardList, Send, Loader2, Sparkles } from 'lucide-react';
+import { DS_ICON_SIZE_LARGE } from '@/components/ui/ds-icons';
 
 const SESSION_KEY_STORAGE = 'student_session_key';
 
@@ -79,6 +80,7 @@ export function EmbedView({ token, initialMode }: Props) {
 
   // Task / submit-for-marking panel
   const [taskOpen, setTaskOpen] = useState(false);
+  const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -571,19 +573,43 @@ export function EmbedView({ token, initialMode }: Props) {
 
   const hasTask = taskBullets.length > 0;
 
-  const taskOverlay = hasTask ? (
-    <>
-      {/* Floating Task button — visible from any view in the embed */}
-      <button
+  // The Task ribbon tab content — same look as a Database Tools tab.
+  const taskTabContent = hasTask ? (
+    <RibbonGroup name="Task">
+      <RibbonButton
+        icon={<ClipboardList size={DS_ICON_SIZE_LARGE} />}
+        label="View Task"
         onClick={() => setTaskOpen(true)}
-        title="View task instructions and submit for AI marking"
-        className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#C42B1C] text-white text-sm font-medium shadow-lg hover:bg-[#9B2118] transition-colors"
-        data-testid="button-open-task"
-      >
-        <ClipboardList size={16} />
-        Task &amp; Submit
-      </button>
-      <Dialog open={taskOpen} onOpenChange={(o) => { setTaskOpen(o); if (!o) setFeedback(null); }}>
+        title="Show the task instructions for this sandbox"
+      />
+      <RibbonButton
+        icon={submitting ? <Loader2 size={DS_ICON_SIZE_LARGE} className="animate-spin" /> : <Send size={DS_ICON_SIZE_LARGE} />}
+        label={submitting ? 'Marking…' : (feedback ? 'Resubmit' : 'Submit for Marking')}
+        onClick={() => setConfirmSubmitOpen(true)}
+        disabled={submitting}
+        title="Send your current database to the AI for marking"
+        wide
+      />
+      {feedback && (
+        <RibbonButton
+          icon={<Sparkles size={DS_ICON_SIZE_LARGE} />}
+          label="View Feedback"
+          onClick={() => setTaskOpen(true)}
+          title="Open the most recent AI feedback"
+        />
+      )}
+    </RibbonGroup>
+  ) : null;
+
+  const extraRibbonTabs = useMemo(
+    () => (hasTask ? [{ name: 'Task', content: taskTabContent }] : []),
+    [hasTask, submitting, feedback]
+  );
+
+  const taskDialogs = hasTask ? (
+    <>
+      {/* Instructions / feedback panel */}
+      <Dialog open={taskOpen} onOpenChange={setTaskOpen}>
         <DialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -591,7 +617,7 @@ export function EmbedView({ token, initialMode }: Props) {
               Task Instructions
             </DialogTitle>
             <DialogDescription>
-              Complete each requirement in your sandbox, then submit for AI marking.
+              Complete each requirement in your sandbox, then use the Submit button on the Task ribbon to send it for AI marking.
             </DialogDescription>
           </DialogHeader>
 
@@ -610,16 +636,39 @@ export function EmbedView({ token, initialMode }: Props) {
             </div>
           )}
 
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTaskOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* "Are you sure?" submission confirmation */}
+      <Dialog open={confirmSubmitOpen} onOpenChange={(o) => { if (!submitting) setConfirmSubmitOpen(o); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send size={18} className="text-[#C42B1C]" />
+              Submit for AI Marking?
+            </DialogTitle>
+            <DialogDescription>
+              This will send the current state of your database to the AI marker.
+              {feedback ? ' Your previous feedback will be replaced.' : ''} Make sure you have completed all the bullet points in the task before submitting.
+            </DialogDescription>
+          </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setTaskOpen(false)} disabled={submitting}>Close</Button>
+            <Button variant="outline" onClick={() => setConfirmSubmitOpen(false)} disabled={submitting}>Cancel</Button>
             <Button
-              onClick={handleSubmitForMarking}
+              onClick={async () => {
+                setConfirmSubmitOpen(false);
+                await handleSubmitForMarking();
+                setTaskOpen(true);
+              }}
               disabled={submitting}
               className="bg-[#C42B1C] hover:bg-[#9B2118] text-white"
-              data-testid="button-submit-marking"
+              data-testid="button-confirm-submit-marking"
             >
               {submitting ? (<><Loader2 size={14} className="mr-1.5 animate-spin" /> Marking…</>)
-                          : (<><Send size={14} className="mr-1.5" /> {feedback ? 'Resubmit for Marking' : 'Submit for AI Marking'}</>)}
+                          : (<><Send size={14} className="mr-1.5" /> Yes, submit</>)}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1053,9 +1102,11 @@ export function EmbedView({ token, initialMode }: Props) {
 
   return (
     <TabBarProvider value={tabBarEl}>
-      {renderContent()}
+      <ExtraRibbonTabsProvider tabs={extraRibbonTabs}>
+        {renderContent()}
+      </ExtraRibbonTabsProvider>
       {wizardDialogs}
-      {taskOverlay}
+      {taskDialogs}
     </TabBarProvider>
   );
 }

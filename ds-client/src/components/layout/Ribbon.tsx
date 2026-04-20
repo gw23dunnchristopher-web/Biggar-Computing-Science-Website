@@ -27,6 +27,14 @@ export function useRibbonSize(): RibbonSize {
   return useContext(RibbonSizeContext);
 }
 
+// ── Extra tabs context ────────────────────────────────────────────────────────
+// Lets a parent component (e.g. EmbedView) inject an additional ribbon tab that
+// appears on every view inside, without each view needing to know about it.
+const ExtraRibbonTabsContext = React.createContext<RibbonTab[]>([]);
+export function ExtraRibbonTabsProvider({ tabs, children }: { tabs: RibbonTab[]; children: React.ReactNode }) {
+  return <ExtraRibbonTabsContext.Provider value={tabs}>{children}</ExtraRibbonTabsContext.Provider>;
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 export interface RibbonTab {
   name: string;
@@ -59,7 +67,9 @@ export function Ribbon({
   title, tabs, contextSection, activeTab, onTabChange,
   homeLink, allDatabasesLink, onSave, onUndo, onRedo, pinnedContent
 }: RibbonProps) {
-  const allTabs = [...tabs, ...(contextSection?.tabs || [])];
+  const extraTabs = useContext(ExtraRibbonTabsContext);
+  const baseTabs = [...tabs, ...extraTabs];
+  const allTabs = [...baseTabs, ...(contextSection?.tabs || [])];
   const defaultActive = contextSection ? contextSection.defaultTab : tabs[0]?.name;
   const [localActive, setLocalActive] = useState(defaultActive);
   const active = activeTab ?? localActive;
@@ -95,7 +105,7 @@ export function Ribbon({
     let used = fileRef.current ? fileRef.current.offsetWidth + 4 : 0;
 
     let firstOverflowTab = -1;
-    for (let i = 0; i < tabs.length; i++) {
+    for (let i = 0; i < baseTabs.length; i++) {
       const el = tabBtnRefs.current[i];
       if (!el) continue;
       used += el.scrollWidth + 1;
@@ -116,9 +126,9 @@ export function Ribbon({
     }
 
     const noOverflow = firstOverflowTab === -1 && firstOverflowCtx === -1;
-    setOverflowFromTab(noOverflow ? -1 : (firstOverflowTab === -1 ? tabs.length : firstOverflowTab));
+    setOverflowFromTab(noOverflow ? -1 : (firstOverflowTab === -1 ? baseTabs.length : firstOverflowTab));
     setOverflowFromCtx(noOverflow ? -1 : (firstOverflowCtx === -1 && firstOverflowTab !== -1 ? 0 : firstOverflowCtx));
-  }, [tabs, contextSection]);
+  }, [baseTabs, contextSection]);
 
   useEffect(() => {
     const container = tabRowRef.current;
@@ -130,7 +140,7 @@ export function Ribbon({
   }, [recalcTabs]);
 
   const overflowTabs: Array<{ tab: RibbonTab; isCtx: boolean }> = [];
-  if (overflowFromTab !== -1) tabs.slice(overflowFromTab).forEach(t => overflowTabs.push({ tab: t, isCtx: false }));
+  if (overflowFromTab !== -1) baseTabs.slice(overflowFromTab).forEach(t => overflowTabs.push({ tab: t, isCtx: false }));
   if (overflowFromCtx !== -1 && contextSection) contextSection.tabs.slice(overflowFromCtx).forEach(t => overflowTabs.push({ tab: t, isCtx: true }));
   const hasOverflow = overflowTabs.length > 0;
   const activeInOverflow = overflowTabs.some(o => o.tab.name === active);
@@ -203,7 +213,7 @@ export function Ribbon({
           </Link>
         )}
 
-        {tabs.map((tab, i) => {
+        {baseTabs.map((tab, i) => {
           const hidden = overflowFromTab !== -1 && i >= overflowFromTab;
           return (
             <button
