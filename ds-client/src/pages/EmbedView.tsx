@@ -303,6 +303,27 @@ export function EmbedView({ token, initialMode }: Props) {
     setActiveView('query');
   }, [queries, addTab]);
 
+  const handleDeleteTableEmbed = useCallback(async (id: number) => {
+    if (!snapshot) return;
+    const tbl = snapshot.tables.find(t => t.id === id);
+    if (!confirm(`Delete table "${tbl?.name ?? 'Table'}"? This cannot be undone.`)) return;
+    try {
+      await apiFetch(`/api/ds/databases/${snapshot.database.id}/tables/${id}`, { method: 'DELETE' });
+      setOpenTabs(prev => prev.filter(t => t.key !== `table-${id}`));
+      if (activeTableId === id) {
+        setActiveTableId(null);
+        setActiveView('datasheet');
+      }
+      const sessionKey = sessionStorage.getItem(SESSION_KEY_STORAGE);
+      const fresh = await apiFetch(`/api/ds/embeds/${token}`, {
+        headers: sessionKey ? { 'x-session-key': sessionKey } : {},
+      });
+      if (fresh) setSnapshot(fresh);
+    } catch (e) {
+      toast({ title: 'Delete failed', variant: 'destructive' });
+    }
+  }, [snapshot, activeTableId, token, toast]);
+
   async function loadForms(id: number) {
     try { const r = await apiFetch(`/api/ds/databases/${id}/forms`); setForms(r || []); } catch {}
   }
@@ -951,7 +972,7 @@ export function EmbedView({ token, initialMode }: Props) {
             tableId={activeTableId}
             db={snapshot.database}
             tables={snapshot.tables}
-            onDeleteTable={() => {}}
+            onDeleteTable={handleDeleteTableEmbed}
             isStudentMode={true}
             onSwitchToDatasheet={() => setSqlSubView('table')}
             onReset={handleReset}
@@ -1030,7 +1051,7 @@ export function EmbedView({ token, initialMode }: Props) {
             tableId={activeTableId}
             db={snapshot.database}
             tables={snapshot.tables}
-            onDeleteTable={() => {}}
+            onDeleteTable={handleDeleteTableEmbed}
             isStudentMode={true}
             onSwitchToDatasheet={() => setActiveView('datasheet')}
             onReset={handleReset}

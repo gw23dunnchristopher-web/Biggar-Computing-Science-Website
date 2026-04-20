@@ -177,6 +177,7 @@ interface Props {
   db: Database;
   tables: TableType[];
   onDeleteTable?: (id: number) => void;
+  onSelectTableDesign?: (id: number) => void;
   isStudentMode?: boolean;
   onSelectTable?: (id: number) => void;
   queries?: ItemRow[];
@@ -234,7 +235,7 @@ type FieldFilter =
 type FieldOpDialog = 'rename' | 'defaultValue' | 'fieldSize' | 'addMore' | null;
 
 export function TableDataView({
-  databaseId, tableId, db, tables, onDeleteTable, isStudentMode,
+  databaseId, tableId, db, tables, onDeleteTable, onSelectTableDesign, isStudentMode,
   onSelectTable, queries = [], forms = [], reports = [], onSelectQuery, onDeleteQuery, onDeleteForm, onDeleteReport,
   onRefresh,
   onCreateTable, onCreateQuery, onQueryWizard, onCreateSqlQuery,
@@ -984,6 +985,7 @@ export function TableDataView({
           tables={tables}
           databaseId={databaseId}
           onDeleteTable={onDeleteTable}
+          onSelectTableDesign={onSelectTableDesign}
           isStudentMode={isStudentMode}
           activeTableId={tableId}
           onSelectTable={onSelectTable}
