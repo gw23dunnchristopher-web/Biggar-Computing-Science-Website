@@ -137,6 +137,29 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
   // ── Type-change warning ──
   const [typeChangeDialog, setTypeChangeDialog] = useState<TypeChangePending | null>(null);
   const [typeChangeBusy, setTypeChangeBusy] = useState(false);
+
+  // ── Delete-field-with-data warning ──
+  const [deleteFieldDialog, setDeleteFieldDialog] = useState<{ name: string; rowCount: number } | null>(null);
+  const deleteFieldResolverRef = useRef<((ok: boolean) => void) | null>(null);
+
+  const onBeforeRemoveField = async (field: UpdateFieldRequest): Promise<boolean> => {
+    try {
+      const data = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}/records`);
+      const recs: { id: number; data: Record<string, any> }[] = data.records ?? data ?? [];
+      const rowCount = recs.filter(r => {
+        const v = r.data?.[field.name];
+        return v !== null && v !== undefined && v !== '';
+      }).length;
+      if (rowCount === 0) return true;
+      return await new Promise<boolean>(resolve => {
+        deleteFieldResolverRef.current = resolve;
+        setDeleteFieldDialog({ name: field.name, rowCount });
+      });
+    } catch {
+      // If we can't read records (e.g. brand-new unsaved field), allow delete
+      return true;
+    }
+  };
   const typeChangeResolveRef = useRef<((ok: boolean) => void) | null>(null);
 
   const onBeforeTypeChange = useCallback(async (fieldIdx: number, oldType: string, newType: string): Promise<boolean> => {
@@ -554,6 +577,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
             databaseId={databaseId}
             tableId={tableId}
             onBeforeTypeChange={onBeforeTypeChange}
+            onBeforeRemoveField={onBeforeRemoveField}
             showPropertySheet={showPropertySheet}
             onCreateRelationship={async (fromTableId, fromFieldName, toTableId, toFieldName, relType) => {
               try {
@@ -669,6 +693,29 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!deleteFieldDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            deleteFieldResolverRef.current?.(false);
+            deleteFieldResolverRef.current = null;
+            setDeleteFieldDialog(null);
+          }
+        }}
+        title="Delete Field"
+        description={
+          deleteFieldDialog
+            ? `The field "${deleteFieldDialog.name}" contains data in ${deleteFieldDialog.rowCount} record${deleteFieldDialog.rowCount === 1 ? '' : 's'}. Deleting it will permanently remove that data. Are you sure you want to continue?`
+            : ''
+        }
+        confirmLabel="Delete Field"
+        onConfirm={() => {
+          deleteFieldResolverRef.current?.(true);
+          deleteFieldResolverRef.current = null;
+          setDeleteFieldDialog(null);
+        }}
+      />
 
       {onReset && (
         <ConfirmDialog

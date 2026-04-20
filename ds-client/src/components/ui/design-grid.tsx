@@ -107,6 +107,7 @@ interface DesignGridProps {
   databaseId?: number;
   tableId?: number;
   onBeforeTypeChange?: (fieldIdx: number, oldType: string, newType: string) => Promise<boolean>;
+  onBeforeRemoveField?: (field: UpdateFieldRequest) => Promise<boolean>;
   showPropertySheet?: boolean;
   onCreateRelationship?: (fromTableId: number, fromFieldName: string, toTableId: number, toFieldName: string, relType: string) => void;
 }
@@ -141,7 +142,7 @@ const FIELD_TYPE_LABELS: Record<string, string> = Object.fromEntries(
   FIELD_TYPES.map(t => [t.value, t.label])
 );
 
-export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onSelectedIndexChange, tables = [], databaseId, tableId, onBeforeTypeChange, showPropertySheet = true, onCreateRelationship }: DesignGridProps, ref) {
+export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function DesignGrid({ fields, onChange, selectedIndex: controlledIdx, onSelectedIndexChange, tables = [], databaseId, tableId, onBeforeTypeChange, onBeforeRemoveField, showPropertySheet = true, onCreateRelationship }: DesignGridProps, ref) {
   const [localIdx, setLocalIdx] = useState<number | null>(null);
   const selectedIndex = controlledIdx !== undefined ? controlledIdx : localIdx;
   const setSelectedIndex = (i: number | null) => { setLocalIdx(i); onSelectedIndexChange?.(i); };
@@ -318,8 +319,13 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
     setSelectedIndex(newIdx);
   };
 
-  const removeField = (index: number) => {
-    if (fields[index]?.isPrimaryKey) return;
+  const removeField = async (index: number) => {
+    const f = fields[index];
+    if (!f || f.isPrimaryKey) return;
+    if (onBeforeRemoveField) {
+      const ok = await onBeforeRemoveField(f);
+      if (!ok) return;
+    }
     onChange(fields.filter((_, i) => i !== index));
     setSelectedIndex(null);
   };
