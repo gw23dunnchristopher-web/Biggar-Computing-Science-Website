@@ -266,7 +266,7 @@ export function Sidebar({
                         <ContextMenuLabel className="text-xs font-normal text-gray-500 px-2 py-1">{t.name}</ContextMenuLabel>
                         <ContextMenuSeparator />
                         {onSelectTable ? (
-                          <ContextMenuItem onClick={() => onSelectTable(t.id)} className="cursor-pointer">
+                          <ContextMenuItem onSelect={(e) => { e.preventDefault(); console.log('[DataSculptor] menu Open clicked', t.id); onSelectTable(t.id); }} className="cursor-pointer">
                             <Grid3X3 className="w-3.5 h-3.5 mr-2 text-gray-500" />
                             Open (Datasheet)
                           </ContextMenuItem>
@@ -279,7 +279,7 @@ export function Sidebar({
                           </ContextMenuItem>
                         )}
                         {onSelectTableDesign ? (
-                          <ContextMenuItem onClick={() => onSelectTableDesign(t.id)} className="cursor-pointer">
+                          <ContextMenuItem onSelect={(e) => { e.preventDefault(); console.log('[DataSculptor] menu Design View clicked', t.id); onSelectTableDesign(t.id); }} className="cursor-pointer">
                             <DesignViewIcon size={14} className="mr-2 flex-shrink-0" />
                             Design View
                           </ContextMenuItem>
@@ -292,17 +292,17 @@ export function Sidebar({
                           </ContextMenuItem>
                         )}
                         <ContextMenuSeparator />
-                        <ContextMenuItem onClick={() => openRename('table', t.id, t.name)}>
+                        <ContextMenuItem onSelect={(e) => { e.preventDefault(); openRename('table', t.id, t.name); }}>
                           <Pencil className="w-3.5 h-3.5 mr-2 text-gray-500" />
                           Rename…
                         </ContextMenuItem>
-                        <ContextMenuItem onClick={() => doCopy('table', t.id, t.name)}>
+                        <ContextMenuItem onSelect={(e) => { e.preventDefault(); console.log('[DataSculptor] menu Copy clicked', t.id); doCopy('table', t.id, t.name); }}>
                           <Copy className="w-3.5 h-3.5 mr-2 text-gray-500" />
                           Copy
                         </ContextMenuItem>
                         <ContextMenuSeparator />
                         <ContextMenuItem
-                          onClick={() => onDeleteTable?.(t.id)}
+                          onSelect={(e) => { e.preventDefault(); console.log('[DataSculptor] menu Delete clicked', t.id); onDeleteTable?.(t.id); }}
                           className="text-red-600 focus:text-red-700 focus:bg-red-50"
                         >
                           <Trash2 className="w-3.5 h-3.5 mr-2" />
