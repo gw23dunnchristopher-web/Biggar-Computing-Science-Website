@@ -275,12 +275,10 @@ export function EmbedView({ token, initialMode }: Props) {
     const label = tbl?.name ?? 'Table';
     addTab(`table-${id}`, label, 'table');
     setActiveTableId(id);
-    if (tbl && /^Table\d+$/i.test(tbl.name)) {
-      setNameTableInput(tbl.name);
-      setNameTableDialog({ tableId: tbl.id });
-    } else {
-      setActiveView('design');
-    }
+    setActiveFormId(null);
+    setActiveReportId(null);
+    setActiveQueryId(null);
+    setActiveView('design');
   }, [snapshot, addTab]);
 
   const selectForm = useCallback((id: number) => {
