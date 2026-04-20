@@ -543,10 +543,6 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
         <div className="flex items-center h-7 bg-[#f3f2f1] border-b border-gray-300 px-2 shadow-sm z-10 flex-none gap-3">
           <span className="font-semibold text-gray-600 text-sm px-2 border-b-2 border-[#c55a11] pb-0.5">{tableName || 'Table Design'}</span>
         </div>
-        <div className="p-3 bg-gray-100 border-b border-gray-300 flex items-center shadow-sm z-10">
-          <span className="text-gray-600 font-semibold mr-4 text-sm">Table Name:</span>
-          <Input value={tableName} onChange={e => setTableName(e.target.value)} className="w-64 h-8 bg-white" />
-        </div>
         <div className="flex-1 overflow-hidden">
           <DesignGrid
             ref={designGridRef}
