@@ -150,7 +150,7 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
 
   // ── Column resize ──
   const [colWidths, setColWidths] = useState<Record<string, number>>({ name: 240, type: 180, desc: 9999 });
-  const [propsPaneHeight, setPropsPaneHeight] = useState<number>(256);
+  const [propsPaneHeight, setPropsPaneHeight] = useState<number>(250);
   const propsResizeRef = useRef<{ startY: number; startH: number } | null>(null);
 
   useEffect(() => {
