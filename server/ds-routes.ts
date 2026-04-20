@@ -100,7 +100,13 @@ async function deepCopyDatabase(sourceDatabaseId: number, newUserId: string): Pr
   }
 
   // ── Step 3: Create the new sandbox database ──
-  const [newDb] = await db.insert(dsDatabases).values({ name: `[Student Copy] ${sourceDb.name}`, userId: newUserId }).returning();
+  const [newDb] = await db.insert(dsDatabases).values({
+    name: `[Student Copy] ${sourceDb.name}`,
+    userId: newUserId,
+    taskDescription: sourceDb.taskDescription,
+    dataDictionary: sourceDb.dataDictionary,
+    theme: sourceDb.theme,
+  }).returning();
 
   // ── Step 4: Copy all tables in parallel, batch-inserting their fields and records ──
   const tableIdMap: Record<number, number> = {};
