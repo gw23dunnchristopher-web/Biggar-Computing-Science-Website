@@ -585,6 +585,21 @@ export function DataGrid({
     const textMax = (type === 'text' && fieldDef?.fieldSize)
       ? Number(fieldDef.fieldSize) || undefined
       : undefined;
+    const handlePasteOverflow = (e: React.ClipboardEvent<HTMLInputElement>) => {
+      if (!textMax) return;
+      const pasted = e.clipboardData.getData('text');
+      const target = e.currentTarget;
+      const current = String(target.value ?? '');
+      const selLen = (target.selectionEnd ?? current.length) - (target.selectionStart ?? 0);
+      const projected = current.length - selLen + pasted.length;
+      if (projected > textMax) {
+        toast({
+          title: `Text was truncated`,
+          description: `${fieldName} only allows ${textMax} character${textMax === 1 ? '' : 's'} (you tried to paste ${pasted.length}).`,
+          variant: 'destructive',
+        });
+      }
+    };
     if (type === 'lookup') {
       const field = table.fields.find(f => f.name === fieldName);
       const cfg = parseLookupConfig(field?.description);
@@ -610,6 +625,7 @@ export function DataGrid({
         onChange={e => onChange(e.target.value)}
         onBlur={onCommit}
         onKeyDown={onKeyDown}
+        onPaste={handlePasteOverflow}
         maxLength={textMax}
         className={baseInput} />
     );
@@ -667,12 +683,28 @@ export function DataGrid({
     const newRowMax = (type === 'text' && newRowFieldDef?.fieldSize)
       ? Number(newRowFieldDef.fieldSize) || undefined
       : undefined;
+    const handleNewRowPasteOverflow = (e: React.ClipboardEvent<HTMLInputElement>) => {
+      if (!newRowMax) return;
+      const pasted = e.clipboardData.getData('text');
+      const target = e.currentTarget;
+      const current = String(target.value ?? '');
+      const selLen = (target.selectionEnd ?? current.length) - (target.selectionStart ?? 0);
+      const projected = current.length - selLen + pasted.length;
+      if (projected > newRowMax) {
+        toast({
+          title: `Text was truncated`,
+          description: `${fieldName} only allows ${newRowMax} character${newRowMax === 1 ? '' : 's'} (you tried to paste ${pasted.length}).`,
+          variant: 'destructive',
+        });
+      }
+    };
     return (
       <input type="text" value={newRowData[fieldName] ?? ''}
         onChange={e => setNewRowData(p => ({ ...p, [fieldName]: e.target.value }))}
         onBlur={handleNewRowSave}
         placeholder={textPlaceholder}
         maxLength={newRowMax}
+        onPaste={handleNewRowPasteOverflow}
         className="w-full bg-transparent outline-none px-1 text-sm placeholder:text-gray-300" />
     );
   };
