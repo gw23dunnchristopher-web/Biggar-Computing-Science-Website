@@ -100,12 +100,10 @@
                         <span class="tool-header-desc">Your own blank database &mdash; create tables, add fields, enter records and run queries. Work is saved to your personal copy automatically.</span>
                     </div>
                     <div class="tool-editor-wrap">
-                        <iframe
-                            class="db-sandbox-frame"
-                            src="/data-sculptor/?embed=82da55672947124b65f9dad04fb891ec"
-                            title="Database Sandbox"
-                            allowfullscreen
-                        ></iframe>
+                        <div style="position:relative;width:100%;">
+                    <iframe id="ds-embed-82da55672947124b65f9dad04fb891ec" src="https://www.bhs-computing.co.uk/data-sculptor/?embed=82da55672947124b65f9dad04fb891ec" class="db-sandbox-frame" title="Database Sandbox" allowfullscreen></iframe>
+                    <script>(function(){var f=document.getElementById('ds-embed-82da55672947124b65f9dad04fb891ec'),done=false;function ready(e){if(e&&e.data&&e.data.type==='ds-embed-ready'&&e.data.token==='82da55672947124b65f9dad04fb891ec'){done=true;window.removeEventListener('message',ready);}}window.addEventListener('message',ready);setTimeout(function(){if(!done){f.src='/data-sculptor/?embed=82da55672947124b65f9dad04fb891ec';}},6000);})();</script>
+                    </div>
                     </div>
                 </div>
             </div>

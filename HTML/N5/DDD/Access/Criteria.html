@@ -36,7 +36,10 @@
 
                     <h2>Practice Sandbox</h2>
                     <p>Use the Library database below to practise working out search criteria. Look at the records and answer these questions: (1) What criteria would find all books published after 2020? (2) What criteria would find books priced between £5.00 and £20.00? (3) What criteria would find books whose title begins with 'T'? Add at least 3 more book records of your own.</p>
-                    <iframe src="/data-sculptor/?embed=003223a47848ee84cc2b519a35990c61" width="100%" height="780" frameborder="0" style="border: 1px solid #ccc; border-radius: 6px; display: block; margin: 16px 0;"></iframe>
+                    <div style="position:relative;width:100%;">
+                    <iframe id="ds-embed-003223a47848ee84cc2b519a35990c61" src="https://www.bhs-computing.co.uk/data-sculptor/?embed=003223a47848ee84cc2b519a35990c61" width="100%" height="780" frameborder="0" style="border: 1px solid #ccc; border-radius: 6px; display: block; margin: 16px 0;"></iframe>
+                    <script>(function(){var f=document.getElementById('ds-embed-003223a47848ee84cc2b519a35990c61'),done=false;function ready(e){if(e&&e.data&&e.data.type==='ds-embed-ready'&&e.data.token==='003223a47848ee84cc2b519a35990c61'){done=true;window.removeEventListener('message',ready);}}window.addEventListener('message',ready);setTimeout(function(){if(!done){f.src='/data-sculptor/?embed=003223a47848ee84cc2b519a35990c61';}},6000);})();</script>
+                    </div>
 
                     <p class="fieldtype tutorial" onclick="toggleLaw(this)"><b>Text Fields</b></p>
                     <div class="fieldProperty tutorial" style="display: none; padding:20px;">
