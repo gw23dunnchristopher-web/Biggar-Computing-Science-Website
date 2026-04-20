@@ -83,6 +83,7 @@ export function EmbedView({ token, initialMode }: Props) {
   const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [markScore, setMarkScore] = useState<{ mark: number | null; maxMark: number } | null>(null);
 
   const taskBullets = useMemo(() => {
     const raw = (snapshot?.database?.taskDescription || '').trim();
@@ -127,6 +128,7 @@ export function EmbedView({ token, initialMode }: Props) {
     if (!snapshot) return;
     setSubmitting(true);
     setFeedback(null);
+    setMarkScore(null);
     try {
       const res = await fetch('/api/ds/grade-database', {
         method: 'POST',
@@ -139,6 +141,9 @@ export function EmbedView({ token, initialMode }: Props) {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'Marking failed');
       setFeedback(data.feedback || 'No feedback returned.');
+      if (typeof data.maxMark === 'number') {
+        setMarkScore({ mark: typeof data.mark === 'number' ? data.mark : null, maxMark: data.maxMark });
+      }
     } catch (e: any) {
       setFeedback(`⚠️ ${e?.message || 'Could not submit for marking. Please try again.'}`);
     } finally {
@@ -393,6 +398,7 @@ export function EmbedView({ token, initialMode }: Props) {
     setActiveFormId(null);
     setActiveReportId(null);
     setFeedback(null);
+    setMarkScore(null);
     setTaskOpen(false);
     setConfirmSubmitOpen(false);
     setResetKey(k => k + 1);
@@ -628,12 +634,25 @@ export function EmbedView({ token, initialMode }: Props) {
             </ul>
           </div>
 
+          {markScore && markScore.mark !== null && (
+            <div className="flex items-center justify-between border border-emerald-200 bg-emerald-50 rounded-md px-4 py-3">
+              <div className="text-sm font-medium text-emerald-900">Your mark</div>
+              <div className="text-2xl font-bold text-emerald-700 tabular-nums">
+                {markScore.mark} <span className="text-emerald-500 font-medium">/ {markScore.maxMark}</span>
+              </div>
+            </div>
+          )}
+
           {feedback && (
             <div className="border border-blue-200 bg-blue-50 rounded-md p-3 max-h-72 overflow-y-auto">
               <div className="flex items-center gap-2 text-blue-800 font-medium text-sm mb-2">
                 <Sparkles size={14} /> AI Feedback
               </div>
-              <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{feedback}</div>
+              <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
+                {feedback.replace(/^\s*\**\s*\d*\.?\s*\**\s*Mark\**\s*:?.*?(\n|$)\s*\d+\s*\/\s*\d+\s*(\n|$)?/i, '')
+                         .replace(/^\s*\**\s*\d*\.?\s*\**\s*Mark\**\s*:?[^\n]*\n?/i, '')
+                         .trim()}
+              </div>
             </div>
           )}
 

@@ -930,6 +930,16 @@ export function registerDsRoutes(app: Express) {
     const taskDescription = clientTaskDesc || dbRow.taskDescription || "";
     const dataDictionary = dbRow.dataDictionary || "";
 
+    // Each bullet point in the task description = 1 mark.
+    const bulletLines = taskDescription
+      .split(/\r?\n/)
+      .map((l: string) => l.replace(/^[\s•\-\*\u2022]+/, "").trim())
+      .filter((l: string) => l.length > 0);
+    const maxMark = bulletLines.length > 0 ? bulletLines.length : 4;
+    const numberedBullets = bulletLines.length > 0
+      ? bulletLines.map((b: string, i: number) => `${i + 1}. ${b}`).join("\n")
+      : "";
+
     const tables = await db!.select().from(dsTables).where(eq(dsTables.databaseId, dbId)).orderBy(dsTables.createdAt);
     const tableDetails = await Promise.all(tables.map(async (t) => {
       const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, t.id)).orderBy(dsFields.sortOrder);
@@ -942,30 +952,40 @@ export function registerDsRoutes(app: Express) {
       `Table: ${t.name} (${t.rowCount} row${t.rowCount !== 1 ? "s" : ""})\n  Fields: ${t.fields.map(f => `${f.name} (${f.type}${f.isPrimaryKey ? ", PK" : ""}${f.isRequired ? ", required" : ""})`).join(", ")}\n  Sample data: ${t.sampleRows.length > 0 ? t.sampleRows.map(r => JSON.stringify(r)).join("; ") : "none"}`
     ).join("\n\n");
 
+    const taskBlock = numberedBullets
+      ? `TASK (each numbered bullet is worth 1 mark, for a total of ${maxMark} mark${maxMark !== 1 ? "s" : ""}):\n${numberedBullets}\n\n`
+      : (taskDescription ? `TASK: ${taskDescription}\n\n` : "");
+
+    const markingRubric = numberedBullets
+      ? `Award 1 mark for each of the ${maxMark} numbered bullet${maxMark !== 1 ? "s" : ""} in the task that the student has clearly satisfied. Partial attempts may be awarded ½-mark style discretion only by rounding to whole marks. The total mark MUST be a whole number between 0 and ${maxMark} inclusive.`
+      : `Give a mark out of 4 (0–4).`;
+
     const prompt = dataDictionary
       ? `You are a Computing Science teacher marking an N4 Computing Science database exercise.
 
-${taskDescription ? `TASK: ${taskDescription}\n\n` : ""}EXPECTED DATA DICTIONARY (the correct tables and fields the final database should contain):
+${taskBlock}EXPECTED DATA DICTIONARY (the correct tables and fields the final database should contain):
 ${dataDictionary}
 
 STUDENT'S DATABASE:
 ${dbSummary}
 
-Please mark this database against the expected data dictionary above. Your response must be structured as follows:
-1. **Mark**: Give a mark out of 4 (0–4) based on how closely the student's tables, field names, data types, primary keys and required attributes match the expected data dictionary and the task requirements.
-2. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Comment on which expected tables/fields are present, missing, incorrectly named, or have the wrong data type, and on the sample data entered.
-3. **Suggestions**: One or two practical improvements the student could make to their database design to better match the expected data dictionary.
+Please mark this database against the task and the expected data dictionary above. Your response must be structured EXACTLY as follows, with the Mark line first:
+1. **Mark**: ${markingRubric} Write the mark on its own line in the form "X / ${maxMark}".
+2. **Per-Bullet Breakdown**: ${numberedBullets ? `For each of the ${maxMark} task bullets, write one line in the form "Bullet N: ✔" (achieved) or "Bullet N: ✘ — short reason" (not achieved).` : "Skip this section."}
+3. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Comment on which expected tables/fields are present, missing, incorrectly named, or have the wrong data type, and on the sample data entered.
+4. **Suggestions**: One or two practical improvements the student could make to their database design.
 
 Be encouraging but honest. Use British English spelling.`
       : `You are a Computing Science teacher marking an N4 Computing Science database exercise.
 
-${taskDescription ? `TASK: ${taskDescription}\n\n` : ""}STUDENT'S DATABASE:
+${taskBlock}STUDENT'S DATABASE:
 ${dbSummary}
 
-There is no fixed expected data dictionary for this task — the student is expected to design their own data dictionary that suits the task. Mark the database on the merits of the student's own design choices and how well they meet the task requirements. Your response must be structured as follows:
-1. **Mark**: Give a mark out of 4 (0–4) based on how well the student's chosen tables, field names, data types, primary keys, required attributes and sample data fulfil the task. Reward sensible design decisions even if they differ from how you would have done it.
-2. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Comment on the suitability of their table structure, field names, data types and any sample data entered, in the context of the task.
-3. **Suggestions**: One or two practical improvements the student could make to their database design.
+There is no fixed expected data dictionary for this task — the student is expected to design their own data dictionary that suits the task. Mark the database on the merits of the student's own design choices and how well they meet the task. Your response must be structured EXACTLY as follows, with the Mark line first:
+1. **Mark**: ${markingRubric} Write the mark on its own line in the form "X / ${maxMark}".
+2. **Per-Bullet Breakdown**: ${numberedBullets ? `For each of the ${maxMark} task bullets, write one line in the form "Bullet N: ✔" (achieved) or "Bullet N: ✘ — short reason" (not achieved).` : "Skip this section."}
+3. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Comment on the suitability of their table structure, field names, data types and any sample data entered, in the context of the task.
+4. **Suggestions**: One or two practical improvements the student could make to their database design.
 
 Be encouraging but honest. Use British English spelling.`;
 
@@ -974,7 +994,15 @@ Be encouraging but honest. Use British English spelling.`;
         model: "gemini-2.5-flash",
         contents: prompt,
       });
-      res.json({ feedback: response.text || "" });
+      const feedback = response.text || "";
+      // Try to parse "X / N" out of the AI's Mark line.
+      const markMatch = feedback.match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+)/);
+      let mark: number | null = null;
+      if (markMatch) {
+        const parsed = Math.round(parseFloat(markMatch[1]));
+        mark = Math.max(0, Math.min(maxMark, parsed));
+      }
+      res.json({ feedback, mark, maxMark });
     } catch (err: any) {
       console.error("DS database grading error:", err?.message || err);
       res.status(500).json({ error: "AI marking failed. Please try again." });
