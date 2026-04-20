@@ -92,12 +92,20 @@ export function evaluateValidationRule(rule: string, value: any, fieldName: stri
 }
 
 function validateField(
-  field: { name: string; fieldType: string; isRequired: boolean; description: string | null },
+  field: { name: string; fieldType: string; isRequired: boolean; description: string | null; fieldSize?: number | null },
   value: any,
   recordData: Record<string, any>
 ): string | null {
   if (field.isRequired && (value === null || value === undefined || value === '')) {
     return `${field.name} is required.`;
+  }
+
+  // Field size limit (Short Text only — Access caps Short Text at 255)
+  if (field.fieldType === 'text' && field.fieldSize && value != null && value !== '') {
+    const max = Number(field.fieldSize);
+    if (Number.isFinite(max) && max > 0 && String(value).length > max) {
+      return `${field.name} must be ${max} character${max === 1 ? '' : 's'} or fewer.`;
+    }
   }
 
   const { rule, text } = parseValidation(field.description);
@@ -573,6 +581,10 @@ export function DataGrid({
         />
       );
     }
+    const fieldDef = table.fields.find(f => f.name === fieldName);
+    const textMax = (type === 'text' && fieldDef?.fieldSize)
+      ? Number(fieldDef.fieldSize) || undefined
+      : undefined;
     if (type === 'lookup') {
       const field = table.fields.find(f => f.name === fieldName);
       const cfg = parseLookupConfig(field?.description);
@@ -598,6 +610,7 @@ export function DataGrid({
         onChange={e => onChange(e.target.value)}
         onBlur={onCommit}
         onKeyDown={onKeyDown}
+        maxLength={textMax}
         className={baseInput} />
     );
   };
@@ -650,11 +663,16 @@ export function DataGrid({
       }
     }
     const textPlaceholder = defaultValue != null && defaultValue !== '' ? defaultValue : '';
+    const newRowFieldDef = table.fields.find(f => f.name === fieldName);
+    const newRowMax = (type === 'text' && newRowFieldDef?.fieldSize)
+      ? Number(newRowFieldDef.fieldSize) || undefined
+      : undefined;
     return (
       <input type="text" value={newRowData[fieldName] ?? ''}
         onChange={e => setNewRowData(p => ({ ...p, [fieldName]: e.target.value }))}
         onBlur={handleNewRowSave}
         placeholder={textPlaceholder}
+        maxLength={newRowMax}
         className="w-full bg-transparent outline-none px-1 text-sm placeholder:text-gray-300" />
     );
   };

@@ -150,6 +150,21 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
 
   // ── Column resize ──
   const [colWidths, setColWidths] = useState<Record<string, number>>({ name: 240, type: 180, desc: 9999 });
+  const [propsPaneHeight, setPropsPaneHeight] = useState<number>(256);
+  const propsResizeRef = useRef<{ startY: number; startH: number } | null>(null);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!propsResizeRef.current) return;
+      const dy = propsResizeRef.current.startY - e.clientY;
+      const next = Math.max(80, Math.min(800, propsResizeRef.current.startH + dy));
+      setPropsPaneHeight(next);
+    };
+    const onUp = () => { propsResizeRef.current = null; document.body.style.cursor = ''; };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    return () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+  }, []);
   const [resizing, setResizing] = useState<{ col: string; startX: number; startW: number } | null>(null);
 
   useEffect(() => {
@@ -909,8 +924,21 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
       </ContextMenuContent>
       </ContextMenu>
 
-      {/* ── Field Properties pane ── */}
-      {showPropertySheet && <div className="h-64 border-t-2 border-gray-400 bg-[#f3f2f1] flex flex-col flex-none">
+      {/* ── Field Properties pane (height is user-resizable) ── */}
+      {showPropertySheet && <>
+        <div
+          role="separator"
+          aria-orientation="horizontal"
+          title="Drag to resize"
+          onMouseDown={e => {
+            propsResizeRef.current = { startY: e.clientY, startH: propsPaneHeight };
+            document.body.style.cursor = 'row-resize';
+            e.preventDefault();
+          }}
+          className="h-1.5 bg-gray-300 hover:bg-[#C42B1C]/60 cursor-row-resize flex-none border-t border-gray-400 z-10"
+        />
+      </>}
+      {showPropertySheet && <div style={{ height: propsPaneHeight }} className="border-t border-gray-400 bg-[#f3f2f1] flex flex-col flex-none">
         <div className="px-4 py-1.5 bg-gray-300 border-b border-gray-400 text-xs font-semibold text-gray-800 select-none">
           Field Properties
           {selectedField && (

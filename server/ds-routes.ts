@@ -19,25 +19,15 @@ function tsFmt(obj: any, ...keys: string[]) {
 }
 
 /* Resolve the public host for embed/iframe URLs.
-   Priority:
-     1. PUBLIC_URL env var  (lets you pin embeds to the production domain)
-     2. X-Forwarded-Host or Host of the current request (so URLs match wherever
-        the teacher is actually viewing the dashboard from — dev or prod)
-     3. REPLIT_DOMAINS first entry
-     4. localhost fallback
-   The underlying database is shared between dev & prod (same DATABASE_URL),
-   so embeds/sandboxes created in dev are also reachable in production. */
-function getPublicHost(req: any): string {
+   All embed URLs are pinned to the production domain so that databases
+   created in either dev or prod always work for students on the live site.
+   The underlying database is shared (same DATABASE_URL secret), so embeds
+   themselves are visible everywhere — only the URL host needs to be fixed.
+   Override with PUBLIC_URL env var if you ever change the production domain. */
+const PRODUCTION_HOST = 'https://www.bhs-computing.co.uk';
+function getPublicHost(_req?: any): string {
   if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/$/, '');
-  const fwdHost = req?.headers?.['x-forwarded-host'] as string | undefined;
-  const host = fwdHost || req?.headers?.host;
-  if (host) {
-    const proto = (req.headers['x-forwarded-proto'] as string | undefined)
-      || (host.includes('localhost') ? 'http' : 'https');
-    return `${proto}://${host}`;
-  }
-  if (process.env.REPLIT_DOMAINS) return `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
-  return 'http://localhost:3000';
+  return PRODUCTION_HOST;
 }
 
 /* ── Deep copy a teacher database for a student sandbox ── */
