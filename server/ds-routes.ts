@@ -373,6 +373,23 @@ export function registerDsRoutes(app: Express) {
     res.json({ ...tsFmt(table, "createdAt", "updatedAt"), fields: updatedFields.map(f => tsFmt(f, "createdAt", "updatedAt")) });
   });
 
+  // Lightweight rename / metadata update — does NOT touch fields.
+  app.patch("/api/ds/databases/:dbId/tables/:tableId", async (req, res) => {
+    const databaseId = parseInt(req.params.dbId);
+    const tableId = parseInt(req.params.tableId);
+    const { name } = req.body ?? {};
+    if (typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ error: "Valid 'name' is required" });
+    }
+    const [table] = await db!.update(dsTables)
+      .set({ name: name.trim(), updatedAt: new Date() })
+      .where(and(eq(dsTables.id, tableId), eq(dsTables.databaseId, databaseId)))
+      .returning();
+    if (!table) return res.status(404).json({ error: "Table not found" });
+    const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, tableId)).orderBy(dsFields.sortOrder);
+    res.json({ ...tsFmt(table, "createdAt", "updatedAt"), fields: fields.map(f => tsFmt(f, "createdAt", "updatedAt")) });
+  });
+
   app.delete("/api/ds/databases/:dbId/tables/:tableId", async (req, res) => {
     const databaseId = parseInt(req.params.dbId);
     const tableId = parseInt(req.params.tableId);
