@@ -1056,23 +1056,7 @@ STUDENT'S ACTUAL DATABASE (what they submitted):
 ${dbSummary}
 
 ${auditBlock}
-You MUST work through these steps IN ORDER inside your reply, before giving any mark. The server has already completed an authoritative schema audit above — you must accept its PRESENT/MISSING verdicts and base your marking on them.
-
-STEP A — Extract the expected schema from the data dictionary above. List every expected table, and under each table list every expected field with its expected data type. Use this exact format:
-  Expected schema:
-  • Table "<TableName>"
-      - <FieldName> (<expected type>)
-      - <FieldName> (<expected type>)
-      ...
-
-STEP B — Audit the student's database against the expected schema. For EACH expected table and EACH expected field, write PRESENT or MISSING and (if present) whether the data type matches. Use this exact format:
-  Audit:
-  • Table "<TableName>": PRESENT / MISSING
-      - <FieldName>: PRESENT (type ok) / PRESENT (wrong type: <actual>) / MISSING
-      ...
-  Then list any EXTRA tables or fields the student added that are NOT in the data dictionary.
-
-STEP C — Apply these STRICT rules when scoring the task bullets:
+The server has already completed an authoritative schema audit above. You must accept its PRESENT/MISSING verdicts and silently base your marking on them. Apply these STRICT rules when deciding bullets:
   • A bullet that asks the student to "create a table" or "create a database with fields X, Y, Z" is ONLY achieved (✔) if EVERY field listed in the data dictionary for that table is PRESENT in the student's submission.
   • A bullet that asks for specific data types is ONLY achieved if those types are correct.
   • A bullet about entering sample data is ONLY achieved if at least one record actually exists.
@@ -1080,12 +1064,12 @@ STEP C — Apply these STRICT rules when scoring the task bullets:
   • Do NOT give credit for "having a table" if the table is mostly empty of the expected fields. Missing the majority of expected fields = bullet ✘, even if the table name is correct.
   • Extra fields the student added that are NOT in the dictionary earn NO marks.
 
-STEP D — Final mark: ${markingRubric} Write the mark on its own line in the EXACT form "Mark: X / ${maxMark}".
+Do NOT include the expected schema or the audit in your reply — the student does not need to see those. Your reply must contain ONLY the following sections, in this exact order:
 
-After Step D, also include:
-- **Per-Bullet Breakdown**: ${numberedBullets ? `For each of the ${maxMark} task bullets, write one line in the form "Bullet N: ✔" or "Bullet N: ✘ — short reason citing what was missing".` : "Skip this section."}
-- **Feedback**: 2–4 sentences naming the specific expected tables/fields that are missing or have the wrong type.
-- **Suggestions**: One or two practical improvements.
+1. **Mark**: ${markingRubric} Write the mark on its own line in the EXACT form "Mark: X / ${maxMark}".
+2. **Per-Bullet Breakdown**: ${numberedBullets ? `For each of the ${maxMark} task bullets, write one line in the form "Bullet N: ✔" or "Bullet N: ✘ — short reason citing what was missing".` : "Skip this section."}
+3. **Feedback**: 2–4 sentences naming the specific expected tables/fields that are missing or have the wrong type.
+4. **Suggestions**: One or two practical improvements.
 
 Be encouraging in tone but absolutely honest and strict about the marks. Use British English spelling.`
       : `You are a Computing Science teacher marking an N4 Computing Science database exercise.
