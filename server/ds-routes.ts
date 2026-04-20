@@ -43,6 +43,26 @@ function getPreviewHost(req?: any): string {
   return getPublicHost(req);
 }
 
+/* Build the iframe snippet teachers paste onto their pages.
+   It loads the production embed first; if no "ready" postMessage arrives
+   within 6 seconds (e.g. the production site is unreachable), it falls back
+   to the secondary URL automatically. Self-contained — no external deps. */
+function buildIframeCode(primary: string, fallback: string, token: string): string {
+  const id = `ds-embed-${token}`;
+  const sameUrl = primary === fallback;
+  if (sameUrl) {
+    return `<iframe src="${primary}" width="100%" height="600" frameborder="0" style="border:1px solid #ccc;border-radius:4px;"></iframe>`;
+  }
+  return `<div style="position:relative;width:100%;">
+  <iframe id="${id}" src="${primary}" width="100%" height="600" frameborder="0" style="border:1px solid #ccc;border-radius:4px;"></iframe>
+  <script>(function(){var f=document.getElementById('${id}'),done=false;
+    function ready(e){if(e&&e.data&&e.data.type==='ds-embed-ready'&&e.data.token==='${token}'){done=true;window.removeEventListener('message',ready);}}
+    window.addEventListener('message',ready);
+    setTimeout(function(){if(!done){f.src='${fallback}';}},6000);
+  })();</script>
+</div>`;
+}
+
 /* ── Deep copy a teacher database for a student sandbox ── */
 async function deepCopyDatabase(sourceDatabaseId: number, newUserId: string): Promise<number> {
   if (!db) throw new Error("Database not available");
@@ -505,7 +525,7 @@ export function registerDsRoutes(app: Express) {
         const embed = embedByDbId.get(d.id)!;
         const embedUrl = `${host}/data-sculptor/?embed=${embed.token}`;
         const previewUrl = `${previewHost}/data-sculptor/?embed=${embed.token}`;
-        const iframeCode = `<iframe src="${embedUrl}" width="100%" height="600" frameborder="0" style="border: 1px solid #ccc; border-radius: 4px;"></iframe>`;
+        const iframeCode = buildIframeCode(embedUrl, previewUrl, embed.token);
         return { ...tsFmt(d, "createdAt", "updatedAt"), token: embed.token, embedUrl, previewUrl, iframeCode };
       });
     res.json(sandboxes);
@@ -521,7 +541,7 @@ export function registerDsRoutes(app: Express) {
     await db!.insert(dsEmbeds).values({ token, databaseId: d.id, userId }).returning();
     const embedUrl = `${host}/data-sculptor/?embed=${token}`;
     const previewUrl = `${previewHost}/data-sculptor/?embed=${token}`;
-    const iframeCode = `<iframe src="${embedUrl}" width="100%" height="600" frameborder="0" style="border: 1px solid #ccc; border-radius: 4px;"></iframe>`;
+    const iframeCode = buildIframeCode(embedUrl, previewUrl, token);
     res.status(201).json({ ...tsFmt(d, "createdAt", "updatedAt"), token, embedUrl, previewUrl, iframeCode });
   });
 
@@ -549,7 +569,7 @@ export function registerDsRoutes(app: Express) {
     const previewHost = getPreviewHost(req);
     const embedUrl = `${host}/data-sculptor/?embed=${token}`;
     const previewUrl = `${previewHost}/data-sculptor/?embed=${token}`;
-    const iframeCode = `<iframe src="${embedUrl}" width="100%" height="600" frameborder="0" style="border: 1px solid #ccc; border-radius: 4px;"></iframe>`;
+    const iframeCode = buildIframeCode(embedUrl, previewUrl, token);
     res.status(201).json({ token: embed.token, databaseId: embed.databaseId, embedUrl, previewUrl, iframeCode, createdAt: embed.createdAt.toISOString() });
   });
 

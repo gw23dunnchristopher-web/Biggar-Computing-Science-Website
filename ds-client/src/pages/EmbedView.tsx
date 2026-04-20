@@ -239,6 +239,7 @@ export function EmbedView({ token, initialMode }: Props) {
       })
       .then(async (data: EmbedSnapshot) => {
         setSnapshot(data);
+        try { window.parent?.postMessage({ type: 'ds-embed-ready', token }, '*'); } catch {}
         // Load forms/reports/queries for the database
         await Promise.all([loadForms(data.database.id), loadReports(data.database.id), loadQueries(data.database.id)]);
         // Auto-open the first table in Datasheet View (mimics Access opening Table1 automatically)
