@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { ClipboardList, Send, Loader2, Sparkles } from 'lucide-react';
 
 const SESSION_KEY_STORAGE = 'student_session_key';
 
@@ -75,6 +76,34 @@ export function EmbedView({ token, initialMode }: Props) {
   const [activeTableId, setActiveTableId] = useState<number | null>(null);
   const [activeView, setActiveView] = useState<ActiveView>('datasheet');
   const [resetKey, setResetKey] = useState(0);
+
+  // Task / submit-for-marking panel
+  const [taskOpen, setTaskOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  async function handleSubmitForMarking() {
+    if (!snapshot) return;
+    setSubmitting(true);
+    setFeedback(null);
+    try {
+      const res = await fetch('/api/ds/grade-database', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-session-key': getOrCreateSessionKey() },
+        body: JSON.stringify({
+          sandboxDatabaseId: snapshot.database.id,
+          taskDescription: snapshot.database.taskDescription || '',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Marking failed');
+      setFeedback(data.feedback || 'No feedback returned.');
+    } catch (e: any) {
+      setFeedback(`⚠️ ${e?.message || 'Could not submit for marking. Please try again.'}`);
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   // Forms / Reports / Queries
   const [forms, setForms] = useState<{ id: number; name: string; databaseId: number }[]>([]);
@@ -532,6 +561,72 @@ export function EmbedView({ token, initialMode }: Props) {
     );
   }
 
+  const taskBullets = useMemo(() => {
+    const raw = (snapshot?.database?.taskDescription || '').trim();
+    if (!raw) return [] as string[];
+    return raw.split(/\r?\n/)
+      .map(l => l.replace(/^[\s•\-\*\u2022]+/, '').trim())
+      .filter(Boolean);
+  }, [snapshot?.database?.taskDescription]);
+
+  const hasTask = taskBullets.length > 0;
+
+  const taskOverlay = hasTask ? (
+    <>
+      {/* Floating Task button — visible from any view in the embed */}
+      <button
+        onClick={() => setTaskOpen(true)}
+        title="View task instructions and submit for AI marking"
+        className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#C42B1C] text-white text-sm font-medium shadow-lg hover:bg-[#9B2118] transition-colors"
+        data-testid="button-open-task"
+      >
+        <ClipboardList size={16} />
+        Task &amp; Submit
+      </button>
+      <Dialog open={taskOpen} onOpenChange={(o) => { setTaskOpen(o); if (!o) setFeedback(null); }}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardList size={18} className="text-[#C42B1C]" />
+              Task Instructions
+            </DialogTitle>
+            <DialogDescription>
+              Complete each requirement in your sandbox, then submit for AI marking.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="border border-amber-200 bg-amber-50 rounded-md p-3">
+            <ul className="list-disc pl-5 space-y-1 text-sm text-gray-800 marker:text-amber-700">
+              {taskBullets.map((b, i) => <li key={i}>{b}</li>)}
+            </ul>
+          </div>
+
+          {feedback && (
+            <div className="border border-blue-200 bg-blue-50 rounded-md p-3 max-h-72 overflow-y-auto">
+              <div className="flex items-center gap-2 text-blue-800 font-medium text-sm mb-2">
+                <Sparkles size={14} /> AI Feedback
+              </div>
+              <div className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{feedback}</div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setTaskOpen(false)} disabled={submitting}>Close</Button>
+            <Button
+              onClick={handleSubmitForMarking}
+              disabled={submitting}
+              className="bg-[#C42B1C] hover:bg-[#9B2118] text-white"
+              data-testid="button-submit-marking"
+            >
+              {submitting ? (<><Loader2 size={14} className="mr-1.5 animate-spin" /> Marking…</>)
+                          : (<><Send size={14} className="mr-1.5" /> {feedback ? 'Resubmit for Marking' : 'Submit for AI Marking'}</>)}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  ) : null;
+
   const wizardDialogs = (
     <>
       {formWizardOpen && (
@@ -960,6 +1055,7 @@ export function EmbedView({ token, initialMode }: Props) {
     <TabBarProvider value={tabBarEl}>
       {renderContent()}
       {wizardDialogs}
+      {taskOverlay}
     </TabBarProvider>
   );
 }
