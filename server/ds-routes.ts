@@ -951,11 +951,19 @@ export function registerDsRoutes(app: Express) {
       const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, t.id)).orderBy(dsFields.sortOrder);
       const records = await db!.select().from(dsRecords).where(and(eq(dsRecords.tableId, t.id), eq(dsRecords.databaseId, dbId)));
       const sampleRows = records.slice(0, 5).map(r => r.data);
-      return { name: t.name, fields: fields.map(f => ({ name: f.name, type: f.fieldType, isPrimaryKey: f.isPrimaryKey, isRequired: f.isRequired })), rowCount: records.length, sampleRows };
+      return { name: t.name, fields: fields.map(f => ({ name: f.name, type: f.fieldType, isPrimaryKey: f.isPrimaryKey, isRequired: f.isRequired, fieldSize: f.fieldSize ?? null, defaultValue: f.defaultValue ?? null, description: f.description ?? null })), rowCount: records.length, sampleRows };
     }));
 
     const dbSummary = tableDetails.map(t =>
-      `Table: ${t.name} (${t.rowCount} row${t.rowCount !== 1 ? "s" : ""})\n  Fields: ${t.fields.map(f => `${f.name} (${f.type}${f.isPrimaryKey ? ", PK" : ""}${f.isRequired ? ", required" : ""})`).join(", ")}\n  Sample data: ${t.sampleRows.length > 0 ? t.sampleRows.map(r => JSON.stringify(r)).join("; ") : "none"}`
+      `Table: ${t.name} (${t.rowCount} row${t.rowCount !== 1 ? "s" : ""})\n  Fields: ${t.fields.map(f => {
+        const parts: string[] = [f.type];
+        if (f.isPrimaryKey) parts.push("PK");
+        if (f.isRequired) parts.push("required");
+        if (f.fieldSize != null) parts.push(`field size ${f.fieldSize}`);
+        if (f.defaultValue != null && f.defaultValue !== "") parts.push(`default "${f.defaultValue}"`);
+        if (f.description) parts.push(`description "${f.description}"`);
+        return `${f.name} (${parts.join(", ")})`;
+      }).join(", ")}\n  Sample data: ${t.sampleRows.length > 0 ? t.sampleRows.map(r => JSON.stringify(r)).join("; ") : "none"}`
     ).join("\n\n");
 
     // ── Deterministic data-dictionary audit (done in code, not by the AI) ──
@@ -1059,10 +1067,11 @@ ${auditBlock}
 The server has already completed an authoritative schema audit above. You must accept its PRESENT/MISSING verdicts and silently base your marking on them. Apply these STRICT rules when deciding bullets:
   • A bullet that asks the student to "create a table" or "create a database with fields X, Y, Z" is ONLY achieved (✔) if EVERY field listed in the data dictionary for that table is PRESENT in the student's submission.
   • A bullet that asks for specific data types is ONLY achieved if those types are correct.
-  • A bullet about entering sample data is ONLY achieved if at least one record actually exists.
+  • A bullet that asks the student to set field sizes (or "set the field size to N", "use a field size of N", "configure field sizes as per the data dictionary") is achieved if the student's "field size N" values match what the data dictionary specifies for the relevant text fields. Look at the "field size N" annotations included in the student's submission above when judging this — DO NOT mark this bullet wrong simply because the data dictionary section above does not repeat the size; cross-reference the actual student submission.
+  • A bullet about entering sample data is ONLY achieved if at least one record actually exists. CRITICAL: Do NOT deduct any marks for missing sample data unless one of the numbered task bullets above EXPLICITLY asks the student to create, enter, add or insert records / sample data / test data. If no bullet asks for it, the absence of records is irrelevant — ignore it completely and award the bullets purely on whether the schema requirements were met.
   • An auto-generated ID field that the student did NOT explicitly create from the dictionary does NOT count toward the mark unless the dictionary itself lists an ID field.
   • Do NOT give credit for "having a table" if the table is mostly empty of the expected fields. Missing the majority of expected fields = bullet ✘, even if the table name is correct.
-  • Extra fields the student added that are NOT in the dictionary earn NO marks.
+  • Extra fields the student added that are NOT in the dictionary earn NO marks but also do NOT cost marks.
 
 Do NOT include the expected schema or the audit in your reply — the student does not need to see those. Your reply must contain ONLY the following sections, in this exact order:
 
