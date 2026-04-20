@@ -118,7 +118,7 @@ function validateField(
   return null;
 }
 
-const DEFAULT_COL_WIDTHS: Record<string, number> = {
+export const DEFAULT_COL_WIDTHS: Record<string, number> = {
   autonumber:  75,
   number:     100,
   boolean:     80,
@@ -160,6 +160,10 @@ interface DataGridProps {
   totalFns?: Record<string, TotalFn>;
   onTotalFnChange?: (field: string, fn: TotalFn) => void;
   onClickToAdd?: (fieldType: string) => void;
+  colWidths?: Record<string, number>;
+  onColWidthsChange?: (next: Record<string, number>) => void;
+  frozenFields?: string[];
+  rowHeightPx?: number;
 }
 
 const CLICK_TO_ADD_WIDTH = 130;
@@ -186,6 +190,9 @@ export function DataGrid({
   hiddenFields = [], onHideField,
   showTotals = false, totalFns = {}, onTotalFnChange,
   onClickToAdd,
+  colWidths: colWidthsProp, onColWidthsChange,
+  frozenFields = [],
+  rowHeightPx,
 }: DataGridProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -198,7 +205,13 @@ export function DataGrid({
   const [ctxTarget, setCtxTarget] = useState<CtxTarget>(null);
   const [filterDlg, setFilterDlg] = useState<FilterDlg>(null);
   const [focusedCell, setFocusedCell] = useState<FocusedCell>(null);
-  const [colWidths, setColWidths] = useState<Record<string, number>>({});
+  const [colWidthsLocal, setColWidthsLocal] = useState<Record<string, number>>({});
+  const colWidths = colWidthsProp ?? colWidthsLocal;
+  const setColWidths = (updater: Record<string, number> | ((prev: Record<string, number>) => Record<string, number>)) => {
+    const next = typeof updater === 'function' ? (updater as any)(colWidths) : updater;
+    if (onColWidthsChange) onColWidthsChange(next);
+    else setColWidthsLocal(next);
+  };
   const [resizing, setResizing] = useState<{ field: string; startX: number; startW: number } | null>(null);
   const [colWidthDlg, setColWidthDlg] = useState<{ field: string; width: number } | null>(null);
   const [unhideDlg, setUnhideDlg] = useState(false);
@@ -271,10 +284,39 @@ export function DataGrid({
   };
 
   const allFieldsSorted = [...table.fields].sort((a, b) => a.sortOrder - b.sortOrder);
-  const fields = allFieldsSorted.filter(f => !hiddenFields.includes(f.name));
+  const visibleFields = allFieldsSorted.filter(f => !hiddenFields.includes(f.name));
+  const frozenSet = new Set(frozenFields);
+  // Frozen fields render first (in their original order), followed by the rest.
+  const fields = [
+    ...visibleFields.filter(f => frozenSet.has(f.name)),
+    ...visibleFields.filter(f => !frozenSet.has(f.name)),
+  ];
 
   const getColWidth = (fieldName: string, fieldType: string) =>
     colWidths[fieldName] ?? DEFAULT_COL_WIDTHS[fieldType] ?? 150;
+
+  // ── Frozen-column sticky-left offsets ──
+  const frozenLeft: Record<string, number> = {};
+  {
+    let acc = 15; // row-selector column width
+    for (const f of fields) {
+      if (frozenSet.has(f.name)) {
+        frozenLeft[f.name] = acc;
+        acc += getColWidth(f.name, f.fieldType);
+      } else {
+        break;
+      }
+    }
+  }
+  const hasFrozen = frozenFields.length > 0;
+  const stickyTh = (fieldName: string): React.CSSProperties =>
+    frozenLeft[fieldName] !== undefined
+      ? { position: 'sticky', left: frozenLeft[fieldName], zIndex: 12 }
+      : {};
+  const stickyTd = (fieldName: string): React.CSSProperties =>
+    frozenLeft[fieldName] !== undefined
+      ? { position: 'sticky', left: frozenLeft[fieldName], zIndex: 4, background: 'inherit', boxShadow: undefined }
+      : {};
 
   const getFieldType = (fieldName: string | null) =>
     allFieldsSorted.find(f => f.name === fieldName)?.fieldType ?? 'text';
@@ -1054,13 +1096,17 @@ export function DataGrid({
               </colgroup>
               <thead className="sticky top-0 z-10">
                 <tr>
-                  <th className="bg-[#f3f2f1] border-r border-b border-gray-300" style={{ width: 15, minWidth: 15, maxWidth: 15 }} />
+                  <th
+                    className="bg-[#f3f2f1] border-r border-b border-gray-300"
+                    style={{ width: 15, minWidth: 15, maxWidth: 15, ...(hasFrozen ? { position: 'sticky', left: 0, zIndex: 13 } : {}) }}
+                  />
                   {fields.map((f, fi) => (
                     <th
                       key={f.id}
                       className={`relative border-r border-b border-gray-300 px-2 py-1.5 font-medium text-gray-700 text-xs select-none cursor-pointer hover:bg-gray-200 transition-colors ${selectedFieldName === f.name ? 'bg-[#cce5ff]' : sortState?.field === f.name ? 'bg-red-50' : 'bg-[#f3f2f1]'}`}
                       onClick={() => { onSortChange?.(f.name); onSelectField?.(f.name); }}
                       onContextMenu={() => { setCtxTarget({ type: 'header', fieldName: f.name }); onSelectField?.(f.name); }}
+                      style={stickyTh(f.name)}
                     >
                       <div className="flex items-center gap-1 pr-2 overflow-hidden">
                         <span className="truncate">{f.name}</span>
@@ -1124,15 +1170,17 @@ export function DataGrid({
                 {records.map((r, rowIdx) => {
                   const isEditing = editingCell?.recordId === r.id;
                   const isFocused = focusedCell?.rowIdx === rowIdx;
+                  const rowBg = selectedRowId === r.id ? '#fef2f2' /* red-50 */ : '#ffffff';
                   return (
                     <tr
                       key={r.id}
                       className={`group border-b border-gray-200 ${selectedRowId === r.id ? 'bg-red-50' : 'hover:bg-red-50/30'}`}
                       onClick={() => { onSelectRow(r.id); setFocusedCell(null); }}
+                      style={{ background: rowBg, ...(rowHeightPx ? { height: rowHeightPx } : {}) }}
                     >
                       <td
-                        className={`border-r border-gray-300 text-center cursor-pointer h-7 flex-none overflow-hidden ${selectedRowId === r.id ? 'bg-[#cce5ff]' : 'bg-[#f3f2f1] group-hover:bg-gray-100'}`}
-                        style={{ width: 15, minWidth: 15, maxWidth: 15 }}
+                        className={`border-r border-gray-300 text-center cursor-pointer flex-none overflow-hidden ${selectedRowId === r.id ? 'bg-[#cce5ff]' : 'bg-[#f3f2f1] group-hover:bg-gray-100'}`}
+                        style={{ width: 15, minWidth: 15, maxWidth: 15, height: rowHeightPx ?? 28, ...(hasFrozen ? { position: 'sticky', left: 0, zIndex: 5 } : {}) }}
                         onContextMenu={() => setCtxTarget({ type: 'row-selector', recordId: r.id, record: r })}
                       >
                         {isEditing
@@ -1151,11 +1199,12 @@ export function DataGrid({
                           <td
                             key={f.id}
                             tabIndex={0}
-                            className={`border-r border-gray-200 h-7 overflow-hidden focus:outline-none
+                            className={`border-r border-gray-200 overflow-hidden focus:outline-none
                               ${f.fieldType === 'autonumber' || f.fieldType === 'calculated' || f.fieldType === 'attachment' ? 'bg-gray-50 cursor-default' : f.fieldType === 'boolean' ? 'cursor-pointer' : 'cursor-text'}
                               ${isCellEditing ? 'p-0' : 'px-2'}
                               ${isCellFocused && !isCellEditing ? 'ring-1 ring-inset ring-[#C42B1C]' : ''}
                             `}
+                            style={{ height: rowHeightPx ?? 28, ...stickyTd(f.name) }}
                             onDoubleClick={() => {
                               if (f.fieldType !== 'autonumber' && f.fieldType !== 'calculated' && f.fieldType !== 'attachment' && f.fieldType !== 'boolean')
                                 handleCellClick(r.id, f.name, cellValue, false, rowIdx, colIdx);
@@ -1222,20 +1271,31 @@ export function DataGrid({
                   ref={newRowTrRef}
                   className="border-b border-gray-200 bg-white"
                   onContextMenu={() => setCtxTarget({ type: 'new-row' })}
+                  style={{ background: '#ffffff' }}
                 >
-                  <td className="border-r border-gray-300 bg-[#f3f2f1] text-center h-7 overflow-hidden" style={{ width: 15, minWidth: 15, maxWidth: 15 }} />
+                  <td
+                    className="border-r border-gray-300 bg-[#f3f2f1] text-center overflow-hidden"
+                    style={{ width: 15, minWidth: 15, maxWidth: 15, height: rowHeightPx ?? 28, ...(hasFrozen ? { position: 'sticky', left: 0, zIndex: 5 } : {}) }}
+                  />
                   {fields.map(f => (
-                    <td key={f.id} className="border-r border-gray-200 h-7 px-1">
+                    <td
+                      key={f.id}
+                      className="border-r border-gray-200 px-1"
+                      style={{ height: rowHeightPx ?? 28, ...stickyTd(f.name) }}
+                    >
                       {renderNewRowInput(f.fieldType, f.name, f.isPrimaryKey, f.defaultValue)}
                     </td>
                   ))}
-                  {onClickToAdd && <td className="border-r border-gray-200 h-7" />}
+                  {onClickToAdd && <td className="border-r border-gray-200" style={{ height: rowHeightPx ?? 28 }} />}
                 </tr>
 
                 {/* Totals Row */}
                 {showTotals && (
-                  <tr className="border-t-2 border-gray-400 bg-[#f3f2f1] sticky bottom-0 z-[5]">
-                    <td className="border-r border-gray-300 text-center h-7 overflow-hidden bg-[#f3f2f1]" style={{ width: 15, minWidth: 15, maxWidth: 15 }} />
+                  <tr className="border-t-2 border-gray-400 bg-[#f3f2f1] sticky bottom-0 z-[5]" style={{ background: '#f3f2f1' }}>
+                    <td
+                      className="border-r border-gray-300 text-center h-7 overflow-hidden bg-[#f3f2f1]"
+                      style={{ width: 15, minWidth: 15, maxWidth: 15, ...(hasFrozen ? { position: 'sticky', left: 0, zIndex: 6 } : {}) }}
+                    />
                     {fields.map(f => {
                       const fn = totalFns[f.name] ?? 'None';
                       const fnOptions = getFnOptionsForType(f.fieldType);
@@ -1246,6 +1306,7 @@ export function DataGrid({
                           className="border-r border-gray-300 h-7 px-1 cursor-pointer"
                           onContextMenu={() => setCtxTarget({ type: 'totals', fieldName: f.name })}
                           onClick={() => setCtxTarget({ type: 'totals', fieldName: f.name })}
+                          style={stickyTd(f.name)}
                         >
                           <div className="flex items-center justify-between gap-1 h-full">
                             <span className="text-xs font-semibold text-gray-700 truncate">

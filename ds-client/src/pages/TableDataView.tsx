@@ -10,7 +10,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton, RibbonViewSplitButton, useRibbonSize } from '@/components/layout/Ribbon';
 import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } from '@/components/layout/AccessRibbonTabs';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { DataGrid } from '@/components/ui/data-grid';
+import { DataGrid, DEFAULT_COL_WIDTHS } from '@/components/ui/data-grid';
 import { DesignViewIcon, DatasheetViewIcon } from '@/components/ui/design-view-icon';
 import {
   DsFilterIcon, DsAscendingIcon, DsDescendingIcon, DsAdvancedFilterIcon,
@@ -265,6 +265,12 @@ export function TableDataView({
   const [designNameDialog, setDesignNameDialog] = useState<{ open: boolean; name: string; busy: boolean }>({ open: false, name: '', busy: false });
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
   const [hiddenFields, setHiddenFields] = useState<string[]>([]);
+  const [frozenFields, setFrozenFields] = useState<string[]>([]);
+  const [colWidths, setColWidths] = useState<Record<string, number>>({});
+  const [rowHeightPx, setRowHeightPx] = useState<number | undefined>(undefined);
+  const [rowHeightDlg, setRowHeightDlg] = useState<{ value: number } | null>(null);
+  const [fieldWidthDlg, setFieldWidthDlg] = useState<{ field: string; value: number } | null>(null);
+  const [unhideDlg, setUnhideDlg] = useState(false);
   const [showTotals, setShowTotals] = useState(false);
   const [totalFns, setTotalFns] = useState<Record<string, 'None' | 'Count' | 'Sum' | 'Average' | 'Minimum' | 'Maximum'>>({});
   const [jumpRecordInput, setJumpRecordInput] = useState('');
@@ -838,15 +844,53 @@ export function TableDataView({
                   </RibbonDropdownButton>
                   <RibbonDropdownButton compact icon={<DsRecordsMoreIcon size={16} />} label="More">
                     <RibbonButton icon={<DsRecordsTotalsIcon size={16} />} label="Totals" active={showTotals} onClick={() => setShowTotals(v => !v)} />
-                    {hiddenFields.length > 0 && (
-                      <RibbonButton icon={<EyeIcon size={16} />} label={`Unhide ${hiddenFields.length} Fields`} onClick={() => setHiddenFields([])} />
-                    )}
-                    <RibbonButton icon={<Rows3 size={16} />} label="Row Height…" disabled />
-                    <RibbonButton icon={<EyeOff size={16} />} label="Hide Fields" disabled />
-                    <RibbonButton icon={<EyeIcon size={16} />} label="Unhide Fields" disabled />
-                    <RibbonButton icon={<Lock size={16} />} label="Freeze Fields" disabled />
-                    <RibbonButton icon={<Lock size={16} />} label="Unfreeze All Fields" disabled />
-                    <RibbonButton icon={<ArrowLeftRight size={16} />} label="Field Width" disabled />
+                    <RibbonButton
+                      icon={<Rows3 size={16} />}
+                      label="Row Height…"
+                      onClick={() => setRowHeightDlg({ value: rowHeightPx ?? 28 })}
+                    />
+                    <RibbonButton
+                      icon={<EyeOff size={16} />}
+                      label="Hide Fields"
+                      disabled={!selectedFieldName}
+                      onClick={() => {
+                        if (!selectedFieldName) return;
+                        setHiddenFields(prev => prev.includes(selectedFieldName) ? prev : [...prev, selectedFieldName]);
+                        setSelectedFieldName(null);
+                      }}
+                    />
+                    <RibbonButton
+                      icon={<EyeIcon size={16} />}
+                      label="Unhide Fields"
+                      disabled={hiddenFields.length === 0}
+                      onClick={() => setUnhideDlg(true)}
+                    />
+                    <RibbonButton
+                      icon={<Lock size={16} />}
+                      label="Freeze Fields"
+                      disabled={!selectedFieldName || frozenFields.includes(selectedFieldName)}
+                      onClick={() => {
+                        if (!selectedFieldName) return;
+                        setFrozenFields(prev => prev.includes(selectedFieldName) ? prev : [...prev, selectedFieldName]);
+                      }}
+                    />
+                    <RibbonButton
+                      icon={<Lock size={16} />}
+                      label="Unfreeze All Fields"
+                      disabled={frozenFields.length === 0}
+                      onClick={() => setFrozenFields([])}
+                    />
+                    <RibbonButton
+                      icon={<ArrowLeftRight size={16} />}
+                      label="Field Width…"
+                      disabled={!selectedFieldName}
+                      onClick={() => {
+                        if (!selectedFieldName) return;
+                        const f = table?.fields?.find((x: any) => x.name === selectedFieldName);
+                        const fallback = f ? (DEFAULT_COL_WIDTHS[f.fieldType as keyof typeof DEFAULT_COL_WIDTHS] ?? 150) : 150;
+                        setFieldWidthDlg({ field: selectedFieldName, value: colWidths[selectedFieldName] ?? fallback });
+                      }}
+                    />
                     <RibbonButton icon={<Download size={16} />} label="Export CSV" onClick={handleExportCSV} />
                   </RibbonDropdownButton>
                 </div>
@@ -1012,6 +1056,10 @@ export function TableDataView({
               totalFns={totalFns}
               onTotalFnChange={handleTotalFnChange}
               onClickToAdd={handleAddField}
+              colWidths={colWidths}
+              onColWidthsChange={setColWidths}
+              frozenFields={frozenFields}
+              rowHeightPx={rowHeightPx}
             />
           )}
         </div>
@@ -1338,6 +1386,148 @@ export function TableDataView({
         confirmLabel="Delete Record"
         onConfirm={doDeleteRecord}
       />
+
+      {/* ── Row Height Dialog ── */}
+      <Dialog open={!!rowHeightDlg} onOpenChange={open => { if (!open) setRowHeightDlg(null); }}>
+        <DialogContent className="sm:max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Row Height</DialogTitle>
+            <DialogDescription>Set the height (in pixels) for all rows in this table.</DialogDescription>
+          </DialogHeader>
+          {rowHeightDlg && (
+            <div className="py-2 space-y-3">
+              <div className="flex items-center gap-2">
+                <Label className="text-xs font-medium text-gray-600 w-20">Height:</Label>
+                <Input
+                  type="number"
+                  min={16}
+                  max={400}
+                  value={rowHeightDlg.value}
+                  onChange={e => setRowHeightDlg({ value: Number(e.target.value) || 28 })}
+                  onKeyDown={e => { if (e.key === 'Enter') { setRowHeightPx(rowHeightDlg.value); setRowHeightDlg(null); } }}
+                  autoFocus
+                  className="h-8"
+                />
+                <span className="text-xs text-gray-500">px</span>
+              </div>
+              <div className="flex justify-between gap-2">
+                <button
+                  onClick={() => { setRowHeightPx(undefined); setRowHeightDlg(null); }}
+                  className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50"
+                >
+                  Standard Height
+                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setRowHeightDlg(null)}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => { setRowHeightPx(rowHeightDlg.value); setRowHeightDlg(null); }}
+                    className="px-3 py-1.5 text-sm bg-[#C42B1C] text-white rounded hover:bg-[#9B2118]"
+                  >
+                    OK
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Field Width Dialog ── */}
+      <Dialog open={!!fieldWidthDlg} onOpenChange={open => { if (!open) setFieldWidthDlg(null); }}>
+        <DialogContent className="sm:max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Field Width</DialogTitle>
+            <DialogDescription>Field: <strong>{fieldWidthDlg?.field}</strong></DialogDescription>
+          </DialogHeader>
+          {fieldWidthDlg && (
+            <div className="py-2 space-y-3">
+              <div className="flex items-center gap-2">
+                <Label className="text-xs font-medium text-gray-600 w-20">Width:</Label>
+                <Input
+                  type="number"
+                  min={20}
+                  max={2000}
+                  value={fieldWidthDlg.value}
+                  onChange={e => setFieldWidthDlg({ ...fieldWidthDlg, value: Number(e.target.value) || 0 })}
+                  onKeyDown={e => { if (e.key === 'Enter') { setColWidths(p => ({ ...p, [fieldWidthDlg.field]: fieldWidthDlg.value })); setFieldWidthDlg(null); } }}
+                  autoFocus
+                  className="h-8"
+                />
+                <span className="text-xs text-gray-500">px</span>
+              </div>
+              <div className="flex justify-between gap-2">
+                <button
+                  onClick={() => {
+                    const f = table?.fields?.find((x: any) => x.name === fieldWidthDlg.field);
+                    const def = f ? (DEFAULT_COL_WIDTHS[f.fieldType as keyof typeof DEFAULT_COL_WIDTHS] ?? 150) : 150;
+                    setColWidths(p => { const n = { ...p }; delete n[fieldWidthDlg.field]; return n; });
+                    setFieldWidthDlg(null);
+                  }}
+                  className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50"
+                >
+                  Standard Width
+                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setFieldWidthDlg(null)}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => { setColWidths(p => ({ ...p, [fieldWidthDlg.field]: fieldWidthDlg.value })); setFieldWidthDlg(null); }}
+                    className="px-3 py-1.5 text-sm bg-[#C42B1C] text-white rounded hover:bg-[#9B2118]"
+                  >
+                    OK
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Unhide Columns Dialog ── */}
+      <Dialog open={unhideDlg} onOpenChange={setUnhideDlg}>
+        <DialogContent className="sm:max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Unhide Columns</DialogTitle>
+            <DialogDescription>Tick the columns you want to show.</DialogDescription>
+          </DialogHeader>
+          <div className="py-2 space-y-1.5 max-h-64 overflow-y-auto">
+            {(table?.fields ?? []).map((f: any) => {
+              const isHidden = hiddenFields.includes(f.name);
+              return (
+                <label key={f.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 px-1 py-0.5 rounded">
+                  <input
+                    type="checkbox"
+                    checked={!isHidden}
+                    onChange={() => {
+                      if (isHidden) setHiddenFields(prev => prev.filter(n => n !== f.name));
+                      else setHiddenFields(prev => [...prev, f.name]);
+                    }}
+                    className="w-3.5 h-3.5"
+                  />
+                  <span className={isHidden ? 'text-gray-400' : 'text-gray-700'}>{f.name}</span>
+                </label>
+              );
+            })}
+          </div>
+          <div className="flex justify-end">
+            <button
+              onClick={() => setUnhideDlg(false)}
+              className="px-3 py-1.5 text-sm bg-[#C42B1C] text-white rounded hover:bg-[#9B2118]"
+            >
+              Close
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* ── Reset Sandbox Confirm ── */}
       {onReset && (
