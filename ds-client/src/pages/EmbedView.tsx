@@ -270,6 +270,19 @@ export function EmbedView({ token, initialMode }: Props) {
     if (activeView !== 'design') setActiveView('datasheet');
   }, [snapshot, addTab, activeView]);
 
+  const selectTableDesign = useCallback((id: number) => {
+    const tbl = snapshot?.tables.find(t => t.id === id);
+    const label = tbl?.name ?? 'Table';
+    addTab(`table-${id}`, label, 'table');
+    setActiveTableId(id);
+    if (tbl && /^Table\d+$/i.test(tbl.name)) {
+      setNameTableInput(tbl.name);
+      setNameTableDialog({ tableId: tbl.id });
+    } else {
+      setActiveView('design');
+    }
+  }, [snapshot, addTab]);
+
   const selectForm = useCallback((id: number) => {
     const f = forms.find(f => f.id === id);
     addTab(`form-${id}`, f?.name ?? 'Form', 'form');
@@ -869,6 +882,7 @@ export function EmbedView({ token, initialMode }: Props) {
           queries={queries}
           isStudentMode={true}
           onSelectTable={selectTable}
+          onSelectTableDesign={selectTableDesign}
           onSelectForm={selectForm}
           onSelectReport={selectReport}
           onSelectQuery={selectQuery}
@@ -891,6 +905,7 @@ export function EmbedView({ token, initialMode }: Props) {
           queries={queries}
           isStudentMode={true}
           onSelectTable={selectTable}
+          onSelectTableDesign={selectTableDesign}
           onSelectForm={selectForm}
           onSelectReport={selectReport}
           onSelectQuery={selectQuery}
@@ -913,6 +928,7 @@ export function EmbedView({ token, initialMode }: Props) {
           forms={forms}
           reports={reports}
           onSelectTable={selectTable}
+          onSelectTableDesign={selectTableDesign}
           onSelectQuery={selectQuery}
           {...wizardProps}
         />
@@ -941,6 +957,7 @@ export function EmbedView({ token, initialMode }: Props) {
             onSwitchToDatasheet={() => setSqlSubView('table')}
             onReset={handleReset}
             onSelectTable={selectTable}
+            onSelectTableDesign={selectTableDesign}
             queries={queries}
             forms={forms}
             reports={reports}
@@ -999,6 +1016,7 @@ export function EmbedView({ token, initialMode }: Props) {
           queries={queries}
           isStudentMode={true}
           onSelectTable={selectTable}
+          onSelectTableDesign={selectTableDesign}
           {...wizardProps}
         />
       );
@@ -1018,6 +1036,7 @@ export function EmbedView({ token, initialMode }: Props) {
             onSwitchToDatasheet={() => setActiveView('datasheet')}
             onReset={handleReset}
             onSelectTable={selectTable}
+            onSelectTableDesign={selectTableDesign}
             queries={queries}
             forms={forms}
             reports={reports}
@@ -1033,6 +1052,7 @@ export function EmbedView({ token, initialMode }: Props) {
           tables={snapshot.tables}
           isStudentMode={true}
           onSelectTable={selectTable}
+          onSelectTableDesign={selectTableDesign}
           onSelectQuery={selectQuery}
           forms={forms}
           reports={reports}
@@ -1084,6 +1104,7 @@ export function EmbedView({ token, initialMode }: Props) {
             databaseId={snapshot.database.id}
             isStudentMode={true}
             onSelectTable={selectTable}
+            onSelectTableDesign={selectTableDesign}
             forms={forms}
             reports={reports}
             queries={queries}

@@ -46,6 +46,7 @@ interface SidebarProps {
   activeFormId?: number;
   activeReportId?: number;
   onSelectTable?: (id: number) => void;
+  onSelectTableDesign?: (id: number) => void;
   onSelectQuery?: (id: number) => void;
   onSelectForm?: (id: number) => void;
   onSelectReport?: (id: number) => void;
@@ -73,7 +74,7 @@ function SectionHeader({ label, open, onToggle }: { label: string; open: boolean
 export function Sidebar({
   tables, databaseId, isStudentMode,
   onDeleteTable, activeTableId, activeQueryId, activeFormId, activeReportId,
-  onSelectTable, onSelectQuery, onSelectForm, onSelectReport,
+  onSelectTable, onSelectTableDesign, onSelectQuery, onSelectForm, onSelectReport,
   onDeleteQuery, onDeleteForm, onDeleteReport,
   queries = [], forms = [], reports = [],
   onRefresh,
@@ -269,12 +270,19 @@ export function Sidebar({
                             Open (Datasheet)
                           </Link>
                         </ContextMenuItem>
-                        <ContextMenuItem asChild>
-                          <Link href={`/databases/${databaseId}/tables/${t.id}/design`} className="flex items-center cursor-pointer">
+                        {onSelectTableDesign ? (
+                          <ContextMenuItem onClick={() => onSelectTableDesign(t.id)} className="cursor-pointer">
                             <DesignViewIcon size={14} className="mr-2 flex-shrink-0" />
                             Design View
-                          </Link>
-                        </ContextMenuItem>
+                          </ContextMenuItem>
+                        ) : (
+                          <ContextMenuItem asChild>
+                            <Link href={`/databases/${databaseId}/tables/${t.id}/design`} className="flex items-center cursor-pointer">
+                              <DesignViewIcon size={14} className="mr-2 flex-shrink-0" />
+                              Design View
+                            </Link>
+                          </ContextMenuItem>
+                        )}
                         <ContextMenuSeparator />
                         <ContextMenuItem onClick={() => openRename('table', t.id, t.name)}>
                           <Pencil className="w-3.5 h-3.5 mr-2 text-gray-500" />
