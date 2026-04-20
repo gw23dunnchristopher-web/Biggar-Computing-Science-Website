@@ -969,10 +969,18 @@ ${dataDictionary}
 STUDENT'S DATABASE:
 ${dbSummary}
 
-Please mark this database against the task and the expected data dictionary above. Your response must be structured EXACTLY as follows, with the Mark line first:
+Please mark this database STRICTLY against the expected data dictionary above. Apply these rules:
+- Compare the student's tables and fields to the expected data dictionary EXACTLY.
+- Field names must match (case-insensitive, ignoring trivial spacing).
+- Data types must match the expected type.
+- Required / primary-key flags must match.
+- Do NOT award marks for fields the student has added that are NOT in the expected data dictionary, even if they are sensible (for example, an automatic ID column added by default does not count unless the data dictionary lists it).
+- A bullet is only achieved if the relevant tables AND fields in the data dictionary are present and correct.
+
+Your response must be structured EXACTLY as follows, with the Mark line first:
 1. **Mark**: ${markingRubric} Write the mark on its own line in the form "X / ${maxMark}".
 2. **Per-Bullet Breakdown**: ${numberedBullets ? `For each of the ${maxMark} task bullets, write one line in the form "Bullet N: ✔" (achieved) or "Bullet N: ✘ — short reason" (not achieved).` : "Skip this section."}
-3. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Comment on which expected tables/fields are present, missing, incorrectly named, or have the wrong data type, and on the sample data entered.
+3. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Call out which expected tables/fields are missing, incorrectly named, the wrong type, or extra fields the student added that aren't in the data dictionary.
 4. **Suggestions**: One or two practical improvements the student could make to their database design.
 
 Be encouraging but honest. Use British English spelling.`
@@ -993,6 +1001,7 @@ Be encouraging but honest. Use British English spelling.`;
       const response = await gemini.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt,
+        config: { thinkingConfig: { thinkingBudget: 0 } },
       });
       const feedback = response.text || "";
       // Try to parse "X / N" out of the AI's Mark line.
@@ -1050,6 +1059,7 @@ Be encouraging but honest. Use British English spelling.`;
       const response = await gemini.models.generateContent({
         model: "gemini-2.5-flash",
         contents: prompt,
+        config: { thinkingConfig: { thinkingBudget: 0 } },
       });
       const text = response.text || "";
       res.json({ feedback: text });
