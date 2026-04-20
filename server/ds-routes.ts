@@ -942,18 +942,30 @@ export function registerDsRoutes(app: Express) {
       `Table: ${t.name} (${t.rowCount} row${t.rowCount !== 1 ? "s" : ""})\n  Fields: ${t.fields.map(f => `${f.name} (${f.type}${f.isPrimaryKey ? ", PK" : ""}${f.isRequired ? ", required" : ""})`).join(", ")}\n  Sample data: ${t.sampleRows.length > 0 ? t.sampleRows.map(r => JSON.stringify(r)).join("; ") : "none"}`
     ).join("\n\n");
 
-    const prompt = `You are a Computing Science teacher marking an N4 Computing Science database exercise.
+    const prompt = dataDictionary
+      ? `You are a Computing Science teacher marking an N4 Computing Science database exercise.
 
-${taskDescription ? `TASK: ${taskDescription}\n\n` : ""}${dataDictionary ? `EXPECTED DATA DICTIONARY (the correct tables and fields the final database should contain):
+${taskDescription ? `TASK: ${taskDescription}\n\n` : ""}EXPECTED DATA DICTIONARY (the correct tables and fields the final database should contain):
 ${dataDictionary}
 
-` : ""}STUDENT'S DATABASE:
+STUDENT'S DATABASE:
 ${dbSummary}
 
-Please mark this database against the expected data dictionary above (if provided). Your response must be structured as follows:
+Please mark this database against the expected data dictionary above. Your response must be structured as follows:
 1. **Mark**: Give a mark out of 4 (0–4) based on how closely the student's tables, field names, data types, primary keys and required attributes match the expected data dictionary and the task requirements.
 2. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Comment on which expected tables/fields are present, missing, incorrectly named, or have the wrong data type, and on the sample data entered.
 3. **Suggestions**: One or two practical improvements the student could make to their database design to better match the expected data dictionary.
+
+Be encouraging but honest. Use British English spelling.`
+      : `You are a Computing Science teacher marking an N4 Computing Science database exercise.
+
+${taskDescription ? `TASK: ${taskDescription}\n\n` : ""}STUDENT'S DATABASE:
+${dbSummary}
+
+There is no fixed expected data dictionary for this task — the student is expected to design their own data dictionary that suits the task. Mark the database on the merits of the student's own design choices and how well they meet the task requirements. Your response must be structured as follows:
+1. **Mark**: Give a mark out of 4 (0–4) based on how well the student's chosen tables, field names, data types, primary keys, required attributes and sample data fulfil the task. Reward sensible design decisions even if they differ from how you would have done it.
+2. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Comment on the suitability of their table structure, field names, data types and any sample data entered, in the context of the task.
+3. **Suggestions**: One or two practical improvements the student could make to their database design.
 
 Be encouraging but honest. Use British English spelling.`;
 
