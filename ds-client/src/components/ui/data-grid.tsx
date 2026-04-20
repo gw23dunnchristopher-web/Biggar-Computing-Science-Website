@@ -674,7 +674,21 @@ export function DataGrid({
   };
 
   const renderNewRowInput = (type: string, fieldName: string, isPrimaryKey: boolean, defaultValue?: string | null) => {
-    if (type === 'autonumber') return <span className="text-gray-300 text-xs px-1 italic">Auto</span>;
+    if (type === 'autonumber') {
+      const hasInput = Object.entries(newRowData).some(([k, v]) => {
+        if (k === fieldName) return false;
+        return v !== '' && v !== null && v !== undefined;
+      });
+      let maxVal = 0;
+      for (const r of records) {
+        const v = parseInt(r.data?.[fieldName] ?? '0');
+        if (!isNaN(v) && v > maxVal) maxVal = v;
+      }
+      const next = maxVal + 1;
+      return hasInput
+        ? <span className="block text-right text-sm text-gray-600 px-1">{next}</span>
+        : <span className="block text-right text-xs italic text-gray-400 px-1">(New)</span>;
+    }
     if (type === 'calculated' || type === 'attachment') return <span className="text-gray-300 text-xs px-1 italic">—</span>;
     if (type === 'boolean') {
       return (
