@@ -82,6 +82,14 @@ export function EmbedView({ token, initialMode }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
+  const taskBullets = useMemo(() => {
+    const raw = (snapshot?.database?.taskDescription || '').trim();
+    if (!raw) return [] as string[];
+    return raw.split(/\r?\n/)
+      .map(l => l.replace(/^[\s•\-\*\u2022]+/, '').trim())
+      .filter(Boolean);
+  }, [snapshot?.database?.taskDescription]);
+
   async function handleSubmitForMarking() {
     if (!snapshot) return;
     setSubmitting(true);
@@ -560,14 +568,6 @@ export function EmbedView({ token, initialMode }: Props) {
       </div>
     );
   }
-
-  const taskBullets = useMemo(() => {
-    const raw = (snapshot?.database?.taskDescription || '').trim();
-    if (!raw) return [] as string[];
-    return raw.split(/\r?\n/)
-      .map(l => l.replace(/^[\s•\-\*\u2022]+/, '').trim())
-      .filter(Boolean);
-  }, [snapshot?.database?.taskDescription]);
 
   const hasTask = taskBullets.length > 0;
 
