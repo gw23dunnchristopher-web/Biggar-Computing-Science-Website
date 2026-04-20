@@ -961,29 +961,46 @@ export function registerDsRoutes(app: Express) {
       : `Give a mark out of 4 (0–4).`;
 
     const prompt = dataDictionary
-      ? `You are a Computing Science teacher marking an N4 Computing Science database exercise.
+      ? `You are a STRICT Computing Science teacher marking an N4 Computing Science database exercise against a fixed data dictionary. You must not be lenient.
 
-${taskBlock}EXPECTED DATA DICTIONARY (the correct tables and fields the final database should contain):
+${taskBlock}EXPECTED DATA DICTIONARY (this is the correct, expected design — the student MUST reproduce it):
 ${dataDictionary}
 
-STUDENT'S DATABASE:
+STUDENT'S ACTUAL DATABASE (what they submitted):
 ${dbSummary}
 
-Please mark this database STRICTLY against the expected data dictionary above. Apply these rules:
-- Compare the student's tables and fields to the expected data dictionary EXACTLY.
-- Field names must match (case-insensitive, ignoring trivial spacing).
-- Data types must match the expected type.
-- Required / primary-key flags must match.
-- Do NOT award marks for fields the student has added that are NOT in the expected data dictionary, even if they are sensible (for example, an automatic ID column added by default does not count unless the data dictionary lists it).
-- A bullet is only achieved if the relevant tables AND fields in the data dictionary are present and correct.
+You MUST work through these steps IN ORDER inside your reply, before giving any mark.
 
-Your response must be structured EXACTLY as follows, with the Mark line first:
-1. **Mark**: ${markingRubric} Write the mark on its own line in the form "X / ${maxMark}".
-2. **Per-Bullet Breakdown**: ${numberedBullets ? `For each of the ${maxMark} task bullets, write one line in the form "Bullet N: ✔" (achieved) or "Bullet N: ✘ — short reason" (not achieved).` : "Skip this section."}
-3. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Call out which expected tables/fields are missing, incorrectly named, the wrong type, or extra fields the student added that aren't in the data dictionary.
-4. **Suggestions**: One or two practical improvements the student could make to their database design.
+STEP A — Extract the expected schema from the data dictionary above. List every expected table, and under each table list every expected field with its expected data type. Use this exact format:
+  Expected schema:
+  • Table "<TableName>"
+      - <FieldName> (<expected type>)
+      - <FieldName> (<expected type>)
+      ...
 
-Be encouraging but honest. Use British English spelling.`
+STEP B — Audit the student's database against the expected schema. For EACH expected table and EACH expected field, write PRESENT or MISSING and (if present) whether the data type matches. Use this exact format:
+  Audit:
+  • Table "<TableName>": PRESENT / MISSING
+      - <FieldName>: PRESENT (type ok) / PRESENT (wrong type: <actual>) / MISSING
+      ...
+  Then list any EXTRA tables or fields the student added that are NOT in the data dictionary.
+
+STEP C — Apply these STRICT rules when scoring the task bullets:
+  • A bullet that asks the student to "create a table" or "create a database with fields X, Y, Z" is ONLY achieved (✔) if EVERY field listed in the data dictionary for that table is PRESENT in the student's submission.
+  • A bullet that asks for specific data types is ONLY achieved if those types are correct.
+  • A bullet about entering sample data is ONLY achieved if at least one record actually exists.
+  • An auto-generated ID field that the student did NOT explicitly create from the dictionary does NOT count toward the mark unless the dictionary itself lists an ID field.
+  • Do NOT give credit for "having a table" if the table is mostly empty of the expected fields. Missing the majority of expected fields = bullet ✘, even if the table name is correct.
+  • Extra fields the student added that are NOT in the dictionary earn NO marks.
+
+STEP D — Final mark: ${markingRubric} Write the mark on its own line in the EXACT form "Mark: X / ${maxMark}".
+
+After Step D, also include:
+- **Per-Bullet Breakdown**: ${numberedBullets ? `For each of the ${maxMark} task bullets, write one line in the form "Bullet N: ✔" or "Bullet N: ✘ — short reason citing what was missing".` : "Skip this section."}
+- **Feedback**: 2–4 sentences naming the specific expected tables/fields that are missing or have the wrong type.
+- **Suggestions**: One or two practical improvements.
+
+Be encouraging in tone but absolutely honest and strict about the marks. Use British English spelling.`
       : `You are a Computing Science teacher marking an N4 Computing Science database exercise.
 
 ${taskBlock}STUDENT'S DATABASE:
@@ -1004,11 +1021,14 @@ Be encouraging but honest. Use British English spelling.`;
         config: { thinkingConfig: { thinkingBudget: 0 } },
       });
       const feedback = response.text || "";
-      // Try to parse "X / N" out of the AI's Mark line.
-      const markMatch = feedback.match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+)/);
+      // Prefer an explicit "Mark: X / N" line, otherwise fall back to the LAST X/N pattern in the text
+      // (the audit step may contain other "X / N"-looking ratios that we don't want to capture).
       let mark: number | null = null;
-      if (markMatch) {
-        const parsed = Math.round(parseFloat(markMatch[1]));
+      const explicit = feedback.match(/\*?\*?Mark\*?\*?\s*[:\-]?\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+)/i);
+      const allMatches = [...feedback.matchAll(/(\d+(?:\.\d+)?)\s*\/\s*(\d+)/g)];
+      const chosen = explicit || (allMatches.length ? allMatches[allMatches.length - 1] : null);
+      if (chosen) {
+        const parsed = Math.round(parseFloat(chosen[1]));
         mark = Math.max(0, Math.min(maxMark, parsed));
       }
       res.json({ feedback, mark, maxMark });
