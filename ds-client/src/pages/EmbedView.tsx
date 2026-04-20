@@ -1147,21 +1147,14 @@ export function EmbedView({ token, initialMode }: Props) {
             isStudentMode={true}
             onSelectTable={selectTable}
             onSelectTableDesign={selectTableDesign}
+            onDeleteTable={handleDeleteTableEmbed}
             forms={forms}
             reports={reports}
             queries={queries}
             onSelectForm={selectForm}
             onSelectReport={selectReport}
             onSelectQuery={selectQuery}
-            onRefresh={() => {
-              const sessionKey = sessionStorage.getItem(SESSION_KEY_STORAGE);
-              apiFetch(`/api/ds/embeds/${token}`, {
-                headers: sessionKey ? { 'x-session-key': sessionKey } : {},
-              }).then(d => d && setSnapshot(d)).catch(() => {});
-              loadForms(snapshot.database.id);
-              loadReports(snapshot.database.id);
-              loadQueries(snapshot.database.id);
-            }}
+            onRefresh={refreshSnapshot}
           />
         }
       >
