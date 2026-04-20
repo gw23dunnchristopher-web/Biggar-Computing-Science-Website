@@ -279,14 +279,25 @@ export function SandboxesPage() {
             <div>
               <label className="text-sm font-medium mb-1.5 block">
                 Task Description
-                <span className="text-gray-400 font-normal text-xs ml-1">(shown to students — used for AI marking)</span>
+                <span className="text-gray-400 font-normal text-xs ml-1">(one bullet per requirement — shown to students &amp; used for AI marking)</span>
               </label>
               <textarea
                 value={newTaskDesc}
+                onFocus={() => { if (!newTaskDesc) setNewTaskDesc('• '); }}
                 onChange={e => setNewTaskDesc(e.target.value)}
-                rows={4}
-                placeholder="Describe what students need to do, e.g. 'Add at least 5 books to the Books table, each with a valid ISBN, title, author, and genre.'"
-                className="w-full border border-gray-200 rounded-md text-sm p-2.5 resize-none focus:outline-none focus:ring-2 focus:ring-[#C42B1C] placeholder:text-gray-300"
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const ta = e.currentTarget;
+                    const { selectionStart: s, selectionEnd: en, value: v } = ta;
+                    const next = v.slice(0, s) + '\n• ' + v.slice(en);
+                    setNewTaskDesc(next);
+                    requestAnimationFrame(() => { ta.selectionStart = ta.selectionEnd = s + 3; });
+                  }
+                }}
+                rows={5}
+                placeholder={'• Create a Books table with fields: ISBN, Title, Author, Genre\n• Add at least 5 valid book records\n• Make ISBN the primary key'}
+                className="w-full border border-gray-200 rounded-md text-sm p-2.5 resize-none focus:outline-none focus:ring-2 focus:ring-[#C42B1C] placeholder:text-gray-300 font-mono leading-6"
               />
             </div>
           </div>
