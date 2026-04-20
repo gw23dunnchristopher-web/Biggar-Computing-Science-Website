@@ -18,6 +18,28 @@ function tsFmt(obj: any, ...keys: string[]) {
   return out;
 }
 
+/* Resolve the public host for embed/iframe URLs.
+   Priority:
+     1. PUBLIC_URL env var  (lets you pin embeds to the production domain)
+     2. X-Forwarded-Host or Host of the current request (so URLs match wherever
+        the teacher is actually viewing the dashboard from — dev or prod)
+     3. REPLIT_DOMAINS first entry
+     4. localhost fallback
+   The underlying database is shared between dev & prod (same DATABASE_URL),
+   so embeds/sandboxes created in dev are also reachable in production. */
+function getPublicHost(req: any): string {
+  if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/$/, '');
+  const fwdHost = req?.headers?.['x-forwarded-host'] as string | undefined;
+  const host = fwdHost || req?.headers?.host;
+  if (host) {
+    const proto = (req.headers['x-forwarded-proto'] as string | undefined)
+      || (host.includes('localhost') ? 'http' : 'https');
+    return `${proto}://${host}`;
+  }
+  if (process.env.REPLIT_DOMAINS) return `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
+  return 'http://localhost:3000';
+}
+
 /* ── Deep copy a teacher database for a student sandbox ── */
 async function deepCopyDatabase(sourceDatabaseId: number, newUserId: string): Promise<number> {
   if (!db) throw new Error("Database not available");
@@ -469,7 +491,7 @@ export function registerDsRoutes(app: Express) {
   app.get("/api/ds/sandboxes", async (req, res) => {
     const { userId } = req.query;
     if (!userId || typeof userId !== "string") return res.status(400).json({ error: "userId is required" });
-    const host = process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}` : "http://localhost:3000";
+    const host = getPublicHost(req);
     const databases = await db!.select().from(dsDatabases).where(eq(dsDatabases.userId, userId)).orderBy(dsDatabases.createdAt);
     const embeds = await db!.select().from(dsEmbeds).where(eq(dsEmbeds.userId, userId));
     const embedByDbId = new Map(embeds.map(e => [e.databaseId, e]));
@@ -487,7 +509,7 @@ export function registerDsRoutes(app: Express) {
   app.post("/api/ds/sandboxes", async (req, res) => {
     const { name, userId, taskDescription } = req.body;
     if (!name || !userId) return res.status(400).json({ error: "name and userId are required" });
-    const host = process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}` : "http://localhost:3000";
+    const host = getPublicHost(req);
     const [d] = await db!.insert(dsDatabases).values({ name, userId, taskDescription: taskDescription?.trim() || null }).returning();
     const token = crypto.randomBytes(16).toString("hex");
     await db!.insert(dsEmbeds).values({ token, databaseId: d.id, userId }).returning();
@@ -516,7 +538,7 @@ export function registerDsRoutes(app: Express) {
     if (!databaseId || !userId) return res.status(400).json({ error: "databaseId and userId are required" });
     const token = crypto.randomBytes(16).toString("hex");
     const [embed] = await db!.insert(dsEmbeds).values({ token, databaseId, userId }).returning();
-    const host = process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}` : `${req.protocol}://${req.headers.host}`;
+    const host = getPublicHost(req);
     const embedUrl = `${host}/data-sculptor/?embed=${token}`;
     const iframeCode = `<iframe src="${embedUrl}" width="100%" height="600" frameborder="0" style="border: 1px solid #ccc; border-radius: 4px;"></iframe>`;
     res.status(201).json({ token: embed.token, databaseId: embed.databaseId, embedUrl, iframeCode, createdAt: embed.createdAt.toISOString() });

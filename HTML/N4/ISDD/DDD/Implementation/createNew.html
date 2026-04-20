@@ -149,12 +149,13 @@
                         <h2>Datasheet and Design View</h2>
                         <p>
                             In Access, there are two different views that you
-                            can use to work with your database. The <b>Design</b>
-                            view and the <b>Datasheet</b> view. You can switch
-                            between them by clicking on the icon in the top left
-                            of the Access window.  Below is an explanation of
-                            the two views (I have included what the view looks
-                            like both in access and in my app below):
+                            can use to work with your database. The
+                            <b>Design</b> view and the <b>Datasheet</b> view.
+                            You can switch between them by clicking on the icon
+                            in the top left of the Access window. Below is an
+                            explanation of the two views (I have included what
+                            the view looks like both in access and in my app
+                            below):
                         </p>
                         <table>
                             <tr>
@@ -171,12 +172,18 @@
                                     will use to add, edit and delete records.
                                 </td>
                                 <td>
-                                    <img src="/Images/N4/DDD/Implementation/datasheetView.png" class="cImg">
+                                    <img
+                                        src="/Images/N4/DDD/Implementation/datasheetView.png"
+                                        class="cImg"
+                                    />
                                 </td>
                                 <td>
-                                    <img src="/Images/N4/DDD/Implementation/datasheetViewApp.jpg" class="cImg">
+                                    <img
+                                        src="/Images/N4/DDD/Implementation/datasheetViewApp.jpg"
+                                        class="cImg"
+                                    />
                                 </td>
-                                </tr>
+                            </tr>
                             <tr>
                                 <th class="subheader">Design View</th>
                                 <td>
@@ -185,18 +192,373 @@
                                     to add, edit and delete fields.
                                 </td>
                                 <td>
-                                    <img src="/Images/N4/DDD/Implementation/designView.png" class="cImg">
+                                    <img
+                                        src="/Images/N4/DDD/Implementation/designView.png"
+                                        class="cImg"
+                                    />
                                 </td>
                                 <td>
-                                    <img src="/Images/N4/DDD/Implementation/designViewApp.jpg" class="cImg">
+                                    <img
+                                        src="/Images/N4/DDD/Implementation/designViewApp.jpg"
+                                        class="cImg"
+                                    />
                                 </td>
                             </tr>
                         </table>
-                        <p>You will notice that when you create a new database, you will <b>start</b> in the <b>Datasheet View</b>.  The first thing you need to
-                        do is click on the icon for the <b>Design View</b>.</p>
-                        <p>Once you click on the Design View icon. You will see the window below - Access will ask you to name the table.</p>
-                        <img src="/Images/N4/DDD/Implementation/nameTable.png" class="cImg" style="max-width: 1000px">
-                        <p>After you give the table a name, it will take you to the design view.</p>
+                        <p>
+                            You will notice that when you create a new database,
+                            you will <b>start</b> in the <b>Datasheet View</b>.
+                            The first thing you need to do is click on the icon
+                            for the <b>Design View</b>.
+                        </p>
+                        <p>
+                            Once you click on the Design View icon. You will see
+                            the window below - Access will ask you to name the
+                            table.
+                        </p>
+                        <img
+                            src="/Images/N4/DDD/Implementation/nameTable.png"
+                            class="cImg"
+                            style="max-width: 1000px"
+                        />
+                        <p>
+                            After you give the table a name, it will take you to
+                            the design view. In Access, the design view looks
+                            like the image below and it looks very similar to
+                            this in the app.
+                        </p>
+                        <img
+                            src="/Images/N4/DDD/Implementation/designViewWindow.jpg"
+                            class="cImg shadowBox"
+                            style="
+                                max-width: 1000px;
+                                padding: 0;
+                                margin-bottom: 20px;
+                            "
+                        />
+                        <p>
+                            You can see that there is a list of fields, and a
+                            list of data types. The table will start with a
+                            field called 'ID' and it will be given the
+                            'AutoNumber' data type. Autonumber means a number
+                            that will automatically increase (by 1) whenever a
+                            new record is created.
+                        </p>
+                        <p>
+                            This is where the data dictionary that we created in
+                            the design phase comes in, because we can take the
+                            field names and data types from our data dictionary
+                            and use them in the Design View. For example, look
+                            at the data dictionary below:
+                        </p>
+                        <table>
+                            <tr>
+                                <th>Entity</th>
+                                <th>Field Name</th>
+                                <th>Data Type</th>
+                                <th>Size</th>
+                                <th>Key</th>
+                            </tr>
+                            <tr>
+                                <th class="subheader" rowspan="7">Customer</th>
+                                <td>Customer ID</td>
+                                <td>Text</td>
+                                <td>6</td>
+                                <td>PK</td>
+                            </tr>
+                            <tr>
+                                <td>Customer Name</td>
+                                <td>Text</td>
+                                <td>20</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Customer Email</td>
+                                <td>Text</td>
+                                <td>30</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Customer Phone</td>
+                                <td>Text</td>
+                                <td>11</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Order No</td>
+                                <td>Number</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Order Date</td>
+                                <td>Date</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Member</td>
+                                <td>Yes/No</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <p>
+                            We can use this to create the fields in the Design
+                            View. You can see the completed Design View below,
+                            note that for the field with the Primary Key I have
+                            just edited the name and data type of the ID field:
+                        </p>
+                        <img
+                            src="/Images/N4/DDD/Implementation/designViewWindow2.jpg"
+                            class="cImg shadowBox"
+                            style="
+                                display: block;
+                                margin: auto;
+                                width: 100%;
+                                max-width: 1000px;
+                                padding: 0;
+                                margin-bottom: 20px;
+                                margin-top: 20px;
+                            "
+                        />
+                        <p>
+                            Now that we have created the fields, we can switch
+                            back to the Datasheet View to start entering data by
+                            clicking on the datasheet icon. When we do this, we
+                            will be asked to save the table and should click
+                            yes.
+                        </p>
+                        <img
+                            src="/Images/N4/DDD/Implementation/saveTable.jpg"
+                            class="shadowBox"
+                            style="
+                                display: block;
+                                margin: auto;
+                                max-width: 1000px;
+                                padding: 0;
+                                margin-bottom: 20px;
+                            "
+                        />
+                        <p>
+                            This will return us to the datasheet view, and you
+                            can see that your table now has columns and is ready
+                            for you to type in the record data!
+                        </p>
+                        <img
+                            src="/Images/N4/DDD/Implementation/datasheetViewWindow.jpg"
+                            class="shadowBox"
+                            style="
+                                display: block;
+                                margin: auto;
+                                width: 100%;
+                                max-width: 1000px;
+                                padding: 0;
+                                margin-bottom: 20px;
+                                margin-top: 20px;
+                            "
+                        />
+                        <h2>Deleting Fields</h2>
+                        <p>
+                            But what if we have made a mistake and added a field
+                            that we don't want? You can delete a field by
+                            returning to the design view, and
+                            <b>right-clicking</b> on the field. This will open a
+                            dropdown menu with a list of options. If you click
+                            on <b>Delete Rows</b> then it should delete the
+                            field.
+                        </p>
+                        <div
+                            style="
+                                display: flex;
+                                align-self: start;
+                                justify-content: center;
+                                flex-wrap: wrap;
+                                gap: 20px;
+                                margin-top: 20px;
+                            "
+                        >
+                            <img
+                                src="/Images/N4/DDD/Implementation/deleteRows.jpg"
+                                class="shadowBox"
+                                style="max-width: 400px; width: 50%"
+                            />
+                            <img
+                                src="/Images/N4/DDD/Implementation/deleteRows2.jpg"
+                                class="shadowBox"
+                                style="
+                                    max-width: 500px;
+                                    width: 50%;
+                                    height: auto;
+                                "
+                            />
+                        </div>
+
+                        <h2>Data Properties</h2>
+                        <p>
+                            There are a number of properties that you can set
+                            for each field. You can see the properties for each
+                            field by clicking on the field in the design view.
+                            The properties for that field will then appear in
+                            the bottom half of the screen. You can see the
+                            properties for the Customer ID field below:
+                        </p>
+                        <img
+                            src="/Images/N4/DDD/Implementation/fieldProperties.jpg"
+                            class="cImg shadowBox"
+                            style="
+                                max-width: 1000px;
+                                padding: 0;
+                                margin: 20px auto;
+                            "
+                        />
+                        <p>
+                            This allows you to change the properties of the
+                            field such as the field size, the default value,
+                            whether the field is required, and whether the field
+                            is a primary key. The properties displayed are
+                            different depending on the data type of the field.
+                        </p>
+                        <p>
+                            At the N4 level, we are only really interested in
+                            the field size, property. The default value depends
+                            on whether the field is a text field or a number
+                            field.
+                        </p>
+                        <p>
+                            For <b>text fields</b>, the default value is 255.
+                            This means that the user can type in up to 255
+                            characters. If you want to limit the number of
+                            characters that the user can type in, you can change
+                            the field size to the number of characters that you
+                            want to allow. For example, if you change this
+                            number to 20, the user can only type in up to 20
+                            characters.
+                        </p>
+                        <img
+                            src="/Images/N4/DDD/Implementation/fieldSizeText.jpg"
+                            class="cImg shadowBox"
+                            style="
+                                max-width: 500px;
+                                padding: 0;
+                                margin: 20px auto;
+                            "
+                        />
+
+                        <h2>Example Database</h2>
+                        <p>
+                            I have created the customers database from the data
+                            dictionary above in the app so that you can see how
+                            it works.
+                        </p>
+                        <iframe
+                            src="https://1b0ccb46-84b3-4339-a290-f5e1468e0440-00-3g6cgevapzqjk.spock.replit.dev/data-sculptor/?embed=10961a17244329f8859320499faf03bc"
+                            width="100%"
+                            height="600"
+                            frameborder="0"
+                            style="border: 1px solid #ccc; border-radius: 4px"
+                        ></iframe>
+
+                        <p>
+                            For <b>number fields</b>, the default value is 'long
+                            integer'. An integer is a whole number, so you can't
+                            type in any numbers with a decimal point like 0.5.
+                            If you want to allow the user to type in numbers
+                            with a decimal point, you can change the field size
+                            to 'double'.
+                        </p>
+                        <img
+                            src="/Images/N4/DDD/Implementation/fieldSizeNumber.jpg"
+                            class="cImg shadowBox"
+                            style="
+                                max-width: 500px;
+                                padding: 0;
+                                margin: 20px auto;
+                            "
+                        />
+
+                        <h2>Try it yourself</h2>
+                        <p>
+                            Below is a data dictionary for a database of
+                            students, including the student's number, their
+                            first name, thier last name, their date of birth,
+                            their phone number, thier address and whether or not
+                            they have paid their tuition fees.
+                        </p>
+                        <table>
+                            <tr>
+                                <th>Entity</th>
+                                <th>Field Name</th>
+                                <th>Data Type</th>
+                                <th>Size</th>
+                                <th>Key</th>
+                            </tr>
+                            <tr>
+                                <th class="subheader" rowspan="7">Students</th>
+                                <td>Student Number</td>
+                                <td>Number</td>
+                                <td></td>
+                                <td>PK</td>
+                            </tr>
+                            <tr>
+                                <td>First Name</td>
+                                <td>Text</td>
+                                <td>20</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Last Name</td>
+                                <td>Text</td>
+                                <td>20</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Date of Birth</td>
+                                <td>Date</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Phone Number</td>
+                                <td>Text</td>
+                                <td>11</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Address</td>
+                                <td>Text</td>
+                                <td>50</td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td>Paid</td>
+                                <td>Yes/No</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </table>
+                        <p>
+                            A database has been created for you below, with one
+                            unnamed table. Complete the following tasks:
+                        </p>
+                        <ol>
+                            <li>
+                                Open the design view, and rename the table to
+                                'Students' when asked.
+                            </li>
+                            <li>
+                                Add the fields from the data dictionary above to
+                                the table.
+                            </li>
+                            <li>
+                                Set the field size for the text fields to the
+                                size specified in the data dictionary.
+                            </li>
+                            <li>
+                                Return to the datasheet view and save the table
+                                when asked.
+                            </li>
+                        </ol>
                     </div>
                 </div>
             </div>

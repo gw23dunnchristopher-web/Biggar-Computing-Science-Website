@@ -824,17 +824,25 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
                       onClick={() => setSelectedIndex(i)}
                       className="w-full px-2 py-1.5 outline-none bg-transparent cursor-pointer"
                     >
-                      <option value="attachment">Attachment</option>
-                      <option value="autonumber">AutoNumber</option>
-                      <option value="calculated">Calculated</option>
-                      <option value="currency">Currency</option>
-                      <option value="date">Date/Time</option>
-                      <option value="hyperlink">Hyperlink</option>
-                      <option value="longtext">Long Text</option>
-                      <option value="lookup">Lookup Wizard…</option>
-                      <option value="number">Number</option>
-                      <option value="text">Short Text</option>
-                      <option value="boolean">Yes/No</option>
+                      <optgroup label="Text">
+                        <option value="text">Short Text</option>
+                        <option value="longtext">Long Text</option>
+                      </optgroup>
+                      <optgroup label="Numeric">
+                        <option value="number">Number</option>
+                        <option value="currency">Currency</option>
+                      </optgroup>
+                      <optgroup label="Date / Boolean">
+                        <option value="date">Date/Time</option>
+                        <option value="boolean">Yes/No</option>
+                      </optgroup>
+                      <optgroup label="Special">
+                        <option value="autonumber">AutoNumber</option>
+                        <option value="hyperlink">Hyperlink</option>
+                        <option value="attachment">Attachment</option>
+                        <option value="calculated">Calculated</option>
+                        <option value="lookup">Lookup Wizard…</option>
+                      </optgroup>
                     </select>
                   </td>
                   <td className="border-r border-gray-300 p-0 overflow-hidden">
