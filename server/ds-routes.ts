@@ -19,15 +19,29 @@ function tsFmt(obj: any, ...keys: string[]) {
 }
 
 /* Resolve the public host for embed/iframe URLs.
-   All embed URLs are pinned to the production domain so that databases
-   created in either dev or prod always work for students on the live site.
-   The underlying database is shared (same DATABASE_URL secret), so embeds
-   themselves are visible everywhere — only the URL host needs to be fixed.
-   Override with PUBLIC_URL env var if you ever change the production domain. */
+   In production (deployed build), URLs are pinned to the production domain so
+   teacher-created embed links remain stable on the live site. In development
+   we use the request host instead, so dev-mode previews actually load (the
+   production domain may not be live yet, or DNS may not be pointed at it).
+   Override either default with the PUBLIC_URL env var. */
 const PRODUCTION_HOST = 'https://www.bhs-computing.co.uk';
-function getPublicHost(_req?: any): string {
+function isProduction(): boolean {
+  return process.env.NODE_ENV === 'production'
+      || !!process.env.REPLIT_DEPLOYMENT
+      || !!process.env.REPLIT_DEPLOYMENT_ID;
+}
+function getPublicHost(req?: any): string {
   if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/$/, '');
-  return PRODUCTION_HOST;
+  if (isProduction()) return PRODUCTION_HOST;
+  const fwdHost = req?.headers?.['x-forwarded-host'] as string | undefined;
+  const host = fwdHost || req?.headers?.host;
+  if (host) {
+    const proto = (req.headers['x-forwarded-proto'] as string | undefined)
+      || (host.includes('localhost') ? 'http' : 'https');
+    return `${proto}://${host}`;
+  }
+  if (process.env.REPLIT_DOMAINS) return `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
+  return 'http://localhost:3000';
 }
 
 /* ── Deep copy a teacher database for a student sandbox ── */
