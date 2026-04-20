@@ -512,6 +512,7 @@ export function DataGrid({
     if (!hasData) return;
 
     for (const f of fields) {
+      if (f.fieldType === 'autonumber' || f.fieldType === 'calculated') continue;
       const val = newRowData[f.name] ?? null;
       const coerced = val === '' ? null : val;
       const error = validateField(f as any, coerced, newRowData);
