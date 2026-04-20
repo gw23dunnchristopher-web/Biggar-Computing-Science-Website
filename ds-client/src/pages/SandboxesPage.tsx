@@ -16,6 +16,7 @@ interface Sandbox {
   name: string;
   userId: string;
   taskDescription: string | null;
+  dataDictionary: string | null;
   token: string;
   embedUrl: string;
   previewUrl?: string;
@@ -63,6 +64,7 @@ export function SandboxesPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newTaskDesc, setNewTaskDesc] = useState('');
+  const [newDataDict, setNewDataDict] = useState('');
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: number | null; name: string }>({ open: false, id: null, name: '' });
   const [deleting, setDeleting] = useState(false);
@@ -80,13 +82,19 @@ export function SandboxesPage() {
     try {
       const sb = await sandboxFetch('/api/ds/sandboxes', {
         method: 'POST',
-        body: JSON.stringify({ name: newName.trim(), userId, taskDescription: newTaskDesc.trim() || null }),
+        body: JSON.stringify({
+          name: newName.trim(),
+          userId,
+          taskDescription: newTaskDesc.trim() || null,
+          dataDictionary: newDataDict.trim() || null,
+        }),
       });
       queryClient.invalidateQueries({ queryKey: ['/api/ds/sandboxes', userId] });
       toast({ title: `"${newName.trim()}" sandbox created` });
       setCreateOpen(false);
       setNewName('');
       setNewTaskDesc('');
+      setNewDataDict('');
       setLocation(`/databases/${sb.id}`);
     } catch {
       toast({ title: 'Failed to create sandbox', variant: 'destructive' });
@@ -297,6 +305,19 @@ export function SandboxesPage() {
                 }}
                 rows={5}
                 placeholder={'• Create a Books table with fields: ISBN, Title, Author, Genre\n• Add at least 5 valid book records\n• Make ISBN the primary key'}
+                className="w-full border border-gray-200 rounded-md text-sm p-2.5 resize-none focus:outline-none focus:ring-2 focus:ring-[#C42B1C] placeholder:text-gray-300 font-mono leading-6"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">
+                Data Dictionary
+                <span className="text-gray-400 font-normal text-xs ml-1">(the tables and fields the finished database should contain — used by the AI marker, not shown to students)</span>
+              </label>
+              <textarea
+                value={newDataDict}
+                onChange={e => setNewDataDict(e.target.value)}
+                rows={8}
+                placeholder={'Table: Books\n  - ISBN (Text, PK, required)\n  - Title (Text, required)\n  - Author (Text)\n  - Genre (Text)\n  - YearPublished (Number)\n\nTable: Loans\n  - LoanID (AutoNumber, PK)\n  - ISBN (Text, required)\n  - BorrowerName (Text)\n  - DateBorrowed (Date)'}
                 className="w-full border border-gray-200 rounded-md text-sm p-2.5 resize-none focus:outline-none focus:ring-2 focus:ring-[#C42B1C] placeholder:text-gray-300 font-mono leading-6"
               />
             </div>

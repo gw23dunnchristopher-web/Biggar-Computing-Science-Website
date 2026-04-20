@@ -320,10 +320,11 @@ export function registerDsRoutes(app: Express) {
 
   app.put("/api/ds/databases/:dbId", async (req, res) => {
     const id = parseInt(req.params.dbId);
-    const { name, taskDescription } = req.body;
+    const { name, taskDescription, dataDictionary } = req.body;
     if (!name) return res.status(400).json({ error: "name is required" });
     const updateData: any = { name, updatedAt: new Date() };
     if (taskDescription !== undefined) updateData.taskDescription = taskDescription || null;
+    if (dataDictionary !== undefined) updateData.dataDictionary = dataDictionary || null;
     const [d] = await db!.update(dsDatabases).set(updateData).where(eq(dsDatabases.id, id)).returning();
     if (!d) return res.status(404).json({ error: "Database not found" });
     res.json(tsFmt(d, "createdAt", "updatedAt"));
@@ -532,11 +533,16 @@ export function registerDsRoutes(app: Express) {
   });
 
   app.post("/api/ds/sandboxes", async (req, res) => {
-    const { name, userId, taskDescription } = req.body;
+    const { name, userId, taskDescription, dataDictionary } = req.body;
     if (!name || !userId) return res.status(400).json({ error: "name and userId are required" });
     const host = getPublicHost(req);
     const previewHost = getPreviewHost(req);
-    const [d] = await db!.insert(dsDatabases).values({ name, userId, taskDescription: taskDescription?.trim() || null }).returning();
+    const [d] = await db!.insert(dsDatabases).values({
+      name,
+      userId,
+      taskDescription: taskDescription?.trim() || null,
+      dataDictionary: dataDictionary?.trim() || null,
+    }).returning();
     const token = crypto.randomBytes(16).toString("hex");
     await db!.insert(dsEmbeds).values({ token, databaseId: d.id, userId }).returning();
     const embedUrl = `${host}/data-sculptor/?embed=${token}`;
@@ -922,6 +928,7 @@ export function registerDsRoutes(app: Express) {
     if (!dbRow) return res.status(404).json({ error: "Database not found" });
 
     const taskDescription = clientTaskDesc || dbRow.taskDescription || "";
+    const dataDictionary = dbRow.dataDictionary || "";
 
     const tables = await db!.select().from(dsTables).where(eq(dsTables.databaseId, dbId)).orderBy(dsTables.createdAt);
     const tableDetails = await Promise.all(tables.map(async (t) => {
@@ -937,13 +944,16 @@ export function registerDsRoutes(app: Express) {
 
     const prompt = `You are a Computing Science teacher marking an N4 Computing Science database exercise.
 
-${taskDescription ? `TASK: ${taskDescription}\n` : ""}STUDENT'S DATABASE:
+${taskDescription ? `TASK: ${taskDescription}\n\n` : ""}${dataDictionary ? `EXPECTED DATA DICTIONARY (the correct tables and fields the final database should contain):
+${dataDictionary}
+
+` : ""}STUDENT'S DATABASE:
 ${dbSummary}
 
-Please mark this database. Your response must be structured as follows:
-1. **Mark**: Give a mark out of 4 (0–4) based on how well the database design matches the task requirements.
-2. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Comment on the table structure, field names, data types, and any sample data entered.
-3. **Suggestions**: One or two practical improvements the student could make to their database design.
+Please mark this database against the expected data dictionary above (if provided). Your response must be structured as follows:
+1. **Mark**: Give a mark out of 4 (0–4) based on how closely the student's tables, field names, data types, primary keys and required attributes match the expected data dictionary and the task requirements.
+2. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Comment on which expected tables/fields are present, missing, incorrectly named, or have the wrong data type, and on the sample data entered.
+3. **Suggestions**: One or two practical improvements the student could make to their database design to better match the expected data dictionary.
 
 Be encouraging but honest. Use British English spelling.`;
 

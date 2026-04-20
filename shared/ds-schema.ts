@@ -5,6 +5,7 @@ export const dsDatabases = pgTable("ds_databases", {
   name: text("name").notNull(),
   userId: text("user_id").notNull(),
   taskDescription: text("task_description"),
+  dataDictionary: text("data_dictionary"),
   theme: jsonb("theme"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
