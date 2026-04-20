@@ -259,7 +259,7 @@ export function Sidebar({
                         )}
                       </div>
                     </ContextMenuTrigger>
-                    {!isStudentMode && (
+                    {true && (
                       <ContextMenuContent className="w-48 text-sm">
                         <ContextMenuLabel className="text-xs font-normal text-gray-500 px-2 py-1">{t.name}</ContextMenuLabel>
                         <ContextMenuSeparator />
@@ -329,7 +329,7 @@ export function Sidebar({
                         )}
                       </div>
                     </ContextMenuTrigger>
-                    {!isStudentMode && (
+                    {true && (
                       <ContextMenuContent className="w-48 text-sm">
                         <ContextMenuLabel className="text-xs font-normal text-gray-500 px-2 py-1">{q.name}</ContextMenuLabel>
                         <ContextMenuSeparator />
@@ -391,7 +391,7 @@ export function Sidebar({
                         )}
                       </div>
                     </ContextMenuTrigger>
-                    {!isStudentMode && (
+                    {true && (
                       <ContextMenuContent className="w-48 text-sm">
                         <ContextMenuLabel className="text-xs font-normal text-gray-500 px-2 py-1">{f.name}</ContextMenuLabel>
                         <ContextMenuSeparator />
@@ -453,7 +453,7 @@ export function Sidebar({
                         )}
                       </div>
                     </ContextMenuTrigger>
-                    {!isStudentMode && (
+                    {true && (
                       <ContextMenuContent className="w-48 text-sm">
                         <ContextMenuLabel className="text-xs font-normal text-gray-500 px-2 py-1">{r.name}</ContextMenuLabel>
                         <ContextMenuSeparator />
