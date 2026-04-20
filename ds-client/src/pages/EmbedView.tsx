@@ -267,8 +267,28 @@ export function EmbedView({ token, initialMode }: Props) {
     const label = tbl?.name ?? 'Table';
     addTab(`table-${id}`, label, 'table');
     setActiveTableId(id);
-    if (activeView !== 'design') setActiveView('datasheet');
-  }, [snapshot, addTab, activeView]);
+    setActiveFormId(null);
+    setActiveReportId(null);
+    setActiveQueryId(null);
+    setActiveView('datasheet');
+  }, [snapshot, addTab]);
+
+  const refreshSnapshot = useCallback(async () => {
+    try {
+      const sessionKey = sessionStorage.getItem(SESSION_KEY_STORAGE);
+      const fresh = await apiFetch(`/api/ds/embeds/${token}`, {
+        headers: sessionKey ? { 'x-session-key': sessionKey } : {},
+      });
+      if (fresh) {
+        setSnapshot(fresh);
+        await Promise.all([
+          loadForms(fresh.database.id),
+          loadReports(fresh.database.id),
+          loadQueries(fresh.database.id),
+        ]);
+      }
+    } catch {}
+  }, [token]);
 
   const selectTableDesign = useCallback((id: number) => {
     console.log('[DataSculptor] selectTableDesign called for table id', id);
@@ -1071,6 +1091,8 @@ export function EmbedView({ token, initialMode }: Props) {
           db={snapshot.database}
           tables={snapshot.tables}
           isStudentMode={true}
+          onDeleteTable={handleDeleteTableEmbed}
+          onRefresh={refreshSnapshot}
           onSelectTable={selectTable}
           onSelectTableDesign={selectTableDesign}
           onSelectQuery={selectQuery}
