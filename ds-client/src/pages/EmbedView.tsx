@@ -92,6 +92,37 @@ export function EmbedView({ token, initialMode }: Props) {
       .filter(Boolean);
   }, [snapshot?.database?.taskDescription]);
 
+  const extraRibbonTabs = useMemo(() => {
+    if (taskBullets.length === 0) return [];
+    const content = (
+      <RibbonGroup name="Task">
+        <RibbonButton
+          icon={<ClipboardList size={DS_ICON_SIZE_LARGE} />}
+          label="View Task"
+          onClick={() => setTaskOpen(true)}
+          title="Show the task instructions for this sandbox"
+        />
+        <RibbonButton
+          icon={submitting ? <Loader2 size={DS_ICON_SIZE_LARGE} className="animate-spin" /> : <Send size={DS_ICON_SIZE_LARGE} />}
+          label={submitting ? 'Marking…' : (feedback ? 'Resubmit' : 'Submit for Marking')}
+          onClick={() => setConfirmSubmitOpen(true)}
+          disabled={submitting}
+          title="Send your current database to the AI for marking"
+          wide
+        />
+        {feedback && (
+          <RibbonButton
+            icon={<Sparkles size={DS_ICON_SIZE_LARGE} />}
+            label="View Feedback"
+            onClick={() => setTaskOpen(true)}
+            title="Open the most recent AI feedback"
+          />
+        )}
+      </RibbonGroup>
+    );
+    return [{ name: 'Task', content }];
+  }, [taskBullets.length, submitting, feedback]);
+
   async function handleSubmitForMarking() {
     if (!snapshot) return;
     setSubmitting(true);
@@ -572,39 +603,6 @@ export function EmbedView({ token, initialMode }: Props) {
   }
 
   const hasTask = taskBullets.length > 0;
-
-  // The Task ribbon tab content — same look as a Database Tools tab.
-  const taskTabContent = hasTask ? (
-    <RibbonGroup name="Task">
-      <RibbonButton
-        icon={<ClipboardList size={DS_ICON_SIZE_LARGE} />}
-        label="View Task"
-        onClick={() => setTaskOpen(true)}
-        title="Show the task instructions for this sandbox"
-      />
-      <RibbonButton
-        icon={submitting ? <Loader2 size={DS_ICON_SIZE_LARGE} className="animate-spin" /> : <Send size={DS_ICON_SIZE_LARGE} />}
-        label={submitting ? 'Marking…' : (feedback ? 'Resubmit' : 'Submit for Marking')}
-        onClick={() => setConfirmSubmitOpen(true)}
-        disabled={submitting}
-        title="Send your current database to the AI for marking"
-        wide
-      />
-      {feedback && (
-        <RibbonButton
-          icon={<Sparkles size={DS_ICON_SIZE_LARGE} />}
-          label="View Feedback"
-          onClick={() => setTaskOpen(true)}
-          title="Open the most recent AI feedback"
-        />
-      )}
-    </RibbonGroup>
-  ) : null;
-
-  const extraRibbonTabs = useMemo(
-    () => (hasTask ? [{ name: 'Task', content: taskTabContent }] : []),
-    [hasTask, submitting, feedback]
-  );
 
   const taskDialogs = hasTask ? (
     <>
