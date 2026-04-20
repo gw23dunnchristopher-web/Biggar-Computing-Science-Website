@@ -390,8 +390,11 @@ function toggleLaw(element) {
     }
 }
 
-preloadSidebar('/HTML/N5/N5Sidebar.html').then(() => {
-    loadSidebar('/HTML/N5/N5Sidebar.html', 'sidebar');
+var __sidebarPath = (typeof window.getSidebarForLevel === 'function')
+    ? window.getSidebarForLevel()
+    : '/HTML/N5/N5Sidebar.html';
+preloadSidebar(__sidebarPath).then(() => {
+    loadSidebar(__sidebarPath, 'sidebar');
     showMainContent();
 }).catch(() => {
     showMainContent();
