@@ -146,6 +146,7 @@ interface DataGridProps {
   onSelectRow: (id: number | null) => void;
   selectedFieldName?: string | null;
   onSelectField?: (fieldName: string | null) => void;
+  onRenameField?: (fieldName: string) => void;
   onFilterBySelection?: (fieldName: string, value: any) => void;
   onFilterExcluding?: (fieldName: string, value: any) => void;
   onRemoveFilter?: () => void;
@@ -185,7 +186,7 @@ export function DataGrid({
   table, records, allRecords, databaseId, focusNewRowRef, sortState, onSortChange,
   onSortAscending, onSortDescending,
   selectedRowId, onSelectRow,
-  selectedFieldName, onSelectField,
+  selectedFieldName, onSelectField, onRenameField,
   onFilterBySelection, onFilterExcluding, onRemoveFilter, onApplyFilter, onFind, onDeleteRecord, onDeleteField, activeFilter,
   hiddenFields = [], onHideField,
   showTotals = false, totalFns = {}, onTotalFnChange,
@@ -1120,6 +1121,7 @@ export function DataGrid({
                       key={f.id}
                       className={`relative border-r border-b border-gray-300 px-2 py-1.5 font-medium text-gray-700 text-xs select-none cursor-pointer hover:bg-gray-200 transition-colors ${selectedFieldName === f.name ? 'bg-[#cce5ff]' : sortState?.field === f.name ? 'bg-red-50' : 'bg-[#f3f2f1]'}`}
                       onClick={() => { onSortChange?.(f.name); onSelectField?.(f.name); }}
+                      onDoubleClick={(e) => { e.stopPropagation(); onSelectField?.(f.name); onRenameField?.(f.name); }}
                       onContextMenu={() => { setCtxTarget({ type: 'header', fieldName: f.name }); onSelectField?.(f.name); }}
                       style={stickyTh(f.name)}
                     >
