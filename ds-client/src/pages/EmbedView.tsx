@@ -323,10 +323,19 @@ export function EmbedView({ token, initialMode }: Props) {
     setActiveView('query');
   }, [queries, addTab]);
 
-  const handleDeleteTableEmbed = useCallback(async (id: number) => {
+  const [deleteTableDialog, setDeleteTableDialog] = useState<{ id: number; name: string } | null>(null);
+  const [isDeletingTable, setIsDeletingTable] = useState(false);
+
+  const handleDeleteTableEmbed = useCallback((id: number) => {
     if (!snapshot) return;
     const tbl = snapshot.tables.find(t => t.id === id);
-    if (!confirm(`Delete table "${tbl?.name ?? 'Table'}"? This cannot be undone.`)) return;
+    setDeleteTableDialog({ id, name: tbl?.name ?? 'Table' });
+  }, [snapshot]);
+
+  const confirmDeleteTable = useCallback(async () => {
+    if (!snapshot || !deleteTableDialog) return;
+    const { id } = deleteTableDialog;
+    setIsDeletingTable(true);
     try {
       await apiFetch(`/api/ds/databases/${snapshot.database.id}/tables/${id}`, { method: 'DELETE' });
       setOpenTabs(prev => prev.filter(t => t.key !== `table-${id}`));
@@ -339,10 +348,13 @@ export function EmbedView({ token, initialMode }: Props) {
         headers: sessionKey ? { 'x-session-key': sessionKey } : {},
       });
       if (fresh) setSnapshot(fresh);
+      setDeleteTableDialog(null);
     } catch (e) {
       toast({ title: 'Delete failed', variant: 'destructive' });
+    } finally {
+      setIsDeletingTable(false);
     }
-  }, [snapshot, activeTableId, token, toast]);
+  }, [snapshot, deleteTableDialog, activeTableId, token, toast]);
 
   async function loadForms(id: number) {
     try { const r = await apiFetch(`/api/ds/databases/${id}/forms`); setForms(r || []); } catch {}
@@ -876,6 +888,33 @@ export function EmbedView({ token, initialMode }: Props) {
                 className="bg-[#C42B1C] hover:bg-[#9B2118]"
               >
                 OK
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Delete table confirmation */}
+      {deleteTableDialog && (
+        <Dialog open onOpenChange={v => { if (!v && !isDeletingTable) setDeleteTableDialog(null); }}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Delete table</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete the table <strong>"{deleteTableDialog.name}"</strong>?
+                This will permanently remove the table and all of its records. This cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setDeleteTableDialog(null)} disabled={isDeletingTable}>
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmDeleteTable}
+                disabled={isDeletingTable}
+                className="bg-[#C42B1C] hover:bg-[#9B2118]"
+              >
+                {isDeletingTable ? 'Deleting…' : 'Delete'}
               </Button>
             </DialogFooter>
           </DialogContent>
