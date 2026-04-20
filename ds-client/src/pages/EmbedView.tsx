@@ -392,6 +392,9 @@ export function EmbedView({ token, initialMode }: Props) {
     setQueries([]);
     setActiveFormId(null);
     setActiveReportId(null);
+    setFeedback(null);
+    setTaskOpen(false);
+    setConfirmSubmitOpen(false);
     setResetKey(k => k + 1);
   }
 

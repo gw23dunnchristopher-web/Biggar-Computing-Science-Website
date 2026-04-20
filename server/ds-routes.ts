@@ -949,7 +949,7 @@ Be encouraging but honest. Use British English spelling.`;
 
     try {
       const response = await gemini.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         contents: prompt,
       });
       res.json({ feedback: response.text || "" });
@@ -998,7 +998,7 @@ Be encouraging but honest. Use British English spelling.`;
 
     try {
       const response = await gemini.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
         contents: prompt,
       });
       const text = response.text || "";
