@@ -18,6 +18,7 @@ interface Sandbox {
   taskDescription: string | null;
   token: string;
   embedUrl: string;
+  previewUrl?: string;
   iframeCode: string;
   createdAt: string;
   updatedAt: string;
@@ -177,7 +178,7 @@ export function SandboxesPage() {
                       Embed Code
                     </button>
                     <button
-                      onClick={() => window.open(sb.embedUrl, '_blank')}
+                      onClick={() => window.open(sb.previewUrl || sb.embedUrl, '_blank')}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
                       title="Preview student view"
                     >

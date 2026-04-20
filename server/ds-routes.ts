@@ -18,21 +18,21 @@ function tsFmt(obj: any, ...keys: string[]) {
   return out;
 }
 
-/* Resolve the public host for embed/iframe URLs.
-   In production (deployed build), URLs are pinned to the production domain so
-   teacher-created embed links remain stable on the live site. In development
-   we use the request host instead, so dev-mode previews actually load (the
-   production domain may not be live yet, or DNS may not be pointed at it).
-   Override either default with the PUBLIC_URL env var. */
+/* Embed-URL hosts.
+   – `getPublicHost` is the CANONICAL host that goes into embedUrl/iframeCode
+     (what teachers copy onto their live pages). It is always the production
+     domain, regardless of where the dashboard was opened from, so a snippet
+     created in dev keeps working when the page goes live.
+   – `getPreviewHost` is the host the dashboard itself is being served from,
+     used for the "Open" / "Test embed" button so dev previews still load
+     even before the production site is reachable.
+   Override either with the PUBLIC_URL env var. */
 const PRODUCTION_HOST = 'https://www.bhs-computing.co.uk';
-function isProduction(): boolean {
-  return process.env.NODE_ENV === 'production'
-      || !!process.env.REPLIT_DEPLOYMENT
-      || !!process.env.REPLIT_DEPLOYMENT_ID;
-}
-function getPublicHost(req?: any): string {
+function getPublicHost(_req?: any): string {
   if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/$/, '');
-  if (isProduction()) return PRODUCTION_HOST;
+  return PRODUCTION_HOST;
+}
+function getPreviewHost(req?: any): string {
   const fwdHost = req?.headers?.['x-forwarded-host'] as string | undefined;
   const host = fwdHost || req?.headers?.host;
   if (host) {
@@ -40,8 +40,7 @@ function getPublicHost(req?: any): string {
       || (host.includes('localhost') ? 'http' : 'https');
     return `${proto}://${host}`;
   }
-  if (process.env.REPLIT_DOMAINS) return `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`;
-  return 'http://localhost:3000';
+  return getPublicHost(req);
 }
 
 /* ── Deep copy a teacher database for a student sandbox ── */
@@ -496,6 +495,7 @@ export function registerDsRoutes(app: Express) {
     const { userId } = req.query;
     if (!userId || typeof userId !== "string") return res.status(400).json({ error: "userId is required" });
     const host = getPublicHost(req);
+    const previewHost = getPreviewHost(req);
     const databases = await db!.select().from(dsDatabases).where(eq(dsDatabases.userId, userId)).orderBy(dsDatabases.createdAt);
     const embeds = await db!.select().from(dsEmbeds).where(eq(dsEmbeds.userId, userId));
     const embedByDbId = new Map(embeds.map(e => [e.databaseId, e]));
@@ -504,8 +504,9 @@ export function registerDsRoutes(app: Express) {
       .map(d => {
         const embed = embedByDbId.get(d.id)!;
         const embedUrl = `${host}/data-sculptor/?embed=${embed.token}`;
+        const previewUrl = `${previewHost}/data-sculptor/?embed=${embed.token}`;
         const iframeCode = `<iframe src="${embedUrl}" width="100%" height="600" frameborder="0" style="border: 1px solid #ccc; border-radius: 4px;"></iframe>`;
-        return { ...tsFmt(d, "createdAt", "updatedAt"), token: embed.token, embedUrl, iframeCode };
+        return { ...tsFmt(d, "createdAt", "updatedAt"), token: embed.token, embedUrl, previewUrl, iframeCode };
       });
     res.json(sandboxes);
   });
@@ -514,12 +515,14 @@ export function registerDsRoutes(app: Express) {
     const { name, userId, taskDescription } = req.body;
     if (!name || !userId) return res.status(400).json({ error: "name and userId are required" });
     const host = getPublicHost(req);
+    const previewHost = getPreviewHost(req);
     const [d] = await db!.insert(dsDatabases).values({ name, userId, taskDescription: taskDescription?.trim() || null }).returning();
     const token = crypto.randomBytes(16).toString("hex");
     await db!.insert(dsEmbeds).values({ token, databaseId: d.id, userId }).returning();
     const embedUrl = `${host}/data-sculptor/?embed=${token}`;
+    const previewUrl = `${previewHost}/data-sculptor/?embed=${token}`;
     const iframeCode = `<iframe src="${embedUrl}" width="100%" height="600" frameborder="0" style="border: 1px solid #ccc; border-radius: 4px;"></iframe>`;
-    res.status(201).json({ ...tsFmt(d, "createdAt", "updatedAt"), token, embedUrl, iframeCode });
+    res.status(201).json({ ...tsFmt(d, "createdAt", "updatedAt"), token, embedUrl, previewUrl, iframeCode });
   });
 
   app.delete("/api/ds/sandboxes/:dbId", async (req, res) => {
@@ -543,9 +546,11 @@ export function registerDsRoutes(app: Express) {
     const token = crypto.randomBytes(16).toString("hex");
     const [embed] = await db!.insert(dsEmbeds).values({ token, databaseId, userId }).returning();
     const host = getPublicHost(req);
+    const previewHost = getPreviewHost(req);
     const embedUrl = `${host}/data-sculptor/?embed=${token}`;
+    const previewUrl = `${previewHost}/data-sculptor/?embed=${token}`;
     const iframeCode = `<iframe src="${embedUrl}" width="100%" height="600" frameborder="0" style="border: 1px solid #ccc; border-radius: 4px;"></iframe>`;
-    res.status(201).json({ token: embed.token, databaseId: embed.databaseId, embedUrl, iframeCode, createdAt: embed.createdAt.toISOString() });
+    res.status(201).json({ token: embed.token, databaseId: embed.databaseId, embedUrl, previewUrl, iframeCode, createdAt: embed.createdAt.toISOString() });
   });
 
   app.get("/api/ds/embeds/:token", async (req, res) => {
