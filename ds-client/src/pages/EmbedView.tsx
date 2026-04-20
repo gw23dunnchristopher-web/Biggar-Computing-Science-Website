@@ -271,6 +271,7 @@ export function EmbedView({ token, initialMode }: Props) {
   }, [snapshot, addTab, activeView]);
 
   const selectTableDesign = useCallback((id: number) => {
+    console.log('[DataSculptor] selectTableDesign called for table id', id);
     const tbl = snapshot?.tables.find(t => t.id === id);
     const label = tbl?.name ?? 'Table';
     addTab(`table-${id}`, label, 'table');
@@ -1110,7 +1111,10 @@ export function EmbedView({ token, initialMode }: Props) {
             onSelectReport={selectReport}
             onSelectQuery={selectQuery}
             onRefresh={() => {
-              apiFetch(`/api/ds/embeds/${token}`).then(d => d && setSnapshot(d)).catch(() => {});
+              const sessionKey = sessionStorage.getItem(SESSION_KEY_STORAGE);
+              apiFetch(`/api/ds/embeds/${token}`, {
+                headers: sessionKey ? { 'x-session-key': sessionKey } : {},
+              }).then(d => d && setSnapshot(d)).catch(() => {});
               loadForms(snapshot.database.id);
               loadReports(snapshot.database.id);
               loadQueries(snapshot.database.id);
