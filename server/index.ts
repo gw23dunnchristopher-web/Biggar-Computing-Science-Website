@@ -1086,9 +1086,60 @@ if (hasDatabase) {
 // ---------------------------------------------------------------------------
 const revisionBuildDir = path.join(path.resolve('.'), 'public', 'revision');
 
-// Register revision API routes (auth, questions, assignments, classes, students…)
-// This must happen AFTER the existing BHS API routes so our /api/tts endpoint wins.
-registerRevisionRoutes(app).catch((err: Error) => {
+// Both the Higher revision app (/revision/) and the N5 revision app
+// (/revision-n5/) historically register many overlapping bare /api/* routes
+// (e.g. /api/questions, /api/custom-quizzes, /api/teacher/*). To stop the two
+// apps from racing for the same Express paths, we install each app's /api
+// routes on its own Router and dispatch requests to the right Router based on
+// the Referer header. Static asset mounts (/assets, /resources) and any
+// non-/api routes still register on the real app.
+const revisionApiRouter = express.Router();
+const n5ApiRouter = express.Router();
+
+function makeApiScopedApp(realApp: any, router: any) {
+  const verbs = new Set(['get','post','put','patch','delete','options','head','all']);
+  return new Proxy(realApp, {
+    get(target, prop: string) {
+      if (verbs.has(prop)) {
+        return (path: any, ...handlers: any[]) => {
+          if (typeof path === 'string' && path.startsWith('/api/')) {
+            const sub = path.slice(4) || '/';
+            return (router as any)[prop](sub, ...handlers);
+          }
+          return (target as any)[prop](path, ...handlers);
+        };
+      }
+      if (prop === 'use') {
+        return (...args: any[]) => {
+          const first = args[0];
+          if (typeof first === 'string' && first.startsWith('/api/')) {
+            const sub = first.slice(4) || '/';
+            return (router as any).use(sub, ...args.slice(1));
+          }
+          return (target as any).use(...args);
+        };
+      }
+      return (target as any)[prop];
+    }
+  });
+}
+
+const revisionScopedApp = makeApiScopedApp(app, revisionApiRouter);
+const n5ScopedApp = makeApiScopedApp(app, n5ApiRouter);
+
+// Mount the dispatcher BEFORE registering any /api routes onto the routers.
+// Choose router by Referer: anything from /revision-n5/ goes to N5; everything
+// else (Higher app, sandbox builder, server-to-server, no referer) goes to the
+// Higher (revision) router by default.
+app.use('/api', (req, res, next) => {
+  const ref = req.get('referer') || '';
+  const isN5 = /\/revision-n5(\/|$|\?|#)/.test(ref);
+  if (isN5) return n5ApiRouter(req, res, next);
+  return revisionApiRouter(req, res, next);
+});
+
+// Register revision API routes onto the revision router (via scoped proxy).
+registerRevisionRoutes(revisionScopedApp).catch((err: Error) => {
   console.error('Revision routes registration failed:', err);
 });
 
@@ -1110,7 +1161,7 @@ if (fs.existsSync(revisionBuildDir)) {
 // ---------------------------------------------------------------------------
 const n5BuildDir = path.join(path.resolve('.'), 'public', 'revision-n5');
 
-registerN5Routes(app).catch((err: Error) => {
+registerN5Routes(n5ScopedApp).catch((err: Error) => {
   console.error('N5 revision routes registration failed:', err);
 });
 
