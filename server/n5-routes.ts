@@ -2098,7 +2098,9 @@ ${studentAnswer}`;
       const question = await storage.getQuestion(req.params.questionId);
       if (!question) return res.status(404).send("Not found");
       
-      const path = req.params[0];
+      const splat = (req.params as any).splat ?? (req.params as any)[0];
+      const path = Array.isArray(splat) ? splat.join("/") : splat;
+      if (!path) return res.status(404).send("Not found");
       const parts = path.split(".");
       let imageData: string | undefined;
       
