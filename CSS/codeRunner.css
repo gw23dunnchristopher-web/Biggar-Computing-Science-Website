@@ -139,15 +139,20 @@
     flex: 1 1 auto;
     min-height: 180px;
     background: #1e1e2e;
+    overflow: hidden;
 }
 
 .cr-py-hl-wrap:focus-within {
     background: #1a1a2a;
 }
 
-/* pre is in normal flow — its natural height drives the wrapper */
+/* pre is absolutely positioned, translated to follow the textarea's scroll */
 .cr-py-hl-wrap .cr-hl-bg {
     display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     margin: 0;
     padding: 14px 14px 14px 10px;
     box-sizing: border-box;
@@ -161,13 +166,12 @@
     overflow: hidden;
     background: transparent;
     pointer-events: none;
-    min-height: 180px;
-    width: 100%;
     color: #cdd6f4;
     border: none;
+    will-change: transform;
 }
 
-/* transparent textarea sits on top, lets user type normally */
+/* transparent textarea sits on top — it is the scroll container */
 .cr-py-hl-wrap .cr-editor {
     position: absolute !important;
     top: 0;
@@ -190,10 +194,17 @@
     tab-size: 4;
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    overflow: hidden;
+    overflow-y: auto !important;
+    overflow-x: hidden;
     min-height: 0 !important;
     flex: none !important;
     z-index: 1;
+}
+
+/* inner element used to translateY the line-number text in sync with editor scroll */
+.cr-line-numbers-inner {
+    white-space: pre;
+    will-change: transform;
 }
 /* py-quiz textarea is the scroll container */
 .pq-quiz .cr-py-hl-wrap .cr-editor {

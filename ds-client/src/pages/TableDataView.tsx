@@ -295,6 +295,15 @@ export function TableDataView({
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
   const recordClipboardRef = useRef<Record<string, any> | null>(null);
   const [hasClipboard, setHasClipboard] = useState(false);
+
+  type UndoOp =
+    | { kind: 'cell'; recordId: number; fieldName: string; before: any; after: any }
+    | { kind: 'create'; recordId: number; data: Record<string, any> }
+    | { kind: 'delete'; data: Record<string, any> }
+    | { kind: 'paste-update'; recordId: number; before: Record<string, any>; after: Record<string, any> };
+  const undoStackRef = useRef<UndoOp[]>([]);
+  const redoStackRef = useRef<UndoOp[]>([]);
+  const pushUndo = (op: UndoOp) => { undoStackRef.current.push(op); if (undoStackRef.current.length > 100) undoStackRef.current.shift(); redoStackRef.current = []; };
   const [hiddenFields, setHiddenFields] = useState<string[]>([]);
   const [frozenFields, setFrozenFields] = useState<string[]>([]);
   const [colWidths, setColWidths] = useState<Record<string, number>>({});
@@ -497,8 +506,10 @@ export function TableDataView({
   const doDeleteRecord = async () => {
     const id = pendingDeleteId || selectedRowId;
     if (!id) return;
+    const rec = (allRecords ?? []).find(r => r.id === id);
     try {
       await deleteRecord.mutateAsync({ databaseId, tableId, recordId: id });
+      if (rec) pushUndo({ kind: 'delete', data: rec.data });
       setSelectedRowId(null);
       setPendingDeleteId(null);
       queryClient.invalidateQueries({ queryKey: getListRecordsQueryKey(databaseId, tableId) });
@@ -515,12 +526,65 @@ export function TableDataView({
 
   const handleNewRecordAfter = async (_recordId: number) => {
     try {
-      await createRecord.mutateAsync({ databaseId, tableId, data: { data: {} } });
+      const created = await createRecord.mutateAsync({ databaseId, tableId, data: { data: {} } });
+      if (created?.id) pushUndo({ kind: 'create', recordId: created.id, data: created.data ?? {} });
       queryClient.invalidateQueries({ queryKey: getListRecordsQueryKey(databaseId, tableId) });
       toast({ title: 'New record created' });
     } catch {
       toast({ title: 'Failed to create record', variant: 'destructive' });
     }
+  };
+
+  const handleCellEdited = (recordId: number, fieldName: string, before: any, after: any) => {
+    pushUndo({ kind: 'cell', recordId, fieldName, before, after });
+  };
+
+  const applyOp = async (op: UndoOp): Promise<UndoOp | null> => {
+    try {
+      if (op.kind === 'cell') {
+        const rec = (allRecords ?? []).find(r => r.id === op.recordId);
+        if (!rec) return null;
+        await updateRecord.mutateAsync({ databaseId, tableId, recordId: op.recordId, data: { data: { ...rec.data, [op.fieldName]: op.before } } });
+        queryClient.invalidateQueries({ queryKey: getListRecordsQueryKey(databaseId, tableId) });
+        return { kind: 'cell', recordId: op.recordId, fieldName: op.fieldName, before: op.after, after: op.before };
+      }
+      if (op.kind === 'create') {
+        await deleteRecord.mutateAsync({ databaseId, tableId, recordId: op.recordId });
+        queryClient.invalidateQueries({ queryKey: getListRecordsQueryKey(databaseId, tableId) });
+        return { kind: 'delete', data: op.data };
+      }
+      if (op.kind === 'delete') {
+        const writable: Record<string, any> = {};
+        const writableNames = new Set(fields.filter(f => f.fieldType !== 'autonumber' && f.fieldType !== 'calculated').map(f => f.name));
+        for (const k of Object.keys(op.data)) if (writableNames.has(k)) writable[k] = op.data[k];
+        const created = await createRecord.mutateAsync({ databaseId, tableId, data: { data: writable } });
+        queryClient.invalidateQueries({ queryKey: getListRecordsQueryKey(databaseId, tableId) });
+        return { kind: 'create', recordId: created.id, data: created.data ?? writable };
+      }
+      if (op.kind === 'paste-update') {
+        const rec = (allRecords ?? []).find(r => r.id === op.recordId);
+        if (!rec) return null;
+        await updateRecord.mutateAsync({ databaseId, tableId, recordId: op.recordId, data: { data: op.before } });
+        queryClient.invalidateQueries({ queryKey: getListRecordsQueryKey(databaseId, tableId) });
+        return { kind: 'paste-update', recordId: op.recordId, before: op.after, after: op.before };
+      }
+    } catch {
+      toast({ title: 'Operation failed', variant: 'destructive' });
+    }
+    return null;
+  };
+
+  const handleUndo = async () => {
+    const op = undoStackRef.current.pop();
+    if (!op) { toast({ title: 'Nothing to undo' }); return; }
+    const inverse = await applyOp(op);
+    if (inverse) redoStackRef.current.push(inverse);
+  };
+  const handleRedo = async () => {
+    const op = redoStackRef.current.pop();
+    if (!op) { toast({ title: 'Nothing to redo' }); return; }
+    const inverse = await applyOp(op);
+    if (inverse) undoStackRef.current.push(inverse);
   };
 
   const writeClipboard = (data: Record<string, any>) => {
@@ -556,15 +620,22 @@ export function TableDataView({
         return;
       }
     }
-    const fieldNames = new Set(fields.map(f => f.name));
+    const writableFieldNames = new Set(
+      fields.filter(f => f.fieldType !== 'autonumber' && f.fieldType !== 'calculated').map(f => f.name)
+    );
     const filtered: Record<string, any> = {};
-    for (const k of Object.keys(data)) if (fieldNames.has(k)) filtered[k] = (data as any)[k];
+    for (const k of Object.keys(data)) if (writableFieldNames.has(k)) filtered[k] = (data as any)[k];
     try {
       if (recordId) {
-        await updateRecord.mutateAsync({ databaseId, tableId, recordId, data: { data: filtered } });
+        const rec = (allRecords ?? []).find(r => r.id === recordId);
+        const before = rec ? { ...rec.data } : {};
+        const after = { ...before, ...filtered };
+        await updateRecord.mutateAsync({ databaseId, tableId, recordId, data: { data: after } });
+        pushUndo({ kind: 'paste-update', recordId, before, after });
         toast({ title: 'Record pasted' });
       } else {
-        await createRecord.mutateAsync({ databaseId, tableId, data: { data: filtered } });
+        const created = await createRecord.mutateAsync({ databaseId, tableId, data: { data: filtered } });
+        if (created?.id) pushUndo({ kind: 'create', recordId: created.id, data: created.data ?? filtered });
         toast({ title: 'Record pasted as new row' });
       }
       queryClient.invalidateQueries({ queryKey: getListRecordsQueryKey(databaseId, tableId) });
@@ -1193,6 +1264,9 @@ export function TableDataView({
               onPasteRecord={handlePasteRecord}
               onOpenRowHeight={handleOpenRowHeight}
               canPaste={hasClipboard}
+              onUndo={handleUndo}
+              onRedo={handleRedo}
+              onCellEdited={handleCellEdited}
             />
           )}
         </div>

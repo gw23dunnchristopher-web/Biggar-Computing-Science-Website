@@ -449,21 +449,25 @@
         function updateHighlight() {
             hlCode.innerHTML = syntaxHighlightPython(editor.value);
         }
+        if (!lineNums.querySelector('.cr-line-numbers-inner')) {
+            lineNums.innerHTML = '<div class="cr-line-numbers-inner"></div>';
+        }
+        var lineNumsInner = lineNums.querySelector('.cr-line-numbers-inner');
         function updateLineNumbers() {
             var count = editor.value.split('\n').length;
             var text  = '';
             for (var i = 1; i <= count; i++) text += i + '\n';
-            lineNums.textContent = text;
+            lineNumsInner.textContent = text;
             updateHighlight();
-            /* sync line-numbers height to match the highlight wrapper after reflow */
-            requestAnimationFrame(function () {
-                var h = hlWrap.offsetHeight;
-                if (h > 0) lineNums.style.height = h + 'px';
-            });
         }
         editor.addEventListener('input',  updateLineNumbers);
         editor.addEventListener('keydown', function () { setTimeout(updateLineNumbers, 0); });
-        editor.addEventListener('scroll', function () { hlPre.scrollLeft = editor.scrollLeft; });
+        editor.addEventListener('scroll', function () {
+            var st = editor.scrollTop;
+            hlPre.style.transform        = 'translateY(' + (-st) + 'px)';
+            lineNumsInner.style.transform = 'translateY(' + (-st) + 'px)';
+            hlPre.scrollLeft             = editor.scrollLeft;
+        });
 
         /* ── virtual filesystem ── */
         var vfs        = Object.assign({}, originals);
@@ -1554,22 +1558,23 @@
         function updateHighlight() {
             hlCode.innerHTML = syntaxHighlightPython(editor.value);
         }
+        if (!lineNums.querySelector('.cr-line-numbers-inner')) {
+            lineNums.innerHTML = '<div class="cr-line-numbers-inner"></div>';
+        }
+        var lineNumsInner = lineNums.querySelector('.cr-line-numbers-inner');
         function updateLineNums() {
             var count = editor.value.split('\n').length;
             var out = '';
             for (var n = 1; n <= count; n++) out += n + '\n';
-            lineNums.textContent = out;
+            lineNumsInner.textContent = out;
             updateHighlight();
-            requestAnimationFrame(function () {
-                var h = hlPre.scrollHeight;
-                if (h > 0) lineNums.style.height = h + 'px';
-            });
         }
         editor.addEventListener('input', updateLineNums);
         editor.addEventListener('scroll', function () {
-            hlPre.scrollLeft = editor.scrollLeft;
-            hlPre.scrollTop  = editor.scrollTop;
-            lineNums.scrollTop = editor.scrollTop;
+            var st = editor.scrollTop;
+            hlPre.style.transform        = 'translateY(' + (-st) + 'px)';
+            lineNumsInner.style.transform = 'translateY(' + (-st) + 'px)';
+            hlPre.scrollLeft             = editor.scrollLeft;
         });
 
         editor.addEventListener('keydown', function (e) {

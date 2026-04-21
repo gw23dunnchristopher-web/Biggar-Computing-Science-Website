@@ -172,6 +172,9 @@ interface DataGridProps {
   onPasteRecord?: (recordId: number | null) => void;
   onOpenRowHeight?: () => void;
   canPaste?: boolean;
+  onUndo?: () => void;
+  onRedo?: () => void;
+  onCellEdited?: (recordId: number, fieldName: string, before: any, after: any) => void;
 }
 
 const CLICK_TO_ADD_WIDTH = 130;
@@ -203,6 +206,7 @@ export function DataGrid({
   rowHeightPx,
   cellStyle,
   onNewRecordAfter, onCutRecord, onCopyRecord, onPasteRecord, onOpenRowHeight, canPaste,
+  onUndo, onRedo, onCellEdited,
 }: DataGridProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -371,6 +375,14 @@ export function DataGrid({
 
   // ── Container keyboard navigation ──
   const handleContainerKeyDown = (e: React.KeyboardEvent) => {
+    if (!editingCell && (e.ctrlKey || e.metaKey)) {
+      const k = e.key.toLowerCase();
+      if (k === 'c' && selectedRowId && onCopyRecord) { e.preventDefault(); onCopyRecord(selectedRowId); return; }
+      if (k === 'x' && selectedRowId && onCutRecord)  { e.preventDefault(); onCutRecord(selectedRowId); return; }
+      if (k === 'v' && onPasteRecord)                 { e.preventDefault(); onPasteRecord(selectedRowId ?? null); return; }
+      if (k === 'z' && onUndo)                        { e.preventDefault(); onUndo(); return; }
+      if (k === 'y' && onRedo)                        { e.preventDefault(); onRedo(); return; }
+    }
     if (editingCell) return;
     if (!focusedCell) return;
     const { rowIdx, colIdx } = focusedCell;
@@ -498,6 +510,7 @@ export function DataGrid({
         data: { data: { ...record.data, [fieldName]: coerced } }
       });
       queryClient.invalidateQueries({ queryKey: getListRecordsQueryKey(databaseId, table.id) });
+      onCellEdited?.(record.id, fieldName, originalVal, coerced);
     } catch {
       toast({ title: "Failed to update record", variant: "destructive" });
     }
@@ -1258,16 +1271,14 @@ export function DataGrid({
                               ${isCellFocused && !isCellEditing ? 'ring-1 ring-inset ring-[#C42B1C]' : ''}
                             `}
                             style={{ height: rowHeightPx ?? 28, ...stickyTd(f.name), ...cellStyle }}
-                            onDoubleClick={() => {
-                              if (f.fieldType !== 'autonumber' && f.fieldType !== 'calculated' && f.fieldType !== 'attachment' && f.fieldType !== 'boolean')
-                                handleCellClick(r.id, f.name, cellValue, false, rowIdx, colIdx);
-                            }}
                             onClick={() => {
                               onSelectRow(r.id);
                               if (f.fieldType !== 'autonumber' && f.fieldType !== 'calculated' && f.fieldType !== 'attachment') {
                                 const editableFields = fields.filter(ef => ef.fieldType !== 'autonumber');
                                 const editableColIdx = editableFields.findIndex(ef => ef.name === f.name);
                                 setFocusedCell({ rowIdx, colIdx: editableColIdx });
+                                if (f.fieldType !== 'boolean')
+                                  handleCellClick(r.id, f.name, cellValue, false, rowIdx, colIdx);
                               }
                             }}
                             onContextMenu={() => setCtxTarget({ type: 'cell', recordId: r.id, fieldName: f.name, value: cellValue, isPrimaryKey: f.isPrimaryKey, record: r })}
