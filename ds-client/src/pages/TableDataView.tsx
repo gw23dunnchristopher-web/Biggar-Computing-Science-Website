@@ -342,6 +342,7 @@ export function TableDataView({
     color: fmtColor,
     backgroundColor: fmtHighlight !== 'transparent' ? fmtHighlight : undefined,
   };
+  console.log('[DS-FMT]', { fmtBold, fmtItalic, fmtUnderline, fmtSize, fmtColor, fmtHighlight, cellStyle });
 
   const { data: table, isLoading: tableLoading } = useGetTable(databaseId, tableId);
   const { data: allRecords, isLoading: recordsLoading } = useListRecords(databaseId, tableId, {});
