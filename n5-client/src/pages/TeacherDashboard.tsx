@@ -240,7 +240,7 @@ export default function TeacherDashboard() {
       </header>
 
       <main className="container mx-auto max-w-6xl p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           <Card className="cursor-pointer hover:shadow-md transition-shadow border-teal-200 dark:border-teal-800 bg-teal-50/50 dark:bg-teal-950/20" onClick={() => setLocation("/teacher/classes")} data-testid="link-class-manager-card">
             <CardContent className="p-4 flex items-center gap-4">
               <div className="w-12 h-12 rounded-lg bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center">
