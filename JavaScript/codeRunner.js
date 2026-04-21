@@ -1,6 +1,149 @@
 (function () {
     'use strict';
 
+    /* ── In-app modal helpers (replace native prompt/confirm) ──────────────
+       crPrompt({ title, message, placeholder, defaultValue, okText })
+         → Promise<string|null>   (null when cancelled)
+       crConfirm({ title, message, okText, danger })
+         → Promise<boolean>
+       Styles are injected once on first use. */
+    function ensureModalStyles() {
+        if (document.getElementById('cr-modal-styles')) return;
+        var s = document.createElement('style');
+        s.id = 'cr-modal-styles';
+        s.textContent = [
+            '.cr-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:99999;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;animation:crFadeIn .12s ease-out;}',
+            '@keyframes crFadeIn{from{opacity:0}to{opacity:1}}',
+            '.cr-modal{background:#fff;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.25);width:min(420px,calc(100% - 32px));padding:18px 20px 16px;animation:crPop .15s ease-out;}',
+            '@keyframes crPop{from{transform:scale(.95);opacity:.6}to{transform:scale(1);opacity:1}}',
+            '.cr-modal h3{margin:0 0 8px;font-size:16px;font-weight:600;color:#1a1a1a;}',
+            '.cr-modal p{margin:0 0 12px;font-size:14px;color:#444;line-height:1.4;word-break:break-word;}',
+            '.cr-modal input{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #c4c4c4;border-radius:5px;font-size:14px;font-family:inherit;outline:none;}',
+            '.cr-modal input:focus{border-color:#3a7bd5;box-shadow:0 0 0 3px rgba(58,123,213,.2);}',
+            '.cr-modal-actions{margin-top:16px;display:flex;gap:8px;justify-content:flex-end;}',
+            '.cr-modal-btn{padding:7px 14px;border:1px solid transparent;border-radius:5px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;}',
+            '.cr-modal-btn-cancel{background:#f0f0f0;color:#333;border-color:#d0d0d0;}',
+            '.cr-modal-btn-cancel:hover{background:#e4e4e4;}',
+            '.cr-modal-btn-ok{background:#3a7bd5;color:#fff;}',
+            '.cr-modal-btn-ok:hover{background:#2e64b0;}',
+            '.cr-modal-btn-danger{background:#d33a3a;color:#fff;}',
+            '.cr-modal-btn-danger:hover{background:#b62f2f;}',
+            '@media (prefers-color-scheme: dark){.cr-modal{background:#2a2a2a;}.cr-modal h3{color:#f0f0f0;}.cr-modal p{color:#c4c4c4;}.cr-modal input{background:#1f1f1f;color:#f0f0f0;border-color:#555;}.cr-modal-btn-cancel{background:#3a3a3a;color:#e0e0e0;border-color:#555;}.cr-modal-btn-cancel:hover{background:#454545;}}'
+        ].join('\n');
+        document.head.appendChild(s);
+    }
+
+    function buildModal(opts) {
+        ensureModalStyles();
+        var overlay = document.createElement('div');
+        overlay.className = 'cr-modal-overlay';
+        var modal = document.createElement('div');
+        modal.className = 'cr-modal';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        return { overlay: overlay, modal: modal };
+    }
+
+    function crPrompt(opts) {
+        opts = opts || {};
+        return new Promise(function (resolve) {
+            var b = buildModal();
+            var title = document.createElement('h3');
+            title.textContent = opts.title || 'Enter a value';
+            b.modal.appendChild(title);
+            if (opts.message) {
+                var p = document.createElement('p');
+                p.textContent = opts.message;
+                b.modal.appendChild(p);
+            }
+            var input = document.createElement('input');
+            input.type = 'text';
+            input.value = opts.defaultValue || '';
+            if (opts.placeholder) input.placeholder = opts.placeholder;
+            b.modal.appendChild(input);
+
+            var actions = document.createElement('div');
+            actions.className = 'cr-modal-actions';
+            var cancelBtn = document.createElement('button');
+            cancelBtn.type = 'button';
+            cancelBtn.className = 'cr-modal-btn cr-modal-btn-cancel';
+            cancelBtn.textContent = 'Cancel';
+            var okBtn = document.createElement('button');
+            okBtn.type = 'button';
+            okBtn.className = 'cr-modal-btn cr-modal-btn-ok';
+            okBtn.textContent = opts.okText || 'OK';
+            actions.appendChild(cancelBtn);
+            actions.appendChild(okBtn);
+            b.modal.appendChild(actions);
+
+            function close(value) {
+                document.removeEventListener('keydown', onKey, true);
+                b.overlay.remove();
+                resolve(value);
+            }
+            function onKey(e) {
+                if (e.key === 'Escape') { e.preventDefault(); close(null); }
+                else if (e.key === 'Enter' && document.activeElement === input) {
+                    e.preventDefault(); close(input.value);
+                }
+            }
+            cancelBtn.addEventListener('click', function () { close(null); });
+            okBtn.addEventListener('click', function () { close(input.value); });
+            b.overlay.addEventListener('click', function (e) {
+                if (e.target === b.overlay) close(null);
+            });
+            document.addEventListener('keydown', onKey, true);
+            setTimeout(function () { input.focus(); input.select(); }, 0);
+        });
+    }
+
+    function crConfirm(opts) {
+        opts = opts || {};
+        return new Promise(function (resolve) {
+            var b = buildModal();
+            var title = document.createElement('h3');
+            title.textContent = opts.title || 'Are you sure?';
+            b.modal.appendChild(title);
+            if (opts.message) {
+                var p = document.createElement('p');
+                p.textContent = opts.message;
+                b.modal.appendChild(p);
+            }
+            var actions = document.createElement('div');
+            actions.className = 'cr-modal-actions';
+            var cancelBtn = document.createElement('button');
+            cancelBtn.type = 'button';
+            cancelBtn.className = 'cr-modal-btn cr-modal-btn-cancel';
+            cancelBtn.textContent = opts.cancelText || 'Cancel';
+            var okBtn = document.createElement('button');
+            okBtn.type = 'button';
+            okBtn.className = 'cr-modal-btn ' + (opts.danger ? 'cr-modal-btn-danger' : 'cr-modal-btn-ok');
+            okBtn.textContent = opts.okText || (opts.danger ? 'Delete' : 'OK');
+            actions.appendChild(cancelBtn);
+            actions.appendChild(okBtn);
+            b.modal.appendChild(actions);
+
+            function close(value) {
+                document.removeEventListener('keydown', onKey, true);
+                b.overlay.remove();
+                resolve(value);
+            }
+            function onKey(e) {
+                if (e.key === 'Escape') { e.preventDefault(); close(false); }
+                else if (e.key === 'Enter') { e.preventDefault(); close(true); }
+            }
+            cancelBtn.addEventListener('click', function () { close(false); });
+            okBtn.addEventListener('click', function () { close(true); });
+            b.overlay.addEventListener('click', function (e) {
+                if (e.target === b.overlay) close(false);
+            });
+            document.addEventListener('keydown', onKey, true);
+            setTimeout(function () { okBtn.focus(); }, 0);
+        });
+    }
+
     /* ── Pyodide singleton ── */
     var pyodideReady = false;
     var pyodideLoading = false;
@@ -626,13 +769,21 @@
                 btn.addEventListener('click', function (e) {
                     e.stopPropagation();
                     var name = btn.dataset.name;
-                    delete vfs[name];
-                    if (activeFile === name) {
-                        activeFile = mainFile;
-                        editor.value = vfs[mainFile] || '';
-                        updateLineNumbers();
-                    }
-                    renderPyFileTree();
+                    crConfirm({
+                        title: 'Delete file?',
+                        message: 'Are you sure you want to delete "' + name + '"? This cannot be undone.',
+                        okText: 'Delete',
+                        danger: true
+                    }).then(function (ok) {
+                        if (!ok) return;
+                        delete vfs[name];
+                        if (activeFile === name) {
+                            activeFile = mainFile;
+                            editor.value = vfs[mainFile] || '';
+                            updateLineNumbers();
+                        }
+                        renderPyFileTree();
+                    });
                 });
             });
         }
@@ -652,43 +803,59 @@
 
         if (newPyFileBtn) {
             newPyFileBtn.addEventListener('click', function () {
-                var name = (window.prompt('File name (e.g. helpers.py, data/scores.csv):') || '').trim();
-                if (!name) return;
-                var basename = name.split('/').pop();
-                if (!basename.includes('.')) name += '.py';
-                if (vfs[name] !== undefined) {
+                crPrompt({
+                    title: 'New file',
+                    message: 'Enter a file name. Add a slash to put it in a folder.',
+                    placeholder: 'helpers.py, data/scores.csv',
+                    okText: 'Create'
+                }).then(function (raw) {
+                    if (raw == null) return;
+                    var name = (raw || '').trim();
+                    if (!name) return;
+                    var basename = name.split('/').pop();
+                    if (!basename.includes('.')) name += '.py';
+                    if (vfs[name] !== undefined) {
+                        vfs[activeFile] = editor.value;
+                        activeFile = name;
+                        editor.value = vfs[name] || '';
+                        updateLineNumbers();
+                        renderPyFileTree();
+                        return;
+                    }
+                    vfs[name] = defaultContentFor(name);
+                    openFolders = Object.assign(openFolders, defaultOpenFolders([name]));
                     vfs[activeFile] = editor.value;
                     activeFile = name;
-                    editor.value = vfs[name] || '';
+                    editor.value = vfs[name];
                     updateLineNumbers();
                     renderPyFileTree();
-                    return;
-                }
-                vfs[name] = defaultContentFor(name);
-                openFolders = Object.assign(openFolders, defaultOpenFolders([name]));
-                vfs[activeFile] = editor.value;
-                activeFile = name;
-                editor.value = vfs[name];
-                updateLineNumbers();
-                renderPyFileTree();
+                });
             });
         }
 
         if (newPyFolderBtn) {
             newPyFolderBtn.addEventListener('click', function () {
-                var name = (window.prompt('Folder name (e.g. data, lib/utils):') || '').trim();
-                if (!name) return;
-                name = name.replace(/^\/+|\/+$/g, '');
-                if (!name) return;
-                extraFolders[name] = true;
-                /* expand every ancestor down to the new folder so the user sees it */
-                openFolders[name] = true;
-                var cum = '';
-                name.split('/').forEach(function (part) {
-                    cum = cum ? cum + '/' + part : part;
-                    openFolders[cum] = true;
+                crPrompt({
+                    title: 'New folder',
+                    message: 'Enter a folder name. Use slashes to nest folders.',
+                    placeholder: 'data, lib/utils',
+                    okText: 'Create'
+                }).then(function (raw) {
+                    if (raw == null) return;
+                    var name = (raw || '').trim();
+                    if (!name) return;
+                    name = name.replace(/^\/+|\/+$/g, '');
+                    if (!name) return;
+                    extraFolders[name] = true;
+                    /* expand every ancestor down to the new folder so the user sees it */
+                    openFolders[name] = true;
+                    var cum = '';
+                    name.split('/').forEach(function (part) {
+                        cum = cum ? cum + '/' + part : part;
+                        openFolders[cum] = true;
+                    });
+                    renderPyFileTree();
                 });
-                renderPyFileTree();
             });
         }
 
@@ -1249,18 +1416,26 @@
                 btn.addEventListener('click', function (e) {
                     e.stopPropagation();
                     var name = btn.dataset.name;
-                    if (uploadedImages[name]) {
-                        delete uploadedImages[name];
-                    } else if (textNames.length > 1) {
-                        delete vfs[name];
-                        if (activeFile === name) {
-                            activeFile = Object.keys(vfs)[0];
-                            editor.value = vfs[activeFile] || '';
-                            updateHighlight();
+                    crConfirm({
+                        title: 'Delete file?',
+                        message: 'Are you sure you want to delete "' + name + '"? This cannot be undone.',
+                        okText: 'Delete',
+                        danger: true
+                    }).then(function (ok) {
+                        if (!ok) return;
+                        if (uploadedImages[name]) {
+                            delete uploadedImages[name];
+                        } else if (textNames.length > 1) {
+                            delete vfs[name];
+                            if (activeFile === name) {
+                                activeFile = Object.keys(vfs)[0];
+                                editor.value = vfs[activeFile] || '';
+                                updateHighlight();
+                            }
                         }
-                    }
-                    renderFileTree();
-                    updatePreview();
+                        renderFileTree();
+                        updatePreview();
+                    });
                 });
             });
         }
@@ -1338,15 +1513,23 @@
         });
 
         newFileBtn.addEventListener('click', function () {
-            var name = (prompt('File name (e.g. style.css, pages/about.html, js/script.js):') || '').trim();
-            if (!name) return;
-            var basename = name.split('/').pop();
-            if (!basename.includes('.')) name += '.html';
-            if (vfs[name]) { switchTo(name); return; }
-            vfs[name] = name.endsWith('.css') ? '/* ' + name + ' */\n' :
-                        name.endsWith('.js')  ? '// ' + name + '\n' :
-                        '<!DOCTYPE html>\n<html>\n<head>\n  <title>' + name + '</title>\n</head>\n<body>\n\n</body>\n</html>';
-            switchTo(name);
+            crPrompt({
+                title: 'New file',
+                message: 'Enter a file name. Add a slash to put it in a folder.',
+                placeholder: 'style.css, pages/about.html, js/script.js',
+                okText: 'Create'
+            }).then(function (raw) {
+                if (raw == null) return;
+                var name = (raw || '').trim();
+                if (!name) return;
+                var basename = name.split('/').pop();
+                if (!basename.includes('.')) name += '.html';
+                if (vfs[name]) { switchTo(name); return; }
+                vfs[name] = name.endsWith('.css') ? '/* ' + name + ' */\n' :
+                            name.endsWith('.js')  ? '// ' + name + '\n' :
+                            '<!DOCTYPE html>\n<html>\n<head>\n  <title>' + name + '</title>\n</head>\n<body>\n\n</body>\n</html>';
+                switchTo(name);
+            });
         });
 
         /* ── preview rendering ── */
