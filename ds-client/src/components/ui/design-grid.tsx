@@ -309,6 +309,9 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
     updateField(selectedIndex, key, value);
   };
 
+  const nameInputsRef = useRef<Map<number, HTMLInputElement>>(new Map());
+  const pendingFocusIdxRef = useRef<number | null>(null);
+
   const addField = () => {
     const newIdx = fields.length;
     onChange([...fields, {
@@ -317,7 +320,19 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
       caption: null, defaultValue: null, fieldSize: null, description: null,
     }]);
     setSelectedIndex(newIdx);
+    pendingFocusIdxRef.current = newIdx;
   };
+
+  useEffect(() => {
+    const idx = pendingFocusIdxRef.current;
+    if (idx === null) return;
+    const el = nameInputsRef.current.get(idx);
+    if (el) {
+      el.focus();
+      el.select();
+      pendingFocusIdxRef.current = null;
+    }
+  }, [fields.length]);
 
   const removeField = async (index: number) => {
     const f = fields[index];
@@ -831,6 +846,10 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
                   </td>
                   <td className="border-r border-gray-300 p-0 focus-within:ring-2 focus-within:ring-[#C42B1C] focus-within:ring-inset overflow-hidden">
                     <input
+                      ref={el => {
+                        if (el) nameInputsRef.current.set(i, el);
+                        else nameInputsRef.current.delete(i);
+                      }}
                       value={f.name}
                       onChange={e => updateField(i, 'name', e.target.value)}
                       onClick={() => setSelectedIndex(i)}
