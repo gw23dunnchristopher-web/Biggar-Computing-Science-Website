@@ -1,5 +1,5 @@
 /**
- * Report Wizard — mirrors the Microsoft Access Report Wizard exactly.
+ * Report Wizard — step-by-step report builder.
  * Step 1: Pick table + fields (shuttle interface)
  * Step 2: Add grouping levels
  * Step 3: Sort order (up to 4 fields, asc/desc)

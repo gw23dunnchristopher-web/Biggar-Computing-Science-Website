@@ -1,5 +1,5 @@
 /**
- * ReportView — read-only formatted report with print support (Access style).
+ * ReportView — read-only formatted report with print support.
  * Shows all records from a table in a structured tabular layout.
  * Design View lets anyone control which fields appear, labels, grouping, sorting, and add images.
  * Attachment fields that hold image URLs are displayed as thumbnail images.

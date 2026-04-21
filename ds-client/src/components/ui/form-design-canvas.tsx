@@ -1,5 +1,5 @@
 /**
- * FormDesignCanvas — visual drag-and-drop form designer (Access Design View style).
+ * FormDesignCanvas — visual drag-and-drop form designer.
  * Labels and controls are independently draggable, resizable, and styleable.
  * 8 resize handles per element (4 corners + 4 edges), snapped to 8px grid.
  */

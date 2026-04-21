@@ -616,7 +616,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
           <div className="bg-white border border-gray-300 shadow-2xl w-[460px] rounded-sm" style={{ fontFamily: 'Segoe UI, sans-serif' }}>
             <div className="flex items-center gap-2 bg-[#c55a11] text-white px-4 py-2.5 rounded-t-sm">
               <AlertTriangle size={16} />
-              <span className="font-semibold text-sm">Microsoft Access</span>
+              <span className="font-semibold text-sm">Database Sandbox</span>
             </div>
             <div className="p-5">
               <div className="flex gap-3 items-start mb-4">
@@ -661,7 +661,7 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
         <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40">
           <div className="bg-white border border-gray-300 shadow-2xl w-[420px] rounded-sm" style={{ fontFamily: 'Segoe UI, sans-serif' }}>
             <div className="flex items-center gap-2 bg-[#2b579a] text-white px-4 py-2.5 rounded-t-sm">
-              <span className="font-semibold text-sm">Microsoft Access</span>
+              <span className="font-semibold text-sm">Database Sandbox</span>
             </div>
             <div className="p-5">
               <div className="flex gap-3 items-start mb-5">

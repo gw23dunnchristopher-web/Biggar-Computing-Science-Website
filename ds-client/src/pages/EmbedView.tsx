@@ -382,7 +382,7 @@ export function EmbedView({ token, initialMode }: Props) {
         try { window.parent?.postMessage({ type: 'ds-embed-ready', token }, '*'); } catch {}
         // Load forms/reports/queries for the database
         await Promise.all([loadForms(data.database.id), loadReports(data.database.id), loadQueries(data.database.id)]);
-        // Auto-open the first table in Datasheet View (mimics Access opening Table1 automatically)
+        // Auto-open the first table in Datasheet View
         const firstTable = data.tables?.[0];
         if (firstTable) {
           setActiveTableId(firstTable.id);
@@ -500,7 +500,7 @@ export function EmbedView({ token, initialMode }: Props) {
   }
 
   // ── "Name this table" dialog (shown when switching to Design View for the
-  //    first time on an auto-named Table, mimicking Access behaviour) ────────
+  //    first time on an auto-named Table) ────────
   const [nameTableDialog, setNameTableDialog] = useState<{ tableId: number } | null>(null);
   const [nameTableInput, setNameTableInput] = useState('');
 
@@ -623,6 +623,7 @@ export function EmbedView({ token, initialMode }: Props) {
 
   // ── Shared wizard callbacks ──────────────────────────────────────────────
   const wizardProps = {
+    onCreateTable: handleCreateTable,
     onQueryWizard: () => setQueryWizardOpen(true),
     onCreateSqlQuery: handleCreateSqlQuery,
     onCreateForm: () => setFormWizardOpen(true),
@@ -861,7 +862,7 @@ export function EmbedView({ token, initialMode }: Props) {
         );
       })()}
 
-      {/* "Save Table" name prompt — shown on first switch to Design View (mimics Access) */}
+      {/* "Save Table" name prompt — shown on first switch to Design View */}
       {nameTableDialog && (
         <Dialog open onOpenChange={v => { if (!v) setNameTableDialog(null); }}>
           <DialogContent className="max-w-xs">

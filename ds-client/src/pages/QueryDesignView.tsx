@@ -508,7 +508,7 @@ export function QueryDesignView({
         setSqlUserEdited(false);
       } else if (!sqlUserEdited) {
         // No tables in design and user hasn't typed their own SQL —
-        // start with the same blank SQL that MS Access shows
+        // start with a blank SQL template
         setSqlText('SELECT;');
       }
       // If sqlUserEdited is true and definition has no tables, keep whatever the user typed

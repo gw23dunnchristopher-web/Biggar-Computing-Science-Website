@@ -11,6 +11,11 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuLabel,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubContent,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
 } from '@/components/ui/context-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -84,6 +89,59 @@ export function Sidebar({
   const [queriesOpen, setQueriesOpen] = useState(true);
   const [formsOpen, setFormsOpen]     = useState(true);
   const [reportsOpen, setReportsOpen] = useState(true);
+
+  type CategoryOpt = 'relatedViews' | 'objectType' | 'created' | 'modified';
+  type SortByOpt = 'name' | 'type' | 'created' | 'modified';
+  type ViewByOpt = 'details' | 'icons' | 'list';
+  const lsRead = (k: string, fallback: string) => {
+    try { return localStorage.getItem(`ds-sidebar-${k}`) || fallback; } catch { return fallback; }
+  };
+  const lsWrite = (k: string, v: string) => {
+    try { localStorage.setItem(`ds-sidebar-${k}`, v); } catch {}
+  };
+  const [category, setCategory] = useState<CategoryOpt>(() => lsRead('category', 'objectType') as CategoryOpt);
+  const [sortBy, setSortBy] = useState<SortByOpt>(() => lsRead('sortBy', 'name') as SortByOpt);
+  const [sortDir, setSortDir] = useState<'asc' | 'desc' | 'none'>(() => lsRead('sortDir', 'asc') as any);
+  const [viewBy, setViewBy] = useState<ViewByOpt>(() => lsRead('viewBy', 'details') as ViewByOpt);
+  React.useEffect(() => { lsWrite('category', category); }, [category]);
+  React.useEffect(() => { lsWrite('sortBy', sortBy); }, [sortBy]);
+  React.useEffect(() => { lsWrite('sortDir', sortDir); }, [sortDir]);
+  React.useEffect(() => { lsWrite('viewBy', viewBy); }, [viewBy]);
+
+  const sortItems = <T extends { id: number; name: string }>(arr: T[], typeOrder = 0): T[] => {
+    if (sortDir === 'none') return arr;
+    const dir = sortDir === 'desc' ? -1 : 1;
+    const sorted = [...arr];
+    sorted.sort((a, b) => {
+      let cmp = 0;
+      switch (sortBy) {
+        case 'name': cmp = a.name.localeCompare(b.name); break;
+        case 'type': cmp = typeOrder; break;
+        case 'created':
+        case 'modified': cmp = a.id - b.id; break;
+      }
+      if (cmp === 0) cmp = a.name.localeCompare(b.name);
+      return cmp * dir;
+    });
+    return sorted;
+  };
+  const sortedTables  = sortItems(tables);
+  const sortedQueries = sortItems(queries);
+  const sortedForms   = sortItems(forms);
+  const sortedReports = sortItems(reports);
+
+  // viewBy controls the row layout / icon size for object items
+  const itemRowClass =
+    viewBy === 'icons' ? 'flex flex-col items-center px-1 py-2 rounded text-[10px] transition-colors text-center'
+    : viewBy === 'list' ? 'flex items-center px-2 py-0.5 rounded text-xs transition-colors'
+    : 'flex items-center px-2 py-1.5 rounded text-xs transition-colors';
+  const itemIconClass =
+    viewBy === 'icons' ? 'w-6 h-6 mb-1 flex-none'
+    : viewBy === 'list' ? 'w-3 h-3 mr-1 flex-none'
+    : 'w-3.5 h-3.5 mr-1.5 flex-none';
+  const groupContainerClass =
+    viewBy === 'icons' ? 'mt-0.5 grid grid-cols-3 gap-1 ml-1'
+    : 'mt-0.5 space-y-0.5 ml-2';
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -220,7 +278,7 @@ export function Sidebar({
     <>
       <div className="w-56 flex-none border-r border-gray-300 bg-gray-50 flex flex-col h-full shadow-sm z-10">
         <div className="px-3 py-2 bg-white border-b border-gray-200 text-xs font-semibold text-gray-700 flex justify-between items-center shadow-sm">
-          <span>All Access Objects</span>
+          <span>All Database Objects</span>
           <button
             onClick={() => setCollapsed(true)}
             title="Hide Navigation Pane"
@@ -230,15 +288,17 @@ export function Sidebar({
           </button>
         </div>
 
+        <ContextMenu>
+        <ContextMenuTrigger asChild>
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1">
 
           {/* ── Tables ── */}
           <div>
             <SectionHeader label="Tables" open={tablesOpen} onToggle={() => setTablesOpen(v => !v)} />
             {tablesOpen && (
-              <div className="mt-0.5 space-y-0.5 ml-2">
+              <div className={groupContainerClass}>
                 {tables.length === 0 && <div className="text-xs text-gray-400 italic px-4 py-1">No tables yet</div>}
-                {tables.map(t => (
+                {sortedTables.map(t => (
                   <ContextMenu key={t.id}>
                     <ContextMenuTrigger asChild>
                       <div className="flex items-center rounded overflow-hidden">
@@ -320,9 +380,9 @@ export function Sidebar({
           {queries.length > 0 && <div>
             <SectionHeader label="Queries" open={queriesOpen} onToggle={() => setQueriesOpen(v => !v)} />
             {queriesOpen && (
-              <div className="mt-0.5 space-y-0.5 ml-2">
+              <div className={groupContainerClass}>
                 {queries.length === 0 && <div className="text-xs text-gray-400 italic px-4 py-1">No queries yet</div>}
-                {queries.map(q => (
+                {sortedQueries.map(q => (
                   <ContextMenu key={q.id}>
                     <ContextMenuTrigger asChild>
                       <div className="flex items-center rounded overflow-hidden">
@@ -382,9 +442,9 @@ export function Sidebar({
           {forms.length > 0 && <div>
             <SectionHeader label="Forms" open={formsOpen} onToggle={() => setFormsOpen(v => !v)} />
             {formsOpen && (
-              <div className="mt-0.5 space-y-0.5 ml-2">
+              <div className={groupContainerClass}>
                 {forms.length === 0 && <div className="text-xs text-gray-400 italic px-4 py-1">No forms yet</div>}
-                {forms.map(f => (
+                {sortedForms.map(f => (
                   <ContextMenu key={f.id}>
                     <ContextMenuTrigger asChild>
                       <div className="flex items-center rounded overflow-hidden">
@@ -444,9 +504,9 @@ export function Sidebar({
           {reports.length > 0 && <div>
             <SectionHeader label="Reports" open={reportsOpen} onToggle={() => setReportsOpen(v => !v)} />
             {reportsOpen && (
-              <div className="mt-0.5 space-y-0.5 ml-2">
+              <div className={groupContainerClass}>
                 {reports.length === 0 && <div className="text-xs text-gray-400 italic px-4 py-1">No reports yet</div>}
-                {reports.map(r => (
+                {sortedReports.map(r => (
                   <ContextMenu key={r.id}>
                     <ContextMenuTrigger asChild>
                       <div className="flex items-center rounded overflow-hidden">
@@ -503,6 +563,47 @@ export function Sidebar({
           </div>}
 
         </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent className="w-56 text-sm">
+          <ContextMenuSub>
+            <ContextMenuSubTrigger className="text-xs">Category</ContextMenuSubTrigger>
+            <ContextMenuSubContent className="w-56">
+              <ContextMenuRadioGroup value={category} onValueChange={(v) => setCategory(v as CategoryOpt)}>
+                <ContextMenuRadioItem value="relatedViews" className="text-xs">Tables and Related Views</ContextMenuRadioItem>
+                <ContextMenuRadioItem value="objectType" className="text-xs">Object Type</ContextMenuRadioItem>
+                <ContextMenuRadioItem value="created" className="text-xs">Created Date</ContextMenuRadioItem>
+                <ContextMenuRadioItem value="modified" className="text-xs">Modified Date</ContextMenuRadioItem>
+              </ContextMenuRadioGroup>
+            </ContextMenuSubContent>
+          </ContextMenuSub>
+          <ContextMenuSub>
+            <ContextMenuSubTrigger className="text-xs">Sort By</ContextMenuSubTrigger>
+            <ContextMenuSubContent className="w-56">
+              <ContextMenuItem className="text-xs" onSelect={() => setSortDir('asc')}>Sort Ascending</ContextMenuItem>
+              <ContextMenuItem className="text-xs" onSelect={() => setSortDir('desc')}>Sort Descending</ContextMenuItem>
+              <ContextMenuSeparator />
+              <ContextMenuRadioGroup value={sortBy} onValueChange={(v) => setSortBy(v as SortByOpt)}>
+                <ContextMenuRadioItem value="name" className="text-xs">Name</ContextMenuRadioItem>
+                <ContextMenuRadioItem value="type" className="text-xs">Type</ContextMenuRadioItem>
+                <ContextMenuRadioItem value="created" className="text-xs">Created Date</ContextMenuRadioItem>
+                <ContextMenuRadioItem value="modified" className="text-xs">Modified Date</ContextMenuRadioItem>
+              </ContextMenuRadioGroup>
+              <ContextMenuSeparator />
+              <ContextMenuItem className="text-xs" onSelect={() => setSortDir('none')}>Remove Automatic Sort</ContextMenuItem>
+            </ContextMenuSubContent>
+          </ContextMenuSub>
+          <ContextMenuSub>
+            <ContextMenuSubTrigger className="text-xs">View By</ContextMenuSubTrigger>
+            <ContextMenuSubContent className="w-40">
+              <ContextMenuRadioGroup value={viewBy} onValueChange={(v) => setViewBy(v as ViewByOpt)}>
+                <ContextMenuRadioItem value="details" className="text-xs">Details</ContextMenuRadioItem>
+                <ContextMenuRadioItem value="icons" className="text-xs">Icons</ContextMenuRadioItem>
+                <ContextMenuRadioItem value="list" className="text-xs">List</ContextMenuRadioItem>
+              </ContextMenuRadioGroup>
+            </ContextMenuSubContent>
+          </ContextMenuSub>
+        </ContextMenuContent>
+        </ContextMenu>
       </div>
 
       {/* ── Rename Dialog ── */}

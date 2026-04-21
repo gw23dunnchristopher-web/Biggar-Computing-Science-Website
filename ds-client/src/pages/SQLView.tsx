@@ -1,5 +1,5 @@
 /**
- * SQLView — SQL editor for the Access Learning Tool.
+ * SQLView — SQL editor for the Database Learning Tool.
  * Students write SELECT queries against their sandboxed database.
  * Left panel: schema browser. Right: editor + results grid.
  */

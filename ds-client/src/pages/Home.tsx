@@ -89,7 +89,7 @@ export function Home() {
       {/* Header */}
       <div className="h-12 bg-[#C42B1C] flex items-center px-6 text-white font-semibold text-lg shadow-md z-10 flex-shrink-0">
         <DatabaseBackup className="w-6 h-6 mr-3" />
-        Access Learning Tool
+        Database Learning Tool
       </div>
 
       {/* Tabs */}

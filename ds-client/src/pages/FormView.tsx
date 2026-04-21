@@ -1,5 +1,5 @@
 /**
- * FormView — single-record form with record navigation (Access style).
+ * FormView — single-record form with record navigation.
  * Form view: renders fields at their designed canvas positions (or falls back to a vertical list).
  * Design view: visual drag-and-drop canvas for positioning, styling, and adding images.
  * Attachment fields that hold image URLs are displayed as images.

@@ -100,7 +100,7 @@ function validateField(
     return `${field.name} is required.`;
   }
 
-  // Field size limit (Short Text only — Access caps Short Text at 255)
+  // Field size limit (Short Text capped at 255)
   if (field.fieldType === 'text' && field.fieldSize && value != null && value !== '') {
     const max = Number(field.fieldSize);
     if (Number.isFinite(max) && max > 0 && String(value).length > max) {

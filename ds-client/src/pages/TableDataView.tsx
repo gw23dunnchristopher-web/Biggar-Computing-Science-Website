@@ -1271,7 +1271,7 @@ export function TableDataView({
           )}
         </div>
 
-        {/* Access-style record navigation bar */}
+        {/* Record navigation bar */}
         <div className="h-7 bg-[#f3f2f1] border-t border-gray-300 flex items-center px-2 text-xs text-gray-600 flex-none gap-0.5 select-none">
           <button onClick={() => setCurrentPage(1)} disabled={currentPage <= 1} className="p-0.5 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed" title="First Record">
             <ChevronFirst size={16} />

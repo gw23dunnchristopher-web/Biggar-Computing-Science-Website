@@ -193,14 +193,14 @@ export function Ribbon({
           {qatBtn(<Undo2 className={`w-${DS_ICON_SIZE_SMALL / 8} h-${DS_ICON_SIZE_SMALL / 8}`} />, 'Undo (Ctrl+Z)', onUndo, !onUndo)}
           {qatBtn(<Redo2 className={`w-${DS_ICON_SIZE_SMALL / 8} h-${DS_ICON_SIZE_SMALL / 8}`} />, 'Redo (Ctrl+Y)', onRedo, !onRedo)}
           {qatBtn(<Printer className={`w-${DS_ICON_SIZE_SMALL / 8} h-${DS_ICON_SIZE_SMALL / 8}`} />, 'Quick Print', () => window.print())}
-          <button title="Customize Quick Access Toolbar" className="w-4 h-5 flex items-center justify-center rounded hover:bg-white/20 cursor-pointer">
+          <button title="Customize Quick Toolbar" className="w-4 h-5 flex items-center justify-center rounded hover:bg-white/20 cursor-pointer">
             <ChevronDown className="w-3 h-3" />
           </button>
         </div>
         <Database className="w-5 h-5 opacity-80 flex-none" />
         <span className="opacity-90 font-semibold truncate min-w-0">{title}</span>
         <span className="opacity-50 mx-1 flex-none">-</span>
-        <span className="opacity-80 flex-none hidden sm:inline">Access Learning Tool</span>
+        <span className="opacity-80 flex-none hidden sm:inline">Database Learning Tool</span>
       </div>
 
       {/* Tab Headers Row */}

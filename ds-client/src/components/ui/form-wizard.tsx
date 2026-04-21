@@ -1,5 +1,5 @@
 /**
- * Form Wizard — mirrors the Microsoft Access Form Wizard exactly.
+ * Form Wizard — step-by-step form builder.
  * Step 1: Pick table + fields (shuttle interface)
  * Step 2: Choose layout (Columnar, Tabular, Datasheet, Justified)
  * Step 3: Name the form + finish options

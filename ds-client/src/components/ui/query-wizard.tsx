@@ -1,6 +1,6 @@
 /**
  * Simple Query Wizard — step-by-step query builder for students.
- * Mirrors the Access "Simple Query Wizard".
+ * Simple step-through query wizard.
  */
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './dialog';
