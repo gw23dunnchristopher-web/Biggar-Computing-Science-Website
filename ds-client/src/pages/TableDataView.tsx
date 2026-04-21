@@ -321,7 +321,7 @@ export function TableDataView({
 
   // Text formatting state (visual ribbon controls)
   const [fmtFont, setFmtFont] = useState('Aptos (Detail)');
-  const [fmtSize, setFmtSize] = useState('11');
+  const [fmtSize, setFmtSize] = useState('14');
   const [fmtBold, setFmtBold] = useState(false);
   const [fmtItalic, setFmtItalic] = useState(false);
   const [fmtUnderline, setFmtUnderline] = useState(false);
