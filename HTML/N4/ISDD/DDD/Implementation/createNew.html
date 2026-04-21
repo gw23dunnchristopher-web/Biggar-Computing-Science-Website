@@ -570,9 +570,10 @@
                         <p>
                             In the database below, you will see that there is a
                             'Task' tab. If you click on that tab you will see
-                            icons for 'View Task' and 'Submit for Marking'. Clicking on View Task will
-                            tell you what you have to do, and clicking Submit for Marking
-                            will mark what you have done.
+                            icons for 'View Task' and 'Submit for Marking'.
+                            Clicking on View Task will tell you what you have to
+                            do, and clicking Submit for Marking will mark what
+                            you have done.
                         </p>
                         <div style="position: relative; width: 100%">
                             <iframe
@@ -611,7 +612,11 @@
                             </script>
                         </div>
                         <h3>Exercise 2</h3>
-                        <p>Below is another data dictionary for a different database, create this one using the tool below.</p>
+                        <p>
+                            Below is another data dictionary for a different
+                            database,this one has been created to store the
+                            books in a library.
+                        </p>
                         <table>
                             <tr>
                                 <th>Entity</th>
@@ -664,7 +669,50 @@
                                 <td></td>
                             </tr>
                         </table>
-                        
+                        <p>Use the tool below to create this database.</p>
+                        <div style="position: relative; width: 100%">
+                            <iframe
+                                id="ds-embed-32f69fe0a4d03f40506a5a4797e6332e"
+                                src="https://www.bhs-computing.co.uk/data-sculptor/?embed=32f69fe0a4d03f40506a5a4797e6332e"
+                                width="100%"
+                                height="600"
+                                frameborder="0"
+                                style="
+                                    border: 1px solid #ccc;
+                                    border-radius: 4px;
+                                "
+                            ></iframe>
+                            <script>
+                                (function () {
+                                    var f = document.getElementById(
+                                            "ds-embed-32f69fe0a4d03f40506a5a4797e6332e",
+                                        ),
+                                        done = false;
+                                    function ready(e) {
+                                        if (
+                                            e &&
+                                            e.data &&
+                                            e.data.type === "ds-embed-ready" &&
+                                            e.data.token ===
+                                                "32f69fe0a4d03f40506a5a4797e6332e"
+                                        ) {
+                                            done = true;
+                                            window.removeEventListener(
+                                                "message",
+                                                ready,
+                                            );
+                                        }
+                                    }
+                                    window.addEventListener("message", ready);
+                                    setTimeout(function () {
+                                        if (!done) {
+                                            f.src =
+                                                "https://1b0ccb46-84b3-4339-a290-f5e1468e0440-00-3g6cgevapzqjk.spock.replit.dev/data-sculptor/?embed=32f69fe0a4d03f40506a5a4797e6332e";
+                                        }
+                                    }, 6000);
+                                })();
+                            </script>
+                        </div>
                     </div>
                 </div>
             </div>
