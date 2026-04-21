@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { useLocation } from 'wouter';
 import {
   Database, Table as TableType,
-  useGetTable, useListRecords, useDeleteRecord, useUpdateTable,
+  useGetTable, useListRecords, useDeleteRecord, useUpdateTable, useCreateRecord, useUpdateRecord,
   getListRecordsQueryKey, getGetTableQueryKey, getListTablesQueryKey, UpdateFieldRequest
 } from '@/api';
 import { Shell } from '@/components/layout/Shell';
@@ -293,6 +293,8 @@ export function TableDataView({
   const [resetConfirm, setResetConfirm] = useState(false);
   const [designNameDialog, setDesignNameDialog] = useState<{ open: boolean; name: string; busy: boolean }>({ open: false, name: '', busy: false });
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
+  const recordClipboardRef = useRef<Record<string, any> | null>(null);
+  const [hasClipboard, setHasClipboard] = useState(false);
   const [hiddenFields, setHiddenFields] = useState<string[]>([]);
   const [frozenFields, setFrozenFields] = useState<string[]>([]);
   const [colWidths, setColWidths] = useState<Record<string, number>>({});
@@ -347,6 +349,8 @@ export function TableDataView({
   const { data: allRecords, isLoading: recordsLoading } = useListRecords(databaseId, tableId, {});
   const deleteRecord = useDeleteRecord();
   const updateTable = useUpdateTable();
+  const createRecord = useCreateRecord();
+  const updateRecord = useUpdateRecord();
 
   const fields = useMemo(() => {
     if (!table) return [];
@@ -508,6 +512,68 @@ export function TableDataView({
     setPendingDeleteId(selectedRowId);
     setDeleteRecordConfirm(true);
   };
+
+  const handleNewRecordAfter = async (_recordId: number) => {
+    try {
+      await createRecord.mutateAsync({ databaseId, tableId, data: { data: {} } });
+      queryClient.invalidateQueries({ queryKey: getListRecordsQueryKey(databaseId, tableId) });
+      toast({ title: 'New record created' });
+    } catch {
+      toast({ title: 'Failed to create record', variant: 'destructive' });
+    }
+  };
+
+  const writeClipboard = (data: Record<string, any>) => {
+    recordClipboardRef.current = data;
+    setHasClipboard(true);
+    try { navigator.clipboard?.writeText(JSON.stringify(data)); } catch {}
+  };
+
+  const handleCopyRecord = (recordId: number) => {
+    const rec = filteredRecords.find(r => r.id === recordId);
+    if (!rec) return;
+    writeClipboard(rec.data);
+    toast({ title: 'Record copied' });
+  };
+
+  const handleCutRecord = (recordId: number) => {
+    const rec = filteredRecords.find(r => r.id === recordId);
+    if (!rec) return;
+    writeClipboard(rec.data);
+    setPendingDeleteId(recordId);
+    setDeleteRecordConfirm(true);
+  };
+
+  const handlePasteRecord = async (recordId: number | null) => {
+    let data = recordClipboardRef.current;
+    if (!data) {
+      try {
+        const txt = await navigator.clipboard.readText();
+        data = JSON.parse(txt);
+        if (!data || typeof data !== 'object') throw new Error('bad');
+      } catch {
+        toast({ title: 'Clipboard is empty or invalid', variant: 'destructive' });
+        return;
+      }
+    }
+    const fieldNames = new Set(fields.map(f => f.name));
+    const filtered: Record<string, any> = {};
+    for (const k of Object.keys(data)) if (fieldNames.has(k)) filtered[k] = (data as any)[k];
+    try {
+      if (recordId) {
+        await updateRecord.mutateAsync({ databaseId, tableId, recordId, data: { data: filtered } });
+        toast({ title: 'Record pasted' });
+      } else {
+        await createRecord.mutateAsync({ databaseId, tableId, data: { data: filtered } });
+        toast({ title: 'Record pasted as new row' });
+      }
+      queryClient.invalidateQueries({ queryKey: getListRecordsQueryKey(databaseId, tableId) });
+    } catch {
+      toast({ title: 'Paste failed — clipboard may not match table structure', variant: 'destructive' });
+    }
+  };
+
+  const handleOpenRowHeight = () => setRowHeightDlg({ value: rowHeightPx ?? 28 });
 
   const saveFields = async (newFields: UpdateFieldRequest[]) => {
     if (!table) return;
@@ -1121,6 +1187,12 @@ export function TableDataView({
               frozenFields={frozenFields}
               rowHeightPx={rowHeightPx}
               cellStyle={cellStyle}
+              onNewRecordAfter={handleNewRecordAfter}
+              onCutRecord={handleCutRecord}
+              onCopyRecord={handleCopyRecord}
+              onPasteRecord={handlePasteRecord}
+              onOpenRowHeight={handleOpenRowHeight}
+              canPaste={hasClipboard}
             />
           )}
         </div>
@@ -1443,8 +1515,9 @@ export function TableDataView({
         open={deleteRecordConfirm}
         onOpenChange={setDeleteRecordConfirm}
         title="Delete Record"
-        description="Are you sure you want to delete this record? This action cannot be undone."
-        confirmLabel="Delete Record"
+        description="You are about to delete 1 record. If you click Yes, you won't be able to undo this Delete operation. Are you sure you want to delete this record?"
+        confirmLabel="Yes"
+        cancelLabel="No"
         onConfirm={doDeleteRecord}
       />
 

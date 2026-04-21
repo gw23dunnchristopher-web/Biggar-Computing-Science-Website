@@ -166,6 +166,12 @@ interface DataGridProps {
   frozenFields?: string[];
   rowHeightPx?: number;
   cellStyle?: React.CSSProperties;
+  onNewRecordAfter?: (recordId: number) => void;
+  onCutRecord?: (recordId: number) => void;
+  onCopyRecord?: (recordId: number) => void;
+  onPasteRecord?: (recordId: number | null) => void;
+  onOpenRowHeight?: () => void;
+  canPaste?: boolean;
 }
 
 const CLICK_TO_ADD_WIDTH = 130;
@@ -196,6 +202,7 @@ export function DataGrid({
   frozenFields = [],
   rowHeightPx,
   cellStyle,
+  onNewRecordAfter, onCutRecord, onCopyRecord, onPasteRecord, onOpenRowHeight, canPaste,
 }: DataGridProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -1533,16 +1540,28 @@ export function DataGrid({
           {/* ── ROW SELECTOR context ── */}
           {ctxTarget?.type === 'row-selector' && (
             <>
-              <ContextMenuLabel className="text-xs text-gray-500 font-normal px-2 py-1">
-                Record #{ctxRecordId}
-              </ContextMenuLabel>
-              <ContextMenuSeparator />
-              <ContextMenuItem onClick={() => ctxRecord && copyToClipboard(JSON.stringify(ctxRecord.data))}>
-                Copy Row Data
+              <ContextMenuItem onClick={() => ctxRecordId && onNewRecordAfter?.(ctxRecordId)}>
+                New Record
+              </ContextMenuItem>
+              <ContextMenuItem onClick={() => ctxRecordId && onDeleteRecord?.(ctxRecordId)}>
+                Delete Record
               </ContextMenuItem>
               <ContextMenuSeparator />
-              <ContextMenuItem onClick={() => ctxRecordId && onDeleteRecord?.(ctxRecordId)} className="text-red-600 focus:text-red-700 focus:bg-red-50">
-                Delete Record
+              <ContextMenuItem onClick={() => ctxRecordId && onCutRecord?.(ctxRecordId)}>
+                Cut
+              </ContextMenuItem>
+              <ContextMenuItem onClick={() => ctxRecordId && onCopyRecord?.(ctxRecordId)}>
+                Copy
+              </ContextMenuItem>
+              <ContextMenuItem
+                onClick={() => onPasteRecord?.(ctxRecordId)}
+                disabled={!canPaste}
+              >
+                Paste
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+              <ContextMenuItem onClick={() => onOpenRowHeight?.()}>
+                Row Height…
               </ContextMenuItem>
             </>
           )}
