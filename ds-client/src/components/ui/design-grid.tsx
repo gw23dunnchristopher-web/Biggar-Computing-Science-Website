@@ -918,9 +918,10 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
               </td>
               <td className="border-r border-gray-300 p-0">
                 <input
+                  readOnly
                   placeholder="Click to add new field..."
-                  onFocus={addField}
-                  className="w-full px-3 py-1.5 outline-none bg-transparent italic text-gray-500"
+                  onMouseDown={e => { e.preventDefault(); addField(); }}
+                  className="w-full px-3 py-1.5 outline-none bg-transparent italic text-gray-500 cursor-pointer"
                 />
               </td>
               <td colSpan={3} />
