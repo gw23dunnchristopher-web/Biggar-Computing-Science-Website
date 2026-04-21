@@ -153,6 +153,8 @@
     top: 0;
     left: 0;
     right: 0;
+    bottom: auto;
+    height: auto;
     margin: 0;
     padding: 14px 14px 14px 10px;
     box-sizing: border-box;
@@ -163,7 +165,7 @@
     tab-size: 4;
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    overflow: hidden;
+    overflow: visible;
     background: transparent;
     pointer-events: none;
     color: #cdd6f4;
