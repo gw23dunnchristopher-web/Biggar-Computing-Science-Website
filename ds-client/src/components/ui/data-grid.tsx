@@ -265,7 +265,7 @@ export function DataGrid({
   const [lookupRecords, setLookupRecords] = useState<Record<number, any[]>>({});
 
   useEffect(() => {
-    const lookupFields = table.fields.filter(f => f.fieldType === 'lookup');
+    const lookupFields = table.fields.filter(f => parseLookupConfig(f.description) != null);
     lookupFields.forEach(f => {
       const cfg = parseLookupConfig(f.description);
       if (cfg?.type === 'table' && cfg.tableId && !lookupRecords[cfg.tableId]) {
@@ -620,16 +620,18 @@ export function DataGrid({
       return '£' + num.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
     if (type === 'date' && value) return String(value).split('T')[0];
-    if (type === 'lookup' && fieldName) {
+    if (fieldName) {
       const field = table.fields.find(f => f.name === fieldName);
       const cfg = parseLookupConfig(field?.description);
-      if (cfg?.type === 'valuelist') return String(value);
-      if (cfg?.type === 'table' && cfg.tableId) {
-        const options = getLookupOptions(cfg);
-        const match = options.find(o => o.value === String(value));
-        return match ? match.display : String(value);
+      if (cfg) {
+        if (cfg.type === 'valuelist') return String(value);
+        if (cfg.type === 'table' && cfg.tableId) {
+          const options = getLookupOptions(cfg);
+          const match = options.find(o => o.value === String(value));
+          return match ? match.display : String(value);
+        }
+        return String(value);
       }
-      return String(value);
     }
     return String(value);
   };
@@ -707,21 +709,23 @@ export function DataGrid({
         });
       }
     };
-    if (type === 'lookup') {
+    {
       const field = table.fields.find(f => f.name === fieldName);
       const cfg = parseLookupConfig(field?.description);
-      const options = getLookupOptions(cfg);
-      if (options.length > 0) {
-        return (
-          <select autoFocus value={value ?? ''}
-            onChange={e => { onChange(e.target.value); onCommit(); }}
-            onBlur={onCommit}
-            onKeyDown={onKeyDown}
-            className={baseInput + ' cursor-pointer'}>
-            <option value="">(none)</option>
-            {options.map(o => <option key={o.value} value={o.value}>{o.display}</option>)}
-          </select>
-        );
+      if (cfg) {
+        const options = getLookupOptions(cfg);
+        if (options.length > 0) {
+          return (
+            <select autoFocus value={value ?? ''}
+              onChange={e => { onChange(e.target.value); onCommit(); }}
+              onBlur={onCommit}
+              onKeyDown={onKeyDown}
+              className={baseInput + ' cursor-pointer'}>
+              <option value="">(none)</option>
+              {options.map(o => <option key={o.value} value={o.value}>{o.display}</option>)}
+            </select>
+          );
+        }
       }
     }
     if (type === 'calculated' || type === 'attachment') {
@@ -783,20 +787,22 @@ export function DataGrid({
           className="w-full bg-transparent outline-none px-1 text-sm" />
       );
     }
-    if (type === 'lookup') {
+    {
       const field = table.fields.find(f => f.name === fieldName);
       const cfg = parseLookupConfig(field?.description);
-      const options = getLookupOptions(cfg);
-      if (options.length > 0) {
-        return (
-          <select value={newRowData[fieldName] ?? ''}
-            onChange={e => setNewRowData(p => ({ ...p, [fieldName]: e.target.value }))}
-            onBlur={handleNewRowBlur}
-            className="w-full bg-transparent outline-none px-1 text-sm cursor-pointer">
-            <option value="">(none)</option>
-            {options.map(o => <option key={o.value} value={o.value}>{o.display}</option>)}
-          </select>
-        );
+      if (cfg) {
+        const options = getLookupOptions(cfg);
+        if (options.length > 0) {
+          return (
+            <select value={newRowData[fieldName] ?? ''}
+              onChange={e => setNewRowData(p => ({ ...p, [fieldName]: e.target.value }))}
+              onBlur={handleNewRowBlur}
+              className="w-full bg-transparent outline-none px-1 text-sm cursor-pointer">
+              <option value="">(none)</option>
+              {options.map(o => <option key={o.value} value={o.value}>{o.display}</option>)}
+            </select>
+          );
+        }
       }
     }
     const textPlaceholder = defaultValue != null && defaultValue !== '' ? defaultValue : '';

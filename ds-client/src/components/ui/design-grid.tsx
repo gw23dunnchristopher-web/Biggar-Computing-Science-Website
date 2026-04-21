@@ -184,6 +184,7 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
   const [lookupWizardOpen, setLookupWizardOpen] = useState(false);
   const [lwStep, setLwStep] = useState(1);
   const [lwFieldIdx, setLwFieldIdx] = useState<number | null>(null);
+  const [lwOriginalType, setLwOriginalType] = useState<string>('text');
   const [lwSourceType, setLwSourceType] = useState<'table' | 'valuelist'>('table');
   const [lwValues, setLwValues] = useState<string[][]>([['']]);
   const [lwNumCols, setLwNumCols] = useState(1);
@@ -227,6 +228,8 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
     setLwFieldIdx(fieldIdx);
     const existing = parseLookupConfig(fields[fieldIdx]?.description);
     const fieldName = fields[fieldIdx]?.name || '';
+    const currentType = (fields[fieldIdx]?.fieldType as string) || 'text';
+    setLwOriginalType(currentType === 'lookup' ? 'text' : currentType);
     if (existing?.type === 'valuelist') {
       setLwSourceType('valuelist');
       const vals = existing.values && existing.values.length > 0 ? existing.values : [''];
@@ -304,7 +307,8 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
       }
     }
     const newFields = [...fields];
-    newFields[lwFieldIdx] = { ...newFields[lwFieldIdx], fieldType: 'lookup', description: encodeLookupConfig(cfg) };
+    const preservedType = (lwOriginalType && lwOriginalType !== 'lookup') ? lwOriginalType : 'text';
+    newFields[lwFieldIdx] = { ...newFields[lwFieldIdx], fieldType: preservedType as any, description: encodeLookupConfig(cfg) };
     if (lwLabel && lwLabel !== newFields[lwFieldIdx].name) {
       newFields[lwFieldIdx] = { ...newFields[lwFieldIdx], caption: lwLabel };
     }
