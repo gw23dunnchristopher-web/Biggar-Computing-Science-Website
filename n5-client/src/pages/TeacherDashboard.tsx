@@ -277,6 +277,18 @@ export default function TeacherDashboard() {
             </CardContent>
           </Card>
 
+          <Card className="cursor-pointer hover:shadow-md transition-shadow border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20" onClick={() => setLocation("/teacher/past-papers")} data-testid="link-past-paper-manager">
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-red-100 dark:bg-red-900/50 flex items-center justify-center">
+                <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-neutral-900 dark:text-white">Past Papers</h3>
+                <p className="text-sm text-neutral-500">{questions.length} questions across all years</p>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="cursor-pointer hover:shadow-md transition-shadow border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20" onClick={() => setLocation("/teacher/analytics")} data-testid="link-analytics-card">
             <CardContent className="p-4 flex items-center gap-4">
               <div className="w-12 h-12 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">

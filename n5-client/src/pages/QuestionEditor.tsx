@@ -233,7 +233,7 @@ export default function QuestionEditor() {
     if (hasLoadedRef.current) return;
     
     if (!isNew && params?.id) {
-      fetch(`/api/questions/${params.id}`)
+      fetch(`/api/n5/questions/${params.id}`)
         .then(res => res.ok ? res.json() : null)
         .then(data => {
           if (data && !hasLoadedRef.current) {

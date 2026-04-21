@@ -1,1 +1,0 @@
-import{j as s,g as o}from"./index-OJ2Fdx8r.js";function r({children:t,className:a}){return s.jsx("div",{className:o("flex flex-col md:flex-row gap-4 items-start justify-start w-full",a),"data-testid":"row-layout",children:t})}function i({children:t,className:a}){return s.jsx("div",{className:o("flex-shrink min-w-0 w-auto",a),children:t})}export{r as R,i as a};

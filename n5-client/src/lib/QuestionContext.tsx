@@ -52,7 +52,7 @@ export function QuestionProvider({ children }: { children: ReactNode }) {
       } else if (studentToken) {
         headers["Authorization"] = `Bearer ${studentToken}`;
       }
-      const response = await fetch('/api/questions', { headers });
+      const response = await fetch('/api/n5/questions', { headers });
       if (response.ok) {
         const dbQuestions = await response.json();
         // Display whatever is in the database - no client-side seeding
@@ -92,9 +92,13 @@ export function QuestionProvider({ children }: { children: ReactNode }) {
 
   const addQuestion = async (question: Question): Promise<boolean> => {
     try {
-      const response = await fetch('/api/questions', {
+      const teacherToken = localStorage.getItem("teacherToken");
+      const response = await fetch('/api/n5/questions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(teacherToken ? { Authorization: `Bearer ${teacherToken}` } : {}),
+        },
         body: JSON.stringify(question),
       });
       if (response.ok) {
@@ -113,9 +117,13 @@ export function QuestionProvider({ children }: { children: ReactNode }) {
 
   const updateQuestion = async (updatedQuestion: Question): Promise<boolean> => {
     try {
-      const response = await fetch(`/api/questions/${updatedQuestion.id}`, {
+      const teacherToken = localStorage.getItem("teacherToken");
+      const response = await fetch(`/api/n5/questions/${updatedQuestion.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(teacherToken ? { Authorization: `Bearer ${teacherToken}` } : {}),
+        },
         body: JSON.stringify(updatedQuestion),
       });
       if (response.ok) {
@@ -134,8 +142,10 @@ export function QuestionProvider({ children }: { children: ReactNode }) {
 
   const deleteQuestion = async (id: string) => {
     try {
-      const response = await fetch(`/api/questions/${id}`, {
+      const teacherToken = localStorage.getItem("teacherToken");
+      const response = await fetch(`/api/n5/questions/${id}`, {
         method: 'DELETE',
+        headers: teacherToken ? { Authorization: `Bearer ${teacherToken}` } : undefined,
       });
       if (response.ok) {
         setQuestions((prev) => prev.filter((q) => q.id !== id));

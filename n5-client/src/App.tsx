@@ -21,6 +21,7 @@ const QuizManager = lazy(() => import("@/pages/QuizManager"));
 const AssignmentManager = lazy(() => import("@/pages/AssignmentManager"));
 const AssignmentPreview = lazy(() => import("@/pages/AssignmentPreview"));
 const QuestionEditor = lazy(() => import("@/pages/QuestionEditor"));
+const PastPaperManager = lazy(() => import("@/pages/PastPaperManager"));
 const TimedModeSetup = lazy(() => import("@/pages/TimedModeSetup"));
 const QuizSelection = lazy(() => import("@/pages/QuizSelection"));
 const StudentQuizBuilder = lazy(() => import("@/pages/StudentQuizBuilder"));
@@ -87,6 +88,7 @@ function AppRouter() {
         <Route path="/teacher/classes" component={ClassManager} />
         <Route path="/teacher/assignment-preview/:id" component={AssignmentPreview} />
         <Route path="/teacher/question/:id" component={QuestionEditor} />
+        <Route path="/teacher/past-papers" component={PastPaperManager} />
         <Route path="/teacher/analytics" component={TeacherAnalytics} />
         <Route component={NotFound} />
       </Switch>

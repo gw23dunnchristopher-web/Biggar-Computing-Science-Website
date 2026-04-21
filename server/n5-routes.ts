@@ -3785,6 +3785,55 @@ Format your response as JSON:
      These paths avoid the route-shadowing caused by Higher CS registering the same
      generic paths (/api/questions, /api/assignments, /api/custom-quizzes) first.   */
 
+  /* GET all N5 regular questions (excludes quiz-only) */
+  app.get("/api/n5/questions", async (_req, res) => {
+    try {
+      const regularQuestions = await storage.getRegularQuestions();
+      res.json(regularQuestions.map(stripBase64Images));
+    } catch (error) {
+      console.error("N5 get questions error:", error);
+      res.status(500).json({ error: "Failed to fetch questions" });
+    }
+  });
+
+  /* GET a single N5 question */
+  app.get("/api/n5/questions/:id", async (req, res) => {
+    try {
+      const question = await storage.getQuestion(req.params.id);
+      if (!question) return res.status(404).json({ error: "Question not found" });
+      res.json(question);
+    } catch (error) {
+      console.error("N5 get question error:", error);
+      res.status(500).json({ error: "Failed to fetch question" });
+    }
+  });
+
+  /* CREATE an N5 question */
+  app.post("/api/n5/questions", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      if (!token || !sessions.has(token)) return res.status(401).json({ error: "Unauthorized" });
+      const question = await storage.createQuestion(req.body);
+      res.status(201).json(question);
+    } catch (error) {
+      console.error("N5 create question error:", error);
+      res.status(500).json({ error: "Failed to create question" });
+    }
+  });
+
+  /* UPDATE an N5 question */
+  app.put("/api/n5/questions/:id", async (req, res) => {
+    try {
+      const token = req.headers.authorization?.replace("Bearer ", "");
+      if (!token || !sessions.has(token)) return res.status(401).json({ error: "Unauthorized" });
+      const question = await storage.updateQuestion({ ...req.body, id: req.params.id });
+      res.json(question);
+    } catch (error) {
+      console.error("N5 update question error:", error);
+      res.status(500).json({ error: "Failed to update question" });
+    }
+  });
+
   /* DELETE a single N5 question */
   app.delete("/api/n5/questions/:id", async (req, res) => {
     try {
