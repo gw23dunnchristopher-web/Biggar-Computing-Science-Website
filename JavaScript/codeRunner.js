@@ -386,7 +386,10 @@
     function buildPyRunner(container, originals) {
         /* determine if multi-file layout needed */
         var fileNames  = Object.keys(originals);
-        var multiFile  = fileNames.length > 1;
+        /* The standalone Python Editor opts in via data-filetree="true" so the
+           file tree is always visible (even with a single starter file). */
+        var forceTree  = container.getAttribute('data-filetree') === 'true';
+        var multiFile  = forceTree || fileNames.length > 1;
         /* pick the main python file to run */
         var mainFile   = originals['main.py'] !== undefined ? 'main.py'
                        : fileNames.find(function (f) { return f.endsWith('.py'); })
@@ -399,6 +402,12 @@
             ? '<div class="cr-filetree">' +
               '  <div class="cr-filetree-hdr">Files</div>' +
               '  <ul class="cr-file-list"></ul>' +
+              '  <button class="cr-new-file-btn" type="button">+ New file</button>' +
+              '  <button class="cr-new-folder-btn" type="button">+ New folder</button>' +
+              '  <label class="cr-filetree-upload" title="Upload CSV, TXT, or JSON data files">' +
+              '    &#x1F4C2; Upload' +
+              '    <input type="file" class="cr-py-tree-file-input" accept=".csv,.txt,.json,.py" multiple style="display:none">' +
+              '  </label>' +
               '</div>'
             : '';
 
@@ -414,14 +423,19 @@
             ? '<div class="cr-workspace">' + ftHtml + editorBlock + '</div>'
             : editorBlock;
 
+        /* Toolbar Upload only appears when there's no file tree — when the tree
+           is shown, uploads are managed via the tree's Upload button. */
+        var toolbarUpload = multiFile ? '' :
+            '    <label class="cr-toolbar-upload" title="Upload a CSV or TXT data file to use in your code">' +
+            '      &#x1F4C2; Upload' +
+            '      <input type="file" class="cr-py-file-input" accept=".csv,.txt,.json" multiple style="display:none">' +
+            '    </label>';
+
         container.innerHTML =
             '<div class="cr-toolbar">' +
             '  <span class="cr-lang">&#x1F40D; Python</span>' +
             '  <div class="cr-btns">' +
-            '    <label class="cr-toolbar-upload" title="Upload a CSV or TXT data file to use in your code">' +
-            '      &#x1F4C2; Upload' +
-            '      <input type="file" class="cr-py-file-input" accept=".csv,.txt,.json" multiple style="display:none">' +
-            '    </label>' +
+            toolbarUpload +
             '    <button class="cr-run-btn">&#9654; Run</button>' +
             '    <button class="cr-download-btn" title="Download your code">&#x2B07;&#xFE0F; Download</button>' +
             '    <button class="cr-reset-btn">&#8635; Reset</button>' +
@@ -473,6 +487,9 @@
         var vfs        = Object.assign({}, originals);
         var activeFile = mainFile;
         var openFolders = defaultOpenFolders(Object.keys(originals));  /* all folders open by default */
+        /* Empty folders the user created via "+ New folder". They show in the
+           tree even though no file lives in them yet. */
+        var extraFolders = {};
 
         editor.value = vfs[activeFile] || '';
         updateLineNumbers();
@@ -498,17 +515,19 @@
         }
 
         /* ── Python file upload handler ── */
-        function handlePyUpload(files) {
-            var accepted = Array.from(files).filter(function (f) {
-                return /\.(csv|txt|json)$/i.test(f.name);
-            });
-            var pending = accepted.length;
-            if (!pending) return;
+        function handlePyUpload(files, prefix) {
+            prefix = prefix || '';
+            /* When the file tree is on, accept .py files too so users can add
+               additional Python modules; the toolbar/strip path stays data-only. */
+            var pattern = multiFile ? /\.(csv|txt|json|py)$/i : /\.(csv|txt|json)$/i;
+            var accepted = Array.from(files).filter(function (f) { return pattern.test(f.name); });
+            if (!accepted.length) return;
             accepted.forEach(function (file) {
                 var reader = new FileReader();
                 reader.onload = function (ev) {
-                    vfs[file.name] = ev.target.result;
-                    openFolders = Object.assign(openFolders, defaultOpenFolders([file.name]));
+                    var path = prefix + file.name;
+                    vfs[path] = ev.target.result;
+                    openFolders = Object.assign(openFolders, defaultOpenFolders([path]));
                     if (multiFile) renderPyFileTree();
                     else renderDataStrip();
                 };
@@ -516,10 +535,19 @@
             });
         }
 
-        pyFileInput.addEventListener('change', function () {
-            handlePyUpload(pyFileInput.files);
-            pyFileInput.value = '';
-        });
+        if (pyFileInput) {
+            pyFileInput.addEventListener('change', function () {
+                handlePyUpload(pyFileInput.files);
+                pyFileInput.value = '';
+            });
+        }
+        var pyTreeFileInput = container.querySelector('.cr-py-tree-file-input');
+        if (pyTreeFileInput) {
+            pyTreeFileInput.addEventListener('change', function () {
+                handlePyUpload(pyTreeFileInput.files);
+                pyTreeFileInput.value = '';
+            });
+        }
 
         /* drag-and-drop CSV/TXT onto the whole Python runner */
         container.addEventListener('dragover', function (e) {
@@ -554,7 +582,23 @@
         function renderPyFileTree() {
             if (!multiFile) return;
             var ftList = container.querySelector('.cr-file-list');
-            var tree   = buildFolderTree(Object.keys(vfs), openFolders);
+            /* Include placeholder paths for any user-created empty folders so
+               buildFolderTree renders them; the placeholders are stripped from
+               the rendered output below. */
+            var paths = Object.keys(vfs).slice();
+            var emptyFolderPaths = Object.keys(extraFolders).filter(function (fp) {
+                return !paths.some(function (p) { return p === fp || p.indexOf(fp + '/') === 0; });
+            });
+            emptyFolderPaths.forEach(function (fp) { paths.push(fp + '/.__empty__'); });
+            var tree = buildFolderTree(paths, openFolders);
+            /* Recursively prune the synthetic placeholder file from the tree. */
+            (function strip(nodes) {
+                for (var i = nodes.length - 1; i >= 0; i--) {
+                    var n = nodes[i];
+                    if (!n.isDir && n.name === '.__empty__') nodes.splice(i, 1);
+                    else if (n.isDir) strip(n.children);
+                }
+            })(tree.children);
             ftList.innerHTML = renderTreeItems(tree.children, 0, {
                 activeFile: activeFile,
                 mainFile:   mainFile,
@@ -594,6 +638,59 @@
         }
 
         if (multiFile) renderPyFileTree();
+
+        /* ── new file / new folder buttons (file tree only) ── */
+        var newPyFileBtn   = container.querySelector('.cr-new-file-btn');
+        var newPyFolderBtn = container.querySelector('.cr-new-folder-btn');
+
+        function defaultContentFor(name) {
+            if (name.endsWith('.py'))   return '# ' + name + '\n';
+            if (name.endsWith('.csv'))  return '';
+            if (name.endsWith('.json')) return '{}\n';
+            return '';
+        }
+
+        if (newPyFileBtn) {
+            newPyFileBtn.addEventListener('click', function () {
+                var name = (window.prompt('File name (e.g. helpers.py, data/scores.csv):') || '').trim();
+                if (!name) return;
+                var basename = name.split('/').pop();
+                if (!basename.includes('.')) name += '.py';
+                if (vfs[name] !== undefined) {
+                    vfs[activeFile] = editor.value;
+                    activeFile = name;
+                    editor.value = vfs[name] || '';
+                    updateLineNumbers();
+                    renderPyFileTree();
+                    return;
+                }
+                vfs[name] = defaultContentFor(name);
+                openFolders = Object.assign(openFolders, defaultOpenFolders([name]));
+                vfs[activeFile] = editor.value;
+                activeFile = name;
+                editor.value = vfs[name];
+                updateLineNumbers();
+                renderPyFileTree();
+            });
+        }
+
+        if (newPyFolderBtn) {
+            newPyFolderBtn.addEventListener('click', function () {
+                var name = (window.prompt('Folder name (e.g. data, lib/utils):') || '').trim();
+                if (!name) return;
+                name = name.replace(/^\/+|\/+$/g, '');
+                if (!name) return;
+                extraFolders[name] = true;
+                /* expand every ancestor down to the new folder so the user sees it */
+                openFolders[name] = true;
+                var cum = '';
+                name.split('/').forEach(function (part) {
+                    cum = cum ? cum + '/' + part : part;
+                    openFolders[cum] = true;
+                });
+                renderPyFileTree();
+            });
+        }
 
         /* ── input state ── */
         var collectedInputs = [];

@@ -39,7 +39,9 @@
 }
 
 .cr-run-btn,
-.cr-reset-btn {
+.cr-reset-btn,
+.cr-download-btn,
+.cr-toolbar-upload {
     padding: 5px 14px;
     border: none;
     border-radius: 5px;
@@ -47,6 +49,23 @@
     font-size: 13px;
     font-weight: bold;
     transition: opacity 0.15s, background 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1;
+    user-select: none;
+    font-family: Arial, sans-serif;
+}
+
+.cr-download-btn,
+.cr-toolbar-upload {
+    background: #45475a;
+    color: #cdd6f4;
+}
+
+.cr-download-btn:hover,
+.cr-toolbar-upload:hover {
+    background: #585b70;
 }
 
 .cr-run-btn {
@@ -394,24 +413,7 @@
     cursor: default;
 }
 
-/* ── toolbar upload label (Python) ── */
-.cr-toolbar-upload {
-    display: inline-flex;
-    align-items: center;
-    padding: 5px 14px;
-    background: #313244;
-    color: #cdd6f4;
-    border-radius: 5px;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.15s;
-    user-select: none;
-}
-
-.cr-toolbar-upload:hover {
-    background: #45475a;
-}
+/* ── toolbar upload label (Python) ── unified with primary toolbar buttons above ── */
 
 /* ── Python data-file strip (single-file uploaded CSV/TXT) ── */
 .cr-data-strip {
@@ -463,24 +465,28 @@
 
 /* ── file-tree footer upload button (HTML runner) ── */
 .cr-filetree-upload {
-    background: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: #45475a;
     border: none;
-    border-top: 1px solid #313244;
-    color: #6c7086;
+    color: #cdd6f4;
     font-family: Arial, sans-serif;
-    font-size: 12px;
-    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 5px 14px;
+    margin: 6px 8px;
+    border-radius: 5px;
     cursor: pointer;
-    text-align: left;
-    width: 100%;
-    transition: background 0.1s, color 0.1s;
+    text-align: center;
+    transition: background 0.15s;
     flex-shrink: 0;
-    display: block;
     user-select: none;
 }
 
 .cr-filetree-upload:hover {
-    background: #1e1e2e;
+    background: #585b70;
     color: #cdd6f4;
 }
 
@@ -708,23 +714,31 @@
     color: #6c7086;
 }
 
-.cr-new-file-btn {
-    background: none;
+.cr-new-file-btn,
+.cr-new-folder-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: #45475a;
     border: none;
-    border-top: 1px solid #313244;
-    color: #6c7086;
+    color: #cdd6f4;
     font-family: Arial, sans-serif;
-    font-size: 12px;
-    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 5px 14px;
+    margin: 6px 8px 0;
+    border-radius: 5px;
     cursor: pointer;
-    text-align: left;
-    width: 100%;
-    transition: background 0.1s, color 0.1s;
+    text-align: center;
+    transition: background 0.15s;
     flex-shrink: 0;
+    user-select: none;
 }
 
-.cr-new-file-btn:hover {
-    background: #1e1e2e;
+.cr-new-file-btn:hover,
+.cr-new-folder-btn:hover {
+    background: #585b70;
     color: #cdd6f4;
 }
 
@@ -1261,11 +1275,11 @@
         opacity: 1;
     }
 
-    .cr-new-file-btn {
-        border-top: none;
-        border-left: 1px solid #313244;
-        width: auto;
+    .cr-new-file-btn,
+    .cr-new-folder-btn {
+        margin: 4px;
         padding: 4px 10px;
+        font-size: 12px;
     }
 
     .cr-workspace .cr-editor,
