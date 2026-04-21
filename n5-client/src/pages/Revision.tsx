@@ -2366,7 +2366,7 @@ export default function Revision() {
             {(() => {
               // Separate practice questions from past paper questions
               const practiceQuestions = allQuestions.filter(q => q.isPractice).sort(compareQuestionsByNumber);
-              const pastPaperQuestions = allQuestions.filter(q => !q.isPractice);
+              const pastPaperQuestions = allQuestions.filter(q => !q.isPractice && !q.additionalPaperId && !q.isAdditionalExam);
 
               // Group past paper questions by year
               const questionsByYear = pastPaperQuestions.reduce((acc, q) => {
