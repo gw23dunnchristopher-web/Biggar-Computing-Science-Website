@@ -91,22 +91,42 @@ function TextFormattingGroup({
     </>
   );
 
+  const fontColorRef = useRef<HTMLInputElement>(null);
+  const highlightColorRef = useRef<HTMLInputElement>(null);
+  const openPicker = (ref: React.RefObject<HTMLInputElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof (el as any).showPicker === 'function') {
+      try { (el as any).showPicker(); return; } catch {}
+    }
+    el.click();
+  };
+
   const colorButtons = (
     <>
-      <label className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer relative" title="Font Color">
-        <div className="flex flex-col items-center gap-px pointer-events-none">
+      <button type="button"
+        onClick={() => openPicker(fontColorRef)}
+        className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer"
+        title="Font Color">
+        <div className="flex flex-col items-center gap-px">
           <span className="text-[11px] font-bold text-gray-700 leading-none">A</span>
           <span className="w-4 h-0.5 rounded-full" style={{ backgroundColor: fmtColor || '#C42B1C' }} />
         </div>
-        <input type="color" value={fmtColor || '#000000'} onChange={e => setFmtColor(e.target.value)}
-          className="absolute inset-0 opacity-0 cursor-pointer" />
-      </label>
-      <label className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer relative" title="Highlight Color">
-        <Highlighter size={14} className="pointer-events-none" style={{ color: fmtHighlight && fmtHighlight !== 'transparent' ? fmtHighlight : '#eab308' }} />
-        <input type="color" value={fmtHighlight && fmtHighlight !== 'transparent' ? fmtHighlight : '#ffff00'}
-          onChange={e => setFmtHighlight(e.target.value)}
-          className="absolute inset-0 opacity-0 cursor-pointer" />
-      </label>
+      </button>
+      <input ref={fontColorRef} type="color" value={fmtColor || '#000000'}
+        onChange={e => setFmtColor(e.target.value)}
+        style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }} />
+
+      <button type="button"
+        onClick={() => openPicker(highlightColorRef)}
+        className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer"
+        title="Highlight Color">
+        <Highlighter size={14} style={{ color: fmtHighlight && fmtHighlight !== 'transparent' ? fmtHighlight : '#eab308' }} />
+      </button>
+      <input ref={highlightColorRef} type="color"
+        value={fmtHighlight && fmtHighlight !== 'transparent' ? fmtHighlight : '#ffff00'}
+        onChange={e => setFmtHighlight(e.target.value)}
+        style={{ position: 'absolute', width: 1, height: 1, opacity: 0, pointerEvents: 'none' }} />
     </>
   );
 
