@@ -341,6 +341,7 @@ export function TableDataView({
     textAlign: fmtAlign as any,
     color: fmtColor,
     backgroundColor: fmtHighlight !== 'transparent' ? fmtHighlight : undefined,
+    outline: fmtBold ? '2px solid lime' : undefined,
   };
   console.log('[DS-FMT]', { fmtBold, fmtItalic, fmtUnderline, fmtSize, fmtColor, fmtHighlight, cellStyle });
 
