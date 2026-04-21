@@ -39,6 +39,8 @@
                 flex-direction: column !important;
                 text-align: left !important;
             }
+            /* Hide the duplicate level heading – the tool header already names the tool */
+            #content > #mainHeading { display: none !important; }
 
             /* Slim tool header bar */
             .tool-header {
@@ -73,6 +75,13 @@
                 flex: 1;
                 min-height: 0;
                 overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+            .tool-editor-wrap > div {
+                flex: 1;
+                min-height: 0;
+                height: 100%;
             }
             .db-sandbox-frame {
                 width: 100%;
