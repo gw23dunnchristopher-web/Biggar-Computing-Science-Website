@@ -439,34 +439,31 @@ export function DataGrid({
 
     if (e.key === 'Tab') {
       e.preventDefault();
-      handleCellSave(record, fieldName, editingValue);
       const nextEditableIdx = e.shiftKey ? editableColIdx - 1 : editableColIdx + 1;
       if (nextEditableIdx >= 0 && nextEditableIdx < editableFields.length) {
         const nextField = editableFields[nextEditableIdx];
-        setTimeout(() => {
-          setEditingCell({ recordId: record.id, fieldName: nextField.name, rowIdx, colIdx: fields.findIndex(f => f.name === nextField.name) });
-          setEditingValue(record.data[nextField.name] ?? '');
-          setFocusedCell({ rowIdx, colIdx: nextEditableIdx });
-        }, 10);
+        // Synchronously move the editing cell first, then fire the save in the
+        // background. Passing keepEditing prevents the save from clearing the
+        // newly-set editing cell once the mutation resolves.
+        setEditingCell({ recordId: record.id, fieldName: nextField.name, rowIdx, colIdx: fields.findIndex(f => f.name === nextField.name) });
+        setEditingValue(record.data[nextField.name] ?? '');
+        setFocusedCell({ rowIdx, colIdx: nextEditableIdx });
+        handleCellSave(record, fieldName, editingValue, { keepEditing: true });
       } else {
-        setEditingCell(null);
+        handleCellSave(record, fieldName, editingValue);
         setFocusedCell({ rowIdx, colIdx: editableColIdx });
       }
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      handleCellSave(record, fieldName, editingValue);
       const nextRowIdx = rowIdx + 1;
-      if (nextRowIdx < records.length) {
-        setTimeout(() => {
-          const nextRecord = records[nextRowIdx];
-          if (nextRecord) {
-            setEditingCell({ recordId: nextRecord.id, fieldName, rowIdx: nextRowIdx, colIdx: fullColIdx });
-            setEditingValue(nextRecord.data[fieldName] ?? '');
-            setFocusedCell({ rowIdx: nextRowIdx, colIdx: editableColIdx });
-          }
-        }, 10);
+      const nextRecord = nextRowIdx < records.length ? records[nextRowIdx] : null;
+      if (nextRecord) {
+        setEditingCell({ recordId: nextRecord.id, fieldName, rowIdx: nextRowIdx, colIdx: fullColIdx });
+        setEditingValue(nextRecord.data[fieldName] ?? '');
+        setFocusedCell({ rowIdx: nextRowIdx, colIdx: editableColIdx });
+        handleCellSave(record, fieldName, editingValue, { keepEditing: true });
       } else {
-        setEditingCell(null);
+        handleCellSave(record, fieldName, editingValue);
         setFocusedCell({ rowIdx, colIdx: editableColIdx });
       }
     } else if (e.key === 'Escape') {
@@ -487,10 +484,11 @@ export function DataGrid({
     setFocusedCell({ rowIdx, colIdx: editableColIdx });
   };
 
-  const handleCellSave = async (record: DbRecord, fieldName: string, value: any) => {
+  const handleCellSave = async (record: DbRecord, fieldName: string, value: any, opts?: { keepEditing?: boolean }) => {
     const originalVal = record.data[fieldName];
     const coerced = value === '' ? null : value;
-    if (originalVal === coerced) { setEditingCell(null); return; }
+    const keepEditing = !!opts?.keepEditing;
+    if (originalVal === coerced) { if (!keepEditing) setEditingCell(null); return; }
 
     const field = fields.find(f => f.name === fieldName);
     if (field) {
@@ -502,6 +500,19 @@ export function DataGrid({
       }
     }
 
+    // Optimistically update the cached records so the UI reflects the new
+    // value immediately without a refetch flicker that can clobber the edit.
+    const queryKey = getListRecordsQueryKey(databaseId, table.id);
+    const previous = queryClient.getQueryData<any>(queryKey);
+    const patch = (list: any[]) => list.map(r =>
+      r.id === record.id ? { ...r, data: { ...r.data, [fieldName]: coerced } } : r
+    );
+    if (Array.isArray(previous)) {
+      queryClient.setQueryData(queryKey, patch(previous));
+    } else if (previous && Array.isArray(previous.data)) {
+      queryClient.setQueryData(queryKey, { ...previous, data: patch(previous.data) });
+    }
+
     try {
       await updateRecord.mutateAsync({
         databaseId,
@@ -509,12 +520,13 @@ export function DataGrid({
         recordId: record.id,
         data: { data: { ...record.data, [fieldName]: coerced } }
       });
-      queryClient.invalidateQueries({ queryKey: getListRecordsQueryKey(databaseId, table.id) });
       onCellEdited?.(record.id, fieldName, originalVal, coerced);
     } catch {
+      // Roll back the optimistic update on error.
+      if (previous !== undefined) queryClient.setQueryData(queryKey, previous);
       toast({ title: "Failed to update record", variant: "destructive" });
     }
-    setEditingCell(null);
+    if (!keepEditing) setEditingCell(null);
   };
 
   const handleBooleanToggle = async (record: DbRecord, fieldName: string) => {
@@ -530,8 +542,22 @@ export function DataGrid({
     }
   };
 
+  // If a save is in flight when fresh keystrokes arrive, remember to re-save
+  // once the in-flight create finishes so we don't drop the new typing.
+  const pendingResaveRef = useRef(false);
+
+  // Only commit the new-row create when focus actually leaves the new row.
+  // Blurring between fields of the same row (e.g. tabbing) would otherwise
+  // race with subsequent keystrokes and silently lose the data.
+  const handleNewRowBlur = useCallback((e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const tr = newRowTrRef.current;
+    const next = e.relatedTarget as Node | null;
+    if (tr && next && tr.contains(next)) return;
+    handleNewRowSave();
+  }, []);
+
   const handleNewRowSave = useCallback(async () => {
-    if (isCreatingRef.current) return;
+    if (isCreatingRef.current) { pendingResaveRef.current = true; return; }
     const hasData = Object.values(newRowData).some(v => v !== '' && v !== null && v !== undefined);
     if (!hasData) return;
 
@@ -547,14 +573,28 @@ export function DataGrid({
     }
 
     isCreatingRef.current = true;
+    const snapshot = newRowData;
     try {
-      await createRecord.mutateAsync({ databaseId, tableId: table.id, data: { data: newRowData } });
-      setNewRowData({});
+      await createRecord.mutateAsync({ databaseId, tableId: table.id, data: { data: snapshot } });
+      // Only clear keys that we actually saved — preserve any keystrokes that
+      // arrived during the in-flight create.
+      setNewRowData(prev => {
+        const next: { [k: string]: any } = {};
+        for (const k of Object.keys(prev)) {
+          if (!(k in snapshot) || prev[k] !== snapshot[k]) next[k] = prev[k];
+        }
+        return next;
+      });
       queryClient.invalidateQueries({ queryKey: getListRecordsQueryKey(databaseId, table.id) });
     } catch {
       toast({ title: "Failed to create record", variant: "destructive" });
     } finally {
       isCreatingRef.current = false;
+      if (pendingResaveRef.current) {
+        pendingResaveRef.current = false;
+        // Re-fire so any data typed during the in-flight create is persisted.
+        setTimeout(() => { handleNewRowSave(); }, 0);
+      }
     }
   }, [newRowData, databaseId, table.id, fields]);
 
@@ -729,7 +769,7 @@ export function DataGrid({
       return (
         <input type="number" value={newRowData[fieldName] ?? ''}
           onChange={e => setNewRowData(p => ({ ...p, [fieldName]: e.target.value ? Number(e.target.value) : '' }))}
-          onBlur={handleNewRowSave}
+          onBlur={handleNewRowBlur}
           onKeyDown={blockNonNumeric}
           placeholder={numPlaceholder}
           className="w-full bg-transparent outline-none px-1 text-sm placeholder:text-gray-300" />
@@ -739,7 +779,7 @@ export function DataGrid({
       return (
         <input type="date" value={newRowData[fieldName] ?? ''}
           onChange={e => setNewRowData(p => ({ ...p, [fieldName]: e.target.value }))}
-          onBlur={handleNewRowSave}
+          onBlur={handleNewRowBlur}
           className="w-full bg-transparent outline-none px-1 text-sm" />
       );
     }
@@ -751,7 +791,7 @@ export function DataGrid({
         return (
           <select value={newRowData[fieldName] ?? ''}
             onChange={e => setNewRowData(p => ({ ...p, [fieldName]: e.target.value }))}
-            onBlur={handleNewRowSave}
+            onBlur={handleNewRowBlur}
             className="w-full bg-transparent outline-none px-1 text-sm cursor-pointer">
             <option value="">(none)</option>
             {options.map(o => <option key={o.value} value={o.value}>{o.display}</option>)}
@@ -782,7 +822,7 @@ export function DataGrid({
     return (
       <input type="text" value={newRowData[fieldName] ?? ''}
         onChange={e => setNewRowData(p => ({ ...p, [fieldName]: e.target.value }))}
-        onBlur={handleNewRowSave}
+        onBlur={handleNewRowBlur}
         placeholder={textPlaceholder}
         maxLength={newRowMax}
         onPaste={handleNewRowPasteOverflow}

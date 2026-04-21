@@ -200,6 +200,28 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
   const [lwLimitToList, setLwLimitToList] = useState(false);
   const [lwAllowMultiple, setLwAllowMultiple] = useState(false);
   const [lwViewFilter, setLwViewFilter] = useState<'tables' | 'queries' | 'both'>('tables');
+  // Fields fetched lazily for tables that don't include `fields` in the parent prop.
+  const [lwFetchedFields, setLwFetchedFields] = useState<{ [tableId: number]: any[] }>({});
+
+  useEffect(() => {
+    if (!lookupWizardOpen || lwSourceType !== 'table' || lwTableId == null || databaseId == null) return;
+    const existing = tables.find(t => t.id === lwTableId);
+    if (existing && Array.isArray((existing as any).fields) && (existing as any).fields.length > 0) return;
+    if (lwFetchedFields[lwTableId]) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/ds/databases/${databaseId}/tables/${lwTableId}`, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (cancelled) return;
+        setLwFetchedFields(prev => ({ ...prev, [lwTableId]: data.fields ?? [] }));
+      } catch { /* ignore */ }
+    })();
+    return () => { cancelled = true; };
+  }, [lookupWizardOpen, lwSourceType, lwTableId, databaseId, tables, lwFetchedFields]);
 
   const openLookupWizard = useCallback((fieldIdx: number) => {
     setLwFieldIdx(fieldIdx);
@@ -291,7 +313,9 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
   };
 
   const lwSelectedTable = tables.find(t => t.id === lwTableId);
-  const lwTableFields: any[] = lwSelectedTable?.fields ?? [];
+  const lwTableFields: any[] = (lwSelectedTable?.fields && lwSelectedTable.fields.length > 0)
+    ? lwSelectedTable.fields
+    : (lwTableId != null ? (lwFetchedFields[lwTableId] ?? []) : []);
   const lwAvailableFields = lwTableFields.filter((f: any) => !lwSelectedFields.includes(f.name));
 
   const lwTotalStepsTable = 6;
