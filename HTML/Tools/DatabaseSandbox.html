@@ -25,7 +25,7 @@
             }
         </script>
         <style>
-            /* Override layout to fill available height */
+            /* Override layout to fill available height (matches PythonEditor / HTMLEditor) */
             #pageContainer {
                 padding-bottom: 0 !important;
                 overflow: hidden !important;
@@ -39,8 +39,6 @@
                 flex-direction: column !important;
                 text-align: left !important;
             }
-            /* Hide the duplicate level heading – the tool header already names the tool */
-            #content > #mainHeading { display: none !important; }
 
             /* Slim tool header bar */
             .tool-header {
@@ -72,16 +70,16 @@
 
             /* Iframe fills remaining space */
             .tool-editor-wrap {
-                flex: 1;
+                flex: 1 1 auto;
                 min-height: 0;
                 overflow: hidden;
-                display: flex;
-                flex-direction: column;
+                position: relative;
             }
             .tool-editor-wrap > div {
-                flex: 1;
-                min-height: 0;
-                height: 100%;
+                position: absolute !important;
+                inset: 0 !important;
+                width: auto !important;
+                height: auto !important;
             }
             .db-sandbox-frame {
                 width: 100%;
