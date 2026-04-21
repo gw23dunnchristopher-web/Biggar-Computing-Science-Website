@@ -44,6 +44,7 @@ function TextFormattingGroup({
   fmtFont, setFmtFont, fmtSize, setFmtSize,
   fmtBold, setFmtBold, fmtItalic, setFmtItalic,
   fmtUnderline, setFmtUnderline, fmtAlign, setFmtAlign,
+  fmtColor, setFmtColor, fmtHighlight, setFmtHighlight,
 }: {
   fmtFont: string; setFmtFont: (v: string) => void;
   fmtSize: string; setFmtSize: (v: string) => void;
@@ -51,6 +52,8 @@ function TextFormattingGroup({
   fmtItalic: boolean; setFmtItalic: (fn: (v: boolean) => boolean) => void;
   fmtUnderline: boolean; setFmtUnderline: (fn: (v: boolean) => boolean) => void;
   fmtAlign: string; setFmtAlign: (v: string) => void;
+  fmtColor: string; setFmtColor: (v: string) => void;
+  fmtHighlight: string; setFmtHighlight: (v: string) => void;
 }) {
   const ribbonSize = useRibbonSize();
 
@@ -90,15 +93,20 @@ function TextFormattingGroup({
 
   const colorButtons = (
     <>
-      <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Font Color">
-        <div className="flex flex-col items-center gap-px">
+      <label className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer relative" title="Font Color">
+        <div className="flex flex-col items-center gap-px pointer-events-none">
           <span className="text-[11px] font-bold text-gray-700 leading-none">A</span>
-          <span className="w-4 h-0.5 rounded-full bg-[#C42B1C]" />
+          <span className="w-4 h-0.5 rounded-full" style={{ backgroundColor: fmtColor || '#C42B1C' }} />
         </div>
-      </button>
-      <button className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer" title="Highlight Color">
-        <Highlighter size={14} className="text-yellow-500" />
-      </button>
+        <input type="color" value={fmtColor || '#000000'} onChange={e => setFmtColor(e.target.value)}
+          className="absolute inset-0 opacity-0 cursor-pointer" />
+      </label>
+      <label className="w-7 h-7 flex items-center justify-center rounded hover:bg-gray-100 cursor-pointer relative" title="Highlight Color">
+        <Highlighter size={14} className="pointer-events-none" style={{ color: fmtHighlight && fmtHighlight !== 'transparent' ? fmtHighlight : '#eab308' }} />
+        <input type="color" value={fmtHighlight && fmtHighlight !== 'transparent' ? fmtHighlight : '#ffff00'}
+          onChange={e => setFmtHighlight(e.target.value)}
+          className="absolute inset-0 opacity-0 cursor-pointer" />
+      </label>
     </>
   );
 
@@ -298,6 +306,22 @@ export function TableDataView({
   const [fmtItalic, setFmtItalic] = useState(false);
   const [fmtUnderline, setFmtUnderline] = useState(false);
   const [fmtAlign, setFmtAlign] = useState<'left' | 'center' | 'right'>('left');
+  const [fmtColor, setFmtColor] = useState('#000000');
+  const [fmtHighlight, setFmtHighlight] = useState('transparent');
+
+  const fontFamilyMap: Record<string, string> = {
+    'Aptos (Detail)': 'Aptos, Calibri, "Segoe UI", sans-serif',
+  };
+  const cellStyle: React.CSSProperties = {
+    fontFamily: fontFamilyMap[fmtFont] ?? fmtFont,
+    fontSize: `${fmtSize}px`,
+    fontWeight: fmtBold ? 'bold' : undefined,
+    fontStyle: fmtItalic ? 'italic' : undefined,
+    textDecoration: fmtUnderline ? 'underline' : undefined,
+    textAlign: fmtAlign as any,
+    color: fmtColor,
+    backgroundColor: fmtHighlight !== 'transparent' ? fmtHighlight : undefined,
+  };
 
   const { data: table, isLoading: tableLoading } = useGetTable(databaseId, tableId);
   const { data: allRecords, isLoading: recordsLoading } = useListRecords(databaseId, tableId, {});
@@ -923,6 +947,8 @@ export function TableDataView({
                 fmtItalic={fmtItalic} setFmtItalic={setFmtItalic}
                 fmtUnderline={fmtUnderline} setFmtUnderline={setFmtUnderline}
                 fmtAlign={fmtAlign} setFmtAlign={setFmtAlign}
+                fmtColor={fmtColor} setFmtColor={setFmtColor}
+                fmtHighlight={fmtHighlight} setFmtHighlight={setFmtHighlight}
               />
             </>
           )
@@ -1074,6 +1100,7 @@ export function TableDataView({
               onColWidthsChange={setColWidths}
               frozenFields={frozenFields}
               rowHeightPx={rowHeightPx}
+              cellStyle={cellStyle}
             />
           )}
         </div>

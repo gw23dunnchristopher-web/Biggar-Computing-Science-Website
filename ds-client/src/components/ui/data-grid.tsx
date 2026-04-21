@@ -165,6 +165,7 @@ interface DataGridProps {
   onColWidthsChange?: (next: Record<string, number>) => void;
   frozenFields?: string[];
   rowHeightPx?: number;
+  cellStyle?: React.CSSProperties;
 }
 
 const CLICK_TO_ADD_WIDTH = 130;
@@ -194,6 +195,7 @@ export function DataGrid({
   colWidths: colWidthsProp, onColWidthsChange,
   frozenFields = [],
   rowHeightPx,
+  cellStyle,
 }: DataGridProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -1248,7 +1250,7 @@ export function DataGrid({
                               ${isCellEditing ? 'p-0' : 'px-2'}
                               ${isCellFocused && !isCellEditing ? 'ring-1 ring-inset ring-[#C42B1C]' : ''}
                             `}
-                            style={{ height: rowHeightPx ?? 28, ...stickyTd(f.name) }}
+                            style={{ height: rowHeightPx ?? 28, ...stickyTd(f.name), ...cellStyle }}
                             onDoubleClick={() => {
                               if (f.fieldType !== 'autonumber' && f.fieldType !== 'calculated' && f.fieldType !== 'attachment' && f.fieldType !== 'boolean')
                                 handleCellClick(r.id, f.name, cellValue, false, rowIdx, colIdx);
