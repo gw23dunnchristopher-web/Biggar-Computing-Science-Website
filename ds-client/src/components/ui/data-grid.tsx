@@ -687,7 +687,11 @@ export function DataGrid({
   const renderEditInput = (
     type: string, value: any,
     onChange: (v: any) => void,
-    onCommit: () => void,
+    // Accepts an optional value override so callers (like the lookup
+    // dropdown) can commit a freshly picked value without waiting for
+    // React state to flush — otherwise we'd save the stale `editingValue`
+    // from the closure of this render.
+    onCommit: (override?: any) => void,
     record: DbRecord,
     fieldName: string,
     rowIdx: number,
@@ -770,19 +774,16 @@ export function DataGrid({
                   try { (el as any).showPicker?.(); } catch { /* ignore */ }
                 });
               }}
-              onChange={e => { onChange(e.target.value); onCommit(); }}
-              onBlur={onCommit}
-              onKeyDown={onKeyDown}
-              onMouseDown={e => {
-                // Without this, browsers that did open the picker on focus
-                // would close it again on the same click. Re-opening on
-                // mousedown keeps the dropdown visible after the click that
-                // triggered editing.
-                const target = e.currentTarget;
-                requestAnimationFrame(() => {
-                  try { (target as any).showPicker?.(); } catch { /* ignore */ }
-                });
+              onChange={e => {
+                const v = e.target.value;
+                onChange(v);
+                // Pass the new value explicitly — relying on `editingValue`
+                // here would commit the previous (stale) value because the
+                // setState above hasn't flushed yet.
+                onCommit(v);
               }}
+              onBlur={() => onCommit()}
+              onKeyDown={onKeyDown}
               className={baseInput + ' cursor-pointer'}>
               <option value="">(none)</option>
               {options.map(o => <option key={o.value} value={o.value}>{o.display}</option>)}
@@ -1421,7 +1422,7 @@ export function DataGrid({
                             {isCellEditing ? (
                               <div className="relative w-full h-full flex items-center">
                                 {renderEditInput(f.fieldType, editingValue, setEditingValue,
-                                  () => handleCellSave(r, f.name, editingValue),
+                                  (override?: any) => handleCellSave(r, f.name, override !== undefined ? override : editingValue),
                                   r, f.name, rowIdx, colIdx)}
                               </div>
                             ) : f.fieldType === 'boolean' ? (
