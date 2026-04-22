@@ -611,10 +611,14 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
             onCreateRelationship={async (fromTableId, fromFieldName, toTableId, toFieldName, relType) => {
               try {
                 await doSave(true);
-                const freshTable = await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}`);
-                const allTables = [freshTable, ...tables.filter((t: any) => t.id !== tableId)];
-                const fromTable = allTables.find((t: any) => t.id === fromTableId);
-                const toTable = allTables.find((t: any) => t.id === toTableId);
+                // The list-tables endpoint doesn't include fields, so fetch each
+                // table involved in the relationship individually to get IDs.
+                const idsToFetch = Array.from(new Set([fromTableId, toTableId]));
+                const fetched = await Promise.all(
+                  idsToFetch.map(id => apiFetch(`/api/ds/databases/${databaseId}/tables/${id}`))
+                );
+                const fromTable = fetched.find((t: any) => t.id === fromTableId);
+                const toTable = fetched.find((t: any) => t.id === toTableId);
                 const fromField = fromTable?.fields?.find((f: any) => f.name === fromFieldName);
                 const toField = toTable?.fields?.find((f: any) => f.name === toFieldName);
                 if (!fromField?.id || !toField?.id) {
