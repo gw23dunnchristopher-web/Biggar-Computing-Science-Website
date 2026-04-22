@@ -1236,6 +1236,7 @@ export function DataGrid({
           >
             <table className="text-left border-collapse bg-white text-sm" style={{ tableLayout: 'fixed', width: getTotalColWidth() }}>
               <colgroup>
+                {hasChildRels && <col style={{ width: 18, minWidth: 18, maxWidth: 18 }} />}
                 <col style={{ width: 15, minWidth: 15, maxWidth: 15 }} />
                 {fields.map(f => (
                   <col key={f.id} style={{ width: getColWidth(f.name, f.fieldType) }} />
@@ -1244,6 +1245,12 @@ export function DataGrid({
               </colgroup>
               <thead className="sticky top-0 z-10">
                 <tr>
+                  {hasChildRels && (
+                    <th
+                      className="bg-[#f3f2f1] border-r border-b border-gray-300"
+                      style={{ width: 18, minWidth: 18, maxWidth: 18 }}
+                    />
+                  )}
                   <th
                     className="bg-[#f3f2f1] border-r border-b border-gray-300"
                     style={{ width: 15, minWidth: 15, maxWidth: 15, ...(hasFrozen ? { position: 'sticky', left: 0, zIndex: 13 } : {}) }}
@@ -1498,6 +1505,12 @@ export function DataGrid({
                   onContextMenu={() => setCtxTarget({ type: 'new-row' })}
                   style={{ background: '#ffffff' }}
                 >
+                  {hasChildRels && (
+                    <td
+                      className="border-r border-gray-300 bg-[#f3f2f1]"
+                      style={{ width: 18, minWidth: 18, maxWidth: 18, height: rowHeightPx ?? 28 }}
+                    />
+                  )}
                   <td
                     className="border-r border-gray-300 bg-[#f3f2f1] text-center overflow-hidden"
                     style={{ width: 15, minWidth: 15, maxWidth: 15, height: rowHeightPx ?? 28, ...(hasFrozen ? { position: 'sticky', left: 0, zIndex: 5 } : {}) }}
@@ -1524,6 +1537,12 @@ export function DataGrid({
                       firstEditable?.focus();
                     }}
                   >
+                    {hasChildRels && (
+                      <td
+                        className="border-r border-gray-300 bg-[#f3f2f1]"
+                        style={{ width: 18, minWidth: 18, maxWidth: 18, height: rowHeightPx ?? 28 }}
+                      />
+                    )}
                     <td
                       className="border-r border-gray-300 bg-[#f3f2f1] text-center overflow-hidden text-gray-500"
                       style={{ width: 15, minWidth: 15, maxWidth: 15, height: rowHeightPx ?? 28, fontSize: 11, ...(hasFrozen ? { position: 'sticky', left: 0, zIndex: 5 } : {}) }}
@@ -1548,6 +1567,12 @@ export function DataGrid({
                 {/* Totals Row */}
                 {showTotals && (
                   <tr className="border-t-2 border-gray-400 bg-[#f3f2f1] sticky bottom-0 z-[5]" style={{ background: '#f3f2f1' }}>
+                    {hasChildRels && (
+                      <td
+                        className="border-r border-gray-300 h-7 bg-[#f3f2f1]"
+                        style={{ width: 18, minWidth: 18, maxWidth: 18 }}
+                      />
+                    )}
                     <td
                       className="border-r border-gray-300 text-center h-7 overflow-hidden bg-[#f3f2f1]"
                       style={{ width: 15, minWidth: 15, maxWidth: 15, ...(hasFrozen ? { position: 'sticky', left: 0, zIndex: 6 } : {}) }}
