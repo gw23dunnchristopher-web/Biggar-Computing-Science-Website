@@ -367,7 +367,7 @@ export function DatabaseView() {
         body: JSON.stringify({ name, definition: { tables: [], columns: [] } })
       });
       await loadQueries();
-      setLocation(`/databases/${databaseId}/queries/${q.id}`);
+      setLocation(`/databases/${databaseId}/queries/${q.id}?view=design`);
     } catch {
       toast({ title: 'Failed to create query', variant: 'destructive' });
     }

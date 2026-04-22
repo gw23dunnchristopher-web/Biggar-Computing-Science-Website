@@ -474,7 +474,7 @@ export function QueryDesignView({
 
   const urlView = new URLSearchParams(search).get('view');
   const resolvedInitialView: 'design' | 'datasheet' | 'sql' =
-    urlView === 'datasheet' ? 'datasheet' : urlView === 'sql' ? 'sql' : (initialView ?? 'datasheet');
+    urlView === 'datasheet' ? 'datasheet' : urlView === 'sql' ? 'sql' : urlView === 'design' ? 'design' : (initialView ?? 'datasheet');
 
   const [view, setView] = useState<'design' | 'datasheet' | 'sql'>(resolvedInitialView);
 
