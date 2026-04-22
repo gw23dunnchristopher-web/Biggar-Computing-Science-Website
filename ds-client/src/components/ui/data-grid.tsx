@@ -758,11 +758,31 @@ export function DataGrid({
       if (cfg) {
         const options = getLookupOptions(cfg);
         if (options.length > 0) {
+          // Drop the option list open straight away when the cell enters edit
+          // mode, so a single click on a lookup cell behaves like Access's
+          // combo box (one click = open dropdown). Falls back gracefully on
+          // browsers that don't yet support `showPicker()`.
           return (
             <select autoFocus value={value ?? ''}
+              ref={el => {
+                if (!el) return;
+                requestAnimationFrame(() => {
+                  try { (el as any).showPicker?.(); } catch { /* ignore */ }
+                });
+              }}
               onChange={e => { onChange(e.target.value); onCommit(); }}
               onBlur={onCommit}
               onKeyDown={onKeyDown}
+              onMouseDown={e => {
+                // Without this, browsers that did open the picker on focus
+                // would close it again on the same click. Re-opening on
+                // mousedown keeps the dropdown visible after the click that
+                // triggered editing.
+                const target = e.currentTarget;
+                requestAnimationFrame(() => {
+                  try { (target as any).showPicker?.(); } catch { /* ignore */ }
+                });
+              }}
               className={baseInput + ' cursor-pointer'}>
               <option value="">(none)</option>
               {options.map(o => <option key={o.value} value={o.value}>{o.display}</option>)}
