@@ -420,7 +420,16 @@ export function DataGrid({
         e.preventDefault();
         const field = editableFields[fieldColIdx];
         const record = records[rowIdx];
-        if (record && field) handleCellSave(record, field.name, null);
+        if (!record || !field) break;
+        if (field.isRequired) {
+          // Required fields can't be saved empty — enter edit mode with the
+          // cell cleared so the user can type a replacement value. Validation
+          // on blur will keep them in the cell if they leave it empty.
+          setEditingCell({ recordId: record.id, fieldName: field.name, rowIdx, colIdx });
+          setEditingValue('');
+        } else {
+          handleCellSave(record, field.name, null);
+        }
         break;
       }
     }
