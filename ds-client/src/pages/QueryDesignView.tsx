@@ -535,8 +535,11 @@ export function QueryDesignView({
         method: 'POST',
         body: JSON.stringify({ sql: sqlText }),
       });
-      if (data?.columns) setSqlResults(data);
-      else setSqlResults({ columns: [], rows: [] });
+      const cols: string[] = data?.columns ?? [];
+      const rows: Record<string, any>[] = data?.rows ?? [];
+      // Reuse the datasheet view to display results — no inline panel.
+      setResults({ columns: cols.map(c => ({ key: c, label: c })), rows });
+      setView('datasheet');
     } catch (e: any) {
       setSqlError(e.message || 'Query failed');
     } finally {
@@ -1178,39 +1181,6 @@ export function QueryDesignView({
             {sqlError && (
               <div className="flex-none mx-3 my-2 p-2 bg-red-50 border border-red-300 rounded text-xs text-red-700 font-mono">
                 {sqlError}
-              </div>
-            )}
-            {sqlResults && !sqlError && (
-              <div className="flex flex-col flex-none max-h-64 overflow-auto border-t border-gray-300">
-                {sqlResults.columns.length === 0 ? (
-                  <div className="p-4 text-xs text-gray-400 italic">No results</div>
-                ) : (
-                  <table className="border-collapse text-xs min-w-full bg-white">
-                    <thead className="sticky top-0 z-10">
-                      <tr>
-                        {sqlResults.columns.map(col => (
-                          <th key={col} className="bg-[#f3f2f1] border-r border-b border-gray-300 px-2 py-1.5 font-semibold text-gray-700 text-left whitespace-nowrap">
-                            {col}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sqlResults.rows.map((row, ri) => (
-                        <tr key={ri} className="border-b border-gray-200 hover:bg-gray-50">
-                          {sqlResults!.columns.map(col => (
-                            <td key={col} className="border-r border-gray-200 px-2 py-1 max-w-[200px] truncate">
-                              {row[col] === null || row[col] === undefined ? <span className="text-gray-400 italic">null</span> : String(row[col])}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-                <div className="h-6 bg-[#f3f2f1] border-t border-gray-300 flex items-center px-3 text-xs text-gray-600 flex-none">
-                  {sqlResults.rows.length} row(s)
-                </div>
               </div>
             )}
           </div>
