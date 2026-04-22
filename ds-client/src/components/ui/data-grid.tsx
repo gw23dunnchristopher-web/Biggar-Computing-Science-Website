@@ -511,16 +511,18 @@ export function DataGrid({
 
     // Optimistically update the cached records so the UI reflects the new
     // value immediately without a refetch flicker that can clobber the edit.
-    const queryKey = getListRecordsQueryKey(databaseId, table.id);
-    const previous = queryClient.getQueryData<any>(queryKey);
+    // Use prefix matching because the actual query key includes a params
+    // object suffix (e.g. `[url, {}]`) that varies per call site.
+    const queryKeyPrefix = getListRecordsQueryKey(databaseId, table.id);
+    const previousEntries = queryClient.getQueriesData<any>({ queryKey: queryKeyPrefix });
     const patch = (list: any[]) => list.map(r =>
       r.id === record.id ? { ...r, data: { ...r.data, [fieldName]: coerced } } : r
     );
-    if (Array.isArray(previous)) {
-      queryClient.setQueryData(queryKey, patch(previous));
-    } else if (previous && Array.isArray(previous.data)) {
-      queryClient.setQueryData(queryKey, { ...previous, data: patch(previous.data) });
-    }
+    queryClient.setQueriesData<any>({ queryKey: queryKeyPrefix }, (prev) => {
+      if (Array.isArray(prev)) return patch(prev);
+      if (prev && Array.isArray(prev.data)) return { ...prev, data: patch(prev.data) };
+      return prev;
+    });
 
     try {
       await updateRecord.mutateAsync({
@@ -532,7 +534,9 @@ export function DataGrid({
       onCellEdited?.(record.id, fieldName, originalVal, coerced);
     } catch {
       // Roll back the optimistic update on error.
-      if (previous !== undefined) queryClient.setQueryData(queryKey, previous);
+      for (const [k, v] of previousEntries) {
+        if (v !== undefined) queryClient.setQueryData(k, v);
+      }
       toast({ title: "Failed to update record", variant: "destructive" });
     }
     if (!keepEditing) setEditingCell(null);
