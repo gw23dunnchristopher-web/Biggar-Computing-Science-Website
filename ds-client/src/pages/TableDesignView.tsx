@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { setDesignGuard } from '@/lib/design-guard';
 
 async function apiFetch(path: string, opts?: RequestInit) {
   const r = await fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', ...opts?.headers } });
@@ -300,6 +301,34 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
     if (fields.length !== savedFields.length) return true;
     return JSON.stringify(fields) !== JSON.stringify(savedFields);
   }, [fields, savedFields, tableName, savedTableName]);
+
+  // Refs so the guard's save/discard always see the latest state
+  const doSaveRef = useRef(doSave);
+  const fieldsRef = useRef(fields);
+  const savedFieldsRef = useRef(savedFields);
+  const savedTableNameRef = useRef(savedTableName);
+  useEffect(() => { doSaveRef.current = doSave; });
+  useEffect(() => { fieldsRef.current = fields; }, [fields]);
+  useEffect(() => { savedFieldsRef.current = savedFields; }, [savedFields]);
+  useEffect(() => { savedTableNameRef.current = savedTableName; }, [savedTableName]);
+
+  // Register a navigation guard while we have unsaved field/name edits.
+  // Sidebar / tab navigation will pop a Save / Discard / Cancel dialog.
+  useEffect(() => {
+    if (!isDirty) {
+      setDesignGuard(null);
+      return;
+    }
+    setDesignGuard({
+      isDirty: true,
+      save: () => doSaveRef.current(false),
+      discard: () => {
+        setFields(savedFieldsRef.current.map(f => ({ ...f })));
+        setTableName(savedTableNameRef.current);
+      },
+    });
+    return () => setDesignGuard(null);
+  }, [isDirty]);
 
   // Navigate to Datasheet View without any saving/reverting
   const doNavigateToDatasheet = () => {

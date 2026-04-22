@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Table2, ChevronDown, ChevronRight, Trash2, List, LayoutTemplate, FileText, Copy, Pencil, Grid3X3, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { DesignViewIcon } from '@/components/ui/design-view-icon';
 import { Link, useLocation } from 'wouter';
+import { guardedNavigate } from '@/lib/design-guard';
 import { Table, useUpdateTable, useCreateTable, getListTablesQueryKey, getGetTableQueryKey } from '@/api';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -311,13 +312,14 @@ export function Sidebar({
                             <span className="truncate">{t.name}</span>
                           </button>
                         ) : (
-                          <Link
+                          <a
                             href={`/databases/${databaseId}/tables/${t.id}/data`}
+                            onClick={(e) => { e.preventDefault(); guardedNavigate(setLocation, `/databases/${databaseId}/tables/${t.id}/data`); }}
                             className={`flex-1 flex items-center px-2 py-1.5 rounded text-xs transition-colors ${isTableActive(t.id) ? 'bg-red-100 text-[#C42B1C] font-medium' : 'text-gray-700 hover:bg-white hover:shadow-sm'}`}
                           >
                             <Table2 className={`w-3.5 h-3.5 mr-1.5 flex-none ${isTableActive(t.id) ? 'text-[#C42B1C]' : 'text-[#C42B1C]/70'}`} />
                             <span className="truncate">{t.name}</span>
-                          </Link>
+                          </a>
                         )}
                       </div>
                     </ContextMenuTrigger>
@@ -395,13 +397,14 @@ export function Sidebar({
                             <span className="truncate">{q.name}</span>
                           </button>
                         ) : (
-                          <Link
+                          <a
                             href={`/databases/${databaseId}/queries/${q.id}`}
+                            onClick={(e) => { e.preventDefault(); guardedNavigate(setLocation, `/databases/${databaseId}/queries/${q.id}`); }}
                             className={`flex-1 flex items-center px-2 py-1.5 rounded text-xs transition-colors ${isQueryActive(q.id) ? 'bg-red-100 text-[#C42B1C] font-medium' : 'text-gray-700 hover:bg-white hover:shadow-sm'}`}
                           >
                             <List className={`w-3.5 h-3.5 mr-1.5 flex-none ${isQueryActive(q.id) ? 'text-[#C42B1C]' : 'text-amber-500'}`} />
                             <span className="truncate">{q.name}</span>
-                          </Link>
+                          </a>
                         )}
                       </div>
                     </ContextMenuTrigger>
@@ -457,13 +460,14 @@ export function Sidebar({
                             <span className="truncate">{f.name}</span>
                           </button>
                         ) : (
-                          <Link
+                          <a
                             href={`/databases/${databaseId}/forms/${f.id}`}
+                            onClick={(e) => { e.preventDefault(); guardedNavigate(setLocation, `/databases/${databaseId}/forms/${f.id}`); }}
                             className={`flex-1 flex items-center px-2 py-1.5 rounded text-xs transition-colors ${isFormActive(f.id) ? 'bg-green-100 text-[#2e7d32] font-medium' : 'text-gray-700 hover:bg-white hover:shadow-sm'}`}
                           >
                             <LayoutTemplate className={`w-3.5 h-3.5 mr-1.5 flex-none ${isFormActive(f.id) ? 'text-[#2e7d32]' : 'text-[#2e7d32]/70'}`} />
                             <span className="truncate">{f.name}</span>
-                          </Link>
+                          </a>
                         )}
                       </div>
                     </ContextMenuTrigger>
@@ -519,13 +523,14 @@ export function Sidebar({
                             <span className="truncate">{r.name}</span>
                           </button>
                         ) : (
-                          <Link
+                          <a
                             href={`/databases/${databaseId}/reports/${r.id}`}
+                            onClick={(e) => { e.preventDefault(); guardedNavigate(setLocation, `/databases/${databaseId}/reports/${r.id}`); }}
                             className={`flex-1 flex items-center px-2 py-1.5 rounded text-xs transition-colors ${isReportActive(r.id) ? 'bg-amber-50 text-[#5d4037] font-medium' : 'text-gray-700 hover:bg-white hover:shadow-sm'}`}
                           >
                             <FileText className={`w-3.5 h-3.5 mr-1.5 flex-none ${isReportActive(r.id) ? 'text-[#5d4037]' : 'text-[#5d4037]/70'}`} />
                             <span className="truncate">{r.name}</span>
-                          </Link>
+                          </a>
                         )}
                       </div>
                     </ContextMenuTrigger>

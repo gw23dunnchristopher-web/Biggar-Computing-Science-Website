@@ -17,6 +17,8 @@ import { RelationshipsView } from './RelationshipsView';
 import { CSVImportModal } from '@/components/ui/csv-import-modal';
 import { AnalyseModal, DocumenterModal, DependenciesModal, ExportDataModal } from '@/components/ui/tools-modals';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { DesignGuardDialog } from '@/components/ui/design-guard-dialog';
+import { guardedNavigate } from '@/lib/design-guard';
 import { QueryWizard } from '@/components/ui/query-wizard';
 import { FormWizard } from '@/components/ui/form-wizard';
 import { ReportWizard } from '@/components/ui/report-wizard';
@@ -288,7 +290,7 @@ export function DatabaseView() {
 
   const activeTabKey = useMemo(() => parseLocation(location)?.key ?? null, [location]);
 
-  const handleTabSelect = (tab: ObjectTab) => setLocation(tab.url);
+  const handleTabSelect = (tab: ObjectTab) => guardedNavigate(setLocation, tab.url);
 
   const handleTabClose = (key: string) => {
     setOpenTabs(prev => {
@@ -616,6 +618,7 @@ export function DatabaseView() {
   return (
     <TabBarProvider value={tabBarEl}>
     <>
+      <DesignGuardDialog />
       <Switch>
         <Route path="/databases/:id">
           <Shell title={db.name} ribbon={defaultRibbon} sidebar={<Sidebar {...sidebarProps} />}>
@@ -643,6 +646,7 @@ export function DatabaseView() {
         <Route path="/databases/:id/tables/:tableId/design">
           {(p) => (
             <TableDesignView
+              key={parseInt(p.tableId)}
               databaseId={databaseId}
               tableId={parseInt(p.tableId)}
               db={db}
@@ -655,6 +659,7 @@ export function DatabaseView() {
         <Route path="/databases/:id/tables/:tableId/data">
           {(p) => (
             <TableDataView
+              key={parseInt(p.tableId)}
               databaseId={databaseId}
               tableId={parseInt(p.tableId)}
               db={db}
