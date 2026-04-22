@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="/CSS/frameStyles.css" />
         <link rel="stylesheet" href="/CSS/sidebarStyles.css" />
         <link rel="stylesheet" href="/CSS/codeRunner.css" />
+        <link rel="stylesheet" href="/CSS/codeProjects.css" />
         <script>
             function getSidebarForLevel() {
                 var params = new URLSearchParams(window.location.search);
@@ -26,9 +27,9 @@
         </script>
         <script src="/JavaScript/script.js"></script>
         <script src="/JavaScript/zipWriter.js"></script>
+        <script src="/JavaScript/codeProjects.js"></script>
         <script src="/JavaScript/codeRunner.js"></script>
         <style>
-            /* Override layout to fill available height */
             #pageContainer {
                 padding-bottom: 0 !important;
                 overflow: hidden !important;
@@ -43,7 +44,6 @@
                 text-align: left !important;
             }
 
-            /* Slim tool header bar */
             .tool-header {
                 flex-shrink: 0;
                 background: #1e1e2e;
@@ -56,22 +56,15 @@
                 font-family: Arial, sans-serif;
                 font-size: 13px;
             }
-            .tool-header-icon {
-                font-size: 20px;
-                flex-shrink: 0;
-            }
+            .tool-header-icon { font-size: 20px; flex-shrink: 0; }
             .tool-header-title {
                 font-weight: bold;
                 font-size: 15px;
                 color: #a6e3a1;
                 flex-shrink: 0;
             }
-            .tool-header-desc {
-                color: #6c7086;
-                font-size: 12px;
-            }
+            .tool-header-desc { color: #6c7086; font-size: 12px; }
 
-            /* Make the runner container fill the remaining space */
             .tool-editor-wrap {
                 flex: 1;
                 min-height: 0;
@@ -80,7 +73,6 @@
                 flex-direction: column;
             }
 
-            /* Override code-runner to fill its container */
             .tool-editor-wrap .code-runner {
                 width: 100% !important;
                 margin: 0 !important;
@@ -93,7 +85,6 @@
                 overflow: hidden !important;
             }
 
-            /* Editor area grows */
             .tool-editor-wrap .cr-editor-wrap {
                 flex: 2 !important;
                 min-height: 120px !important;
@@ -105,7 +96,6 @@
                 min-height: 0 !important;
             }
 
-            /* Output area grows to fill remaining space */
             .tool-editor-wrap .cr-output-area {
                 flex: 1 !important;
                 display: flex !important;
@@ -132,15 +122,13 @@
                 <div id="sidebar"></div>
                 <div id="content">
                     <div id="mainHeading"><h1 id="levelLabel">Computing Science</h1></div>
-                    <div class="tool-header">
+                    <div class="tool-header" id="toolHeader">
                         <span class="tool-header-icon">&#x1F40D;</span>
                         <span class="tool-header-title">Python Editor</span>
-                        <span class="tool-header-desc">Write and run Python programs &mdash; use <strong>Upload</strong> to load CSV/TXT data files, <strong>Run</strong> to execute, <strong>Reset</strong> to clear.</span>
+                        <span class="tool-header-desc" id="toolHeaderDesc">Your personal Python projects &mdash; create as many as you like. Each one is saved to this browser automatically.</span>
                     </div>
-                    <div class="tool-editor-wrap">
-                        <div class="py-runner" data-filetree="true">
-                            <textarea class="cr-code" data-filename="main.py" style="display:none"></textarea>
-                        </div>
+                    <div id="toolBody" class="tool-editor-wrap">
+                        <!-- Either dashboard or editor is injected here by the script below -->
                     </div>
                 </div>
             </div>
@@ -158,6 +146,217 @@
         </div>
         <script>
             document.getElementById('levelLabel').textContent = getLevelLabel();
+
+            (function () {
+                var KIND = 'python';
+                var STARTER = '# Write your Python program here\nprint("Hello, world!")\n';
+                var params = new URLSearchParams(window.location.search);
+                var projectId = params.get('project');
+                var body = document.getElementById('toolBody');
+                var headerDesc = document.getElementById('toolHeaderDesc');
+                var header = document.getElementById('toolHeader');
+
+                function escapeHtml(s) {
+                    return String(s).replace(/[&<>"']/g, function (c) {
+                        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+                    });
+                }
+
+                function fmtDate(ts) {
+                    if (!ts) return '';
+                    var d = new Date(ts);
+                    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+
+                function basePath() {
+                    return window.location.pathname + '?level=' + (params.get('level') || 'n5');
+                }
+
+                function showModal(html, onMount) {
+                    var bg = document.createElement('div');
+                    bg.className = 'cp-modal-backdrop';
+                    bg.innerHTML = '<div class="cp-modal">' + html + '</div>';
+                    document.body.appendChild(bg);
+                    function close() { document.body.removeChild(bg); }
+                    bg.addEventListener('click', function (e) { if (e.target === bg) close(); });
+                    if (onMount) onMount(bg.querySelector('.cp-modal'), close);
+                    return close;
+                }
+
+                function promptName(initial, title) {
+                    return new Promise(function (resolve) {
+                        showModal(
+                            '<h3>' + escapeHtml(title || 'Name your project') + '</h3>' +
+                            '<input type="text" id="cpNameInput" value="' + escapeHtml(initial || '') + '" placeholder="My program" />' +
+                            '<div class="cp-modal-buttons">' +
+                            '  <button id="cpCancel">Cancel</button>' +
+                            '  <button class="cp-primary" id="cpOk">OK</button>' +
+                            '</div>',
+                            function (modal, close) {
+                                var input = modal.querySelector('#cpNameInput');
+                                input.focus();
+                                input.select();
+                                modal.querySelector('#cpCancel').onclick = function () { close(); resolve(null); };
+                                modal.querySelector('#cpOk').onclick = function () {
+                                    var v = input.value.trim();
+                                    if (!v) return;
+                                    close(); resolve(v);
+                                };
+                                input.addEventListener('keydown', function (e) {
+                                    if (e.key === 'Enter') modal.querySelector('#cpOk').click();
+                                    if (e.key === 'Escape') modal.querySelector('#cpCancel').click();
+                                });
+                            }
+                        );
+                    });
+                }
+
+                function confirmDelete(name) {
+                    return new Promise(function (resolve) {
+                        showModal(
+                            '<h3>Delete project?</h3>' +
+                            '<p>Are you sure you want to delete <strong>"' + escapeHtml(name) + '"</strong>? This cannot be undone.</p>' +
+                            '<div class="cp-modal-buttons">' +
+                            '  <button id="cpCancel">Cancel</button>' +
+                            '  <button class="cp-danger" id="cpOk">Delete</button>' +
+                            '</div>',
+                            function (modal, close) {
+                                modal.querySelector('#cpCancel').onclick = function () { close(); resolve(false); };
+                                modal.querySelector('#cpOk').onclick = function () { close(); resolve(true); };
+                            }
+                        );
+                    });
+                }
+
+                function renderDashboard() {
+                    var projects = CodeProjects.list(KIND);
+                    var html = '<div class="cp-dashboard">' +
+                        '<h2>Good day</h2>' +
+                        '<p class="cp-sub">Open a project to keep working on it, or create a new one.</p>' +
+                        '<div class="cp-grid">' +
+                        '<button class="cp-tile cp-tile-create" id="cpNewBtn">' +
+                        '  <div class="cp-plus">+</div>' +
+                        '  <div>New Python Project</div>' +
+                        '</button>' +
+                        projects.map(function (p) {
+                            return '<button class="cp-tile" data-id="' + p.id + '">' +
+                                '<button class="cp-tile-delete" data-del="' + p.id + '" title="Delete project">&times;</button>' +
+                                '<div class="cp-tile-name">' + escapeHtml(p.name) + '</div>' +
+                                '<div class="cp-tile-meta">Updated ' + escapeHtml(fmtDate(p.updatedAt)) + '</div>' +
+                                '</button>';
+                        }).join('') +
+                        '</div></div>';
+                    body.innerHTML = html;
+
+                    body.querySelector('#cpNewBtn').addEventListener('click', async function () {
+                        var name = await promptName('My program', 'New Python project');
+                        if (!name) return;
+                        var p = CodeProjects.create(KIND, name, STARTER);
+                        window.location.href = basePath() + '&project=' + encodeURIComponent(p.id);
+                    });
+
+                    body.querySelectorAll('.cp-tile[data-id]').forEach(function (tile) {
+                        tile.addEventListener('click', function (e) {
+                            if (e.target.closest('[data-del]')) return;
+                            window.location.href = basePath() + '&project=' + encodeURIComponent(tile.dataset.id);
+                        });
+                    });
+                    body.querySelectorAll('[data-del]').forEach(function (btn) {
+                        btn.addEventListener('click', async function (e) {
+                            e.stopPropagation();
+                            var id = btn.dataset.del;
+                            var p = CodeProjects.get(KIND, id);
+                            if (!p) return;
+                            var ok = await confirmDelete(p.name);
+                            if (!ok) return;
+                            CodeProjects.remove(KIND, id);
+                            renderDashboard();
+                        });
+                    });
+                }
+
+                function renderEditor(project) {
+                    headerDesc.textContent = 'Use Upload to load CSV/TXT data files, Run to execute, Reset to clear.';
+
+                    // Inject back-button + project name into the header
+                    var existingBack = header.querySelector('.cp-back-link');
+                    if (!existingBack) {
+                        var back = document.createElement('a');
+                        back.className = 'cp-back-link';
+                        back.href = basePath();
+                        back.innerHTML = '&larr; Projects';
+                        header.insertBefore(back, header.firstChild);
+                    }
+                    var existingName = header.querySelector('.cp-project-name');
+                    if (existingName) existingName.remove();
+                    var nameSpan = document.createElement('span');
+                    nameSpan.className = 'cp-project-name';
+                    nameSpan.textContent = project.name;
+                    nameSpan.title = 'Click to rename';
+                    nameSpan.style.cursor = 'pointer';
+                    nameSpan.addEventListener('click', async function () {
+                        var newName = await promptName(project.name, 'Rename project');
+                        if (!newName) return;
+                        CodeProjects.updateName(KIND, project.id, newName);
+                        project.name = newName;
+                        nameSpan.textContent = newName;
+                    });
+                    header.insertBefore(nameSpan, header.querySelector('.tool-header-desc'));
+
+                    // Build the runner
+                    var wrap = document.createElement('div');
+                    wrap.className = 'py-runner';
+                    wrap.setAttribute('data-filetree', 'true');
+                    var ta = document.createElement('textarea');
+                    ta.className = 'cr-code';
+                    ta.setAttribute('data-filename', 'main.py');
+                    ta.style.display = 'none';
+                    ta.value = project.code || '';
+                    wrap.appendChild(ta);
+                    body.appendChild(wrap);
+
+                    // Initialise the runner now that the textarea is ready.
+                    if (window.CodeRunner && window.CodeRunner.initPy) {
+                        window.CodeRunner.initPy(wrap);
+                    }
+
+                    // Auto-save the editor's content with a short debounce
+                    var saveTimer = null;
+                    function scheduleSave() {
+                        clearTimeout(saveTimer);
+                        saveTimer = setTimeout(function () {
+                            var ed = wrap.querySelector('.cr-editor');
+                            if (!ed) return;
+                            CodeProjects.updateCode(KIND, project.id, ed.value);
+                        }, 400);
+                    }
+                    // The editor might be created asynchronously, so poll briefly
+                    var attempts = 0;
+                    var hookTimer = setInterval(function () {
+                        var ed = wrap.querySelector('.cr-editor');
+                        if (ed) {
+                            ed.addEventListener('input', scheduleSave);
+                            clearInterval(hookTimer);
+                        } else if (++attempts > 50) {
+                            clearInterval(hookTimer);
+                        }
+                    }, 100);
+                }
+
+                function init() {
+                    if (projectId) {
+                        var project = CodeProjects.get(KIND, projectId);
+                        if (project) { renderEditor(project); return; }
+                    }
+                    renderDashboard();
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', init);
+                } else {
+                    init();
+                }
+            })();
         </script>
     </body>
 </html>

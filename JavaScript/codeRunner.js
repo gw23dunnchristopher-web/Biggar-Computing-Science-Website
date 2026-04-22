@@ -2614,4 +2614,12 @@
     } else {
         init();
     }
+
+    /* Expose individual initialisers so other scripts (e.g. the editor
+       project dashboards) can construct a runner element on demand and
+       initialise it after the original auto-init has already run. */
+    window.CodeRunner = {
+        initPy:   function (el) { initPyRunner(el); },
+        initHtml: function (el) { initHtmlRunner(el); },
+    };
 })();
