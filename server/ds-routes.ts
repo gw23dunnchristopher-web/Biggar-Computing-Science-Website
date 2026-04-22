@@ -830,7 +830,19 @@ export function registerDsRoutes(app: Express) {
   });
 
   app.delete("/api/ds/databases/:dbId/relationships/:relId", async (req, res) => {
-    await db!.delete(dsRelationships).where(and(eq(dsRelationships.id, parseInt(req.params.relId)), eq(dsRelationships.databaseId, parseInt(req.params.dbId))));
+    const dbId = parseInt(req.params.dbId);
+    const relId = parseInt(req.params.relId);
+    // Look up the relationship before deleting so we can also strip the
+    // lookup-dropdown config from the FK field, restoring it to a plain
+    // text/number/etc. cell in the data view.
+    const [rel] = await db!.select().from(dsRelationships).where(and(eq(dsRelationships.id, relId), eq(dsRelationships.databaseId, dbId)));
+    await db!.delete(dsRelationships).where(and(eq(dsRelationships.id, relId), eq(dsRelationships.databaseId, dbId)));
+    if (rel?.toFieldId) {
+      const [fkField] = await db!.select().from(dsFields).where(eq(dsFields.id, rel.toFieldId));
+      if (fkField?.description?.startsWith('__lookup__:')) {
+        await db!.update(dsFields).set({ description: null }).where(eq(dsFields.id, rel.toFieldId));
+      }
+    }
     res.status(204).send();
   });
 
