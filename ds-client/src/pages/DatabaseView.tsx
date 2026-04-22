@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRoute, useLocation, Switch, Route } from 'wouter';
 import { ObjectTabBar, ObjectTab } from '@/components/ui/object-tab-bar';
 import { TabBarProvider } from '@/contexts/tab-bar-context';
-import { useGetDatabase, useListTables, useDeleteTable, getListTablesQueryKey, useCreateTable, useUpdateDatabase } from '@/api';
+import { useGetDatabase, useListTables, useDeleteTable, getListTablesQueryKey, useCreateTable, useUpdateDatabase, useUpdateTable, getGetTableQueryKey } from '@/api';
 import { Shell } from '@/components/layout/Shell';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton } from '@/components/layout/Ribbon';
@@ -172,6 +172,7 @@ export function DatabaseView() {
 
   const deleteTable = useDeleteTable();
   const createTable = useCreateTable();
+  const updateTable = useUpdateTable();
   const embedMutation = useCreateEmbed();
   const updateDb = useUpdateDatabase();
 
@@ -182,6 +183,12 @@ export function DatabaseView() {
 
   // Track tables created in this session that haven't been explicitly named yet
   const [newlyCreatedTableId, setNewlyCreatedTableId] = useState<number | null>(null);
+
+  // Rename-before-design dialog (triggered when right-clicking "Design View"
+  // on a freshly-created, unnamed table from the sidebar).
+  const [designNameDialog, setDesignNameDialog] = useState<{
+    open: boolean; tableId: number | null; name: string; busy: boolean;
+  }>({ open: false, tableId: null, name: '', busy: false });
 
   // Dialogs
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -593,10 +600,55 @@ export function DatabaseView() {
     />
   );
 
+  const handleSelectTableDesign = (id: number) => {
+    // If this is a freshly-created table that has not been renamed yet,
+    // prompt for a name first (mirrors the design-icon flow in TableDataView).
+    if (newlyCreatedTableId === id) {
+      const tbl = (tables || []).find(t => t.id === id);
+      setDesignNameDialog({ open: true, tableId: id, name: tbl?.name ?? '', busy: false });
+      return;
+    }
+    setLocation(`/databases/${databaseId}/tables/${id}/design`);
+  };
+
+  const confirmSidebarDesignSwitch = async () => {
+    const id = designNameDialog.tableId;
+    const newName = designNameDialog.name.trim();
+    if (!id || !newName) return;
+    setDesignNameDialog(d => ({ ...d, busy: true }));
+    try {
+      const tbl = (tables || []).find(t => t.id === id);
+      if (newName !== tbl?.name) {
+        // Fetch the full table so we keep its existing fields when renaming.
+        const fullRes = await fetch(`/api/ds/databases/${databaseId}/tables/${id}`);
+        const full = await fullRes.json();
+        const fields = (full?.fields ?? []).map((f: any) => ({
+          id: f.id, name: f.name, fieldType: f.fieldType,
+          isRequired: !!f.isRequired, isPrimaryKey: !!f.isPrimaryKey,
+          sortOrder: f.sortOrder,
+          caption: f.caption ?? null, defaultValue: f.defaultValue ?? null,
+          fieldSize: f.fieldSize ?? null, description: f.description ?? null,
+        }));
+        await updateTable.mutateAsync({
+          databaseId, tableId: id, data: { name: newName, fields },
+        });
+        queryClient.invalidateQueries({ queryKey: getListTablesQueryKey(databaseId) });
+        queryClient.invalidateQueries({ queryKey: getGetTableQueryKey(databaseId, id) });
+      }
+      setNewlyCreatedTableId(null);
+      setDesignNameDialog({ open: false, tableId: null, name: '', busy: false });
+      setLocation(`/databases/${databaseId}/tables/${id}/design`);
+    } catch {
+      toast({ title: 'Failed to rename table', variant: 'destructive' });
+      setDesignNameDialog(d => ({ ...d, busy: false }));
+    }
+  };
+
   const sidebarProps = {
     tables: tables || [],
     databaseId,
     onDeleteTable: handleDeleteTable,
+    onSelectTableDesign: handleSelectTableDesign,
     queries,
     onDeleteQuery: handleDeleteQuery,
     forms,
@@ -959,6 +1011,45 @@ export function DatabaseView() {
         </DialogContent>
       </Dialog>
 
+      {/* ── Rename-before-Design dialog (sidebar right-click → Design View on a new table) ── */}
+      <Dialog
+        open={designNameDialog.open}
+        onOpenChange={open => !open && setDesignNameDialog({ open: false, tableId: null, name: '', busy: false })}
+      >
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Save Table</DialogTitle>
+            <DialogDescription>You must save the table before switching to Design view. Confirm or update the table name below.</DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            <label className="text-xs font-medium text-gray-600 mb-1 block">Table Name</label>
+            <Input
+              value={designNameDialog.name}
+              onChange={e => setDesignNameDialog(d => ({ ...d, name: e.target.value }))}
+              onKeyDown={e => { if (e.key === 'Enter') confirmSidebarDesignSwitch(); }}
+              autoFocus
+              className="border-gray-300 focus-visible:ring-[#C42B1C]"
+              placeholder="Table name"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDesignNameDialog({ open: false, tableId: null, name: '', busy: false })}
+              disabled={designNameDialog.busy}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmSidebarDesignSwitch}
+              disabled={designNameDialog.busy || !designNameDialog.name.trim()}
+              className="bg-[#C42B1C] hover:bg-[#9B2118]"
+            >
+              {designNameDialog.busy ? 'Saving…' : 'OK'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
     </>
     </TabBarProvider>

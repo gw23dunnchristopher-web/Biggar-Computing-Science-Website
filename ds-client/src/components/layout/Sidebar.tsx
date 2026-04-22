@@ -169,11 +169,25 @@ export function Sidebar({
     try {
       const { type, id } = renameDialog;
       if (type === 'table') {
-        const tbl = tables.find(t => t.id === id);
-        if (!tbl) return;
+        // The list endpoint returns tables WITHOUT their fields, so we must
+        // fetch the full table before sending the update — otherwise the
+        // PUT replaces the field list with an empty array.
+        const full = await apiFetch(`/api/ds/databases/${databaseId}/tables/${id}`);
+        const fields = (full?.fields ?? []).map((f: any) => ({
+          id: f.id,
+          name: f.name,
+          fieldType: f.fieldType,
+          isRequired: !!f.isRequired,
+          isPrimaryKey: !!f.isPrimaryKey,
+          sortOrder: f.sortOrder,
+          caption: f.caption ?? null,
+          defaultValue: f.defaultValue ?? null,
+          fieldSize: f.fieldSize ?? null,
+          description: f.description ?? null,
+        }));
         await updateTable.mutateAsync({
           databaseId, tableId: id,
-          data: { name: renameName.trim(), fields: tbl.fields.map(f => ({ ...f })) },
+          data: { name: renameName.trim(), fields },
         });
         queryClient.invalidateQueries({ queryKey: getListTablesQueryKey(databaseId) });
         queryClient.invalidateQueries({ queryKey: getGetTableQueryKey(databaseId, id) });
