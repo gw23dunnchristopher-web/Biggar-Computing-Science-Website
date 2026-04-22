@@ -3,7 +3,7 @@ import { storage } from "./revision-storage";
 
 const ALLOWED_KINDS = new Set(["python", "html"]);
 const MAX_NAME_LEN = 80;
-const MAX_CODE_BYTES = 1_000_000;       // ~1 MB per project
+const MAX_CODE_BYTES = 2_000_000;       // ~2 MB per project
 const MAX_PROJECTS_PER_KIND = 100;       // soft per-student cap
 
 async function requireStudent(req: Request, res: Response, next: NextFunction) {
