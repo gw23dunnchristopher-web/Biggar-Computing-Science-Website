@@ -25,6 +25,7 @@ import {
   bhsStudents as students, bhsClasses as classes,
   bhsQuestions, bhsPapers, bhsCustomQuizzes,
   bhsAssignments, bhsAssignmentSections, bhsAssignmentParts, bhsAssignmentResources,
+  bhsCodeProjects,
 } from "@shared/bhs-schema";
 import { Question } from "../revision-client/src/lib/past-papers";
 import bcrypt from "bcryptjs";
@@ -199,6 +200,13 @@ export interface IStorage {
   getLatestStudentSession(studentId: string): Promise<StudentSession | undefined>;
   deleteStudentSession(token: string): Promise<void>;
   deleteStudentSessionsByStudentId(studentId: string): Promise<void>;
+
+  // Per-student code editor projects (Python / HTML tools)
+  listCodeProjects(studentId: string, kind: string): Promise<{ id: string; name: string; updatedAt: Date | null; createdAt: Date | null }[]>;
+  getCodeProject(studentId: string, id: string): Promise<{ id: string; kind: string; name: string; code: string; updatedAt: Date | null; createdAt: Date | null } | undefined>;
+  createCodeProject(studentId: string, kind: string, name: string, code: string): Promise<{ id: string; kind: string; name: string; code: string; updatedAt: Date | null; createdAt: Date | null }>;
+  updateCodeProject(studentId: string, id: string, data: { name?: string; code?: string }): Promise<{ id: string; kind: string; name: string; code: string; updatedAt: Date | null; createdAt: Date | null } | undefined>;
+  deleteCodeProject(studentId: string, id: string): Promise<void>;
 
   saveStudentExamResult(result: InsertStudentExamResult): Promise<StudentExamResult>;
   getStudentExamResults(studentId: string): Promise<StudentExamResult[]>;
@@ -624,6 +632,37 @@ class DatabaseStorage implements IStorage {
   async deleteStudentSession(token: string) { const database = this.checkDb(); await database.delete(studentSessions).where(eq(studentSessions.token, token)); }
   async deleteStudentSessionsByStudentId(studentId: string) { const database = this.checkDb(); await database.delete(studentSessions).where(eq(studentSessions.studentId, studentId)); }
 
+  async listCodeProjects(studentId: string, kind: string) {
+    const database = this.checkDb();
+    const rows = await database.select({ id: bhsCodeProjects.id, name: bhsCodeProjects.name, updatedAt: bhsCodeProjects.updatedAt, createdAt: bhsCodeProjects.createdAt })
+      .from(bhsCodeProjects)
+      .where(and(eq(bhsCodeProjects.studentId, studentId), eq(bhsCodeProjects.kind, kind)))
+      .orderBy(desc(bhsCodeProjects.updatedAt));
+    return rows;
+  }
+  async getCodeProject(studentId: string, id: string) {
+    const database = this.checkDb();
+    const r = await database.select().from(bhsCodeProjects).where(and(eq(bhsCodeProjects.id, id), eq(bhsCodeProjects.studentId, studentId)));
+    return r[0];
+  }
+  async createCodeProject(studentId: string, kind: string, name: string, code: string) {
+    const database = this.checkDb();
+    const r = await database.insert(bhsCodeProjects).values({ studentId, kind, name, code, updatedAt: new Date() }).returning();
+    return r[0];
+  }
+  async updateCodeProject(studentId: string, id: string, data: { name?: string; code?: string }) {
+    const database = this.checkDb();
+    const patch: any = { updatedAt: new Date() };
+    if (typeof data.name === "string") patch.name = data.name;
+    if (typeof data.code === "string") patch.code = data.code;
+    const r = await database.update(bhsCodeProjects).set(patch).where(and(eq(bhsCodeProjects.id, id), eq(bhsCodeProjects.studentId, studentId))).returning();
+    return r[0];
+  }
+  async deleteCodeProject(studentId: string, id: string) {
+    const database = this.checkDb();
+    await database.delete(bhsCodeProjects).where(and(eq(bhsCodeProjects.id, id), eq(bhsCodeProjects.studentId, studentId)));
+  }
+
   async saveStudentExamResult(result: InsertStudentExamResult) { const database = this.checkDb(); const r = await database.insert(studentExamResults).values({ id: genId("ser"), ...result }).returning(); return r[0]; }
   async getStudentExamResults(studentId: string) { const database = this.checkDb(); return database.select().from(studentExamResults).where(eq(studentExamResults.studentId, studentId)).orderBy(desc(studentExamResults.completedAt)); }
   async getStudentExamResultById(id: string) { const database = this.checkDb(); const r = await database.select().from(studentExamResults).where(eq(studentExamResults.id, id)); return r[0]; }
@@ -680,6 +719,14 @@ const databaseStorage = dbAvailable ? new DatabaseStorage() : null;
 const memoryStorage = new MemoryStorage();
 let activeStorage: IStorage = databaseStorage || memoryStorage;
 let usingDatabase = !!databaseStorage;
+
+// Stubs for any methods MemoryStorage doesn't implement (code projects need DB).
+const notImpl = (name: string) => () => { throw new Error(`MemoryStorage does not implement ${name}; database is required for code projects.`); };
+(MemoryStorage.prototype as any).listCodeProjects ||= notImpl("listCodeProjects");
+(MemoryStorage.prototype as any).getCodeProject ||= notImpl("getCodeProject");
+(MemoryStorage.prototype as any).createCodeProject ||= notImpl("createCodeProject");
+(MemoryStorage.prototype as any).updateCodeProject ||= notImpl("updateCodeProject");
+(MemoryStorage.prototype as any).deleteCodeProject ||= notImpl("deleteCodeProject");
 
 export const storage: IStorage = {
   getUser: (id) => activeStorage.getUser(id),
@@ -765,6 +812,12 @@ export const storage: IStorage = {
   getLatestStudentSession: (studentId) => activeStorage.getLatestStudentSession(studentId),
   deleteStudentSession: (token) => activeStorage.deleteStudentSession(token),
   deleteStudentSessionsByStudentId: (studentId) => activeStorage.deleteStudentSessionsByStudentId(studentId),
+
+  listCodeProjects: (studentId, kind) => activeStorage.listCodeProjects(studentId, kind),
+  getCodeProject: (studentId, id) => activeStorage.getCodeProject(studentId, id),
+  createCodeProject: (studentId, kind, name, code) => activeStorage.createCodeProject(studentId, kind, name, code),
+  updateCodeProject: (studentId, id, data) => activeStorage.updateCodeProject(studentId, id, data),
+  deleteCodeProject: (studentId, id) => activeStorage.deleteCodeProject(studentId, id),
 
   saveStudentExamResult: (result) => activeStorage.saveStudentExamResult(result),
   getStudentExamResults: (studentId) => activeStorage.getStudentExamResults(studentId),

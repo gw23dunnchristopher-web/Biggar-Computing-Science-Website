@@ -228,11 +228,20 @@
                     });
                 }
 
-                function renderDashboard() {
-                    var projects = CodeProjects.list(KIND);
+                async function renderDashboard() {
+                    body.innerHTML = '<div class="cp-dashboard cp-theme-python"><p class="cp-sub">Loading…</p></div>';
+                    var projects = [];
+                    try { projects = await CodeProjects.list(KIND); }
+                    catch (e) {
+                        body.innerHTML = '<div class="cp-dashboard cp-theme-python"><p class="cp-sub">Could not load your projects. Please refresh.</p></div>';
+                        return;
+                    }
+                    var modeNote = CodeProjects.isCloud()
+                        ? 'Saved to your account — your projects follow you to any device.'
+                        : 'Saved to this browser only. <a href="#" id="cpLoginLink">Log in</a> to keep your projects across devices.';
                     var html = '<div class="cp-dashboard cp-theme-python">' +
                         '<h2>Good day</h2>' +
-                        '<p class="cp-sub">Open a project to keep working on it, or create a new one.</p>' +
+                        '<p class="cp-sub">' + modeNote + '</p>' +
                         '<div class="cp-grid">' +
                         '<div class="cp-tile cp-tile-create" id="cpNewBtn" role="button" tabindex="0">' +
                         '  <div class="cp-plus">+</div>' +
@@ -248,11 +257,21 @@
                         '</div></div>';
                     body.innerHTML = html;
 
+                    var loginLink = body.querySelector('#cpLoginLink');
+                    if (loginLink) loginLink.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        if (window.SiteAuth && window.SiteAuth.openLogin) window.SiteAuth.openLogin();
+                    });
+
                     body.querySelector('#cpNewBtn').addEventListener('click', async function () {
                         var name = await promptName('My program', 'New Python project');
                         if (!name) return;
-                        var p = CodeProjects.create(KIND, name, STARTER);
-                        window.location.href = basePath() + '&project=' + encodeURIComponent(p.id);
+                        try {
+                            var p = await CodeProjects.create(KIND, name, STARTER);
+                            window.location.href = basePath() + '&project=' + encodeURIComponent(p.id);
+                        } catch (e) {
+                            alert('Could not create project: ' + (e && e.message ? e.message : 'unknown error'));
+                        }
                     });
 
                     body.querySelectorAll('.cp-tile[data-id]').forEach(function (tile) {
@@ -265,13 +284,37 @@
                         btn.addEventListener('click', async function (e) {
                             e.stopPropagation();
                             var id = btn.dataset.del;
-                            var p = CodeProjects.get(KIND, id);
+                            var p = await CodeProjects.get(KIND, id);
                             if (!p) return;
                             var ok = await confirmDelete(p.name);
                             if (!ok) return;
-                            CodeProjects.remove(KIND, id);
+                            try { await CodeProjects.remove(KIND, id); } catch (_) {}
                             renderDashboard();
                         });
+                    });
+
+                    // If the student just logged in and has guest projects sitting in
+                    // localStorage, offer to import them to their account.
+                    CodeProjects.maybePromptImport(KIND, function (info) {
+                        showModal(
+                            '<h3>Import your saved projects?</h3>' +
+                            '<p>You have <strong>' + info.count + '</strong> Python project' + (info.count === 1 ? '' : 's') +
+                            ' saved on this device. Would you like to copy them into your account so you can open them on any computer?</p>' +
+                            '<div class="cp-modal-buttons">' +
+                            '  <button id="cpSkip">Not now</button>' +
+                            '  <button class="cp-primary" id="cpImport">Import</button>' +
+                            '</div>',
+                            function (modal, close) {
+                                modal.querySelector('#cpSkip').onclick = function () { info.skip(); close(); };
+                                modal.querySelector('#cpImport').onclick = async function () {
+                                    var btn = modal.querySelector('#cpImport');
+                                    btn.disabled = true; btn.textContent = 'Importing…';
+                                    try { await info.doImport(); } catch (_) {}
+                                    close();
+                                    renderDashboard();
+                                };
+                            }
+                        );
                     });
                 }
 
@@ -297,7 +340,7 @@
                     nameSpan.addEventListener('click', async function () {
                         var newName = await promptName(project.name, 'Rename project');
                         if (!newName) return;
-                        CodeProjects.updateName(KIND, project.id, newName);
+                        try { await CodeProjects.updateName(KIND, project.id, newName); } catch (_) {}
                         project.name = newName;
                         nameSpan.textContent = newName;
                     });
@@ -327,8 +370,8 @@
                         saveTimer = setTimeout(function () {
                             var ed = wrap.querySelector('.cr-editor');
                             if (!ed) return;
-                            CodeProjects.updateCode(KIND, project.id, ed.value);
-                        }, 400);
+                            CodeProjects.updateCode(KIND, project.id, ed.value).catch(function () { /* ignore transient save errors */ });
+                        }, 600);
                     }
                     // The editor might be created asynchronously, so poll briefly
                     var attempts = 0;
@@ -343,13 +386,29 @@
                     }, 100);
                 }
 
-                function init() {
+                async function init() {
                     if (projectId) {
-                        var project = CodeProjects.get(KIND, projectId);
-                        if (project) { renderEditor(project); return; }
+                        try {
+                            var project = await CodeProjects.get(KIND, projectId);
+                            if (project) { renderEditor(project); return; }
+                        } catch (_) {}
+                        // Project not found in the active backend — bounce to dashboard.
+                        window.location.href = basePath();
+                        return;
                     }
                     renderDashboard();
                 }
+
+                // Re-render when the student logs in or out so the dashboard
+                // (or editor) reflects the active backend.
+                CodeProjects.onChange(function () {
+                    if (projectId) {
+                        // The current project's id may not exist on the new backend.
+                        window.location.href = basePath();
+                    } else {
+                        renderDashboard();
+                    }
+                });
 
                 if (document.readyState === 'loading') {
                     document.addEventListener('DOMContentLoaded', init);

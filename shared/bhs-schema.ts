@@ -167,6 +167,23 @@ export const insertBhsAssignmentResourceSchema = createInsertSchema(bhsAssignmen
   id: true, uploadedAt: true,
 });
 
+// ── Per-student code projects (Python and HTML/CSS editor tools) ────────────
+//
+// Backs the cloud-sync of the in-browser code editors when a student is
+// signed in via the site-wide login. Each row is one named project (a single
+// primary file: main.py for python, index.html for html).
+// `kind` is "python" | "html". `student_id` references bhs_students.id.
+
+export const bhsCodeProjects = pgTable("bhs_code_projects", {
+  id:        varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentId: varchar("student_id").notNull(),
+  kind:      text("kind").notNull(),
+  name:      text("name").notNull(),
+  code:      text("code").notNull().default(""),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // ── Types ────────────────────────────────────────────────────────────────────
 
 export type BhsClass         = typeof bhsClasses.$inferSelect;

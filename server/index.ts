@@ -9,6 +9,8 @@ import { registerN5Routes, n5Sessions, n5AddSession } from './n5-routes';
 import { registerDsRoutes } from './ds-routes';
 import { registerProgressRoutes } from './progress-routes';
 import { registerContentRoutes } from './content-routes';
+import { registerCodeProjectsRoutes } from './code-projects-routes';
+import { registerDsWorkspaceRoutes } from './ds-workspace-routes';
 import { eq } from 'drizzle-orm';
 import { sessions as revSessionsTable, users as revUsersTable } from '@shared/revision-schema';
 
@@ -1216,6 +1218,8 @@ if (fs.existsSync(progressBuildDir)) {
 // Shared content routes — papers, questions, assignments for both courses
 // ---------------------------------------------------------------------------
 registerContentRoutes(app, requireTeacher);
+registerCodeProjectsRoutes(app);
+registerDsWorkspaceRoutes(app);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);

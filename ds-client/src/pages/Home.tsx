@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
-import { useLocalUser, useIsWorkspaceMode } from '@/hooks/use-local-user';
+import { useLocalUser, useIsWorkspaceMode, useWorkspaceTransfer } from '@/hooks/use-local-user';
 import { useListDatabases, useCreateDatabase, useCreateTable, getListDatabasesQueryKey } from '@/api';
 import { format } from 'date-fns';
 import { Database, PlusCircle, DatabaseBackup, Trash2, FlaskConical } from 'lucide-react';
@@ -24,6 +24,8 @@ async function apiFetch(path: string, opts?: RequestInit) {
 export function Home() {
   const userId = useLocalUser();
   const isWorkspace = useIsWorkspaceMode();
+  const pendingTransfer = useWorkspaceTransfer(userId);
+  const [transferring, setTransferring] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -218,6 +220,44 @@ export function Home() {
               disabled={isDeleting}
             >
               {isDeleting ? 'Deleting…' : 'Delete Database'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import guest databases prompt (shown the first time a student logs in
+          while there are still databases sitting under their old guest id). */}
+      <Dialog open={!!pendingTransfer} onOpenChange={open => { if (!open && pendingTransfer) pendingTransfer.skip(); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Import your saved databases?</DialogTitle>
+            <DialogDescription>
+              You have <strong>{pendingTransfer?.count}</strong> database{pendingTransfer?.count === 1 ? '' : 's'} saved on this device.
+              Would you like to copy {pendingTransfer?.count === 1 ? 'it' : 'them'} into your account so you can open {pendingTransfer?.count === 1 ? 'it' : 'them'} on any computer?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => pendingTransfer?.skip()} disabled={transferring}>
+              Not now
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!pendingTransfer) return;
+                setTransferring(true);
+                try {
+                  const n = await pendingTransfer.doImport();
+                  toast({ title: `Imported ${n} database${n === 1 ? '' : 's'} into your account` });
+                  queryClient.invalidateQueries({ queryKey: getListDatabasesQueryKey({ userId: userId || '' }) });
+                } catch {
+                  toast({ title: 'Import failed', variant: 'destructive' });
+                } finally {
+                  setTransferring(false);
+                }
+              }}
+              disabled={transferring}
+              className="bg-[#C42B1C] hover:bg-[#9B2118]"
+            >
+              {transferring ? 'Importing…' : 'Import'}
             </Button>
           </DialogFooter>
         </DialogContent>
