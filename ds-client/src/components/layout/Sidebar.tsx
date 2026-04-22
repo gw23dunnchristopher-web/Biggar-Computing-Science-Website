@@ -3,7 +3,7 @@ import { Table2, ChevronDown, ChevronRight, Trash2, List, LayoutTemplate, FileTe
 import { DesignViewIcon } from '@/components/ui/design-view-icon';
 import { Link, useLocation } from 'wouter';
 import { guardedNavigate } from '@/lib/design-guard';
-import { Table, useUpdateTable, useCreateTable, getListTablesQueryKey, getGetTableQueryKey } from '@/api';
+import { Table, useCreateTable, getListTablesQueryKey, getGetTableQueryKey } from '@/api';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   ContextMenu,
@@ -146,7 +146,6 @@ export function Sidebar({
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const updateTable = useUpdateTable();
   const createTable = useCreateTable();
 
   const [renameDialog, setRenameDialog] = useState<RenameDialog | null>(null);
@@ -169,25 +168,12 @@ export function Sidebar({
     try {
       const { type, id } = renameDialog;
       if (type === 'table') {
-        // The list endpoint returns tables WITHOUT their fields, so we must
-        // fetch the full table before sending the update — otherwise the
-        // PUT replaces the field list with an empty array.
-        const full = await apiFetch(`/api/ds/databases/${databaseId}/tables/${id}`);
-        const fields = (full?.fields ?? []).map((f: any) => ({
-          id: f.id,
-          name: f.name,
-          fieldType: f.fieldType,
-          isRequired: !!f.isRequired,
-          isPrimaryKey: !!f.isPrimaryKey,
-          sortOrder: f.sortOrder,
-          caption: f.caption ?? null,
-          defaultValue: f.defaultValue ?? null,
-          fieldSize: f.fieldSize ?? null,
-          description: f.description ?? null,
-        }));
-        await updateTable.mutateAsync({
-          databaseId, tableId: id,
-          data: { name: renameName.trim(), fields },
+        // PATCH renames the table without touching its field list, so we
+        // don't have to round-trip the fields and there's no risk of
+        // accidentally wiping them.
+        await apiFetch(`/api/ds/databases/${databaseId}/tables/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ name: renameName.trim() }),
         });
         queryClient.invalidateQueries({ queryKey: getListTablesQueryKey(databaseId) });
         queryClient.invalidateQueries({ queryKey: getGetTableQueryKey(databaseId, id) });

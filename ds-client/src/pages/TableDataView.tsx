@@ -374,8 +374,13 @@ export function TableDataView({
   const isAutoName = (name: string) => /^Table\d+$/i.test(name);
 
   const handleDesignIconClick = () => {
-    if (isNewTable && table) {
-      setDesignNameDialog({ open: true, name: table.name, busy: false });
+    if (isNewTable) {
+      // Fall back to the name from the tables list if the full table hasn't
+      // loaded yet — we still want to show the rename modal on first switch
+      // rather than silently navigating to design view.
+      const fallbackName =
+        table?.name ?? tables.find(t => t.id === tableId)?.name ?? '';
+      setDesignNameDialog({ open: true, name: fallbackName, busy: false });
     } else {
       goToDesign();
     }
@@ -384,27 +389,15 @@ export function TableDataView({
   const confirmDesignSwitch = async () => {
     const newName = designNameDialog.name.trim();
     if (!newName) return;
-    if (newName !== table?.name) {
+    const currentName = table?.name ?? tables.find(t => t.id === tableId)?.name;
+    if (newName !== currentName) {
       setDesignNameDialog(d => ({ ...d, busy: true }));
       try {
-        await updateTable.mutateAsync({
-          databaseId,
-          tableId,
-          data: {
-            name: newName,
-            fields: fields.map(f => ({
-              id: f.id,
-              name: f.name,
-              fieldType: f.fieldType as UpdateFieldRequest['fieldType'],
-              isRequired: f.isRequired,
-              isPrimaryKey: f.isPrimaryKey,
-              sortOrder: f.sortOrder,
-              caption: f.caption ?? null,
-              defaultValue: f.defaultValue ?? null,
-              fieldSize: f.fieldSize ?? null,
-              description: f.description ?? null,
-            })),
-          },
+        // PATCH only renames — it never touches fields, so we can't
+        // accidentally wipe them by sending an empty fields array.
+        await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ name: newName }),
         });
         queryClient.invalidateQueries({ queryKey: getGetTableQueryKey(databaseId, tableId) });
         queryClient.invalidateQueries({ queryKey: getListTablesQueryKey(databaseId) });

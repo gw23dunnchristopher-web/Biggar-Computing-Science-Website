@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRoute, useLocation, Switch, Route } from 'wouter';
 import { ObjectTabBar, ObjectTab } from '@/components/ui/object-tab-bar';
 import { TabBarProvider } from '@/contexts/tab-bar-context';
-import { useGetDatabase, useListTables, useDeleteTable, getListTablesQueryKey, useCreateTable, useUpdateDatabase, useUpdateTable, getGetTableQueryKey } from '@/api';
+import { useGetDatabase, useListTables, useDeleteTable, getListTablesQueryKey, useCreateTable, useUpdateDatabase, getGetTableQueryKey } from '@/api';
 import { Shell } from '@/components/layout/Shell';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Ribbon, RibbonGroup, RibbonButton, RibbonDropdownButton } from '@/components/layout/Ribbon';
@@ -172,7 +172,6 @@ export function DatabaseView() {
 
   const deleteTable = useDeleteTable();
   const createTable = useCreateTable();
-  const updateTable = useUpdateTable();
   const embedMutation = useCreateEmbed();
   const updateDb = useUpdateDatabase();
 
@@ -619,18 +618,11 @@ export function DatabaseView() {
     try {
       const tbl = (tables || []).find(t => t.id === id);
       if (newName !== tbl?.name) {
-        // Fetch the full table so we keep its existing fields when renaming.
-        const fullRes = await fetch(`/api/ds/databases/${databaseId}/tables/${id}`);
-        const full = await fullRes.json();
-        const fields = (full?.fields ?? []).map((f: any) => ({
-          id: f.id, name: f.name, fieldType: f.fieldType,
-          isRequired: !!f.isRequired, isPrimaryKey: !!f.isPrimaryKey,
-          sortOrder: f.sortOrder,
-          caption: f.caption ?? null, defaultValue: f.defaultValue ?? null,
-          fieldSize: f.fieldSize ?? null, description: f.description ?? null,
-        }));
-        await updateTable.mutateAsync({
-          databaseId, tableId: id, data: { name: newName, fields },
+        // PATCH renames without touching fields, so we can't accidentally
+        // wipe the table's field list.
+        await apiFetch(`/api/ds/databases/${databaseId}/tables/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ name: newName }),
         });
         queryClient.invalidateQueries({ queryKey: getListTablesQueryKey(databaseId) });
         queryClient.invalidateQueries({ queryKey: getGetTableQueryKey(databaseId, id) });
