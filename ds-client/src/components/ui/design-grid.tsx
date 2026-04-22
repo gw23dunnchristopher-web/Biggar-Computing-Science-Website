@@ -109,7 +109,7 @@ interface DesignGridProps {
   onBeforeTypeChange?: (fieldIdx: number, oldType: string, newType: string) => Promise<boolean>;
   onBeforeRemoveField?: (field: UpdateFieldRequest) => Promise<boolean>;
   showPropertySheet?: boolean;
-  onCreateRelationship?: (fromTableId: number, fromFieldName: string, toTableId: number, toFieldName: string, relType: string) => void;
+  onCreateRelationship?: (fromTableId: number, fromFieldName: string, toTableId: number, toFieldName: string, relType: string, pendingFields?: UpdateFieldRequest[]) => void;
 }
 
 export interface DesignGridHandle {
@@ -301,10 +301,6 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
         cascadeDelete: lwCascadeDelete,
         allowMultipleValues: lwAllowMultiple,
       };
-      if (lwEnforceIntegrity && lwTableId && primaryField && tableId && onCreateRelationship) {
-        const currentFieldName = fields[lwFieldIdx]?.name || lwLabel;
-        onCreateRelationship(lwTableId, primaryField, tableId, currentFieldName, 'one-to-many');
-      }
     }
     const newFields = [...fields];
     const preservedType = (lwOriginalType && lwOriginalType !== 'lookup') ? lwOriginalType : 'text';
@@ -313,6 +309,15 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
       newFields[lwFieldIdx] = { ...newFields[lwFieldIdx], caption: lwLabel };
     }
     onChange(newFields);
+    if (cfg.type === 'table') {
+      const primaryField = (cfg as any).valueField;
+      if (lwEnforceIntegrity && lwTableId && primaryField && tableId && onCreateRelationship) {
+        const currentFieldName = newFields[lwFieldIdx]?.name || lwLabel;
+        // Pass the freshly-built fields so the parent can save the lookup
+        // config in the same write that creates the relationship.
+        onCreateRelationship(lwTableId, primaryField, tableId, currentFieldName, 'one-to-many', newFields);
+      }
+    }
     setLookupWizardOpen(false);
   };
 

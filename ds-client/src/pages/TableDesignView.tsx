@@ -608,9 +608,18 @@ export function TableDesignView({ databaseId, tableId, db, tables, onDeleteTable
             onBeforeTypeChange={onBeforeTypeChange}
             onBeforeRemoveField={onBeforeRemoveField}
             showPropertySheet={showPropertySheet}
-            onCreateRelationship={async (fromTableId, fromFieldName, toTableId, toFieldName, relType) => {
+            onCreateRelationship={async (fromTableId, fromFieldName, toTableId, toFieldName, relType, pendingFields) => {
               try {
-                await doSave(true);
+                if (pendingFields && pendingFields.length > 0) {
+                  // Save directly with the wizard's freshly-built fields so the
+                  // lookup config is persisted in the same write. Going through
+                  // doSave would rely on parent state that hasn't flushed yet.
+                  await updateTable.mutateAsync({ databaseId, tableId, data: { name: tableName, fields: pendingFields } });
+                  setFields(pendingFields);
+                  queryClient.invalidateQueries({ queryKey: getGetTableQueryKey(databaseId, tableId) });
+                } else {
+                  await doSave(true);
+                }
                 // The list-tables endpoint doesn't include fields, so fetch each
                 // table involved in the relationship individually to get IDs.
                 const idsToFetch = Array.from(new Set([fromTableId, toTableId]));
