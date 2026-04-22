@@ -546,16 +546,6 @@ export function DataGrid({
   // once the in-flight create finishes so we don't drop the new typing.
   const pendingResaveRef = useRef(false);
 
-  // Only commit the new-row create when focus actually leaves the new row.
-  // Blurring between fields of the same row (e.g. tabbing) would otherwise
-  // race with subsequent keystrokes and silently lose the data.
-  const handleNewRowBlur = useCallback((e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const tr = newRowTrRef.current;
-    const next = e.relatedTarget as Node | null;
-    if (tr && next && tr.contains(next)) return;
-    handleNewRowSave();
-  }, []);
-
   const handleNewRowSave = useCallback(async () => {
     if (isCreatingRef.current) { pendingResaveRef.current = true; return; }
     const hasData = Object.values(newRowData).some(v => v !== '' && v !== null && v !== undefined);
@@ -597,6 +587,21 @@ export function DataGrid({
       }
     }
   }, [newRowData, databaseId, table.id, fields]);
+
+  // Keep a ref to the latest save callback so the blur handler always invokes
+  // the current closure (with up-to-date newRowData/fields), not the first one.
+  const handleNewRowSaveRef = useRef(handleNewRowSave);
+  useEffect(() => { handleNewRowSaveRef.current = handleNewRowSave; }, [handleNewRowSave]);
+
+  // Only commit the new-row create when focus actually leaves the new row.
+  // Blurring between fields of the same row (e.g. tabbing) would otherwise
+  // race with subsequent keystrokes and silently lose the data.
+  const handleNewRowBlur = useCallback((e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const tr = newRowTrRef.current;
+    const next = e.relatedTarget as Node | null;
+    if (tr && next && tr.contains(next)) return;
+    handleNewRowSaveRef.current();
+  }, []);
 
   const renderCellValue = (type: string, value: any, fieldName?: string, record?: DbRecord) => {
     if (type === 'boolean') return null; // rendered as checkbox
