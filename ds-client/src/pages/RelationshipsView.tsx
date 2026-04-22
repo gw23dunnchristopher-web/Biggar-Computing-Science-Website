@@ -11,9 +11,10 @@ import { CreateTabContent, ExternalDataTabContent, DatabaseToolsTabContent } fro
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { GitBranch, Plus, Trash2, Link2, Info, KeyRound, Hash, Type, Calendar, ToggleLeft } from 'lucide-react';
+import { GitBranch, Plus, Trash2, Link2, Info, KeyRound, Hash, Type, Calendar, ToggleLeft, Pencil } from 'lucide-react';
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
+import { isTableOpenElsewhere } from '@/lib/openTables';
 
 
 async function apiFetch(path: string, opts?: RequestInit) {
@@ -29,7 +30,16 @@ async function apiFetch(path: string, opts?: RequestInit) {
 
 interface Field { id: number; name: string; fieldType: string; isPrimaryKey: boolean; sortOrder: number; }
 interface TableWithFields { id: number; name: string; fields: Field[]; }
-interface Relationship { id: number; fromTableId: number; fromFieldId: number; toTableId: number; toFieldId: number; relationshipType: string; }
+interface Relationship {
+  id: number;
+  fromTableId: number; fromFieldId: number;
+  toTableId: number; toFieldId: number;
+  relationshipType: string;
+  enforceIntegrity?: boolean;
+  cascadeUpdate?: boolean;
+  cascadeDelete?: boolean;
+  joinType?: number;
+}
 interface BoxPos { x: number; y: number; }
 
 const FIELD_ICONS: Record<string, React.ReactNode> = {
@@ -107,6 +117,29 @@ export function RelationshipsView({
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [addForm, setAddForm] = useState({ fromTableId: '', fromFieldId: '', toTableId: '', toFieldId: '', relationshipType: 'one-to-many' });
 
+  // Edit relationship dialog (Access-style)
+  const [editRelId, setEditRelId] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState({
+    fromTableId: '', fromFieldId: '', toTableId: '', toFieldId: '',
+    relationshipType: 'one-to-many',
+    enforceIntegrity: false, cascadeUpdate: false, cascadeDelete: false,
+    joinType: 1,
+  });
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+
+  // Context menu for relationship lines
+  const [relMenu, setRelMenu] = useState<{ relId: number; x: number; y: number } | null>(null);
+  useEffect(() => {
+    if (!relMenu) return;
+    const close = () => setRelMenu(null);
+    window.addEventListener('click', close);
+    window.addEventListener('contextmenu', close);
+    return () => {
+      window.removeEventListener('click', close);
+      window.removeEventListener('contextmenu', close);
+    };
+  }, [relMenu]);
+
   // Drag state
   const dragRef = useRef<{ tableId: number; startX: number; startY: number; origX: number; origY: number } | null>(null);
 
@@ -166,13 +199,103 @@ export function RelationshipsView({
     }
   };
 
+  const isAnyEndpointTableOpen = (rel: Relationship): string | null => {
+    const fromOpen = isTableOpenElsewhere(databaseId, rel.fromTableId);
+    const toOpen = isTableOpenElsewhere(databaseId, rel.toTableId);
+    if (!fromOpen && !toOpen) return null;
+    const names = [
+      fromOpen ? schema.find(t => t.id === rel.fromTableId)?.name : null,
+      toOpen ? schema.find(t => t.id === rel.toTableId)?.name : null,
+    ].filter(Boolean);
+    return names.join(' and ') || 'one of the tables';
+  };
+
   const handleDeleteRelationship = async (id: number) => {
+    const rel = relationships.find(r => r.id === id);
+    if (rel) {
+      const openName = isAnyEndpointTableOpen(rel);
+      if (openName) {
+        toast({
+          title: 'Cannot delete relationship',
+          description: `Close "${openName}" in other tabs before deleting this relationship.`,
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
     try {
       await apiFetch(`/api/ds/databases/${databaseId}/relationships/${id}`, { method: 'DELETE' });
       await loadRelationships();
       setSelectedRel(null);
     } catch { toast({ title: 'Failed to delete', variant: 'destructive' }); }
   };
+
+  const openEditDialog = (id: number) => {
+    const rel = relationships.find(r => r.id === id);
+    if (!rel) return;
+    setEditRelId(id);
+    setEditForm({
+      fromTableId: String(rel.fromTableId),
+      fromFieldId: String(rel.fromFieldId),
+      toTableId: String(rel.toTableId),
+      toFieldId: String(rel.toFieldId),
+      relationshipType: rel.relationshipType || 'one-to-many',
+      enforceIntegrity: !!rel.enforceIntegrity,
+      cascadeUpdate: !!rel.cascadeUpdate,
+      cascadeDelete: !!rel.cascadeDelete,
+      joinType: rel.joinType ?? 1,
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (editRelId === null) return;
+    if (!editForm.fromTableId || !editForm.fromFieldId || !editForm.toTableId || !editForm.toFieldId) {
+      toast({ title: 'All fields are required', variant: 'destructive' }); return;
+    }
+    const fromId = parseInt(editForm.fromTableId);
+    const toId = parseInt(editForm.toTableId);
+    const openName = (() => {
+      const fromOpen = isTableOpenElsewhere(databaseId, fromId);
+      const toOpen = isTableOpenElsewhere(databaseId, toId);
+      const names = [
+        fromOpen ? schema.find(t => t.id === fromId)?.name : null,
+        toOpen ? schema.find(t => t.id === toId)?.name : null,
+      ].filter(Boolean);
+      return names.join(' and ');
+    })();
+    if (openName && editForm.enforceIntegrity) {
+      toast({
+        title: 'Table is open',
+        description: `Close "${openName}" in other tabs before changing this relationship.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+    try {
+      await apiFetch(`/api/ds/databases/${databaseId}/relationships/${editRelId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          fromTableId: fromId,
+          fromFieldId: parseInt(editForm.fromFieldId),
+          toTableId: toId,
+          toFieldId: parseInt(editForm.toFieldId),
+          relationshipType: editForm.relationshipType,
+          enforceIntegrity: editForm.enforceIntegrity,
+          cascadeUpdate: editForm.enforceIntegrity ? editForm.cascadeUpdate : false,
+          cascadeDelete: editForm.enforceIntegrity ? editForm.cascadeDelete : false,
+          joinType: editForm.joinType,
+        }),
+      });
+      await loadRelationships();
+      setEditRelId(null);
+      toast({ title: 'Relationship updated' });
+    } catch (e: any) {
+      toast({ title: e.message || 'Failed to update', variant: 'destructive' });
+    }
+  };
+
+  const editFromFields = schema.find(t => t.id === parseInt(editForm.fromTableId))?.fields || [];
+  const editToFields = schema.find(t => t.id === parseInt(editForm.toTableId))?.fields || [];
 
   // Dragging table boxes
   const startDrag = (e: React.MouseEvent, tableId: number) => {
@@ -369,7 +492,15 @@ export function RelationshipsView({
 
                 return (
                   <g key={rel.id} className="cursor-pointer" style={{ pointerEvents: 'all' }}
-                    onClick={() => setSelectedRel(isSelected ? null : rel.id)}>
+                    onClick={() => setSelectedRel(isSelected ? null : rel.id)}
+                    onDoubleClick={(e) => { e.stopPropagation(); if (!isStudentMode) openEditDialog(rel.id); }}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (isStudentMode) return;
+                      setSelectedRel(rel.id);
+                      setRelMenu({ relId: rel.id, x: e.clientX, y: e.clientY });
+                    }}>
                     <path
                       d={`M ${x1} ${fromY} C ${cx1} ${fromY}, ${cx2} ${toY}, ${x2} ${toY}`}
                       fill="none" stroke="transparent" strokeWidth="16"
@@ -493,6 +624,175 @@ export function RelationshipsView({
           </div>
         </div>
       </div>
+
+      {/* Right-click context menu on relationship line */}
+      {relMenu && !isStudentMode && (
+        <div
+          className="fixed z-[60] bg-white border border-gray-300 shadow-lg rounded text-sm py-1 min-w-[180px]"
+          style={{ left: relMenu.x, top: relMenu.y }}
+          onClick={e => e.stopPropagation()}
+          onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }}
+        >
+          <button
+            className="w-full text-left px-3 py-1.5 hover:bg-purple-50 flex items-center gap-2"
+            onClick={() => { const id = relMenu.relId; setRelMenu(null); openEditDialog(id); }}
+          >
+            <Pencil size={13} className="text-purple-700" /> Edit Relationship…
+          </button>
+          <div className="border-t border-gray-200 my-1" />
+          <button
+            className="w-full text-left px-3 py-1.5 hover:bg-red-50 text-red-600 flex items-center gap-2"
+            onClick={() => { const id = relMenu.relId; setRelMenu(null); handleDeleteRelationship(id); }}
+          >
+            <Trash2 size={13} /> Delete
+          </button>
+        </div>
+      )}
+
+      {/* Edit Relationship Dialog (Access-style) */}
+      <Dialog open={editRelId !== null} onOpenChange={(o) => { if (!o) { setEditRelId(null); setJoinDialogOpen(false); } }}>
+        <DialogContent className="max-w-xl p-0 gap-0 overflow-hidden">
+          <DialogHeader className="bg-[#7b1fa2] text-white px-3 py-2">
+            <DialogTitle className="text-sm font-semibold flex items-center gap-2">
+              <Link2 size={14} /> Edit Relationships
+            </DialogTitle>
+            <DialogDescription className="sr-only">Edit the link between two tables.</DialogDescription>
+          </DialogHeader>
+          <div className="p-4 bg-[#f3f2f1]">
+            {/* Top grid: Table/Field selectors mirroring Access */}
+            <div className="grid grid-cols-[120px_1fr_1fr] gap-2 items-center text-xs">
+              <div></div>
+              <div className="font-semibold text-gray-700">Table/Query:</div>
+              <div className="font-semibold text-gray-700">Related Table/Query:</div>
+
+              <div className="font-medium text-gray-700">Table:</div>
+              <select
+                value={editForm.fromTableId}
+                onChange={e => setEditForm(f => ({ ...f, fromTableId: e.target.value, fromFieldId: '' }))}
+                className="border border-gray-400 bg-white px-2 py-1 text-sm"
+              >
+                <option value="">— select —</option>
+                {schema.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+              <select
+                value={editForm.toTableId}
+                onChange={e => setEditForm(f => ({ ...f, toTableId: e.target.value, toFieldId: '' }))}
+                className="border border-gray-400 bg-white px-2 py-1 text-sm"
+              >
+                <option value="">— select —</option>
+                {schema.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+
+              <div className="font-medium text-gray-700">Field:</div>
+              <select
+                value={editForm.fromFieldId}
+                disabled={!editForm.fromTableId}
+                onChange={e => setEditForm(f => ({ ...f, fromFieldId: e.target.value }))}
+                className="border border-gray-400 bg-white px-2 py-1 text-sm"
+              >
+                <option value="">— select —</option>
+                {editFromFields.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+              </select>
+              <select
+                value={editForm.toFieldId}
+                disabled={!editForm.toTableId}
+                onChange={e => setEditForm(f => ({ ...f, toFieldId: e.target.value }))}
+                className="border border-gray-400 bg-white px-2 py-1 text-sm"
+              >
+                <option value="">— select —</option>
+                {editToFields.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+              </select>
+            </div>
+
+            {/* Integrity / cascade options */}
+            <div className="mt-4 border border-gray-400 bg-white p-3 space-y-1.5 text-sm">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editForm.enforceIntegrity}
+                  onChange={e => setEditForm(f => ({
+                    ...f, enforceIntegrity: e.target.checked,
+                    cascadeUpdate: e.target.checked ? f.cascadeUpdate : false,
+                    cascadeDelete: e.target.checked ? f.cascadeDelete : false,
+                  }))}
+                />
+                <span>Enforce Referential Integrity</span>
+              </label>
+              <label className={`flex items-center gap-2 ml-5 ${editForm.enforceIntegrity ? 'cursor-pointer' : 'opacity-40'}`}>
+                <input
+                  type="checkbox"
+                  disabled={!editForm.enforceIntegrity}
+                  checked={editForm.cascadeUpdate}
+                  onChange={e => setEditForm(f => ({ ...f, cascadeUpdate: e.target.checked }))}
+                />
+                <span>Cascade Update Related Fields</span>
+              </label>
+              <label className={`flex items-center gap-2 ml-5 ${editForm.enforceIntegrity ? 'cursor-pointer' : 'opacity-40'}`}>
+                <input
+                  type="checkbox"
+                  disabled={!editForm.enforceIntegrity}
+                  checked={editForm.cascadeDelete}
+                  onChange={e => setEditForm(f => ({ ...f, cascadeDelete: e.target.checked }))}
+                />
+                <span>Cascade Delete Related Records</span>
+              </label>
+            </div>
+
+            {/* Relationship type display */}
+            <div className="mt-3 text-sm flex items-center gap-2">
+              <span className="font-semibold text-gray-700">Relationship Type:</span>
+              <select
+                value={editForm.relationshipType}
+                onChange={e => setEditForm(f => ({ ...f, relationshipType: e.target.value }))}
+                className="border border-gray-400 bg-white px-2 py-1 text-sm"
+              >
+                <option value="one-to-many">One-To-Many</option>
+                <option value="one-to-one">One-To-One</option>
+                <option value="many-to-many">Many-To-Many (Indeterminate)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="bg-[#f3f2f1] border-t border-gray-300 px-4 py-3 flex justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => setJoinDialogOpen(true)}>Join Type…</Button>
+            <div className="flex-1" />
+            <Button size="sm" onClick={handleSaveEdit} className="bg-[#7b1fa2] hover:bg-[#6a1b9a]">OK</Button>
+            <Button variant="outline" size="sm" onClick={() => setEditRelId(null)}>Cancel</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Join Type sub-dialog */}
+      <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
+        <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
+          <DialogHeader className="bg-[#7b1fa2] text-white px-3 py-2">
+            <DialogTitle className="text-sm font-semibold">Join Properties</DialogTitle>
+            <DialogDescription className="sr-only">Choose the type of join between the two tables.</DialogDescription>
+          </DialogHeader>
+          <div className="p-4 bg-[#f3f2f1] text-sm space-y-3">
+            {[
+              { v: 1, label: 'Only include rows where the joined fields from both tables are equal.' },
+              { v: 2, label: 'Include ALL records from the left table and only those records from the right table where the joined fields are equal.' },
+              { v: 3, label: 'Include ALL records from the right table and only those records from the left table where the joined fields are equal.' },
+            ].map(opt => (
+              <label key={opt.v} className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="join-type"
+                  checked={editForm.joinType === opt.v}
+                  onChange={() => setEditForm(f => ({ ...f, joinType: opt.v }))}
+                  className="mt-0.5"
+                />
+                <span><span className="font-semibold mr-1">{opt.v}:</span>{opt.label}</span>
+              </label>
+            ))}
+          </div>
+          <div className="bg-[#f3f2f1] border-t border-gray-300 px-4 py-3 flex justify-end gap-2">
+            <Button size="sm" onClick={() => setJoinDialogOpen(false)} className="bg-[#7b1fa2] hover:bg-[#6a1b9a]">OK</Button>
+            <Button variant="outline" size="sm" onClick={() => setJoinDialogOpen(false)}>Cancel</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Add Relationship Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>

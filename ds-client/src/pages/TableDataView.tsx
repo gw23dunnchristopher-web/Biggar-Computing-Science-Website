@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import { registerOpenTable } from '@/lib/openTables';
 import { useLocation } from 'wouter';
 import {
   Database, Table as TableType,
@@ -353,6 +354,13 @@ export function TableDataView({
     color: fmtColor,
     backgroundColor: fmtHighlight !== 'transparent' ? fmtHighlight : undefined,
   };
+
+  // Register this (database, table) as open in this tab so other tabs and
+  // the lookup wizard can detect a conflict before doing structural changes.
+  useEffect(() => {
+    if (!databaseId || !tableId) return;
+    return registerOpenTable(databaseId, tableId);
+  }, [databaseId, tableId]);
 
   const { data: table, isLoading: tableLoading } = useGetTable(databaseId, tableId);
   const { data: allRecords, isLoading: recordsLoading } = useListRecords(databaseId, tableId, {});

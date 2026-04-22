@@ -11,6 +11,8 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
+import { useToast } from '@/hooks/use-toast';
+import { isTableOpenElsewhere } from '@/lib/openTables';
 
 export interface LookupConfig {
   type: 'valuelist' | 'table';
@@ -203,6 +205,9 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
   const [lwViewFilter, setLwViewFilter] = useState<'tables' | 'queries' | 'both'>('tables');
   // Fields fetched lazily for tables that don't include `fields` in the parent prop.
   const [lwFetchedFields, setLwFetchedFields] = useState<{ [tableId: number]: any[] }>({});
+  // Sample records used to populate the column-width preview (step 5).
+  const [lwSampleRecords, setLwSampleRecords] = useState<{ [tableId: number]: any[] }>({});
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!lookupWizardOpen || lwSourceType !== 'table' || lwTableId == null || databaseId == null) return;
@@ -274,8 +279,42 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
 
   useImperativeHandle(ref, () => ({ openLookupWizard }), [openLookupWizard]);
 
+  // Fetch up to 10 sample records once we reach the column-width preview step
+  // so the user can see real values, like Access does.
+  useEffect(() => {
+    if (!lookupWizardOpen || lwSourceType !== 'table' || lwStep !== 5 || lwTableId == null || databaseId == null) return;
+    if (lwSampleRecords[lwTableId]) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/ds/databases/${databaseId}/tables/${lwTableId}/records?limit=10`, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (cancelled) return;
+        const rows = Array.isArray(data) ? data : (Array.isArray(data?.records) ? data.records : []);
+        setLwSampleRecords(prev => ({ ...prev, [lwTableId]: rows.slice(0, 10) }));
+      } catch { /* ignore */ }
+    })();
+    return () => { cancelled = true; };
+  }, [lookupWizardOpen, lwStep, lwSourceType, lwTableId, databaseId, lwSampleRecords]);
+
   const finishLookupWizard = () => {
     if (lwFieldIdx === null) return;
+    // If the user enabled referential integrity (which creates a relationship)
+    // and the source table is open in another tab, refuse — Access blocks
+    // structural changes while a referenced table is open.
+    if (lwSourceType === 'table' && lwEnforceIntegrity && lwTableId != null && databaseId != null
+        && isTableOpenElsewhere(databaseId, lwTableId)) {
+      const t = tables.find(x => x.id === lwTableId);
+      toast({
+        title: 'Source table is open',
+        description: `Close "${t?.name ?? 'the source table'}" in other tabs before creating this lookup with referential integrity.`,
+        variant: 'destructive',
+      });
+      return;
+    }
     let cfg: LookupConfig;
     if (lwSourceType === 'valuelist') {
       const flatValues = lwValues.map(row => row[0] || '').filter(v => v.trim() !== '');
@@ -621,25 +660,47 @@ export const DesignGrid = forwardRef<DesignGridHandle, DesignGridProps>(function
                       To adjust the width of a column, drag its right edge to the width you want, or double-click the right edge of the column heading to get the best fit.
                     </p>
                     <div className="border border-gray-400 bg-white h-[160px] overflow-auto">
-                      <table className="text-sm border-collapse w-full">
-                        <thead>
-                          <tr>
-                            {(lwSelectedFields.length > 0 ? lwSelectedFields : ['(field)']).map((fname, i) => (
-                              <th key={i} className="border-b border-r border-gray-300 bg-[#f3f2f1] px-2 py-1 text-left text-xs font-medium text-gray-700">{fname}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {[0,1,2,3,4,5].map(r => (
-                            <tr key={r}>
-                              {(lwSelectedFields.length > 0 ? lwSelectedFields : ['(field)']).map((_, ci) => (
-                                <td key={ci} className="border-b border-r border-gray-200 px-2 py-1 text-gray-300 text-xs">&nbsp;</td>
+                      {(() => {
+                        const cols = lwSelectedFields.length > 0 ? lwSelectedFields : ['(field)'];
+                        const rows = (lwTableId != null ? lwSampleRecords[lwTableId] : null) ?? [];
+                        const display = rows.length > 0 ? rows : Array(6).fill(null);
+                        return (
+                          <table className="text-sm border-collapse w-full">
+                            <thead>
+                              <tr>
+                                {cols.map((fname, i) => (
+                                  <th key={i} className="border-b border-r border-gray-300 bg-[#f3f2f1] px-2 py-1 text-left text-xs font-medium text-gray-700">{fname}</th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {display.map((row: any, r: number) => (
+                                <tr key={r}>
+                                  {cols.map((fname, ci) => {
+                                    const raw = row && typeof row === 'object' ? row[fname] : null;
+                                    const text = raw === null || raw === undefined || raw === ''
+                                      ? ''
+                                      : (typeof raw === 'object' ? JSON.stringify(raw) : String(raw));
+                                    return (
+                                      <td
+                                        key={ci}
+                                        title={text}
+                                        className={`border-b border-r border-gray-200 px-2 py-1 text-xs whitespace-nowrap overflow-hidden text-ellipsis max-w-[180px] ${text ? 'text-gray-800' : 'text-gray-300'}`}
+                                      >
+                                        {text || '\u00A0'}
+                                      </td>
+                                    );
+                                  })}
+                                </tr>
                               ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                            </tbody>
+                          </table>
+                        );
+                      })()}
                     </div>
+                    {lwTableId != null && (lwSampleRecords[lwTableId]?.length ?? 0) === 0 && (
+                      <p className="text-[11px] text-gray-500 mt-1">No records in this table yet — sample data will appear once rows exist.</p>
+                    )}
                   </>
                 )}
 

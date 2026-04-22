@@ -794,10 +794,39 @@ export function registerDsRoutes(app: Express) {
 
   app.post("/api/ds/databases/:dbId/relationships", async (req, res) => {
     const databaseId = parseInt(req.params.dbId);
-    const { fromTableId, fromFieldId, toTableId, toFieldId, relationshipType } = req.body;
+    const { fromTableId, fromFieldId, toTableId, toFieldId, relationshipType, enforceIntegrity, cascadeUpdate, cascadeDelete, joinType } = req.body;
     if (!fromTableId || !fromFieldId || !toTableId || !toFieldId) return res.status(400).json({ error: "fromTableId, fromFieldId, toTableId, toFieldId are required" });
-    const [r] = await db!.insert(dsRelationships).values({ databaseId, fromTableId, fromFieldId, toTableId, toFieldId, relationshipType: relationshipType || "one-to-many" }).returning();
+    const [r] = await db!.insert(dsRelationships).values({
+      databaseId, fromTableId, fromFieldId, toTableId, toFieldId,
+      relationshipType: relationshipType || "one-to-many",
+      enforceIntegrity: !!enforceIntegrity,
+      cascadeUpdate: !!cascadeUpdate,
+      cascadeDelete: !!cascadeDelete,
+      joinType: typeof joinType === 'number' ? joinType : 1,
+    }).returning();
     res.status(201).json(tsFmt(r, "createdAt"));
+  });
+
+  app.put("/api/ds/databases/:dbId/relationships/:relId", async (req, res) => {
+    const databaseId = parseInt(req.params.dbId);
+    const relId = parseInt(req.params.relId);
+    const { fromTableId, fromFieldId, toTableId, toFieldId, relationshipType, enforceIntegrity, cascadeUpdate, cascadeDelete, joinType } = req.body;
+    const updates: any = {};
+    if (fromTableId !== undefined) updates.fromTableId = fromTableId;
+    if (fromFieldId !== undefined) updates.fromFieldId = fromFieldId;
+    if (toTableId !== undefined) updates.toTableId = toTableId;
+    if (toFieldId !== undefined) updates.toFieldId = toFieldId;
+    if (relationshipType !== undefined) updates.relationshipType = relationshipType;
+    if (enforceIntegrity !== undefined) updates.enforceIntegrity = !!enforceIntegrity;
+    if (cascadeUpdate !== undefined) updates.cascadeUpdate = !!cascadeUpdate;
+    if (cascadeDelete !== undefined) updates.cascadeDelete = !!cascadeDelete;
+    if (joinType !== undefined) updates.joinType = joinType;
+    if (Object.keys(updates).length === 0) return res.status(400).json({ error: "no fields to update" });
+    const [r] = await db!.update(dsRelationships).set(updates)
+      .where(and(eq(dsRelationships.id, relId), eq(dsRelationships.databaseId, databaseId)))
+      .returning();
+    if (!r) return res.status(404).json({ error: "Relationship not found" });
+    res.json(tsFmt(r, "createdAt"));
   });
 
   app.delete("/api/ds/databases/:dbId/relationships/:relId", async (req, res) => {

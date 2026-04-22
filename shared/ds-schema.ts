@@ -97,5 +97,9 @@ export const dsRelationships = pgTable("ds_relationships", {
   toTableId: integer("to_table_id").notNull(),
   toFieldId: integer("to_field_id").notNull(),
   relationshipType: text("relationship_type").notNull().default("one-to-many"),
+  enforceIntegrity: boolean("enforce_integrity").notNull().default(false),
+  cascadeUpdate: boolean("cascade_update").notNull().default(false),
+  cascadeDelete: boolean("cascade_delete").notNull().default(false),
+  joinType: integer("join_type").notNull().default(1),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
