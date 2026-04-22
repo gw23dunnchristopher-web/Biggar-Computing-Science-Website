@@ -226,20 +226,20 @@
 
                 function renderDashboard() {
                     var projects = CodeProjects.list(KIND);
-                    var html = '<div class="cp-dashboard">' +
+                    var html = '<div class="cp-dashboard cp-theme-html">' +
                         '<h2>Good day</h2>' +
                         '<p class="cp-sub">Open a project to keep working on it, or create a new one.</p>' +
                         '<div class="cp-grid">' +
-                        '<button class="cp-tile cp-tile-create" id="cpNewBtn">' +
+                        '<div class="cp-tile cp-tile-create" id="cpNewBtn" role="button" tabindex="0">' +
                         '  <div class="cp-plus">+</div>' +
                         '  <div>New HTML Project</div>' +
-                        '</button>' +
+                        '</div>' +
                         projects.map(function (p) {
-                            return '<button class="cp-tile" data-id="' + p.id + '">' +
+                            return '<div class="cp-tile" data-id="' + p.id + '" role="button" tabindex="0">' +
                                 '<button class="cp-tile-delete" data-del="' + p.id + '" title="Delete project">&times;</button>' +
                                 '<div class="cp-tile-name">' + escapeHtml(p.name) + '</div>' +
                                 '<div class="cp-tile-meta">Updated ' + escapeHtml(fmtDate(p.updatedAt)) + '</div>' +
-                                '</button>';
+                                '</div>';
                         }).join('') +
                         '</div></div>';
                     body.innerHTML = html;

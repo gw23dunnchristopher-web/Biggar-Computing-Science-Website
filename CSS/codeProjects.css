@@ -1,5 +1,36 @@
 /* Dashboard styles for the Python and HTML/CSS editor tools.
-   Visually consistent with the Database Sandbox dashboard. */
+   Visually consistent with the Database Sandbox dashboard.
+
+   Per-tool colour themes are applied by adding a class to .cp-dashboard:
+     .cp-theme-python   → green
+     .cp-theme-html     → blue
+   Default (no theme class) keeps the original red accent.
+*/
+
+.cp-dashboard {
+    /* Theme tokens — overridden by .cp-theme-* below */
+    --cp-accent: #c42b1c;
+    --cp-accent-hover: #9b2118;
+    --cp-accent-soft: #fff5f5;
+    --cp-accent-soft-hover: #fee2e2;
+    --cp-accent-border: #fca5a5;
+}
+
+.cp-dashboard.cp-theme-python {
+    --cp-accent: #15803d;          /* green-700 */
+    --cp-accent-hover: #166534;    /* green-800 */
+    --cp-accent-soft: #f0fdf4;     /* green-50 */
+    --cp-accent-soft-hover: #dcfce7; /* green-100 */
+    --cp-accent-border: #86efac;   /* green-300 */
+}
+
+.cp-dashboard.cp-theme-html {
+    --cp-accent: #1d4ed8;          /* blue-700 */
+    --cp-accent-hover: #1e40af;    /* blue-800 */
+    --cp-accent-soft: #eff6ff;     /* blue-50 */
+    --cp-accent-soft-hover: #dbeafe; /* blue-100 */
+    --cp-accent-border: #93c5fd;   /* blue-300 */
+}
 
 .cp-dashboard {
     flex: 1;
@@ -50,7 +81,7 @@
 }
 .cp-tile:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    border-color: #c42b1c;
+    border-color: var(--cp-accent);
 }
 .cp-tile:active { transform: translateY(1px); }
 
@@ -87,12 +118,12 @@
 .cp-tile-delete:hover { background: #fee2e2; color: #b91c1c; }
 
 .cp-tile-create {
-    border: 2px dashed #fca5a5;
-    background: #fff5f5;
+    border: 2px dashed var(--cp-accent-border);
+    background: var(--cp-accent-soft);
     align-items: center;
     justify-content: center;
     text-align: center;
-    color: #c42b1c;
+    color: var(--cp-accent);
     font-weight: 600;
 }
 .cp-tile-create .cp-plus {
@@ -100,7 +131,7 @@
     line-height: 1;
     margin-bottom: 4px;
 }
-.cp-tile-create:hover { background: #fee2e2; }
+.cp-tile-create:hover { background: var(--cp-accent-soft-hover); }
 
 /* Back-to-projects link in the tool header */
 .cp-back-link {
