@@ -1,7 +1,8 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { TableWithFields, Record as DbRecord, useCreateRecord, useUpdateRecord, getListRecordsQueryKey } from '@/api';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowUp, ArrowDown, Pencil, ChevronDown, Paperclip, ExternalLink, Trash2 } from 'lucide-react';
+import { ArrowUp, ArrowDown, Pencil, ChevronDown, Paperclip, ExternalLink, Trash2, Plus, Minus } from 'lucide-react';
+import { SubDatasheet } from '@/components/ui/sub-datasheet';
 import { useToast } from '@/hooks/use-toast';
 import { parseLookupConfig, parseCalculatedExpr, parseValidation, type LookupConfig } from '@/components/ui/design-grid';
 import {
@@ -175,6 +176,20 @@ interface DataGridProps {
   onUndo?: () => void;
   onRedo?: () => void;
   onCellEdited?: (recordId: number, fieldName: string, before: any, after: any) => void;
+  /**
+   * Relationships where the current table is the PARENT (one-side).
+   * Each entry tells the grid that, for this row's `parentFieldName` value,
+   * we should be able to expand and show child records from `childTableId`
+   * (linked via `childFieldName`).
+   */
+  childRelationships?: Array<{
+    relId: number;
+    parentFieldName: string;
+    childTableId: number;
+    childTableName: string;
+    childFieldId: number;
+  }>;
+  onOpenChildTable?: (childTableId: number) => void;
 }
 
 const CLICK_TO_ADD_WIDTH = 130;
@@ -207,7 +222,17 @@ export function DataGrid({
   cellStyle,
   onNewRecordAfter, onCutRecord, onCopyRecord, onPasteRecord, onOpenRowHeight, canPaste,
   onUndo, onRedo, onCellEdited,
+  childRelationships = [], onOpenChildTable,
 }: DataGridProps) {
+  // Tracks which parent rows are currently expanded to show their related
+  // child records. Keyed by record id.
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  const toggleRowExpanded = (id: number) => setExpandedRows(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const hasChildRels = childRelationships.length > 0;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const createRecord = useCreateRecord();
@@ -1308,6 +1333,18 @@ export function DataGrid({
                       onClick={() => { onSelectRow(r.id); setFocusedCell(null); }}
                       style={{ background: rowBg, ...(rowHeightPx ? { height: rowHeightPx } : {}) }}
                     >
+                      {hasChildRels && (
+                        <td
+                          className={`border-r border-gray-300 text-center cursor-pointer flex-none overflow-hidden ${selectedRowId === r.id ? 'bg-[#cce5ff]' : 'bg-[#f3f2f1] group-hover:bg-gray-100'}`}
+                          style={{ width: 18, minWidth: 18, maxWidth: 18, height: rowHeightPx ?? 28 }}
+                          onClick={(e) => { e.stopPropagation(); toggleRowExpanded(r.id); }}
+                          title={expandedRows.has(r.id) ? 'Collapse related records' : 'Show related records'}
+                        >
+                          {expandedRows.has(r.id)
+                            ? <Minus className="w-3 h-3 text-purple-700 mx-auto" />
+                            : <Plus className="w-3 h-3 text-purple-700 mx-auto" />}
+                        </td>
+                      )}
                       <td
                         className={`border-r border-gray-300 text-center cursor-pointer flex-none overflow-hidden ${selectedRowId === r.id ? 'bg-[#cce5ff]' : 'bg-[#f3f2f1] group-hover:bg-gray-100'}`}
                         style={{ width: 15, minWidth: 15, maxWidth: 15, height: rowHeightPx ?? 28, ...(hasFrozen ? { position: 'sticky', left: 0, zIndex: 5 } : {}) }}
@@ -1394,6 +1431,43 @@ export function DataGrid({
                       })}
                       {onClickToAdd && <td className="border-r border-gray-200 h-7" />}
                     </tr>
+                  );
+                  const expanded = hasChildRels && expandedRows.has(r.id);
+                  // Total columns = expand-caret + row-selector + fields + optional click-to-add
+                  const totalCols = (hasChildRels ? 1 : 0) + 1 + fields.length + (onClickToAdd ? 1 : 0);
+                  return (
+                    <React.Fragment key={r.id}>
+                      {row}
+                      {expanded && (
+                        <tr className="bg-purple-50/30">
+                          <td colSpan={totalCols} className="p-0">
+                            <div className="space-y-1">
+                              {childRelationships.map(cr => {
+                                const parentValue = r.data?.[cr.parentFieldName];
+                                if (parentValue === null || parentValue === undefined || parentValue === '') {
+                                  return (
+                                    <div key={cr.relId} className="text-[11px] text-gray-500 italic px-8 py-1.5">
+                                      No related {cr.childTableName} (this row has no {cr.parentFieldName} value).
+                                    </div>
+                                  );
+                                }
+                                return (
+                                  <SubDatasheet
+                                    key={cr.relId}
+                                    databaseId={databaseId}
+                                    childTableId={cr.childTableId}
+                                    childTableName={cr.childTableName}
+                                    childFieldId={cr.childFieldId}
+                                    parentValue={parentValue}
+                                    onOpenChildTable={onOpenChildTable}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   );
                 })}
 

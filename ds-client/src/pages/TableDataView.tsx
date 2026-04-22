@@ -30,7 +30,7 @@ import {
   EyeIcon, Lock, Maximize2, SpellCheck
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -373,6 +373,53 @@ export function TableDataView({
     if (!table) return [];
     return [...table.fields].sort((a, b) => a.sortOrder - b.sortOrder);
   }, [table]);
+
+  // Fetch all relationships for this database so we can show Access-style
+  // sub-datasheets when this table is on the parent (one) side of any
+  // relationship. We only enable the request once the table has loaded.
+  const { data: allRelationships } = useQuery<any[]>({
+    queryKey: ['/api/ds/databases', databaseId, 'relationships'],
+    queryFn: async () => {
+      const res = await fetch(`/api/ds/databases/${databaseId}/relationships`, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) return [];
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    },
+    enabled: !!databaseId,
+  });
+
+  const childRelationships = useMemo(() => {
+    if (!allRelationships || !table) return [];
+    return allRelationships
+      .filter((rel: any) => rel.fromTableId === tableId)
+      .map((rel: any) => {
+        // Resolve human-readable field/table names. Names are needed because
+        // the data records and the SubDatasheet operate on field names rather
+        // than ids.
+        const parentField = table.fields.find((f: any) => f.id === rel.fromFieldId);
+        const childTable = tables.find((t: any) => t.id === rel.toTableId);
+        // The SubDatasheet itself fetches the child table's full schema and
+        // resolves the FK field name from this id.
+        const childFieldId: number | undefined = rel.toFieldId;
+        if (!parentField || !childTable || !childFieldId) return null;
+        return {
+          relId: rel.id as number,
+          parentFieldName: parentField.name as string,
+          childTableId: rel.toTableId as number,
+          childTableName: childTable.name as string,
+          childFieldId,
+        };
+      })
+      .filter(Boolean) as Array<{
+        relId: number;
+        parentFieldName: string;
+        childTableId: number;
+        childTableName: string;
+        childFieldId: number;
+      }>;
+  }, [allRelationships, table, tables, tableId]);
 
   const goToDesign = () => {
     if (onSwitchToDesign) onSwitchToDesign();
@@ -1270,6 +1317,11 @@ export function TableDataView({
               onUndo={handleUndo}
               onRedo={handleRedo}
               onCellEdited={handleCellEdited}
+              childRelationships={childRelationships}
+              onOpenChildTable={(childId) => {
+                if (onSelectTable) onSelectTable(childId);
+                else setLocation(`/databases/${databaseId}/tables/${childId}`);
+              }}
             />
           )}
         </div>
