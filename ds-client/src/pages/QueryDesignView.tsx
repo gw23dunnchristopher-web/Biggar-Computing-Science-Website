@@ -265,6 +265,200 @@ function buildQuerySql(definition: QueryDefinition): string {
   return sql;
 }
 
+/**
+ * Strip surrounding quotes/brackets from a SQL identifier.
+ * `"My Field"` → `My Field`, `[My Field]` → `My Field`, `MyField` → `MyField`.
+ */
+function unquoteIdent(s: string): string {
+  s = s.trim();
+  if (!s) return s;
+  if (s.startsWith('"') && s.endsWith('"')) return s.slice(1, -1).replace(/""/g, '"');
+  if (s.startsWith('`') && s.endsWith('`')) return s.slice(1, -1);
+  if (s.startsWith('[') && s.endsWith(']')) return s.slice(1, -1);
+  return s;
+}
+
+/** Split a comma-separated list while respecting quotes and parentheses. */
+function splitTopLevel(s: string, sep: string = ','): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let buf = '';
+  let q: string | null = null;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (q) {
+      buf += c;
+      if (c === q) q = null;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') { q = c; buf += c; continue; }
+    if (c === '(' || c === '[') { depth++; buf += c; continue; }
+    if (c === ')' || c === ']') { depth--; buf += c; continue; }
+    if (depth === 0 && c === sep) { parts.push(buf); buf = ''; continue; }
+    buf += c;
+  }
+  if (buf.trim()) parts.push(buf);
+  return parts.map(p => p.trim()).filter(Boolean);
+}
+
+interface ParsedQuery {
+  tables: { tableId: number; tableName: string }[];
+  columns: QueryColumn[];
+}
+
+/**
+ * Best-effort parser for the same SELECT subset that buildQuerySql produces.
+ * Supports: SELECT a, b AS x, * FROM t1 [, t2 …] [WHERE col = v AND …] [ORDER BY col ASC|DESC, …].
+ * Returns null if the SQL uses features we don't reverse-engineer (JOINs,
+ * sub-queries, GROUP BY/HAVING, UNION, etc.) so the design grid stays as-is.
+ */
+function parseQuerySql(rawSql: string, knownTables: { id: number; name: string }[]): ParsedQuery | null {
+  // Strip line and block comments, normalise whitespace, drop trailing semicolon.
+  let sql = rawSql
+    .replace(/--[^\n]*/g, ' ')
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/;+\s*$/, '');
+  if (!/^select\b/i.test(sql)) return null;
+  // Bail on features we don't model in design view.
+  if (/\b(join|union|intersect|except|having|group\s+by)\b/i.test(sql)) return null;
+  if (/\bselect\b[\s\S]*\bselect\b/i.test(sql)) return null; // sub-query
+
+  const m = sql.match(/^select\s+([\s\S]+?)\s+from\s+([\s\S]+?)(?:\s+where\s+([\s\S]+?))?(?:\s+order\s+by\s+([\s\S]+?))?$/i);
+  if (!m) return null;
+  const selectClause = m[1];
+  const fromClause = m[2];
+  const whereClause = m[3];
+  const orderClause = m[4];
+
+  // FROM: comma-separated table names (no JOINs).
+  const tableNames = splitTopLevel(fromClause).map(unquoteIdent);
+  const resolved: { tableId: number; tableName: string }[] = [];
+  for (const tn of tableNames) {
+    const t = knownTables.find(kt => kt.name.toLowerCase() === tn.toLowerCase());
+    if (!t) return null; // Unknown table — give up rather than silently dropping it.
+    resolved.push({ tableId: t.id, tableName: t.name });
+  }
+  if (resolved.length === 0) return null;
+  const defaultTableName = resolved.length === 1 ? resolved[0].tableName : '';
+
+  // Helpers to split "Table.Field" / "Field" with quoting.
+  const parseFieldRef = (raw: string): { tableName: string; fieldName: string } | null => {
+    const r = raw.trim();
+    const dot = (() => {
+      let q: string | null = null;
+      for (let i = 0; i < r.length; i++) {
+        const c = r[i];
+        if (q) { if (c === q) q = null; continue; }
+        if (c === '"' || c === '`' || c === "'") { q = c; continue; }
+        if (c === '.') return i;
+      }
+      return -1;
+    })();
+    if (dot >= 0) {
+      const tn = unquoteIdent(r.slice(0, dot));
+      const fn = unquoteIdent(r.slice(dot + 1));
+      const t = resolved.find(x => x.tableName.toLowerCase() === tn.toLowerCase());
+      if (!t) return null;
+      return { tableName: t.tableName, fieldName: fn };
+    }
+    if (!defaultTableName) return null; // Ambiguous in multi-table FROM.
+    return { tableName: defaultTableName, fieldName: unquoteIdent(r) };
+  };
+
+  // SELECT columns. `*` means show every column from the (single) FROM table.
+  const selectItems = splitTopLevel(selectClause);
+  const columns: QueryColumn[] = [];
+  // We treat sort/criteria as overlays on the same column when possible, so
+  // build a lookup keyed by table.field while we go.
+  const colKey = (t: string, f: string) => `${t.toLowerCase()}\u0001${f.toLowerCase()}`;
+  const columnIndex = new Map<string, number>();
+
+  if (selectItems.length === 1 && selectItems[0].trim() === '*') {
+    // Leave columns empty — design view will treat this as "all columns".
+  } else {
+    for (const item of selectItems) {
+      // Strip optional "AS alias".
+      const asMatch = item.match(/^([\s\S]+?)\s+as\s+([\w"'`\[\]]+)\s*$/i);
+      const exprPart = asMatch ? asMatch[1].trim() : item.trim();
+      const aliasPart = asMatch ? unquoteIdent(asMatch[2]) : '';
+      // Reject any select expression that looks like an aggregate or
+      // arithmetic — design view doesn't model those without GROUP BY.
+      if (/[()+\-*/]/.test(exprPart)) return null;
+      const ref = parseFieldRef(exprPart);
+      if (!ref) return null;
+      columns.push({
+        tableId: resolved.find(t => t.tableName === ref.tableName)!.tableId,
+        tableName: ref.tableName,
+        fieldName: ref.fieldName,
+        alias: aliasPart || '',
+        show: true,
+        criteria: '',
+        sort: '',
+        totalFn: '',
+      } as QueryColumn);
+      columnIndex.set(colKey(ref.tableName, ref.fieldName), columns.length - 1);
+    }
+  }
+
+  // ORDER BY → set sort on the matching column, or add a hidden column.
+  if (orderClause) {
+    const orderItems = splitTopLevel(orderClause);
+    for (const item of orderItems) {
+      const dirMatch = item.match(/^([\s\S]+?)(?:\s+(asc|desc))?\s*$/i);
+      if (!dirMatch) return null;
+      const ref = parseFieldRef(dirMatch[1]);
+      if (!ref) return null;
+      const dir = (dirMatch[2] || 'asc').toLowerCase() === 'desc' ? 'desc' : 'asc';
+      const k = colKey(ref.tableName, ref.fieldName);
+      let idx = columnIndex.get(k);
+      if (idx === undefined) {
+        columns.push({
+          tableId: resolved.find(t => t.tableName === ref.tableName)!.tableId,
+          tableName: ref.tableName, fieldName: ref.fieldName,
+          alias: '', show: false, criteria: '', sort: dir, totalFn: '',
+        } as QueryColumn);
+        columnIndex.set(k, columns.length - 1);
+      } else {
+        columns[idx].sort = dir;
+      }
+    }
+  }
+
+  // WHERE → set criteria. Only support `field <op> value` joined by AND, where
+  // the LHS is a simple field reference. Anything trickier → bail.
+  if (whereClause) {
+    const conds = whereClause.split(/\s+AND\s+/i).map(s => s.trim()).filter(Boolean);
+    for (const cond of conds) {
+      const cm = cond.match(/^([\w".\[\]`]+)\s*(=|<>|!=|>=|<=|>|<|\bLIKE\b)\s*([\s\S]+)$/i);
+      if (!cm) return null;
+      const ref = parseFieldRef(cm[1]);
+      if (!ref) return null;
+      const op = cm[2].trim().toUpperCase();
+      const rhs = cm[3].trim();
+      // Mirror the criteria the user would type in the design grid. For `=`
+      // we drop the operator (criteria field assumes equality), otherwise we
+      // keep the operator prefix so buildQuerySql round-trips correctly.
+      const criteria = op === '=' ? rhs : `${op === '!=' ? '<>' : op} ${rhs}`;
+      const k = colKey(ref.tableName, ref.fieldName);
+      let idx = columnIndex.get(k);
+      if (idx === undefined) {
+        columns.push({
+          tableId: resolved.find(t => t.tableName === ref.tableName)!.tableId,
+          tableName: ref.tableName, fieldName: ref.fieldName,
+          alias: '', show: false, criteria, sort: '', totalFn: '',
+        } as QueryColumn);
+        columnIndex.set(k, columns.length - 1);
+      } else {
+        columns[idx].criteria = criteria;
+      }
+    }
+  }
+
+  return { tables: resolved, columns };
+}
+
 export function QueryDesignView({
   databaseId, queryId, db, tables, onDeleteTable, isStudentMode, initialView,
   queries = [], forms = [], reports = [], onSelectTable, onSelectQuery, onDeleteQuery, onDeleteForm, onDeleteReport,
@@ -592,8 +786,26 @@ export function QueryDesignView({
       const formatted = { columns: cols.map(c => ({ key: c, label: c })), rows };
       setResults(formatted);
       setView('datasheet');
-      // Persist fresh results so they show immediately on reopen.
-      saveStateRef.current = { ...saveStateRef.current, results: formatted };
+      // Try to recreate the design grid from the SQL the user just ran. If
+      // the SQL uses features we can't model (JOINs, sub-queries, etc.) we
+      // leave the design definition untouched.
+      const parsed = parseQuerySql(sqlText, tables);
+      let nextDefinition = definition;
+      if (parsed) {
+        nextDefinition = {
+          ...definition,
+          tables: parsed.tables,
+          columns: parsed.columns,
+        };
+        setDefinition(nextDefinition);
+      }
+      // Persist fresh results (and any updated design) so they show
+      // immediately on reopen.
+      saveStateRef.current = {
+        ...saveStateRef.current,
+        results: formatted,
+        definition: nextDefinition,
+      };
       void persistQuery(true);
     } catch (e: any) {
       setSqlError(e.message || 'Query failed');
