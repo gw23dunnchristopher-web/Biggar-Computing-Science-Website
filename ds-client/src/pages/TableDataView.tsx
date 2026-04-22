@@ -395,10 +395,12 @@ export function TableDataView({
       try {
         // PATCH only renames — it never touches fields, so we can't
         // accidentally wipe them by sending an empty fields array.
-        await apiFetch(`/api/ds/databases/${databaseId}/tables/${tableId}`, {
+        const res = await fetch(`/api/ds/databases/${databaseId}/tables/${tableId}`, {
           method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: newName }),
         });
+        if (!res.ok) throw new Error(`PATCH failed: ${res.status}`);
         queryClient.invalidateQueries({ queryKey: getGetTableQueryKey(databaseId, tableId) });
         queryClient.invalidateQueries({ queryKey: getListTablesQueryKey(databaseId) });
       } catch {
