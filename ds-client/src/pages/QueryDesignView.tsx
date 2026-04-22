@@ -674,7 +674,7 @@ export function QueryDesignView({
           >
             <RibbonButton icon={<DesignViewIcon size={16} />} label="Design" onClick={() => switchView('design')} active={view === 'design'} />
             <RibbonButton icon={<DsDatasheetIcon size={16} />} label="Datasheet" onClick={() => switchView('datasheet')} active={view === 'datasheet'} />
-            <RibbonButton icon={<span className="text-[14px] font-semibold leading-none">SQL</span>} label="SQL" onClick={() => switchView('sql')} active={view === 'sql'} />
+            <RibbonButton icon={<span className="text-[14px] font-semibold leading-none">SQL</span>} label="View" onClick={() => switchView('sql')} active={view === 'sql'} />
           </RibbonDropdownButton>
         </RibbonGroup>
       }
@@ -1166,18 +1166,7 @@ export function QueryDesignView({
                 />
               </div>
             </div>
-            {/* Run bar */}
-            <div className="flex-none flex items-center gap-2 px-3 py-2 bg-[#f3f2f1] border-t border-gray-300">
-              <button
-                onClick={handleRunSql}
-                disabled={isSqlRunning}
-                className="flex items-center gap-1.5 px-3 py-1 bg-[#e1dfdd] border border-gray-400 text-gray-700 text-xs rounded hover:bg-[#d2d0ce] disabled:opacity-50"
-              >
-                <Play size={12} /> {isSqlRunning ? 'Running...' : 'Run'}
-              </button>
-              <span className="text-xs text-gray-400">Ctrl+Enter or F5 to run</span>
-            </div>
-            {/* Results */}
+            {/* Error display (Run is in the ribbon) */}
             {sqlError && (
               <div className="flex-none mx-3 my-2 p-2 bg-red-50 border border-red-300 rounded text-xs text-red-700 font-mono">
                 {sqlError}
