@@ -15,6 +15,7 @@ import { GitBranch, Plus, Trash2, Link2, Info, KeyRound, Hash, Type, Calendar, T
 import type { Database, Table } from '@/api';
 import type { QueryRow } from '@/components/layout/Sidebar';
 import { isTableOpenElsewhere } from '@/lib/openTables';
+import { useQueryClient } from '@tanstack/react-query';
 
 
 async function apiFetch(path: string, opts?: RequestInit) {
@@ -106,6 +107,7 @@ export function RelationshipsView({
   onCompact, onAnalyse, onDocumenter, onObjectDependencies,
 }: Props) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const [schema, setSchema] = useState<TableWithFields[]>([]);
@@ -226,6 +228,13 @@ export function RelationshipsView({
     try {
       await apiFetch(`/api/ds/databases/${databaseId}/relationships/${id}`, { method: 'DELETE' });
       await loadRelationships();
+      // The server also clears the lookup config from the FK field, so any
+      // open table data view should refetch its schema/records to drop the
+      // dropdown widget. Invalidating broadly is cheap here.
+      queryClient.invalidateQueries({ queryKey: ['/api/ds/databases', databaseId] });
+      queryClient.invalidateQueries({ predicate: q =>
+        Array.isArray(q.queryKey) && typeof q.queryKey[0] === 'string' && (q.queryKey[0] as string).startsWith(`/api/ds/databases/${databaseId}`)
+      });
       setSelectedRel(null);
     } catch { toast({ title: 'Failed to delete', variant: 'destructive' }); }
   };
