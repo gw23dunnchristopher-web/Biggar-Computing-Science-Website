@@ -367,22 +367,25 @@ export function EmbedView({ token, initialMode }: Props) {
   }
 
   useEffect(() => {
+    let cancelled = false;
     const sessionKey = getOrCreateSessionKey();
     setIsLoading(true);
     setError(null);
-    fetch(`/api/ds/embeds/${token}`, {
-      headers: { 'Content-Type': 'application/json', 'x-session-key': sessionKey }
-    })
-      .then(r => {
-        if (!r.ok) throw new Error('Invalid embed');
-        return r.json();
-      })
-      .then(async (data: EmbedSnapshot) => {
+
+    const attempt = async (tryNum: number): Promise<void> => {
+      try {
+        const r = await fetch(`/api/ds/embeds/${token}`, {
+          headers: { 'Content-Type': 'application/json', 'x-session-key': sessionKey }
+        });
+        if (!r.ok) {
+          throw new Error(r.status === 404 ? 'not-found' : `http-${r.status}`);
+        }
+        const data: EmbedSnapshot = await r.json();
+        if (cancelled) return;
         setSnapshot(data);
         try { window.parent?.postMessage({ type: 'ds-embed-ready', token }, '*'); } catch {}
-        // Load forms/reports/queries for the database
         await Promise.all([loadForms(data.database.id), loadReports(data.database.id), loadQueries(data.database.id)]);
-        // Auto-open the first table in Datasheet View
+        if (cancelled) return;
         const firstTable = data.tables?.[0];
         if (firstTable) {
           setActiveTableId(firstTable.id);
@@ -390,11 +393,22 @@ export function EmbedView({ token, initialMode }: Props) {
           setOpenTabs([{ key: `table-${firstTable.id}`, url: '', label: firstTable.name, objectType: 'table' }]);
         }
         setIsLoading(false);
-      })
-      .catch(e => {
-        setError(e.message);
-        setIsLoading(false);
-      });
+      } catch (e: any) {
+        // Retry once on transient/network errors (common on slow mobile data).
+        const msg = String(e?.message || e);
+        const transient = msg !== 'not-found' && tryNum < 2;
+        if (transient && !cancelled) {
+          await new Promise(r => setTimeout(r, 800));
+          if (!cancelled) return attempt(tryNum + 1);
+        }
+        if (!cancelled) {
+          setError(msg);
+          setIsLoading(false);
+        }
+      }
+    };
+    attempt(1);
+    return () => { cancelled = true; };
   }, [token, resetKey]);
 
   // ── Quick-create (Blank/Auto Form & Report) ─────────────────────────────
@@ -670,9 +684,27 @@ export function EmbedView({ token, initialMode }: Props) {
   }
 
   if (error || !snapshot) {
+    const isNotFound = error === 'not-found';
     return (
-      <div className="p-8 text-center text-red-600 font-bold">
-        Error: Invalid or expired embed token.
+      <div className="p-8 text-center max-w-md mx-auto">
+        <div className="text-red-600 font-bold mb-2">
+          {isNotFound
+            ? 'This database exercise is no longer available.'
+            : "Couldn't load the database."}
+        </div>
+        <div className="text-sm text-gray-600 mb-4">
+          {isNotFound
+            ? 'The embed token in this page is missing from the server. Please refresh the lesson page.'
+            : 'This usually means the connection dropped. Try again in a moment.'}
+        </div>
+        {!isNotFound && (
+          <button
+            onClick={() => { setError(null); setResetKey(k => k + 1); }}
+            className="px-4 py-2 bg-[#C42B1C] text-white rounded font-semibold hover:bg-[#9B2118]"
+          >
+            Try again
+          </button>
+        )}
       </div>
     );
   }
