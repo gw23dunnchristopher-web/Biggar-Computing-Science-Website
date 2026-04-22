@@ -5,6 +5,13 @@
         s.src = '/JavaScript/accessibility.js';
         document.head.appendChild(s);
     }
+
+    if (!document.getElementById('sa-script')) {
+        var s = document.createElement('script');
+        s.id = 'sa-script';
+        s.src = '/JavaScript/siteAuth.js';
+        document.head.appendChild(s);
+    }
 })();
 
 function brighten(event) {

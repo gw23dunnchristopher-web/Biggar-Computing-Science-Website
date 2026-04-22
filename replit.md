@@ -35,6 +35,9 @@ The Python Editor (`HTML/Tools/PythonEditor.html`) and HTML/CSS Editor (`HTML/To
 ### BHS Progress Tracker
 A unified progress tracking SPA at `/progress/` provides teachers with a consolidated view of student progress across all courses, including class lists, student result timelines, and visual bar charts.
 
+### Site-Wide Student Login (`JavaScript/siteAuth.js`, `CSS/siteAuth.css`)
+A small vanilla-JS component that mounts a fixed login pill in the top-right of every static page on the main site. It is auto-loaded by the existing bootstrap scripts (`script.js`, `higherScript.js`, `N4Script.js`, `indexScript.js`) — no per-page edits required. It reuses the existing `/api/student/login`, `/api/student/verify`, `/api/student/change-password`, `/api/student/logout` endpoints and stores the session under the same `studentToken` / `studentTokenExpires` localStorage keys the Higher and N5 revision SPAs use, so signing in on the main site automatically signs the student into the revision apps and vice versa (cross-tab `storage` event keeps the bar in sync). The login modal handles the "must change password" first-login flow. Exposes a global `window.SiteAuth` API (`getUser`, `getToken`, `isAuthenticated`, `onChange`, `requireLogin`, `openLogin`, `logout`) for tool pages to gate cloud-sync features behind a logged-in student. Login remains entirely optional — guests (e.g. visitors from other schools) can use every tool without an account.
+
 ### Cross-App Settings Synchronization
 Settings like dark/light mode (`vite-ui-theme`) and accessibility settings (`a11y-settings`) are synchronized across the main website, revision apps, and Data Sculptor using localStorage and `storage` event listeners for a consistent user experience.
 
