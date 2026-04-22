@@ -1354,9 +1354,8 @@ export function DataGrid({
                   const isEditing = editingCell?.recordId === r.id;
                   const isFocused = focusedCell?.rowIdx === rowIdx;
                   const rowBg = selectedRowId === r.id ? '#fef2f2' /* red-50 */ : '#ffffff';
-                  return (
+                  const row = (
                     <tr
-                      key={r.id}
                       className={`group border-b border-gray-200 ${selectedRowId === r.id ? 'bg-red-50' : 'hover:bg-red-50/30'}`}
                       onClick={() => { onSelectRow(r.id); setFocusedCell(null); }}
                       style={{ background: rowBg, ...(rowHeightPx ? { height: rowHeightPx } : {}) }}
@@ -1461,6 +1460,7 @@ export function DataGrid({
                     </tr>
                   );
                   const expanded = hasChildRels && expandedRows.has(r.id);
+                  void isEditing; void isFocused;
                   // Total columns = expand-caret + row-selector + fields + optional click-to-add
                   const totalCols = (hasChildRels ? 1 : 0) + 1 + fields.length + (onClickToAdd ? 1 : 0);
                   return (
