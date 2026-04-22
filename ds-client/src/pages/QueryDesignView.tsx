@@ -98,6 +98,7 @@ interface QueryDefinition {
   parameters?: QueryParameter[];
   sqlText?: string;
   sqlUserEdited?: boolean;
+  cachedResults?: { columns: { key: string; label: string; fieldName?: string; tableName?: string }[]; rows: Record<string, any>[] };
 }
 
 interface QueryRow { id: number; name: string; databaseId: number; definition: any; }
@@ -338,6 +339,9 @@ export function QueryDesignView({
           setSqlText(def.sqlText);
           if (def.sqlUserEdited) setSqlUserEdited(true);
         }
+        // Restore the last-saved results so the datasheet is populated
+        // immediately on reopen, without re-running.
+        if (def.cachedResults) setResults(def.cachedResults);
         if (resolvedInitialView === 'sql') {
           const sql = def.sqlUserEdited && def.sqlText
             ? def.sqlText
@@ -345,8 +349,8 @@ export function QueryDesignView({
                 ? buildQuerySql({ tables: def.tables || [], columns: def.columns || [] })
                 : 'SELECT;');
           setSqlText(sql);
-        } else if (resolvedInitialView === 'datasheet') {
-          // Auto-run the query to show results immediately
+        } else if (resolvedInitialView === 'datasheet' && !def.cachedResults) {
+          // No saved results — auto-run the query to populate the datasheet.
           setIsRunning(true);
           apiFetch(`/api/ds/databases/${databaseId}/queries/${queryId}/run`, { method: 'POST' })
             .then(data => { setResults(data); setView('datasheet'); })
@@ -463,11 +467,11 @@ export function QueryDesignView({
   // closures.
   const saveStateRef = useRef({
     queryName, definition, queryProperties, queryParameters,
-    sqlText, sqlUserEdited,
+    sqlText, sqlUserEdited, results,
   });
   useEffect(() => {
-    saveStateRef.current = { queryName, definition, queryProperties, queryParameters, sqlText, sqlUserEdited };
-  }, [queryName, definition, queryProperties, queryParameters, sqlText, sqlUserEdited]);
+    saveStateRef.current = { queryName, definition, queryProperties, queryParameters, sqlText, sqlUserEdited, results };
+  }, [queryName, definition, queryProperties, queryParameters, sqlText, sqlUserEdited, results]);
 
   const persistQuery = async (silent = false) => {
     const s = saveStateRef.current;
@@ -477,6 +481,7 @@ export function QueryDesignView({
       parameters: s.queryParameters,
       sqlText: s.sqlText || undefined,
       sqlUserEdited: s.sqlUserEdited || undefined,
+      cachedResults: s.results || undefined,
     };
     try {
       await apiFetch(`/api/ds/databases/${databaseId}/queries/${queryId}`, {
@@ -532,6 +537,9 @@ export function QueryDesignView({
       const data = await apiFetch(`/api/ds/databases/${databaseId}/queries/${queryId}/run`, { method: 'POST' });
       setResults(data);
       setView('datasheet');
+      // Persist the fresh results so they show immediately on reopen.
+      saveStateRef.current = { ...saveStateRef.current, results: data };
+      void persistQuery(true);
     } catch {
       toast({ title: 'Failed to run query', variant: 'destructive' });
     } finally {
@@ -581,8 +589,12 @@ export function QueryDesignView({
       const cols: string[] = data?.columns ?? [];
       const rows: Record<string, any>[] = data?.rows ?? [];
       // Reuse the datasheet view to display results — no inline panel.
-      setResults({ columns: cols.map(c => ({ key: c, label: c })), rows });
+      const formatted = { columns: cols.map(c => ({ key: c, label: c })), rows };
+      setResults(formatted);
       setView('datasheet');
+      // Persist fresh results so they show immediately on reopen.
+      saveStateRef.current = { ...saveStateRef.current, results: formatted };
+      void persistQuery(true);
     } catch (e: any) {
       setSqlError(e.message || 'Query failed');
     } finally {
