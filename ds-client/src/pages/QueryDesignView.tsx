@@ -672,9 +672,9 @@ export function QueryDesignView({
             icon={view === 'datasheet' ? <DsDatasheetIcon size={40} /> : view === 'sql' ? <span className="text-[28px] font-semibold leading-none">SQL</span> : <DesignViewIcon size={40} />}
             label={view === 'sql' ? 'View' : view === 'datasheet' ? 'Datasheet' : 'Design'}
           >
-            <RibbonButton icon={<DesignViewIcon size={16} />} label="Design" onClick={() => switchView('design')} active={view === 'design'} />
-            <RibbonButton icon={<DsDatasheetIcon size={16} />} label="Datasheet" onClick={() => switchView('datasheet')} active={view === 'datasheet'} />
-            <RibbonButton icon={<span className="text-[14px] font-semibold leading-none">SQL</span>} label="View" onClick={() => switchView('sql')} active={view === 'sql'} />
+            <RibbonButton icon={<DesignViewIcon size={16} />} label="Design View" onClick={() => switchView('design')} active={view === 'design'} />
+            <RibbonButton icon={<DsDatasheetIcon size={16} />} label="Datasheet View" onClick={() => switchView('datasheet')} active={view === 'datasheet'} />
+            <RibbonButton icon={<span className="text-[14px] font-semibold leading-none">SQL</span>} label="SQL View" onClick={() => switchView('sql')} active={view === 'sql'} />
           </RibbonDropdownButton>
         </RibbonGroup>
       }
