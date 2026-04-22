@@ -155,13 +155,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex flex-col items-center font-sans selection:bg-blue-100 selection:text-blue-900">
 
-      <div className="w-full bg-black dark:bg-neutral-800 pt-20 pb-8 mb-12 relative overflow-hidden">
+      <div className="w-full bg-black dark:bg-neutral-800 pt-6 pb-8 mb-12 relative overflow-hidden">
         <img
           src="/revision-n5/Biggar_HS_Logo_1766054584535.png"
           alt=""
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-36 h-36 md:w-48 md:h-48 object-contain opacity-15 pointer-events-none"
         />
-        <div className="absolute top-6 left-6 flex items-center gap-4">
+        <div className="relative z-10 px-6 mb-10 flex flex-wrap items-center justify-between gap-y-3 gap-x-4">
+        <div className="flex flex-wrap items-center gap-2">
           {studentAuth.isLoggedIn ? (
             <div className="flex items-center gap-2" data-testid="student-indicator">
               <div className="flex items-center gap-2 bg-blue-600/20 border border-blue-400/30 rounded-full px-3 py-1.5">
@@ -217,7 +218,7 @@ export default function Home() {
           </Button>
         </div>
 
-        <div className="absolute top-6 right-6 flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-2">
             <a href="/HTML/N5/N5Home.html">
               <Button variant="outline" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
                 Return to Main Website
@@ -250,6 +251,7 @@ export default function Home() {
 
             <ModeToggle />
           </div>
+        </div>
         <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
