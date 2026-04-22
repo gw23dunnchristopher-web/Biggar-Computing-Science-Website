@@ -96,6 +96,8 @@ interface QueryDefinition {
   columns: QueryColumn[];
   properties?: Partial<QueryProperties>;
   parameters?: QueryParameter[];
+  sqlText?: string;
+  sqlUserEdited?: boolean;
 }
 
 interface QueryRow { id: number; name: string; databaseId: number; definition: any; }
@@ -331,8 +333,17 @@ export function QueryDesignView({
         setDefinition({ tables: def.tables || [], columns: def.columns || [], properties: def.properties, parameters: def.parameters });
         if (def.properties) setQueryProperties({ ...DEFAULT_QUERY_PROPERTIES, ...def.properties });
         if (def.parameters) setQueryParameters(def.parameters);
+        // Restore previously-typed SQL if present
+        if (def.sqlText) {
+          setSqlText(def.sqlText);
+          if (def.sqlUserEdited) setSqlUserEdited(true);
+        }
         if (resolvedInitialView === 'sql') {
-          const sql = def.tables && def.tables.length > 0 ? buildQuerySql({ tables: def.tables || [], columns: def.columns || [] }) : 'SELECT;';
+          const sql = def.sqlUserEdited && def.sqlText
+            ? def.sqlText
+            : (def.tables && def.tables.length > 0
+                ? buildQuerySql({ tables: def.tables || [], columns: def.columns || [] })
+                : 'SELECT;');
           setSqlText(sql);
         } else if (resolvedInitialView === 'datasheet') {
           // Auto-run the query to show results immediately
@@ -448,21 +459,49 @@ export function QueryDesignView({
     });
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
+  // Latest values, kept in refs so the unmount autosave doesn't capture stale
+  // closures.
+  const saveStateRef = useRef({
+    queryName, definition, queryProperties, queryParameters,
+    sqlText, sqlUserEdited,
+  });
+  useEffect(() => {
+    saveStateRef.current = { queryName, definition, queryProperties, queryParameters, sqlText, sqlUserEdited };
+  }, [queryName, definition, queryProperties, queryParameters, sqlText, sqlUserEdited]);
+
+  const persistQuery = async (silent = false) => {
+    const s = saveStateRef.current;
+    const defToSave: QueryDefinition = {
+      ...s.definition,
+      properties: s.queryProperties,
+      parameters: s.queryParameters,
+      sqlText: s.sqlText || undefined,
+      sqlUserEdited: s.sqlUserEdited || undefined,
+    };
     try {
-      const defToSave = { ...definition, properties: queryProperties, parameters: queryParameters };
       await apiFetch(`/api/ds/databases/${databaseId}/queries/${queryId}`, {
         method: 'PUT',
-        body: JSON.stringify({ name: queryName, definition: defToSave })
+        body: JSON.stringify({ name: s.queryName, definition: defToSave })
       });
-      toast({ title: 'Query saved' });
+      return true;
     } catch {
-      toast({ title: 'Failed to save query', variant: 'destructive' });
-    } finally {
-      setIsSaving(false);
+      if (!silent) toast({ title: 'Failed to save query', variant: 'destructive' });
+      return false;
     }
   };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    const ok = await persistQuery();
+    setIsSaving(false);
+    if (ok) toast({ title: 'Query saved' });
+  };
+
+  // Autosave on unmount (covers tab close / navigation away).
+  useEffect(() => {
+    return () => { void persistQuery(true); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /** Look up a column's field type from tableDetails */
   const getQueryColType = (col: { fieldName?: string; tableName?: string }): string => {
@@ -522,11 +561,15 @@ export function QueryDesignView({
       // so that next time they switch to SQL the definition drives the content
       setSqlUserEdited(false);
     }
+    // Persist current state before swapping views so unsaved edits survive.
+    void persistQuery(true);
     setView(next);
   };
 
   const handleRunSql = async () => {
     if (!sqlText.trim() || isSqlRunning) return;
+    // Persist the SQL before executing so it survives a tab close.
+    await persistQuery(true);
     setIsSqlRunning(true);
     setSqlError(null);
     setSqlResults(null);
