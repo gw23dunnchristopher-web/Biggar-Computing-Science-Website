@@ -11,6 +11,284 @@ import { GoogleGenAI } from "@google/genai";
 
 const gemini = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
 
+/* ────────────────────────────────────────────────────────────────────────────
+   SHARED AI GRADER HELPERS
+   These are exported so other parts of the site (e.g. BHS Classwork) can
+   delegate marking to the SAME prompt the Data Sculptor sandbox uses, instead
+   of running their own copy. The HTTP routes `/api/ds/grade-sandbox` and
+   `/api/ds/grade-database` further down are now thin wrappers over these.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+export interface DsGradeResult {
+  feedback: string;
+  mark: number | null;
+  maxMark: number;
+}
+
+/** Mark a pupil's SQL query against a task description (the DS sandbox / N4
+ *  embed grader). `databaseId` is optional and only used to look up a stored
+ *  task description if `taskDescription` isn't supplied. `results` is the
+ *  optional output of running the query. `maxMark` defaults to 4 so the DS
+ *  embed keeps its existing behaviour; pass a different value (e.g. from a
+ *  Classwork question's max_marks) to scale the marking. */
+export async function gradeSandboxSql(args: {
+  sql: string;
+  taskDescription?: string;
+  databaseId?: number | string | null;
+  results?: any;
+  maxMark?: number;
+}): Promise<DsGradeResult> {
+  const { sql, results } = args;
+  if (!sql || !sql.trim()) throw new Error('sql is required');
+  if (!gemini) throw new Error('AI grading is not available (no API key configured)');
+  const maxMark = Math.max(1, Math.round(args.maxMark ?? 4));
+
+  let taskDescription = args.taskDescription || '';
+  if (!taskDescription && args.databaseId != null && db) {
+    const dbId = typeof args.databaseId === 'string' ? parseInt(args.databaseId) : args.databaseId;
+    if (!Number.isNaN(dbId)) {
+      const [dbRow] = await db.select({ taskDescription: dsDatabases.taskDescription })
+        .from(dsDatabases).where(eq(dsDatabases.id, dbId));
+      taskDescription = dbRow?.taskDescription || '';
+    }
+  }
+
+  const resultSummary = results
+    ? (results.columns && results.rows
+        ? `Columns: ${results.columns.join(', ')}\nRows (first 10):\n${results.rows.slice(0, 10).map((r: any) => JSON.stringify(r)).join('\n')}`
+        : results.isDml
+          ? `${results.statementType?.toUpperCase()} successful — ${results.rowsAffected} row(s) affected`
+          : 'No results')
+    : 'Query was not run';
+
+  const prompt = `You are a Computing Science teacher marking a student's SQL query exercise.
+
+${taskDescription ? `TASK: ${taskDescription}\n` : ''}STUDENT'S SQL QUERY:
+\`\`\`sql
+${sql.length > 8000 ? sql.slice(0, 8000) + '\n-- (truncated)' : sql}
+\`\`\`
+
+QUERY RESULTS:
+${resultSummary}
+
+Please mark this SQL query. Your response must be structured as follows:
+1. **Mark**: Give a whole-number mark out of ${maxMark} (0–${maxMark}) based on correctness and efficiency. Write the mark on its own line in the EXACT form "Mark: X / ${maxMark}".
+2. **Feedback**: 2–4 sentences of specific, constructive feedback written for a Computing Science student. Mention what was done well and what could be improved.
+3. **Suggestions**: One or two practical improvements the student could make.
+
+Be encouraging but honest. Use British English spelling.`;
+
+  const response = await gemini.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+    config: { thinkingConfig: { thinkingBudget: 0 } },
+  });
+  const feedback = response.text || '';
+  // Parse the "Mark: X / N" line; fall back to the LAST X/N pattern in the text.
+  let mark: number | null = null;
+  const explicit = feedback.match(/\*?\*?Mark\*?\*?\s*[:\-]?\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+)/i);
+  const allMatches = [...feedback.matchAll(/(\d+(?:\.\d+)?)\s*\/\s*(\d+)/g)];
+  const chosen = explicit || (allMatches.length ? allMatches[allMatches.length - 1] : null);
+  if (chosen) {
+    const parsed = Math.round(parseFloat(chosen[1]));
+    mark = Math.max(0, Math.min(maxMark, parsed));
+  }
+  return { feedback, mark, maxMark };
+}
+
+/** Mark a pupil's database structure (tables / fields / sample data) against a
+ *  bullet-pointed task description and optional data dictionary. This is the
+ *  N4 / "design a database" grader used by the Data Sculptor embed. */
+export async function gradeDatabaseStructure(args: {
+  sandboxDatabaseId: number | string;
+  taskDescription?: string;
+}): Promise<DsGradeResult> {
+  if (!gemini) throw new Error('AI marking is not available (no API key configured)');
+  if (!db) throw new Error('Database not available');
+  const dbId = typeof args.sandboxDatabaseId === 'string' ? parseInt(args.sandboxDatabaseId) : args.sandboxDatabaseId;
+  if (!dbId || Number.isNaN(dbId)) throw new Error('sandboxDatabaseId is required');
+
+  const [dbRow] = await db.select().from(dsDatabases).where(eq(dsDatabases.id, dbId));
+  if (!dbRow) throw new Error('Database not found');
+
+  const taskDescription = args.taskDescription || dbRow.taskDescription || '';
+  const dataDictionary = dbRow.dataDictionary || '';
+
+  // Each bullet point in the task description = 1 mark.
+  const bulletLines = taskDescription
+    .split(/\r?\n/)
+    .map((l: string) => l.replace(/^[\s•\-\*\u2022]+/, '').trim())
+    .filter((l: string) => l.length > 0);
+  const maxMark = bulletLines.length > 0 ? bulletLines.length : 4;
+  const numberedBullets = bulletLines.length > 0
+    ? bulletLines.map((b: string, i: number) => `${i + 1}. ${b}`).join('\n')
+    : '';
+
+  const tables = await db.select().from(dsTables).where(eq(dsTables.databaseId, dbId)).orderBy(dsTables.createdAt);
+  const tableDetails = await Promise.all(tables.map(async (t) => {
+    const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, t.id)).orderBy(dsFields.sortOrder);
+    const records = await db!.select().from(dsRecords).where(and(eq(dsRecords.tableId, t.id), eq(dsRecords.databaseId, dbId)));
+    const sampleRows = records.slice(0, 5).map(r => r.data);
+    return { name: t.name, fields: fields.map(f => ({ name: f.name, type: f.fieldType, isPrimaryKey: f.isPrimaryKey, isRequired: f.isRequired, fieldSize: f.fieldSize ?? null, defaultValue: f.defaultValue ?? null, description: f.description ?? null })), rowCount: records.length, sampleRows };
+  }));
+
+  const dbSummary = tableDetails.map(t =>
+    `Table: ${t.name} (${t.rowCount} row${t.rowCount !== 1 ? 's' : ''})\n  Fields: ${t.fields.map(f => {
+      const parts: string[] = [f.type];
+      if (f.isPrimaryKey) parts.push('PK');
+      if (f.isRequired) parts.push('required');
+      if (f.fieldSize != null) parts.push(`field size ${f.fieldSize}`);
+      if (f.defaultValue != null && f.defaultValue !== '') parts.push(`default "${f.defaultValue}"`);
+      if (f.description) parts.push(`description "${f.description}"`);
+      return `${f.name} (${parts.join(', ')})`;
+    }).join(', ')}\n  Sample data: ${t.sampleRows.length > 0 ? t.sampleRows.map(r => JSON.stringify(r)).join('; ') : 'none'}`
+  ).join('\n\n');
+
+  // Deterministic data-dictionary audit (server-side, not by the AI).
+  function parseDataDictionary(text: string): { table: string; fields: string[] }[] {
+    const lines = text.split(/\r?\n/);
+    const out: { table: string; fields: string[] }[] = [];
+    let current: { table: string; fields: string[] } | null = null;
+    const cleanFieldName = (s: string): string | null => {
+      let t = s.trim().replace(/^[\-*•●·]+\s*/, '').replace(/^\d+\.\s*/, '');
+      t = t.split(/[(:|—–\-]/)[0].trim();
+      t = t.replace(/[*_`]/g, '').trim();
+      if (!t) return null;
+      if (!/^[A-Za-z][A-Za-z0-9 _]*$/.test(t)) return null;
+      if (/^(table|fields?|data type|type|name|description|primary key|key|required|format|example|notes?|validation|constraints?)$/i.test(t)) return null;
+      return t;
+    };
+    const cleanTableName = (s: string): string | null => {
+      let t = s.trim().replace(/^[\-*•●·]+\s*/, '').replace(/^\d+\.\s*/, '');
+      t = t.replace(/^table\s*[:\-]?\s*/i, '');
+      t = t.replace(/[*_`:]/g, '').trim();
+      if (!t) return null;
+      if (!/^[A-Za-z][A-Za-z0-9 _]*$/.test(t)) return null;
+      return t;
+    };
+    for (const raw of lines) {
+      if (!raw.trim()) continue;
+      const indented = /^(\s{2,}|\t|\s*[-*•●·])/.test(raw);
+      if (indented && current) {
+        const f = cleanFieldName(raw);
+        if (f) current.fields.push(f);
+      } else {
+        const t = cleanTableName(raw);
+        if (t) {
+          current = { table: t, fields: [] };
+          out.push(current);
+        }
+      }
+    }
+    return out.filter(t => t.fields.length > 0);
+  }
+
+  const expectedTables = dataDictionary ? parseDataDictionary(dataDictionary) : [];
+  const studentFieldsByTable = new Map<string, Set<string>>();
+  for (const t of tableDetails) {
+    studentFieldsByTable.set(t.name.toLowerCase().trim(), new Set(t.fields.map(f => f.name.toLowerCase().trim())));
+  }
+  type AuditRow = { table: string; field: string; tablePresent: boolean; fieldPresent: boolean };
+  const auditRows: AuditRow[] = [];
+  for (const et of expectedTables) {
+    const studentSet = studentFieldsByTable.get(et.table.toLowerCase().trim());
+    for (const ef of et.fields) {
+      auditRows.push({
+        table: et.table,
+        field: ef,
+        tablePresent: !!studentSet,
+        fieldPresent: !!studentSet?.has(ef.toLowerCase().trim()),
+      });
+    }
+  }
+  const totalExpectedFields = auditRows.length;
+  const presentFields = auditRows.filter(r => r.fieldPresent).length;
+  const completeness = totalExpectedFields > 0 ? presentFields / totalExpectedFields : 1;
+
+  const auditBlock = auditRows.length > 0
+    ? 'AUTOMATIC SCHEMA AUDIT (computed by the server — these results are authoritative; do NOT contradict them):\n' +
+      expectedTables.map(et => {
+        const rows = auditRows.filter(r => r.table === et.table);
+        const tablePresent = rows[0]?.tablePresent;
+        const header = `• Table "${et.table}": ${tablePresent ? 'PRESENT' : 'MISSING'}`;
+        const fieldLines = rows.map(r => `    - ${r.field}: ${r.fieldPresent ? 'PRESENT' : 'MISSING'}`).join('\n');
+        return `${header}\n${fieldLines}`;
+      }).join('\n') +
+      `\n\nSchema completeness: ${presentFields} / ${totalExpectedFields} expected fields present (${Math.round(completeness * 100)}%).\n`
+    : '';
+
+  const taskBlock = numberedBullets
+    ? `TASK (each numbered bullet is worth 1 mark, for a total of ${maxMark} mark${maxMark !== 1 ? 's' : ''}):\n${numberedBullets}\n\n`
+    : (taskDescription ? `TASK: ${taskDescription}\n\n` : '');
+
+  const markingRubric = numberedBullets
+    ? `Award 1 mark for each of the ${maxMark} numbered bullet${maxMark !== 1 ? 's' : ''} in the task that the student has clearly satisfied. Partial attempts may be awarded ½-mark style discretion only by rounding to whole marks. The total mark MUST be a whole number between 0 and ${maxMark} inclusive.`
+    : `Give a mark out of 4 (0–4).`;
+
+  const prompt = dataDictionary
+    ? `You are a STRICT Computing Science teacher marking an N4 Computing Science database exercise against a fixed data dictionary. You must not be lenient.
+
+${taskBlock}EXPECTED DATA DICTIONARY (this is the correct, expected design — the student MUST reproduce it):
+${dataDictionary}
+
+STUDENT'S ACTUAL DATABASE (what they submitted):
+${dbSummary}
+
+${auditBlock}
+The server has already completed an authoritative schema audit above. You must accept its PRESENT/MISSING verdicts and silently base your marking on them. Apply these STRICT rules when deciding bullets:
+  • A bullet that asks the student to "create a table" or "create a database with fields X, Y, Z" is ONLY achieved (✔) if EVERY field listed in the data dictionary for that table is PRESENT in the student's submission.
+  • A bullet that asks for specific data types is ONLY achieved if those types are correct.
+  • A bullet that asks the student to set field sizes (or "set the field size to N", "use a field size of N", "configure field sizes as per the data dictionary") is achieved if the student's "field size N" values match what the data dictionary specifies for the relevant text fields. Look at the "field size N" annotations included in the student's submission above when judging this — DO NOT mark this bullet wrong simply because the data dictionary section above does not repeat the size; cross-reference the actual student submission.
+  • A bullet about entering sample data is ONLY achieved if at least one record actually exists. CRITICAL: Do NOT deduct any marks for missing sample data unless one of the numbered task bullets above EXPLICITLY asks the student to create, enter, add or insert records / sample data / test data. If no bullet asks for it, the absence of records is irrelevant — ignore it completely and award the bullets purely on whether the schema requirements were met.
+  • An auto-generated ID field that the student did NOT explicitly create from the dictionary does NOT count toward the mark unless the dictionary itself lists an ID field.
+  • Do NOT give credit for "having a table" if the table is mostly empty of the expected fields. Missing the majority of expected fields = bullet ✘, even if the table name is correct.
+  • Extra fields the student added that are NOT in the dictionary earn NO marks but also do NOT cost marks.
+
+Do NOT include the expected schema or the audit in your reply — the student does not need to see those. Your reply must contain ONLY the following sections, in this exact order:
+
+1. **Mark**: ${markingRubric} Write the mark on its own line in the EXACT form "Mark: X / ${maxMark}".
+2. **Per-Bullet Breakdown**: ${numberedBullets ? `For each of the ${maxMark} task bullets, write one line in the form "Bullet N: ✔" or "Bullet N: ✘ — short reason citing what was missing".` : 'Skip this section.'}
+3. **Feedback**: 2–4 sentences naming the specific expected tables/fields that are missing or have the wrong type.
+4. **Suggestions**: One or two practical improvements.
+
+Be encouraging in tone but absolutely honest and strict about the marks. Use British English spelling.`
+    : `You are a Computing Science teacher marking an N4 Computing Science database exercise.
+
+${taskBlock}STUDENT'S DATABASE:
+${dbSummary}
+
+There is no fixed expected data dictionary for this task — the student is expected to design their own data dictionary that suits the task. Mark the database on the merits of the student's own design choices and how well they meet the task. Your response must be structured EXACTLY as follows, with the Mark line first:
+1. **Mark**: ${markingRubric} Write the mark on its own line in the form "X / ${maxMark}".
+2. **Per-Bullet Breakdown**: ${numberedBullets ? `For each of the ${maxMark} task bullets, write one line in the form "Bullet N: ✔" (achieved) or "Bullet N: ✘ — short reason" (not achieved).` : 'Skip this section.'}
+3. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Comment on the suitability of their table structure, field names, data types and any sample data entered, in the context of the task.
+4. **Suggestions**: One or two practical improvements the student could make to their database design.
+
+Be encouraging but honest. Use British English spelling.`;
+
+  const response = await gemini.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+    config: { thinkingConfig: { thinkingBudget: 0 } },
+  });
+  let feedback = response.text || '';
+  let mark: number | null = null;
+  const explicit = feedback.match(/\*?\*?Mark\*?\*?\s*[:\-]?\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+)/i);
+  const allMatches = [...feedback.matchAll(/(\d+(?:\.\d+)?)\s*\/\s*(\d+)/g)];
+  const chosen = explicit || (allMatches.length ? allMatches[allMatches.length - 1] : null);
+  if (chosen) {
+    const parsed = Math.round(parseFloat(chosen[1]));
+    mark = Math.max(0, Math.min(maxMark, parsed));
+  }
+  if (totalExpectedFields > 0 && mark !== null) {
+    const cap = Math.ceil(maxMark * completeness);
+    if (mark > cap) {
+      feedback += `\n\n*(Mark automatically capped from ${mark} to ${cap} based on schema completeness: ${presentFields}/${totalExpectedFields} expected fields present.)*`;
+      mark = cap;
+    }
+  }
+  return { feedback, mark, maxMark };
+}
+
 function ts(d: Date) { return d.toISOString(); }
 function tsFmt(obj: any, ...keys: string[]) {
   const out = { ...obj };
@@ -964,257 +1242,38 @@ export function registerDsRoutes(app: Express) {
     res.json({ message: "Compact & Repair complete", tablesChecked: tables.length, orphanedRecordsRemoved: orphans.length, status: "healthy" });
   });
 
-  /* ── AI Database Structure Grading (for student embed / N4 mode) ── */
+
+  /* ── AI Database Structure Grading (for student embed / N4 mode) ──
+     Thin wrapper around the shared `gradeDatabaseStructure` helper. */
   app.post("/api/ds/grade-database", async (req, res) => {
     const { sandboxDatabaseId, taskDescription: clientTaskDesc } = req.body;
     if (!sandboxDatabaseId) return res.status(400).json({ error: "sandboxDatabaseId is required" });
-    if (!gemini) return res.status(503).json({ error: "AI marking is not available (no API key configured)" });
-
-    const dbId = parseInt(sandboxDatabaseId);
-    const [dbRow] = await db!.select().from(dsDatabases).where(eq(dsDatabases.id, dbId));
-    if (!dbRow) return res.status(404).json({ error: "Database not found" });
-
-    const taskDescription = clientTaskDesc || dbRow.taskDescription || "";
-    const dataDictionary = dbRow.dataDictionary || "";
-
-    // Each bullet point in the task description = 1 mark.
-    const bulletLines = taskDescription
-      .split(/\r?\n/)
-      .map((l: string) => l.replace(/^[\s•\-\*\u2022]+/, "").trim())
-      .filter((l: string) => l.length > 0);
-    const maxMark = bulletLines.length > 0 ? bulletLines.length : 4;
-    const numberedBullets = bulletLines.length > 0
-      ? bulletLines.map((b: string, i: number) => `${i + 1}. ${b}`).join("\n")
-      : "";
-
-    const tables = await db!.select().from(dsTables).where(eq(dsTables.databaseId, dbId)).orderBy(dsTables.createdAt);
-    const tableDetails = await Promise.all(tables.map(async (t) => {
-      const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, t.id)).orderBy(dsFields.sortOrder);
-      const records = await db!.select().from(dsRecords).where(and(eq(dsRecords.tableId, t.id), eq(dsRecords.databaseId, dbId)));
-      const sampleRows = records.slice(0, 5).map(r => r.data);
-      return { name: t.name, fields: fields.map(f => ({ name: f.name, type: f.fieldType, isPrimaryKey: f.isPrimaryKey, isRequired: f.isRequired, fieldSize: f.fieldSize ?? null, defaultValue: f.defaultValue ?? null, description: f.description ?? null })), rowCount: records.length, sampleRows };
-    }));
-
-    const dbSummary = tableDetails.map(t =>
-      `Table: ${t.name} (${t.rowCount} row${t.rowCount !== 1 ? "s" : ""})\n  Fields: ${t.fields.map(f => {
-        const parts: string[] = [f.type];
-        if (f.isPrimaryKey) parts.push("PK");
-        if (f.isRequired) parts.push("required");
-        if (f.fieldSize != null) parts.push(`field size ${f.fieldSize}`);
-        if (f.defaultValue != null && f.defaultValue !== "") parts.push(`default "${f.defaultValue}"`);
-        if (f.description) parts.push(`description "${f.description}"`);
-        return `${f.name} (${parts.join(", ")})`;
-      }).join(", ")}\n  Sample data: ${t.sampleRows.length > 0 ? t.sampleRows.map(r => JSON.stringify(r)).join("; ") : "none"}`
-    ).join("\n\n");
-
-    // ── Deterministic data-dictionary audit (done in code, not by the AI) ──
-    // Parse the teacher's data dictionary into expected (table, field) pairs, then
-    // check each against what the student actually built. The result is both fed
-    // into the AI prompt AND used to CAP the final mark so the AI cannot award
-    // marks that are not supported by the schema.
-    function parseDataDictionary(text: string): { table: string; fields: string[] }[] {
-      const lines = text.split(/\r?\n/);
-      const out: { table: string; fields: string[] }[] = [];
-      let current: { table: string; fields: string[] } | null = null;
-      const cleanFieldName = (s: string): string | null => {
-        let t = s.trim().replace(/^[\-*•●·]+\s*/, "").replace(/^\d+\.\s*/, "");
-        // Strip anything after a type marker: "Name (Text)" / "Name: Text" / "Name — Text"
-        t = t.split(/[(:|—–\-]/)[0].trim();
-        // Strip markdown
-        t = t.replace(/[*_`]/g, "").trim();
-        if (!t) return null;
-        if (!/^[A-Za-z][A-Za-z0-9 _]*$/.test(t)) return null;
-        if (/^(table|fields?|data type|type|name|description|primary key|key|required|format|example|notes?|validation|constraints?)$/i.test(t)) return null;
-        return t;
-      };
-      const cleanTableName = (s: string): string | null => {
-        let t = s.trim().replace(/^[\-*•●·]+\s*/, "").replace(/^\d+\.\s*/, "");
-        t = t.replace(/^table\s*[:\-]?\s*/i, "");
-        t = t.replace(/[*_`:]/g, "").trim();
-        if (!t) return null;
-        if (!/^[A-Za-z][A-Za-z0-9 _]*$/.test(t)) return null;
-        return t;
-      };
-      for (const raw of lines) {
-        if (!raw.trim()) continue;
-        const indented = /^(\s{2,}|\t|\s*[-*•●·])/.test(raw);
-        if (indented && current) {
-          const f = cleanFieldName(raw);
-          if (f) current.fields.push(f);
-        } else {
-          const t = cleanTableName(raw);
-          if (t) {
-            current = { table: t, fields: [] };
-            out.push(current);
-          }
-        }
-      }
-      // Drop tables that ended up empty (likely stray headers).
-      return out.filter(t => t.fields.length > 0);
-    }
-
-    const expectedTables = dataDictionary ? parseDataDictionary(dataDictionary) : [];
-    const studentFieldsByTable = new Map<string, Set<string>>();
-    for (const t of tableDetails) {
-      studentFieldsByTable.set(t.name.toLowerCase().trim(), new Set(t.fields.map(f => f.name.toLowerCase().trim())));
-    }
-    type AuditRow = { table: string; field: string; tablePresent: boolean; fieldPresent: boolean };
-    const auditRows: AuditRow[] = [];
-    for (const et of expectedTables) {
-      const studentSet = studentFieldsByTable.get(et.table.toLowerCase().trim());
-      for (const ef of et.fields) {
-        auditRows.push({
-          table: et.table,
-          field: ef,
-          tablePresent: !!studentSet,
-          fieldPresent: !!studentSet?.has(ef.toLowerCase().trim()),
-        });
-      }
-    }
-    const totalExpectedFields = auditRows.length;
-    const presentFields = auditRows.filter(r => r.fieldPresent).length;
-    const completeness = totalExpectedFields > 0 ? presentFields / totalExpectedFields : 1;
-
-    const auditBlock = auditRows.length > 0
-      ? "AUTOMATIC SCHEMA AUDIT (computed by the server — these results are authoritative; do NOT contradict them):\n" +
-        expectedTables.map(et => {
-          const rows = auditRows.filter(r => r.table === et.table);
-          const tablePresent = rows[0]?.tablePresent;
-          const header = `• Table "${et.table}": ${tablePresent ? "PRESENT" : "MISSING"}`;
-          const fieldLines = rows.map(r => `    - ${r.field}: ${r.fieldPresent ? "PRESENT" : "MISSING"}`).join("\n");
-          return `${header}\n${fieldLines}`;
-        }).join("\n") +
-        `\n\nSchema completeness: ${presentFields} / ${totalExpectedFields} expected fields present (${Math.round(completeness * 100)}%).\n`
-      : "";
-
-    const taskBlock = numberedBullets
-      ? `TASK (each numbered bullet is worth 1 mark, for a total of ${maxMark} mark${maxMark !== 1 ? "s" : ""}):\n${numberedBullets}\n\n`
-      : (taskDescription ? `TASK: ${taskDescription}\n\n` : "");
-
-    const markingRubric = numberedBullets
-      ? `Award 1 mark for each of the ${maxMark} numbered bullet${maxMark !== 1 ? "s" : ""} in the task that the student has clearly satisfied. Partial attempts may be awarded ½-mark style discretion only by rounding to whole marks. The total mark MUST be a whole number between 0 and ${maxMark} inclusive.`
-      : `Give a mark out of 4 (0–4).`;
-
-    const prompt = dataDictionary
-      ? `You are a STRICT Computing Science teacher marking an N4 Computing Science database exercise against a fixed data dictionary. You must not be lenient.
-
-${taskBlock}EXPECTED DATA DICTIONARY (this is the correct, expected design — the student MUST reproduce it):
-${dataDictionary}
-
-STUDENT'S ACTUAL DATABASE (what they submitted):
-${dbSummary}
-
-${auditBlock}
-The server has already completed an authoritative schema audit above. You must accept its PRESENT/MISSING verdicts and silently base your marking on them. Apply these STRICT rules when deciding bullets:
-  • A bullet that asks the student to "create a table" or "create a database with fields X, Y, Z" is ONLY achieved (✔) if EVERY field listed in the data dictionary for that table is PRESENT in the student's submission.
-  • A bullet that asks for specific data types is ONLY achieved if those types are correct.
-  • A bullet that asks the student to set field sizes (or "set the field size to N", "use a field size of N", "configure field sizes as per the data dictionary") is achieved if the student's "field size N" values match what the data dictionary specifies for the relevant text fields. Look at the "field size N" annotations included in the student's submission above when judging this — DO NOT mark this bullet wrong simply because the data dictionary section above does not repeat the size; cross-reference the actual student submission.
-  • A bullet about entering sample data is ONLY achieved if at least one record actually exists. CRITICAL: Do NOT deduct any marks for missing sample data unless one of the numbered task bullets above EXPLICITLY asks the student to create, enter, add or insert records / sample data / test data. If no bullet asks for it, the absence of records is irrelevant — ignore it completely and award the bullets purely on whether the schema requirements were met.
-  • An auto-generated ID field that the student did NOT explicitly create from the dictionary does NOT count toward the mark unless the dictionary itself lists an ID field.
-  • Do NOT give credit for "having a table" if the table is mostly empty of the expected fields. Missing the majority of expected fields = bullet ✘, even if the table name is correct.
-  • Extra fields the student added that are NOT in the dictionary earn NO marks but also do NOT cost marks.
-
-Do NOT include the expected schema or the audit in your reply — the student does not need to see those. Your reply must contain ONLY the following sections, in this exact order:
-
-1. **Mark**: ${markingRubric} Write the mark on its own line in the EXACT form "Mark: X / ${maxMark}".
-2. **Per-Bullet Breakdown**: ${numberedBullets ? `For each of the ${maxMark} task bullets, write one line in the form "Bullet N: ✔" or "Bullet N: ✘ — short reason citing what was missing".` : "Skip this section."}
-3. **Feedback**: 2–4 sentences naming the specific expected tables/fields that are missing or have the wrong type.
-4. **Suggestions**: One or two practical improvements.
-
-Be encouraging in tone but absolutely honest and strict about the marks. Use British English spelling.`
-      : `You are a Computing Science teacher marking an N4 Computing Science database exercise.
-
-${taskBlock}STUDENT'S DATABASE:
-${dbSummary}
-
-There is no fixed expected data dictionary for this task — the student is expected to design their own data dictionary that suits the task. Mark the database on the merits of the student's own design choices and how well they meet the task. Your response must be structured EXACTLY as follows, with the Mark line first:
-1. **Mark**: ${markingRubric} Write the mark on its own line in the form "X / ${maxMark}".
-2. **Per-Bullet Breakdown**: ${numberedBullets ? `For each of the ${maxMark} task bullets, write one line in the form "Bullet N: ✔" (achieved) or "Bullet N: ✘ — short reason" (not achieved).` : "Skip this section."}
-3. **Feedback**: 2–4 sentences of specific, constructive feedback for a Computing Science student. Comment on the suitability of their table structure, field names, data types and any sample data entered, in the context of the task.
-4. **Suggestions**: One or two practical improvements the student could make to their database design.
-
-Be encouraging but honest. Use British English spelling.`;
-
     try {
-      const response = await gemini.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: { thinkingConfig: { thinkingBudget: 0 } },
-      });
-      let feedback = response.text || "";
-      // Prefer an explicit "Mark: X / N" line, otherwise fall back to the LAST X/N pattern
-      // (earlier "X / N" ratios in the audit section would otherwise be picked up wrongly).
-      let mark: number | null = null;
-      const explicit = feedback.match(/\*?\*?Mark\*?\*?\s*[:\-]?\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+)/i);
-      const allMatches = [...feedback.matchAll(/(\d+(?:\.\d+)?)\s*\/\s*(\d+)/g)];
-      const chosen = explicit || (allMatches.length ? allMatches[allMatches.length - 1] : null);
-      if (chosen) {
-        const parsed = Math.round(parseFloat(chosen[1]));
-        mark = Math.max(0, Math.min(maxMark, parsed));
-      }
-      // Cap the mark based on the deterministic schema audit so the AI cannot
-      // award marks that aren't backed by the student's actual submission.
-      if (totalExpectedFields > 0 && mark !== null) {
-        const cap = Math.ceil(maxMark * completeness);
-        if (mark > cap) {
-          feedback += `\n\n*(Mark automatically capped from ${mark} to ${cap} based on schema completeness: ${presentFields}/${totalExpectedFields} expected fields present.)*`;
-          mark = cap;
-        }
-      }
-      res.json({ feedback, mark, maxMark });
+      const result = await gradeDatabaseStructure({ sandboxDatabaseId, taskDescription: clientTaskDesc });
+      res.json(result);
     } catch (err: any) {
-      console.error("DS database grading error:", err?.message || err);
+      const msg = err?.message || "AI marking failed";
+      if (msg === "Database not found") return res.status(404).json({ error: msg });
+      if (/AI marking is not available/i.test(msg)) return res.status(503).json({ error: msg });
+      console.error("DS database grading error:", msg);
       res.status(500).json({ error: "AI marking failed. Please try again." });
     }
   });
 
-  /* ── AI SQL Grading ── */
+  /* ── AI SQL Grading ──
+     Thin wrapper around the shared `gradeSandboxSql` helper. The DS embed only
+     reads `feedback`; the extra `mark` / `maxMark` fields are additive and used
+     by other callers (e.g. BHS Classwork). */
   app.post("/api/ds/grade-sandbox", async (req, res) => {
     const { databaseId, sql, results, taskDescription: clientTaskDesc } = req.body;
     if (!sql) return res.status(400).json({ error: "sql is required" });
-    if (!gemini) return res.status(503).json({ error: "AI grading is not available (no API key configured)" });
-
-    let taskDescription = clientTaskDesc || "";
-    if (!taskDescription && databaseId) {
-      const [dbRow] = await db!.select({ taskDescription: dsDatabases.taskDescription }).from(dsDatabases).where(eq(dsDatabases.id, parseInt(databaseId)));
-      taskDescription = dbRow?.taskDescription || "";
-    }
-
-    const resultSummary = results
-      ? (results.columns && results.rows
-          ? `Columns: ${results.columns.join(", ")}\nRows (first 10):\n${results.rows.slice(0, 10).map((r: any) => JSON.stringify(r)).join("\n")}`
-          : results.isDml
-            ? `${results.statementType?.toUpperCase()} successful — ${results.rowsAffected} row(s) affected`
-            : "No results")
-      : "Query was not run";
-
-    const prompt = `You are a Computing Science teacher marking a student's SQL query exercise.
-
-${taskDescription ? `TASK: ${taskDescription}\n` : ""}STUDENT'S SQL QUERY:
-\`\`\`sql
-${sql}
-\`\`\`
-
-QUERY RESULTS:
-${resultSummary}
-
-Please mark this SQL query. Your response must be structured as follows:
-1. **Mark**: Give a mark out of 4 (0–4) based on correctness and efficiency.
-2. **Feedback**: 2–4 sentences of specific, constructive feedback written for a Computing Science student. Mention what was done well and what could be improved.
-3. **Suggestions**: One or two practical improvements the student could make.
-
-Be encouraging but honest. Use British English spelling.`;
-
     try {
-      const response = await gemini.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: { thinkingConfig: { thinkingBudget: 0 } },
-      });
-      const text = response.text || "";
-      res.json({ feedback: text });
+      const result = await gradeSandboxSql({ databaseId, sql, results, taskDescription: clientTaskDesc });
+      res.json(result);
     } catch (err: any) {
-      console.error("DS grading error:", err?.message || err);
+      const msg = err?.message || "AI grading failed";
+      if (/AI grading is not available/i.test(msg)) return res.status(503).json({ error: msg });
+      console.error("DS grading error:", msg);
       res.status(500).json({ error: "AI grading failed. Please try again." });
     }
   });

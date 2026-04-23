@@ -25,6 +25,7 @@ import os from 'os';
 import { spawn } from 'child_process';
 import crypto from 'crypto';
 import { pool, hasDatabase } from './db';
+import { gradeSandboxSql } from './ds-routes';
 
 const gemini = process.env.GEMINI_API_KEY
   ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
@@ -908,28 +909,31 @@ async function markCodeProject(
 // The teacher attaches a Data Sculptor database (its embed/share URL is stored
 // on the question as config.databaseUrl). Pupils open it in a new tab, write
 // and run their query in DS, then paste the SQL back into the submission box.
-// We can't see the database from here, so the AI marks the SQL itself against
-// the task description, mirroring the pattern of /api/ds/grade-sandbox.
+// We delegate the actual marking to the SAME helper used by the Data Sculptor
+// embed (`/api/ds/grade-sandbox`) so the prompt, behaviour and any future
+// improvements stay in lock-step with the rest of the site.
 async function markSqlTask(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {
   if (!s.text_answer || !gemini) return null;
   const sql = s.text_answer.trim();
   if (!sql) return null;
-  const prompt = [
-    `You are a Scottish secondary school Computing Science teacher marking a pupil's SQL query exercise from the BHS Data Sculptor.`,
-    `You can see the SQL but you have NOT run it against the database, so judge it by reading. Mention any obvious result or syntax issues, but don't invent values you can't verify.`,
-    '',
-    `Task (worth ${q.max_marks} mark${q.max_marks === 1 ? '' : 's'}):`,
+  const taskDescription = [
     q.prompt,
     q.marking_scheme ? `\nMarking scheme:\n${q.marking_scheme}` : '',
     q.ai_grading_guidance ? `\nAdditional guidance:\n${q.ai_grading_guidance}` : '',
-    '',
-    `Pupil's SQL:`,
-    `\`\`\`sql`,
-    sql.length > 8000 ? sql.slice(0, 8000) + '\n-- (truncated)' : sql,
-    `\`\`\``,
-    '',
-    `Award a whole number from 0 to ${q.max_marks} marks. Write 2-4 sentences of feedback for the pupil — say what was right, what was missing or inefficient, and one improvement.`,
-    `Return ONLY a JSON object: {"marks": <integer>, "feedback": "<string>"}.`,
   ].filter(Boolean).join('\n');
-  return await callGeminiForMark(prompt, q.max_marks);
+  try {
+    const result = await gradeSandboxSql({
+      sql,
+      taskDescription,
+      maxMark: q.max_marks,
+    });
+    return {
+      marksAwarded: result.mark ?? 0,
+      feedback: result.feedback || 'No feedback returned.',
+      markedBy: 'ai',
+    };
+  } catch (err) {
+    console.error('[classwork-ai] sql_task delegation failed:', err);
+    return null;
+  }
 }
