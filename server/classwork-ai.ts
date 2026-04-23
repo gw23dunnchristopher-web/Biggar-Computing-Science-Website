@@ -24,6 +24,7 @@ import fs from 'fs/promises';
 import os from 'os';
 import { spawn } from 'child_process';
 import crypto from 'crypto';
+import { pool, hasDatabase } from './db';
 
 const gemini = process.env.GEMINI_API_KEY
   ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
@@ -81,6 +82,12 @@ export async function markSubmission(
         return await markPresentation(q, s);
       case 'video_question':
         return await markVideoQuestion(q, s);
+      case 'python_task':
+        return await markCodeProject(q, s, 'python');
+      case 'html_task':
+        return await markCodeProject(q, s, 'html');
+      case 'sql_task':
+        return await markSqlTask(q, s);
       default:
         return null;
     }
@@ -821,6 +828,108 @@ async function markGenericLink(q: AIQuestion, s: AISubmission): Promise<AIMarkRe
     `Page text:\n"""\n${text}\n"""`,
     '',
     `Award 0-${q.max_marks} marks. Return ONLY JSON: {"marks": <number>, "feedback": "<string>"}.`,
+  ].filter(Boolean).join('\n');
+  return await callGeminiForMark(prompt, q.max_marks);
+}
+
+/* ---------- 10. Code-editor projects (Python / HTML) ---------- */
+
+// The pupil picks one of their saved projects in the SPA. The client fetches
+// the full project from /api/code-projects/<kind>/<id> (which it can do because
+// it's the pupil's own project and they're signed in) and sends the code as
+// `text_answer`. We DO still re-fetch the project here from the database when
+// possible, so the AI marks the latest committed version, not whatever was in
+// the textarea when they hit submit.
+async function markCodeProject(
+  q: AIQuestion,
+  s: AISubmission,
+  kind: 'python' | 'html',
+): Promise<AIMarkResult | null> {
+  if (!gemini) return null;
+  let code = (s.text_answer || '').trim();
+  let projectName = '';
+  // The client puts "<projectId>" or "<projectId>|<name>" into link_url so we
+  // can re-load the latest code server-side.
+  if (s.link_url && hasDatabase) {
+    const [pid] = String(s.link_url).split('|');
+    if (pid) {
+      try {
+        const r = await pool.query(
+          `SELECT name, code FROM code_projects WHERE id = $1 AND kind = $2`,
+          [pid, kind],
+        );
+        if (r.rows[0]) {
+          code = String(r.rows[0].code || '').trim();
+          projectName = String(r.rows[0].name || '');
+        }
+      } catch (err) {
+        console.error('[classwork-ai] code-project fetch failed:', err);
+      }
+    }
+  }
+  if (!code) {
+    return {
+      marksAwarded: 0,
+      feedback: kind === 'python'
+        ? 'Your project looks empty. Save some code in the Python editor and submit again.'
+        : 'Your project looks empty. Save some HTML/CSS in the editor and submit again.',
+      markedBy: 'ai',
+    };
+  }
+  // Hard cap so we don't blow the prompt budget.
+  const MAX_CODE = 15_000;
+  const truncated = code.length > MAX_CODE;
+  const codeForPrompt = truncated ? code.slice(0, MAX_CODE) + '\n… (truncated)' : code;
+  const langLabel = kind === 'python' ? 'Python' : 'HTML/CSS (single-file web page)';
+  const fence = kind === 'python' ? 'python' : 'html';
+  const prompt = [
+    `You are a Scottish secondary school Computing Science teacher marking a pupil's ${langLabel} project, written in the BHS in-browser code editor.`,
+    projectName ? `Pupil's project name: "${projectName}"` : '',
+    truncated ? '(The code was longer than 15 000 characters and has been truncated for marking — judge what you can see and mention this if it matters.)' : '',
+    '',
+    `Question (worth ${q.max_marks} mark${q.max_marks === 1 ? '' : 's'}):`,
+    q.prompt,
+    q.marking_scheme ? `\nMarking scheme:\n${q.marking_scheme}` : '',
+    q.ai_grading_guidance ? `\nAdditional guidance:\n${q.ai_grading_guidance}` : '',
+    '',
+    `Pupil's code:`,
+    `\`\`\`${fence}`,
+    codeForPrompt,
+    `\`\`\``,
+    '',
+    `Mark the code against the question and marking scheme. You CAN see the source but you have NOT run it — judge correctness by reading. Be encouraging but accurate. Write 2-4 sentences of feedback for the pupil and one concrete next step.`,
+    `Return ONLY a JSON object: {"marks": <integer>, "feedback": "<string>"}.`,
+  ].filter(Boolean).join('\n');
+  return await callGeminiForMark(prompt, q.max_marks);
+}
+
+/* ---------- 11. Data Sculptor SQL task ---------- */
+
+// The teacher attaches a Data Sculptor database (its embed/share URL is stored
+// on the question as config.databaseUrl). Pupils open it in a new tab, write
+// and run their query in DS, then paste the SQL back into the submission box.
+// We can't see the database from here, so the AI marks the SQL itself against
+// the task description, mirroring the pattern of /api/ds/grade-sandbox.
+async function markSqlTask(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {
+  if (!s.text_answer || !gemini) return null;
+  const sql = s.text_answer.trim();
+  if (!sql) return null;
+  const prompt = [
+    `You are a Scottish secondary school Computing Science teacher marking a pupil's SQL query exercise from the BHS Data Sculptor.`,
+    `You can see the SQL but you have NOT run it against the database, so judge it by reading. Mention any obvious result or syntax issues, but don't invent values you can't verify.`,
+    '',
+    `Task (worth ${q.max_marks} mark${q.max_marks === 1 ? '' : 's'}):`,
+    q.prompt,
+    q.marking_scheme ? `\nMarking scheme:\n${q.marking_scheme}` : '',
+    q.ai_grading_guidance ? `\nAdditional guidance:\n${q.ai_grading_guidance}` : '',
+    '',
+    `Pupil's SQL:`,
+    `\`\`\`sql`,
+    sql.length > 8000 ? sql.slice(0, 8000) + '\n-- (truncated)' : sql,
+    `\`\`\``,
+    '',
+    `Award a whole number from 0 to ${q.max_marks} marks. Write 2-4 sentences of feedback for the pupil — say what was right, what was missing or inefficient, and one improvement.`,
+    `Return ONLY a JSON object: {"marks": <integer>, "feedback": "<string>"}.`,
   ].filter(Boolean).join('\n');
   return await callGeminiForMark(prompt, q.max_marks);
 }

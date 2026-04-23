@@ -25,6 +25,9 @@ export const CLASSWORK_QUESTION_TYPES = [
   'project',
   'presentation',
   'video_question',
+  'python_task',
+  'html_task',
+  'sql_task',
 ] as const;
 export type ClassworkQuestionType = (typeof CLASSWORK_QUESTION_TYPES)[number];
 

@@ -62,6 +62,9 @@ const TYPE_LABELS: Record<string, string> = {
   project: 'Long-form project',
   presentation: 'Presentation (.pptx)',
   video_question: 'Watch a video and answer',
+  python_task: 'Python project (in-site editor)',
+  html_task: 'HTML/CSS project (in-site editor)',
+  sql_task: 'SQL task (Data Sculptor)',
 };
 
 export default function Lesson() {
@@ -231,8 +234,44 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  // python_task / html_task: list the pupil's saved code projects so they
+  // can pick one and submit its latest code with one click.
+  const [codeProjects, setCodeProjects] = useState<{ id: string; name: string; updatedAt: number | null }[] | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
 
   const t = question.question_type;
+  const codeProjectKind: 'python' | 'html' | null =
+    t === 'python_task' ? 'python' : t === 'html_task' ? 'html' : null;
+  const editorHref = (id: string) => codeProjectKind === 'python'
+    ? `/HTML/Tools/PythonEditor.html?project=${encodeURIComponent(id)}`
+    : codeProjectKind === 'html'
+      ? `/HTML/Tools/HTMLEditor.html?project=${encodeURIComponent(id)}`
+      : '#';
+  const sqlDbUrl: string = (() => {
+    if (t !== 'sql_task') return '';
+    const cfg = (question as any).config;
+    return cfg && typeof cfg === 'object' && typeof cfg.databaseUrl === 'string' ? cfg.databaseUrl : '';
+  })();
+
+  // Load the pupil's project list once, when this question is a code task.
+  useEffect(() => {
+    if (!codeProjectKind || preview) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = localStorage.getItem('studentToken') || '';
+        const r = await fetch(`/api/code-projects/${codeProjectKind}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+        if (!r.ok) { if (!cancelled) setCodeProjects([]); return; }
+        const data = await r.json();
+        if (!cancelled) setCodeProjects(Array.isArray(data) ? data : []);
+      } catch {
+        if (!cancelled) setCodeProjects([]);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [codeProjectKind, preview]);
   const uploadKind: 'screenshot' | 'project' | null =
     t === 'screenshot' ? 'screenshot'
       : t === 'project' || t === 'presentation' ? 'project'
@@ -290,7 +329,20 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
       else if (t === 'project') {
         if (fileUrl) body.fileUrl = fileUrl;
         if (url) body.linkUrl = url;
-      } else body.textAnswer = text; // short / long / code / video_question
+      } else if (codeProjectKind) {
+        // python_task / html_task — pull the latest code from the chosen
+        // project and submit it as the text answer; stash the project id in
+        // link_url so the server can re-fetch the latest version at marking time.
+        if (!selectedProjectId) throw new Error('Please pick a project to submit.');
+        const token = localStorage.getItem('studentToken') || '';
+        const r = await fetch(`/api/code-projects/${codeProjectKind}/${encodeURIComponent(selectedProjectId)}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
+        if (!r.ok) throw new Error('Could not load that project.');
+        const data = await r.json();
+        body.textAnswer = String(data?.code ?? '');
+        body.linkUrl = `${selectedProjectId}|${data?.name || ''}`;
+      } else body.textAnswer = text; // short / long / code / video_question / sql_task
       const result = await api<Submission>(`/api/classwork/questions/${question.id}/submit`, {
         method: 'POST', body: JSON.stringify(body),
       });
@@ -314,6 +366,7 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
     t === 'presentation' ? !!fileUrl :
     t === 'project' ? !!(fileUrl || url) :
     ['scratch_link', 'makecode_link', 'google_sites_link'].includes(t) ? !!url :
+    codeProjectKind ? !!selectedProjectId :
     !!text.trim();
   return (
     <div style={{ marginTop: 12, padding: 12, border: '1px dashed var(--cw-border)', borderRadius: 8, background: '#fafbfd' }}>
@@ -344,6 +397,74 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
           onChange={(e) => setText(e.target.value)}
           style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--cw-border)', fontFamily: t === 'code' ? 'JetBrains Mono, monospace' : 'inherit' }}
         />
+      )}
+
+      {codeProjectKind && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
+            Pick one of your saved {codeProjectKind === 'python' ? 'Python' : 'HTML/CSS'} projects.
+            The code you've saved will be sent for marking.
+          </div>
+          {codeProjects === null ? (
+            <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>Loading your projects…</div>
+          ) : codeProjects.length === 0 ? (
+            <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
+              You don't have any {codeProjectKind === 'python' ? 'Python' : 'HTML/CSS'} projects yet.{' '}
+              <a href={codeProjectKind === 'python' ? '/HTML/Tools/PythonEditor.html' : '/HTML/Tools/HTMLEditor.html'} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--cw-accent)' }}>
+                Open the editor
+              </a>{' '}
+              to create one, then come back and refresh.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <select
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+                style={{ flex: 1, minWidth: 200, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--cw-border)', background: '#fff' }}
+              >
+                <option value="">— choose a project —</option>
+                {codeProjects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}{p.updatedAt ? ` · saved ${new Date(p.updatedAt).toLocaleDateString()}` : ''}
+                  </option>
+                ))}
+              </select>
+              {selectedProjectId && (
+                <a
+                  href={editorHref(selectedProjectId)}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--cw-border)', background: '#fff', color: 'var(--cw-ink)', textDecoration: 'none', fontSize: 13 }}
+                >Open in editor</a>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {t === 'sql_task' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
+            {sqlDbUrl
+              ? 'Open the database in Data Sculptor, work out and run your query, then paste the SQL below.'
+              : 'Write your SQL query below and submit it for marking.'}
+          </div>
+          {sqlDbUrl && (
+            <div>
+              <a
+                href={sqlDbUrl} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-block', padding: '8px 12px', borderRadius: 8, background: 'var(--cw-accent)', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
+              >Open the database</a>
+            </div>
+          )}
+          <textarea
+            rows={6}
+            placeholder="SELECT * FROM table_name WHERE …"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            spellCheck={false}
+            style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--cw-border)', fontFamily: 'JetBrains Mono, ui-monospace, monospace', fontSize: 13 }}
+          />
+        </div>
       )}
 
       {uploadKind && (
@@ -612,6 +733,7 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
   const [rubric, setRubric] = useState<{ label: string; marks: number }[]>([]);
   const [useRubric, setUseRubric] = useState(false);
   const [visualMarking, setVisualMarking] = useState(false);
+  const [sqlDatabaseUrl, setSqlDatabaseUrl] = useState('');
   const [videoKind, setVideoKind] = useState<'youtube' | 'mp4'>('youtube');
   const [videoUrl, setVideoUrl] = useState('');
   const [videoFileName, setVideoFileName] = useState('');
@@ -678,6 +800,9 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
         if (visualMarking) cfg.visualMarking = true;
         if (Object.keys(cfg).length) body.config = cfg;
       }
+      if (type === 'sql_task' && sqlDatabaseUrl.trim()) {
+        body.config = { databaseUrl: sqlDatabaseUrl.trim() };
+      }
       if (type === 'video_question') {
         if (!videoUrl.trim()) {
           throw new Error(videoKind === 'youtube'
@@ -735,6 +860,36 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
               style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}>
               + Add option
             </button>
+          </div>
+        )}
+        {type === 'sql_task' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontSize: 13, color: 'var(--cw-muted)', marginBottom: 6 }}>
+              Pupils write a SQL query against a Data Sculptor database. Paste the database's
+              share link below — it will appear as an "Open the database" button on the question
+              so pupils can run their query in DS, then paste the SQL back to submit.
+            </div>
+            <input
+              type="url"
+              placeholder="https://…/data-sculptor/?embed=… (or any Data Sculptor URL)"
+              value={sqlDatabaseUrl}
+              onChange={(e) => setSqlDatabaseUrl(e.target.value)}
+              style={input}
+            />
+            <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
+              Optional — leave blank if pupils should write SQL without an attached database.
+              The AI marks the SQL itself, not the result, so be specific in your marking scheme.
+            </div>
+          </div>
+        )}
+        {(type === 'python_task' || type === 'html_task') && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
+              Pupils pick one of their saved {type === 'python_task' ? 'Python' : 'HTML/CSS'} projects
+              from the in-site editor and submit it. The AI reads the code (it doesn't run it) and
+              marks against your marking scheme. Make sure your marking scheme spells out what the
+              code should do.
+            </div>
           </div>
         )}
         {type === 'video_question' && (
