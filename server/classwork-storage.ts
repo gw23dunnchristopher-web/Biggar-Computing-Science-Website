@@ -124,6 +124,24 @@ export function ensureClassworkSchema(): Promise<void> {
       // straight from a planner). Idempotent.
       await client.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons ADD COLUMN IF NOT EXISTS learning_intentions TEXT;`);
       await client.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons ADD COLUMN IF NOT EXISTS success_criteria   TEXT;`);
+
+      // Per-lesson resources (image, document, youtube video, plain link).
+      // These are shown above the questions on the lesson page so pupils can
+      // read / watch / refer to them. `url` is either an external URL (for
+      // youtube/link) or `/classwork-uploads/<file>` for uploaded images and
+      // documents. `kind` is constrained at the application layer.
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS bhs_classwork_lesson_resources (
+          id VARCHAR(64) PRIMARY KEY,
+          lesson_id VARCHAR(64) NOT NULL REFERENCES bhs_classwork_lessons(id) ON DELETE CASCADE,
+          kind VARCHAR(16) NOT NULL,
+          title TEXT,
+          url TEXT NOT NULL,
+          order_index INTEGER DEFAULT 0,
+          created_at TIMESTAMP DEFAULT NOW()
+        );
+      `);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_resources_lesson ON bhs_classwork_lesson_resources(lesson_id);`);
     } finally {
       client.release();
     }
@@ -478,6 +496,62 @@ export async function updateLesson(id: string, fields: {
 export async function deleteLesson(id: string) {
   await ensureClassworkSchema();
   await pool.query(`DELETE FROM bhs_classwork_lessons WHERE id = $1`, [id]);
+}
+
+/* ---------- Lesson resources ---------- */
+
+export type LessonResourceKind = 'image' | 'document' | 'youtube' | 'link';
+const RESOURCE_KINDS: LessonResourceKind[] = ['image', 'document', 'youtube', 'link'];
+export const isLessonResourceKind = (k: any): k is LessonResourceKind =>
+  typeof k === 'string' && (RESOURCE_KINDS as string[]).includes(k);
+
+export async function listLessonResources(lessonId: string) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `SELECT id, lesson_id, kind, title, url, order_index, created_at
+       FROM bhs_classwork_lesson_resources
+      WHERE lesson_id = $1
+      ORDER BY order_index ASC, created_at ASC`,
+    [lessonId]
+  );
+  return r.rows;
+}
+
+export async function addLessonResource(input: {
+  lessonId: string;
+  kind: LessonResourceKind;
+  title?: string | null;
+  url: string;
+  orderIndex?: number;
+}) {
+  await ensureClassworkSchema();
+  const id = newId('res');
+  const r = await pool.query(
+    `INSERT INTO bhs_classwork_lesson_resources (id, lesson_id, kind, title, url, order_index)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [id, input.lessonId, input.kind, input.title ?? null, input.url, input.orderIndex ?? 0]
+  );
+  return r.rows[0];
+}
+
+export async function updateLessonResource(id: string, fields: { title?: string | null; url?: string; orderIndex?: number }) {
+  await ensureClassworkSchema();
+  const sets: string[] = []; const vals: any[] = []; let i = 1;
+  if (fields.title      !== undefined) { sets.push(`title = $${i++}`);       vals.push(fields.title); }
+  if (fields.url        !== undefined) { sets.push(`url = $${i++}`);         vals.push(fields.url); }
+  if (fields.orderIndex !== undefined) { sets.push(`order_index = $${i++}`); vals.push(fields.orderIndex); }
+  if (!sets.length) return null;
+  vals.push(id);
+  const r = await pool.query(
+    `UPDATE bhs_classwork_lesson_resources SET ${sets.join(', ')} WHERE id = $${i} RETURNING *`,
+    vals
+  );
+  return r.rows[0] || null;
+}
+
+export async function deleteLessonResource(id: string) {
+  await ensureClassworkSchema();
+  await pool.query(`DELETE FROM bhs_classwork_lesson_resources WHERE id = $1`, [id]);
 }
 
 /* ---------- Questions ---------- */

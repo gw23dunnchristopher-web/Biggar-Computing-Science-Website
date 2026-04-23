@@ -11,6 +11,15 @@ interface LessonInfo {
   is_published: boolean;
 }
 
+interface LessonResource {
+  id: string;
+  lesson_id: string;
+  kind: 'image' | 'document' | 'youtube' | 'link';
+  title: string | null;
+  url: string;
+  order_index: number;
+}
+
 interface Question {
   id: string;
   lesson_id: string;
@@ -58,6 +67,7 @@ export default function Lesson() {
   const lessonId = params?.id || '';
   const role = getCurrentRole();
   const [lesson, setLesson] = useState<LessonInfo | null>(null);
+  const [resources, setResources] = useState<LessonResource[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [allSubs, setAllSubs] = useState<Submission[]>([]);
@@ -70,12 +80,14 @@ export default function Lesson() {
     setLoading(true);
     setErr(null);
     try {
-      const [info, qs] = await Promise.all([
+      const [info, qs, res] = await Promise.all([
         api<LessonInfo>(`/api/classwork/lessons/${lessonId}`).catch(() => null),
         api<Question[]>(`/api/classwork/lessons/${lessonId}/questions`),
+        api<LessonResource[]>(`/api/classwork/lessons/${lessonId}/resources`).catch(() => [] as LessonResource[]),
       ]);
       setLesson(info);
       setQuestions(qs);
+      setResources(res || []);
       if (role === 'student') {
         try {
           const subs = await api<Submission[]>(`/api/classwork/lessons/${lessonId}/my-submissions`);
@@ -108,6 +120,9 @@ export default function Lesson() {
     <Shell title="Lesson" back={{ href: '/', label: 'All courses' }}>
       {lesson && (lesson.title || lesson.learning_intentions || lesson.success_criteria) && (
         <LessonHeader lesson={lesson} />
+      )}
+      {resources.length > 0 && (
+        <LessonResources resources={resources} />
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: lesson ? 16 : 0 }}>
         <h1 style={{ margin: 0 }}>Questions</h1>
@@ -647,6 +662,93 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
             background: 'var(--cw-accent)', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
           }}>{busy ? 'Saving…' : 'Save question'}</button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function youtubeIdFromUrl(url: string): string | null {
+  // Accepts watch?v=, youtu.be/, embed/, shorts/.
+  const patterns = [
+    /youtu\.be\/([\w-]{6,})/i,
+    /[?&]v=([\w-]{6,})/i,
+    /youtube\.com\/embed\/([\w-]{6,})/i,
+    /youtube\.com\/shorts\/([\w-]{6,})/i,
+  ];
+  for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
+  return null;
+}
+
+function LessonResources({ resources }: { resources: LessonResource[] }) {
+  return (
+    <div style={{
+      background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 12,
+      padding: 18, marginTop: 14, boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
+    }}>
+      <h2 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--cw-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+        Resources
+      </h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {resources.map((r) => {
+          const title = r.title || r.url;
+          if (r.kind === 'youtube') {
+            const id = youtubeIdFromUrl(r.url);
+            if (!id) {
+              return (
+                <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer"
+                   style={{ color: 'var(--cw-accent)' }}>{title}</a>
+              );
+            }
+            return (
+              <figure key={r.id} style={{ margin: 0 }}>
+                {r.title && <figcaption style={{ fontWeight: 600, marginBottom: 6 }}>{r.title}</figcaption>}
+                <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${id}`}
+                    title={title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
+                  />
+                </div>
+              </figure>
+            );
+          }
+          if (r.kind === 'image') {
+            return (
+              <figure key={r.id} style={{ margin: 0 }}>
+                <img
+                  src={r.url} alt={title}
+                  style={{ maxWidth: '100%', maxHeight: 480, borderRadius: 8, border: '1px solid var(--cw-border)', display: 'block' }}
+                />
+                {r.title && (
+                  <figcaption style={{ marginTop: 6, fontSize: 13, color: 'var(--cw-muted)' }}>{r.title}</figcaption>
+                )}
+              </figure>
+            );
+          }
+          // document or generic link
+          const isDoc = r.kind === 'document';
+          return (
+            <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer"
+               style={{
+                 display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 14px',
+                 background: '#f8fafc', border: '1px solid var(--cw-border)', borderRadius: 8,
+                 color: 'var(--cw-ink)', textDecoration: 'none', fontWeight: 600,
+                 alignSelf: 'flex-start', maxWidth: '100%',
+               }}>
+              <span style={{
+                fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                background: isDoc ? '#fef3c7' : '#e0e7ff',
+                color: isDoc ? '#92400e' : '#3730a3',
+                textTransform: 'uppercase', flex: '0 0 auto',
+              }}>{isDoc ? 'Document' : 'Link'}</span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {isDoc ? `Open: ${title}` : title}
+              </span>
+            </a>
+          );
+        })}
       </div>
     </div>
   );

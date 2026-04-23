@@ -12,6 +12,12 @@ interface Lesson {
   is_published: boolean;
 }
 
+interface Resource {
+  id: string; lesson_id: string;
+  kind: 'image' | 'document' | 'youtube' | 'link';
+  title: string | null; url: string; order_index: number;
+}
+
 const COURSE_LABELS: Record<string, string> = {
   s1: 'S1', s2: 'S2', s3: 'S3', n4: 'National 4', n5: 'National 5', higher: 'Higher',
 };
@@ -40,6 +46,13 @@ export default function Course() {
   const [editTitle, setEditTitle] = useState('');
   const [editLI, setEditLI] = useState('');
   const [editSC, setEditSC] = useState('');
+  const [editResources, setEditResources] = useState<Resource[]>([]);
+  const [resourceBusy, setResourceBusy] = useState(false);
+  const [resourceErr, setResourceErr] = useState<string | null>(null);
+  // Inline "add resource" form state inside the Edit lesson modal.
+  const [addResKind, setAddResKind] = useState<'youtube' | 'link' | null>(null);
+  const [addResUrl, setAddResUrl] = useState('');
+  const [addResTitle, setAddResTitle] = useState('');
   const [modalErr, setModalErr] = useState<string | null>(null);
   const closeModal = () => setModal({ kind: 'none' });
 
@@ -77,8 +90,79 @@ export default function Course() {
     setEditTitle(l.title);
     setEditLI(l.learning_intentions || '');
     setEditSC(l.success_criteria || '');
+    setEditResources([]);
+    setResourceErr(null);
+    setAddResKind(null); setAddResUrl(''); setAddResTitle('');
     setModalErr(null);
     setModal({ kind: 'editLesson', lesson: l });
+    // Load this lesson's resources in the background.
+    api<Resource[]>(`/api/classwork/lessons/${l.id}/resources`)
+      .then(setEditResources)
+      .catch((e: any) => setResourceErr(e.message || 'Failed to load resources'));
+  }
+
+  async function refreshResources(lessonId: string) {
+    try {
+      const list = await api<Resource[]>(`/api/classwork/lessons/${lessonId}/resources`);
+      setEditResources(list);
+    } catch (e: any) { setResourceErr(e.message || 'Failed to load resources'); }
+  }
+
+  async function addInlineResource(lessonId: string) {
+    const url = addResUrl.trim();
+    const title = addResTitle.trim();
+    if (!url) { setResourceErr('A URL is required.'); return; }
+    if (addResKind === 'youtube' && !/youtu\.?be/i.test(url)) {
+      setResourceErr('That doesn\u2019t look like a YouTube URL.');
+      return;
+    }
+    setResourceBusy(true); setResourceErr(null);
+    try {
+      await api(`/api/classwork/lessons/${lessonId}/resources`, {
+        method: 'POST',
+        body: JSON.stringify({ kind: addResKind, url, title: title || null }),
+      });
+      setAddResKind(null); setAddResUrl(''); setAddResTitle('');
+      await refreshResources(lessonId);
+    } catch (e: any) { setResourceErr(e.message || 'Failed to add resource'); }
+    finally { setResourceBusy(false); }
+  }
+
+  async function uploadResource(lessonId: string, kind: 'image' | 'document', file: File) {
+    setResourceBusy(true); setResourceErr(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      // Use raw fetch so the browser sets the multipart boundary itself; the
+      // shared api() helper forces Content-Type: application/json.
+      const teacherToken = (() => { try { return localStorage.getItem('teacher_token') || localStorage.getItem('teacherToken') || ''; } catch { return ''; } })();
+      const headers: Record<string, string> = {};
+      if (teacherToken) headers['x-teacher-password'] = teacherToken;
+      const res = await fetch(`/api/classwork/teacher/upload/resource`, {
+        method: 'POST', headers, body: fd,
+      });
+      if (!res.ok) {
+        let msg = `Upload failed (${res.status})`;
+        try { const j = await res.json(); if (j?.error) msg = j.error; } catch {}
+        throw new Error(msg);
+      }
+      const up = await res.json() as { url: string; filename: string };
+      await api(`/api/classwork/lessons/${lessonId}/resources`, {
+        method: 'POST',
+        body: JSON.stringify({ kind, url: up.url, title: file.name }),
+      });
+      await refreshResources(lessonId);
+    } catch (e: any) { setResourceErr(e.message || 'Upload failed'); }
+    finally { setResourceBusy(false); }
+  }
+
+  async function deleteResource(lessonId: string, resourceId: string) {
+    setResourceBusy(true); setResourceErr(null);
+    try {
+      await api(`/api/classwork/resources/${resourceId}`, { method: 'DELETE' });
+      await refreshResources(lessonId);
+    } catch (e: any) { setResourceErr(e.message || 'Failed to delete'); }
+    finally { setResourceBusy(false); }
   }
 
   async function submitEditLesson(l: Lesson) {
@@ -335,6 +419,107 @@ export default function Course() {
             One bullet per line. Leave blank to hide.
           </p>
         </div>
+
+        {modal.kind === 'editLesson' && (
+          <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--cw-border)' }}>
+            <label style={{ ...modalLabel, marginBottom: 8 }}>Resources for pupils</label>
+            <p style={{ margin: '0 0 10px', fontSize: 12, color: 'var(--cw-muted)' }}>
+              Attach images, documents, YouTube videos or web links. Pupils see these above the questions on the lesson page.
+            </p>
+
+            {editResources.length === 0 ? (
+              <p style={{ margin: '4px 0 10px', fontSize: 13, color: 'var(--cw-muted)' }}>No resources yet.</p>
+            ) : (
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {editResources.map((r) => (
+                  <li key={r.id} style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    padding: '6px 10px', border: '1px solid var(--cw-border)', borderRadius: 8, background: '#f8fafc',
+                  }}>
+                    <span style={{
+                      fontSize: 11, fontWeight: 600, padding: '2px 6px', borderRadius: 4,
+                      background: '#e2e8f0', color: 'var(--cw-ink)', textTransform: 'uppercase',
+                    }}>{r.kind}</span>
+                    <a href={r.url} target="_blank" rel="noopener noreferrer" style={{
+                      flex: 1, color: 'var(--cw-accent)', textDecoration: 'none',
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: 13,
+                    }}>{r.title || r.url}</a>
+                    <button
+                      onClick={() => deleteResource(modal.lesson.id, r.id)}
+                      disabled={resourceBusy}
+                      style={{ ...modalDangerBtn, padding: '4px 10px', fontSize: 12 }}
+                    >Remove</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {addResKind === null ? (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                <label style={{ ...modalSecondaryBtn, cursor: 'pointer' }}>
+                  Add image
+                  <input
+                    type="file" accept="image/*" style={{ display: 'none' }} disabled={resourceBusy}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f && modal.kind === 'editLesson') uploadResource(modal.lesson.id, 'image', f);
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+                <label style={{ ...modalSecondaryBtn, cursor: 'pointer' }}>
+                  Add document
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.md"
+                    style={{ display: 'none' }}
+                    disabled={resourceBusy}
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f && modal.kind === 'editLesson') uploadResource(modal.lesson.id, 'document', f);
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+                <button
+                  onClick={() => { setAddResKind('youtube'); setAddResUrl(''); setAddResTitle(''); setResourceErr(null); }}
+                  style={modalSecondaryBtn}
+                >Add YouTube video</button>
+                <button
+                  onClick={() => { setAddResKind('link'); setAddResUrl(''); setAddResTitle(''); setResourceErr(null); }}
+                  style={modalSecondaryBtn}
+                >Add web link</button>
+              </div>
+            ) : (
+              <div style={{ marginTop: 4, padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff' }}>
+                <label style={modalLabel}>{addResKind === 'youtube' ? 'YouTube URL' : 'Web link URL'}</label>
+                <input
+                  autoFocus value={addResUrl}
+                  onChange={(e) => setAddResUrl(e.target.value)}
+                  placeholder={addResKind === 'youtube' ? 'https://www.youtube.com/watch?v=...' : 'https://...'}
+                  style={modalInput}
+                />
+                <label style={{ ...modalLabel, marginTop: 8 }}>Title shown to pupils (optional)</label>
+                <input
+                  value={addResTitle}
+                  onChange={(e) => setAddResTitle(e.target.value)}
+                  placeholder="e.g. Intro video"
+                  style={modalInput}
+                />
+                <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+                  <button
+                    onClick={() => modal.kind === 'editLesson' && addInlineResource(modal.lesson.id)}
+                    disabled={resourceBusy} style={modalPrimaryBtn}
+                  >Add</button>
+                  <button onClick={() => { setAddResKind(null); setResourceErr(null); }} style={modalSecondaryBtn}>Cancel</button>
+                </div>
+              </div>
+            )}
+
+            {resourceErr && <p style={{ color: 'var(--cw-danger)', margin: '8px 0 0', fontSize: 13 }}>{resourceErr}</p>}
+          </div>
+        )}
+
         {modalErr && <p style={{ color: 'var(--cw-danger)', margin: '8px 0 0' }}>{modalErr}</p>}
       </Modal>
 

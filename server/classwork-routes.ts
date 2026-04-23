@@ -40,6 +40,11 @@ import {
   createStudentInClass,
   resetStudentPassword,
   setStudentUsername,
+  listLessonResources,
+  addLessonResource,
+  updateLessonResource,
+  deleteLessonResource,
+  isLessonResourceKind,
   deleteStudentAnywhere,
   deleteClassAnywhere,
   moveStudentToClass,
@@ -195,6 +200,21 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
   app.post(
     '/api/classwork/upload/project',
     requireStudent,
+    (req, res, next) => {
+      projectUpload.single('file')(req, res, (err: any) => {
+        if (err) return res.status(400).json({ error: err.message || 'Upload failed' });
+        next();
+      });
+    },
+    handleUpload('project')
+  );
+
+  // Teacher-only: upload a lesson-resource file (image or document). Reuses
+  // the broader projectUpload preset so PDFs, docs and images are all allowed
+  // up to 20 MB. Returns the same shape as the student endpoints.
+  app.post(
+    '/api/classwork/teacher/upload/resource',
+    requireTeacher,
     (req, res, next) => {
       projectUpload.single('file')(req, res, (err: any) => {
         if (err) return res.status(400).json({ error: err.message || 'Upload failed' });
@@ -384,6 +404,75 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] deleteLesson error:', err);
       res.status(500).json({ error: 'Failed to delete lesson' });
+    }
+  });
+
+  /* ---------- Lesson resources ---------- */
+
+  // Anyone who can see the lesson can list its resources (teachers always,
+  // pupils only when published).
+  app.get('/api/classwork/lessons/:id/resources', async (req, res) => {
+    try {
+      const lesson = await getLesson(req.params.id);
+      if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
+      const isTeacher = await checkTeacher(req, requireTeacher);
+      if (!isTeacher && !lesson.is_published) return res.status(404).json({ error: 'Lesson not found' });
+      res.json(await listLessonResources(req.params.id));
+    } catch (err) {
+      console.error('[classwork] listLessonResources error:', err);
+      res.status(500).json({ error: 'Failed to load resources' });
+    }
+  });
+
+  app.post('/api/classwork/lessons/:id/resources', requireTeacher, async (req, res) => {
+    try {
+      const lesson = await getLesson(req.params.id);
+      if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
+      const { kind, url, title, orderIndex } = req.body || {};
+      if (!isLessonResourceKind(kind)) return res.status(400).json({ error: 'Invalid resource kind' });
+      if (!url || typeof url !== 'string') return res.status(400).json({ error: 'URL is required' });
+      // Compute the next order_index so new items go at the end.
+      const existing = await listLessonResources(req.params.id);
+      const nextOrder = typeof orderIndex === 'number'
+        ? orderIndex
+        : (existing.length ? Math.max(...existing.map((r: any) => r.order_index ?? 0)) + 1 : 0);
+      const row = await addLessonResource({
+        lessonId: req.params.id,
+        kind,
+        url: url.trim(),
+        title: typeof title === 'string' && title.trim() ? title.trim() : null,
+        orderIndex: nextOrder,
+      });
+      res.json(row);
+    } catch (err) {
+      console.error('[classwork] addLessonResource error:', err);
+      res.status(500).json({ error: 'Failed to add resource' });
+    }
+  });
+
+  app.patch('/api/classwork/resources/:id', requireTeacher, async (req, res) => {
+    try {
+      const { title, url, orderIndex } = req.body || {};
+      const fields: any = {};
+      if (title      !== undefined) fields.title = title === null ? null : String(title);
+      if (url        !== undefined) fields.url = String(url);
+      if (orderIndex !== undefined) fields.orderIndex = Number(orderIndex) || 0;
+      const row = await updateLessonResource(req.params.id, fields);
+      if (!row) return res.status(404).json({ error: 'Resource not found' });
+      res.json(row);
+    } catch (err) {
+      console.error('[classwork] updateLessonResource error:', err);
+      res.status(500).json({ error: 'Failed to update resource' });
+    }
+  });
+
+  app.delete('/api/classwork/resources/:id', requireTeacher, async (req, res) => {
+    try {
+      await deleteLessonResource(req.params.id);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('[classwork] deleteLessonResource error:', err);
+      res.status(500).json({ error: 'Failed to delete resource' });
     }
   });
 
