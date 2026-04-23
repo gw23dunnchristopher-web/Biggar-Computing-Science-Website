@@ -231,6 +231,31 @@ export default function Lesson() {
 
               {q.question_type === 'video_question' && <VideoQuestionPlayer config={q.config} />}
 
+              {q.question_type === 'presentation' && q.config && typeof q.config === 'object' && (q.config as any).starterFileUrl && (
+                <div style={{
+                  marginTop: 8, padding: '10px 12px', borderRadius: 8,
+                  background: '#eff6ff', border: '1px solid #bfdbfe',
+                  display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+                }}>
+                  <span style={{ fontWeight: 600 }}>Starter presentation:</span>
+                  <a
+                    href={(q.config as any).starterFileUrl}
+                    download={(q.config as any).starterFileName || undefined}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      padding: '6px 12px', borderRadius: 6,
+                      background: '#fff', border: '1px solid #bfdbfe',
+                      color: '#1e40af', fontWeight: 600, textDecoration: 'none',
+                    }}
+                  >
+                    Download {((q.config as any).starterFileName as string | undefined) || 'starter.pptx'}
+                  </a>
+                  <span style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+                    Open it in PowerPoint, edit it, then upload your finished version below.
+                  </span>
+                </div>
+              )}
+
               <QuestionResources
                 questionId={q.id}
                 isTeacher={role === 'teacher' && !previewAsStudent}
@@ -949,6 +974,12 @@ function NewQuestionModal({ lessonId, passages, onClose, onCreated }: { lessonId
   const [rubric, setRubric] = useState<{ label: string; marks: number }[]>([]);
   const [useRubric, setUseRubric] = useState(false);
   const [visualMarking, setVisualMarking] = useState(false);
+  // Optional starter .pptx for presentation questions: pupils download it,
+  // edit it and upload their version. The marker uses it as a baseline so
+  // the AI only credits the pupil's additions, not the original starter.
+  const [starterFileUrl, setStarterFileUrl] = useState('');
+  const [starterFileName, setStarterFileName] = useState('');
+  const [starterUploading, setStarterUploading] = useState(false);
   const [sqlDatabaseUrl, setSqlDatabaseUrl] = useState('');
   const [dbEmbedInput, setDbEmbedInput] = useState('');
   const [isExtension, setIsExtension] = useState(false);
@@ -1026,6 +1057,10 @@ function NewQuestionModal({ lessonId, passages, onClose, onCreated }: { lessonId
           if (cleaned.length) cfg.rubric = cleaned;
         }
         if (visualMarking) cfg.visualMarking = true;
+        if (starterFileUrl) {
+          cfg.starterFileUrl = starterFileUrl;
+          if (starterFileName) cfg.starterFileName = starterFileName;
+        }
         if (Object.keys(cfg).length) body.config = cfg;
       }
       if (type === 'sql_task' && sqlDatabaseUrl.trim()) {
@@ -1301,6 +1336,56 @@ function NewQuestionModal({ lessonId, passages, onClose, onCreated }: { lessonId
                 Without a rubric the AI gives one holistic mark out of {maxMarks}.
               </div>
             )}
+            <div style={{ marginTop: 12, padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff' }}>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>Starter presentation (optional)</div>
+              <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginBottom: 8 }}>
+                Upload a PowerPoint (.pptx) for pupils to download and edit. The AI marker
+                will treat its content as a baseline and only credit the pupil's additions
+                and changes against your success criteria.
+              </div>
+              {starterFileUrl ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <a href={starterFileUrl} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600 }}>
+                    {starterFileName || 'Starter file'}
+                  </a>
+                  <button
+                    onClick={() => { setStarterFileUrl(''); setStarterFileName(''); }}
+                    style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid var(--cw-border)', background: '#fff', cursor: 'pointer', fontSize: 12 }}
+                  >Remove</button>
+                </div>
+              ) : (
+                <input
+                  type="file"
+                  accept=".pptx"
+                  disabled={starterUploading}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setStarterUploading(true);
+                    setErr(null);
+                    try {
+                      const fd = new FormData();
+                      fd.append('file', file);
+                      const teacherToken = (() => {
+                        try { return localStorage.getItem('teacher_token') || localStorage.getItem('teacherToken') || ''; } catch { return ''; }
+                      })();
+                      const headers: Record<string, string> = {};
+                      if (teacherToken) headers['x-teacher-password'] = teacherToken;
+                      const r = await fetch('/api/classwork/teacher/upload/resource', { method: 'POST', headers, body: fd });
+                      const data = await r.json();
+                      if (!r.ok) throw new Error(data?.error || 'Upload failed');
+                      setStarterFileUrl(data.url);
+                      setStarterFileName(data.filename || file.name);
+                    } catch (e: any) {
+                      setErr(e.message || 'Starter upload failed');
+                    } finally {
+                      setStarterUploading(false);
+                    }
+                  }}
+                />
+              )}
+              {starterUploading && <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>Uploading…</div>}
+            </div>
           </div>
         )}
         {type !== 'passage' && (

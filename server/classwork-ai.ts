@@ -667,6 +667,7 @@ async function markPresentationVisual(
   summary: PptxSummary,
   rubric: RubricRow[],
   cappedTotal: number,
+  starter: { summary: PptxSummary; images: Buffer[] } | null,
 ): Promise<AIMarkResult | null> {
   if (!gemini) return null;
   const SLIDE_LIMIT = 25;
@@ -675,7 +676,7 @@ async function markPresentationVisual(
 
   const trimSlide = (t: string, max = 400) => t.length > max ? t.slice(0, max) + '…' : t;
   const slidesBlock = summary.slides.slice(0, images.length).map((sl) => {
-    const parts = [`Slide ${sl.index}:`,
+    const parts = [`Pupil slide ${sl.index}:`,
       sl.text ? `  Text: ${trimSlide(sl.text)}` : '  Text: (no text)'];
     if (sl.notes) parts.push(`  Speaker notes: ${trimSlide(sl.notes, 200)}`);
     return parts.join('\n');
@@ -685,20 +686,33 @@ async function markPresentationVisual(
     .map((r, i) => `  ${i + 1}. ${r.label} — up to ${r.marks} mark${r.marks === 1 ? '' : 's'}`)
     .join('\n');
 
+  const starterSlidesBlock = starter
+    ? starter.summary.slides.slice(0, starter.images.length).map((sl) => {
+        const parts = [`Starter slide ${sl.index}:`,
+          sl.text ? `  Text: ${trimSlide(sl.text)}` : '  Text: (no text)'];
+        if (sl.notes) parts.push(`  Speaker notes: ${trimSlide(sl.notes, 200)}`);
+        return parts.join('\n');
+      }).join('\n')
+    : '';
+
   const promptText = [
     `You are marking a Scottish secondary school pupil's PowerPoint presentation for a Computing Science task.`,
     `You can SEE the slides — each slide has been rendered as an image and attached in order. Use the visual layout (titles, structure, images, diagrams, colour, balance, neatness) AS WELL AS the text/notes shown below to mark fairly.`,
     omitted > 0 ? `Note: only the first ${images.length} of ${summary.slideCount} slides were rendered; mark on what you can see and mention the missing slides briefly.` : '',
+    starter
+      ? `IMPORTANT: The pupil started from a STARTER deck the teacher provided. The first ${starter.images.length} image(s) attached are the STARTER slides — these are NOT the pupil's work, and you must NOT credit any content (text, layout, images, design) that already appears in the starter. The remaining ${images.length} image(s) are the PUPIL'S submission, in order. Mark only the additions, changes and improvements the pupil has made on top of the starter, judged against the success criteria. If the pupil has made very few changes, say so honestly and award accordingly.`
+      : '',
     '',
     `Question (worth up to ${q.max_marks} mark${q.max_marks === 1 ? '' : 's'} in total):`,
     q.prompt,
-    q.marking_scheme ? `\nGeneral marking scheme:\n${q.marking_scheme}` : '',
+    q.marking_scheme ? `\nGeneral marking scheme (success criteria):\n${q.marking_scheme}` : '',
     q.ai_grading_guidance ? `\nAdditional guidance:\n${q.ai_grading_guidance}` : '',
     '',
     `Rubric (mark each criterion separately, then sum — total cannot exceed ${cappedTotal}):`,
     rubricBlock,
     '',
-    `Per-slide text and speaker notes (for cross-reference; the images are authoritative for layout/visuals):`,
+    starter ? `Starter deck — text/notes (already provided to the pupil; ignore for credit):\n${starterSlidesBlock}\n` : '',
+    `Pupil's deck — text and speaker notes (for cross-reference; the images are authoritative for layout/visuals):`,
     slidesBlock,
     '',
     `Be encouraging but accurate. In your feedback, list a brief breakdown by criterion and one concrete improvement.`,
@@ -706,6 +720,13 @@ async function markPresentationVisual(
   ].filter(Boolean).join('\n');
 
   const parts: any[] = [{ text: promptText }];
+  if (starter) {
+    parts.push({ text: '--- STARTER SLIDES (do not credit, ignore for marks) ---' });
+    for (const buf of starter.images) {
+      parts.push({ inlineData: { data: buf.toString('base64'), mimeType: 'image/png' } });
+    }
+    parts.push({ text: '--- PUPIL SUBMISSION (mark only this, on top of the starter above) ---' });
+  }
   for (const buf of images) {
     parts.push({ inlineData: { data: buf.toString('base64'), mimeType: 'image/png' } });
   }
@@ -757,6 +778,25 @@ async function markPresentation(q: AIQuestion, s: AISubmission): Promise<AIMarkR
   const rubricRows = getRubric(q);
   const rubricRowsTotal = rubricRows.reduce((a, r) => a + r.marks, 0);
   const visualCappedTotal = Math.min(q.max_marks, rubricRowsTotal);
+  // Optional starter file: if the teacher attached a baseline .pptx, summarise
+  // it (and render its slides to images for the visual path) so the marker can
+  // tell the AI what was already there and credit only the pupil's additions.
+  const starterUrl = (q.config && typeof q.config === 'object' && typeof (q.config as any).starterFileUrl === 'string')
+    ? (q.config as any).starterFileUrl as string
+    : '';
+  let starterSummary: PptxSummary | null = null;
+  let starterImages: Buffer[] | null = null;
+  if (starterUrl) {
+    const starterPath = resolveUploadPath(starterUrl);
+    if (starterPath && /\.pptx$/i.test(starterPath)) {
+      try {
+        starterSummary = await summarisePptx(starterPath);
+      } catch { starterSummary = null; }
+    }
+    // Visual rendering of the starter is only useful if we're also doing the
+    // visual path; we render it lazily below.
+    void starterPath;
+  }
   // Visual marking is opt-in per question (config.visualMarking === true).
   // It renders every slide to a PNG via LibreOffice headless + pdftoppm and
   // hands them to Gemini Vision so the model can judge layout, colour and
@@ -764,7 +804,17 @@ async function markPresentation(q: AIQuestion, s: AISubmission): Promise<AIMarkR
   // to the text-only path below so the pupil still gets a mark.
   const wantVisual = !!(q.config && typeof q.config === 'object' && (q.config as any).visualMarking === true);
   if (wantVisual) {
-    const visual = await markPresentationVisual(q, onDisk, summary, rubricRows, visualCappedTotal);
+    let starterPair: { summary: PptxSummary; images: Buffer[] } | null = null;
+    if (starterUrl && starterSummary) {
+      const starterPath = resolveUploadPath(starterUrl);
+      if (starterPath) {
+        starterImages = await renderPptxToImages(starterPath, { dpi: 100, maxSlides: 25 });
+        if (starterImages && starterImages.length) {
+          starterPair = { summary: starterSummary, images: starterImages };
+        }
+      }
+    }
+    const visual = await markPresentationVisual(q, onDisk, summary, rubricRows, visualCappedTotal, starterPair);
     if (visual) return visual;
   }
   // Cap text per slide so very long decks still fit in the prompt.
@@ -783,23 +833,38 @@ async function markPresentation(q: AIQuestion, s: AISubmission): Promise<AIMarkR
   const totalRubricMarks = rubric.reduce((a, r) => a + r.marks, 0);
   const cappedTotal = Math.min(q.max_marks, totalRubricMarks);
 
+  const trimStarterSlide = (t: string, max = 400) => t.length > max ? t.slice(0, max) + '…' : t;
+  const starterTextBlock = starterSummary
+    ? starterSummary.slides.map((sl) => {
+        const parts = [`Starter slide ${sl.index}:`, sl.text ? `  Text: ${trimStarterSlide(sl.text)}` : '  Text: (no text)'];
+        if (sl.notes) parts.push(`  Speaker notes: ${trimStarterSlide(sl.notes, 200)}`);
+        return parts.join('\n');
+      }).join('\n')
+    : '';
+
   const prompt = [
     `You are marking a Scottish secondary school pupil's PowerPoint presentation for a Computing Science task.`,
     `You cannot see the visual layout, fonts or colours of the slides — only the text on each slide, the number of embedded images, and any speaker notes. Be honest about what you can and can\u2019t judge.`,
+    starterSummary
+      ? `IMPORTANT: The pupil started from a STARTER deck the teacher provided. Below you'll see two decks — first the STARTER (already given to the pupil; do NOT credit any text or content that appears in it), then the PUPIL'S submission. Mark only the additions and changes the pupil has made on top of the starter, judged against the success criteria. If the pupil has made very few changes, say so honestly and award accordingly.`
+      : '',
     '',
     `Question (worth up to ${q.max_marks} mark${q.max_marks === 1 ? '' : 's'} in total):`,
     q.prompt,
-    q.marking_scheme ? `\nGeneral marking scheme:\n${q.marking_scheme}` : '',
+    q.marking_scheme ? `\nGeneral marking scheme (success criteria):\n${q.marking_scheme}` : '',
     q.ai_grading_guidance ? `\nAdditional guidance:\n${q.ai_grading_guidance}` : '',
     '',
     `Rubric (mark each criterion separately, then sum — total cannot exceed ${cappedTotal}):`,
     rubricBlock,
     '',
-    `Deck summary:`,
+    starterSummary
+      ? `Starter deck (${starterSummary.slideCount} slide${starterSummary.slideCount === 1 ? '' : 's'}, ${starterSummary.imageCount} embedded media — ignore for credit):\n${starterTextBlock}\n`
+      : '',
+    `Pupil's deck summary:`,
     `  Total slides: ${summary.slideCount}`,
     `  Total embedded media files: ${summary.imageCount}`,
     '',
-    `Per-slide content:`,
+    `Pupil's per-slide content:`,
     slidesBlock,
     '',
     `Award marks fairly. Be encouraging but accurate. Explain in 2-4 sentences what worked well and one concrete improvement, and list a brief breakdown by criterion.`,
