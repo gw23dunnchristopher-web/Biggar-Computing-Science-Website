@@ -247,41 +247,90 @@ export default function Students() {
         <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 16 }}>
           <div style={card}>
             <h3 style={{ marginTop: 0 }}>Classes</h3>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {classes.map((c) => {
-                const isSel = selectedId === c.id;
-                return (
-                  <li key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <button
-                      onClick={() => { setSelectedId(c.id); setLastCreated([]); }}
-                      style={{
-                        flex: 1, textAlign: 'left', minWidth: 0,
-                        background: isSel ? 'var(--cw-accent)' : '#f1f5f9',
-                        color: isSel ? '#fff' : 'var(--cw-ink)',
-                        border: '1px solid var(--cw-border)', borderRadius: 6,
-                        padding: '8px 10px', cursor: 'pointer', fontWeight: 600,
-                      }}
-                    >
-                      <span style={{
-                        display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>{c.name}</span>
-                    </button>
-                    <button
-                      onClick={() => openEditYear(c)}
-                      title={c.course ? `Year: ${yearLabel(c.course)} — click to change` : 'Set year'}
-                      style={{
-                        fontSize: 11, fontWeight: 700, padding: '4px 8px', borderRadius: 999,
-                        whiteSpace: 'nowrap', cursor: 'pointer', minWidth: 44, textAlign: 'center',
-                        background: c.course ? '#dbeafe' : '#fee2e2',
-                        color: c.course ? '#1e3a8a' : '#991b1b',
-                        border: c.course ? '1px solid #bfdbfe' : '1px solid #fecaca',
-                      }}
-                    >{yearShort(c.course)}</button>
-                    <button onClick={() => setModal({ kind: 'deleteClass', cls: c })} style={dangerBtn} title="Delete class">×</button>
-                  </li>
-                );
-              })}
-            </ul>
+            {(() => {
+              // Group classes by year, ordered Higher → N5 → N4 → S3 → S2 → S1,
+              // with any classes that don't have a year set falling to the bottom.
+              // Each group is a collapsible <details> that starts collapsed so the
+              // page isn't a wall of class names — the teacher opens just the year
+              // they care about.
+              const groupOrder: { key: string; label: string }[] = [
+                { key: 'higher', label: 'Higher' },
+                { key: 'n5',     label: 'National 5' },
+                { key: 'n4',     label: 'National 4' },
+                { key: 's3',     label: 'S3' },
+                { key: 's2',     label: 'S2' },
+                { key: 's1',     label: 'S1' },
+                { key: '__none', label: 'No year set' },
+              ];
+              const groups = new Map<string, ClassRow[]>();
+              for (const c of classes) {
+                const k = c.course || '__none';
+                if (!groups.has(k)) groups.set(k, []);
+                groups.get(k)!.push(c);
+              }
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {groupOrder.map((g) => {
+                    const items = groups.get(g.key);
+                    if (!items || items.length === 0) return null;
+                    return (
+                      <details key={g.key} style={{
+                        border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff',
+                      }}>
+                        <summary style={{
+                          cursor: 'pointer', padding: '8px 10px', fontWeight: 700,
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                          listStyle: 'revert', // keep the native disclosure triangle
+                        }}>
+                          <span>{g.label}</span>
+                          <span style={{ fontSize: 12, color: 'var(--cw-muted)', fontWeight: 600 }}>
+                            {items.length}
+                          </span>
+                        </summary>
+                        <ul style={{
+                          listStyle: 'none', padding: '6px 8px 8px', margin: 0,
+                          display: 'flex', flexDirection: 'column', gap: 6,
+                        }}>
+                          {items.map((c) => {
+                            const isSel = selectedId === c.id;
+                            return (
+                              <li key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <button
+                                  onClick={() => { setSelectedId(c.id); setLastCreated([]); }}
+                                  style={{
+                                    flex: 1, textAlign: 'left', minWidth: 0,
+                                    background: isSel ? 'var(--cw-accent)' : '#f1f5f9',
+                                    color: isSel ? '#fff' : 'var(--cw-ink)',
+                                    border: '1px solid var(--cw-border)', borderRadius: 6,
+                                    padding: '8px 10px', cursor: 'pointer', fontWeight: 600,
+                                  }}
+                                >
+                                  <span style={{
+                                    display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                  }}>{c.name}</span>
+                                </button>
+                                <button
+                                  onClick={() => openEditYear(c)}
+                                  title={c.course ? `Year: ${yearLabel(c.course)} — click to change` : 'Set year'}
+                                  style={{
+                                    fontSize: 11, fontWeight: 700, padding: '4px 8px', borderRadius: 999,
+                                    whiteSpace: 'nowrap', cursor: 'pointer', minWidth: 44, textAlign: 'center',
+                                    background: c.course ? '#dbeafe' : '#fee2e2',
+                                    color: c.course ? '#1e3a8a' : '#991b1b',
+                                    border: c.course ? '1px solid #bfdbfe' : '1px solid #fecaca',
+                                  }}
+                                >{yearShort(c.course)}</button>
+                                <button onClick={() => setModal({ kind: 'deleteClass', cls: c })} style={dangerBtn} title="Delete class">×</button>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </details>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
 
           <div style={card}>
