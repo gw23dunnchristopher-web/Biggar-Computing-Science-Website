@@ -110,12 +110,62 @@ export default function Analytics() {
     return () => { cancelled = true; };
   }, [course]);
 
+  const [downloading, setDownloading] = useState(false);
+  const [downloadErr, setDownloadErr] = useState<string | null>(null);
+
+  async function downloadExcel() {
+    setDownloading(true);
+    setDownloadErr(null);
+    try {
+      const teacherToken =
+        localStorage.getItem('teacher_token') ||
+        localStorage.getItem('teacherToken') || '';
+      const res = await fetch(`/api/classwork/${course}/analytics/export.xlsx`, {
+        headers: { 'x-teacher-password': teacherToken },
+      });
+      if (!res.ok) {
+        let msg = `Download failed (${res.status})`;
+        try { const j = await res.json(); if (j?.error) msg = j.error; } catch { /* ignore */ }
+        throw new Error(msg);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `bhs-classwork-${course}-analytics-${new Date().toISOString().slice(0,10)}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e: any) {
+      setDownloadErr(e?.message || 'Download failed');
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   return (
     <Shell title={`Analytics — ${COURSE_LABELS[course] || course}`} back={{ href: `/course/${course}`, label: 'Back to course' }}>
       {err && <p style={{ color: 'var(--cw-danger)' }}>{err}</p>}
       {!data && !err && <p>Loading…</p>}
       {data && (
         <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            {downloadErr && <span style={{ color: 'var(--cw-danger)', fontSize: 13 }}>{downloadErr}</span>}
+            <button
+              onClick={downloadExcel}
+              disabled={downloading}
+              style={{
+                padding: '8px 14px', borderRadius: 8, border: '1px solid var(--cw-border)',
+                background: downloading ? '#e2e8f0' : 'var(--cw-accent)',
+                color: downloading ? 'var(--cw-muted)' : '#fff',
+                cursor: downloading ? 'wait' : 'pointer', fontWeight: 600, fontSize: 13,
+              }}
+            >
+              {downloading ? 'Building workbook…' : 'Download Excel'}
+            </button>
+          </div>
+
           <div style={summaryRow}>
             <Tile label="Students who submitted" value={data.totals.distinct_students} />
             <Tile label="Total submissions" value={data.totals.submission_count} />

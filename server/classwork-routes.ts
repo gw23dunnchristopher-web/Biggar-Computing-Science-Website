@@ -623,6 +623,23 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     }
   });
 
+  app.get('/api/classwork/:course/analytics/export.xlsx', requireTeacher, async (req, res) => {
+    const course = req.params.course;
+    if (!isClassworkCourse(course)) return res.status(400).json({ error: 'Invalid course' });
+    try {
+      const { buildAnalyticsWorkbook } = await import('./classwork-export.js');
+      const wb = await buildAnalyticsWorkbook(course);
+      const filename = `bhs-classwork-${course}-analytics-${new Date().toISOString().slice(0,10)}.xlsx`;
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      await wb.xlsx.write(res);
+      res.end();
+    } catch (err) {
+      console.error('[classwork] analytics export error:', err);
+      if (!res.headersSent) res.status(500).json({ error: 'Failed to build analytics workbook' });
+    }
+  });
+
   app.get('/api/classwork/lessons/:lessonId/analytics', requireTeacher, async (req, res) => {
     try {
       const data = await getLessonAnalytics(req.params.lessonId);
