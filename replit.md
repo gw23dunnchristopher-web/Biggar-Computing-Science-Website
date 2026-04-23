@@ -19,7 +19,7 @@ A Node.js/Express server serves static content, utilizing TypeScript for type sa
 - **Paper Builder:** A native panel for teachers to create, edit, and manage exam papers, questions, and assignments.
 - **Data Sculptor:** A sandboxed database tool providing personal multi-database dashboards for students (workspace mode) and advanced database design capabilities for teachers, including AI marking for SQL tasks.
 - **Code Editor Project Dashboards:** Personal project management for Python and HTML/CSS editors with cloud synchronization.
-- **BHS Classwork App:** A React SPA for AI-marked classwork across multiple courses, supporting various question types and real-time feedback.
+- **BHS Classwork App:** A React SPA at `/classwork/` for AI-marked classwork across S1, S2, S3, N5 and Higher. Supports text, multiple-choice, code, link (Scratch / MakeCode / Google Sites) and file-upload (screenshot, project) question types with real-time AI feedback. Uploads land in `public/classwork-uploads/` via `POST /api/classwork/upload/screenshot` and `POST /api/classwork/upload/project` (both require a student bearer token; 8 MB images / 20 MB project files).
 - **BHS Progress Tracker:** A unified SPA for teachers to view student progress across all courses.
 - **Site-Wide Student Login:** A vanilla-JS component for consistent student authentication across the main site and SPAs.
 

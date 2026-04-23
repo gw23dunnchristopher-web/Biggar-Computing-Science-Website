@@ -1,4 +1,7 @@
-import type { Express, Request, Response, NextFunction } from 'express';
+import express, { type Express, type Request, type Response, type NextFunction } from 'express';
+import path from 'path';
+import fs from 'fs';
+import multer from 'multer';
 import { pool, hasDatabase } from './db';
 import {
   ensureClassworkSchema,
@@ -63,11 +66,100 @@ async function requireStudent(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+/* ---------- File uploads ---------- */
+
+const classworkUploadDir = path.join(process.cwd(), 'public', 'classwork-uploads');
+if (!fs.existsSync(classworkUploadDir)) {
+  fs.mkdirSync(classworkUploadDir, { recursive: true });
+}
+
+const classworkFileStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, classworkUploadDir),
+  filename: (_req, file, cb) => {
+    const safeBase = path.basename(file.originalname).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 60);
+    const stamp = Date.now() + '_' + Math.round(Math.random() * 1e9);
+    cb(null, stamp + '_' + safeBase);
+  },
+});
+
+// Two upload presets: images-only for screenshot questions, broader file
+// types for project questions.
+const SCREENSHOT_EXT = /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i;
+const PROJECT_EXT = /\.(jpg|jpeg|png|gif|webp|pdf|txt|csv|sql|py|vb|html|htm|css|js|ts|json|xml|md|sb3|hex|zip|docx|pptx|xlsx)$/i;
+
+const screenshotUpload = multer({
+  storage: classworkFileStorage,
+  limits: { fileSize: 8 * 1024 * 1024 }, // 8 MB
+  fileFilter: (_req, file, cb) => {
+    if (SCREENSHOT_EXT.test(path.extname(file.originalname))) cb(null, true);
+    else cb(new Error('Only image files are allowed (jpg, jpeg, png, gif, webp, heic).'));
+  },
+});
+
+const projectUpload = multer({
+  storage: classworkFileStorage,
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB
+  fileFilter: (_req, file, cb) => {
+    if (PROJECT_EXT.test(path.extname(file.originalname))) cb(null, true);
+    else cb(new Error('That file type isn\u2019t allowed.'));
+  },
+});
+
 export function registerClassworkRoutes(app: Express, requireTeacher: RequireTeacher) {
   // Initialise tables in the background; don't block startup.
   ensureClassworkSchema().catch((err) => {
     console.error('[classwork] schema init failed:', err);
   });
+
+  // Serve uploaded files at /classwork-uploads/<filename>.
+  app.use('/classwork-uploads', (req, res, next) => {
+    // Disallow path traversal and dotfiles defensively.
+    if (req.path.includes('..') || req.path.startsWith('/.')) {
+      return res.status(400).send('Bad request');
+    }
+    next();
+  });
+  app.use('/classwork-uploads', express.static(classworkUploadDir, {
+    dotfiles: 'deny',
+    index: false,
+    maxAge: '1d',
+  }));
+
+  // Student upload endpoints. Both return { url, filename, size, mimeType }.
+  function handleUpload(kind: 'screenshot' | 'project') {
+    return (req: Request, res: Response) => {
+      const f = (req as any).file as Express.Multer.File | undefined;
+      if (!f) return res.status(400).json({ error: 'No file received' });
+      const url = `/classwork-uploads/${path.basename(f.path)}`;
+      res.json({ url, filename: f.originalname, size: f.size, mimeType: f.mimetype, kind });
+    };
+  }
+
+  // multer must run inside the requireStudent gate, otherwise unauthenticated
+  // callers could write files. requireStudent runs first, then multer.
+  app.post(
+    '/api/classwork/upload/screenshot',
+    requireStudent,
+    (req, res, next) => {
+      screenshotUpload.single('file')(req, res, (err: any) => {
+        if (err) return res.status(400).json({ error: err.message || 'Upload failed' });
+        next();
+      });
+    },
+    handleUpload('screenshot')
+  );
+
+  app.post(
+    '/api/classwork/upload/project',
+    requireStudent,
+    (req, res, next) => {
+      projectUpload.single('file')(req, res, (err: any) => {
+        if (err) return res.status(400).json({ error: err.message || 'Upload failed' });
+        next();
+      });
+    },
+    handleUpload('project')
+  );
 
   /* ---------- Public ---------- */
 

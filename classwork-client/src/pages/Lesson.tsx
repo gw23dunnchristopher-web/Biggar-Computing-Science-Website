@@ -138,17 +138,56 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted }: {
   const [text, setText] = useState('');
   const [option, setOption] = useState<string>('');
   const [url, setUrl] = useState('');
+  const [fileUrl, setFileUrl] = useState('');
+  const [fileName, setFileName] = useState('');
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+
+  const t = question.question_type;
+  const uploadKind: 'screenshot' | 'project' | null =
+    t === 'screenshot' ? 'screenshot' : t === 'project' ? 'project' : null;
+  const acceptAttr = uploadKind === 'screenshot'
+    ? 'image/*'
+    : '.jpg,.jpeg,.png,.gif,.webp,.pdf,.txt,.csv,.sql,.py,.vb,.html,.htm,.css,.js,.ts,.json,.xml,.md,.sb3,.hex,.zip,.docx,.pptx,.xlsx';
+
+  async function pickFile(file: File) {
+    if (!uploadKind) return;
+    setUploading(true);
+    setMsg(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const token = localStorage.getItem('studentToken');
+      const r = await fetch(`/api/classwork/upload/${uploadKind}`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: fd,
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data?.error || 'Upload failed');
+      setFileUrl(data.url);
+      setFileName(data.filename || file.name);
+      setMsg(`Uploaded ${data.filename || file.name}.`);
+    } catch (e: any) {
+      setMsg(e.message || 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function submit() {
     setBusy(true);
     setMsg('Submitting and marking…');
     try {
       const body: any = {};
-      if (question.question_type === 'multiple_choice') body.selectedOptionLabel = option;
-      else if (['scratch_link', 'makecode_link', 'google_sites_link'].includes(question.question_type)) body.linkUrl = url;
-      else body.textAnswer = text;
+      if (t === 'multiple_choice') body.selectedOptionLabel = option;
+      else if (['scratch_link', 'makecode_link', 'google_sites_link'].includes(t)) body.linkUrl = url;
+      else if (t === 'screenshot') body.fileUrl = fileUrl;
+      else if (t === 'project') {
+        if (fileUrl) body.fileUrl = fileUrl;
+        if (url) body.linkUrl = url;
+      } else body.textAnswer = text;
       const result = await api<Submission>(`/api/classwork/questions/${question.id}/submit`, {
         method: 'POST', body: JSON.stringify(body),
       });
@@ -157,7 +196,7 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted }: {
       } else {
         setMsg('Submitted — your teacher will mark this soon.');
       }
-      setText(''); setOption(''); setUrl('');
+      setText(''); setOption(''); setUrl(''); setFileUrl(''); setFileName('');
       onSubmitted();
     } catch (e: any) {
       setMsg(e.message || 'Failed to submit');
@@ -166,7 +205,12 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted }: {
     }
   }
 
-  const t = question.question_type;
+  const canSubmit =
+    t === 'multiple_choice' ? !!option :
+    t === 'screenshot' ? !!fileUrl :
+    t === 'project' ? !!(fileUrl || url) :
+    ['scratch_link', 'makecode_link', 'google_sites_link'].includes(t) ? !!url :
+    !!text.trim();
   return (
     <div style={{ marginTop: 12, padding: 12, border: '1px dashed var(--cw-border)', borderRadius: 8, background: '#fafbfd' }}>
       {t === 'multiple_choice' && Array.isArray(question.options) && (
@@ -197,22 +241,47 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted }: {
         />
       )}
 
-      {(t === 'screenshot' || t === 'project') && (
-        <p style={{ color: 'var(--cw-muted)', fontSize: 13 }}>
-          File upload coming soon — for now this question type can\u2019t be answered yet.
-        </p>
-      )}
-
-      {!['screenshot', 'project'].includes(t) && (
-        <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={submit} disabled={busy} style={{
-            background: 'var(--cw-accent)', color: '#fff', border: 'none',
-            padding: '8px 14px', borderRadius: 8, fontWeight: 600,
-            cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.7 : 1,
-          }}>{busy ? 'Submitting…' : 'Submit'}</button>
-          {msg && <span style={{ fontSize: 14, color: msg === 'Submitted!' ? '#166534' : 'var(--cw-danger)' }}>{msg}</span>}
+      {uploadKind && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <input
+            type="file"
+            accept={acceptAttr}
+            disabled={uploading || busy}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) pickFile(f);
+            }}
+          />
+          {fileName && (
+            <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
+              Attached: <strong>{fileName}</strong>{' '}
+              <button type="button" onClick={() => { setFileUrl(''); setFileName(''); }}
+                style={{ marginLeft: 8, background: 'none', border: 'none', color: 'var(--cw-accent)', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>
+                remove
+              </button>
+            </div>
+          )}
+          {t === 'project' && (
+            <input
+              type="url"
+              placeholder="Or paste a project link (Scratch, MakeCode, Google Sites, …) — optional"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--cw-border)' }}
+            />
+          )}
         </div>
       )}
+
+      <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <button onClick={submit} disabled={busy || uploading || !canSubmit} style={{
+          background: 'var(--cw-accent)', color: '#fff', border: 'none',
+          padding: '8px 14px', borderRadius: 8, fontWeight: 600,
+          cursor: (busy || uploading || !canSubmit) ? 'not-allowed' : 'pointer',
+          opacity: (busy || uploading || !canSubmit) ? 0.6 : 1,
+        }}>{busy ? 'Submitting…' : uploading ? 'Uploading…' : 'Submit'}</button>
+        {msg && <span style={{ fontSize: 14, color: 'var(--cw-muted)' }}>{msg}</span>}
+      </div>
 
       {last && (
         <div style={{ marginTop: 12, fontSize: 13, color: 'var(--cw-muted)' }}>
