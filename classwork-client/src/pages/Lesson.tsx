@@ -1217,17 +1217,18 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
   // fill_in_blanks: each blank has an `id` (referenced from the prompt as
   // `{{id}}`) and a comma-separated list of accepted answers (case- and
   // whitespace-insensitive on the marker side).
-  const [blanks, setBlanks] = useState<{ id: string; accept: string }[]>(
+  const [blanks, setBlanks] = useState<{ id: string; accept: string; aiGuidance: string }[]>(
     Array.isArray(cfg.blanks)
       ? cfg.blanks.map((b: any) => ({
           id: String(b?.id ?? ''),
           accept: Array.isArray(b?.accept) ? b.accept.join(', ') : '',
+          aiGuidance: String(b?.aiGuidance || ''),
         }))
-      : [{ id: '1', accept: '' }, { id: '2', accept: '' }]
+      : [{ id: '1', accept: '', aiGuidance: '' }, { id: '2', accept: '', aiGuidance: '' }]
   );
   // table: a 2D grid. Each cell is either a fixed value (shown to pupils as
   // text) or a blank with a comma-separated list of accepted answers.
-  type TblCell = { value: string; blank: boolean; accept: string };
+  type TblCell = { value: string; blank: boolean; accept: string; aiGuidance: string };
   const initTable = (() => {
     const t = cfg.table;
     if (t && Array.isArray(t.headers) && Array.isArray(t.rows)) {
@@ -1238,6 +1239,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             value: String(c?.value ?? ''),
             blank: !!c?.blank,
             accept: Array.isArray(c?.accept) ? c.accept.join(', ') : '',
+            aiGuidance: String(c?.aiGuidance || ''),
           }))
         ),
       };
@@ -1245,8 +1247,8 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
     return {
       headers: ['Column 1', 'Column 2'],
       rows: [
-        [{ value: '', blank: false, accept: '' }, { value: '', blank: true, accept: '' }],
-        [{ value: '', blank: false, accept: '' }, { value: '', blank: true, accept: '' }],
+        [{ value: '', blank: false, accept: '', aiGuidance: '' }, { value: '', blank: true, accept: '', aiGuidance: '' }],
+        [{ value: '', blank: false, accept: '', aiGuidance: '' }, { value: '', blank: true, accept: '', aiGuidance: '' }],
       ] as TblCell[][],
     };
   })();
@@ -1254,13 +1256,14 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
   const [tblRows, setTblRows] = useState<TblCell[][]>(initTable.rows);
   // labeled_inputs: a list of fields, each with a label and a comma-separated
   // list of accepted answers.
-  const [fields, setFields] = useState<{ label: string; accept: string }[]>(
+  const [fields, setFields] = useState<{ label: string; accept: string; aiGuidance: string }[]>(
     Array.isArray(cfg.fields)
       ? cfg.fields.map((f: any) => ({
           label: String(f?.label || ''),
           accept: Array.isArray(f?.accept) ? f.accept.join(', ') : '',
+          aiGuidance: String(f?.aiGuidance || ''),
         }))
-      : [{ label: 'Forename', accept: '' }, { label: 'Surname', accept: '' }]
+      : [{ label: 'Forename', accept: '', aiGuidance: '' }, { label: 'Surname', accept: '', aiGuidance: '' }]
   );
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -1358,10 +1361,15 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
       }
       if (type === 'fill_in_blanks') {
         const cleaned = blanks
-          .map((b) => ({
-            id: String(b.id || '').trim(),
-            accept: b.accept.split(',').map((s) => s.trim()).filter(Boolean),
-          }))
+          .map((b) => {
+            const row: any = {
+              id: String(b.id || '').trim(),
+              accept: b.accept.split(',').map((s) => s.trim()).filter(Boolean),
+            };
+            const ai = String(b.aiGuidance || '').trim();
+            if (ai) row.aiGuidance = ai;
+            return row;
+          })
           .filter((b) => b.id);
         if (cleaned.length === 0) throw new Error('Add at least one blank.');
         body.config = { blanks: cleaned };
@@ -1375,6 +1383,8 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
               cell.blank = true;
               const accept = c.accept.split(',').map((s) => s.trim()).filter(Boolean);
               if (accept.length) cell.accept = accept;
+              const ai = String(c.aiGuidance || '').trim();
+              if (ai) cell.aiGuidance = ai;
             }
             return cell;
           })
@@ -1385,10 +1395,15 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
       }
       if (type === 'labeled_inputs') {
         const cleaned = fields
-          .map((f) => ({
-            label: String(f.label || '').trim(),
-            accept: f.accept.split(',').map((s) => s.trim()).filter(Boolean),
-          }))
+          .map((f) => {
+            const row: any = {
+              label: String(f.label || '').trim(),
+              accept: f.accept.split(',').map((s) => s.trim()).filter(Boolean),
+            };
+            const ai = String(f.aiGuidance || '').trim();
+            if (ai) row.aiGuidance = ai;
+            return row;
+          })
           .filter((f) => f.label);
         if (cleaned.length === 0) throw new Error('Add at least one labelled field.');
         body.config = { fields: cleaned };
@@ -1726,35 +1741,49 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             <div style={{ fontWeight: 600 }}>Blanks &amp; accepted answers</div>
             <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 2, marginBottom: 6 }}>
               Each row matches a <code>&#123;&#123;id&#125;&#125;</code> placeholder in the sentence above.
-              List acceptable answers separated by commas — matching is case-insensitive
-              and ignores extra spaces.
+              For short answers, list acceptable answers separated by commas — matching is
+              case-insensitive and ignores extra spaces. For sentence-style answers, leave the
+              accepted-answers box blank and write a short marking note in the AI judge box
+              instead — the marker will use it to award the mark.
             </div>
             {blanks.map((b, i) => (
-              <div key={i} style={{ display: 'flex', gap: 6, marginTop: 6, alignItems: 'center' }}>
-                <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>&#123;&#123;</span>
-                <input
-                  value={b.id}
-                  placeholder="id"
-                  onChange={(e) => { const a = [...blanks]; a[i].id = e.target.value; setBlanks(a); }}
-                  style={{ ...input, width: 70 }}
+              <div key={i} style={{
+                display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8,
+                padding: 8, border: '1px solid var(--cw-border)', borderRadius: 6, background: '#fff',
+              }}>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>&#123;&#123;</span>
+                  <input
+                    value={b.id}
+                    placeholder="id"
+                    onChange={(e) => { const a = [...blanks]; a[i].id = e.target.value; setBlanks(a); }}
+                    style={{ ...input, width: 70 }}
+                  />
+                  <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>&#125;&#125;</span>
+                  <input
+                    value={b.accept}
+                    placeholder="Accepted answers (comma-sep) — for short answers"
+                    onChange={(e) => { const a = [...blanks]; a[i].accept = e.target.value; setBlanks(a); }}
+                    style={{ ...input, flex: 1 }}
+                  />
+                  <button
+                    onClick={() => setBlanks(blanks.filter((_, j) => j !== i))}
+                    style={{ ...input, width: 40, cursor: 'pointer' }}
+                  >×</button>
+                </div>
+                <textarea
+                  rows={1}
+                  value={b.aiGuidance}
+                  placeholder="AI judge note (optional) — e.g. 'Award if they mention worst-case O(n²)'"
+                  onChange={(e) => { const a = [...blanks]; a[i].aiGuidance = e.target.value; setBlanks(a); }}
+                  style={{ ...input, fontSize: 13 }}
                 />
-                <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>&#125;&#125;</span>
-                <input
-                  value={b.accept}
-                  placeholder="Paris, paris, PARIS"
-                  onChange={(e) => { const a = [...blanks]; a[i].accept = e.target.value; setBlanks(a); }}
-                  style={{ ...input, flex: 1 }}
-                />
-                <button
-                  onClick={() => setBlanks(blanks.filter((_, j) => j !== i))}
-                  style={{ ...input, width: 40, cursor: 'pointer' }}
-                >×</button>
               </div>
             ))}
             <button
               onClick={() => {
                 const nextId = String(blanks.length + 1);
-                setBlanks([...blanks, { id: nextId, accept: '' }]);
+                setBlanks([...blanks, { id: nextId, accept: '', aiGuidance: '' }]);
               }}
               style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}
             >+ Add blank</button>
@@ -1764,32 +1793,45 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           <div style={fieldLabel as any}>
             <div style={{ fontWeight: 600 }}>Labelled fields</div>
             <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 2, marginBottom: 6 }}>
-              Each field becomes a labelled text box for the pupil. List acceptable answers
-              separated by commas (case-insensitive, ignores extra spaces). Leave Accepted answers
-              blank if you'll mark this field by hand.
+              Each field becomes a labelled text box for the pupil. For short answers, list
+              acceptable answers separated by commas (case-insensitive, ignores extra spaces).
+              For sentence-style answers, leave Accepted answers blank and add a marking note
+              in the AI judge box; otherwise leave both blank to mark by hand.
             </div>
             {fields.map((f, i) => (
-              <div key={i} style={{ display: 'flex', gap: 6, marginTop: 6, alignItems: 'center' }}>
-                <input
-                  value={f.label}
-                  placeholder="Label (e.g. Forename)"
-                  onChange={(e) => { const a = [...fields]; a[i].label = e.target.value; setFields(a); }}
-                  style={{ ...input, width: 180 }}
+              <div key={i} style={{
+                display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8,
+                padding: 8, border: '1px solid var(--cw-border)', borderRadius: 6, background: '#fff',
+              }}>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <input
+                    value={f.label}
+                    placeholder="Label (e.g. Forename)"
+                    onChange={(e) => { const a = [...fields]; a[i].label = e.target.value; setFields(a); }}
+                    style={{ ...input, width: 180 }}
+                  />
+                  <input
+                    value={f.accept}
+                    placeholder="Accepted answers (comma-sep) — for short answers"
+                    onChange={(e) => { const a = [...fields]; a[i].accept = e.target.value; setFields(a); }}
+                    style={{ ...input, flex: 1 }}
+                  />
+                  <button
+                    onClick={() => setFields(fields.filter((_, j) => j !== i))}
+                    style={{ ...input, width: 40, cursor: 'pointer' }}
+                  >×</button>
+                </div>
+                <textarea
+                  rows={1}
+                  value={f.aiGuidance}
+                  placeholder="AI judge note (optional) — e.g. 'Award if the explanation mentions binary'"
+                  onChange={(e) => { const a = [...fields]; a[i].aiGuidance = e.target.value; setFields(a); }}
+                  style={{ ...input, fontSize: 13 }}
                 />
-                <input
-                  value={f.accept}
-                  placeholder="Accepted answers, comma-separated"
-                  onChange={(e) => { const a = [...fields]; a[i].accept = e.target.value; setFields(a); }}
-                  style={{ ...input, flex: 1 }}
-                />
-                <button
-                  onClick={() => setFields(fields.filter((_, j) => j !== i))}
-                  style={{ ...input, width: 40, cursor: 'pointer' }}
-                >×</button>
               </div>
             ))}
             <button
-              onClick={() => setFields([...fields, { label: '', accept: '' }])}
+              onClick={() => setFields([...fields, { label: '', accept: '', aiGuidance: '' }])}
               style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}
             >+ Add field</button>
           </div>
@@ -1799,8 +1841,9 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             <div style={{ fontWeight: 600 }}>Table</div>
             <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 2, marginBottom: 6 }}>
               Build the grid pupils will see. Tick "Blank" to turn a cell into an input box; in
-              that case put the accepted answers (comma-separated) in the value field.
-              Otherwise the cell is shown to pupils as fixed text.
+              that case put the accepted answers (comma-separated) in the value field, or for
+              sentence-style cells leave it blank and add a marking note in the AI judge box that
+              appears beneath. Otherwise the cell is shown to pupils as fixed text.
             </div>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ borderCollapse: 'collapse', width: '100%' }}>
@@ -1856,6 +1899,19 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
                                 }}
                               /> Blank for pupil
                             </label>
+                            {cell.blank && (
+                              <textarea
+                                rows={1}
+                                value={cell.aiGuidance}
+                                placeholder="AI judge note (optional)"
+                                onChange={(e) => {
+                                  const a = tblRows.map((rr) => rr.map((cc) => ({ ...cc })));
+                                  a[r][c].aiGuidance = e.target.value;
+                                  setTblRows(a);
+                                }}
+                                style={{ ...input, width: '100%', fontSize: 12 }}
+                              />
+                            )}
                           </div>
                         </td>
                       ))}

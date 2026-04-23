@@ -92,11 +92,11 @@ export async function markSubmission(
       case 'database_task':
         return await markDatabaseTask(q, s);
       case 'fill_in_blanks':
-        return markFillBlanks(q, s);
+        return await markFillBlanks(q, s);
       case 'table':
-        return markTable(q, s);
+        return await markTable(q, s);
       case 'labeled_inputs':
-        return markLabeledInputs(q, s);
+        return await markLabeledInputs(q, s);
       case 'info_only':
       case 'passage':
         return null;
@@ -1101,86 +1101,174 @@ function parseAnswerJson(s: AISubmission): Record<string, string> | null {
   } catch { return null; }
 }
 
-function markFillBlanks(q: AIQuestion, s: AISubmission): AIMarkResult | null {
-  const cfg = q.config;
-  const blanks = cfg && Array.isArray(cfg.blanks) ? cfg.blanks : null;
-  if (!blanks) return null;
-  const parsed = parseAnswerJson(s);
-  if (!parsed) return null;
+// A normalised description of one auto-markable cell. Each cell is judged
+// either by exact match against an accept list, or by sending the pupil's
+// answer + per-cell guidance to Gemini in a single batched call.
+type CellSpec = {
+  key: string;          // unique within the question (blank id / "r,c" / field index)
+  label: string;        // human-friendly (e.g. "Blank 1", "Row 2 · Name")
+  pupilAnswer: string;
+  accept: string[];     // exact-match alternatives (case/whitespace-insensitive)
+  aiGuidance: string;   // teacher's marking note for this cell ('' = no AI judging)
+};
+
+async function judgeCellsWithAI(
+  q: AIQuestion,
+  cells: CellSpec[]
+): Promise<Map<string, { correct: boolean; feedback: string }>> {
+  const out = new Map<string, { correct: boolean; feedback: string }>();
+  if (!gemini || cells.length === 0) return out;
+  const cellsForPrompt = cells.map((c) => ({
+    key: c.key,
+    cell: c.label,
+    pupilAnswer: c.pupilAnswer,
+    markIfTheyMeet: c.aiGuidance,
+  }));
+  const prompt = [
+    `You are a Scottish secondary school Computing Science teacher marking specific cells of a single classwork question.`,
+    `Question prompt: ${q.prompt}`,
+    q.marking_scheme ? `Overall marking scheme: ${q.marking_scheme}` : '',
+    q.ai_grading_guidance ? `Overall guidance: ${q.ai_grading_guidance}` : '',
+    '',
+    `For EACH cell below, decide whether the pupil's answer meets the per-cell guidance. Be fair but accurate. A cell is worth 1 mark or 0 marks (no half marks).`,
+    `Cells:`,
+    JSON.stringify(cellsForPrompt, null, 2),
+    '',
+    `Return ONLY a JSON object keyed by the cell "key", where each value is { "correct": 0 or 1, "feedback": "<one short sentence aimed at the pupil>" }.`,
+  ].filter(Boolean).join('\n');
+  try {
+    const resp = await gemini.models.generateContent({
+      model: MODEL,
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        thinkingConfig: { thinkingBudget: 0 },
+      },
+    });
+    const parsed = safeParseJson(resp.text || '');
+    if (parsed && typeof parsed === 'object') {
+      for (const c of cells) {
+        const v = (parsed as any)[c.key];
+        if (v && typeof v === 'object') {
+          out.set(c.key, {
+            correct: !!Number(v.correct),
+            feedback: String(v.feedback || ''),
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[classwork-ai] judgeCellsWithAI failed:', err);
+  }
+  return out;
+}
+
+// Shared engine used by all three cell-based question types. Walks an ordered
+// list of cell specs, splits them into exact-match and AI-judged buckets,
+// dispatches one Gemini call for the AI bucket, and assembles the final
+// scaled mark + per-cell feedback.
+async function gradeCellList(q: AIQuestion, cells: CellSpec[]): Promise<AIMarkResult | null> {
+  const aiCells = cells.filter((c) => c.aiGuidance && c.accept.length === 0 && c.pupilAnswer.trim());
+  const judgements = aiCells.length ? await judgeCellsWithAI(q, aiCells) : new Map();
   const lines: string[] = [];
   let correct = 0; let auto = 0;
-  for (const b of blanks) {
-    const id = String(b?.id ?? '');
-    const accept = Array.isArray(b?.accept) ? b.accept : [];
-    if (!id || accept.length === 0) continue;
-    auto++;
-    const ans = String(parsed[id] || '');
-    if (cellMatches(ans, accept)) {
-      correct++;
-      lines.push(`Blank ${id}: correct ("${ans}")`);
-    } else {
-      lines.push(`Blank ${id}: you wrote "${ans}" — expected "${accept[0]}"`);
+  for (const c of cells) {
+    if (c.accept.length > 0) {
+      auto++;
+      if (cellMatches(c.pupilAnswer, c.accept)) {
+        correct++;
+        lines.push(`${c.label}: correct ("${c.pupilAnswer}")`);
+      } else {
+        lines.push(`${c.label}: you wrote "${c.pupilAnswer}" — expected "${c.accept[0]}"`);
+      }
+    } else if (c.aiGuidance) {
+      auto++;
+      if (!c.pupilAnswer.trim()) {
+        lines.push(`${c.label}: nothing written.`);
+        continue;
+      }
+      const v = judgements.get(c.key);
+      if (!v) {
+        // AI judging unavailable (no API key, network error, parse fail) —
+        // bail out so the teacher marks the whole submission by hand rather
+        // than silently penalising the pupil for cells we couldn't grade.
+        return null;
+      }
+      if (v.correct) correct++;
+      const tick = v.correct ? 'correct' : 'not yet';
+      lines.push(`${c.label}: ${tick}${v.feedback ? ` — ${v.feedback}` : ''}`);
     }
+    // else: cell has neither an accept list nor AI guidance → not auto-marked.
   }
   if (auto === 0) return null;
   return buildCellResult(correct, auto, q.max_marks, lines);
 }
 
-function markTable(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+async function markFillBlanks(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {
+  const cfg = q.config;
+  const blanks = cfg && Array.isArray(cfg.blanks) ? cfg.blanks : null;
+  if (!blanks) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  const cells: CellSpec[] = [];
+  for (const b of blanks) {
+    const id = String(b?.id ?? '');
+    if (!id) continue;
+    cells.push({
+      key: id,
+      label: `Blank ${id}`,
+      pupilAnswer: String(parsed[id] || ''),
+      accept: Array.isArray(b?.accept) ? b.accept.map(String) : [],
+      aiGuidance: String(b?.aiGuidance || '').trim(),
+    });
+  }
+  return gradeCellList(q, cells);
+}
+
+async function markTable(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {
   const cfg = q.config;
   const table = cfg && cfg.table;
   if (!table || !Array.isArray(table.rows)) return null;
   const parsed = parseAnswerJson(s);
   if (!parsed) return null;
   const headers: string[] = Array.isArray(table.headers) ? table.headers.map((h: any) => String(h || '')) : [];
-  const lines: string[] = [];
-  let correct = 0; let auto = 0;
+  const cells: CellSpec[] = [];
   for (let r = 0; r < table.rows.length; r++) {
     const row = table.rows[r];
     if (!Array.isArray(row)) continue;
     for (let c = 0; c < row.length; c++) {
       const cell = row[c];
       if (!cell || !cell.blank) continue;
-      const accept = Array.isArray(cell.accept) ? cell.accept : [];
-      if (accept.length === 0) continue;
-      auto++;
       const key = `${r},${c}`;
-      const ans = String(parsed[key] || '');
       const colLabel = headers[c] || `Col ${c + 1}`;
-      if (cellMatches(ans, accept)) {
-        correct++;
-        lines.push(`Row ${r + 1} · ${colLabel}: correct ("${ans}")`);
-      } else {
-        lines.push(`Row ${r + 1} · ${colLabel}: you wrote "${ans}" — expected "${accept[0]}"`);
-      }
+      cells.push({
+        key,
+        label: `Row ${r + 1} · ${colLabel}`,
+        pupilAnswer: String(parsed[key] || ''),
+        accept: Array.isArray(cell.accept) ? cell.accept.map(String) : [],
+        aiGuidance: String(cell.aiGuidance || '').trim(),
+      });
     }
   }
-  if (auto === 0) return null;
-  return buildCellResult(correct, auto, q.max_marks, lines);
+  return gradeCellList(q, cells);
 }
 
-function markLabeledInputs(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+async function markLabeledInputs(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {
   const cfg = q.config;
   const fields = cfg && Array.isArray(cfg.fields) ? cfg.fields : null;
   if (!fields) return null;
   const parsed = parseAnswerJson(s);
   if (!parsed) return null;
-  const lines: string[] = [];
-  let correct = 0; let auto = 0;
+  const cells: CellSpec[] = [];
   for (let i = 0; i < fields.length; i++) {
     const f = fields[i];
-    const accept = Array.isArray(f?.accept) ? f.accept : [];
-    if (accept.length === 0) continue;
-    auto++;
-    const ans = String(parsed[String(i)] || '');
-    const label = String(f?.label || `Field ${i + 1}`);
-    if (cellMatches(ans, accept)) {
-      correct++;
-      lines.push(`${label}: correct ("${ans}")`);
-    } else {
-      lines.push(`${label}: you wrote "${ans}" — expected "${accept[0]}"`);
-    }
+    cells.push({
+      key: String(i),
+      label: String(f?.label || `Field ${i + 1}`),
+      pupilAnswer: String(parsed[String(i)] || ''),
+      accept: Array.isArray(f?.accept) ? f.accept.map(String) : [],
+      aiGuidance: String(f?.aiGuidance || '').trim(),
+    });
   }
-  if (auto === 0) return null;
-  return buildCellResult(correct, auto, q.max_marks, lines);
+  return gradeCellList(q, cells);
 }
