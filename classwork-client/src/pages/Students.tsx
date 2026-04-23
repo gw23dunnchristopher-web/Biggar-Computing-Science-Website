@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Shell from '@/components/Shell';
+import Modal, { modalPrimaryBtn, modalSecondaryBtn, modalDangerBtn, modalLabel, modalInput } from '@/components/Modal';
 import { api, getCurrentRole } from '@/lib/api';
 
 interface ClassRow { id: string; name: string; course: string | null; }
@@ -9,6 +10,7 @@ const YEAR_OPTIONS: { value: string; label: string }[] = [
   { value: 's1', label: 'S1' },
   { value: 's2', label: 'S2' },
   { value: 's3', label: 'S3' },
+  { value: 'n4', label: 'National 4' },
   { value: 'n5', label: 'National 5' },
   { value: 'higher', label: 'Higher' },
 ];
@@ -16,6 +18,17 @@ function yearLabel(course: string | null): string {
   if (!course) return 'No year set';
   return YEAR_OPTIONS.find((y) => y.value === course)?.label || course;
 }
+
+type ModalState =
+  | { kind: 'none' }
+  | { kind: 'addClass' }
+  | { kind: 'editYear'; cls: ClassRow }
+  | { kind: 'moveStudent'; student: StudentRow }
+  | { kind: 'deleteClass'; cls: ClassRow }
+  | { kind: 'deleteStudent'; student: StudentRow }
+  | { kind: 'resetPassword'; student: StudentRow }
+  | { kind: 'showPassword'; username: string; password: string }
+  | { kind: 'info'; title: string; message: string };
 
 export default function Students() {
   const role = getCurrentRole();
@@ -28,6 +41,34 @@ export default function Students() {
   const [bulkCount, setBulkCount] = useState('5');
   const [busy, setBusy] = useState(false);
   const [lastCreated, setLastCreated] = useState<{ username: string; plainPassword: string }[]>([]);
+
+  const [modal, setModal] = useState<ModalState>({ kind: 'none' });
+  const closeModal = () => setModal({ kind: 'none' });
+
+  // form state for the various modals (reset every time the modal opens)
+  const [newClassName, setNewClassName] = useState('');
+  const [newClassYear, setNewClassYear] = useState('');
+  const [editYearValue, setEditYearValue] = useState('');
+  const [moveTargetId, setMoveTargetId] = useState('');
+  const [modalErr, setModalErr] = useState<string | null>(null);
+
+  function openAddClass() {
+    setNewClassName(''); setNewClassYear(''); setModalErr(null);
+    setModal({ kind: 'addClass' });
+  }
+  function openEditYear(cls: ClassRow) {
+    setEditYearValue(cls.course || ''); setModalErr(null);
+    setModal({ kind: 'editYear', cls });
+  }
+  function openMoveStudent(s: StudentRow) {
+    const choices = classes.filter((c) => c.id !== s.classId);
+    if (!choices.length) {
+      setModal({ kind: 'info', title: 'No other classes', message: 'You only have one class. Create another class first, then you can move pupils into it.' });
+      return;
+    }
+    setMoveTargetId(choices[0].id); setModalErr(null);
+    setModal({ kind: 'moveStudent', student: s });
+  }
 
   async function loadClasses() {
     setLoadingClasses(true);
@@ -52,72 +93,59 @@ export default function Students() {
   useEffect(() => { loadClasses(); }, []);
   useEffect(() => { if (selectedId) loadStudents(selectedId); }, [selectedId]);
 
-  async function addClass() {
-    const name = prompt('Class name? (e.g. "Mr Dunn 1A")');
-    if (!name || !name.trim()) return;
-    const yearAns = prompt('Year? Type one of: s1, s2, s3, n5, higher');
-    const course = (yearAns || '').trim().toLowerCase();
-    if (course && !YEAR_OPTIONS.some((y) => y.value === course)) {
-      alert('Year must be s1, s2, s3, n5 or higher.');
-      return;
-    }
+  async function submitAddClass() {
+    const name = newClassName.trim();
+    if (!name) { setModalErr('Class name is required.'); return; }
     try {
       const c = await api<ClassRow>('/api/classwork/teacher/classes', {
-        method: 'POST', body: JSON.stringify({ name: name.trim(), course: course || null }),
+        method: 'POST', body: JSON.stringify({ name, course: newClassYear || null }),
       });
       await loadClasses();
       setSelectedId(c.id);
       setLastCreated([]);
-    } catch (e: any) { alert(e.message); }
+      closeModal();
+    } catch (e: any) { setModalErr(e.message); }
   }
 
-  async function changeYear(c: ClassRow) {
-    const ans = prompt(`Year for "${c.name}"? Type one of: s1, s2, s3, n5, higher (or leave blank for none)`, c.course || '');
-    if (ans === null) return;
-    const course = ans.trim().toLowerCase();
-    if (course && !YEAR_OPTIONS.some((y) => y.value === course)) {
-      alert('Year must be s1, s2, s3, n5 or higher.');
-      return;
-    }
+  async function submitEditYear(cls: ClassRow) {
     try {
-      await api(`/api/classwork/teacher/classes/${c.id}`, {
-        method: 'PATCH', body: JSON.stringify({ course: course || null }),
+      await api(`/api/classwork/teacher/classes/${cls.id}`, {
+        method: 'PATCH', body: JSON.stringify({ course: editYearValue || null }),
       });
-      loadClasses();
-    } catch (e: any) { alert(e.message); }
+      await loadClasses();
+      closeModal();
+    } catch (e: any) { setModalErr(e.message); }
   }
 
-  async function moveStudent(s: StudentRow) {
-    const choices = classes.filter((c) => c.id !== s.classId);
-    if (!choices.length) { alert('No other classes to move them to. Create another class first.'); return; }
-    const list = choices.map((c, i) => `${i + 1}. ${c.name}${c.course ? ' (' + yearLabel(c.course) + ')' : ''}`).join('\n');
-    const ans = prompt(`Move ${s.username} to which class?\n\n${list}\n\nType the number:`);
-    const idx = parseInt((ans || '').trim(), 10) - 1;
-    if (isNaN(idx) || idx < 0 || idx >= choices.length) return;
-    const target = choices[idx];
+  async function submitMoveStudent(s: StudentRow) {
+    if (!moveTargetId) { setModalErr('Pick a class.'); return; }
     try {
       await api(`/api/classwork/teacher/students/${s.id}`, {
-        method: 'PATCH', body: JSON.stringify({ classId: target.id }),
+        method: 'PATCH', body: JSON.stringify({ classId: moveTargetId }),
       });
       if (selectedId) loadStudents(selectedId);
-    } catch (e: any) { alert(e.message); }
+      closeModal();
+    } catch (e: any) { setModalErr(e.message); }
   }
 
-  async function removeClass(c: ClassRow) {
-    if (!confirm(`Delete class "${c.name}"? Students in this class will also be removed.`)) return;
+  async function confirmDeleteClass(c: ClassRow) {
     try {
       await api(`/api/classwork/teacher/classes/${c.id}`, { method: 'DELETE' });
       if (selectedId === c.id) setSelectedId(null);
       setStudents([]);
       setLastCreated([]);
       loadClasses();
-    } catch (e: any) { alert(e.message); }
+      closeModal();
+    } catch (e: any) { setModalErr(e.message); }
   }
 
   async function bulkAdd() {
     if (!selectedId) return;
     const n = parseInt(bulkCount, 10);
-    if (!n || n < 1 || n > 50) { alert('Enter a number between 1 and 50.'); return; }
+    if (!n || n < 1 || n > 50) {
+      setModal({ kind: 'info', title: 'Out of range', message: 'Enter a number between 1 and 50.' });
+      return;
+    }
     setBusy(true);
     setLastCreated([]);
     try {
@@ -127,32 +155,33 @@ export default function Students() {
       );
       setLastCreated(r.created);
       loadStudents(selectedId);
-    } catch (e: any) { alert(e.message); }
+    } catch (e: any) {
+      setModal({ kind: 'info', title: 'Could not add students', message: e.message });
+    }
     finally { setBusy(false); }
   }
 
-  async function resetPassword(s: StudentRow) {
-    if (!confirm(`Reset password for ${s.username}? They'll be asked to set a new one on next login.`)) return;
+  async function confirmResetPassword(s: StudentRow) {
     try {
       const r = await api<{ plainPassword: string }>(`/api/classwork/teacher/students/${s.id}/reset-password`, { method: 'POST' });
-      alert(`New password for ${s.username}:\n\n${r.plainPassword}\n\nWrite this down — they'll change it on next login.`);
       if (selectedId) loadStudents(selectedId);
-    } catch (e: any) { alert(e.message); }
+      setModal({ kind: 'showPassword', username: s.username, password: r.plainPassword });
+    } catch (e: any) { setModalErr(e.message); }
   }
 
-  async function removeStudent(s: StudentRow) {
-    if (!confirm(`Delete student ${s.username}? This cannot be undone.`)) return;
+  async function confirmDeleteStudent(s: StudentRow) {
     try {
       await api(`/api/classwork/teacher/students/${s.id}`, { method: 'DELETE' });
       if (selectedId) loadStudents(selectedId);
-    } catch (e: any) { alert(e.message); }
+      closeModal();
+    } catch (e: any) { setModalErr(e.message); }
   }
 
   function copyCreated() {
     const txt = lastCreated.map((c) => `${c.username}\t${c.plainPassword}`).join('\n');
     navigator.clipboard?.writeText(txt).then(
-      () => alert('Copied! Paste into a spreadsheet — username and password are tab-separated.'),
-      () => alert('Could not copy. Select the text manually.')
+      () => setModal({ kind: 'info', title: 'Copied', message: 'Paste into a spreadsheet — username and password are tab-separated.' }),
+      () => setModal({ kind: 'info', title: 'Copy failed', message: 'Could not copy. Select the text manually.' })
     );
   }
 
@@ -170,11 +199,11 @@ export default function Students() {
     <Shell title="Students &amp; classes" back={{ href: '/', label: 'Back to home' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <h1 style={{ margin: 0 }}>Students &amp; classes</h1>
-        <button onClick={addClass} style={primaryBtn}>+ New class</button>
+        <button onClick={openAddClass} style={primaryBtn}>+ New class</button>
       </div>
       <p style={{ color: 'var(--cw-muted)', marginTop: 0 }}>
         Classes here are shared with the N5 and Higher revision apps. Use a clear name like
-        <em> "S1 Mr Dunn 1A"</em> so you can spot it in any teacher dashboard.
+        <em> "Mr Dunn 1A"</em> so you can spot it in any teacher dashboard.
       </p>
 
       {err && <p style={{ color: 'var(--cw-danger)' }}>{err}</p>}
@@ -209,8 +238,8 @@ export default function Students() {
                       color: c.course ? (selectedId === c.id ? '#fff' : '#1e3a8a') : (selectedId === c.id ? '#fff' : '#991b1b'),
                     }}>{yearLabel(c.course)}</span>
                   </button>
-                  <button onClick={() => changeYear(c)} style={secondaryBtn} title="Change year">Yr</button>
-                  <button onClick={() => removeClass(c)} style={dangerBtn} title="Delete class">×</button>
+                  <button onClick={() => openEditYear(c)} style={secondaryBtn} title="Change year">Yr</button>
+                  <button onClick={() => setModal({ kind: 'deleteClass', cls: c })} style={dangerBtn} title="Delete class">×</button>
                 </li>
               ))}
             </ul>
@@ -279,9 +308,9 @@ export default function Students() {
                                 : <span style={{ color: '#166534' }}>Set own password</span>}
                             </td>
                             <td style={{ ...td, textAlign: 'right' }}>
-                              <button onClick={() => moveStudent(s)} style={secondaryBtn}>Move</button>{' '}
-                              <button onClick={() => resetPassword(s)} style={secondaryBtn}>Reset password</button>{' '}
-                              <button onClick={() => removeStudent(s)} style={dangerBtn}>Delete</button>
+                              <button onClick={() => openMoveStudent(s)} style={secondaryBtn}>Move</button>{' '}
+                              <button onClick={() => { setModalErr(null); setModal({ kind: 'resetPassword', student: s }); }} style={secondaryBtn}>Reset password</button>{' '}
+                              <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteStudent', student: s }); }} style={dangerBtn}>Delete</button>
                             </td>
                           </tr>
                         ))}
@@ -294,6 +323,154 @@ export default function Students() {
           </div>
         </div>
       )}
+
+      {/* ---------- Modals ---------- */}
+
+      <Modal
+        open={modal.kind === 'addClass'}
+        title="New class"
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={submitAddClass} style={modalPrimaryBtn}>Create class</button>
+        </>}
+      >
+        <div>
+          <label style={modalLabel}>Class name</label>
+          <input
+            autoFocus value={newClassName}
+            onChange={(e) => setNewClassName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') submitAddClass(); }}
+            placeholder="e.g. Mr Dunn 1A"
+            style={modalInput}
+          />
+        </div>
+        <div>
+          <label style={modalLabel}>Year</label>
+          <select value={newClassYear} onChange={(e) => setNewClassYear(e.target.value)} style={modalInput}>
+            <option value="">— Choose a year —</option>
+            {YEAR_OPTIONS.map((y) => <option key={y.value} value={y.value}>{y.label}</option>)}
+          </select>
+          <p style={{ fontSize: 12, color: 'var(--cw-muted)', margin: '4px 0 0' }}>
+            Students added to this class will be sent straight to this year's lessons.
+          </p>
+        </div>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'editYear'}
+        title={modal.kind === 'editYear' ? `Year for "${modal.cls.name}"` : ''}
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={() => modal.kind === 'editYear' && submitEditYear(modal.cls)} style={modalPrimaryBtn}>Save</button>
+        </>}
+      >
+        <div>
+          <label style={modalLabel}>Year</label>
+          <select value={editYearValue} onChange={(e) => setEditYearValue(e.target.value)} style={modalInput}>
+            <option value="">— No year —</option>
+            {YEAR_OPTIONS.map((y) => <option key={y.value} value={y.value}>{y.label}</option>)}
+          </select>
+        </div>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'moveStudent'}
+        title={modal.kind === 'moveStudent' ? `Move ${modal.student.username}` : ''}
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={() => modal.kind === 'moveStudent' && submitMoveStudent(modal.student)} style={modalPrimaryBtn}>Move student</button>
+        </>}
+      >
+        <div>
+          <label style={modalLabel}>Move to class</label>
+          <select value={moveTargetId} onChange={(e) => setMoveTargetId(e.target.value)} style={modalInput}>
+            {classes.filter((c) => modal.kind === 'moveStudent' && c.id !== modal.student.classId).map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}{c.course ? ` — ${yearLabel(c.course)}` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'deleteClass'}
+        title="Delete class?"
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={() => modal.kind === 'deleteClass' && confirmDeleteClass(modal.cls)} style={modalDangerBtn}>Delete class</button>
+        </>}
+      >
+        <p style={{ margin: 0 }}>
+          Delete <strong>{modal.kind === 'deleteClass' ? modal.cls.name : ''}</strong>? Every student in this class will be removed too.
+          This can't be undone.
+        </p>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'deleteStudent'}
+        title="Delete student?"
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={() => modal.kind === 'deleteStudent' && confirmDeleteStudent(modal.student)} style={modalDangerBtn}>Delete student</button>
+        </>}
+      >
+        <p style={{ margin: 0 }}>
+          Delete <code>{modal.kind === 'deleteStudent' ? modal.student.username : ''}</code>? This can't be undone.
+        </p>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'resetPassword'}
+        title="Reset password?"
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={() => modal.kind === 'resetPassword' && confirmResetPassword(modal.student)} style={modalPrimaryBtn}>Reset password</button>
+        </>}
+      >
+        <p style={{ margin: 0 }}>
+          Give <code>{modal.kind === 'resetPassword' ? modal.student.username : ''}</code> a brand-new password? They'll be asked to change it the next time they log in.
+        </p>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'showPassword'}
+        title="New password"
+        onClose={closeModal}
+        footer={<button onClick={closeModal} style={modalPrimaryBtn}>Done</button>}
+      >
+        <p style={{ margin: 0 }}>
+          New password for <code>{modal.kind === 'showPassword' ? modal.username : ''}</code>:
+        </p>
+        <div style={{
+          padding: 12, fontFamily: 'monospace', fontSize: 18, fontWeight: 700,
+          background: '#f1f5f9', border: '1px solid var(--cw-border)', borderRadius: 8, textAlign: 'center',
+        }}>{modal.kind === 'showPassword' ? modal.password : ''}</div>
+        <p style={{ margin: 0, fontSize: 13, color: 'var(--cw-muted)' }}>
+          Write this down now — they'll be asked to set their own password the next time they log in.
+        </p>
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'info'}
+        title={modal.kind === 'info' ? modal.title : ''}
+        onClose={closeModal}
+        footer={<button onClick={closeModal} style={modalPrimaryBtn}>OK</button>}
+      >
+        <p style={{ margin: 0 }}>{modal.kind === 'info' ? modal.message : ''}</p>
+      </Modal>
     </Shell>
   );
 }

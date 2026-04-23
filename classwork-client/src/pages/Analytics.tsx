@@ -4,7 +4,7 @@ import Shell from '@/components/Shell';
 import { api, getCurrentRole } from '@/lib/api';
 
 const COURSE_LABELS: Record<string, string> = {
-  s1: 'S1', s2: 'S2', s3: 'S3', n5: 'National 5', higher: 'Higher',
+  s1: 'S1', s2: 'S2', s3: 'S3', n4: 'National 4', n5: 'National 5', higher: 'Higher',
 };
 
 interface CourseLessonStat {

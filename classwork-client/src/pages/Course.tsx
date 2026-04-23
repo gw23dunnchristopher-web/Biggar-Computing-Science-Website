@@ -1,14 +1,24 @@
 import { useEffect, useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
+import Modal, { modalPrimaryBtn, modalSecondaryBtn, modalDangerBtn, modalLabel, modalInput } from '@/components/Modal';
 import { api, getCurrentRole } from '@/lib/api';
 
 interface Unit { id: string; title: string; description: string | null; course: string; }
 interface Lesson { id: string; unit_id: string; title: string; description: string | null; is_published: boolean; }
 
 const COURSE_LABELS: Record<string, string> = {
-  s1: 'S1', s2: 'S2', s3: 'S3', n5: 'National 5', higher: 'Higher',
+  s1: 'S1', s2: 'S2', s3: 'S3', n4: 'National 4', n5: 'National 5', higher: 'Higher',
 };
+
+type ModalState =
+  | { kind: 'none' }
+  | { kind: 'addUnit' }
+  | { kind: 'addLesson'; unitId: string }
+  | { kind: 'deleteUnit'; unit: Unit }
+  | { kind: 'deleteLesson'; lesson: Lesson }
+  | { kind: 'lockAll' }
+  | { kind: 'info'; title: string; message: string };
 
 export default function Course() {
   const [, params] = useRoute('/course/:course');
@@ -18,6 +28,11 @@ export default function Course() {
   const [lessonsByUnit, setLessonsByUnit] = useState<Record<string, Lesson[]>>({});
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+
+  const [modal, setModal] = useState<ModalState>({ kind: 'none' });
+  const [titleInput, setTitleInput] = useState('');
+  const [modalErr, setModalErr] = useState<string | null>(null);
+  const closeModal = () => setModal({ kind: 'none' });
 
   async function refresh() {
     setLoading(true);
@@ -41,26 +56,37 @@ export default function Course() {
 
   useEffect(() => { refresh(); }, [course]);
 
-  async function addUnit() {
-    const title = prompt('Unit title?');
-    if (!title) return;
+  function openAddUnit() {
+    setTitleInput(''); setModalErr(null);
+    setModal({ kind: 'addUnit' });
+  }
+  function openAddLesson(unitId: string) {
+    setTitleInput(''); setModalErr(null);
+    setModal({ kind: 'addLesson', unitId });
+  }
+
+  async function submitAddUnit() {
+    const title = titleInput.trim();
+    if (!title) { setModalErr('Title is required.'); return; }
     try {
       await api(`/api/classwork/${course}/units`, {
         method: 'POST', body: JSON.stringify({ title, orderIndex: units.length }),
       });
+      closeModal();
       refresh();
-    } catch (e: any) { alert(e.message); }
+    } catch (e: any) { setModalErr(e.message); }
   }
 
-  async function addLesson(unitId: string) {
-    const title = prompt('Lesson title?');
-    if (!title) return;
+  async function submitAddLesson(unitId: string) {
+    const title = titleInput.trim();
+    if (!title) { setModalErr('Title is required.'); return; }
     try {
       await api(`/api/classwork/units/${unitId}/lessons`, {
         method: 'POST', body: JSON.stringify({ title, orderIndex: (lessonsByUnit[unitId] || []).length }),
       });
+      closeModal();
       refresh();
-    } catch (e: any) { alert(e.message); }
+    } catch (e: any) { setModalErr(e.message); }
   }
 
   async function togglePublish(lesson: Lesson) {
@@ -69,32 +95,34 @@ export default function Course() {
         method: 'PATCH', body: JSON.stringify({ isPublished: !lesson.is_published }),
       });
       refresh();
-    } catch (e: any) { alert(e.message); }
+    } catch (e: any) {
+      setModal({ kind: 'info', title: 'Could not update lesson', message: e.message });
+    }
   }
 
-  async function deleteLesson(lesson: Lesson) {
-    if (!confirm(`Delete lesson "${lesson.title}"? This also deletes its questions and submissions.`)) return;
+  async function confirmDeleteLesson(lesson: Lesson) {
     try {
       await api(`/api/classwork/lessons/${lesson.id}`, { method: 'DELETE' });
+      closeModal();
       refresh();
-    } catch (e: any) { alert(e.message); }
+    } catch (e: any) { setModalErr(e.message); }
   }
 
-  async function deleteUnit(unit: Unit) {
-    if (!confirm(`Delete unit "${unit.title}" and all its lessons?`)) return;
+  async function confirmDeleteUnit(unit: Unit) {
     try {
       await api(`/api/classwork/units/${unit.id}`, { method: 'DELETE' });
+      closeModal();
       refresh();
-    } catch (e: any) { alert(e.message); }
+    } catch (e: any) { setModalErr(e.message); }
   }
 
-  async function lockAll() {
-    if (!confirm(`Lock every lesson in ${COURSE_LABELS[course] || course}? Students will see nothing until you unlock lessons one by one.`)) return;
+  async function confirmLockAll() {
     try {
       const r = await api<{ locked: number }>(`/api/classwork/${course}/lock-all-lessons`, { method: 'POST' });
-      alert(`Locked ${r.locked} lesson${r.locked === 1 ? '' : 's'}.`);
+      closeModal();
+      setModal({ kind: 'info', title: 'All lessons locked', message: `Locked ${r.locked} lesson${r.locked === 1 ? '' : 's'}. Use the Publish button on any lesson to release it to students.` });
       refresh();
-    } catch (e: any) { alert(e.message); }
+    } catch (e: any) { setModalErr(e.message); }
   }
 
   return (
@@ -108,8 +136,8 @@ export default function Course() {
               background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
               padding: '8px 14px', borderRadius: 8, fontWeight: 600, textDecoration: 'none',
             }}>Analytics</Link>
-            <button onClick={lockAll} style={dangerBtn} title="Hide every lesson from students at once">Lock all</button>
-            <button onClick={addUnit} style={primaryBtn}>+ New unit</button>
+            <button onClick={() => { setModalErr(null); setModal({ kind: 'lockAll' }); }} style={dangerBtn} title="Hide every lesson from students at once">Lock all</button>
+            <button onClick={openAddUnit} style={primaryBtn}>+ New unit</button>
           </div>
         )}
       </div>
@@ -131,8 +159,8 @@ export default function Course() {
                 <h2 style={{ margin: 0, fontSize: 20 }}>{u.title}</h2>
                 {role === 'teacher' && (
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => addLesson(u.id)} style={secondaryBtn}>+ Lesson</button>
-                    <button onClick={() => deleteUnit(u)} style={dangerBtn}>Delete unit</button>
+                    <button onClick={() => openAddLesson(u.id)} style={secondaryBtn}>+ Lesson</button>
+                    <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteUnit', unit: u }); }} style={dangerBtn}>Delete unit</button>
                   </div>
                 )}
               </div>
@@ -164,7 +192,7 @@ export default function Course() {
                             >
                               {l.is_published ? 'Lock' : 'Publish'}
                             </button>
-                            <button onClick={() => deleteLesson(l)} style={dangerBtn}>Delete</button>
+                            <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteLesson', lesson: l }); }} style={dangerBtn}>Delete</button>
                           </>
                         )}
                       </div>
@@ -176,6 +204,109 @@ export default function Course() {
           );
         })}
       </div>
+
+      {/* ---------- Modals ---------- */}
+
+      <Modal
+        open={modal.kind === 'addUnit'}
+        title="New unit"
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={submitAddUnit} style={modalPrimaryBtn}>Create unit</button>
+        </>}
+      >
+        <div>
+          <label style={modalLabel}>Unit title</label>
+          <input
+            autoFocus value={titleInput}
+            onChange={(e) => setTitleInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') submitAddUnit(); }}
+            placeholder="e.g. Programming basics"
+            style={modalInput}
+          />
+        </div>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'addLesson'}
+        title="New lesson"
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={() => modal.kind === 'addLesson' && submitAddLesson(modal.unitId)} style={modalPrimaryBtn}>Create lesson</button>
+        </>}
+      >
+        <div>
+          <label style={modalLabel}>Lesson title</label>
+          <input
+            autoFocus value={titleInput}
+            onChange={(e) => setTitleInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && modal.kind === 'addLesson') submitAddLesson(modal.unitId); }}
+            placeholder="e.g. Variables and data types"
+            style={modalInput}
+          />
+        </div>
+        <p style={{ margin: 0, fontSize: 12, color: 'var(--cw-muted)' }}>
+          New lessons start <strong>Locked</strong>. Use the Publish button when you're ready for pupils to see it.
+        </p>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'deleteUnit'}
+        title="Delete unit?"
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={() => modal.kind === 'deleteUnit' && confirmDeleteUnit(modal.unit)} style={modalDangerBtn}>Delete unit</button>
+        </>}
+      >
+        <p style={{ margin: 0 }}>
+          Delete <strong>{modal.kind === 'deleteUnit' ? modal.unit.title : ''}</strong> and every lesson inside it? This can't be undone.
+        </p>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'deleteLesson'}
+        title="Delete lesson?"
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={() => modal.kind === 'deleteLesson' && confirmDeleteLesson(modal.lesson)} style={modalDangerBtn}>Delete lesson</button>
+        </>}
+      >
+        <p style={{ margin: 0 }}>
+          Delete <strong>{modal.kind === 'deleteLesson' ? modal.lesson.title : ''}</strong>? Its questions and pupil submissions will be removed too.
+        </p>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'lockAll'}
+        title="Lock every lesson?"
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={confirmLockAll} style={modalDangerBtn}>Lock all lessons</button>
+        </>}
+      >
+        <p style={{ margin: 0 }}>
+          Hide every lesson in <strong>{COURSE_LABELS[course] || course}</strong> from pupils. You can then click <strong>Publish</strong> on individual lessons to release them as the year goes on.
+        </p>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'info'}
+        title={modal.kind === 'info' ? modal.title : ''}
+        onClose={closeModal}
+        footer={<button onClick={closeModal} style={modalPrimaryBtn}>OK</button>}
+      >
+        <p style={{ margin: 0 }}>{modal.kind === 'info' ? modal.message : ''}</p>
+      </Modal>
     </Shell>
   );
 }

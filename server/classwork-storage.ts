@@ -1,13 +1,14 @@
 import { pool, hasDatabase } from './db';
 import crypto from 'crypto';
 
-export const CLASSWORK_COURSES = ['s1', 's2', 's3', 'n5', 'higher'] as const;
+export const CLASSWORK_COURSES = ['s1', 's2', 's3', 'n4', 'n5', 'higher'] as const;
 export type ClassworkCourse = (typeof CLASSWORK_COURSES)[number];
 
 export const CLASSWORK_COURSE_LABELS: Record<ClassworkCourse, string> = {
   s1: 'S1',
   s2: 'S2',
   s3: 'S3',
+  n4: 'National 4',
   n5: 'National 5',
   higher: 'Higher',
 };
