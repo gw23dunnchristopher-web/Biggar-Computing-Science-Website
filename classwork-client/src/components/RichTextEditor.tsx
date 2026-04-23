@@ -25,6 +25,29 @@ export default function RichTextEditor({
   const [hasSelectedImg, setHasSelectedImg] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState<string | null>(null);
+  const [inTableCell, setInTableCell] = useState(false);
+
+  // Track whether the caret is inside a table cell so the table-edit buttons
+  // (add row, delete column, etc.) only light up when they make sense.
+  useEffect(() => {
+    function onSelChange() {
+      const sel = window.getSelection();
+      const root = ref.current;
+      if (!sel || !sel.anchorNode || !root) { setInTableCell(false); return; }
+      let node: Node | null = sel.anchorNode;
+      let inside = false;
+      while (node && node !== root) {
+        if (node.nodeType === 1) {
+          const tag = (node as Element).tagName;
+          if (tag === 'TD' || tag === 'TH') { inside = true; break; }
+        }
+        node = node.parentNode;
+      }
+      setInTableCell(inside && root.contains(sel.anchorNode));
+    }
+    document.addEventListener('selectionchange', onSelChange);
+    return () => document.removeEventListener('selectionchange', onSelChange);
+  }, []);
 
   // Push value into the editor only when it differs from what we last wrote
   // ourselves, so we don't fight the user's caret on every keystroke.
@@ -117,6 +140,100 @@ export default function RichTextEditor({
     img.classList.add('cw-img-' + align);
     handleInput();
   }
+  /* ---- Table helpers ---- */
+
+  function currentCell(): HTMLTableCellElement | null {
+    const sel = window.getSelection();
+    if (!sel || !sel.anchorNode || !ref.current) return null;
+    let node: Node | null = sel.anchorNode;
+    while (node && node !== ref.current) {
+      if (node.nodeType === 1) {
+        const tag = (node as Element).tagName;
+        if (tag === 'TD' || tag === 'TH') return node as HTMLTableCellElement;
+      }
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  function insertTable() {
+    const rowsStr = window.prompt('How many rows? (1\u201320)', '3');
+    if (!rowsStr) return;
+    const colsStr = window.prompt('How many columns? (1\u201310)', '3');
+    if (!colsStr) return;
+    const rows = Math.max(1, Math.min(20, parseInt(rowsStr, 10) || 0));
+    const cols = Math.max(1, Math.min(10, parseInt(colsStr, 10) || 0));
+    if (!rows || !cols) return;
+    let html = '<table class="cw-table"><thead><tr>';
+    for (let c = 0; c < cols; c++) html += '<th>Heading</th>';
+    html += '</tr></thead><tbody>';
+    for (let r = 0; r < rows - 1; r++) {
+      html += '<tr>';
+      for (let c = 0; c < cols; c++) html += '<td>&nbsp;</td>';
+      html += '</tr>';
+    }
+    html += '</tbody></table><p><br></p>';
+    ref.current?.focus();
+    try { document.execCommand('insertHTML', false, html); } catch { /* ignore */ }
+    handleInput();
+  }
+
+  function addRowBelow() {
+    const cell = currentCell();
+    const row = cell?.parentElement as HTMLTableRowElement | null;
+    const table = row?.closest('table');
+    if (!cell || !row || !table) return;
+    const colCount = Array.from(row.cells).reduce((n, c) => n + (c.colSpan || 1), 0);
+    const newRow = document.createElement('tr');
+    for (let i = 0; i < colCount; i++) {
+      const td = document.createElement('td');
+      td.innerHTML = '&nbsp;';
+      newRow.appendChild(td);
+    }
+    row.parentNode?.insertBefore(newRow, row.nextSibling);
+    handleInput();
+  }
+  function addColRight() {
+    const cell = currentCell();
+    const table = cell?.closest('table');
+    if (!cell || !table) return;
+    const cellIndex = cell.cellIndex;
+    Array.from(table.rows).forEach((r) => {
+      const reference = r.cells[cellIndex];
+      const isHeader = reference?.tagName === 'TH';
+      const fresh = document.createElement(isHeader ? 'th' : 'td');
+      fresh.innerHTML = isHeader ? 'Heading' : '&nbsp;';
+      r.insertBefore(fresh, reference?.nextSibling || null);
+    });
+    handleInput();
+  }
+  function deleteRow() {
+    const cell = currentCell();
+    const row = cell?.parentElement as HTMLTableRowElement | null;
+    const table = row?.closest('table');
+    if (!cell || !row || !table) return;
+    if (table.rows.length <= 1) { deleteTable(); return; }
+    row.remove();
+    handleInput();
+  }
+  function deleteCol() {
+    const cell = currentCell();
+    const table = cell?.closest('table');
+    if (!cell || !table) return;
+    const cellIndex = cell.cellIndex;
+    const firstRow = table.rows[0];
+    if (firstRow && firstRow.cells.length <= 1) { deleteTable(); return; }
+    Array.from(table.rows).forEach((r) => { r.cells[cellIndex]?.remove(); });
+    handleInput();
+  }
+  function deleteTable() {
+    const cell = currentCell();
+    const table = cell?.closest('table');
+    if (!table) return;
+    table.remove();
+    handleInput();
+  }
+
   function removeImage() {
     const img = selectedImgRef.current;
     if (!img) return;
@@ -143,6 +260,20 @@ export default function RichTextEditor({
         <Sep />
         <ToolBtn onClick={addLink} title="Insert link">Link</ToolBtn>
         <ToolBtn onClick={() => exec('removeFormat')} title="Clear formatting">Clear</ToolBtn>
+        <Sep />
+        <ToolBtn onClick={insertTable} title="Insert a new table">Table</ToolBtn>
+      </div>
+
+      {/* Table edit row — only lights up when the caret is inside a table cell. */}
+      <div style={imgBar} role="toolbar" aria-label="Table">
+        <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginRight: 4 }}>
+          {inTableCell ? 'In a table — edit it:' : 'Click inside a table to edit it:'}
+        </span>
+        <ToolBtn onClick={addRowBelow} title="Add a new row below this one" disabled={!inTableCell}>+ Row</ToolBtn>
+        <ToolBtn onClick={addColRight} title="Add a new column to the right" disabled={!inTableCell}>+ Column</ToolBtn>
+        <ToolBtn onClick={deleteRow} title="Delete this row" disabled={!inTableCell}>&minus; Row</ToolBtn>
+        <ToolBtn onClick={deleteCol} title="Delete this column" disabled={!inTableCell}>&minus; Column</ToolBtn>
+        <ToolBtn onClick={deleteTable} title="Delete the whole table" disabled={!inTableCell}>Delete table</ToolBtn>
       </div>
 
       {/* Image alignment row — only enabled when a pasted image is selected. */}
@@ -210,6 +341,9 @@ export default function RichTextEditor({
         .cw-rte img.cw-img-center { display: block; margin: 8px auto; max-width: 100%; clear: both; }
         .cw-rte img.cw-img-selected { outline: 2px solid var(--cw-accent); outline-offset: 2px; }
         .cw-rte::after { content: ''; display: block; clear: both; }
+        .cw-rte table.cw-table { border-collapse: collapse; margin: 8px 0; width: auto; max-width: 100%; }
+        .cw-rte table.cw-table th, .cw-rte table.cw-table td { border: 1px solid #cbd5e1; padding: 6px 10px; vertical-align: top; min-width: 40px; }
+        .cw-rte table.cw-table th { background: #f1f5f9; text-align: left; font-weight: 600; }
       `}</style>
     </div>
   );

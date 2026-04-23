@@ -8,11 +8,15 @@ const ALLOWED_TAGS = new Set([
   'UL', 'OL', 'LI',
   'A', 'BLOCKQUOTE', 'CODE', 'PRE', 'SPAN', 'DIV',
   'IMG', 'FIGURE', 'FIGCAPTION',
+  'TABLE', 'THEAD', 'TBODY', 'TR', 'TH', 'TD',
 ]);
 
 const ALLOWED_ATTRS: Record<string, Set<string>> = {
   A: new Set(['href', 'title']),
   IMG: new Set(['src', 'alt', 'width', 'class']),
+  TH: new Set(['colspan', 'rowspan']),
+  TD: new Set(['colspan', 'rowspan']),
+  TABLE: new Set(['class']),
 };
 
 // The only classes pupils can persist on images are the alignment classes
@@ -75,6 +79,11 @@ function clean(node: Node, out: Node): void {
         } else if (lower === 'width' && tag === 'IMG') {
           const n = parseInt(value, 10);
           if (Number.isFinite(n) && n > 0 && n <= 4000) replacement.setAttribute('width', String(n));
+        } else if ((lower === 'colspan' || lower === 'rowspan') && (tag === 'TH' || tag === 'TD')) {
+          const n = parseInt(value, 10);
+          if (Number.isFinite(n) && n > 0 && n <= 50) replacement.setAttribute(lower, String(n));
+        } else if (lower === 'class' && tag === 'TABLE') {
+          replacement.setAttribute('class', 'cw-table');
         } else {
           replacement.setAttribute(lower, value);
         }

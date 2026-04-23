@@ -64,6 +64,9 @@ export default function JotterPage() {
         .cw-jotter-body img.cw-img-right  { float: right; margin: 4px 0 4px 12px; max-width: 50%; }
         .cw-jotter-body img.cw-img-center { display: block; margin: 8px auto; max-width: 100%; clear: both; }
         .cw-jotter-body::after { content: ''; display: block; clear: both; }
+        .cw-jotter-body table.cw-table { border-collapse: collapse; margin: 8px 0; width: auto; max-width: 100%; }
+        .cw-jotter-body table.cw-table th, .cw-jotter-body table.cw-table td { border: 1px solid #cbd5e1; padding: 6px 10px; vertical-align: top; }
+        .cw-jotter-body table.cw-table th { background: #f1f5f9; text-align: left; font-weight: 600; }
       `}</style>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
