@@ -168,7 +168,10 @@
         }
         if (currentUser) {
             barEl.innerHTML =
-                '<div style="position:relative">' +
+                '<div style="position:relative; display:flex; gap:8px; align-items:center;">' +
+                '  <a class="sa-pill sa-classwork-link" href="/classwork/" title="Open BHS Classwork" style="background:#1e40af;color:#fff;border:none;">' +
+                '    <span>BHS Classwork</span>' +
+                '  </a>' +
                 '  <button class="sa-pill" id="saUserBtn" aria-haspopup="true">' +
                 '    <span class="sa-dot"></span>' +
                 '    <span>' + escapeHtml(currentUser.username) + '</span>' +
@@ -178,6 +181,7 @@
                 '      Signed in as <strong>' + escapeHtml(currentUser.username) + '</strong>' +
                 (currentUser.className ? '<br>Class: ' + escapeHtml(currentUser.className) : '') +
                 '    </div>' +
+                '    <a class="sa-menu-item" href="/classwork/" style="display:block;text-decoration:none;color:inherit;">Open BHS Classwork</a>' +
                 '    <button class="sa-menu-item" id="saLogout">Log out</button>' +
                 '  </div>' +
                 '</div>';

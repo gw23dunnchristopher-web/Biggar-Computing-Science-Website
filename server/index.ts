@@ -8,6 +8,7 @@ import { registerRoutes as registerRevisionRoutes } from './revision-routes';
 import { registerN5Routes, n5Sessions, n5AddSession } from './n5-routes';
 import { registerDsRoutes } from './ds-routes';
 import { registerProgressRoutes } from './progress-routes';
+import { registerClassworkRoutes } from './classwork-routes';
 import { registerContentRoutes } from './content-routes';
 import { registerCodeProjectsRoutes } from './code-projects-routes';
 import { registerDsWorkspaceRoutes } from './ds-workspace-routes';
@@ -1211,6 +1212,24 @@ if (fs.existsSync(progressBuildDir)) {
 } else {
   app.get('/progress/*splat', (_req, res) => {
     res.status(503).send('Progress app not built yet. Run: npm run build:progress');
+  });
+}
+
+// ---------------------------------------------------------------------------
+// BHS Classwork — API routes + static serving at /classwork/
+// ---------------------------------------------------------------------------
+registerClassworkRoutes(app, requireTeacher);
+
+const classworkBuildDir = path.join(path.resolve('.'), 'public', 'classwork');
+
+if (fs.existsSync(classworkBuildDir)) {
+  app.use('/classwork', express.static(classworkBuildDir, { dotfiles: 'deny' }));
+  app.get('/classwork/*splat', (_req, res) => {
+    res.sendFile(path.join(classworkBuildDir, 'index.html'));
+  });
+} else {
+  app.get('/classwork/*splat', (_req, res) => {
+    res.status(503).send('BHS Classwork app not built yet. Run: npm run build:classwork');
   });
 }
 

@@ -10,7 +10,8 @@
     "build:revision": "vite build --config vite.revision.config.ts",
     "build:n5": "vite build --config vite.n5.config.ts",
     "build:ds": "vite build --config vite.ds.config.ts",
-    "build:progress": "vite build --config vite.progress.config.ts"
+    "build:progress": "vite build --config vite.progress.config.ts",
+    "build:classwork": "vite build --config vite.classwork.config.ts"
   },
   "keywords": [],
   "author": "",
