@@ -73,6 +73,25 @@ export default function RichTextEditor({
     handleInput();
   }
 
+  // Tell browsers to emit inline `style` attributes (e.g.
+  // `<span style="color: red">`) instead of the deprecated `<font>` tag.
+  // Means colour, highlight and indent commands round-trip cleanly through
+  // our sanitiser. Re-applied on every focus because some browsers reset it.
+  function ensureStyleWithCSS() {
+    try { document.execCommand('styleWithCSS', false, true as any); } catch { /* ignore */ }
+  }
+
+  function setColor(color: string) { ensureStyleWithCSS(); exec('foreColor', color); }
+  function setHighlight(color: string) {
+    ensureStyleWithCSS();
+    // Chrome / Firefox use hiliteColor; Safari and older IE use backColor.
+    // Try both — execCommand silently ignores the one it doesn't support.
+    try { document.execCommand('hiliteColor', false, color); } catch { /* ignore */ }
+    try { document.execCommand('backColor', false, color); } catch { /* ignore */ }
+    handleInput();
+  }
+  function clearHighlight() { setHighlight('transparent'); }
+
   function handleInput() {
     const el = ref.current;
     if (!el) return;
@@ -245,9 +264,18 @@ export default function RichTextEditor({
   return (
     <div style={wrap}>
       <div style={toolbar} role="toolbar" aria-label="Formatting">
+        <ToolBtn onClick={() => exec('undo')} title="Undo (Ctrl+Z)">&#x21B6;</ToolBtn>
+        <ToolBtn onClick={() => exec('redo')} title="Redo (Ctrl+Y)">&#x21B7;</ToolBtn>
+        <Sep />
         <ToolBtn onClick={() => exec('bold')} title="Bold (Ctrl+B)"><b>B</b></ToolBtn>
         <ToolBtn onClick={() => exec('italic')} title="Italic (Ctrl+I)"><i>I</i></ToolBtn>
         <ToolBtn onClick={() => exec('underline')} title="Underline (Ctrl+U)"><u>U</u></ToolBtn>
+        <ToolBtn onClick={() => exec('strikeThrough')} title="Strikethrough"><s>S</s></ToolBtn>
+        <ToolBtn onClick={() => exec('superscript')} title="Superscript">x<sup>2</sup></ToolBtn>
+        <ToolBtn onClick={() => exec('subscript')} title="Subscript">x<sub>2</sub></ToolBtn>
+        <Sep />
+        <ColorBtn label="A" title="Text colour" onPick={setColor} onReset={() => setColor('#0f172a')} />
+        <ColorBtn label={'\u25A0'} title="Highlight colour" defaultColor="#fff59d" onPick={setHighlight} onReset={clearHighlight} />
         <Sep />
         <ToolBtn onClick={() => exec('formatBlock', '<h2>')} title="Big heading">H1</ToolBtn>
         <ToolBtn onClick={() => exec('formatBlock', '<h3>')} title="Medium heading">H2</ToolBtn>
@@ -256,8 +284,15 @@ export default function RichTextEditor({
         <Sep />
         <ToolBtn onClick={() => exec('insertUnorderedList')} title="Bulleted list">&bull; List</ToolBtn>
         <ToolBtn onClick={() => exec('insertOrderedList')} title="Numbered list">1. List</ToolBtn>
-        <ToolBtn onClick={() => exec('formatBlock', '<blockquote>')} title="Quote block">&ldquo; &rdquo;</ToolBtn>
+        <ToolBtn onClick={() => { ensureStyleWithCSS(); exec('indent'); }} title="Indent (Tab)">&#x21E5;</ToolBtn>
+        <ToolBtn onClick={() => { ensureStyleWithCSS(); exec('outdent'); }} title="Outdent (Shift+Tab)">&#x21E4;</ToolBtn>
         <Sep />
+        <ToolBtn onClick={() => exec('justifyLeft')} title="Align left">&#x2630;&#x2190;</ToolBtn>
+        <ToolBtn onClick={() => exec('justifyCenter')} title="Centre">&#x2261;</ToolBtn>
+        <ToolBtn onClick={() => exec('justifyRight')} title="Align right">&#x2192;&#x2630;</ToolBtn>
+        <ToolBtn onClick={() => exec('justifyFull')} title="Justify">&#x2630;</ToolBtn>
+        <Sep />
+        <ToolBtn onClick={() => exec('formatBlock', '<blockquote>')} title="Quote block">&ldquo; &rdquo;</ToolBtn>
         <ToolBtn onClick={addLink} title="Insert link">Link</ToolBtn>
         <ToolBtn onClick={() => exec('removeFormat')} title="Clear formatting">Clear</ToolBtn>
         <Sep />
@@ -299,6 +334,56 @@ export default function RichTextEditor({
           const t = e.target as HTMLElement;
           if (t && t.tagName === 'IMG') selectImage(t as HTMLImageElement);
           else selectImage(null);
+        }}
+        onKeyDown={(e) => {
+          // Tab indents the current block (or moves between table cells when
+          // inside a table) — same as Word / Google Docs. Without this, Tab
+          // moves focus out of the editor entirely, which surprises pupils.
+          if (e.key === 'Tab') {
+            const cell = currentCell();
+            if (cell) {
+              e.preventDefault();
+              const table = cell.closest('table');
+              if (!table) return;
+              const cells = Array.from(table.querySelectorAll('th, td')) as HTMLTableCellElement[];
+              const idx = cells.indexOf(cell);
+              let target: HTMLTableCellElement | null = null;
+              if (e.shiftKey) {
+                target = cells[idx - 1] || null;
+              } else {
+                target = cells[idx + 1] || null;
+                if (!target) {
+                  // Past the last cell with Tab → add a new row and jump to its
+                  // first cell, mirroring Word's "Tab in last cell" behaviour.
+                  const lastRow = table.rows[table.rows.length - 1];
+                  if (lastRow) {
+                    const colCount = Array.from(lastRow.cells).reduce((n, c) => n + (c.colSpan || 1), 0);
+                    const tr = document.createElement('tr');
+                    for (let i = 0; i < colCount; i++) {
+                      const td = document.createElement('td');
+                      td.innerHTML = '&nbsp;';
+                      tr.appendChild(td);
+                    }
+                    lastRow.parentNode?.insertBefore(tr, lastRow.nextSibling);
+                    target = tr.cells[0] || null;
+                    handleInput();
+                  }
+                }
+              }
+              if (target) {
+                const range = document.createRange();
+                range.selectNodeContents(target);
+                range.collapse(true);
+                const sel = window.getSelection();
+                sel?.removeAllRanges(); sel?.addRange(range);
+                (target as HTMLElement).focus();
+              }
+              return;
+            }
+            e.preventDefault();
+            ensureStyleWithCSS();
+            exec(e.shiftKey ? 'outdent' : 'indent');
+          }
         }}
         onPaste={(e) => {
           // Pull any image off the clipboard first; otherwise fall back to
@@ -362,6 +447,57 @@ function ToolBtn({ children, onClick, title, disabled }: { children: React.React
   );
 }
 function Sep() { return <span style={{ width: 1, alignSelf: 'stretch', background: '#e2e8f0', margin: '0 2px' }} />; }
+
+// A toolbar button that pairs a label (e.g. "A" for text colour, square for
+// highlight) with the OS-native colour picker. The button itself applies the
+// last-chosen colour; clicking the small ▾ opens a fresh picker; clicking
+// the × resets to the default. The native picker is far smaller and more
+// accessible than a custom palette and works the same on every device.
+function ColorBtn({
+  label, title, defaultColor, onPick, onReset,
+}: {
+  label: string; title: string; defaultColor?: string;
+  onPick: (color: string) => void; onReset: () => void;
+}) {
+  const [color, setColor] = useState(defaultColor || '#fbbf24');
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  return (
+    <span
+      style={{ display: 'inline-flex', alignItems: 'stretch' }}
+      onMouseDown={(e) => e.preventDefault()}
+      title={title}
+    >
+      <button
+        type="button"
+        onClick={() => onPick(color)}
+        style={{
+          ...btn, borderTopRightRadius: 0, borderBottomRightRadius: 0,
+          borderRight: 'none', minWidth: 32,
+          textDecoration: 'underline', textDecorationColor: color, textDecorationThickness: 3,
+        }}
+      >{label}</button>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        style={{ ...btn, borderRadius: 0, borderRight: 'none', padding: '4px 4px', fontSize: 11 }}
+        title="Pick colour"
+      >&#x25BE;</button>
+      <button
+        type="button"
+        onClick={onReset}
+        style={{ ...btn, borderTopLeftRadius: 0, borderBottomLeftRadius: 0, padding: '4px 6px', fontSize: 11 }}
+        title="Reset"
+      >&times;</button>
+      <input
+        ref={inputRef}
+        type="color"
+        value={color}
+        onChange={(e) => { setColor(e.target.value); onPick(e.target.value); }}
+        style={{ position: 'absolute', width: 0, height: 0, opacity: 0, pointerEvents: 'none' }}
+      />
+    </span>
+  );
+}
 
 const wrap: React.CSSProperties = {
   border: '1px solid var(--cw-border)', borderRadius: 8, overflow: 'hidden', background: '#fff',

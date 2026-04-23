@@ -3,19 +3,29 @@
 // handlers, and javascript: URLs). Safe to feed into dangerouslySetInnerHTML.
 
 const ALLOWED_TAGS = new Set([
-  'P', 'BR', 'B', 'STRONG', 'I', 'EM', 'U',
-  'H2', 'H3', 'H4',
+  'P', 'BR', 'B', 'STRONG', 'I', 'EM', 'U', 'S', 'STRIKE', 'DEL', 'MARK',
+  'SUB', 'SUP', 'H2', 'H3', 'H4',
   'UL', 'OL', 'LI',
   'A', 'BLOCKQUOTE', 'CODE', 'PRE', 'SPAN', 'DIV',
   'IMG', 'FIGURE', 'FIGCAPTION',
   'TABLE', 'THEAD', 'TBODY', 'TR', 'TH', 'TD',
 ]);
 
+// Tags where we keep a sanitised inline `style` attribute. This lets pupils
+// use things like text colour, highlight (background-color), text alignment
+// and indentation produced by execCommand without us having to invent a new
+// class for every variant.
+const STYLE_TAGS = new Set([
+  'SPAN', 'P', 'DIV', 'LI', 'UL', 'OL', 'TR', 'TH', 'TD',
+  'H2', 'H3', 'H4', 'BLOCKQUOTE', 'B', 'STRONG', 'I', 'EM', 'U', 'MARK',
+  'SUB', 'SUP', 'CODE', 'PRE', 'A', 'S', 'STRIKE', 'DEL',
+]);
+
 const ALLOWED_ATTRS: Record<string, Set<string>> = {
-  A: new Set(['href', 'title']),
+  A: new Set(['href', 'title', 'style']),
   IMG: new Set(['src', 'alt', 'width', 'class']),
-  TH: new Set(['colspan', 'rowspan']),
-  TD: new Set(['colspan', 'rowspan']),
+  TH: new Set(['colspan', 'rowspan', 'style']),
+  TD: new Set(['colspan', 'rowspan', 'style']),
   TABLE: new Set(['class']),
 };
 
@@ -23,6 +33,46 @@ const ALLOWED_ATTRS: Record<string, Set<string>> = {
 // our editor and the jotter both know how to style. Anything else (including
 // the editor's transient "selected" outline) is dropped on save.
 const ALLOWED_IMG_CLASSES = new Set(['cw-img-left', 'cw-img-center', 'cw-img-right']);
+
+// ---- Style whitelist -----------------------------------------------------
+//
+// We only persist a small set of CSS declarations, each validated against a
+// strict regex so we never let arbitrary CSS (or `expression()`-style attacks)
+// reach the DOM.
+const COLOR_RE = /^(#[0-9a-f]{3,8}|rgb\(\s*\d{1,3}(\s*,\s*\d{1,3}){2}\s*\)|rgba\(\s*\d{1,3}(\s*,\s*\d{1,3}){2}\s*,\s*(0|1|0?\.\d+)\s*\)|[a-z]+)$/i;
+const LENGTH_RE = /^-?\d{1,4}(\.\d+)?(px|em|rem|%)?$/i;
+
+function isColor(v: string): boolean { return COLOR_RE.test(v.trim()); }
+function isLength(v: string): boolean { return LENGTH_RE.test(v.trim()); }
+function isAlign(v: string): boolean { return /^(left|right|center|justify)$/i.test(v.trim()); }
+
+const STYLE_RULES: Record<string, (v: string) => boolean> = {
+  'color': isColor,
+  'background-color': isColor,
+  'text-align': isAlign,
+  'margin-left': isLength,
+  'padding-left': isLength,
+  'font-weight': (v) => /^(normal|bold|[1-9]00)$/i.test(v.trim()),
+  'font-style': (v) => /^(normal|italic|oblique)$/i.test(v.trim()),
+  'text-decoration': (v) => /^(none|underline|line-through|underline\s+line-through)$/i.test(v.trim()),
+};
+
+function sanitizeStyle(raw: string): string {
+  const out: string[] = [];
+  for (const decl of (raw || '').split(';')) {
+    const idx = decl.indexOf(':');
+    if (idx <= 0) continue;
+    const prop = decl.slice(0, idx).trim().toLowerCase();
+    const val = decl.slice(idx + 1).trim();
+    if (!val || /[\\(]/.test(val) && prop !== 'color' && prop !== 'background-color') {
+      // values containing parens are only allowed for colour functions above
+      if (!/^(rgb|rgba)\(/i.test(val)) continue;
+    }
+    const test = STYLE_RULES[prop];
+    if (test && test(val)) out.push(`${prop}: ${val}`);
+  }
+  return out.join('; ');
+}
 
 function safeImgSrc(src: string): string | null {
   const trimmed = (src || '').trim();
@@ -55,14 +105,26 @@ function clean(node: Node, out: Node): void {
     }
     if (child.nodeType !== Node.ELEMENT_NODE) continue;
     const el = child as Element;
-    const tag = el.tagName.toUpperCase();
+    let tag = el.tagName.toUpperCase();
+    // Some browsers emit deprecated <font color="..."> from execCommand.
+    // Translate it to <span style="color:..."> so the whitelist accepts it.
+    if (tag === 'FONT') {
+      const span = document.createElement('span');
+      const styles: string[] = [];
+      const c = el.getAttribute('color'); if (c) styles.push(`color: ${c}`);
+      const f = el.getAttribute('face');  if (f && /^[\w\s,'-]+$/.test(f)) styles.push(`font-family: ${f}`);
+      if (styles.length) span.setAttribute('style', sanitizeStyle(styles.join('; ')));
+      clean(el, span);
+      out.appendChild(span);
+      continue;
+    }
     if (!ALLOWED_TAGS.has(tag)) {
       // Drop the tag but keep its (cleaned) children.
       clean(el, out);
       continue;
     }
     const replacement = document.createElement(tag.toLowerCase());
-    const allowed = ALLOWED_ATTRS[tag];
+    const allowed = ALLOWED_ATTRS[tag] || (STYLE_TAGS.has(tag) ? new Set(['style']) : null);
     if (allowed) {
       for (const { name, value } of Array.from(el.attributes)) {
         const lower = name.toLowerCase();
@@ -84,6 +146,9 @@ function clean(node: Node, out: Node): void {
           if (Number.isFinite(n) && n > 0 && n <= 50) replacement.setAttribute(lower, String(n));
         } else if (lower === 'class' && tag === 'TABLE') {
           replacement.setAttribute('class', 'cw-table');
+        } else if (lower === 'style' && STYLE_TAGS.has(tag)) {
+          const cleaned = sanitizeStyle(value);
+          if (cleaned) replacement.setAttribute('style', cleaned);
         } else {
           replacement.setAttribute(lower, value);
         }
