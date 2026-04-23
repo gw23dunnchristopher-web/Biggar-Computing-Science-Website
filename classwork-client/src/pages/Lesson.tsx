@@ -611,6 +611,7 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
   ]);
   const [rubric, setRubric] = useState<{ label: string; marks: number }[]>([]);
   const [useRubric, setUseRubric] = useState(false);
+  const [visualMarking, setVisualMarking] = useState(false);
   const [videoKind, setVideoKind] = useState<'youtube' | 'mp4'>('youtube');
   const [videoUrl, setVideoUrl] = useState('');
   const [videoFileName, setVideoFileName] = useState('');
@@ -666,11 +667,16 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
         questionType: type, prompt, maxMarks, markingScheme, aiGradingGuidance: aiGuidance,
       };
       if (type === 'multiple_choice') body.options = options;
-      if (type === 'presentation' && useRubric) {
-        const cleaned = rubric
-          .map((r) => ({ label: r.label.trim(), marks: Math.max(0, Math.round(r.marks || 0)) }))
-          .filter((r) => r.label && r.marks > 0);
-        if (cleaned.length) body.config = { rubric: cleaned };
+      if (type === 'presentation') {
+        const cfg: any = {};
+        if (useRubric) {
+          const cleaned = rubric
+            .map((r) => ({ label: r.label.trim(), marks: Math.max(0, Math.round(r.marks || 0)) }))
+            .filter((r) => r.label && r.marks > 0);
+          if (cleaned.length) cfg.rubric = cleaned;
+        }
+        if (visualMarking) cfg.visualMarking = true;
+        if (Object.keys(cfg).length) body.config = cfg;
       }
       if (type === 'video_question') {
         if (!videoUrl.trim()) {
@@ -779,13 +785,27 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
         {type === 'presentation' && (
           <div style={fieldLabel as any}>
             <div style={{ fontSize: 13, color: 'var(--cw-muted)', marginBottom: 6 }}>
-              Pupils upload a PowerPoint (.pptx). The AI marker reads slide text, speaker notes
-              and counts embedded images — it can't see colours, fonts or layout, so be honest in
-              your rubric.
+              Pupils upload a PowerPoint (.pptx). By default the AI marker reads slide text,
+              speaker notes and counts embedded images — it can't see colours, fonts or layout
+              unless you turn on visual marking below.
             </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
               <input type="checkbox" checked={useRubric} onChange={(e) => setUseRubric(e.target.checked)} />
               Use a rubric (mark each criterion separately)
+            </label>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 14, marginTop: 6 }}>
+              <input
+                type="checkbox" checked={visualMarking}
+                onChange={(e) => setVisualMarking(e.target.checked)}
+                style={{ marginTop: 3 }}
+              />
+              <span>
+                Visual marking (slower, more accurate)
+                <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 2 }}>
+                  Renders every slide to an image and lets the AI see layout, colour and pictures.
+                  Marking takes ~10-30 seconds per pupil and uses more API tokens. First 25 slides only.
+                </div>
+              </span>
             </label>
             {useRubric && (
               <div style={{ marginTop: 8 }}>

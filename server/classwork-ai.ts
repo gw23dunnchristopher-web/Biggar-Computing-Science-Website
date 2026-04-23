@@ -21,6 +21,9 @@ import { GoogleGenAI } from '@google/genai';
 import JSZip from 'jszip';
 import path from 'path';
 import fs from 'fs/promises';
+import os from 'os';
+import { spawn } from 'child_process';
+import crypto from 'crypto';
 
 const gemini = process.env.GEMINI_API_KEY
   ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
@@ -575,6 +578,150 @@ function getRubric(q: AIQuestion): RubricRow[] {
   return [{ label: 'Overall presentation quality', marks: q.max_marks }];
 }
 
+/**
+ * Render a .pptx to one PNG per slide using LibreOffice headless + pdftoppm.
+ * Returns an array of PNG buffers (in slide order), or null on any failure.
+ * Caller is responsible for capping how many slides actually get sent to the
+ * model. Conversion happens inside an isolated temp directory which is
+ * cleaned up before returning.
+ */
+async function renderPptxToImages(pptxPath: string, opts: { dpi?: number; maxSlides?: number } = {}): Promise<Buffer[] | null> {
+  const dpi = opts.dpi ?? 100;
+  const maxSlides = opts.maxSlides ?? 25;
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'cw-pptx-'));
+  const profile = path.join(tmp, 'lo-profile');
+  await fs.mkdir(profile, { recursive: true });
+  const run = (cmd: string, args: string[], timeoutMs: number) => new Promise<{ code: number; stderr: string }>((resolve) => {
+    const child = spawn(cmd, args, {
+      env: { ...process.env, HOME: tmp },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    let stderr = '';
+    child.stderr.on('data', (d) => { stderr += d.toString(); });
+    const t = setTimeout(() => { try { child.kill('SIGKILL'); } catch {} }, timeoutMs);
+    child.on('exit', (code) => { clearTimeout(t); resolve({ code: code ?? 1, stderr }); });
+    child.on('error', () => { clearTimeout(t); resolve({ code: 1, stderr: 'spawn error' }); });
+  });
+  try {
+    const pdfRes = await run('soffice', [
+      '--headless', '--norestore', '--nolockcheck', '--nodefault', '--nofirststartwizard',
+      `-env:UserInstallation=file://${profile}`,
+      '--convert-to', 'pdf', '--outdir', tmp, pptxPath,
+    ], 90_000);
+    if (pdfRes.code !== 0) {
+      console.error('[classwork-ai] soffice failed:', pdfRes.stderr.slice(0, 400));
+      return null;
+    }
+    const base = path.basename(pptxPath).replace(/\.pptx$/i, '.pdf');
+    const pdfPath = path.join(tmp, base);
+    try { await fs.access(pdfPath); } catch {
+      console.error('[classwork-ai] expected pdf not found:', pdfPath);
+      return null;
+    }
+    const ppmRes = await run('pdftoppm', [
+      '-png', '-r', String(dpi), '-l', String(maxSlides),
+      pdfPath, path.join(tmp, 'slide'),
+    ], 60_000);
+    if (ppmRes.code !== 0) {
+      console.error('[classwork-ai] pdftoppm failed:', ppmRes.stderr.slice(0, 400));
+      return null;
+    }
+    const files = (await fs.readdir(tmp))
+      .filter((n) => /^slide-\d+\.png$/i.test(n))
+      .sort((a, b) => {
+        const na = parseInt(a.match(/slide-(\d+)/i)![1], 10);
+        const nb = parseInt(b.match(/slide-(\d+)/i)![1], 10);
+        return na - nb;
+      });
+    const out: Buffer[] = [];
+    for (const f of files) {
+      out.push(await fs.readFile(path.join(tmp, f)));
+    }
+    return out;
+  } catch (err) {
+    console.error('[classwork-ai] renderPptxToImages error:', err);
+    return null;
+  } finally {
+    fs.rm(tmp, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+/**
+ * True visual marking: render every slide to a PNG and pass them all to
+ * Gemini Vision in one multimodal request alongside the text/notes summary.
+ * Falls back to null on any failure so the caller can use the text-only path.
+ */
+async function markPresentationVisual(
+  q: AIQuestion,
+  pptxPath: string,
+  summary: PptxSummary,
+  rubric: RubricRow[],
+  cappedTotal: number,
+): Promise<AIMarkResult | null> {
+  if (!gemini) return null;
+  const SLIDE_LIMIT = 25;
+  const images = await renderPptxToImages(pptxPath, { dpi: 100, maxSlides: SLIDE_LIMIT });
+  if (!images || images.length === 0) return null;
+
+  const trimSlide = (t: string, max = 400) => t.length > max ? t.slice(0, max) + '…' : t;
+  const slidesBlock = summary.slides.slice(0, images.length).map((sl) => {
+    const parts = [`Slide ${sl.index}:`,
+      sl.text ? `  Text: ${trimSlide(sl.text)}` : '  Text: (no text)'];
+    if (sl.notes) parts.push(`  Speaker notes: ${trimSlide(sl.notes, 200)}`);
+    return parts.join('\n');
+  }).join('\n');
+  const omitted = Math.max(0, summary.slideCount - images.length);
+  const rubricBlock = rubric
+    .map((r, i) => `  ${i + 1}. ${r.label} — up to ${r.marks} mark${r.marks === 1 ? '' : 's'}`)
+    .join('\n');
+
+  const promptText = [
+    `You are marking a Scottish secondary school pupil's PowerPoint presentation for a Computing Science task.`,
+    `You can SEE the slides — each slide has been rendered as an image and attached in order. Use the visual layout (titles, structure, images, diagrams, colour, balance, neatness) AS WELL AS the text/notes shown below to mark fairly.`,
+    omitted > 0 ? `Note: only the first ${images.length} of ${summary.slideCount} slides were rendered; mark on what you can see and mention the missing slides briefly.` : '',
+    '',
+    `Question (worth up to ${q.max_marks} mark${q.max_marks === 1 ? '' : 's'} in total):`,
+    q.prompt,
+    q.marking_scheme ? `\nGeneral marking scheme:\n${q.marking_scheme}` : '',
+    q.ai_grading_guidance ? `\nAdditional guidance:\n${q.ai_grading_guidance}` : '',
+    '',
+    `Rubric (mark each criterion separately, then sum — total cannot exceed ${cappedTotal}):`,
+    rubricBlock,
+    '',
+    `Per-slide text and speaker notes (for cross-reference; the images are authoritative for layout/visuals):`,
+    slidesBlock,
+    '',
+    `Be encouraging but accurate. In your feedback, list a brief breakdown by criterion and one concrete improvement.`,
+    `Return ONLY a JSON object: {"marks": <integer total>, "feedback": "<string>"}.`,
+  ].filter(Boolean).join('\n');
+
+  const parts: any[] = [{ text: promptText }];
+  for (const buf of images) {
+    parts.push({ inlineData: { data: buf.toString('base64'), mimeType: 'image/png' } });
+  }
+  try {
+    const resp = await gemini.models.generateContent({
+      model: MODEL,
+      contents: parts as any,
+      config: {
+        responseMimeType: 'application/json',
+        thinkingConfig: { thinkingBudget: 0 },
+      },
+    });
+    const parsed = safeParseJson(resp.text || '');
+    if (!parsed) return null;
+    const marks = Math.max(0, Math.min(cappedTotal, Math.round(Number(parsed.marks) || 0)));
+    return {
+      marksAwarded: marks,
+      feedback: String(parsed.feedback || '').trim() || 'Marked by AI (visual).',
+      markedBy: 'ai',
+    };
+  } catch (err) {
+    console.error('[classwork-ai] visual presentation mark failed:', err);
+    return null;
+  }
+}
+
 async function markPresentation(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {
   if (!s.file_url || !gemini) return null;
   const onDisk = resolveUploadPath(s.file_url);
@@ -596,6 +743,19 @@ async function markPresentation(q: AIQuestion, s: AISubmission): Promise<AIMarkR
       feedback: 'I couldn\u2019t read any slides out of that .pptx file. Please re-export it from PowerPoint or Google Slides and try again.',
       markedBy: 'ai',
     };
+  }
+  const rubricRows = getRubric(q);
+  const rubricRowsTotal = rubricRows.reduce((a, r) => a + r.marks, 0);
+  const visualCappedTotal = Math.min(q.max_marks, rubricRowsTotal);
+  // Visual marking is opt-in per question (config.visualMarking === true).
+  // It renders every slide to a PNG via LibreOffice headless + pdftoppm and
+  // hands them to Gemini Vision so the model can judge layout, colour and
+  // images, not just the raw text. On any failure we silently fall through
+  // to the text-only path below so the pupil still gets a mark.
+  const wantVisual = !!(q.config && typeof q.config === 'object' && (q.config as any).visualMarking === true);
+  if (wantVisual) {
+    const visual = await markPresentationVisual(q, onDisk, summary, rubricRows, visualCappedTotal);
+    if (visual) return visual;
   }
   // Cap text per slide so very long decks still fit in the prompt.
   const trimSlide = (t: string, max = 600) => t.length > max ? t.slice(0, max) + '…' : t;
