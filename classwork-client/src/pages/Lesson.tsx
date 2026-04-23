@@ -1208,6 +1208,12 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
   const [videoUrl, setVideoUrl] = useState(cfg.video && typeof cfg.video.url === 'string' ? cfg.video.url : '');
   const [videoFileName, setVideoFileName] = useState('');
   const [videoUploading, setVideoUploading] = useState(false);
+  // Resources staged inside the New-question modal. Each entry is the same
+  // shape as a saved resource minus the id; once the question is created we
+  // POST each one to /api/classwork/questions/:newId/resources. In edit mode
+  // this state is unused — we mount the live <QuestionResources> panel for
+  // the existing question id instead.
+  const [pendingResources, setPendingResources] = useState<{ kind: LessonResource['kind']; title: string; url: string }[]>([]);
   // fill_in_blanks: each blank has an `id` (referenced from the prompt as
   // `{{id}}`) and a comma-separated list of accepted answers (case- and
   // whitespace-insensitive on the marker side).
@@ -1418,9 +1424,25 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           method: 'PATCH', body: JSON.stringify(body),
         });
       } else {
-        await api(`/api/classwork/lessons/${lessonId}/questions`, {
+        const created = await api<{ id: string }>(`/api/classwork/lessons/${lessonId}/questions`, {
           method: 'POST', body: JSON.stringify(body),
         });
+        // Flush any resources the teacher attached inside the modal before
+        // saving. Failures are surfaced but the question itself is already
+        // created, so we still close the modal and let them retry from the
+        // per-question resources panel on the lesson page.
+        if (created?.id && pendingResources.length > 0) {
+          for (const r of pendingResources) {
+            try {
+              await api(`/api/classwork/questions/${created.id}/resources`, {
+                method: 'POST',
+                body: JSON.stringify({ kind: r.kind, url: r.url, title: r.title || null }),
+              });
+            } catch (err) {
+              console.error('[classwork] failed to attach pending resource', err);
+            }
+          }
+        }
       }
       onCreated();
     } catch (e: any) {
@@ -1943,6 +1965,20 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             </div>
           </div>
         )}
+        <div style={{ marginTop: 8 }}>
+          <div style={{ ...fieldLabel, marginBottom: 4 }}>Resources for this question</div>
+          <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginBottom: 6 }}>
+            Attach images, documents, YouTube clips, links or embeds. Pupils see them above the answer area on this question only.
+          </div>
+          {isEdit ? (
+            <QuestionResources questionId={existing!.id} isTeacher={true} />
+          ) : (
+            <PendingResourcesEditor
+              items={pendingResources}
+              onChange={setPendingResources}
+            />
+          )}
+        </div>
         {type !== 'passage' && type !== 'info_only' && (
           <>
             <label style={fieldLabel}>Marking scheme (teacher view only)
@@ -2133,6 +2169,135 @@ function renderResource(r: LessonResource): React.ReactNode {
         Open: {title}
       </span>
     </a>
+  );
+}
+
+/* Lightweight resources editor used inside the New-question modal where the
+   question doesn't have an id yet. Mirrors the look of <QuestionResources>
+   but stages everything in local state; the parent modal POSTs each entry
+   to /api/classwork/questions/:newId/resources after the question is saved. */
+function PendingResourcesEditor({
+  items,
+  onChange,
+}: {
+  items: { kind: LessonResource['kind']; title: string; url: string }[];
+  onChange: (next: { kind: LessonResource['kind']; title: string; url: string }[]) => void;
+}) {
+  const [showForm, setShowForm] = useState(false);
+  const [kind, setKind] = useState<LessonResource['kind']>('image');
+  const [title, setTitle] = useState('');
+  const [url, setUrl] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function uploadFile(file: File) {
+    setBusy(true); setErr(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const teacherToken = (() => {
+        try { return localStorage.getItem('teacher_token') || localStorage.getItem('teacherToken') || ''; } catch { return ''; }
+      })();
+      const headers: Record<string, string> = {};
+      if (teacherToken) headers['x-teacher-password'] = teacherToken;
+      const r = await fetch('/api/classwork/teacher/upload/resource', { method: 'POST', headers, body: fd });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data?.error || 'Upload failed');
+      setUrl(data.url);
+      if (!title) setTitle(data.filename || file.name);
+    } catch (e: any) {
+      setErr(e.message || 'Upload failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function add() {
+    if (!url.trim()) { setErr('Please provide a URL or upload a file.'); return; }
+    onChange([...items, { kind, title: title.trim(), url: url.trim() }]);
+    setKind('image'); setTitle(''); setUrl(''); setErr(null); setShowForm(false);
+  }
+
+  function remove(idx: number) {
+    onChange(items.filter((_, i) => i !== idx));
+  }
+
+  return (
+    <div>
+      {items.length > 0 && (
+        <div style={{
+          display: 'flex', flexDirection: 'column', gap: 8,
+          padding: 10, background: '#f8fafc', border: '1px solid var(--cw-border)', borderRadius: 8,
+          marginBottom: 8,
+        }}>
+          {items.map((r, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+              <div style={{ flex: 1, minWidth: 0, fontSize: 13 }}>
+                <strong>{r.kind}</strong>{r.title ? ` — ${r.title}` : ''}
+                <div style={{ color: 'var(--cw-muted)', fontSize: 12, wordBreak: 'break-all' }}>{r.url}</div>
+              </div>
+              <button onClick={() => remove(i)} title="Remove"
+                style={{
+                  border: '1px solid var(--cw-border)', background: '#fff', borderRadius: 6,
+                  padding: '4px 8px', cursor: 'pointer', color: 'var(--cw-danger)', fontWeight: 700,
+                }}>×</button>
+            </div>
+          ))}
+          <div style={{ fontSize: 11, color: 'var(--cw-muted)' }}>These will be attached when you click <em>Save question</em>.</div>
+        </div>
+      )}
+      {!showForm ? (
+        <button type="button" onClick={() => setShowForm(true)} style={{
+          fontSize: 13, padding: '6px 10px', border: '1px dashed var(--cw-border)',
+          background: '#fff', borderRadius: 6, cursor: 'pointer', color: 'var(--cw-muted)',
+        }}>+ Add resource to this question</button>
+      ) : (
+        <div style={{ padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff' }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+            <select value={kind} onChange={(e) => { setKind(e.target.value as any); setUrl(''); }} style={input}>
+              <option value="image">Image (upload)</option>
+              <option value="document">Document (upload)</option>
+              <option value="youtube">YouTube link</option>
+              <option value="link">Web link</option>
+              <option value="embed">Embed (iframe URL)</option>
+            </select>
+            <input
+              placeholder="Title (optional)"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              style={{ ...input, flex: '1 1 200px' }}
+            />
+          </div>
+          {(kind === 'image' || kind === 'document') ? (
+            <div style={{ marginTop: 6 }}>
+              <input type="file"
+                accept={kind === 'image' ? 'image/*' : '.pdf,.docx,.pptx,.xlsx,.txt,.csv,.zip'}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f); }}
+              />
+              {url && <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>Uploaded: <code>{url}</code></div>}
+            </div>
+          ) : (
+            <input
+              placeholder={kind === 'youtube' ? 'https://www.youtube.com/watch?v=…' : 'https://…'}
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              style={{ ...input, marginTop: 6, width: '100%' }}
+            />
+          )}
+          {err && <div style={{ color: 'var(--cw-danger)', fontSize: 13, marginTop: 6 }}>{err}</div>}
+          <div style={{ marginTop: 8, display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+            <button type="button" onClick={() => { setShowForm(false); setErr(null); setUrl(''); setTitle(''); }}
+              style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', background: '#fff', cursor: 'pointer' }}>
+              Cancel
+            </button>
+            <button type="button" onClick={add} disabled={busy} style={{
+              padding: '6px 12px', borderRadius: 6, border: 'none',
+              background: 'var(--cw-accent)', color: '#fff', fontWeight: 600, cursor: 'pointer',
+            }}>{busy ? 'Uploading…' : 'Add'}</button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
