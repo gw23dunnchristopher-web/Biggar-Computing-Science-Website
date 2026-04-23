@@ -32,6 +32,10 @@ export default function Shell({ title, back, children }: Props) {
         <Link href="/" style={{ color: '#fff', fontWeight: 700, fontSize: 18, textDecoration: 'none' }}>
           BHS Classwork
         </Link>
+        <a href="/" style={{
+          color: '#fff', fontSize: 13, textDecoration: 'none',
+          background: 'rgba(255,255,255,0.18)', padding: '4px 10px', borderRadius: 999
+        }} title="Back to BHS Computing Science main site">← Main site</a>
         <div style={{ flex: 1, fontSize: 16, opacity: 0.9 }}>{title}</div>
         {role !== 'guest' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 14 }}>
