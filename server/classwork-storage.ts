@@ -28,6 +28,7 @@ export const CLASSWORK_QUESTION_TYPES = [
   'python_task',
   'html_task',
   'sql_task',
+  'database_task',
 ] as const;
 export type ClassworkQuestionType = (typeof CLASSWORK_QUESTION_TYPES)[number];
 

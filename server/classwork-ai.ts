@@ -25,7 +25,7 @@ import os from 'os';
 import { spawn } from 'child_process';
 import crypto from 'crypto';
 import { pool, hasDatabase } from './db';
-import { gradeSandboxSql } from './ds-routes';
+import { gradeSandboxSql, gradeDatabaseStructure } from './ds-routes';
 
 const gemini = process.env.GEMINI_API_KEY
   ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
@@ -89,6 +89,8 @@ export async function markSubmission(
         return await markCodeProject(q, s, 'html');
       case 'sql_task':
         return await markSqlTask(q, s);
+      case 'database_task':
+        return await markDatabaseTask(q, s);
       default:
         return null;
     }
@@ -934,6 +936,61 @@ async function markSqlTask(q: AIQuestion, s: AISubmission): Promise<AIMarkResult
     };
   } catch (err) {
     console.error('[classwork-ai] sql_task delegation failed:', err);
+    return null;
+  }
+}
+
+/* ---------- 12. Data Sculptor database design / population task ---------- */
+
+// The teacher attaches a Data Sculptor embed (its token is stored on the
+// question as config.embedToken). Pupils open the embed in a new tab — the
+// existing DS embed flow forks them a personal sandbox copy of the teacher's
+// template database, keyed by (token, sessionKey). When the pupil hits Submit
+// in classwork, the client passes back "<embedToken>|<sessionKey>" in
+// link_url so we can resolve their forked sandbox here and delegate the
+// marking to the SAME helper the DS embed uses (`/api/ds/grade-database`),
+// which marks each bullet of the task description and applies the schema
+// audit + cap. The numeric mark and feedback then flow back into classwork
+// analytics like any other AI-marked submission.
+async function markDatabaseTask(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {
+  if (!s.link_url || !hasDatabase) return null;
+  const [embedToken, sessionKey] = String(s.link_url).split('|');
+  if (!embedToken || !sessionKey) return null;
+  let sandboxDatabaseId: number | null = null;
+  try {
+    const r = await pool.query(
+      `SELECT sandbox_database_id FROM ds_student_sessions WHERE token = $1 AND session_key = $2`,
+      [embedToken, sessionKey],
+    );
+    if (r.rows[0]) sandboxDatabaseId = Number(r.rows[0].sandbox_database_id);
+  } catch (err) {
+    console.error('[classwork-ai] database_task session lookup failed:', err);
+    return null;
+  }
+  if (!sandboxDatabaseId) {
+    return {
+      marksAwarded: 0,
+      feedback: 'We couldn\u2019t find your database. Please open the database first, do your work in Data Sculptor, then come back and submit again.',
+      markedBy: 'ai',
+    };
+  }
+  const taskDescription = [
+    q.prompt,
+    q.marking_scheme ? `\nMarking scheme:\n${q.marking_scheme}` : '',
+    q.ai_grading_guidance ? `\nAdditional guidance:\n${q.ai_grading_guidance}` : '',
+  ].filter(Boolean).join('\n');
+  try {
+    const result = await gradeDatabaseStructure({
+      sandboxDatabaseId,
+      taskDescription,
+    });
+    return {
+      marksAwarded: result.mark ?? 0,
+      feedback: result.feedback || 'No feedback returned.',
+      markedBy: 'ai',
+    };
+  } catch (err) {
+    console.error('[classwork-ai] database_task delegation failed:', err);
     return null;
   }
 }

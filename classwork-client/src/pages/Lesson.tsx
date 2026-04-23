@@ -65,6 +65,7 @@ const TYPE_LABELS: Record<string, string> = {
   python_task: 'Python project (in-site editor)',
   html_task: 'HTML/CSS project (in-site editor)',
   sql_task: 'SQL task (Data Sculptor)',
+  database_task: 'Database task (Data Sculptor sandbox)',
 };
 
 export default function Lesson() {
@@ -288,6 +289,24 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
     const cfg = (question as any).config;
     return cfg && typeof cfg === 'object' && typeof cfg.databaseUrl === 'string' ? cfg.databaseUrl : '';
   })();
+  // database_task: the teacher pastes a Data Sculptor embed URL (or just the
+  // token). Pupils open it, get a forked sandbox via the standard DS embed
+  // flow, work in it, and on Submit we send "<token>|<sessionKey>" so the
+  // server can resolve their sandbox and call the DS structure grader.
+  const dbEmbedToken: string = (() => {
+    if (t !== 'database_task') return '';
+    const cfg = (question as any).config;
+    if (!cfg || typeof cfg !== 'object') return '';
+    if (typeof cfg.embedToken === 'string' && cfg.embedToken) return cfg.embedToken;
+    if (typeof cfg.embedUrl === 'string' && cfg.embedUrl) {
+      const m = cfg.embedUrl.match(/[?&]embed=([A-Za-z0-9_-]+)/);
+      return m ? m[1] : '';
+    }
+    return '';
+  })();
+  const dbEmbedUrl: string = dbEmbedToken
+    ? `/data-sculptor/?embed=${encodeURIComponent(dbEmbedToken)}`
+    : '';
 
   // Load the pupil's project list once, when this question is a code task.
   useEffect(() => {
@@ -378,6 +397,13 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
         const data = await r.json();
         body.textAnswer = String(data?.code ?? '');
         body.linkUrl = `${selectedProjectId}|${data?.name || ''}`;
+      } else if (t === 'database_task') {
+        // Resolve the pupil's DS embed sandbox from their session key
+        // (mirrored to localStorage by the embed app on the same origin).
+        if (!dbEmbedToken) throw new Error('This task is missing its database link. Ask your teacher to add one.');
+        const sessionKey = localStorage.getItem('student_session_key');
+        if (!sessionKey) throw new Error('Please open the database first, do your work, then come back and submit.');
+        body.linkUrl = `${dbEmbedToken}|${sessionKey}`;
       } else body.textAnswer = text; // short / long / code / video_question / sql_task
       const result = await api<Submission>(`/api/classwork/questions/${question.id}/submit`, {
         method: 'POST', body: JSON.stringify(body),
@@ -403,6 +429,7 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
     t === 'project' ? !!(fileUrl || url) :
     ['scratch_link', 'makecode_link', 'google_sites_link'].includes(t) ? !!url :
     codeProjectKind ? !!selectedProjectId :
+    t === 'database_task' ? !!dbEmbedToken :
     !!text.trim();
   return (
     <div style={{ marginTop: 12, padding: 12, border: '1px dashed var(--cw-border)', borderRadius: 8, background: '#fafbfd' }}>
@@ -472,6 +499,24 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
                   style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--cw-border)', background: '#fff', color: 'var(--cw-ink)', textDecoration: 'none', fontSize: 13 }}
                 >Open in editor</a>
               )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {t === 'database_task' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
+            {dbEmbedUrl
+              ? 'Open the database in Data Sculptor and complete the task in there. When you\u2019re done, come back to this page and click Submit \u2014 the AI will mark the database you built.'
+              : 'This task is missing a database link. Ask your teacher to add one.'}
+          </div>
+          {dbEmbedUrl && (
+            <div>
+              <a
+                href={dbEmbedUrl} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-block', padding: '8px 12px', borderRadius: 8, background: 'var(--cw-accent)', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
+              >Open the database</a>
             </div>
           )}
         </div>
@@ -770,6 +815,7 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
   const [useRubric, setUseRubric] = useState(false);
   const [visualMarking, setVisualMarking] = useState(false);
   const [sqlDatabaseUrl, setSqlDatabaseUrl] = useState('');
+  const [dbEmbedInput, setDbEmbedInput] = useState('');
   const [isExtension, setIsExtension] = useState(false);
   const [videoKind, setVideoKind] = useState<'youtube' | 'mp4'>('youtube');
   const [videoUrl, setVideoUrl] = useState('');
@@ -841,6 +887,19 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
       if (type === 'sql_task' && sqlDatabaseUrl.trim()) {
         body.config = { databaseUrl: sqlDatabaseUrl.trim() };
       }
+      if (type === 'database_task') {
+        const raw = dbEmbedInput.trim();
+        if (!raw) throw new Error('Please paste a Data Sculptor embed link or token.');
+        // Accept either a full embed URL ("…/data-sculptor/?embed=TOKEN") or
+        // just the bare token. Reject anything that doesn't look like one.
+        let token = raw;
+        const m = raw.match(/[?&]embed=([A-Za-z0-9_-]+)/);
+        if (m) token = m[1];
+        if (!/^[A-Za-z0-9_-]{8,}$/.test(token)) {
+          throw new Error('That doesn\u2019t look like a Data Sculptor embed link or token.');
+        }
+        body.config = { embedToken: token, embedUrl: raw };
+      }
       if (type === 'video_question') {
         if (!videoUrl.trim()) {
           throw new Error(videoKind === 'youtube'
@@ -908,6 +967,29 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
               style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}>
               + Add option
             </button>
+          </div>
+        )}
+        {type === 'database_task' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontSize: 13, color: 'var(--cw-muted)', marginBottom: 6 }}>
+              Pupils open a Data Sculptor sandbox and either design or populate a database in
+              there. Each pupil gets their own forked copy of the database you paste below. Paste
+              the embed link from Data Sculptor — pupils click "Open the database", do the work,
+              then come back and click Submit. The same AI grader the DS embed uses will mark
+              their work against your task description (one mark per bullet point).
+            </div>
+            <input
+              type="text"
+              placeholder="https://www.bhs-computing.co.uk/data-sculptor/?embed=…  (or just the token)"
+              value={dbEmbedInput}
+              onChange={(e) => setDbEmbedInput(e.target.value)}
+              style={input}
+            />
+            <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
+              Tip: write your task instructions as a bullet-pointed list in the Question field
+              above and (optionally) a data dictionary in the marking scheme — that's what gives
+              the AI marker its rubric.
+            </div>
           </div>
         )}
         {type === 'sql_task' && (

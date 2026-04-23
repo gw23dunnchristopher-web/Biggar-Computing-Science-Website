@@ -51,11 +51,18 @@ interface EmbedSnapshot {
 type ActiveView = 'datasheet' | 'design' | 'sql' | 'form' | 'report' | 'relationships' | 'query';
 
 function getOrCreateSessionKey(): string {
-  let key = sessionStorage.getItem(SESSION_KEY_STORAGE);
+  // Read from sessionStorage first (per-tab), falling back to localStorage so
+  // the same pupil keeps the same DS sandbox across new tabs / restarts.
+  // We also mirror the key into localStorage so other apps on the same origin
+  // (notably BHS Classwork) can resolve which forked sandbox belongs to this
+  // pupil and pass it to the AI graders.
+  let key = sessionStorage.getItem(SESSION_KEY_STORAGE)
+    || localStorage.getItem(SESSION_KEY_STORAGE);
   if (!key) {
     key = crypto.randomUUID();
-    sessionStorage.setItem(SESSION_KEY_STORAGE, key);
   }
+  sessionStorage.setItem(SESSION_KEY_STORAGE, key);
+  try { localStorage.setItem(SESSION_KEY_STORAGE, key); } catch { /* private mode etc. */ }
   return key;
 }
 
