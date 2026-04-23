@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRoute } from 'wouter';
 import Shell from '@/components/Shell';
+import PromptText from '@/components/PromptText';
 import { api, getCurrentRole } from '@/lib/api';
 
 interface LessonInfo {
@@ -191,7 +192,7 @@ export default function Lesson() {
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>{q.max_marks} mark{q.max_marks === 1 ? '' : 's'}</div>
               </div>
-              <p style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}>{q.prompt}</p>
+              <p style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}><PromptText text={q.prompt} /></p>
 
               {q.question_type === 'video_question' && <VideoQuestionPlayer config={q.config} />}
 
@@ -949,6 +950,10 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
         </label>
         <label style={fieldLabel}>Question / prompt
           <textarea rows={3} value={prompt} onChange={(e) => setPrompt(e.target.value)} style={input} />
+          <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
+            Tip: paste a URL (e.g. https://bbc.co.uk/bitesize) and it will appear as a clickable link that opens in a new window.
+            For a friendlier label, write <code>[Bitesize lesson](https://bbc.co.uk/bitesize)</code>.
+          </span>
         </label>
         <label style={fieldLabel}>Max marks
           <input type="number" min={1} value={maxMarks} onChange={(e) => setMaxMarks(parseInt(e.target.value) || 1)} style={input} />
