@@ -114,6 +114,10 @@ export function ensureClassworkSchema(): Promise<void> {
       // Idempotent and safe to run on every boot. Existing rows get NULL until
       // a teacher tags them with a year via the Classwork students page.
       await client.query(`ALTER TABLE IF EXISTS n5_classes ADD COLUMN IF NOT EXISTS course VARCHAR(16);`);
+      // Archive flag: lets teachers hide last year's classes without deleting
+      // them (so all the pupils' work stays intact for reference). Idempotent.
+      await client.query(`ALTER TABLE IF EXISTS n5_classes  ADD COLUMN IF NOT EXISTS is_archived BOOLEAN NOT NULL DEFAULT FALSE;`);
+      await client.query(`ALTER TABLE IF EXISTS bhs_classes ADD COLUMN IF NOT EXISTS is_archived BOOLEAN NOT NULL DEFAULT FALSE;`);
     } finally {
       client.release();
     }
@@ -137,13 +141,19 @@ export async function listClassesWithCourse() {
   // If the same id exists in both tables (legacy/migrated rows), prefer the
   // n5 row — that's where the pupils for it actually live in this codebase.
   const r = await pool.query(
-    `SELECT id, name, course, 'bhs'::text AS source FROM bhs_classes b
+    `SELECT id, name, course, is_archived, 'bhs'::text AS source FROM bhs_classes b
         WHERE NOT EXISTS (SELECT 1 FROM n5_classes n WHERE n.id = b.id)
      UNION ALL
-     SELECT id, name, course, 'n5'::text  AS source FROM n5_classes
+     SELECT id, name, course, is_archived, 'n5'::text  AS source FROM n5_classes
      ORDER BY course NULLS LAST, name ASC`
   );
-  return r.rows as { id: string; name: string; course: string | null; source: ClassSource }[];
+  return r.rows.map((row: any) => ({
+    id: row.id,
+    name: row.name,
+    course: row.course,
+    source: row.source as ClassSource,
+    archived: !!row.is_archived,
+  }));
 }
 
 export async function getClassSource(classId: string): Promise<ClassSource | null> {
@@ -171,14 +181,15 @@ export async function getStudentSource(studentId: string): Promise<ClassSource |
   return (r.rows[0]?.src as ClassSource) ?? null;
 }
 
-export async function setClassFields(classId: string, fields: { name?: string; course?: string | null }) {
+export async function setClassFields(classId: string, fields: { name?: string; course?: string | null; archived?: boolean }) {
   const src = await getClassSource(classId);
   if (!src) return;
   const sets: string[] = [];
   const vals: any[] = [];
   let i = 1;
-  if (fields.name !== undefined)   { sets.push(`name = $${i++}`); vals.push(fields.name); }
-  if (fields.course !== undefined) { sets.push(`course = $${i++}`); vals.push(fields.course); }
+  if (fields.name !== undefined)     { sets.push(`name = $${i++}`);        vals.push(fields.name); }
+  if (fields.course !== undefined)   { sets.push(`course = $${i++}`);      vals.push(fields.course); }
+  if (fields.archived !== undefined) { sets.push(`is_archived = $${i++}`); vals.push(fields.archived); }
   if (sets.length === 0) return;
   vals.push(classId);
   await pool.query(`UPDATE ${classTbl(src)} SET ${sets.join(', ')} WHERE id = $${i}`, vals);

@@ -3,7 +3,7 @@ import Shell from '@/components/Shell';
 import Modal, { modalPrimaryBtn, modalSecondaryBtn, modalDangerBtn, modalLabel, modalInput } from '@/components/Modal';
 import { api, getCurrentRole } from '@/lib/api';
 
-interface ClassRow { id: string; name: string; course: string | null; }
+interface ClassRow { id: string; name: string; course: string | null; archived?: boolean; }
 interface StudentRow { id: string; username: string; classId: string; initialPassword: string | null; mustChangePassword: boolean; }
 
 const YEAR_OPTIONS: { value: string; label: string; short: string }[] = [
@@ -158,6 +158,20 @@ export default function Students() {
     } catch (e: any) { setModalErr(e.message); }
   }
 
+  async function toggleArchiveClass(c: ClassRow) {
+    try {
+      await api(`/api/classwork/teacher/classes/${c.id}`, {
+        method: 'PATCH', body: JSON.stringify({ archived: !c.archived }),
+      });
+      // If we just archived the currently-selected class, clear the right pane
+      // so the teacher isn't staring at pupils from a class they can't see.
+      if (!c.archived && selectedId === c.id) { setSelectedId(null); setStudents([]); }
+      loadClasses();
+    } catch (e: any) {
+      setModal({ kind: 'info', title: 'Archive failed', message: e.message });
+    }
+  }
+
   async function confirmDeleteClass(c: ClassRow) {
     try {
       await api(`/api/classwork/teacher/classes/${c.id}`, { method: 'DELETE' });
@@ -248,11 +262,9 @@ export default function Students() {
           <div style={card}>
             <h3 style={{ marginTop: 0 }}>Classes</h3>
             {(() => {
-              // Group classes by year, ordered Higher → N5 → N4 → S3 → S2 → S1,
-              // with any classes that don't have a year set falling to the bottom.
-              // Each group is a collapsible <details> that starts collapsed so the
-              // page isn't a wall of class names — the teacher opens just the year
-              // they care about.
+              // Render a year-grouped, collapsible list for the given set of
+              // classes. Used twice — once for active classes, once for the
+              // archived ones. All groups start collapsed.
               const groupOrder: { key: string; label: string }[] = [
                 { key: 'higher', label: 'Higher' },
                 { key: 'n5',     label: 'National 5' },
@@ -262,72 +274,110 @@ export default function Students() {
                 { key: 's1',     label: 'S1' },
                 { key: '__none', label: 'No year set' },
               ];
-              const groups = new Map<string, ClassRow[]>();
-              for (const c of classes) {
-                const k = c.course || '__none';
-                if (!groups.has(k)) groups.set(k, []);
-                groups.get(k)!.push(c);
-              }
+              const renderClassRow = (c: ClassRow) => {
+                const isSel = selectedId === c.id;
+                return (
+                  <li key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <button
+                      onClick={() => { setSelectedId(c.id); setLastCreated([]); }}
+                      style={{
+                        flex: 1, textAlign: 'left', minWidth: 0,
+                        background: isSel ? 'var(--cw-accent)' : '#f1f5f9',
+                        color: isSel ? '#fff' : 'var(--cw-ink)',
+                        border: '1px solid var(--cw-border)', borderRadius: 6,
+                        padding: '8px 10px', cursor: 'pointer', fontWeight: 600,
+                        opacity: c.archived ? 0.7 : 1,
+                      }}
+                    >
+                      <span style={{
+                        display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>{c.name}</span>
+                    </button>
+                    <button
+                      onClick={() => openEditYear(c)}
+                      title={c.course ? `Year: ${yearLabel(c.course)} — click to change` : 'Set year'}
+                      style={{
+                        fontSize: 11, fontWeight: 700, padding: '4px 8px', borderRadius: 999,
+                        whiteSpace: 'nowrap', cursor: 'pointer', minWidth: 44, textAlign: 'center',
+                        background: c.course ? '#dbeafe' : '#fee2e2',
+                        color: c.course ? '#1e3a8a' : '#991b1b',
+                        border: c.course ? '1px solid #bfdbfe' : '1px solid #fecaca',
+                      }}
+                    >{yearShort(c.course)}</button>
+                    <button
+                      onClick={() => toggleArchiveClass(c)}
+                      title={c.archived ? 'Unarchive — bring this class back into the active list' : 'Archive — hide this class without deleting it'}
+                      style={{ ...secondaryBtn, padding: '4px 8px', fontSize: 12 }}
+                    >{c.archived ? 'Unarchive' : 'Archive'}</button>
+                    <button onClick={() => setModal({ kind: 'deleteClass', cls: c })} style={dangerBtn} title="Delete class">×</button>
+                  </li>
+                );
+              };
+              const renderGroupedList = (rows: ClassRow[]) => {
+                const groups = new Map<string, ClassRow[]>();
+                for (const c of rows) {
+                  const k = c.course || '__none';
+                  if (!groups.has(k)) groups.set(k, []);
+                  groups.get(k)!.push(c);
+                }
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {groupOrder.map((g) => {
+                      const items = groups.get(g.key);
+                      if (!items || items.length === 0) return null;
+                      return (
+                        <details key={g.key} style={{
+                          border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff',
+                        }}>
+                          <summary style={{
+                            cursor: 'pointer', padding: '8px 10px', fontWeight: 700,
+                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                            listStyle: 'revert',
+                          }}>
+                            <span>{g.label}</span>
+                            <span style={{ fontSize: 12, color: 'var(--cw-muted)', fontWeight: 600 }}>
+                              {items.length}
+                            </span>
+                          </summary>
+                          <ul style={{
+                            listStyle: 'none', padding: '6px 8px 8px', margin: 0,
+                            display: 'flex', flexDirection: 'column', gap: 6,
+                          }}>
+                            {items.map(renderClassRow)}
+                          </ul>
+                        </details>
+                      );
+                    })}
+                  </div>
+                );
+              };
+
+              const active   = classes.filter((c) => !c.archived);
+              const archived = classes.filter((c) =>  c.archived);
+
               return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {groupOrder.map((g) => {
-                    const items = groups.get(g.key);
-                    if (!items || items.length === 0) return null;
-                    return (
-                      <details key={g.key} style={{
-                        border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff',
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {active.length === 0
+                    ? <p style={{ color: 'var(--cw-muted)', margin: 0, fontSize: 13 }}>No active classes.</p>
+                    : renderGroupedList(active)}
+                  {archived.length > 0 && (
+                    <details style={{
+                      border: '1px dashed var(--cw-border)', borderRadius: 8,
+                      background: '#f8fafc', padding: '4px 6px',
+                    }}>
+                      <summary style={{
+                        cursor: 'pointer', padding: '6px 6px', fontWeight: 700,
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        color: 'var(--cw-muted)', listStyle: 'revert',
                       }}>
-                        <summary style={{
-                          cursor: 'pointer', padding: '8px 10px', fontWeight: 700,
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          listStyle: 'revert', // keep the native disclosure triangle
-                        }}>
-                          <span>{g.label}</span>
-                          <span style={{ fontSize: 12, color: 'var(--cw-muted)', fontWeight: 600 }}>
-                            {items.length}
-                          </span>
-                        </summary>
-                        <ul style={{
-                          listStyle: 'none', padding: '6px 8px 8px', margin: 0,
-                          display: 'flex', flexDirection: 'column', gap: 6,
-                        }}>
-                          {items.map((c) => {
-                            const isSel = selectedId === c.id;
-                            return (
-                              <li key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <button
-                                  onClick={() => { setSelectedId(c.id); setLastCreated([]); }}
-                                  style={{
-                                    flex: 1, textAlign: 'left', minWidth: 0,
-                                    background: isSel ? 'var(--cw-accent)' : '#f1f5f9',
-                                    color: isSel ? '#fff' : 'var(--cw-ink)',
-                                    border: '1px solid var(--cw-border)', borderRadius: 6,
-                                    padding: '8px 10px', cursor: 'pointer', fontWeight: 600,
-                                  }}
-                                >
-                                  <span style={{
-                                    display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                                  }}>{c.name}</span>
-                                </button>
-                                <button
-                                  onClick={() => openEditYear(c)}
-                                  title={c.course ? `Year: ${yearLabel(c.course)} — click to change` : 'Set year'}
-                                  style={{
-                                    fontSize: 11, fontWeight: 700, padding: '4px 8px', borderRadius: 999,
-                                    whiteSpace: 'nowrap', cursor: 'pointer', minWidth: 44, textAlign: 'center',
-                                    background: c.course ? '#dbeafe' : '#fee2e2',
-                                    color: c.course ? '#1e3a8a' : '#991b1b',
-                                    border: c.course ? '1px solid #bfdbfe' : '1px solid #fecaca',
-                                  }}
-                                >{yearShort(c.course)}</button>
-                                <button onClick={() => setModal({ kind: 'deleteClass', cls: c })} style={dangerBtn} title="Delete class">×</button>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </details>
-                    );
-                  })}
+                        <span>Archived</span>
+                        <span style={{ fontSize: 12, fontWeight: 600 }}>{archived.length}</span>
+                      </summary>
+                      <div style={{ padding: '6px 2px 2px' }}>
+                        {renderGroupedList(archived)}
+                      </div>
+                    </details>
+                  )}
                 </div>
               );
             })()}

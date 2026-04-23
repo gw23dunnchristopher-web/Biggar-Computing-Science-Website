@@ -615,13 +615,16 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
 
   app.patch('/api/classwork/teacher/classes/:id', requireTeacher, async (req, res) => {
     try {
-      const fields: { name?: string; course?: string | null } = {};
+      const fields: { name?: string; course?: string | null; archived?: boolean } = {};
       if (typeof req.body?.name === 'string') fields.name = req.body.name.trim();
       if ('course' in (req.body || {})) {
         const c = req.body.course;
         if (c === null || c === '') fields.course = null;
         else if (typeof c === 'string' && isClassworkCourse(c)) fields.course = c;
         else return res.status(400).json({ error: 'Invalid year' });
+      }
+      if ('archived' in (req.body || {})) {
+        fields.archived = !!req.body.archived;
       }
       await setClassFields(req.params.id, fields);
       res.json({ ok: true });
