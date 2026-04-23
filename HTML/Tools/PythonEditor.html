@@ -108,7 +108,32 @@
                 max-height: none !important;
                 resize: none !important;
             }
+            /* Embed mode: when loaded inside an iframe (e.g. from BHS Classwork)
+               with ?embed=1, hide all the site chrome and let the editor fill
+               the iframe viewport. */
+            body.embed-mode { margin: 0 !important; padding: 0 !important; overflow: hidden !important; background: #fff; }
+            body.embed-mode header,
+            body.embed-mode footer,
+            body.embed-mode #sidebar,
+            body.embed-mode .toggle-btn,
+            body.embed-mode #mainHeading,
+            body.embed-mode .tool-header { display: none !important; }
+            body.embed-mode #mainContent { padding: 0 !important; margin: 0 !important; }
+            body.embed-mode #pageContainer { height: 100vh !important; min-height: 100vh !important; padding: 0 !important; margin: 0 !important; }
+            body.embed-mode #content { padding: 0 !important; height: 100vh !important; }
         </style>
+        <script>
+            (function () {
+                try {
+                    if (new URLSearchParams(window.location.search).get('embed') === '1') {
+                        document.documentElement.classList.add('embed-mode');
+                        document.addEventListener('DOMContentLoaded', function () {
+                            document.body.classList.add('embed-mode');
+                        });
+                    }
+                } catch (_) { /* ignore */ }
+            })();
+        </script>
     </head>
     <body onload="loadSidebar(getSidebarForLevel(), 'sidebar')">
         <div id="loading"></div>

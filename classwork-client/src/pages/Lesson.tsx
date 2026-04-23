@@ -308,25 +308,48 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
     ? `/data-sculptor/?embed=${encodeURIComponent(dbEmbedToken)}`
     : '';
 
-  // Load the pupil's project list once, when this question is a code task.
+  // For python_task / html_task we now embed the editor itself inline as a
+  // sandbox (mirroring the Data Sculptor flow). The first time a pupil opens
+  // the question we look for the per-question project — identified by a name
+  // starting with the marker `[CW q<questionId>]` — and create it if it
+  // doesn't exist. selectedProjectId then drives both the iframe src and the
+  // existing submit() path (which already pulls the latest code from
+  // /api/code-projects/<kind>/<id>).
+  const cwProjectMarker = `[CW q${question.id.slice(0, 8)}]`;
+  const cwProjectName = `${cwProjectMarker} ${(question.prompt || 'classwork task').slice(0, 60)}`;
   useEffect(() => {
     if (!codeProjectKind || preview) return;
     let cancelled = false;
     (async () => {
+      const token = localStorage.getItem('studentToken') || '';
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
       try {
-        const token = localStorage.getItem('studentToken') || '';
-        const r = await fetch(`/api/code-projects/${codeProjectKind}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        });
+        const r = await fetch(`/api/code-projects/${codeProjectKind}`, { headers });
         if (!r.ok) { if (!cancelled) setCodeProjects([]); return; }
         const data = await r.json();
-        if (!cancelled) setCodeProjects(Array.isArray(data) ? data : []);
+        const list: { id: string; name: string; updatedAt: number | null }[] = Array.isArray(data) ? data : [];
+        let mine = list.find((p) => typeof p.name === 'string' && p.name.startsWith(cwProjectMarker));
+        if (!mine) {
+          const cr = await fetch(`/api/code-projects/${codeProjectKind}`, {
+            method: 'POST',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: cwProjectName, code: '' }),
+          });
+          if (cr.ok) {
+            const created = await cr.json();
+            mine = { id: created.id, name: created.name, updatedAt: created.updatedAt ?? null };
+            list.unshift(mine);
+          }
+        }
+        if (cancelled) return;
+        setCodeProjects(list);
+        if (mine) setSelectedProjectId(mine.id);
       } catch {
         if (!cancelled) setCodeProjects([]);
       }
     })();
     return () => { cancelled = true; };
-  }, [codeProjectKind, preview]);
+  }, [codeProjectKind, preview, question.id]);
   const uploadKind: 'screenshot' | 'project' | null =
     t === 'screenshot' ? 'screenshot'
       : t === 'project' || t === 'presentation' ? 'project'
@@ -465,41 +488,32 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
       {codeProjectKind && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
-            Pick one of your saved {codeProjectKind === 'python' ? 'Python' : 'HTML/CSS'} projects.
-            The code you've saved will be sent for marking.
+            Write and run your {codeProjectKind === 'python' ? 'Python' : 'HTML/CSS'} below.
+            Your work is auto-saved to your account. When you're done, click Submit and the AI
+            will mark your latest saved code.
           </div>
-          {codeProjects === null ? (
-            <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>Loading your projects…</div>
-          ) : codeProjects.length === 0 ? (
-            <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
-              You don't have any {codeProjectKind === 'python' ? 'Python' : 'HTML/CSS'} projects yet.{' '}
-              <a href={codeProjectKind === 'python' ? '/HTML/Tools/PythonEditor.html' : '/HTML/Tools/HTMLEditor.html'} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--cw-accent)' }}>
-                Open the editor
-              </a>{' '}
-              to create one, then come back and refresh.
-            </div>
+          {codeProjects === null || !selectedProjectId ? (
+            <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>Loading your editor…</div>
           ) : (
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-              <select
-                value={selectedProjectId}
-                onChange={(e) => setSelectedProjectId(e.target.value)}
-                style={{ flex: 1, minWidth: 200, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--cw-border)', background: '#fff' }}
-              >
-                <option value="">— choose a project —</option>
-                {codeProjects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}{p.updatedAt ? ` · saved ${new Date(p.updatedAt).toLocaleDateString()}` : ''}
-                  </option>
-                ))}
-              </select>
-              {selectedProjectId && (
+            <>
+              <div style={{ width: '100%', height: 560, border: '1px solid var(--cw-border)', borderRadius: 8, overflow: 'hidden', background: '#fff' }}>
+                <iframe
+                  src={`${editorHref(selectedProjectId)}&embed=1`}
+                  title={`${codeProjectKind === 'python' ? 'Python' : 'HTML/CSS'} editor`}
+                  style={{ width: '100%', height: '100%', border: 0, display: 'block' }}
+                  allow="clipboard-read; clipboard-write"
+                />
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+                Need more space?{' '}
                 <a
                   href={editorHref(selectedProjectId)}
                   target="_blank" rel="noopener noreferrer"
-                  style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid var(--cw-border)', background: '#fff', color: 'var(--cw-ink)', textDecoration: 'none', fontSize: 13 }}
-                >Open in editor</a>
-              )}
-            </div>
+                  style={{ color: 'var(--cw-accent)' }}
+                >Open this project in a full editor tab</a>
+                . Your saves sync both ways.
+              </div>
+            </>
           )}
         </div>
       )}
