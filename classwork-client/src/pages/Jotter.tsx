@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
 import { api, getCurrentRole } from '@/lib/api';
+import { sanitizeHtml, plainTextToHtml, looksLikeHtml } from '@/lib/sanitizeHtml';
 
 interface UnitNotes {
   unitId: string;
@@ -51,6 +52,13 @@ export default function JotterPage() {
           body { background: #fff !important; }
           .cw-jotter-card { break-inside: avoid; box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
         }
+        .cw-jotter-body h2 { font-size: 22px; margin: 12px 0 6px; }
+        .cw-jotter-body h3 { font-size: 18px; margin: 10px 0 6px; }
+        .cw-jotter-body h4 { font-size: 16px; margin: 10px 0 6px; }
+        .cw-jotter-body p  { margin: 6px 0; }
+        .cw-jotter-body ul, .cw-jotter-body ol { padding-left: 24px; margin: 6px 0; }
+        .cw-jotter-body blockquote { margin: 8px 0; padding: 4px 12px; border-left: 3px solid #cbd5e1; color: #475569; }
+        .cw-jotter-body a { color: var(--cw-accent); text-decoration: underline; }
       `}</style>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
@@ -103,12 +111,16 @@ export default function JotterPage() {
                 </span>
               )}
             </div>
-            <div style={{
-              marginTop: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-              fontFamily: 'inherit', fontSize: 15, lineHeight: 1.6, color: 'var(--cw-ink)',
-            }}>
-              {u.content}
-            </div>
+            <div
+              className="cw-jotter-body"
+              style={{
+                marginTop: 12, wordBreak: 'break-word',
+                fontFamily: 'inherit', fontSize: 15, lineHeight: 1.6, color: 'var(--cw-ink)',
+              }}
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(looksLikeHtml(u.content) ? u.content : plainTextToHtml(u.content)),
+              }}
+            />
           </div>
         ))}
       </div>

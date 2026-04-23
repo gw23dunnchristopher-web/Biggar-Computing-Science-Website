@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
+import RichTextEditor from '@/components/RichTextEditor';
 import Modal, { modalPrimaryBtn, modalSecondaryBtn, modalDangerBtn, modalLabel, modalInput } from '@/components/Modal';
 import { api, getCurrentRole } from '@/lib/api';
 
@@ -660,15 +661,16 @@ export default function Course() {
         ) : (
           <>
             <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--cw-muted)' }}>
-              Your private notes for this unit. Only you can see these — your teacher can’t.
-              Your notes save automatically as you type.
+              Your notes for this unit. Use the toolbar to add headings, bold, lists and links.
+              Your notes save automatically as you type. Your teacher can see your compiled jotter.
             </p>
-            <textarea
+            <RichTextEditor
               autoFocus
               value={notesContent}
-              onChange={(e) => setNotesContent(e.target.value)}
+              onChange={setNotesContent}
               placeholder={'Jot anything you want to remember about this unit\u2014 definitions, examples, questions to ask your teacher, exam tips, etc.'}
-              style={{ ...modalInput, minHeight: 320, fontFamily: 'inherit', resize: 'vertical', lineHeight: 1.5 }}
+              minHeight={320}
+              ariaLabel="Unit notes"
             />
           </>
         )}

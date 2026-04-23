@@ -956,14 +956,33 @@ export async function getUnitNotes(unitId: string, studentId: string): Promise<{
   };
 }
 
+// Server-side defence in depth: strip the obviously dangerous bits before
+// persisting (script tags, on*= handlers, javascript:/vbscript:/data: URLs,
+// inline style/onclick attributes). The client also sanitises on render with
+// a strict whitelist, so this is belt-and-braces, not the only line of
+// defence. We deliberately don't try to fully parse HTML on the server.
+function scrubNotesHtml(input: string): string {
+  if (!input) return '';
+  let s = input;
+  s = s.replace(/<\s*script\b[\s\S]*?<\s*\/\s*script\s*>/gi, '');
+  s = s.replace(/<\s*style\b[\s\S]*?<\s*\/\s*style\s*>/gi, '');
+  s = s.replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, '');
+  s = s.replace(/\son[a-z]+\s*=\s*'[^']*'/gi, '');
+  s = s.replace(/\son[a-z]+\s*=\s*[^\s>]+/gi, '');
+  s = s.replace(/(href|src)\s*=\s*"\s*(?:javascript|vbscript|data):[^"]*"/gi, '$1="#"');
+  s = s.replace(/(href|src)\s*=\s*'\s*(?:javascript|vbscript|data):[^']*'/gi, "$1='#'");
+  return s;
+}
+
 export async function saveUnitNotes(unitId: string, studentId: string, content: string): Promise<{ content: string; updatedAt: number }> {
   await ensureClassworkSchema();
+  const safe = scrubNotesHtml(content);
   const r = await pool.query(
     `INSERT INTO bhs_classwork_unit_notes (unit_id, student_id, content, updated_at)
      VALUES ($1, $2, $3, NOW())
      ON CONFLICT (unit_id, student_id) DO UPDATE SET content = EXCLUDED.content, updated_at = NOW()
      RETURNING content, updated_at`,
-    [unitId, studentId, content]
+    [unitId, studentId, safe]
   );
   return {
     content: r.rows[0].content || '',
