@@ -2,8 +2,20 @@ import { useEffect, useState } from 'react';
 import Shell from '@/components/Shell';
 import { api, getCurrentRole } from '@/lib/api';
 
-interface ClassRow { id: string; name: string; }
+interface ClassRow { id: string; name: string; course: string | null; }
 interface StudentRow { id: string; username: string; classId: string; initialPassword: string | null; mustChangePassword: boolean; }
+
+const YEAR_OPTIONS: { value: string; label: string }[] = [
+  { value: 's1', label: 'S1' },
+  { value: 's2', label: 'S2' },
+  { value: 's3', label: 'S3' },
+  { value: 'n5', label: 'National 5' },
+  { value: 'higher', label: 'Higher' },
+];
+function yearLabel(course: string | null): string {
+  if (!course) return 'No year set';
+  return YEAR_OPTIONS.find((y) => y.value === course)?.label || course;
+}
 
 export default function Students() {
   const role = getCurrentRole();
@@ -41,15 +53,53 @@ export default function Students() {
   useEffect(() => { if (selectedId) loadStudents(selectedId); }, [selectedId]);
 
   async function addClass() {
-    const name = prompt('Class name? (e.g. "S1 Mr Dunn 1A")');
+    const name = prompt('Class name? (e.g. "Mr Dunn 1A")');
     if (!name || !name.trim()) return;
+    const yearAns = prompt('Year? Type one of: s1, s2, s3, n5, higher');
+    const course = (yearAns || '').trim().toLowerCase();
+    if (course && !YEAR_OPTIONS.some((y) => y.value === course)) {
+      alert('Year must be s1, s2, s3, n5 or higher.');
+      return;
+    }
     try {
       const c = await api<ClassRow>('/api/classwork/teacher/classes', {
-        method: 'POST', body: JSON.stringify({ name: name.trim() }),
+        method: 'POST', body: JSON.stringify({ name: name.trim(), course: course || null }),
       });
       await loadClasses();
       setSelectedId(c.id);
       setLastCreated([]);
+    } catch (e: any) { alert(e.message); }
+  }
+
+  async function changeYear(c: ClassRow) {
+    const ans = prompt(`Year for "${c.name}"? Type one of: s1, s2, s3, n5, higher (or leave blank for none)`, c.course || '');
+    if (ans === null) return;
+    const course = ans.trim().toLowerCase();
+    if (course && !YEAR_OPTIONS.some((y) => y.value === course)) {
+      alert('Year must be s1, s2, s3, n5 or higher.');
+      return;
+    }
+    try {
+      await api(`/api/classwork/teacher/classes/${c.id}`, {
+        method: 'PATCH', body: JSON.stringify({ course: course || null }),
+      });
+      loadClasses();
+    } catch (e: any) { alert(e.message); }
+  }
+
+  async function moveStudent(s: StudentRow) {
+    const choices = classes.filter((c) => c.id !== s.classId);
+    if (!choices.length) { alert('No other classes to move them to. Create another class first.'); return; }
+    const list = choices.map((c, i) => `${i + 1}. ${c.name}${c.course ? ' (' + yearLabel(c.course) + ')' : ''}`).join('\n');
+    const ans = prompt(`Move ${s.username} to which class?\n\n${list}\n\nType the number:`);
+    const idx = parseInt((ans || '').trim(), 10) - 1;
+    if (isNaN(idx) || idx < 0 || idx >= choices.length) return;
+    const target = choices[idx];
+    try {
+      await api(`/api/classwork/teacher/students/${s.id}`, {
+        method: 'PATCH', body: JSON.stringify({ classId: target.id }),
+      });
+      if (selectedId) loadStudents(selectedId);
     } catch (e: any) { alert(e.message); }
   }
 
@@ -149,8 +199,17 @@ export default function Students() {
                       color: selectedId === c.id ? '#fff' : 'var(--cw-ink)',
                       border: '1px solid var(--cw-border)', borderRadius: 6,
                       padding: '8px 10px', cursor: 'pointer', fontWeight: 600,
+                      display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6,
                     }}
-                  >{c.name}</button>
+                  >
+                    <span>{c.name}</span>
+                    <span style={{
+                      fontSize: 11, padding: '1px 6px', borderRadius: 999,
+                      background: c.course ? (selectedId === c.id ? 'rgba(255,255,255,0.25)' : '#dbeafe') : (selectedId === c.id ? 'rgba(255,255,255,0.18)' : '#fee2e2'),
+                      color: c.course ? (selectedId === c.id ? '#fff' : '#1e3a8a') : (selectedId === c.id ? '#fff' : '#991b1b'),
+                    }}>{yearLabel(c.course)}</span>
+                  </button>
+                  <button onClick={() => changeYear(c)} style={secondaryBtn} title="Change year">Yr</button>
                   <button onClick={() => removeClass(c)} style={dangerBtn} title="Delete class">×</button>
                 </li>
               ))}
@@ -220,6 +279,7 @@ export default function Students() {
                                 : <span style={{ color: '#166534' }}>Set own password</span>}
                             </td>
                             <td style={{ ...td, textAlign: 'right' }}>
+                              <button onClick={() => moveStudent(s)} style={secondaryBtn}>Move</button>{' '}
                               <button onClick={() => resetPassword(s)} style={secondaryBtn}>Reset password</button>{' '}
                               <button onClick={() => removeStudent(s)} style={dangerBtn}>Delete</button>
                             </td>

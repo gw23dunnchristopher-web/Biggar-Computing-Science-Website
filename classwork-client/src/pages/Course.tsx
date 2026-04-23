@@ -88,6 +88,15 @@ export default function Course() {
     } catch (e: any) { alert(e.message); }
   }
 
+  async function lockAll() {
+    if (!confirm(`Lock every lesson in ${COURSE_LABELS[course] || course}? Students will see nothing until you unlock lessons one by one.`)) return;
+    try {
+      const r = await api<{ locked: number }>(`/api/classwork/${course}/lock-all-lessons`, { method: 'POST' });
+      alert(`Locked ${r.locked} lesson${r.locked === 1 ? '' : 's'}.`);
+      refresh();
+    } catch (e: any) { alert(e.message); }
+  }
+
   return (
     <Shell title={COURSE_LABELS[course] || course} back={{ href: '/', label: 'All courses' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -99,6 +108,7 @@ export default function Course() {
               background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
               padding: '8px 14px', borderRadius: 8, fontWeight: 600, textDecoration: 'none',
             }}>Analytics</Link>
+            <button onClick={lockAll} style={dangerBtn} title="Hide every lesson from students at once">Lock all</button>
             <button onClick={addUnit} style={primaryBtn}>+ New unit</button>
           </div>
         )}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import Shell from '@/components/Shell';
 import { api, getCurrentRole } from '@/lib/api';
 
@@ -9,12 +9,25 @@ export default function Home() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const role = getCurrentRole();
+  const [, navigate] = useLocation();
+  const [myCourse, setMyCourse] = useState<{ course: string | null; className: string | null } | null>(null);
 
   useEffect(() => {
     api<Course[]>('/api/classwork/courses')
       .then(setCourses)
       .finally(() => setLoading(false));
   }, []);
+
+  // Students with a year set get whisked straight to their course world.
+  useEffect(() => {
+    if (role !== 'student') return;
+    api<{ course: string | null; className: string | null }>('/api/classwork/me/course')
+      .then((r) => {
+        setMyCourse(r);
+        if (r?.course) navigate(`/course/${r.course}`, { replace: true });
+      })
+      .catch(() => { /* ignore — fallback to manual picker */ });
+  }, [role]);
 
   return (
     <Shell title="Home">
@@ -31,7 +44,9 @@ export default function Home() {
         {role === 'teacher'
           ? 'Pick the year group you want to manage. You can add units, lessons and questions inside each.'
           : role === 'student'
-            ? 'Open your year group to see the lessons your teacher has set.'
+            ? (myCourse && !myCourse.course
+                ? "You haven't been put in a year group yet — please ask your teacher to add you to a class. In the meantime you can browse below."
+                : 'Taking you to your year group…')
             : 'You are browsing as a guest. Sign in to save your work.'}
       </p>
       {loading ? (

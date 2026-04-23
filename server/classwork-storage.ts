@@ -108,11 +108,67 @@ export function ensureClassworkSchema(): Promise<void> {
       await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_subs_q ON bhs_classwork_submissions(question_id);`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_subs_student ON bhs_classwork_submissions(student_id);`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_subs_lesson ON bhs_classwork_submissions(lesson_id);`);
+
+      // Add a nullable `course` (year group) column to the shared classes table.
+      // Idempotent and safe to run on every boot. Existing rows get NULL until
+      // a teacher tags them with a year via the Classwork students page.
+      await client.query(`ALTER TABLE IF EXISTS n5_classes ADD COLUMN IF NOT EXISTS course VARCHAR(16);`);
     } finally {
       client.release();
     }
   })();
   return initPromise;
+}
+
+/* ---------- Helpers for the shared `n5_classes` / `students` tables ----- */
+
+export async function listClassesWithCourse() {
+  await ensureClassworkSchema();
+  const r = await pool.query(`SELECT id, name, course FROM n5_classes ORDER BY name ASC`);
+  return r.rows as { id: string; name: string; course: string | null }[];
+}
+
+export async function getClassCourse(classId: string) {
+  await ensureClassworkSchema();
+  const r = await pool.query(`SELECT course FROM n5_classes WHERE id = $1`, [classId]);
+  return r.rows[0]?.course as string | null | undefined;
+}
+
+export async function setClassFields(classId: string, fields: { name?: string; course?: string | null }) {
+  await ensureClassworkSchema();
+  const sets: string[] = [];
+  const vals: any[] = [];
+  let i = 1;
+  if (fields.name !== undefined)   { sets.push(`name = $${i++}`); vals.push(fields.name); }
+  if (fields.course !== undefined) { sets.push(`course = $${i++}`); vals.push(fields.course); }
+  if (sets.length === 0) return;
+  vals.push(classId);
+  await pool.query(`UPDATE n5_classes SET ${sets.join(', ')} WHERE id = $${i}`, vals);
+}
+
+export async function setStudentClass(studentId: string, classId: string) {
+  await ensureClassworkSchema();
+  await pool.query(`UPDATE students SET class_id = $1 WHERE id = $2`, [classId, studentId]);
+}
+
+export async function getStudentClassCourse(studentId: string) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `SELECT c.course AS course, c.id AS class_id, c.name AS class_name
+       FROM students s JOIN n5_classes c ON c.id = s.class_id
+      WHERE s.id = $1`,
+    [studentId]
+  );
+  return r.rows[0] as { course: string | null; class_id: string; class_name: string } | undefined;
+}
+
+export async function lockAllLessonsInCourse(course: string) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `UPDATE bhs_classwork_lessons SET is_published = FALSE WHERE course = $1`,
+    [course]
+  );
+  return r.rowCount ?? 0;
 }
 
 export function newId(prefix: string): string {

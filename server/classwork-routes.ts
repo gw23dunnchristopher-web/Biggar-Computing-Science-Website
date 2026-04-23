@@ -30,6 +30,11 @@ import {
   getCourseAnalytics,
   getLessonAnalytics,
   getStudentCourseAnalytics,
+  listClassesWithCourse,
+  setClassFields,
+  setStudentClass,
+  getStudentClassCourse,
+  lockAllLessonsInCourse,
 } from './classwork-storage';
 import { markSubmission } from './classwork-ai';
 import { storage as n5Storage } from './n5-storage';
@@ -572,7 +577,7 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
 
   app.get('/api/classwork/teacher/classes', requireTeacher, async (_req, res) => {
     try {
-      const classes = await n5Storage.getClasses();
+      const classes = await listClassesWithCourse();
       res.json(classes);
     } catch (err) {
       console.error('[classwork] list classes error:', err);
@@ -583,12 +588,76 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
   app.post('/api/classwork/teacher/classes', requireTeacher, async (req, res) => {
     try {
       const name = (req.body?.name || '').toString().trim();
+      const course = req.body?.course ? String(req.body.course) : null;
       if (!name) return res.status(400).json({ error: 'Class name required' });
+      if (course && !isClassworkCourse(course)) {
+        return res.status(400).json({ error: 'Invalid year' });
+      }
       const cls = await n5Storage.createClass({ name });
-      res.json(cls);
+      if (course) await setClassFields(cls.id, { course });
+      res.json({ ...cls, course });
     } catch (err) {
       console.error('[classwork] create class error:', err);
       res.status(500).json({ error: 'Failed to create class' });
+    }
+  });
+
+  app.patch('/api/classwork/teacher/classes/:id', requireTeacher, async (req, res) => {
+    try {
+      const fields: { name?: string; course?: string | null } = {};
+      if (typeof req.body?.name === 'string') fields.name = req.body.name.trim();
+      if ('course' in (req.body || {})) {
+        const c = req.body.course;
+        if (c === null || c === '') fields.course = null;
+        else if (typeof c === 'string' && isClassworkCourse(c)) fields.course = c;
+        else return res.status(400).json({ error: 'Invalid year' });
+      }
+      await setClassFields(req.params.id, fields);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('[classwork] update class error:', err);
+      res.status(500).json({ error: 'Failed to update class' });
+    }
+  });
+
+  app.patch('/api/classwork/teacher/students/:id', requireTeacher, async (req, res) => {
+    try {
+      const classId = req.body?.classId;
+      if (!classId || typeof classId !== 'string') {
+        return res.status(400).json({ error: 'classId required' });
+      }
+      await setStudentClass(req.params.id, classId);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('[classwork] move student error:', err);
+      res.status(500).json({ error: 'Failed to move student' });
+    }
+  });
+
+  // Lock every lesson in a course in one go (e.g. at start of new year).
+  app.post('/api/classwork/:course/lock-all-lessons', requireTeacher, async (req, res) => {
+    try {
+      if (!isClassworkCourse(req.params.course)) {
+        return res.status(400).json({ error: 'Unknown course' });
+      }
+      const n = await lockAllLessonsInCourse(req.params.course);
+      res.json({ locked: n });
+    } catch (err) {
+      console.error('[classwork] lock-all error:', err);
+      res.status(500).json({ error: 'Failed to lock lessons' });
+    }
+  });
+
+  // Student endpoint: which course world should I land on?
+  app.get('/api/classwork/me/course', requireStudent, async (req, res) => {
+    try {
+      const studentId = (req as any).studentId as string;
+      const info = await getStudentClassCourse(studentId);
+      if (!info) return res.json({ course: null, className: null });
+      res.json({ course: info.course, className: info.class_name });
+    } catch (err) {
+      console.error('[classwork] me/course error:', err);
+      res.status(500).json({ error: 'Failed to look up course' });
     }
   });
 
