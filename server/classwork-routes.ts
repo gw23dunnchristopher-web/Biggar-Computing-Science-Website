@@ -32,6 +32,32 @@ import {
   getStudentCourseAnalytics,
 } from './classwork-storage';
 import { markSubmission } from './classwork-ai';
+import { storage as n5Storage } from './n5-storage';
+import bcrypt from 'bcryptjs';
+
+/* ----- shared username/password generators (mirrors n5-routes) ----- */
+const _ADJ = ["brave","clever","swift","bright","calm","eager","fair","gentle","happy","keen","lively","noble","proud","quick","sharp","steady","true","vivid","warm","wise"];
+const _ANI = ["badger","cobra","dolphin","eagle","falcon","gecko","hawk","iguana","jaguar","koala","lemur","meerkat","newt","otter","panda","quail","robin","snake","tiger","viper"];
+function _genUsername() {
+  const a = _ADJ[Math.floor(Math.random() * _ADJ.length)];
+  const an = _ANI[Math.floor(Math.random() * _ANI.length)];
+  const n = Math.floor(Math.random() * 90) + 10;
+  return `${a}-${an}-${n}`;
+}
+function _genPassword() {
+  const chars = "abcdefghjkmnpqrstuvwxyz23456789";
+  let pw = "";
+  for (let i = 0; i < 6; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+  return pw;
+}
+async function _uniqueUsername(): Promise<string> {
+  for (let i = 0; i < 12; i++) {
+    const u = _genUsername();
+    const existing = await n5Storage.getStudentByUsername(u);
+    if (!existing) return u;
+  }
+  return _genUsername() + '-' + Math.floor(Math.random() * 1000);
+}
 
 /**
  * Auth helpers.
@@ -535,6 +561,110 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] submissions error:', err);
       res.status(500).json({ error: 'Failed to list submissions' });
+    }
+  });
+
+  /* ===================== TEACHER: STUDENT/CLASS MANAGEMENT =====================
+     These endpoints reuse the unified student/class storage shared with the N5
+     and Higher revision apps so a teacher can manage S1/S2/S3 (and any other)
+     classes from inside the Classwork app.
+  ============================================================================ */
+
+  app.get('/api/classwork/teacher/classes', requireTeacher, async (_req, res) => {
+    try {
+      const classes = await n5Storage.getClasses();
+      res.json(classes);
+    } catch (err) {
+      console.error('[classwork] list classes error:', err);
+      res.status(500).json({ error: 'Failed to list classes' });
+    }
+  });
+
+  app.post('/api/classwork/teacher/classes', requireTeacher, async (req, res) => {
+    try {
+      const name = (req.body?.name || '').toString().trim();
+      if (!name) return res.status(400).json({ error: 'Class name required' });
+      const cls = await n5Storage.createClass({ name });
+      res.json(cls);
+    } catch (err) {
+      console.error('[classwork] create class error:', err);
+      res.status(500).json({ error: 'Failed to create class' });
+    }
+  });
+
+  app.delete('/api/classwork/teacher/classes/:id', requireTeacher, async (req, res) => {
+    try {
+      await n5Storage.deleteClass(req.params.id);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('[classwork] delete class error:', err);
+      res.status(500).json({ error: 'Failed to delete class' });
+    }
+  });
+
+  app.get('/api/classwork/teacher/classes/:id/students', requireTeacher, async (req, res) => {
+    try {
+      const students = await n5Storage.getStudentsByClass(req.params.id);
+      // Strip password hash; expose initialPassword so teacher can re-share.
+      res.json(students.map((s: any) => ({
+        id: s.id,
+        username: s.username,
+        classId: s.classId,
+        initialPassword: s.initialPassword,
+        mustChangePassword: s.mustChangePassword,
+      })));
+    } catch (err) {
+      console.error('[classwork] list class students error:', err);
+      res.status(500).json({ error: 'Failed to list students' });
+    }
+  });
+
+  app.post('/api/classwork/teacher/classes/:id/students/bulk', requireTeacher, async (req, res) => {
+    try {
+      const cls = await n5Storage.getClass(req.params.id);
+      if (!cls) return res.status(404).json({ error: 'Class not found' });
+      const count = parseInt(req.body?.count, 10);
+      if (!count || count < 1 || count > 50) return res.status(400).json({ error: 'Count must be between 1 and 50' });
+      const created: { id: string; username: string; plainPassword: string }[] = [];
+      for (let i = 0; i < count; i++) {
+        const username = await _uniqueUsername();
+        const plain = _genPassword();
+        const hashed = await bcrypt.hash(plain, 10);
+        const s = await n5Storage.createStudent({
+          username,
+          password: hashed,
+          initialPassword: plain,
+          classId: req.params.id,
+          mustChangePassword: true,
+        } as any);
+        created.push({ id: s.id, username: s.username, plainPassword: plain });
+      }
+      res.json({ created });
+    } catch (err) {
+      console.error('[classwork] bulk add students error:', err);
+      res.status(500).json({ error: 'Failed to add students' });
+    }
+  });
+
+  app.post('/api/classwork/teacher/students/:id/reset-password', requireTeacher, async (req, res) => {
+    try {
+      const plain = _genPassword();
+      const hashed = await bcrypt.hash(plain, 10);
+      await n5Storage.updateStudentPassword(req.params.id, hashed, true, plain);
+      res.json({ plainPassword: plain });
+    } catch (err) {
+      console.error('[classwork] reset password error:', err);
+      res.status(500).json({ error: 'Failed to reset password' });
+    }
+  });
+
+  app.delete('/api/classwork/teacher/students/:id', requireTeacher, async (req, res) => {
+    try {
+      await n5Storage.deleteStudent(req.params.id);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('[classwork] delete student error:', err);
+      res.status(500).json({ error: 'Failed to delete student' });
     }
   });
 }

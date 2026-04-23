@@ -18,7 +18,15 @@ export default function Home() {
 
   return (
     <Shell title="Home">
-      <h1 style={{ marginTop: 0 }}>Choose a course</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+        <h1 style={{ margin: 0 }}>Choose a course</h1>
+        {role === 'teacher' && (
+          <Link href="/students" style={{
+            background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+            padding: '8px 14px', borderRadius: 8, fontWeight: 600, textDecoration: 'none', fontSize: 14,
+          }}>Manage students &amp; classes</Link>
+        )}
+      </div>
       <p style={{ color: 'var(--cw-muted)' }}>
         {role === 'teacher'
           ? 'Pick the year group you want to manage. You can add units, lessons and questions inside each.'
