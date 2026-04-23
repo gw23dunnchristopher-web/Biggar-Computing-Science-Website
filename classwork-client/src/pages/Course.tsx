@@ -30,6 +30,7 @@ type ModalState =
   | { kind: 'deleteUnit'; unit: Unit }
   | { kind: 'deleteLesson'; lesson: Lesson }
   | { kind: 'lockAll' }
+  | { kind: 'notes'; unit: Unit }
   | { kind: 'info'; title: string; message: string };
 
 export default function Course() {
@@ -53,7 +54,44 @@ export default function Course() {
   const [addResUrl, setAddResUrl] = useState('');
   const [addResTitle, setAddResTitle] = useState('');
   const [modalErr, setModalErr] = useState<string | null>(null);
+  // Per-unit notes jotter state. Loaded when the notes modal opens, saved
+  // explicitly via a button or implicitly on a debounce as the pupil types.
+  const [notesContent, setNotesContent] = useState('');
+  const [notesSavedAt, setNotesSavedAt] = useState<number | null>(null);
+  const [notesStatus, setNotesStatus] = useState<'idle' | 'loading' | 'saving' | 'saved' | 'error'>('idle');
   const closeModal = () => setModal({ kind: 'none' });
+
+  function openNotes(unit: Unit) {
+    setNotesContent(''); setNotesSavedAt(null);
+    setNotesStatus('loading'); setModalErr(null);
+    setModal({ kind: 'notes', unit });
+    api<{ content: string; updatedAt: number | null }>(`/api/classwork/units/${unit.id}/notes`)
+      .then((r) => { setNotesContent(r.content || ''); setNotesSavedAt(r.updatedAt); setNotesStatus('idle'); })
+      .catch((e: any) => { setNotesStatus('error'); setModalErr(e.message || 'Failed to load notes'); });
+  }
+
+  async function saveNotes(unit: Unit, content: string) {
+    setNotesStatus('saving'); setModalErr(null);
+    try {
+      const r = await api<{ content: string; updatedAt: number }>(`/api/classwork/units/${unit.id}/notes`, {
+        method: 'PUT', body: JSON.stringify({ content }),
+      });
+      setNotesSavedAt(r.updatedAt);
+      setNotesStatus('saved');
+    } catch (e: any) {
+      setNotesStatus('error');
+      setModalErr(e.message || 'Failed to save notes');
+    }
+  }
+
+  // Debounced auto-save while the pupil types in the notes modal.
+  useEffect(() => {
+    if (modal.kind !== 'notes') return;
+    if (notesStatus === 'loading') return;
+    const unit = modal.unit;
+    const handle = window.setTimeout(() => { saveNotes(unit, notesContent); }, 1200);
+    return () => window.clearTimeout(handle);
+  }, [notesContent, modal.kind]);
 
   async function refresh() {
     setLoading(true);
@@ -274,12 +312,21 @@ export default function Course() {
             <div key={u.id} style={card}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <h2 style={{ margin: 0, fontSize: 20 }}>{u.title}</h2>
-                {role === 'teacher' && (
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => openAddLesson(u.id)} style={secondaryBtn}>+ Lesson</button>
-                    <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteUnit', unit: u }); }} style={dangerBtn}>Delete unit</button>
-                  </div>
-                )}
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {role === 'student' && (
+                    <button
+                      onClick={() => openNotes(u)}
+                      style={secondaryBtn}
+                      title="Open your private notes jotter for this unit"
+                    >My notes</button>
+                  )}
+                  {role === 'teacher' && (
+                    <>
+                      <button onClick={() => openAddLesson(u.id)} style={secondaryBtn}>+ Lesson</button>
+                      <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteUnit', unit: u }); }} style={dangerBtn}>Delete unit</button>
+                    </>
+                  )}
+                </div>
               </div>
               {u.description && <p style={{ color: 'var(--cw-muted)', marginTop: 6 }}>{u.description}</p>}
               {lessons.length === 0 ? (
@@ -577,6 +624,46 @@ export default function Course() {
           Hide every lesson in <strong>{COURSE_LABELS[course] || course}</strong> from pupils. You can then click <strong>Publish</strong> on individual lessons to release them as the year goes on.
         </p>
         {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'notes'}
+        title={modal.kind === 'notes' ? `Notes for: ${modal.unit.title}` : ''}
+        onClose={closeModal}
+        footer={<>
+          <span style={{ flex: 1, fontSize: 12, color: 'var(--cw-muted)' }}>
+            {notesStatus === 'saving' ? 'Saving…'
+              : notesStatus === 'saved' && notesSavedAt ? `Saved at ${new Date(notesSavedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+              : notesStatus === 'error' ? 'Couldn\u2019t save'
+              : notesSavedAt ? `Last saved ${new Date(notesSavedAt).toLocaleString()}`
+              : 'Not saved yet'}
+          </span>
+          <button
+            onClick={() => modal.kind === 'notes' && saveNotes(modal.unit, notesContent)}
+            disabled={notesStatus === 'loading' || notesStatus === 'saving'}
+            style={modalSecondaryBtn}
+          >Save now</button>
+          <button onClick={closeModal} style={modalPrimaryBtn}>Done</button>
+        </>}
+      >
+        {notesStatus === 'loading' ? (
+          <p style={{ margin: 0, color: 'var(--cw-muted)' }}>Loading your notes…</p>
+        ) : (
+          <>
+            <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--cw-muted)' }}>
+              Your private notes for this unit. Only you can see these — your teacher can’t.
+              Your notes save automatically as you type.
+            </p>
+            <textarea
+              autoFocus
+              value={notesContent}
+              onChange={(e) => setNotesContent(e.target.value)}
+              placeholder={'Jot anything you want to remember about this unit\u2014 definitions, examples, questions to ask your teacher, exam tips, etc.'}
+              style={{ ...modalInput, minHeight: 320, fontFamily: 'inherit', resize: 'vertical', lineHeight: 1.5 }}
+            />
+          </>
+        )}
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: '8px 0 0' }}>{modalErr}</p>}
       </Modal>
 
       <Modal

@@ -112,6 +112,18 @@ export function ensureClassworkSchema(): Promise<void> {
           submitted_at TIMESTAMP DEFAULT NOW()
         );
       `);
+      // Per-pupil free-form notes jotter, one per (unit, student). Pupils only.
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS bhs_classwork_unit_notes (
+          unit_id    VARCHAR(64) NOT NULL REFERENCES bhs_classwork_units(id) ON DELETE CASCADE,
+          student_id VARCHAR(64) NOT NULL,
+          content    TEXT NOT NULL DEFAULT '',
+          updated_at TIMESTAMP DEFAULT NOW(),
+          PRIMARY KEY (unit_id, student_id)
+        );
+      `);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_unit_notes_student ON bhs_classwork_unit_notes(student_id);`);
+
       await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_subs_q ON bhs_classwork_submissions(question_id);`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_subs_student ON bhs_classwork_submissions(student_id);`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_subs_lesson ON bhs_classwork_submissions(lesson_id);`);
@@ -927,4 +939,34 @@ export async function setSubmissionMark(id: string, marksAwarded: number, aiFeed
     [marksAwarded, aiFeedback, markedBy, id]
   );
   return r.rows[0] || null;
+}
+
+/* ---------- Per-pupil unit notes (notes jotter) ---------- */
+
+export async function getUnitNotes(unitId: string, studentId: string): Promise<{ content: string; updatedAt: number | null }> {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `SELECT content, updated_at FROM bhs_classwork_unit_notes WHERE unit_id = $1 AND student_id = $2`,
+    [unitId, studentId]
+  );
+  if (!r.rows[0]) return { content: '', updatedAt: null };
+  return {
+    content: r.rows[0].content || '',
+    updatedAt: r.rows[0].updated_at ? new Date(r.rows[0].updated_at).getTime() : null,
+  };
+}
+
+export async function saveUnitNotes(unitId: string, studentId: string, content: string): Promise<{ content: string; updatedAt: number }> {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `INSERT INTO bhs_classwork_unit_notes (unit_id, student_id, content, updated_at)
+     VALUES ($1, $2, $3, NOW())
+     ON CONFLICT (unit_id, student_id) DO UPDATE SET content = EXCLUDED.content, updated_at = NOW()
+     RETURNING content, updated_at`,
+    [unitId, studentId, content]
+  );
+  return {
+    content: r.rows[0].content || '',
+    updatedAt: new Date(r.rows[0].updated_at).getTime(),
+  };
 }

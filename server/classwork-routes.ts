@@ -13,6 +13,8 @@ import {
   createUnit,
   updateUnit,
   deleteUnit,
+  getUnitNotes,
+  saveUnitNotes,
   listLessons,
   getLesson,
   createLesson,
@@ -334,6 +336,36 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] deleteUnit error:', err);
       res.status(500).json({ error: 'Failed to delete unit' });
+    }
+  });
+
+  /* ---------- Per-pupil unit notes (notes jotter) ---------- */
+
+  // Each pupil gets one free-form notes page per unit. Teachers cannot see or
+  // write notes — these are private to the pupil.
+  app.get('/api/classwork/units/:unitId/notes', requireStudent, async (req, res) => {
+    try {
+      const studentId = (req as any).studentId as string;
+      res.json(await getUnitNotes(req.params.unitId, studentId));
+    } catch (err) {
+      console.error('[classwork] getUnitNotes error:', err);
+      res.status(500).json({ error: 'Failed to load notes' });
+    }
+  });
+
+  app.put('/api/classwork/units/:unitId/notes', requireStudent, async (req, res) => {
+    try {
+      const studentId = (req as any).studentId as string;
+      const raw = req.body?.content;
+      const content = typeof raw === 'string' ? raw : '';
+      // Cap at 200 KB so a runaway paste can't blow up the row.
+      if (Buffer.byteLength(content, 'utf8') > 200_000) {
+        return res.status(413).json({ error: 'Notes are too long (max 200 KB).' });
+      }
+      res.json(await saveUnitNotes(req.params.unitId, studentId, content));
+    } catch (err) {
+      console.error('[classwork] saveUnitNotes error:', err);
+      res.status(500).json({ error: 'Failed to save notes' });
     }
   });
 
