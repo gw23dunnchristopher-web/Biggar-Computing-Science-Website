@@ -18,6 +18,9 @@
  */
 
 import { GoogleGenAI } from '@google/genai';
+import JSZip from 'jszip';
+import path from 'path';
+import fs from 'fs/promises';
 
 const gemini = process.env.GEMINI_API_KEY
   ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
@@ -71,6 +74,8 @@ export async function markSubmission(
         return await markScreenshot(q, s);
       case 'project':
         return await markProject(q, s);
+      case 'presentation':
+        return await markPresentation(q, s);
       default:
         return null;
     }
@@ -437,6 +442,171 @@ async function markProject(q: AIQuestion, s: AISubmission): Promise<AIMarkResult
   }
   // File-based project marking lands when uploads ship.
   return null;
+}
+
+/* ---------- 8. Presentation (.pptx) ---------- */
+
+interface PptxSlide {
+  index: number;
+  text: string;
+  notes: string;
+  imageCount: number;
+}
+
+interface PptxSummary {
+  slideCount: number;
+  imageCount: number;
+  slides: PptxSlide[];
+  warnings: string[];
+}
+
+// Extract every <a:t>...</a:t> text run from a slide XML blob.
+function extractTextRuns(xml: string): string {
+  const out: string[] = [];
+  const re = /<a:t[^>]*>([\s\S]*?)<\/a:t>/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(xml)) !== null) {
+    const t = m[1]
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&apos;/g, "'");
+    if (t.trim()) out.push(t);
+  }
+  return out.join(' ').replace(/\s+/g, ' ').trim();
+}
+
+// Resolve /classwork-uploads/<file> to an absolute path on disk.
+function resolveUploadPath(fileUrl: string): string | null {
+  // Accept full URLs too (strip origin).
+  let p = fileUrl;
+  try { const u = new URL(fileUrl); p = u.pathname; } catch { /* relative */ }
+  if (!p.startsWith('/classwork-uploads/')) return null;
+  const base = path.join(process.cwd(), 'public', 'classwork-uploads');
+  const name = path.basename(p);
+  return path.join(base, name);
+}
+
+async function summarisePptx(filePath: string): Promise<PptxSummary | null> {
+  try {
+    const buf = await fs.readFile(filePath);
+    if (buf.length > 25 * 1024 * 1024) {
+      return { slideCount: 0, imageCount: 0, slides: [], warnings: ['File too large to analyse (>25 MB).'] };
+    }
+    const zip = await JSZip.loadAsync(buf);
+    const slideKeys = Object.keys(zip.files)
+      .filter((k) => /^ppt\/slides\/slide\d+\.xml$/.test(k))
+      .sort((a, b) => {
+        const na = parseInt(a.match(/slide(\d+)\.xml/)![1], 10);
+        const nb = parseInt(b.match(/slide(\d+)\.xml/)![1], 10);
+        return na - nb;
+      });
+    const slides: PptxSlide[] = [];
+    for (const key of slideKeys) {
+      const idx = parseInt(key.match(/slide(\d+)\.xml/)![1], 10);
+      const xml = await zip.files[key].async('string');
+      const text = extractTextRuns(xml);
+      // Count picture references on this slide (p:pic elements).
+      const imageCount = (xml.match(/<p:pic[\s>]/g) || []).length;
+      // Speaker notes file mirrors the slide number.
+      let notes = '';
+      const notesKey = `ppt/notesSlides/notesSlide${idx}.xml`;
+      if (zip.files[notesKey]) {
+        try { notes = extractTextRuns(await zip.files[notesKey].async('string')); } catch {}
+      }
+      slides.push({ index: idx, text, notes, imageCount });
+    }
+    // Total embedded media files (images, video posters, etc.) under ppt/media.
+    const mediaCount = Object.keys(zip.files).filter((k) => /^ppt\/media\//.test(k)).length;
+    return {
+      slideCount: slides.length,
+      imageCount: mediaCount,
+      slides,
+      warnings: slides.length ? [] : ['No slides could be read from the file.'],
+    };
+  } catch (err) {
+    console.error('[classwork-ai] pptx parse failed:', err);
+    return null;
+  }
+}
+
+interface RubricRow { label: string; marks: number; }
+
+function getRubric(q: AIQuestion): RubricRow[] {
+  const cfg = q.config && typeof q.config === 'object' ? q.config : {};
+  const raw = Array.isArray(cfg.rubric) ? cfg.rubric : [];
+  const rows: RubricRow[] = raw
+    .map((r: any) => ({
+      label: String(r?.label ?? '').trim(),
+      marks: Math.max(0, Math.round(Number(r?.marks) || 0)),
+    }))
+    .filter((r: RubricRow) => r.label && r.marks > 0);
+  if (rows.length) return rows;
+  // Sensible default: one holistic criterion worth the question's max marks.
+  return [{ label: 'Overall presentation quality', marks: q.max_marks }];
+}
+
+async function markPresentation(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {
+  if (!s.file_url || !gemini) return null;
+  const onDisk = resolveUploadPath(s.file_url);
+  if (!onDisk) {
+    return { marksAwarded: 0, feedback: 'The uploaded file couldn\u2019t be located on the server.', markedBy: 'ai' };
+  }
+  // Quick sanity check on the extension.
+  if (!/\.pptx$/i.test(onDisk)) {
+    return {
+      marksAwarded: 0,
+      feedback: 'Please upload a PowerPoint (.pptx) file. Other formats can\u2019t be auto-marked.',
+      markedBy: 'ai',
+    };
+  }
+  const summary = await summarisePptx(onDisk);
+  if (!summary || summary.slideCount === 0) {
+    return {
+      marksAwarded: 0,
+      feedback: 'I couldn\u2019t read any slides out of that .pptx file. Please re-export it from PowerPoint or Google Slides and try again.',
+      markedBy: 'ai',
+    };
+  }
+  // Cap text per slide so very long decks still fit in the prompt.
+  const trimSlide = (t: string, max = 600) => t.length > max ? t.slice(0, max) + '…' : t;
+  const slidesBlock = summary.slides.map((sl) => {
+    const parts = [`Slide ${sl.index}:`, sl.text ? `  Text: ${trimSlide(sl.text)}` : '  Text: (no text)'];
+    if (sl.imageCount > 0) parts.push(`  Images on slide: ${sl.imageCount}`);
+    if (sl.notes) parts.push(`  Speaker notes: ${trimSlide(sl.notes, 300)}`);
+    return parts.join('\n');
+  }).join('\n');
+
+  const rubric = getRubric(q);
+  const rubricBlock = rubric
+    .map((r, i) => `  ${i + 1}. ${r.label} — up to ${r.marks} mark${r.marks === 1 ? '' : 's'}`)
+    .join('\n');
+  const totalRubricMarks = rubric.reduce((a, r) => a + r.marks, 0);
+  const cappedTotal = Math.min(q.max_marks, totalRubricMarks);
+
+  const prompt = [
+    `You are marking a Scottish secondary school pupil's PowerPoint presentation for a Computing Science task.`,
+    `You cannot see the visual layout, fonts or colours of the slides — only the text on each slide, the number of embedded images, and any speaker notes. Be honest about what you can and can\u2019t judge.`,
+    '',
+    `Question (worth up to ${q.max_marks} mark${q.max_marks === 1 ? '' : 's'} in total):`,
+    q.prompt,
+    q.marking_scheme ? `\nGeneral marking scheme:\n${q.marking_scheme}` : '',
+    q.ai_grading_guidance ? `\nAdditional guidance:\n${q.ai_grading_guidance}` : '',
+    '',
+    `Rubric (mark each criterion separately, then sum — total cannot exceed ${cappedTotal}):`,
+    rubricBlock,
+    '',
+    `Deck summary:`,
+    `  Total slides: ${summary.slideCount}`,
+    `  Total embedded media files: ${summary.imageCount}`,
+    '',
+    `Per-slide content:`,
+    slidesBlock,
+    '',
+    `Award marks fairly. Be encouraging but accurate. Explain in 2-4 sentences what worked well and one concrete improvement, and list a brief breakdown by criterion.`,
+    `Return ONLY a JSON object of the form:`,
+    `{"marks": <integer total>, "feedback": "<string with the breakdown and overall comment>"}`,
+  ].filter(Boolean).join('\n');
+
+  return await callGeminiForMark(prompt, Math.min(q.max_marks, cappedTotal));
 }
 
 async function markGenericLink(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {

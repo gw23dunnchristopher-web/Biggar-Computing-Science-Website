@@ -23,6 +23,7 @@ export const CLASSWORK_QUESTION_TYPES = [
   'makecode_link',
   'google_sites_link',
   'project',
+  'presentation',
 ] as const;
 export type ClassworkQuestionType = (typeof CLASSWORK_QUESTION_TYPES)[number];
 

@@ -60,6 +60,7 @@ const TYPE_LABELS: Record<string, string> = {
   makecode_link: 'MakeCode project link',
   google_sites_link: 'Google Sites link',
   project: 'Long-form project',
+  presentation: 'Presentation (.pptx)',
 };
 
 export default function Lesson() {
@@ -230,10 +231,14 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
 
   const t = question.question_type;
   const uploadKind: 'screenshot' | 'project' | null =
-    t === 'screenshot' ? 'screenshot' : t === 'project' ? 'project' : null;
+    t === 'screenshot' ? 'screenshot'
+      : t === 'project' || t === 'presentation' ? 'project'
+      : null;
   const acceptAttr = uploadKind === 'screenshot'
     ? 'image/*'
-    : '.jpg,.jpeg,.png,.gif,.webp,.pdf,.txt,.csv,.sql,.py,.vb,.html,.htm,.css,.js,.ts,.json,.xml,.md,.sb3,.hex,.zip,.docx,.pptx,.xlsx';
+    : t === 'presentation'
+      ? '.pptx'
+      : '.jpg,.jpeg,.png,.gif,.webp,.pdf,.txt,.csv,.sql,.py,.vb,.html,.htm,.css,.js,.ts,.json,.xml,.md,.sb3,.hex,.zip,.docx,.pptx,.xlsx';
 
   async function pickFile(file: File) {
     if (!uploadKind) return;
@@ -278,6 +283,7 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
       if (t === 'multiple_choice') body.selectedOptionLabel = option;
       else if (['scratch_link', 'makecode_link', 'google_sites_link'].includes(t)) body.linkUrl = url;
       else if (t === 'screenshot') body.fileUrl = fileUrl;
+      else if (t === 'presentation') body.fileUrl = fileUrl;
       else if (t === 'project') {
         if (fileUrl) body.fileUrl = fileUrl;
         if (url) body.linkUrl = url;
@@ -302,6 +308,7 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
   const canSubmit =
     t === 'multiple_choice' ? !!option :
     t === 'screenshot' ? !!fileUrl :
+    t === 'presentation' ? !!fileUrl :
     t === 'project' ? !!(fileUrl || url) :
     ['scratch_link', 'makecode_link', 'google_sites_link'].includes(t) ? !!url :
     !!text.trim();
@@ -556,6 +563,12 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
     );
   }
 
+  if (t === 'presentation') {
+    return s.file_url
+      ? <a href={s.file_url} target="_blank" rel="noopener noreferrer">Download .pptx</a>
+      : <span style={muted}>No file uploaded.</span>;
+  }
+
   // short / long / code
   const text = s.text_answer || '';
   if (!text) return <span style={muted}>Empty answer.</span>;
@@ -592,8 +605,25 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
     { label: 'A', text: '', isCorrect: false },
     { label: 'B', text: '', isCorrect: false },
   ]);
+  const [rubric, setRubric] = useState<{ label: string; marks: number }[]>([]);
+  const [useRubric, setUseRubric] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  // Seed a sensible default rubric the first time the teacher switches to a
+  // presentation question so they aren't faced with an empty list.
+  function onTypeChange(next: string) {
+    setType(next);
+    if (next === 'presentation' && rubric.length === 0) {
+      setRubric([
+        { label: 'Title slide and clear structure', marks: 1 },
+        { label: 'Accurate and well-explained content', marks: 2 },
+        { label: 'Use of images, diagrams or examples', marks: 1 },
+        { label: 'Clear writing with few mistakes', marks: 1 },
+      ]);
+      setMaxMarks(5);
+    }
+  }
 
   async function save() {
     setBusy(true);
@@ -603,6 +633,12 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
         questionType: type, prompt, maxMarks, markingScheme, aiGradingGuidance: aiGuidance,
       };
       if (type === 'multiple_choice') body.options = options;
+      if (type === 'presentation' && useRubric) {
+        const cleaned = rubric
+          .map((r) => ({ label: r.label.trim(), marks: Math.max(0, Math.round(r.marks || 0)) }))
+          .filter((r) => r.label && r.marks > 0);
+        if (cleaned.length) body.config = { rubric: cleaned };
+      }
       await api(`/api/classwork/lessons/${lessonId}/questions`, {
         method: 'POST', body: JSON.stringify(body),
       });
@@ -614,12 +650,14 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
     }
   }
 
+  const rubricTotal = rubric.reduce((a, r) => a + (Number(r.marks) || 0), 0);
+
   return (
     <div style={modalOverlay} onClick={onClose}>
       <div style={modal} onClick={(e) => e.stopPropagation()}>
         <h2 style={{ marginTop: 0 }}>New question</h2>
         <label style={fieldLabel}>Type
-          <select value={type} onChange={(e) => setType(e.target.value)} style={input}>
+          <select value={type} onChange={(e) => onTypeChange(e.target.value)} style={input}>
             {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </label>
@@ -647,6 +685,56 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
               style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}>
               + Add option
             </button>
+          </div>
+        )}
+        {type === 'presentation' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontSize: 13, color: 'var(--cw-muted)', marginBottom: 6 }}>
+              Pupils upload a PowerPoint (.pptx). The AI marker reads slide text, speaker notes
+              and counts embedded images — it can't see colours, fonts or layout, so be honest in
+              your rubric.
+            </div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+              <input type="checkbox" checked={useRubric} onChange={(e) => setUseRubric(e.target.checked)} />
+              Use a rubric (mark each criterion separately)
+            </label>
+            {useRubric && (
+              <div style={{ marginTop: 8 }}>
+                {rubric.map((r, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+                    <input
+                      placeholder="Criterion (e.g. Accurate content)"
+                      value={r.label}
+                      onChange={(e) => { const a = [...rubric]; a[i].label = e.target.value; setRubric(a); }}
+                      style={{ ...input, flex: 1 }}
+                    />
+                    <input
+                      type="number" min={0}
+                      value={r.marks}
+                      onChange={(e) => { const a = [...rubric]; a[i].marks = parseInt(e.target.value) || 0; setRubric(a); }}
+                      style={{ ...input, width: 80 }}
+                    />
+                    <button onClick={() => setRubric(rubric.filter((_, j) => j !== i))}
+                      style={{ ...input, width: 40, cursor: 'pointer' }}>×</button>
+                  </div>
+                ))}
+                <button onClick={() => setRubric([...rubric, { label: '', marks: 1 }])}
+                  style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}>
+                  + Add criterion
+                </button>
+                <div style={{ marginTop: 6, fontSize: 13, color: 'var(--cw-muted)' }}>
+                  Rubric total: <strong>{rubricTotal}</strong> · Max marks: <strong>{maxMarks}</strong>
+                  {rubricTotal !== maxMarks && (
+                    <> — these don't match. The AI marker will cap the total at {Math.min(rubricTotal, maxMarks)}.</>
+                  )}
+                </div>
+              </div>
+            )}
+            {!useRubric && (
+              <div style={{ marginTop: 6, fontSize: 13, color: 'var(--cw-muted)' }}>
+                Without a rubric the AI gives one holistic mark out of {maxMarks}.
+              </div>
+            )}
           </div>
         )}
         <label style={fieldLabel}>Marking scheme (teacher view only)

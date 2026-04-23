@@ -43,7 +43,6 @@ export default function Course() {
 
   const [modal, setModal] = useState<ModalState>({ kind: 'none' });
   const [titleInput, setTitleInput] = useState('');
-  const [editTitle, setEditTitle] = useState('');
   const [editLI, setEditLI] = useState('');
   const [editSC, setEditSC] = useState('');
   const [editResources, setEditResources] = useState<Resource[]>([]);
@@ -87,7 +86,6 @@ export default function Course() {
     setModal({ kind: 'addLesson', unitId });
   }
   function openEditLesson(l: Lesson) {
-    setEditTitle(l.title);
     setEditLI(l.learning_intentions || '');
     setEditSC(l.success_criteria || '');
     setEditResources([]);
@@ -166,13 +164,10 @@ export default function Course() {
   }
 
   async function submitEditLesson(l: Lesson) {
-    const title = editTitle.trim();
-    if (!title) { setModalErr('Lesson title is required.'); return; }
     try {
       await api(`/api/classwork/lessons/${l.id}`, {
         method: 'PATCH',
         body: JSON.stringify({
-          title,
           // Empty textarea → clear the field on the server.
           learningIntentions: editLI.trim() ? editLI : null,
           successCriteria:    editSC.trim() ? editSC : null,
@@ -386,14 +381,6 @@ export default function Course() {
         </>}
       >
         <div>
-          <label style={modalLabel}>Lesson title</label>
-          <input
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            style={modalInput}
-          />
-        </div>
-        <div style={{ marginTop: 12 }}>
           <label style={modalLabel}>Learning intentions</label>
           <textarea
             rows={4}
