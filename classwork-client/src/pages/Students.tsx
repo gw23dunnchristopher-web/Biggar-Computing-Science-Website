@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Shell from '@/components/Shell';
 import Modal, { modalPrimaryBtn, modalSecondaryBtn, modalDangerBtn, modalLabel, modalInput } from '@/components/Modal';
+import Menu from '@/components/Menu';
 import { api, getCurrentRole } from '@/lib/api';
 
 interface ClassRow { id: string; name: string; course: string | null; archived?: boolean; }
@@ -342,17 +343,15 @@ export default function Students() {
                         border: c.course ? '1px solid #bfdbfe' : '1px solid #fecaca',
                       }}
                     >{yearShort(c.course)}</button>
-                    <button
-                      onClick={() => openRenameClass(c)}
-                      title="Rename class"
-                      style={{ ...secondaryBtn, padding: '4px 8px', fontSize: 12 }}
-                    >Rename</button>
-                    <button
-                      onClick={() => toggleArchiveClass(c)}
-                      title={c.archived ? 'Unarchive — bring this class back into the active list' : 'Archive — hide this class without deleting it'}
-                      style={{ ...secondaryBtn, padding: '4px 8px', fontSize: 12 }}
-                    >{c.archived ? 'Unarchive' : 'Archive'}</button>
-                    <button onClick={() => setModal({ kind: 'deleteClass', cls: c })} style={dangerBtn} title="Delete class">×</button>
+                    <Menu
+                      title="Class actions"
+                      items={[
+                        { label: 'Rename class…',          onClick: () => openRenameClass(c) },
+                        { label: 'Change year…',           onClick: () => openEditYear(c) },
+                        { label: c.archived ? 'Unarchive' : 'Archive', onClick: () => toggleArchiveClass(c) },
+                        { label: 'Delete class…',          onClick: () => setModal({ kind: 'deleteClass', cls: c }), danger: true },
+                      ]}
+                    />
                   </li>
                 );
               };
@@ -489,10 +488,15 @@ export default function Students() {
                                 : <span style={{ color: '#166534' }}>Set own password</span>}
                             </td>
                             <td style={{ ...td, textAlign: 'right' }}>
-                              <button onClick={() => openRenameStudent(s)} style={secondaryBtn}>Rename</button>{' '}
-                              <button onClick={() => openMoveStudent(s)} style={secondaryBtn}>Move</button>{' '}
-                              <button onClick={() => { setModalErr(null); setModal({ kind: 'resetPassword', student: s }); }} style={secondaryBtn}>Reset password</button>{' '}
-                              <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteStudent', student: s }); }} style={dangerBtn}>Delete</button>
+                              <Menu
+                                title="Student actions"
+                                items={[
+                                  { label: 'Rename username…', onClick: () => openRenameStudent(s) },
+                                  { label: 'Move or copy…',    onClick: () => openMoveStudent(s) },
+                                  { label: 'Reset password…',  onClick: () => { setModalErr(null); setModal({ kind: 'resetPassword', student: s }); } },
+                                  { label: 'Delete student…',  onClick: () => { setModalErr(null); setModal({ kind: 'deleteStudent', student: s }); }, danger: true },
+                                ]}
+                              />
                             </td>
                           </tr>
                         ))}
