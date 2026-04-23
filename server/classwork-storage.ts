@@ -118,6 +118,12 @@ export function ensureClassworkSchema(): Promise<void> {
       // them (so all the pupils' work stays intact for reference). Idempotent.
       await client.query(`ALTER TABLE IF EXISTS n5_classes  ADD COLUMN IF NOT EXISTS is_archived BOOLEAN NOT NULL DEFAULT FALSE;`);
       await client.query(`ALTER TABLE IF EXISTS bhs_classes ADD COLUMN IF NOT EXISTS is_archived BOOLEAN NOT NULL DEFAULT FALSE;`);
+
+      // Learning intentions + success criteria for each lesson. Stored as
+      // free-form TEXT (one bullet per line — kept simple so teachers can paste
+      // straight from a planner). Idempotent.
+      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons ADD COLUMN IF NOT EXISTS learning_intentions TEXT;`);
+      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons ADD COLUMN IF NOT EXISTS success_criteria   TEXT;`);
     } finally {
       client.release();
     }
@@ -407,7 +413,9 @@ export async function listLessons(unitId: string, opts: { onlyPublished?: boolea
     ? 'WHERE unit_id = $1 AND is_published = TRUE'
     : 'WHERE unit_id = $1';
   const r = await pool.query(
-    `SELECT id, unit_id, course, title, description, order_index, is_published, created_at
+    `SELECT id, unit_id, course, title, description,
+            learning_intentions, success_criteria,
+            order_index, is_published, created_at
        FROM bhs_classwork_lessons
        ${where}
       ORDER BY order_index ASC, created_at ASC`,
@@ -419,7 +427,9 @@ export async function listLessons(unitId: string, opts: { onlyPublished?: boolea
 export async function getLesson(id: string) {
   await ensureClassworkSchema();
   const r = await pool.query(
-    `SELECT id, unit_id, course, title, description, order_index, is_published, created_at
+    `SELECT id, unit_id, course, title, description,
+            learning_intentions, success_criteria,
+            order_index, is_published, created_at
        FROM bhs_classwork_lessons WHERE id = $1`,
     [id]
   );
@@ -438,13 +448,22 @@ export async function createLesson(unitId: string, course: ClassworkCourse, titl
   return r.rows[0];
 }
 
-export async function updateLesson(id: string, fields: { title?: string; description?: string; orderIndex?: number; isPublished?: boolean }) {
+export async function updateLesson(id: string, fields: {
+  title?: string;
+  description?: string;
+  learningIntentions?: string | null;
+  successCriteria?: string | null;
+  orderIndex?: number;
+  isPublished?: boolean;
+}) {
   await ensureClassworkSchema();
   const sets: string[] = [];
   const vals: any[] = [];
   let i = 1;
   if (fields.title !== undefined) { sets.push(`title = $${i++}`); vals.push(fields.title); }
   if (fields.description !== undefined) { sets.push(`description = $${i++}`); vals.push(fields.description); }
+  if (fields.learningIntentions !== undefined) { sets.push(`learning_intentions = $${i++}`); vals.push(fields.learningIntentions); }
+  if (fields.successCriteria    !== undefined) { sets.push(`success_criteria    = $${i++}`); vals.push(fields.successCriteria); }
   if (fields.orderIndex !== undefined) { sets.push(`order_index = $${i++}`); vals.push(fields.orderIndex); }
   if (fields.isPublished !== undefined) { sets.push(`is_published = $${i++}`); vals.push(fields.isPublished); }
   if (!sets.length) return null;

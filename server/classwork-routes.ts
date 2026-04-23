@@ -348,6 +348,24 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     }
   });
 
+  // Fetch one lesson (used by the SPA to render the title + learning
+  // intentions + success criteria above the questions). Students only see
+  // published lessons; teachers see everything.
+  app.get('/api/classwork/lessons/:id', async (req, res) => {
+    try {
+      const lesson = await getLesson(req.params.id);
+      if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
+      const isTeacher = await checkTeacher(req, requireTeacher);
+      if (!isTeacher && !lesson.is_published) {
+        return res.status(404).json({ error: 'Lesson not found' });
+      }
+      res.json(lesson);
+    } catch (err) {
+      console.error('[classwork] getLesson error:', err);
+      res.status(500).json({ error: 'Failed to load lesson' });
+    }
+  });
+
   app.patch('/api/classwork/lessons/:id', requireTeacher, async (req, res) => {
     try {
       const lesson = await updateLesson(req.params.id, req.body || {});

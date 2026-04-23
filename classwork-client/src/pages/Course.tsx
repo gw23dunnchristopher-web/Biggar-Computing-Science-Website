@@ -5,7 +5,12 @@ import Modal, { modalPrimaryBtn, modalSecondaryBtn, modalDangerBtn, modalLabel, 
 import { api, getCurrentRole } from '@/lib/api';
 
 interface Unit { id: string; title: string; description: string | null; course: string; }
-interface Lesson { id: string; unit_id: string; title: string; description: string | null; is_published: boolean; }
+interface Lesson {
+  id: string; unit_id: string; title: string; description: string | null;
+  learning_intentions?: string | null;
+  success_criteria?: string | null;
+  is_published: boolean;
+}
 
 const COURSE_LABELS: Record<string, string> = {
   s1: 'S1', s2: 'S2', s3: 'S3', n4: 'National 4', n5: 'National 5', higher: 'Higher',
@@ -15,6 +20,7 @@ type ModalState =
   | { kind: 'none' }
   | { kind: 'addUnit' }
   | { kind: 'addLesson'; unitId: string }
+  | { kind: 'editLesson'; lesson: Lesson }
   | { kind: 'deleteUnit'; unit: Unit }
   | { kind: 'deleteLesson'; lesson: Lesson }
   | { kind: 'lockAll' }
@@ -31,6 +37,9 @@ export default function Course() {
 
   const [modal, setModal] = useState<ModalState>({ kind: 'none' });
   const [titleInput, setTitleInput] = useState('');
+  const [editTitle, setEditTitle] = useState('');
+  const [editLI, setEditLI] = useState('');
+  const [editSC, setEditSC] = useState('');
   const [modalErr, setModalErr] = useState<string | null>(null);
   const closeModal = () => setModal({ kind: 'none' });
 
@@ -63,6 +72,31 @@ export default function Course() {
   function openAddLesson(unitId: string) {
     setTitleInput(''); setModalErr(null);
     setModal({ kind: 'addLesson', unitId });
+  }
+  function openEditLesson(l: Lesson) {
+    setEditTitle(l.title);
+    setEditLI(l.learning_intentions || '');
+    setEditSC(l.success_criteria || '');
+    setModalErr(null);
+    setModal({ kind: 'editLesson', lesson: l });
+  }
+
+  async function submitEditLesson(l: Lesson) {
+    const title = editTitle.trim();
+    if (!title) { setModalErr('Lesson title is required.'); return; }
+    try {
+      await api(`/api/classwork/lessons/${l.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          title,
+          // Empty textarea → clear the field on the server.
+          learningIntentions: editLI.trim() ? editLI : null,
+          successCriteria:    editSC.trim() ? editSC : null,
+        }),
+      });
+      closeModal();
+      refresh();
+    } catch (e: any) { setModalErr(e.message); }
   }
 
   async function submitAddUnit() {
@@ -192,6 +226,10 @@ export default function Course() {
                             >
                               {l.is_published ? 'Lock' : 'Publish'}
                             </button>
+                            <button onClick={() => openEditLesson(l)} style={secondaryBtn}
+                              title="Edit lesson title, learning intentions and success criteria">
+                              Edit
+                            </button>
                             <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteLesson', lesson: l }); }} style={dangerBtn}>Delete</button>
                           </>
                         )}
@@ -252,6 +290,52 @@ export default function Course() {
           New lessons start <strong>Locked</strong>. Use the Publish button when you're ready for pupils to see it.
         </p>
         {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'editLesson'}
+        title={modal.kind === 'editLesson' ? `Edit "${modal.lesson.title}"` : ''}
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={() => modal.kind === 'editLesson' && submitEditLesson(modal.lesson)} style={modalPrimaryBtn}>Save lesson</button>
+        </>}
+      >
+        <div>
+          <label style={modalLabel}>Lesson title</label>
+          <input
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            style={modalInput}
+          />
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <label style={modalLabel}>Learning intentions</label>
+          <textarea
+            rows={4}
+            value={editLI}
+            onChange={(e) => setEditLI(e.target.value)}
+            placeholder={'One per line, e.g.\nUnderstand what a variable is\nIdentify suitable data types'}
+            style={{ ...modalInput, fontFamily: 'inherit', resize: 'vertical' }}
+          />
+          <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--cw-muted)' }}>
+            One bullet per line. Leave blank to hide.
+          </p>
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <label style={modalLabel}>Success criteria</label>
+          <textarea
+            rows={4}
+            value={editSC}
+            onChange={(e) => setEditSC(e.target.value)}
+            placeholder={'One per line, e.g.\nI can declare a variable\nI can choose the right data type for a value'}
+            style={{ ...modalInput, fontFamily: 'inherit', resize: 'vertical' }}
+          />
+          <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--cw-muted)' }}>
+            One bullet per line. Leave blank to hide.
+          </p>
+        </div>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: '8px 0 0' }}>{modalErr}</p>}
       </Modal>
 
       <Modal

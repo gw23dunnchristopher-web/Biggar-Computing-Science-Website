@@ -3,6 +3,14 @@ import { useRoute } from 'wouter';
 import Shell from '@/components/Shell';
 import { api, getCurrentRole } from '@/lib/api';
 
+interface LessonInfo {
+  id: string;
+  title: string;
+  learning_intentions: string | null;
+  success_criteria: string | null;
+  is_published: boolean;
+}
+
 interface Question {
   id: string;
   lesson_id: string;
@@ -49,6 +57,7 @@ export default function Lesson() {
   const [, params] = useRoute('/lesson/:id');
   const lessonId = params?.id || '';
   const role = getCurrentRole();
+  const [lesson, setLesson] = useState<LessonInfo | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [allSubs, setAllSubs] = useState<Submission[]>([]);
@@ -61,7 +70,11 @@ export default function Lesson() {
     setLoading(true);
     setErr(null);
     try {
-      const qs = await api<Question[]>(`/api/classwork/lessons/${lessonId}/questions`);
+      const [info, qs] = await Promise.all([
+        api<LessonInfo>(`/api/classwork/lessons/${lessonId}`).catch(() => null),
+        api<Question[]>(`/api/classwork/lessons/${lessonId}/questions`),
+      ]);
+      setLesson(info);
       setQuestions(qs);
       if (role === 'student') {
         try {
@@ -93,7 +106,10 @@ export default function Lesson() {
 
   return (
     <Shell title="Lesson" back={{ href: '/', label: 'All courses' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+      {lesson && (lesson.title || lesson.learning_intentions || lesson.success_criteria) && (
+        <LessonHeader lesson={lesson} />
+      )}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: lesson ? 16 : 0 }}>
         <h1 style={{ margin: 0 }}>Questions</h1>
         {role === 'teacher' && (
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -632,6 +648,60 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
           }}>{busy ? 'Saving…' : 'Save question'}</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function LessonHeader({ lesson }: { lesson: LessonInfo }) {
+  // Split a textarea blob into bullet-style lines, ignoring blank lines and
+  // any leading "- ", "* " or numbered prefix the teacher may have pasted.
+  const toLines = (raw: string | null | undefined): string[] => {
+    if (!raw) return [];
+    return raw.split(/\r?\n/)
+      .map((s) => s.replace(/^\s*(?:[-*•]|\d+[.)])\s+/, '').trim())
+      .filter(Boolean);
+  };
+  const li = toLines(lesson.learning_intentions);
+  const sc = toLines(lesson.success_criteria);
+  return (
+    <div style={{
+      background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 12,
+      padding: 18, boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
+    }}>
+      <h1 style={{ margin: 0, fontSize: 22 }}>{lesson.title}</h1>
+      {(li.length > 0 || sc.length > 0) && (
+        <div style={{
+          display: 'grid', gridTemplateColumns: li.length && sc.length ? '1fr 1fr' : '1fr',
+          gap: 18, marginTop: 14,
+        }}>
+          {li.length > 0 && (
+            <section style={{
+              background: '#eff6ff', border: '1px solid #bfdbfe',
+              borderRadius: 8, padding: '12px 14px',
+            }}>
+              <h2 style={{ margin: 0, fontSize: 14, color: '#1e3a8a', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Learning intentions
+              </h2>
+              <ul style={{ margin: '8px 0 0', paddingLeft: 20, color: 'var(--cw-ink)', fontSize: 14, lineHeight: 1.5 }}>
+                {li.map((line, i) => <li key={i}>{line}</li>)}
+              </ul>
+            </section>
+          )}
+          {sc.length > 0 && (
+            <section style={{
+              background: '#ecfdf5', border: '1px solid #a7f3d0',
+              borderRadius: 8, padding: '12px 14px',
+            }}>
+              <h2 style={{ margin: 0, fontSize: 14, color: '#065f46', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Success criteria
+              </h2>
+              <ul style={{ margin: '8px 0 0', paddingLeft: 20, color: 'var(--cw-ink)', fontSize: 14, lineHeight: 1.5 }}>
+                {sc.map((line, i) => <li key={i}>{line}</li>)}
+              </ul>
+            </section>
+          )}
+        </div>
+      )}
     </div>
   );
 }
