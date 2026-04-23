@@ -54,7 +54,8 @@ export default function Home() {
       ) : (
         <div style={{
           display: 'grid', gap: 12,
-          gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', marginTop: 24
+          gridTemplateColumns: `repeat(${Math.max(courses.length, 1)}, minmax(0, 1fr))`,
+          marginTop: 24,
         }}
         className="cw-home-grid">
           {courses.map((c) => (
