@@ -121,22 +121,59 @@ export function ensureClassworkSchema(): Promise<void> {
   return initPromise;
 }
 
-/* ---------- Helpers for the shared `n5_classes` / `students` tables ----- */
+/* ---------- Cross-app helpers for classes + students ---------------------
+   The Higher revision app uses `bhs_classes` + `bhs_students`, while the N5
+   revision app uses `n5_classes` + `n5_students`. The Classwork app needs to
+   surface both, so every helper either takes the table source explicitly or
+   detects it on the fly. Each helper returns/uses a `source: 'bhs' | 'n5'`.
+------------------------------------------------------------------------- */
+
+export type ClassSource = 'bhs' | 'n5';
+const studentTbl = (s: ClassSource) => s === 'bhs' ? 'bhs_students' : 'n5_students';
+const classTbl   = (s: ClassSource) => s === 'bhs' ? 'bhs_classes'  : 'n5_classes';
 
 export async function listClassesWithCourse() {
   await ensureClassworkSchema();
-  const r = await pool.query(`SELECT id, name, course FROM n5_classes ORDER BY name ASC`);
-  return r.rows as { id: string; name: string; course: string | null }[];
+  // If the same id exists in both tables (legacy/migrated rows), prefer the
+  // n5 row — that's where the pupils for it actually live in this codebase.
+  const r = await pool.query(
+    `SELECT id, name, course, 'bhs'::text AS source FROM bhs_classes b
+        WHERE NOT EXISTS (SELECT 1 FROM n5_classes n WHERE n.id = b.id)
+     UNION ALL
+     SELECT id, name, course, 'n5'::text  AS source FROM n5_classes
+     ORDER BY course NULLS LAST, name ASC`
+  );
+  return r.rows as { id: string; name: string; course: string | null; source: ClassSource }[];
 }
 
-export async function getClassCourse(classId: string) {
+export async function getClassSource(classId: string): Promise<ClassSource | null> {
   await ensureClassworkSchema();
-  const r = await pool.query(`SELECT course FROM n5_classes WHERE id = $1`, [classId]);
-  return r.rows[0]?.course as string | null | undefined;
+  // n5 wins on collision (matches listClassesWithCourse).
+  const r = await pool.query(
+    `SELECT 'n5'::text  AS src FROM n5_classes  WHERE id = $1
+     UNION ALL
+     SELECT 'bhs'::text AS src FROM bhs_classes WHERE id = $1
+     LIMIT 1`,
+    [classId]
+  );
+  return (r.rows[0]?.src as ClassSource) ?? null;
+}
+
+export async function getStudentSource(studentId: string): Promise<ClassSource | null> {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `SELECT 'bhs'::text AS src FROM bhs_students WHERE id = $1
+     UNION ALL
+     SELECT 'n5'::text  AS src FROM n5_students WHERE id = $1
+     LIMIT 1`,
+    [studentId]
+  );
+  return (r.rows[0]?.src as ClassSource) ?? null;
 }
 
 export async function setClassFields(classId: string, fields: { name?: string; course?: string | null }) {
-  await ensureClassworkSchema();
+  const src = await getClassSource(classId);
+  if (!src) return;
   const sets: string[] = [];
   const vals: any[] = [];
   let i = 1;
@@ -144,20 +181,127 @@ export async function setClassFields(classId: string, fields: { name?: string; c
   if (fields.course !== undefined) { sets.push(`course = $${i++}`); vals.push(fields.course); }
   if (sets.length === 0) return;
   vals.push(classId);
-  await pool.query(`UPDATE n5_classes SET ${sets.join(', ')} WHERE id = $${i}`, vals);
+  await pool.query(`UPDATE ${classTbl(src)} SET ${sets.join(', ')} WHERE id = $${i}`, vals);
 }
 
-export async function setStudentClass(studentId: string, classId: string) {
+/* Listing pupils in a class — works for either source. */
+export async function listStudentsInClass(classId: string) {
+  const src = await getClassSource(classId);
+  if (!src) return [];
+  const r = await pool.query(
+    `SELECT id, username, class_id, initial_password, must_change_password
+       FROM ${studentTbl(src)}
+      WHERE class_id = $1
+      ORDER BY username ASC`,
+    [classId]
+  );
+  return r.rows.map((s: any) => ({
+    id: s.id,
+    username: s.username,
+    classId: s.class_id,
+    initialPassword: s.initial_password,
+    mustChangePassword: s.must_change_password,
+  }));
+}
+
+/* Username uniqueness is checked across both tables so a teacher can't
+   accidentally collide a Higher pupil's login with an N5 pupil's. */
+export async function usernameTakenAnywhere(username: string): Promise<boolean> {
   await ensureClassworkSchema();
-  await pool.query(`UPDATE students SET class_id = $1 WHERE id = $2`, [classId, studentId]);
+  const r = await pool.query(
+    `SELECT 1 FROM bhs_students WHERE username = $1
+     UNION ALL
+     SELECT 1 FROM n5_students  WHERE username = $1
+     LIMIT 1`,
+    [username]
+  );
+  return (r.rowCount ?? 0) > 0;
+}
+
+export async function createStudentInClass(opts: {
+  classId: string;
+  username: string;
+  hashedPassword: string;
+  plainPassword: string;
+}) {
+  const src = await getClassSource(opts.classId);
+  if (!src) throw new Error('Class not found');
+  const id = newId('stu');
+  if (src === 'bhs') {
+    // bhs_students has an extra `course` column — copy it from the parent class.
+    const c = await pool.query(`SELECT course FROM bhs_classes WHERE id = $1`, [opts.classId]);
+    const course = c.rows[0]?.course || 'higher';
+    const r = await pool.query(
+      `INSERT INTO bhs_students (id, username, password, initial_password, course, class_id, must_change_password)
+       VALUES ($1, $2, $3, $4, $5, $6, TRUE)
+       RETURNING id, username, class_id`,
+      [id, opts.username, opts.hashedPassword, opts.plainPassword, course, opts.classId]
+    );
+    return { id: r.rows[0].id, username: r.rows[0].username };
+  } else {
+    const r = await pool.query(
+      `INSERT INTO n5_students (id, username, password, initial_password, class_id, must_change_password)
+       VALUES ($1, $2, $3, $4, $5, TRUE)
+       RETURNING id, username, class_id`,
+      [id, opts.username, opts.hashedPassword, opts.plainPassword, opts.classId]
+    );
+    return { id: r.rows[0].id, username: r.rows[0].username };
+  }
+}
+
+export async function resetStudentPassword(studentId: string, hashed: string, plain: string) {
+  const src = await getStudentSource(studentId);
+  if (!src) throw new Error('Student not found');
+  await pool.query(
+    `UPDATE ${studentTbl(src)} SET password = $1, initial_password = $2, must_change_password = TRUE WHERE id = $3`,
+    [hashed, plain, studentId]
+  );
+}
+
+export async function deleteStudentAnywhere(studentId: string) {
+  const src = await getStudentSource(studentId);
+  if (!src) return;
+  await pool.query(`DELETE FROM ${studentTbl(src)} WHERE id = $1`, [studentId]);
+}
+
+export async function deleteClassAnywhere(classId: string) {
+  const src = await getClassSource(classId);
+  if (!src) return;
+  // Wipe pupils first — these tables don't all have ON DELETE CASCADE.
+  await pool.query(`DELETE FROM ${studentTbl(src)} WHERE class_id = $1`, [classId]);
+  await pool.query(`DELETE FROM ${classTbl(src)}   WHERE id       = $1`, [classId]);
+}
+
+/* Move a pupil to another class. Both classes must live in the same source
+   table (bhs↔bhs or n5↔n5) — the underlying revision apps store progress
+   keyed to a specific student_id and table, so cross-table moves would
+   stranded their submissions. We surface a clear error in that case. */
+export async function moveStudentToClass(studentId: string, targetClassId: string) {
+  const studentSrc = await getStudentSource(studentId);
+  const classSrc   = await getClassSource(targetClassId);
+  if (!studentSrc) throw new Error('Student not found');
+  if (!classSrc)   throw new Error('Target class not found');
+  if (studentSrc !== classSrc) {
+    throw new Error(
+      "Sorry — pupils can't be moved between Higher and the other year groups yet. " +
+      "Create a fresh login for them in the new class instead."
+    );
+  }
+  await pool.query(
+    `UPDATE ${studentTbl(studentSrc)} SET class_id = $1 WHERE id = $2`,
+    [targetClassId, studentId]
+  );
 }
 
 export async function getStudentClassCourse(studentId: string) {
   await ensureClassworkSchema();
   const r = await pool.query(
     `SELECT c.course AS course, c.id AS class_id, c.name AS class_name
-       FROM students s JOIN n5_classes c ON c.id = s.class_id
-      WHERE s.id = $1`,
+       FROM bhs_students s JOIN bhs_classes c ON c.id = s.class_id WHERE s.id = $1
+     UNION ALL
+     SELECT c.course AS course, c.id AS class_id, c.name AS class_name
+       FROM n5_students s JOIN n5_classes c ON c.id = s.class_id WHERE s.id = $1
+     LIMIT 1`,
     [studentId]
   );
   return r.rows[0] as { course: string | null; class_id: string; class_name: string } | undefined;

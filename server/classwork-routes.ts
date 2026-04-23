@@ -32,9 +32,16 @@ import {
   getStudentCourseAnalytics,
   listClassesWithCourse,
   setClassFields,
-  setStudentClass,
+  getClassSource,
   getStudentClassCourse,
   lockAllLessonsInCourse,
+  listStudentsInClass,
+  createStudentInClass,
+  resetStudentPassword,
+  deleteStudentAnywhere,
+  deleteClassAnywhere,
+  moveStudentToClass,
+  usernameTakenAnywhere,
 } from './classwork-storage';
 import { markSubmission } from './classwork-ai';
 import { storage as n5Storage } from './n5-storage';
@@ -593,9 +600,12 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
       if (course && !isClassworkCourse(course)) {
         return res.status(400).json({ error: 'Invalid year' });
       }
+      // New classes created from the Classwork app land in n5_classes for now
+      // (the Higher revision app's class table is owned by that app's own
+      // teacher dashboard). Teachers can still see Higher classes here.
       const cls = await n5Storage.createClass({ name });
       if (course) await setClassFields(cls.id, { course });
-      res.json({ ...cls, course });
+      res.json({ ...cls, course, source: 'n5' });
     } catch (err) {
       console.error('[classwork] create class error:', err);
       res.status(500).json({ error: 'Failed to create class' });
@@ -626,11 +636,11 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
       if (!classId || typeof classId !== 'string') {
         return res.status(400).json({ error: 'classId required' });
       }
-      await setStudentClass(req.params.id, classId);
+      await moveStudentToClass(req.params.id, classId);
       res.json({ ok: true });
-    } catch (err) {
+    } catch (err: any) {
       console.error('[classwork] move student error:', err);
-      res.status(500).json({ error: 'Failed to move student' });
+      res.status(400).json({ error: err?.message || 'Failed to move student' });
     }
   });
 
@@ -663,7 +673,7 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
 
   app.delete('/api/classwork/teacher/classes/:id', requireTeacher, async (req, res) => {
     try {
-      await n5Storage.deleteClass(req.params.id);
+      await deleteClassAnywhere(req.params.id);
       res.json({ ok: true });
     } catch (err) {
       console.error('[classwork] delete class error:', err);
@@ -673,15 +683,8 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
 
   app.get('/api/classwork/teacher/classes/:id/students', requireTeacher, async (req, res) => {
     try {
-      const students = await n5Storage.getStudentsByClass(req.params.id);
-      // Strip password hash; expose initialPassword so teacher can re-share.
-      res.json(students.map((s: any) => ({
-        id: s.id,
-        username: s.username,
-        classId: s.classId,
-        initialPassword: s.initialPassword,
-        mustChangePassword: s.mustChangePassword,
-      })));
+      const students = await listStudentsInClass(req.params.id);
+      res.json(students);
     } catch (err) {
       console.error('[classwork] list class students error:', err);
       res.status(500).json({ error: 'Failed to list students' });
@@ -690,22 +693,21 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
 
   app.post('/api/classwork/teacher/classes/:id/students/bulk', requireTeacher, async (req, res) => {
     try {
-      const cls = await n5Storage.getClass(req.params.id);
-      if (!cls) return res.status(404).json({ error: 'Class not found' });
+      const src = await getClassSource(req.params.id);
+      if (!src) return res.status(404).json({ error: 'Class not found' });
       const count = parseInt(req.body?.count, 10);
       if (!count || count < 1 || count > 50) return res.status(400).json({ error: 'Count must be between 1 and 50' });
       const created: { id: string; username: string; plainPassword: string }[] = [];
       for (let i = 0; i < count; i++) {
-        const username = await _uniqueUsername();
+        const username = await _uniqueUsernameAcrossTables();
         const plain = _genPassword();
         const hashed = await bcrypt.hash(plain, 10);
-        const s = await n5Storage.createStudent({
-          username,
-          password: hashed,
-          initialPassword: plain,
+        const s = await createStudentInClass({
           classId: req.params.id,
-          mustChangePassword: true,
-        } as any);
+          username,
+          hashedPassword: hashed,
+          plainPassword: plain,
+        });
         created.push({ id: s.id, username: s.username, plainPassword: plain });
       }
       res.json({ created });
@@ -719,7 +721,7 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     try {
       const plain = _genPassword();
       const hashed = await bcrypt.hash(plain, 10);
-      await n5Storage.updateStudentPassword(req.params.id, hashed, true, plain);
+      await resetStudentPassword(req.params.id, hashed, plain);
       res.json({ plainPassword: plain });
     } catch (err) {
       console.error('[classwork] reset password error:', err);
@@ -729,13 +731,23 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
 
   app.delete('/api/classwork/teacher/students/:id', requireTeacher, async (req, res) => {
     try {
-      await n5Storage.deleteStudent(req.params.id);
+      await deleteStudentAnywhere(req.params.id);
       res.json({ ok: true });
     } catch (err) {
       console.error('[classwork] delete student error:', err);
       res.status(500).json({ error: 'Failed to delete student' });
     }
   });
+}
+
+/* Generate a memorable username that's free in BOTH the bhs_ and n5_ student
+   tables, so logins never collide between revision apps. */
+async function _uniqueUsernameAcrossTables(): Promise<string> {
+  for (let i = 0; i < 25; i++) {
+    const u = _genUsername();
+    if (!(await usernameTakenAnywhere(u))) return u;
+  }
+  throw new Error('Could not generate a unique username');
 }
 
 /* ----- helper: detect teacher without erroring out the response ----- */
