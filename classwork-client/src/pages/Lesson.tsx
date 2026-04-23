@@ -143,16 +143,20 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted }: {
 
   async function submit() {
     setBusy(true);
-    setMsg(null);
+    setMsg('Submitting and marking…');
     try {
       const body: any = {};
       if (question.question_type === 'multiple_choice') body.selectedOptionLabel = option;
       else if (['scratch_link', 'makecode_link', 'google_sites_link'].includes(question.question_type)) body.linkUrl = url;
       else body.textAnswer = text;
-      await api(`/api/classwork/questions/${question.id}/submit`, {
+      const result = await api<Submission>(`/api/classwork/questions/${question.id}/submit`, {
         method: 'POST', body: JSON.stringify(body),
       });
-      setMsg('Submitted!');
+      if (result.marks_awarded != null) {
+        setMsg(`Marked: ${result.marks_awarded}/${question.max_marks}`);
+      } else {
+        setMsg('Submitted — your teacher will mark this soon.');
+      }
       setText(''); setOption(''); setUrl('');
       onSubmitted();
     } catch (e: any) {

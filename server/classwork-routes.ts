@@ -23,7 +23,9 @@ import {
   createSubmission,
   listMySubmissionsForLesson,
   listSubmissionsForLesson,
+  setSubmissionMark,
 } from './classwork-storage';
+import { markSubmission } from './classwork-ai';
 
 /**
  * Auth helpers.
@@ -301,14 +303,17 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
 
   /* ---------- Submissions ---------- */
 
-  // Student submits an answer to a single question.
+  // Student submits an answer to a single question. The submission is saved
+  // immediately, then auto-marked in the background. The HTTP response waits
+  // for the mark so the student sees feedback right away (with a sensible
+  // overall timeout to avoid hanging the UI on a slow Gemini response).
   app.post('/api/classwork/questions/:questionId/submit', requireStudent, async (req, res) => {
     try {
       const q = await getQuestion(req.params.questionId);
       if (!q) return res.status(404).json({ error: 'Question not found' });
       if (!isClassworkCourse(q.course)) return res.status(500).json({ error: 'Question has invalid course' });
       const { textAnswer, selectedOptionLabel, linkUrl, fileUrl } = req.body || {};
-      const sub = await createSubmission({
+      let sub = await createSubmission({
         questionId: q.id,
         lessonId: q.lesson_id,
         course: q.course,
@@ -319,10 +324,65 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
         linkUrl,
         fileUrl,
       });
+
+      // Try to AI-mark within ~25 s; fall back to "pending teacher mark"
+      // if the model takes too long or no key is configured.
+      try {
+        const markPromise = markSubmission(q as any, sub as any);
+        const result = await Promise.race([
+          markPromise,
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 25000)),
+        ]);
+        if (result) {
+          const updated = await setSubmissionMark(sub.id, result.marksAwarded, result.feedback, result.markedBy);
+          if (updated) sub = updated;
+        }
+      } catch (err) {
+        console.error('[classwork] auto-mark error:', err);
+      }
+
       res.json(sub);
     } catch (err) {
       console.error('[classwork] submit error:', err);
       res.status(500).json({ error: 'Failed to submit answer' });
+    }
+  });
+
+  // Teacher: override the mark on a submission.
+  app.patch('/api/classwork/submissions/:id/mark', requireTeacher, async (req, res) => {
+    const { marksAwarded, feedback } = req.body || {};
+    if (typeof marksAwarded !== 'number') return res.status(400).json({ error: 'marksAwarded (number) required' });
+    try {
+      const updated = await setSubmissionMark(
+        req.params.id,
+        Math.max(0, Math.round(marksAwarded)),
+        typeof feedback === 'string' ? feedback : null,
+        'teacher'
+      );
+      if (!updated) return res.status(404).json({ error: 'Submission not found' });
+      res.json(updated);
+    } catch (err) {
+      console.error('[classwork] manual mark error:', err);
+      res.status(500).json({ error: 'Failed to set mark' });
+    }
+  });
+
+  // Teacher: re-run the AI marker on an existing submission (e.g. after
+  // changing the marking scheme).
+  app.post('/api/classwork/submissions/:id/remark', requireTeacher, async (req, res) => {
+    try {
+      const r = await pool.query(`SELECT * FROM bhs_classwork_submissions WHERE id = $1`, [req.params.id]);
+      const sub = r.rows[0];
+      if (!sub) return res.status(404).json({ error: 'Submission not found' });
+      const q = await getQuestion(sub.question_id);
+      if (!q) return res.status(404).json({ error: 'Question not found' });
+      const result = await markSubmission(q as any, sub as any);
+      if (!result) return res.status(503).json({ error: 'AI marking unavailable for this submission' });
+      const updated = await setSubmissionMark(sub.id, result.marksAwarded, result.feedback, result.markedBy);
+      res.json(updated);
+    } catch (err) {
+      console.error('[classwork] remark error:', err);
+      res.status(500).json({ error: 'Failed to re-mark' });
     }
   });
 
