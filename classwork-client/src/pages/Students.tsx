@@ -121,14 +121,40 @@ export default function Students() {
     } catch (e: any) { setModalErr(e.message); }
   }
 
+  // Helper: are the source class (the one the pupil is currently in) and the
+  // chosen target class in the same year? If yes → straight move. If no →
+  // copy (creates a fresh login in the target, leaves the original behind so
+  // the old class can be archived with all the pupil's work intact).
+  function isSameYear(sourceClassId: string, targetClassId: string): boolean {
+    const a = classes.find((c) => c.id === sourceClassId);
+    const b = classes.find((c) => c.id === targetClassId);
+    if (!a || !b) return false;
+    // Treat "no year set" on either side as same-year, so the teacher just gets
+    // the simpler move action and isn't surprised by an unexpected copy.
+    if (!a.course || !b.course) return true;
+    return a.course === b.course;
+  }
+
   async function submitMoveStudent(s: StudentRow) {
     if (!moveTargetId) { setModalErr('Pick a class.'); return; }
+    const sameYear = isSameYear(s.classId, moveTargetId);
     try {
-      await api(`/api/classwork/teacher/students/${s.id}`, {
-        method: 'PATCH', body: JSON.stringify({ classId: moveTargetId }),
-      });
-      if (selectedId) loadStudents(selectedId);
-      closeModal();
+      if (sameYear) {
+        await api(`/api/classwork/teacher/students/${s.id}`, {
+          method: 'PATCH', body: JSON.stringify({ classId: moveTargetId }),
+        });
+        if (selectedId) loadStudents(selectedId);
+        closeModal();
+      } else {
+        const r = await api<{ id: string; username: string; plainPassword: string }>(
+          `/api/classwork/teacher/students/${s.id}/copy-to-class`,
+          { method: 'POST', body: JSON.stringify({ classId: moveTargetId }) }
+        );
+        // Refresh so a new pupil shows up if the teacher is viewing the target class.
+        if (selectedId) loadStudents(selectedId);
+        // Surface the new credentials so the teacher can hand them over.
+        setModal({ kind: 'showPassword', username: r.username, password: r.plainPassword });
+      }
     } catch (e: any) { setModalErr(e.message); }
   }
 
@@ -390,27 +416,45 @@ export default function Students() {
         {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
       </Modal>
 
-      <Modal
-        open={modal.kind === 'moveStudent'}
-        title={modal.kind === 'moveStudent' ? `Move ${modal.student.username}` : ''}
-        onClose={closeModal}
-        footer={<>
-          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
-          <button onClick={() => modal.kind === 'moveStudent' && submitMoveStudent(modal.student)} style={modalPrimaryBtn}>Move student</button>
-        </>}
-      >
-        <div>
-          <label style={modalLabel}>Move to class</label>
-          <select value={moveTargetId} onChange={(e) => setMoveTargetId(e.target.value)} style={modalInput}>
-            {classes.filter((c) => modal.kind === 'moveStudent' && c.id !== modal.student.classId).map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}{c.course ? ` — ${yearLabel(c.course)}` : ''}
-              </option>
-            ))}
-          </select>
-        </div>
-        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
-      </Modal>
+      {(() => {
+        // Decide button label + helper text based on whether the chosen target
+        // class is in the same year as the pupil's current class.
+        const moving = modal.kind === 'moveStudent' ? modal.student : null;
+        const sameYear = moving && moveTargetId ? isSameYear(moving.classId, moveTargetId) : true;
+        const targetCls = classes.find((c) => c.id === moveTargetId) || null;
+        const sourceCls = moving ? classes.find((c) => c.id === moving.classId) || null : null;
+        return (
+          <Modal
+            open={modal.kind === 'moveStudent'}
+            title={moving ? `Move or copy ${moving.username}` : ''}
+            onClose={closeModal}
+            footer={<>
+              <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+              <button onClick={() => moving && submitMoveStudent(moving)} style={modalPrimaryBtn}>
+                {sameYear ? 'Move student' : 'Copy to new class'}
+              </button>
+            </>}
+          >
+            <div>
+              <label style={modalLabel}>{sameYear ? 'Move to class' : 'Copy to class'}</label>
+              <select value={moveTargetId} onChange={(e) => setMoveTargetId(e.target.value)} style={modalInput}>
+                {classes.filter((c) => moving && c.id !== moving.classId).map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}{c.course ? ` — ${yearLabel(c.course)}` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <p style={{ margin: 0, fontSize: 13, color: 'var(--cw-muted)', lineHeight: 1.4 }}>
+              {sameYear
+                ? `Same year — the pupil will be moved into ${targetCls?.name || 'the chosen class'}. Their existing work stays with them.`
+                : `Different year — a brand-new login will be created in ${targetCls?.name || 'the new class'}. ${sourceCls ? `The original pupil and all their work stay in ${sourceCls.name}` : 'The original pupil stays where they are'}, so you can archive that class once the year is over.`
+              }
+            </p>
+            {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+          </Modal>
+        );
+      })()}
 
       <Modal
         open={modal.kind === 'deleteClass'}

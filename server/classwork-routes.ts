@@ -33,6 +33,7 @@ import {
   listClassesWithCourse,
   setClassFields,
   getClassSource,
+  getStudentSource,
   getStudentClassCourse,
   lockAllLessonsInCourse,
   listStudentsInClass,
@@ -726,6 +727,37 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] reset password error:', err);
       res.status(500).json({ error: 'Failed to reset password' });
+    }
+  });
+
+  /* Copy a pupil to another class. This creates a brand-new login (fresh
+     username + password) in the target class, leaving the original pupil
+     and all their submissions intact in the source class for archiving.
+     Works across sources (e.g. promoting an N5 pupil into a Higher class). */
+  app.post('/api/classwork/teacher/students/:id/copy-to-class', requireTeacher, async (req, res) => {
+    try {
+      const targetClassId = req.body?.classId;
+      if (!targetClassId || typeof targetClassId !== 'string') {
+        return res.status(400).json({ error: 'classId required' });
+      }
+      const studentSrc = await getStudentSource(req.params.id);
+      if (!studentSrc) return res.status(404).json({ error: 'Student not found' });
+      const targetSrc = await getClassSource(targetClassId);
+      if (!targetSrc) return res.status(404).json({ error: 'Target class not found' });
+
+      const username = await _uniqueUsernameAcrossTables();
+      const plain = _genPassword();
+      const hashed = await bcrypt.hash(plain, 10);
+      const s = await createStudentInClass({
+        classId: targetClassId,
+        username,
+        hashedPassword: hashed,
+        plainPassword: plain,
+      });
+      res.json({ id: s.id, username: s.username, plainPassword: plain });
+    } catch (err: any) {
+      console.error('[classwork] copy student error:', err);
+      res.status(400).json({ error: err?.message || 'Failed to copy student' });
     }
   });
 
