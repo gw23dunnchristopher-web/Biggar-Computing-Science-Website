@@ -6,17 +6,21 @@ import { api, getCurrentRole } from '@/lib/api';
 interface ClassRow { id: string; name: string; course: string | null; }
 interface StudentRow { id: string; username: string; classId: string; initialPassword: string | null; mustChangePassword: boolean; }
 
-const YEAR_OPTIONS: { value: string; label: string }[] = [
-  { value: 's1', label: 'S1' },
-  { value: 's2', label: 'S2' },
-  { value: 's3', label: 'S3' },
-  { value: 'n4', label: 'National 4' },
-  { value: 'n5', label: 'National 5' },
-  { value: 'higher', label: 'Higher' },
+const YEAR_OPTIONS: { value: string; label: string; short: string }[] = [
+  { value: 's1', label: 'S1', short: 'S1' },
+  { value: 's2', label: 'S2', short: 'S2' },
+  { value: 's3', label: 'S3', short: 'S3' },
+  { value: 'n4', label: 'National 4', short: 'N4' },
+  { value: 'n5', label: 'National 5', short: 'N5' },
+  { value: 'higher', label: 'Higher', short: 'Higher' },
 ];
 function yearLabel(course: string | null): string {
   if (!course) return 'No year set';
   return YEAR_OPTIONS.find((y) => y.value === course)?.label || course;
+}
+function yearShort(course: string | null): string {
+  if (!course) return 'Set year';
+  return YEAR_OPTIONS.find((y) => y.value === course)?.short || course;
 }
 
 type ModalState =
@@ -218,30 +222,39 @@ export default function Students() {
           <div style={card}>
             <h3 style={{ marginTop: 0 }}>Classes</h3>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {classes.map((c) => (
-                <li key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <button
-                    onClick={() => { setSelectedId(c.id); setLastCreated([]); }}
-                    style={{
-                      flex: 1, textAlign: 'left',
-                      background: selectedId === c.id ? 'var(--cw-accent)' : '#f1f5f9',
-                      color: selectedId === c.id ? '#fff' : 'var(--cw-ink)',
-                      border: '1px solid var(--cw-border)', borderRadius: 6,
-                      padding: '8px 10px', cursor: 'pointer', fontWeight: 600,
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6,
-                    }}
-                  >
-                    <span>{c.name}</span>
-                    <span style={{
-                      fontSize: 11, padding: '1px 6px', borderRadius: 999,
-                      background: c.course ? (selectedId === c.id ? 'rgba(255,255,255,0.25)' : '#dbeafe') : (selectedId === c.id ? 'rgba(255,255,255,0.18)' : '#fee2e2'),
-                      color: c.course ? (selectedId === c.id ? '#fff' : '#1e3a8a') : (selectedId === c.id ? '#fff' : '#991b1b'),
-                    }}>{yearLabel(c.course)}</span>
-                  </button>
-                  <button onClick={() => openEditYear(c)} style={secondaryBtn} title="Change year">Yr</button>
-                  <button onClick={() => setModal({ kind: 'deleteClass', cls: c })} style={dangerBtn} title="Delete class">×</button>
-                </li>
-              ))}
+              {classes.map((c) => {
+                const isSel = selectedId === c.id;
+                return (
+                  <li key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <button
+                      onClick={() => { setSelectedId(c.id); setLastCreated([]); }}
+                      style={{
+                        flex: 1, textAlign: 'left', minWidth: 0,
+                        background: isSel ? 'var(--cw-accent)' : '#f1f5f9',
+                        color: isSel ? '#fff' : 'var(--cw-ink)',
+                        border: '1px solid var(--cw-border)', borderRadius: 6,
+                        padding: '8px 10px', cursor: 'pointer', fontWeight: 600,
+                      }}
+                    >
+                      <span style={{
+                        display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>{c.name}</span>
+                    </button>
+                    <button
+                      onClick={() => openEditYear(c)}
+                      title={c.course ? `Year: ${yearLabel(c.course)} — click to change` : 'Set year'}
+                      style={{
+                        fontSize: 11, fontWeight: 700, padding: '4px 8px', borderRadius: 999,
+                        whiteSpace: 'nowrap', cursor: 'pointer', minWidth: 44, textAlign: 'center',
+                        background: c.course ? '#dbeafe' : '#fee2e2',
+                        color: c.course ? '#1e3a8a' : '#991b1b',
+                        border: c.course ? '1px solid #bfdbfe' : '1px solid #fecaca',
+                      }}
+                    >{yearShort(c.course)}</button>
+                    <button onClick={() => setModal({ kind: 'deleteClass', cls: c })} style={dangerBtn} title="Delete class">×</button>
+                  </li>
+                );
+              })}
             </ul>
           </div>
 
