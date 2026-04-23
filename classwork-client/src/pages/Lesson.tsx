@@ -20,12 +20,16 @@ interface Question {
 interface Submission {
   id: string;
   question_id: string;
+  student_id?: string;
+  student_username?: string | null;
   text_answer: string | null;
   selected_option_label: string | null;
   link_url: string | null;
   file_url: string | null;
   marks_awarded: number | null;
   ai_feedback: string | null;
+  marked_by?: 'ai' | 'teacher' | null;
+  marked_at?: string | null;
   submitted_at: string;
 }
 
@@ -47,6 +51,7 @@ export default function Lesson() {
   const role = getCurrentRole();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [allSubs, setAllSubs] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [previewAsStudent, setPreviewAsStudent] = useState(false);
@@ -63,12 +68,25 @@ export default function Lesson() {
           const subs = await api<Submission[]>(`/api/classwork/lessons/${lessonId}/my-submissions`);
           setSubmissions(subs);
         } catch { /* student may have no submissions */ }
+      } else if (role === 'teacher') {
+        try {
+          const subs = await api<Submission[]>(`/api/classwork/lessons/${lessonId}/submissions`);
+          setAllSubs(subs);
+        } catch { /* none yet */ }
       }
     } catch (e: any) {
       setErr(e.message || 'Failed to load');
     } finally {
       setLoading(false);
     }
+  }
+
+  async function refreshSubmissions() {
+    if (role !== 'teacher') return;
+    try {
+      const subs = await api<Submission[]>(`/api/classwork/lessons/${lessonId}/submissions`);
+      setAllSubs(subs);
+    } catch { /* ignore */ }
   }
 
   useEffect(() => { refresh(); }, [lessonId]);
@@ -141,6 +159,13 @@ export default function Lesson() {
                   previousSubmissions={mySubs}
                   onSubmitted={refresh}
                   preview={role === 'teacher' && previewAsStudent}
+                />
+              )}
+              {role === 'teacher' && !previewAsStudent && (
+                <TeacherSubmissions
+                  question={q}
+                  submissions={allSubs.filter((s) => s.question_id === q.id)}
+                  onChanged={refreshSubmissions}
                 />
               )}
               {role === 'guest' && (
@@ -329,6 +354,187 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
         </div>
       )}
     </div>
+  );
+}
+
+function TeacherSubmissions({ question, submissions, onChanged }: {
+  question: Question;
+  submissions: Submission[];
+  onChanged: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  if (submissions.length === 0) {
+    return (
+      <div style={{ marginTop: 8, fontSize: 13, color: 'var(--cw-muted)' }}>
+        No student submissions yet.
+      </div>
+    );
+  }
+  // Sort newest first.
+  const sorted = [...submissions].sort(
+    (a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime()
+  );
+  return (
+    <details open={open} onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}
+      style={{ marginTop: 10 }}>
+      <summary style={{ cursor: 'pointer', fontSize: 14, fontWeight: 600 }}>
+        Student submissions ({submissions.length})
+      </summary>
+      <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {sorted.map((s) => (
+          <SubmissionRow key={s.id} question={question} submission={s} onChanged={onChanged} />
+        ))}
+      </div>
+    </details>
+  );
+}
+
+function SubmissionRow({ question, submission, onChanged }: {
+  question: Question;
+  submission: Submission;
+  onChanged: () => void;
+}) {
+  const s = submission;
+  const [marks, setMarks] = useState<string>(s.marks_awarded != null ? String(s.marks_awarded) : '');
+  const [feedback, setFeedback] = useState<string>(s.ai_feedback || '');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  async function save() {
+    const n = parseInt(marks, 10);
+    if (isNaN(n) || n < 0) {
+      setMsg('Mark must be a number ≥ 0.');
+      return;
+    }
+    setBusy(true); setMsg(null);
+    try {
+      await api(`/api/classwork/submissions/${s.id}/mark`, {
+        method: 'PATCH',
+        body: JSON.stringify({ marksAwarded: n, feedback }),
+      });
+      setMsg('Saved.');
+      onChanged();
+    } catch (e: any) {
+      setMsg(e.message || 'Failed to save');
+    } finally { setBusy(false); }
+  }
+
+  async function remark() {
+    setBusy(true); setMsg('Asking the AI to mark again…');
+    try {
+      const updated = await api<Submission>(`/api/classwork/submissions/${s.id}/remark`, { method: 'POST' });
+      setMarks(updated.marks_awarded != null ? String(updated.marks_awarded) : '');
+      setFeedback(updated.ai_feedback || '');
+      setMsg('AI re-marked.');
+      onChanged();
+    } catch (e: any) {
+      setMsg(e.message || 'Re-mark failed');
+    } finally { setBusy(false); }
+  }
+
+  return (
+    <div style={{ border: '1px solid var(--cw-border)', borderRadius: 8, padding: 12, background: '#fff' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, fontSize: 13 }}>
+        <div style={{ fontWeight: 700 }}>
+          {s.student_username || s.student_id || 'Unknown student'}
+        </div>
+        <div style={{ color: 'var(--cw-muted)' }}>
+          Submitted {new Date(s.submitted_at).toLocaleString()}
+          {s.marked_by && <> · marked by {s.marked_by === 'teacher' ? 'teacher' : 'AI'}</>}
+        </div>
+      </div>
+
+      <div style={{ marginTop: 8 }}>
+        <SubmissionAnswer question={question} submission={s} />
+      </div>
+
+      <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '120px 1fr', gap: 8, alignItems: 'start' }}>
+        <label style={{ fontSize: 13, fontWeight: 600 }}>
+          Mark<br />
+          <span style={{ color: 'var(--cw-muted)', fontWeight: 400, fontSize: 12 }}>out of {question.max_marks}</span>
+        </label>
+        <input
+          type="number" min={0} max={question.max_marks} value={marks}
+          onChange={(e) => setMarks(e.target.value)}
+          style={{ padding: '6px 10px', border: '1px solid var(--cw-border)', borderRadius: 6, width: 100 }}
+        />
+        <label style={{ fontSize: 13, fontWeight: 600 }}>Feedback</label>
+        <textarea rows={3} value={feedback} onChange={(e) => setFeedback(e.target.value)}
+          style={{ padding: '6px 10px', border: '1px solid var(--cw-border)', borderRadius: 6, width: '100%', fontFamily: 'inherit' }} />
+      </div>
+
+      <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <button onClick={save} disabled={busy} style={{
+          background: 'var(--cw-accent)', color: '#fff', border: 'none',
+          padding: '6px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 13,
+        }}>{busy ? 'Working…' : 'Save override'}</button>
+        <button onClick={remark} disabled={busy} style={{
+          background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+          padding: '6px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 13,
+        }}>Re-mark with AI</button>
+        {msg && <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>{msg}</span>}
+      </div>
+    </div>
+  );
+}
+
+function SubmissionAnswer({ question, submission }: { question: Question; submission: Submission }) {
+  const s = submission;
+  const t = question.question_type;
+  const muted: React.CSSProperties = { color: 'var(--cw-muted)', fontStyle: 'italic' };
+
+  if (t === 'multiple_choice') {
+    const opts = Array.isArray(question.options) ? question.options : [];
+    const chosen = opts.find((o: any) => (o.label || '') === (s.selected_option_label || ''));
+    return (
+      <div style={{ fontSize: 14 }}>
+        Selected: <strong>{s.selected_option_label || '—'}</strong>
+        {chosen?.text && <> — {chosen.text}</>}
+        {chosen && typeof chosen.isCorrect === 'boolean' && (
+          <span style={{
+            marginLeft: 8, fontSize: 11, padding: '1px 6px', borderRadius: 999,
+            background: chosen.isCorrect ? '#dcfce7' : '#fee2e2',
+            color: chosen.isCorrect ? '#166534' : '#991b1b',
+          }}>{chosen.isCorrect ? 'correct' : 'incorrect'}</span>
+        )}
+      </div>
+    );
+  }
+
+  if (['scratch_link', 'makecode_link', 'google_sites_link'].includes(t)) {
+    return s.link_url
+      ? <a href={s.link_url} target="_blank" rel="noopener noreferrer">{s.link_url}</a>
+      : <span style={muted}>No link submitted.</span>;
+  }
+
+  if (t === 'screenshot') {
+    return s.file_url
+      ? <a href={s.file_url} target="_blank" rel="noopener noreferrer">
+          <img src={s.file_url} alt="Screenshot" style={{ maxWidth: '100%', maxHeight: 280, borderRadius: 6, border: '1px solid var(--cw-border)' }} />
+        </a>
+      : <span style={muted}>No screenshot uploaded.</span>;
+  }
+
+  if (t === 'project') {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {s.file_url && <a href={s.file_url} target="_blank" rel="noopener noreferrer">Download attached file</a>}
+        {s.link_url && <a href={s.link_url} target="_blank" rel="noopener noreferrer">{s.link_url}</a>}
+        {!s.file_url && !s.link_url && <span style={muted}>Nothing submitted.</span>}
+      </div>
+    );
+  }
+
+  // short / long / code
+  const text = s.text_answer || '';
+  if (!text) return <span style={muted}>Empty answer.</span>;
+  return (
+    <pre style={{
+      whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, padding: 8,
+      background: '#f8fafc', border: '1px solid var(--cw-border)', borderRadius: 6,
+      fontFamily: t === 'code' ? 'JetBrains Mono, monospace' : 'inherit',
+      fontSize: t === 'code' ? 13 : 14, maxHeight: 280, overflow: 'auto',
+    }}>{text}</pre>
   );
 }
 
