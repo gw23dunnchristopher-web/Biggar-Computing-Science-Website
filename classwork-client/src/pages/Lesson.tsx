@@ -81,7 +81,6 @@ export default function Lesson() {
   const lessonId = params?.id || '';
   const role = getCurrentRole();
   const [lesson, setLesson] = useState<LessonInfo | null>(null);
-  const [resources, setResources] = useState<LessonResource[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [allSubs, setAllSubs] = useState<Submission[]>([]);
@@ -94,14 +93,12 @@ export default function Lesson() {
     setLoading(true);
     setErr(null);
     try {
-      const [info, qs, res] = await Promise.all([
+      const [info, qs] = await Promise.all([
         api<LessonInfo>(`/api/classwork/lessons/${lessonId}`).catch(() => null),
         api<Question[]>(`/api/classwork/lessons/${lessonId}/questions`),
-        api<LessonResource[]>(`/api/classwork/lessons/${lessonId}/resources`).catch(() => [] as LessonResource[]),
       ]);
       setLesson(info);
       setQuestions(qs);
-      setResources(res || []);
       if (role === 'student') {
         try {
           const subs = await api<Submission[]>(`/api/classwork/lessons/${lessonId}/my-submissions`);
@@ -134,9 +131,6 @@ export default function Lesson() {
     <Shell title="Lesson" back={{ href: '/', label: 'All courses' }}>
       {lesson && (lesson.title || lesson.learning_intentions || lesson.success_criteria) && (
         <LessonHeader lesson={lesson} />
-      )}
-      {resources.length > 0 && (
-        <LessonResources resources={resources} />
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: lesson ? 16 : 0 }}>
         <h1 style={{ margin: 0 }}>Questions</h1>
@@ -2293,7 +2287,10 @@ function QuestionResources({ questionId, isTeacher }: { questionId: string; isTe
   );
 }
 
-function LessonResources({ resources }: { resources: LessonResource[] }) {
+// Kept for reference but no longer mounted: lesson-level resources have been
+// retired in favour of per-question attachments (see QuestionResources).
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _LessonResources_legacy({ resources }: { resources: LessonResource[] }) {
   return (
     <div style={{
       background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 12,
