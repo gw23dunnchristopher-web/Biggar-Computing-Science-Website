@@ -49,6 +49,8 @@ export default function Lesson() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [previewAsStudent, setPreviewAsStudent] = useState(false);
+  const showStudentView = role === 'student' || (role === 'teacher' && previewAsStudent);
 
   async function refresh() {
     setLoading(true);
@@ -73,12 +75,36 @@ export default function Lesson() {
 
   return (
     <Shell title="Lesson" back={{ href: '/', label: 'All courses' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
         <h1 style={{ margin: 0 }}>Questions</h1>
         {role === 'teacher' && (
-          <NewQuestionButton lessonId={lessonId} onCreated={refresh} />
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={() => setPreviewAsStudent((v) => !v)}
+              style={{
+                background: previewAsStudent ? 'var(--cw-accent)' : '#f1f5f9',
+                color: previewAsStudent ? '#fff' : 'var(--cw-ink)',
+                border: '1px solid ' + (previewAsStudent ? 'var(--cw-accent)' : 'var(--cw-border)'),
+                padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
+              }}
+              title="Show this lesson exactly as a student would see it"
+            >
+              {previewAsStudent ? 'Exit student preview' : 'Preview as student'}
+            </button>
+            {!previewAsStudent && <NewQuestionButton lessonId={lessonId} onCreated={refresh} />}
+          </div>
         )}
       </div>
+
+      {role === 'teacher' && previewAsStudent && (
+        <div style={{
+          marginTop: 12, padding: '8px 12px', background: '#fef3c7', border: '1px solid #fde68a',
+          color: '#854d0e', borderRadius: 8, fontSize: 13,
+        }}>
+          You are previewing this lesson as a student. Answers won&rsquo;t actually be submitted.
+        </div>
+      )}
 
       {loading && <p>Loading…</p>}
       {err && <p style={{ color: 'var(--cw-danger)' }}>{err}</p>}
@@ -99,7 +125,7 @@ export default function Lesson() {
               </div>
               <p style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}>{q.prompt}</p>
 
-              {role === 'teacher' && (
+              {role === 'teacher' && !previewAsStudent && (
                 <details style={{ marginTop: 8, fontSize: 14, color: 'var(--cw-muted)' }}>
                   <summary style={{ cursor: 'pointer' }}>Marking scheme &amp; AI guidance</summary>
                   <div style={{ marginTop: 8 }}>
@@ -109,11 +135,12 @@ export default function Lesson() {
                 </details>
               )}
 
-              {role === 'student' && (
+              {showStudentView && (
                 <StudentAnswer
                   question={q}
                   previousSubmissions={mySubs}
                   onSubmitted={refresh}
+                  preview={role === 'teacher' && previewAsStudent}
                 />
               )}
               {role === 'guest' && (
@@ -129,10 +156,11 @@ export default function Lesson() {
   );
 }
 
-function StudentAnswer({ question, previousSubmissions, onSubmitted }: {
+function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = false }: {
   question: Question;
   previousSubmissions: Submission[];
   onSubmitted: () => void;
+  preview?: boolean;
 }) {
   const last = previousSubmissions[0];
   const [text, setText] = useState('');
@@ -153,6 +181,12 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted }: {
 
   async function pickFile(file: File) {
     if (!uploadKind) return;
+    if (preview) {
+      setFileUrl('preview://' + file.name);
+      setFileName(file.name);
+      setMsg(`Selected ${file.name} (preview only — not uploaded).`);
+      return;
+    }
     setUploading(true);
     setMsg(null);
     try {
@@ -177,6 +211,10 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted }: {
   }
 
   async function submit() {
+    if (preview) {
+      setMsg('Preview only — your answer wasn\u2019t submitted.');
+      return;
+    }
     setBusy(true);
     setMsg('Submitting and marking…');
     try {
