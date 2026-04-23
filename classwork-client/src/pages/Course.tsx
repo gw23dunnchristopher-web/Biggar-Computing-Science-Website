@@ -142,13 +142,17 @@ export default function Course() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         {role === 'teacher' && (
                           <>
-                            <span style={{
+                            <span title={l.is_published ? 'Students can see this lesson' : 'Hidden from students — safe to edit'} style={{
                               fontSize: 12, padding: '2px 8px', borderRadius: 999,
                               background: l.is_published ? '#dcfce7' : '#fee2e2',
                               color: l.is_published ? '#166534' : '#991b1b'
-                            }}>{l.is_published ? 'Published' : 'Draft'}</span>
-                            <button onClick={() => togglePublish(l)} style={secondaryBtn}>
-                              {l.is_published ? 'Unpublish' : 'Publish'}
+                            }}>{l.is_published ? 'Published' : 'Locked (draft)'}</span>
+                            <button
+                              onClick={() => togglePublish(l)}
+                              style={secondaryBtn}
+                              title={l.is_published ? 'Lock this lesson so students can\'t see it while you edit' : 'Publish this lesson so students can see it'}
+                            >
+                              {l.is_published ? 'Lock' : 'Publish'}
                             </button>
                             <button onClick={() => deleteLesson(l)} style={dangerBtn}>Delete</button>
                           </>
