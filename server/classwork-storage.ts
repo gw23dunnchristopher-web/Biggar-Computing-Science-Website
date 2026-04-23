@@ -24,6 +24,7 @@ export const CLASSWORK_QUESTION_TYPES = [
   'google_sites_link',
   'project',
   'presentation',
+  'video_question',
 ] as const;
 export type ClassworkQuestionType = (typeof CLASSWORK_QUESTION_TYPES)[number];
 

@@ -133,7 +133,7 @@ const classworkFileStorage = multer.diskStorage({
 // Two upload presets: images-only for screenshot questions, broader file
 // types for project questions.
 const SCREENSHOT_EXT = /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i;
-const PROJECT_EXT = /\.(jpg|jpeg|png|gif|webp|pdf|txt|csv|sql|py|vb|html|htm|css|js|ts|json|xml|md|sb3|hex|zip|docx|pptx|xlsx)$/i;
+const PROJECT_EXT = /\.(jpg|jpeg|png|gif|webp|pdf|txt|csv|sql|py|vb|html|htm|css|js|ts|json|xml|md|sb3|hex|zip|docx|pptx|xlsx|mp4|webm|mov|m4v)$/i;
 
 const screenshotUpload = multer({
   storage: classworkFileStorage,

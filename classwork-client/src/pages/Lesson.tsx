@@ -61,6 +61,7 @@ const TYPE_LABELS: Record<string, string> = {
   google_sites_link: 'Google Sites link',
   project: 'Long-form project',
   presentation: 'Presentation (.pptx)',
+  video_question: 'Watch a video and answer',
 };
 
 export default function Lesson() {
@@ -175,6 +176,8 @@ export default function Lesson() {
               </div>
               <p style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}>{q.prompt}</p>
 
+              {q.question_type === 'video_question' && <VideoQuestionPlayer config={q.config} />}
+
               {role === 'teacher' && !previewAsStudent && (
                 <details style={{ marginTop: 8, fontSize: 14, color: 'var(--cw-muted)' }}>
                   <summary style={{ cursor: 'pointer' }}>Marking scheme &amp; AI guidance</summary>
@@ -287,7 +290,7 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
       else if (t === 'project') {
         if (fileUrl) body.fileUrl = fileUrl;
         if (url) body.linkUrl = url;
-      } else body.textAnswer = text;
+      } else body.textAnswer = text; // short / long / code / video_question
       const result = await api<Submission>(`/api/classwork/questions/${question.id}/submit`, {
         method: 'POST', body: JSON.stringify(body),
       });
@@ -333,9 +336,10 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
           style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--cw-border)' }} />
       )}
 
-      {(t === 'short' || t === 'long' || t === 'code') && (
+      {(t === 'short' || t === 'long' || t === 'code' || t === 'video_question') && (
         <textarea
           rows={t === 'short' ? 3 : 8}
+          placeholder={t === 'video_question' ? 'Watch the video above, then write your answer here…' : undefined}
           value={text}
           onChange={(e) => setText(e.target.value)}
           style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--cw-border)', fontFamily: t === 'code' ? 'JetBrains Mono, monospace' : 'inherit' }}
@@ -607,8 +611,37 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
   ]);
   const [rubric, setRubric] = useState<{ label: string; marks: number }[]>([]);
   const [useRubric, setUseRubric] = useState(false);
+  const [videoKind, setVideoKind] = useState<'youtube' | 'mp4'>('youtube');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoFileName, setVideoFileName] = useState('');
+  const [videoUploading, setVideoUploading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  async function uploadVideo(file: File) {
+    setVideoUploading(true);
+    setErr(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const teacherToken = (() => {
+        try { return localStorage.getItem('teacher_token') || localStorage.getItem('teacherToken') || ''; } catch { return ''; }
+      })();
+      const headers: Record<string, string> = {};
+      if (teacherToken) headers['x-teacher-password'] = teacherToken;
+      const r = await fetch('/api/classwork/teacher/upload/resource', {
+        method: 'POST', headers, body: fd,
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data?.error || 'Upload failed');
+      setVideoUrl(data.url);
+      setVideoFileName(data.filename || file.name);
+    } catch (e: any) {
+      setErr(e.message || 'Video upload failed');
+    } finally {
+      setVideoUploading(false);
+    }
+  }
 
   // Seed a sensible default rubric the first time the teacher switches to a
   // presentation question so they aren't faced with an empty list.
@@ -638,6 +671,17 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
           .map((r) => ({ label: r.label.trim(), marks: Math.max(0, Math.round(r.marks || 0)) }))
           .filter((r) => r.label && r.marks > 0);
         if (cleaned.length) body.config = { rubric: cleaned };
+      }
+      if (type === 'video_question') {
+        if (!videoUrl.trim()) {
+          throw new Error(videoKind === 'youtube'
+            ? 'Please paste a YouTube URL.'
+            : 'Please upload a video file.');
+        }
+        if (videoKind === 'youtube' && !youtubeIdFromUrl(videoUrl)) {
+          throw new Error('That doesn\u2019t look like a YouTube URL.');
+        }
+        body.config = { video: { kind: videoKind, url: videoUrl.trim() } };
       }
       await api(`/api/classwork/lessons/${lessonId}/questions`, {
         method: 'POST', body: JSON.stringify(body),
@@ -685,6 +729,51 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
               style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}>
               + Add option
             </button>
+          </div>
+        )}
+        {type === 'video_question' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontSize: 13, color: 'var(--cw-muted)', marginBottom: 6 }}>
+              Pupils watch the video then type their answer below it. The AI marker reads the
+              pupil's written answer against your marking scheme — it does not watch the video,
+              so make sure your marking points are clear.
+            </div>
+            <div style={{ display: 'flex', gap: 14, marginBottom: 6 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14 }}>
+                <input type="radio" name="vk" checked={videoKind === 'youtube'}
+                  onChange={() => { setVideoKind('youtube'); setVideoUrl(''); setVideoFileName(''); }} />
+                YouTube link
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14 }}>
+                <input type="radio" name="vk" checked={videoKind === 'mp4'}
+                  onChange={() => { setVideoKind('mp4'); setVideoUrl(''); setVideoFileName(''); }} />
+                Upload a video file (.mp4 / .webm / .mov, up to 20 MB)
+              </label>
+            </div>
+            {videoKind === 'youtube' ? (
+              <input
+                type="url"
+                placeholder="https://www.youtube.com/watch?v=…"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                style={input}
+              />
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <input
+                  type="file"
+                  accept=".mp4,.webm,.mov,.m4v,video/mp4,video/webm,video/quicktime"
+                  disabled={videoUploading}
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadVideo(f); }}
+                />
+                {videoFileName && (
+                  <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
+                    Attached: <strong>{videoFileName}</strong>
+                  </div>
+                )}
+                {videoUploading && <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>Uploading…</div>}
+              </div>
+            )}
           </div>
         )}
         {type === 'presentation' && (
@@ -765,6 +854,49 @@ function youtubeIdFromUrl(url: string): string | null {
   ];
   for (const p of patterns) { const m = url.match(p); if (m) return m[1]; }
   return null;
+}
+
+function VideoQuestionPlayer({ config }: { config: any }) {
+  const v = config && typeof config === 'object' ? config.video : null;
+  if (!v || typeof v !== 'object' || !v.url) {
+    return (
+      <div style={{ marginTop: 10, padding: 10, border: '1px dashed var(--cw-border)', borderRadius: 8, fontSize: 14, color: 'var(--cw-muted)' }}>
+        No video has been attached to this question yet.
+      </div>
+    );
+  }
+  if (v.kind === 'youtube') {
+    const id = youtubeIdFromUrl(String(v.url));
+    if (!id) {
+      return (
+        <div style={{ marginTop: 10, fontSize: 14, color: 'var(--cw-danger)' }}>
+          The attached YouTube link couldn't be read. <a href={v.url} target="_blank" rel="noopener noreferrer">Open it in a new tab.</a>
+        </div>
+      );
+    }
+    return (
+      <div style={{ marginTop: 10, position: 'relative', paddingTop: '56.25%', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
+        <iframe
+          src={`https://www.youtube.com/embed/${id}`}
+          title="Video question"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
+        />
+      </div>
+    );
+  }
+  // mp4 / webm / mov
+  return (
+    <video
+      controls
+      preload="metadata"
+      src={v.url}
+      style={{ marginTop: 10, width: '100%', maxHeight: 480, borderRadius: 8, background: '#000' }}
+    >
+      Your browser can't play this video. <a href={v.url} target="_blank" rel="noopener noreferrer">Download it</a>.
+    </video>
+  );
 }
 
 function LessonResources({ resources }: { resources: LessonResource[] }) {

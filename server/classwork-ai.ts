@@ -76,6 +76,8 @@ export async function markSubmission(
         return await markProject(q, s);
       case 'presentation':
         return await markPresentation(q, s);
+      case 'video_question':
+        return await markVideoQuestion(q, s);
       default:
         return null;
     }
@@ -442,6 +444,35 @@ async function markProject(q: AIQuestion, s: AISubmission): Promise<AIMarkResult
   }
   // File-based project marking lands when uploads ship.
   return null;
+}
+
+/* ---------- 9. Watch a video and answer ---------- */
+
+// The teacher attaches a YouTube link or an .mp4/.webm file to the question
+// (stored in q.config.video). The student watches the video in the SPA and
+// submits a written answer. The AI marks the *written answer* against the
+// question and marking scheme — it does not watch the video itself, and the
+// prompt makes that limitation explicit.
+async function markVideoQuestion(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {
+  if (!s.text_answer || !gemini) return null;
+  const cfg = q.config && typeof q.config === 'object' ? q.config : {};
+  const video = cfg.video && typeof cfg.video === 'object' ? cfg.video : {};
+  const videoKind = video.kind === 'mp4' ? 'an uploaded video clip' : 'a YouTube video';
+  const prompt = [
+    `You are a Scottish secondary school Computing Science teacher marking a pupil's written answer to a question about ${videoKind}.`,
+    `You have NOT watched the video yourself, so you must judge the answer purely against the question and marking scheme. If the answer is plausible and addresses the marking points, award marks; if it clearly contradicts the question or marking scheme, deduct marks. Be honest in your feedback that you couldn't watch the video.`,
+    '',
+    `Question (worth ${q.max_marks} mark${q.max_marks === 1 ? '' : 's'}):`,
+    q.prompt,
+    q.marking_scheme ? `\nMarking scheme:\n${q.marking_scheme}` : '',
+    q.ai_grading_guidance ? `\nAdditional guidance:\n${q.ai_grading_guidance}` : '',
+    '',
+    `Pupil's written answer:\n"""\n${s.text_answer}\n"""`,
+    '',
+    `Award a whole number from 0 to ${q.max_marks} and write 2-3 sentences of constructive feedback aimed at the pupil.`,
+    `Return ONLY a JSON object: {"marks": <number>, "feedback": "<string>"}.`,
+  ].filter(Boolean).join('\n');
+  return await callGeminiForMark(prompt, q.max_marks);
 }
 
 /* ---------- 8. Presentation (.pptx) ---------- */
