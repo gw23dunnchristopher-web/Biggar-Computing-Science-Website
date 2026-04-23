@@ -495,7 +495,7 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
   });
 
   app.post('/api/classwork/lessons/:lessonId/questions', requireTeacher, async (req, res) => {
-    const { questionType, prompt, markingScheme, aiGradingGuidance, maxMarks, options, config, orderIndex } = req.body || {};
+    const { questionType, prompt, markingScheme, aiGradingGuidance, maxMarks, options, config, orderIndex, isExtension } = req.body || {};
     if (!isClassworkQuestionType(questionType)) return res.status(400).json({ error: 'Invalid questionType' });
     if (!prompt || typeof prompt !== 'string') return res.status(400).json({ error: 'prompt required' });
     try {
@@ -514,6 +514,7 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
         options,
         config,
         orderIndex,
+        isExtension: isExtension === true,
       });
       res.json(q);
     } catch (err) {

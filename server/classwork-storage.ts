@@ -124,6 +124,13 @@ export function ensureClassworkSchema(): Promise<void> {
       await client.query(`ALTER TABLE IF EXISTS n5_classes  ADD COLUMN IF NOT EXISTS is_archived BOOLEAN NOT NULL DEFAULT FALSE;`);
       await client.query(`ALTER TABLE IF EXISTS bhs_classes ADD COLUMN IF NOT EXISTS is_archived BOOLEAN NOT NULL DEFAULT FALSE;`);
 
+      // Extension-activity flag on questions. Extension questions are still
+      // submitted and AI-marked (so the pupil gets feedback), but they're
+      // excluded from every analytics aggregate so they don't drag the class
+      // average down or show up as "missing" work for pupils who skip them.
+      // Idempotent.
+      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_questions ADD COLUMN IF NOT EXISTS is_extension BOOLEAN NOT NULL DEFAULT FALSE;`);
+
       // Learning intentions + success criteria for each lesson. Stored as
       // free-form TEXT (one bullet per line — kept simple so teachers can paste
       // straight from a planner). Idempotent.
@@ -565,7 +572,7 @@ export async function listQuestions(lessonId: string) {
   await ensureClassworkSchema();
   const r = await pool.query(
     `SELECT id, lesson_id, course, order_index, question_type, prompt, marking_scheme,
-            ai_grading_guidance, max_marks, options, config, created_at
+            ai_grading_guidance, max_marks, options, config, is_extension, created_at
        FROM bhs_classwork_questions
       WHERE lesson_id = $1
       ORDER BY order_index ASC, created_at ASC`,
@@ -578,7 +585,7 @@ export async function getQuestion(id: string) {
   await ensureClassworkSchema();
   const r = await pool.query(
     `SELECT id, lesson_id, course, order_index, question_type, prompt, marking_scheme,
-            ai_grading_guidance, max_marks, options, config, created_at
+            ai_grading_guidance, max_marks, options, config, is_extension, created_at
        FROM bhs_classwork_questions WHERE id = $1`,
     [id]
   );
@@ -596,6 +603,7 @@ export interface CreateQuestionInput {
   options?: any;
   config?: any;
   orderIndex?: number;
+  isExtension?: boolean;
 }
 
 export async function createQuestion(input: CreateQuestionInput) {
@@ -604,8 +612,8 @@ export async function createQuestion(input: CreateQuestionInput) {
   const r = await pool.query(
     `INSERT INTO bhs_classwork_questions
        (id, lesson_id, course, order_index, question_type, prompt, marking_scheme,
-        ai_grading_guidance, max_marks, options, config)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+        ai_grading_guidance, max_marks, options, config, is_extension)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
      RETURNING *`,
     [
       id,
@@ -619,6 +627,7 @@ export async function createQuestion(input: CreateQuestionInput) {
       input.maxMarks ?? 1,
       input.options ? JSON.stringify(input.options) : null,
       input.config ? JSON.stringify(input.config) : null,
+      input.isExtension === true,
     ]
   );
   return r.rows[0];
@@ -637,6 +646,7 @@ export async function updateQuestion(id: string, fields: Partial<Omit<CreateQues
   if (fields.options !== undefined) { sets.push(`options = $${i++}`); vals.push(fields.options ? JSON.stringify(fields.options) : null); }
   if (fields.config !== undefined) { sets.push(`config = $${i++}`); vals.push(fields.config ? JSON.stringify(fields.config) : null); }
   if (fields.orderIndex !== undefined) { sets.push(`order_index = $${i++}`); vals.push(fields.orderIndex); }
+  if (fields.isExtension !== undefined) { sets.push(`is_extension = $${i++}`); vals.push(fields.isExtension === true); }
   if (!sets.length) return null;
   vals.push(id);
   const r = await pool.query(
@@ -742,6 +752,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
        LEFT JOIN (
          SELECT lesson_id, COUNT(*)::int AS question_count
            FROM bhs_classwork_questions
+          WHERE is_extension = FALSE
           GROUP BY lesson_id
        ) qstat ON qstat.lesson_id = l.id
        LEFT JOIN (
@@ -756,7 +767,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
                 )                                              AS avg_percent
            FROM bhs_classwork_submissions s
            JOIN bhs_classwork_questions q ON q.id = s.question_id
-          WHERE s.course = $1
+          WHERE s.course = $1 AND q.is_extension = FALSE
           GROUP BY s.lesson_id
        ) sstat ON sstat.lesson_id = l.id
       WHERE l.course = $1
@@ -779,17 +790,20 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
             )                                                    AS avg_percent
        FROM bhs_classwork_submissions s
        JOIN bhs_classwork_questions q ON q.id = s.question_id
-      WHERE s.course = $1
+      WHERE s.course = $1 AND q.is_extension = FALSE
       GROUP BY s.student_id
       ORDER BY MAX(s.student_username) ASC`,
     [course]
   );
 
-  // Course-wide totals.
+  // Course-wide totals. Extension-question submissions are excluded so
+  // optional enrichment work doesn't inflate the headline numbers.
   const totals = await pool.query(
     `SELECT COUNT(*)::int                              AS submission_count,
-            COUNT(DISTINCT student_id)::int            AS distinct_students
-       FROM bhs_classwork_submissions WHERE course = $1`,
+            COUNT(DISTINCT s.student_id)::int          AS distinct_students
+       FROM bhs_classwork_submissions s
+       JOIN bhs_classwork_questions q ON q.id = s.question_id
+      WHERE s.course = $1 AND q.is_extension = FALSE`,
     [course]
   );
 
@@ -840,7 +854,7 @@ export async function getLessonAnalytics(lessonId: string) {
           WHERE lesson_id = $1
           GROUP BY question_id
        ) s ON s.question_id = q.id
-      WHERE q.lesson_id = $1
+      WHERE q.lesson_id = $1 AND q.is_extension = FALSE
       ORDER BY q.order_index, q.id`,
     [lessonId]
   );
@@ -857,7 +871,7 @@ export async function getLessonAnalytics(lessonId: string) {
               q.max_marks
          FROM bhs_classwork_submissions s
          JOIN bhs_classwork_questions q ON q.id = s.question_id
-        WHERE s.lesson_id = $1
+        WHERE s.lesson_id = $1 AND q.is_extension = FALSE
         ORDER BY s.student_id, s.question_id, s.marks_awarded DESC NULLS LAST, s.submitted_at DESC
      )
      SELECT student_id,
@@ -894,7 +908,7 @@ export async function getStudentCourseAnalytics(course: ClassworkCourse, student
        JOIN bhs_classwork_questions q ON q.id = s.question_id
        JOIN bhs_classwork_lessons   l ON l.id = s.lesson_id
        JOIN bhs_classwork_units     u ON u.id = l.unit_id
-      WHERE s.course = $1 AND s.student_id = $2
+      WHERE s.course = $1 AND s.student_id = $2 AND q.is_extension = FALSE
       ORDER BY u.order_index, l.order_index, q.order_index, s.submitted_at DESC`,
     [course, studentId]
   );

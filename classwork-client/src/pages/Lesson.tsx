@@ -168,13 +168,26 @@ export default function Lesson() {
         </p>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 }}>
-        {questions.map((q, i) => {
+      {(() => {
+        const mainQs = questions.filter((q) => !q.is_extension);
+        const extQs  = questions.filter((q) => !!q.is_extension);
+        const renderQuestion = (q: any, label: string, isExt: boolean) => {
           const mySubs = submissions.filter(s => s.question_id === q.id);
           return (
-            <div key={q.id} style={card}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                <div style={{ fontWeight: 700 }}>Q{i + 1} · {TYPE_LABELS[q.question_type] || q.question_type}</div>
+            <div key={q.id} style={{
+              ...card,
+              ...(isExt ? { borderColor: '#c084fc', background: '#faf5ff' } : {}),
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
+                  <span>{label} · {TYPE_LABELS[q.question_type] || q.question_type}</span>
+                  {isExt && (
+                    <span style={{
+                      fontSize: 11, fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase',
+                      padding: '2px 8px', borderRadius: 999, background: '#7c3aed', color: '#fff',
+                    }}>Extension</span>
+                  )}
+                </div>
                 <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>{q.max_marks} mark{q.max_marks === 1 ? '' : 's'}</div>
               </div>
               <p style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}>{q.prompt}</p>
@@ -213,8 +226,31 @@ export default function Lesson() {
               )}
             </div>
           );
-        })}
-      </div>
+        };
+        return (
+          <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 }}>
+              {mainQs.map((q, i) => renderQuestion(q, `Q${i + 1}`, false))}
+            </div>
+            {extQs.length > 0 && (
+              <div style={{ marginTop: 28 }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10,
+                  paddingBottom: 8, borderBottom: '2px solid #e9d5ff',
+                }}>
+                  <h2 style={{ margin: 0, fontSize: 18, color: '#6b21a8' }}>Extension activities</h2>
+                  <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
+                    Optional — these are marked but don't count towards class analytics.
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {extQs.map((q, i) => renderQuestion(q, `E${i + 1}`, true))}
+                </div>
+              </div>
+            )}
+          </>
+        );
+      })()}
     </Shell>
   );
 }
@@ -734,6 +770,7 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
   const [useRubric, setUseRubric] = useState(false);
   const [visualMarking, setVisualMarking] = useState(false);
   const [sqlDatabaseUrl, setSqlDatabaseUrl] = useState('');
+  const [isExtension, setIsExtension] = useState(false);
   const [videoKind, setVideoKind] = useState<'youtube' | 'mp4'>('youtube');
   const [videoUrl, setVideoUrl] = useState('');
   const [videoFileName, setVideoFileName] = useState('');
@@ -787,6 +824,7 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
     try {
       const body: any = {
         questionType: type, prompt, maxMarks, markingScheme, aiGradingGuidance: aiGuidance,
+        isExtension,
       };
       if (type === 'multiple_choice') body.options = options;
       if (type === 'presentation') {
@@ -841,6 +879,16 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
         </label>
         <label style={fieldLabel}>Max marks
           <input type="number" min={1} value={maxMarks} onChange={(e) => setMaxMarks(parseInt(e.target.value) || 1)} style={input} />
+        </label>
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 12, cursor: 'pointer' }}>
+          <input type="checkbox" checked={isExtension} onChange={(e) => setIsExtension(e.target.checked)} style={{ marginTop: 3 }} />
+          <span>
+            <span style={{ fontWeight: 600 }}>Extension activity</span>
+            <span style={{ display: 'block', fontSize: 12, color: 'var(--cw-muted)' }}>
+              Pupils still get AI feedback and a mark, but this question is hidden from class
+              analytics — it won't drag the class average down or count as missing work.
+            </span>
+          </span>
         </label>
         {type === 'multiple_choice' && (
           <div style={fieldLabel as any}>
