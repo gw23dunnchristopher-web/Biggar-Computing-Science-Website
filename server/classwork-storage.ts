@@ -260,6 +260,26 @@ export async function createStudentInClass(opts: {
   }
 }
 
+export async function setStudentUsername(studentId: string, newUsername: string) {
+  const src = await getStudentSource(studentId);
+  if (!src) throw new Error('Student not found');
+  // Reject if the username is already in use anywhere (across both tables).
+  // We have to be careful to allow setting it to its own current value (rename
+  // to itself is a no-op, not a clash).
+  const cur = await pool.query(
+    `SELECT username FROM ${studentTbl(src)} WHERE id = $1`,
+    [studentId]
+  );
+  if (cur.rows[0]?.username === newUsername) return;
+  if (await usernameTakenAnywhere(newUsername)) {
+    throw new Error('That username is already taken — pick a different one.');
+  }
+  await pool.query(
+    `UPDATE ${studentTbl(src)} SET username = $1 WHERE id = $2`,
+    [newUsername, studentId]
+  );
+}
+
 export async function resetStudentPassword(studentId: string, hashed: string, plain: string) {
   const src = await getStudentSource(studentId);
   if (!src) throw new Error('Student not found');

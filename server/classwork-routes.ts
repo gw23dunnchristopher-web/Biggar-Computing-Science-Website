@@ -39,6 +39,7 @@ import {
   listStudentsInClass,
   createStudentInClass,
   resetStudentPassword,
+  setStudentUsername,
   deleteStudentAnywhere,
   deleteClassAnywhere,
   moveStudentToClass,
@@ -634,17 +635,35 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     }
   });
 
+  // Patch a student: supports either { classId } (move to a class in the same
+  // year — see moveStudentToClass) or { username } (rename their login). Both
+  // can be sent in one request if needed.
   app.patch('/api/classwork/teacher/students/:id', requireTeacher, async (req, res) => {
     try {
-      const classId = req.body?.classId;
-      if (!classId || typeof classId !== 'string') {
-        return res.status(400).json({ error: 'classId required' });
+      const body = req.body || {};
+      const classId  = typeof body.classId  === 'string' ? body.classId  : undefined;
+      const username = typeof body.username === 'string' ? body.username.trim() : undefined;
+
+      if (username !== undefined) {
+        // Same character set as auto-generated usernames: lowercase letters,
+        // digits and hyphens. Keeps things consistent and url-safe.
+        if (!/^[a-z0-9][a-z0-9-]{2,31}$/.test(username)) {
+          return res.status(400).json({
+            error: 'Username must be 3-32 characters: lowercase letters, digits and hyphens only.',
+          });
+        }
+        await setStudentUsername(req.params.id, username);
       }
-      await moveStudentToClass(req.params.id, classId);
+      if (classId !== undefined) {
+        await moveStudentToClass(req.params.id, classId);
+      }
+      if (username === undefined && classId === undefined) {
+        return res.status(400).json({ error: 'Nothing to update — supply username or classId.' });
+      }
       res.json({ ok: true });
     } catch (err: any) {
-      console.error('[classwork] move student error:', err);
-      res.status(400).json({ error: err?.message || 'Failed to move student' });
+      console.error('[classwork] update student error:', err);
+      res.status(400).json({ error: err?.message || 'Failed to update student' });
     }
   });
 

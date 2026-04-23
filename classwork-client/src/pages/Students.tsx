@@ -27,7 +27,9 @@ type ModalState =
   | { kind: 'none' }
   | { kind: 'addClass' }
   | { kind: 'editYear'; cls: ClassRow }
+  | { kind: 'renameClass'; cls: ClassRow }
   | { kind: 'moveStudent'; student: StudentRow }
+  | { kind: 'renameStudent'; student: StudentRow }
   | { kind: 'deleteClass'; cls: ClassRow }
   | { kind: 'deleteStudent'; student: StudentRow }
   | { kind: 'resetPassword'; student: StudentRow }
@@ -53,6 +55,8 @@ export default function Students() {
   const [newClassName, setNewClassName] = useState('');
   const [newClassYear, setNewClassYear] = useState('');
   const [editYearValue, setEditYearValue] = useState('');
+  const [renameClassValue, setRenameClassValue] = useState('');
+  const [renameStudentValue, setRenameStudentValue] = useState('');
   const [moveTargetId, setMoveTargetId] = useState('');
   const [modalErr, setModalErr] = useState<string | null>(null);
 
@@ -63,6 +67,14 @@ export default function Students() {
   function openEditYear(cls: ClassRow) {
     setEditYearValue(cls.course || ''); setModalErr(null);
     setModal({ kind: 'editYear', cls });
+  }
+  function openRenameClass(cls: ClassRow) {
+    setRenameClassValue(cls.name); setModalErr(null);
+    setModal({ kind: 'renameClass', cls });
+  }
+  function openRenameStudent(s: StudentRow) {
+    setRenameStudentValue(s.username); setModalErr(null);
+    setModal({ kind: 'renameStudent', student: s });
   }
   function openMoveStudent(s: StudentRow) {
     const choices = classes.filter((c) => c.id !== s.classId);
@@ -117,6 +129,32 @@ export default function Students() {
         method: 'PATCH', body: JSON.stringify({ course: editYearValue || null }),
       });
       await loadClasses();
+      closeModal();
+    } catch (e: any) { setModalErr(e.message); }
+  }
+
+  async function submitRenameClass(cls: ClassRow) {
+    const name = renameClassValue.trim();
+    if (!name) { setModalErr('Class name is required.'); return; }
+    if (name === cls.name) { closeModal(); return; }
+    try {
+      await api(`/api/classwork/teacher/classes/${cls.id}`, {
+        method: 'PATCH', body: JSON.stringify({ name }),
+      });
+      await loadClasses();
+      closeModal();
+    } catch (e: any) { setModalErr(e.message); }
+  }
+
+  async function submitRenameStudent(s: StudentRow) {
+    const username = renameStudentValue.trim().toLowerCase();
+    if (!username) { setModalErr('Username is required.'); return; }
+    if (username === s.username) { closeModal(); return; }
+    try {
+      await api(`/api/classwork/teacher/students/${s.id}`, {
+        method: 'PATCH', body: JSON.stringify({ username }),
+      });
+      if (selectedId) loadStudents(selectedId);
       closeModal();
     } catch (e: any) { setModalErr(e.message); }
   }
@@ -305,6 +343,11 @@ export default function Students() {
                       }}
                     >{yearShort(c.course)}</button>
                     <button
+                      onClick={() => openRenameClass(c)}
+                      title="Rename class"
+                      style={{ ...secondaryBtn, padding: '4px 8px', fontSize: 12 }}
+                    >Rename</button>
+                    <button
                       onClick={() => toggleArchiveClass(c)}
                       title={c.archived ? 'Unarchive — bring this class back into the active list' : 'Archive — hide this class without deleting it'}
                       style={{ ...secondaryBtn, padding: '4px 8px', fontSize: 12 }}
@@ -446,6 +489,7 @@ export default function Students() {
                                 : <span style={{ color: '#166534' }}>Set own password</span>}
                             </td>
                             <td style={{ ...td, textAlign: 'right' }}>
+                              <button onClick={() => openRenameStudent(s)} style={secondaryBtn}>Rename</button>{' '}
                               <button onClick={() => openMoveStudent(s)} style={secondaryBtn}>Move</button>{' '}
                               <button onClick={() => { setModalErr(null); setModal({ kind: 'resetPassword', student: s }); }} style={secondaryBtn}>Reset password</button>{' '}
                               <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteStudent', student: s }); }} style={dangerBtn}>Delete</button>
@@ -491,6 +535,55 @@ export default function Students() {
           </select>
           <p style={{ fontSize: 12, color: 'var(--cw-muted)', margin: '4px 0 0' }}>
             Students added to this class will be sent straight to this year's lessons.
+          </p>
+        </div>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'renameClass'}
+        title={modal.kind === 'renameClass' ? `Rename "${modal.cls.name}"` : ''}
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={() => modal.kind === 'renameClass' && submitRenameClass(modal.cls)} style={modalPrimaryBtn}>Save name</button>
+        </>}
+      >
+        <div>
+          <label style={modalLabel}>Class name</label>
+          <input
+            type="text"
+            value={renameClassValue}
+            onChange={(e) => setRenameClassValue(e.target.value)}
+            placeholder="e.g. Mr Dunn 1A"
+            style={modalInput}
+            autoFocus
+          />
+        </div>
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'renameStudent'}
+        title={modal.kind === 'renameStudent' ? `Rename ${modal.student.username}` : ''}
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button onClick={() => modal.kind === 'renameStudent' && submitRenameStudent(modal.student)} style={modalPrimaryBtn}>Save username</button>
+        </>}
+      >
+        <div>
+          <label style={modalLabel}>New username</label>
+          <input
+            type="text"
+            value={renameStudentValue}
+            onChange={(e) => setRenameStudentValue(e.target.value.toLowerCase())}
+            placeholder="lower-case-with-hyphens"
+            style={{ ...modalInput, fontFamily: 'monospace' }}
+            autoFocus
+          />
+          <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--cw-muted)' }}>
+            3-32 characters: lowercase letters, digits and hyphens only. The pupil's password is unchanged.
           </p>
         </div>
         {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
