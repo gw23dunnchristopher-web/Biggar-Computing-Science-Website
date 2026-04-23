@@ -970,3 +970,31 @@ export async function saveUnitNotes(unitId: string, studentId: string, content: 
     updatedAt: new Date(r.rows[0].updated_at).getTime(),
   };
 }
+
+/* ---------- Compiled per-pupil notes jotter ---------- */
+
+// Returns the pupil's full year jotter: every unit in their course (in order)
+// for which they've written non-empty notes. Used by both the pupil's own
+// "My jotter" view and the teacher's "View jotter" view.
+export async function getJotterForStudent(studentId: string, course: string): Promise<{
+  studentId: string; course: string; units: { unitId: string; unitTitle: string; content: string; updatedAt: number | null }[];
+}> {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `SELECT u.id AS unit_id, u.title AS unit_title, n.content, n.updated_at
+       FROM bhs_classwork_units u
+       JOIN bhs_classwork_unit_notes n ON n.unit_id = u.id
+      WHERE u.course = $1 AND n.student_id = $2 AND COALESCE(n.content, '') <> ''
+      ORDER BY u.order_index, u.created_at`,
+    [course, studentId]
+  );
+  return {
+    studentId, course,
+    units: r.rows.map((row: any) => ({
+      unitId: row.unit_id,
+      unitTitle: row.unit_title,
+      content: row.content || '',
+      updatedAt: row.updated_at ? new Date(row.updated_at).getTime() : null,
+    })),
+  };
+}

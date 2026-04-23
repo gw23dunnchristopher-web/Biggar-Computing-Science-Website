@@ -284,17 +284,26 @@ export default function Course() {
     <Shell title={COURSE_LABELS[course] || course} back={{ href: '/', label: 'All courses' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <h1 style={{ margin: 0 }}>Units</h1>
-        {role === 'teacher' && (
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Link href={`/analytics/${course}`} style={{
+        <div style={{ display: 'flex', gap: 8 }}>
+          {role === 'student' && (
+            <Link href="/jotter" style={{
               display: 'inline-block',
               background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
               padding: '8px 14px', borderRadius: 8, fontWeight: 600, textDecoration: 'none',
-            }}>Analytics</Link>
-            <button onClick={() => { setModalErr(null); setModal({ kind: 'lockAll' }); }} style={dangerBtn} title="Hide every lesson from students at once">Lock all</button>
-            <button onClick={openAddUnit} style={primaryBtn}>+ New unit</button>
-          </div>
-        )}
+            }} title="Open all your notes for the year in one place">My jotter</Link>
+          )}
+          {role === 'teacher' && (
+            <>
+              <Link href={`/analytics/${course}`} style={{
+                display: 'inline-block',
+                background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+                padding: '8px 14px', borderRadius: 8, fontWeight: 600, textDecoration: 'none',
+              }}>Analytics</Link>
+              <button onClick={() => { setModalErr(null); setModal({ kind: 'lockAll' }); }} style={dangerBtn} title="Hide every lesson from students at once">Lock all</button>
+              <button onClick={openAddUnit} style={primaryBtn}>+ New unit</button>
+            </>
+          )}
+        </div>
       </div>
 
       {loading && <p>Loading…</p>}

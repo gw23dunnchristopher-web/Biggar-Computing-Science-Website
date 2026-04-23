@@ -8,6 +8,7 @@ const Course = lazy(() => import('@/pages/Course'));
 const Lesson = lazy(() => import('@/pages/Lesson'));
 const Analytics = lazy(() => import('@/pages/Analytics'));
 const Students = lazy(() => import('@/pages/Students'));
+const Jotter = lazy(() => import('@/pages/Jotter'));
 
 function Loading() {
   return <div style={{ padding: 40, textAlign: 'center', color: '#64748b' }}>Loading…</div>;
@@ -38,6 +39,8 @@ export default function App() {
           <Route path="/lesson/:id" component={() => <Gate><Lesson /></Gate>} />
           <Route path="/analytics/:course" component={() => <Gate><Analytics /></Gate>} />
           <Route path="/students" component={() => <Gate><Students /></Gate>} />
+          <Route path="/jotter" component={() => <Gate><Jotter /></Gate>} />
+          <Route path="/jotter/:studentId" component={() => <Gate><Jotter /></Gate>} />
           <Route>{() => <Redirect to="/" />}</Route>
         </Switch>
       </Suspense>

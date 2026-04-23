@@ -15,6 +15,7 @@ import {
   deleteUnit,
   getUnitNotes,
   saveUnitNotes,
+  getJotterForStudent,
   listLessons,
   getLesson,
   createLesson,
@@ -366,6 +367,38 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] saveUnitNotes error:', err);
       res.status(500).json({ error: 'Failed to save notes' });
+    }
+  });
+
+  /* ---------- Compiled per-pupil notes jotter ---------- */
+
+  // Pupil viewing their own compiled jotter for the year. Resolves their
+  // course from their class assignment and stitches every unit's notes in
+  // order. Returns 409 if they haven't been put in a year group yet.
+  app.get('/api/classwork/me/jotter', requireStudent, async (req, res) => {
+    try {
+      const studentId = (req as any).studentId as string;
+      const cc = await getStudentClassCourse(studentId);
+      if (!cc?.course) return res.status(409).json({ error: 'You haven\u2019t been put in a year group yet.' });
+      const jotter = await getJotterForStudent(studentId, cc.course);
+      res.json({ ...jotter, courseLabel: CLASSWORK_COURSE_LABELS[cc.course] || cc.course });
+    } catch (err) {
+      console.error('[classwork] getMyJotter error:', err);
+      res.status(500).json({ error: 'Failed to load jotter' });
+    }
+  });
+
+  // Teacher viewing a specific pupil's compiled jotter.
+  app.get('/api/classwork/students/:studentId/jotter', requireTeacher, async (req, res) => {
+    try {
+      const studentId = req.params.studentId;
+      const cc = await getStudentClassCourse(studentId);
+      if (!cc?.course) return res.status(409).json({ error: 'This pupil hasn\u2019t been put in a year group yet.' });
+      const jotter = await getJotterForStudent(studentId, cc.course);
+      res.json({ ...jotter, courseLabel: CLASSWORK_COURSE_LABELS[cc.course] || cc.course });
+    } catch (err) {
+      console.error('[classwork] getStudentJotter error:', err);
+      res.status(500).json({ error: 'Failed to load jotter' });
     }
   });
 

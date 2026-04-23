@@ -491,6 +491,7 @@ export default function Students() {
                               <Menu
                                 title="Student actions"
                                 items={[
+                                  { label: 'View notes jotter…', onClick: () => { window.location.href = `/classwork/jotter/${encodeURIComponent(s.id)}`; } },
                                   { label: 'Rename username…', onClick: () => openRenameStudent(s) },
                                   { label: 'Move or copy…',    onClick: () => openMoveStudent(s) },
                                   { label: 'Reset password…',  onClick: () => { setModalErr(null); setModal({ kind: 'resetPassword', student: s }); } },
