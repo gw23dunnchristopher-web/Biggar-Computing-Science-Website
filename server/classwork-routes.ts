@@ -44,6 +44,7 @@ import {
   resetStudentPassword,
   setStudentUsername,
   listLessonResources,
+  listQuestionResources,
   addLessonResource,
   updateLessonResource,
   deleteLessonResource,
@@ -541,6 +542,50 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     }
   });
 
+  /* ---------- Per-question resources ---------- */
+
+  // Anyone who can see the lesson can list a question's resources.
+  app.get('/api/classwork/questions/:id/resources', async (req, res) => {
+    try {
+      const q = await getQuestion(req.params.id);
+      if (!q) return res.status(404).json({ error: 'Question not found' });
+      const lesson = await getLesson(q.lesson_id);
+      if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
+      const isTeacher = await checkTeacher(req, requireTeacher);
+      if (!isTeacher && !lesson.is_published) return res.status(404).json({ error: 'Question not found' });
+      res.json(await listQuestionResources(req.params.id));
+    } catch (err) {
+      console.error('[classwork] listQuestionResources error:', err);
+      res.status(500).json({ error: 'Failed to load resources' });
+    }
+  });
+
+  app.post('/api/classwork/questions/:id/resources', requireTeacher, async (req, res) => {
+    try {
+      const q = await getQuestion(req.params.id);
+      if (!q) return res.status(404).json({ error: 'Question not found' });
+      const { kind, url, title, orderIndex } = req.body || {};
+      if (!isLessonResourceKind(kind)) return res.status(400).json({ error: 'Invalid resource kind' });
+      if (!url || typeof url !== 'string') return res.status(400).json({ error: 'URL is required' });
+      const existing = await listQuestionResources(req.params.id);
+      const nextOrder = typeof orderIndex === 'number'
+        ? orderIndex
+        : (existing.length ? Math.max(...existing.map((r: any) => r.order_index ?? 0)) + 1 : 0);
+      const row = await addLessonResource({
+        lessonId: q.lesson_id,
+        questionId: q.id,
+        kind,
+        url: url.trim(),
+        title: typeof title === 'string' && title.trim() ? title.trim() : null,
+        orderIndex: nextOrder,
+      });
+      res.json(row);
+    } catch (err) {
+      console.error('[classwork] addQuestionResource error:', err);
+      res.status(500).json({ error: 'Failed to add resource' });
+    }
+  });
+
   /* ---------- Questions ---------- */
 
   app.get('/api/classwork/lessons/:lessonId/questions', async (req, res) => {
@@ -560,7 +605,7 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
   });
 
   app.post('/api/classwork/lessons/:lessonId/questions', requireTeacher, async (req, res) => {
-    const { questionType, prompt, markingScheme, aiGradingGuidance, maxMarks, options, config, orderIndex, isExtension } = req.body || {};
+    const { questionType, prompt, markingScheme, aiGradingGuidance, maxMarks, options, config, orderIndex, isExtension, passageId } = req.body || {};
     if (!isClassworkQuestionType(questionType)) return res.status(400).json({ error: 'Invalid questionType' });
     if (!prompt || typeof prompt !== 'string') return res.status(400).json({ error: 'prompt required' });
     try {
@@ -580,6 +625,7 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
         config,
         orderIndex,
         isExtension: isExtension === true,
+        passageId: typeof passageId === 'string' && passageId ? passageId : null,
       });
       res.json(q);
     } catch (err) {

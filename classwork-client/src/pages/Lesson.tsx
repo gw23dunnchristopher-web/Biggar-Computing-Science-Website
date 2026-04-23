@@ -33,6 +33,8 @@ interface Question {
   max_marks: number;
   options: any;
   config: any;
+  is_extension?: boolean;
+  passage_id?: string | null;
 }
 
 interface Submission {
@@ -67,6 +69,7 @@ const TYPE_LABELS: Record<string, string> = {
   html_task: 'HTML/CSS project (in-site editor)',
   sql_task: 'SQL task (Data Sculptor)',
   database_task: 'Database task (Data Sculptor sandbox)',
+  passage: 'Reading passage (with attached questions)',
 };
 
 export default function Lesson() {
@@ -148,7 +151,11 @@ export default function Lesson() {
             >
               {previewAsStudent ? 'Exit student preview' : 'Preview as student'}
             </button>
-            {!previewAsStudent && <NewQuestionButton lessonId={lessonId} onCreated={refresh} />}
+            {!previewAsStudent && <NewQuestionButton
+              lessonId={lessonId}
+              passages={questions.filter((q) => q.question_type === 'passage')}
+              onCreated={refresh}
+            />}
           </div>
         )}
       </div>
@@ -173,8 +180,36 @@ export default function Lesson() {
       {(() => {
         const mainQs = questions.filter((q) => !q.is_extension);
         const extQs  = questions.filter((q) => !!q.is_extension);
-        const renderQuestion = (q: any, label: string, isExt: boolean) => {
-          const mySubs = submissions.filter(s => s.question_id === q.id);
+
+        // Build a render plan: each passage groups any later-or-earlier questions
+        // whose passage_id matches it. Standalone (non-passage, non-attached)
+        // questions render as before. Passages whose id no-one references still
+        // render as a single passage card.
+        type Item = { type: 'standalone'; q: Question } | { type: 'group'; passage: Question; children: Question[] };
+        const buildItems = (qs: Question[]): Item[] => {
+          const consumed = new Set<string>();
+          const items: Item[] = [];
+          for (const q of qs) {
+            if (consumed.has(q.id)) continue;
+            if (q.question_type === 'passage') {
+              const children = qs.filter((c) =>
+                c.id !== q.id && c.question_type !== 'passage' && c.passage_id === q.id && !consumed.has(c.id)
+              );
+              children.forEach((c) => consumed.add(c.id));
+              consumed.add(q.id);
+              items.push({ type: 'group', passage: q, children });
+            } else {
+              consumed.add(q.id);
+              items.push({ type: 'standalone', q });
+            }
+          }
+          return items;
+        };
+
+        // A simple counter so non-passage questions across standalones AND
+        // groups share one continuous Q1, Q2, Q3… numbering.
+        const renderQuestionCard = (q: Question, label: string, isExt: boolean) => {
+          const mySubs = submissions.filter((s) => s.question_id === q.id);
           return (
             <div key={q.id} style={{
               ...card,
@@ -195,6 +230,11 @@ export default function Lesson() {
               <p style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}><PromptText text={q.prompt} /></p>
 
               {q.question_type === 'video_question' && <VideoQuestionPlayer config={q.config} />}
+
+              <QuestionResources
+                questionId={q.id}
+                isTeacher={role === 'teacher' && !previewAsStudent}
+              />
 
               {role === 'teacher' && !previewAsStudent && (
                 <details style={{ marginTop: 8, fontSize: 14, color: 'var(--cw-muted)' }}>
@@ -229,10 +269,81 @@ export default function Lesson() {
             </div>
           );
         };
+
+        // The passage panel: a card with the passage prompt + its own resources.
+        // No marks, no marking scheme, no answer area — it's reading material only.
+        const renderPassagePanel = (p: Question, label: string) => (
+          <div style={{
+            ...card,
+            background: '#fffbeb', borderColor: '#fcd34d',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#92400e' }}>
+              <span style={{
+                fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase',
+                padding: '2px 8px', borderRadius: 999, background: '#f59e0b', color: '#fff',
+              }}>Passage</span>
+              <span>{label}</span>
+            </div>
+            <p style={{ marginTop: 8, whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>
+              <PromptText text={p.prompt} />
+            </p>
+            <QuestionResources
+              questionId={p.id}
+              isTeacher={role === 'teacher' && !previewAsStudent}
+            />
+          </div>
+        );
+
+        // Run buildItems on main and extension lists separately so extensions stay
+        // in their own section. Numbering (qIdx, pIdx) is shared so pupils see
+        // a single continuous Q-sequence within each section.
+        const renderItems = (items: Item[], isExt: boolean, prefix: 'Q' | 'E') => {
+          let qIdx = 0;
+          let pIdx = 0;
+          const totalPassages = items.filter((it) => it.type === 'group').length;
+          return items.map((it) => {
+            if (it.type === 'standalone') {
+              qIdx++;
+              return renderQuestionCard(it.q, `${prefix}${qIdx}`, isExt);
+            }
+            pIdx++;
+            const passageLabel = totalPassages > 1 ? `Passage ${pIdx}` : 'Passage';
+            // Two-column sticky layout on desktop; stacks on narrow screens via
+            // the global @media block at the bottom of this file. Passage stays
+            // visible on the left while pupils scroll the questions on the right.
+            return (
+              <div
+                key={it.passage.id}
+                className="cw-passage-group"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(280px, 38%) 1fr',
+                  gap: 16,
+                  alignItems: 'start',
+                }}
+              >
+                <div style={{ position: 'sticky', top: 16 }}>
+                  {renderPassagePanel(it.passage, passageLabel)}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {it.children.length === 0 ? (
+                    <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0 }}>
+                      No questions are attached to this passage yet.
+                    </p>
+                  ) : it.children.map((c) => {
+                    qIdx++;
+                    return renderQuestionCard(c, `${prefix}${qIdx}`, isExt);
+                  })}
+                </div>
+              </div>
+            );
+          });
+        };
+
         return (
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 }}>
-              {mainQs.map((q, i) => renderQuestion(q, `Q${i + 1}`, false))}
+              {renderItems(buildItems(mainQs), false, 'Q')}
             </div>
             {extQs.length > 0 && (
               <div style={{ marginTop: 28 }}>
@@ -246,13 +357,19 @@ export default function Lesson() {
                   </span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {extQs.map((q, i) => renderQuestion(q, `E${i + 1}`, true))}
+                  {renderItems(buildItems(extQs), true, 'E')}
                 </div>
               </div>
             )}
           </>
         );
       })()}
+      <style>{`
+        @media (max-width: 800px) {
+          .cw-passage-group { grid-template-columns: 1fr !important; }
+          .cw-passage-group > div:first-child { position: static !important; }
+        }
+      `}</style>
     </Shell>
   );
 }
@@ -803,7 +920,7 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
   );
 }
 
-function NewQuestionButton({ lessonId, onCreated }: { lessonId: string; onCreated: () => void }) {
+function NewQuestionButton({ lessonId, passages, onCreated }: { lessonId: string; passages: Question[]; onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -811,14 +928,17 @@ function NewQuestionButton({ lessonId, onCreated }: { lessonId: string; onCreate
         background: 'var(--cw-accent)', color: '#fff', border: 'none',
         padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
       }}>+ New question</button>
-      {open && <NewQuestionModal lessonId={lessonId} onClose={() => setOpen(false)} onCreated={() => { setOpen(false); onCreated(); }} />}
+      {open && <NewQuestionModal lessonId={lessonId} passages={passages} onClose={() => setOpen(false)} onCreated={() => { setOpen(false); onCreated(); }} />}
     </>
   );
 }
 
-function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; onClose: () => void; onCreated: () => void }) {
+function NewQuestionModal({ lessonId, passages, onClose, onCreated }: { lessonId: string; passages: Question[]; onClose: () => void; onCreated: () => void }) {
   const [type, setType] = useState('short');
   const [prompt, setPrompt] = useState('');
+  // For non-passage types, optionally attach this new question to an existing
+  // passage in the lesson so they render together as a stimulus group.
+  const [passageId, setPassageId] = useState<string>('');
   const [maxMarks, setMaxMarks] = useState(1);
   const [markingScheme, setMarkingScheme] = useState('');
   const [aiGuidance, setAiGuidance] = useState('');
@@ -884,9 +1004,18 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
     setErr(null);
     try {
       const body: any = {
-        questionType: type, prompt, maxMarks, markingScheme, aiGradingGuidance: aiGuidance,
+        questionType: type, prompt,
+        // Passages have no marks / marking scheme / AI guidance / answer area —
+        // they're reading material only, so we send neutral defaults so the
+        // server doesn't reject them and analytics ignores them.
+        maxMarks: type === 'passage' ? 0 : maxMarks,
+        markingScheme: type === 'passage' ? '' : markingScheme,
+        aiGradingGuidance: type === 'passage' ? '' : aiGuidance,
         isExtension,
       };
+      // Only non-passage types can be attached to a passage (a passage
+      // attaching to itself doesn't make sense).
+      if (type !== 'passage' && passageId) body.passageId = passageId;
       if (type === 'multiple_choice') body.options = options;
       if (type === 'presentation') {
         const cfg: any = {};
@@ -948,16 +1077,40 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
             {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </label>
-        <label style={fieldLabel}>Question / prompt
-          <textarea rows={3} value={prompt} onChange={(e) => setPrompt(e.target.value)} style={input} />
+        <label style={fieldLabel}>{type === 'passage' ? 'Passage text (what pupils read)' : 'Question / prompt'}
+          <textarea
+            rows={type === 'passage' ? 8 : 3}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            style={input}
+          />
           <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
-            Tip: paste a URL (e.g. https://bbc.co.uk/bitesize) and it will appear as a clickable link that opens in a new window.
-            For a friendlier label, write <code>[Bitesize lesson](https://bbc.co.uk/bitesize)</code>.
+            {type === 'passage'
+              ? 'Type or paste the paragraph pupils have to read. It will sit in a sticky panel beside its attached questions, so pupils can refer back to it as they answer.'
+              : <>Tip: paste a URL (e.g. https://bbc.co.uk/bitesize) and it will appear as a clickable link that opens in a new window. For a friendlier label, write <code>[Bitesize lesson](https://bbc.co.uk/bitesize)</code>.</>}
           </span>
         </label>
-        <label style={fieldLabel}>Max marks
-          <input type="number" min={1} value={maxMarks} onChange={(e) => setMaxMarks(parseInt(e.target.value) || 1)} style={input} />
-        </label>
+        {type !== 'passage' && passages.length > 0 && (
+          <label style={fieldLabel}>Attach to passage (optional)
+            <select value={passageId} onChange={(e) => setPassageId(e.target.value)} style={input}>
+              <option value="">— None (standalone question) —</option>
+              {passages.map((p, i) => (
+                <option key={p.id} value={p.id}>
+                  {passages.length > 1 ? `Passage ${i + 1}: ` : 'Passage: '}
+                  {(p.prompt || '').slice(0, 60)}{(p.prompt || '').length > 60 ? '…' : ''}
+                </option>
+              ))}
+            </select>
+            <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
+              Group this question with a reading passage so pupils see the passage in a sticky panel beside it while they answer.
+            </span>
+          </label>
+        )}
+        {type !== 'passage' && (
+          <label style={fieldLabel}>Max marks
+            <input type="number" min={1} value={maxMarks} onChange={(e) => setMaxMarks(parseInt(e.target.value) || 1)} style={input} />
+          </label>
+        )}
         <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 12, cursor: 'pointer' }}>
           <input type="checkbox" checked={isExtension} onChange={(e) => setIsExtension(e.target.checked)} style={{ marginTop: 3 }} />
           <span>
@@ -1150,12 +1303,16 @@ function NewQuestionModal({ lessonId, onClose, onCreated }: { lessonId: string; 
             )}
           </div>
         )}
-        <label style={fieldLabel}>Marking scheme (teacher view only)
-          <textarea rows={2} value={markingScheme} onChange={(e) => setMarkingScheme(e.target.value)} style={input} />
-        </label>
-        <label style={fieldLabel}>AI grading guidance (used by AI marker — Phase 2)
-          <textarea rows={2} value={aiGuidance} onChange={(e) => setAiGuidance(e.target.value)} style={input} />
-        </label>
+        {type !== 'passage' && (
+          <>
+            <label style={fieldLabel}>Marking scheme (teacher view only)
+              <textarea rows={2} value={markingScheme} onChange={(e) => setMarkingScheme(e.target.value)} style={input} />
+            </label>
+            <label style={fieldLabel}>AI grading guidance (used by AI marker — Phase 2)
+              <textarea rows={2} value={aiGuidance} onChange={(e) => setAiGuidance(e.target.value)} style={input} />
+            </label>
+          </>
+        )}
         {err && <div style={{ color: 'var(--cw-danger)', fontSize: 14, marginTop: 6 }}>{err}</div>}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
           <button onClick={onClose} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid var(--cw-border)', background: '#fff', cursor: 'pointer' }}>Cancel</button>
@@ -1220,6 +1377,230 @@ function VideoQuestionPlayer({ config }: { config: any }) {
     >
       Your browser can't play this video. <a href={v.url} target="_blank" rel="noopener noreferrer">Download it</a>.
     </video>
+  );
+}
+
+/* ---------- Per-question resources ----------
+   Lets a teacher attach images / documents / YouTube videos / generic links /
+   embed URLs to one specific question. Pupils see them rendered above the
+   answer area; teachers also get + Add / × Remove controls. The actual list
+   item rendering is shared with the legacy LessonResources block via
+   `renderResource()` so both look identical. */
+
+function renderResource(r: LessonResource): React.ReactNode {
+  const title = r.title || r.url;
+  if (r.kind === 'youtube') {
+    const id = youtubeIdFromUrl(r.url);
+    if (!id) {
+      return <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--cw-accent)' }}>{title}</a>;
+    }
+    return (
+      <figure key={r.id} style={{ margin: 0 }}>
+        {r.title && <figcaption style={{ fontWeight: 600, marginBottom: 6 }}>{r.title}</figcaption>}
+        <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
+          <iframe src={`https://www.youtube.com/embed/${id}`} title={title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }} />
+        </div>
+      </figure>
+    );
+  }
+  if (r.kind === 'embed') {
+    return (
+      <figure key={r.id} style={{ margin: 0 }}>
+        {r.title && <figcaption style={{ fontWeight: 600, marginBottom: 6 }}>{r.title}</figcaption>}
+        <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', background: '#000', border: '1px solid var(--cw-border)', height: 600, maxHeight: '80vh' }}>
+          <iframe src={r.url} title={title} loading="lazy"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-pointer-lock allow-downloads"
+            allow="autoplay; fullscreen; clipboard-write; gamepad; microphone; camera; geolocation"
+            allowFullScreen referrerPolicy="no-referrer"
+            style={{ width: '100%', height: '100%', border: 0, display: 'block', background: '#fff' }} />
+        </div>
+        <div style={{ marginTop: 6, fontSize: 12, color: 'var(--cw-muted)' }}>
+          Trouble loading? <a href={r.url} target="_blank" rel="noopener noreferrer">Open in a new tab</a>.
+        </div>
+      </figure>
+    );
+  }
+  if (r.kind === 'image') {
+    return (
+      <figure key={r.id} style={{ margin: 0 }}>
+        <img src={r.url} alt={title} style={{ maxWidth: '100%', maxHeight: 480, borderRadius: 8, border: '1px solid var(--cw-border)', display: 'block' }} />
+        {r.title && <figcaption style={{ marginTop: 6, fontSize: 13, color: 'var(--cw-muted)' }}>{r.title}</figcaption>}
+      </figure>
+    );
+  }
+  const isDoc = r.kind === 'document';
+  return (
+    <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer"
+       style={{
+         display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 14px',
+         background: '#f8fafc', border: '1px solid var(--cw-border)', borderRadius: 8,
+         color: 'var(--cw-ink)', textDecoration: 'none', fontWeight: 600,
+         alignSelf: 'flex-start', maxWidth: '100%',
+       }}>
+      <span style={{
+        fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+        background: isDoc ? '#fef3c7' : '#e0e7ff',
+        color: isDoc ? '#92400e' : '#3730a3',
+        textTransform: 'uppercase', flex: '0 0 auto',
+      }}>{isDoc ? 'Document' : 'Link'}</span>
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {isDoc ? `Open: ${title}` : title}
+      </span>
+    </a>
+  );
+}
+
+function QuestionResources({ questionId, isTeacher }: { questionId: string; isTeacher: boolean }) {
+  const [resources, setResources] = useState<LessonResource[] | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [kind, setKind] = useState<LessonResource['kind']>('image');
+  const [title, setTitle] = useState('');
+  const [url, setUrl] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function load() {
+    try {
+      const list = await api<LessonResource[]>(`/api/classwork/questions/${questionId}/resources`);
+      setResources(list || []);
+    } catch {
+      setResources([]);
+    }
+  }
+  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [questionId]);
+
+  async function uploadFile(file: File) {
+    setBusy(true); setErr(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const teacherToken = (() => {
+        try { return localStorage.getItem('teacher_token') || localStorage.getItem('teacherToken') || ''; } catch { return ''; }
+      })();
+      const headers: Record<string, string> = {};
+      if (teacherToken) headers['x-teacher-password'] = teacherToken;
+      const r = await fetch('/api/classwork/teacher/upload/resource', { method: 'POST', headers, body: fd });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data?.error || 'Upload failed');
+      setUrl(data.url);
+      if (!title) setTitle(data.filename || file.name);
+    } catch (e: any) {
+      setErr(e.message || 'Upload failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function add() {
+    if (!url.trim()) { setErr('Please provide a URL or upload a file.'); return; }
+    setBusy(true); setErr(null);
+    try {
+      await api(`/api/classwork/questions/${questionId}/resources`, {
+        method: 'POST',
+        body: JSON.stringify({ kind, url: url.trim(), title: title.trim() || null }),
+      });
+      setUrl(''); setTitle(''); setKind('image'); setShowForm(false);
+      await load();
+    } catch (e: any) {
+      setErr(e.message || 'Failed to add resource');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove(id: string) {
+    if (!window.confirm('Remove this resource?')) return;
+    try {
+      await api(`/api/classwork/resources/${id}`, { method: 'DELETE' });
+      await load();
+    } catch (e: any) {
+      window.alert(e.message || 'Failed to remove');
+    }
+  }
+
+  if (!resources) return null;
+  if (!isTeacher && resources.length === 0) return null;
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      {resources.length > 0 && (
+        <div style={{
+          display: 'flex', flexDirection: 'column', gap: 12,
+          padding: 12, background: '#f8fafc', border: '1px solid var(--cw-border)', borderRadius: 8,
+        }}>
+          {resources.map((r) => (
+            <div key={r.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>{renderResource(r)}</div>
+              {isTeacher && (
+                <button onClick={() => remove(r.id)} title="Remove resource"
+                  style={{
+                    border: '1px solid var(--cw-border)', background: '#fff', borderRadius: 6,
+                    padding: '4px 8px', cursor: 'pointer', color: 'var(--cw-danger)', fontWeight: 700,
+                  }}>×</button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {isTeacher && (
+        <div style={{ marginTop: 8 }}>
+          {!showForm ? (
+            <button onClick={() => setShowForm(true)} style={{
+              fontSize: 13, padding: '6px 10px', border: '1px dashed var(--cw-border)',
+              background: '#fff', borderRadius: 6, cursor: 'pointer', color: 'var(--cw-muted)',
+            }}>+ Add resource to this question</button>
+          ) : (
+            <div style={{ padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff' }}>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                <select value={kind} onChange={(e) => setKind(e.target.value as any)} style={input}>
+                  <option value="image">Image (upload)</option>
+                  <option value="document">Document (upload)</option>
+                  <option value="youtube">YouTube link</option>
+                  <option value="link">Web link</option>
+                  <option value="embed">Embed (iframe URL)</option>
+                </select>
+                <input
+                  placeholder="Title (optional)"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  style={{ ...input, flex: '1 1 200px' }}
+                />
+              </div>
+              {(kind === 'image' || kind === 'document') ? (
+                <div style={{ marginTop: 6 }}>
+                  <input type="file"
+                    accept={kind === 'image' ? 'image/*' : '.pdf,.docx,.pptx,.xlsx,.txt,.csv,.zip'}
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f); }}
+                  />
+                  {url && <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>Uploaded: <code>{url}</code></div>}
+                </div>
+              ) : (
+                <input
+                  placeholder={kind === 'youtube' ? 'https://www.youtube.com/watch?v=…' : 'https://…'}
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  style={{ ...input, marginTop: 6, width: '100%' }}
+                />
+              )}
+              {err && <div style={{ color: 'var(--cw-danger)', fontSize: 13, marginTop: 6 }}>{err}</div>}
+              <div style={{ marginTop: 8, display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                <button onClick={() => { setShowForm(false); setErr(null); setUrl(''); setTitle(''); }}
+                  style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', background: '#fff', cursor: 'pointer' }}>
+                  Cancel
+                </button>
+                <button onClick={add} disabled={busy} style={{
+                  padding: '6px 12px', borderRadius: 6, border: 'none',
+                  background: 'var(--cw-accent)', color: '#fff', fontWeight: 600, cursor: 'pointer',
+                }}>{busy ? 'Saving…' : 'Add'}</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 

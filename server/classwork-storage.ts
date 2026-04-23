@@ -29,6 +29,7 @@ export const CLASSWORK_QUESTION_TYPES = [
   'html_task',
   'sql_task',
   'database_task',
+  'passage',
 ] as const;
 export type ClassworkQuestionType = (typeof CLASSWORK_QUESTION_TYPES)[number];
 
@@ -167,6 +168,20 @@ export function ensureClassworkSchema(): Promise<void> {
         );
       `);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_resources_lesson ON bhs_classwork_lesson_resources(lesson_id);`);
+
+      // Stimulus groups: a question of type "passage" holds a paragraph of
+      // reading material; other questions can attach themselves to it via
+      // passage_id so they render in a sticky two-column layout. No FK on
+      // passage_id — children are detached at the application layer when a
+      // passage is deleted (see deleteQuestion). Idempotent.
+      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_questions ADD COLUMN IF NOT EXISTS passage_id VARCHAR(64);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_questions_passage ON bhs_classwork_questions(passage_id);`);
+
+      // Per-question resources: lets teachers attach images / docs / videos /
+      // links / embeds to an individual question rather than the whole lesson.
+      // question_id is NULL for legacy lesson-level resources. Idempotent.
+      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_lesson_resources ADD COLUMN IF NOT EXISTS question_id VARCHAR(64) REFERENCES bhs_classwork_questions(id) ON DELETE CASCADE;`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_resources_question ON bhs_classwork_lesson_resources(question_id);`);
     } finally {
       client.release();
     }
@@ -532,18 +547,33 @@ export const isLessonResourceKind = (k: any): k is LessonResourceKind =>
 
 export async function listLessonResources(lessonId: string) {
   await ensureClassworkSchema();
+  // Lesson-level only — per-question resources (question_id IS NOT NULL)
+  // are now fetched via listQuestionResources.
   const r = await pool.query(
-    `SELECT id, lesson_id, kind, title, url, order_index, created_at
+    `SELECT id, lesson_id, question_id, kind, title, url, order_index, created_at
        FROM bhs_classwork_lesson_resources
-      WHERE lesson_id = $1
+      WHERE lesson_id = $1 AND question_id IS NULL
       ORDER BY order_index ASC, created_at ASC`,
     [lessonId]
   );
   return r.rows;
 }
 
+export async function listQuestionResources(questionId: string) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `SELECT id, lesson_id, question_id, kind, title, url, order_index, created_at
+       FROM bhs_classwork_lesson_resources
+      WHERE question_id = $1
+      ORDER BY order_index ASC, created_at ASC`,
+    [questionId]
+  );
+  return r.rows;
+}
+
 export async function addLessonResource(input: {
   lessonId: string;
+  questionId?: string | null;
   kind: LessonResourceKind;
   title?: string | null;
   url: string;
@@ -552,9 +582,9 @@ export async function addLessonResource(input: {
   await ensureClassworkSchema();
   const id = newId('res');
   const r = await pool.query(
-    `INSERT INTO bhs_classwork_lesson_resources (id, lesson_id, kind, title, url, order_index)
-     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-    [id, input.lessonId, input.kind, input.title ?? null, input.url, input.orderIndex ?? 0]
+    `INSERT INTO bhs_classwork_lesson_resources (id, lesson_id, question_id, kind, title, url, order_index)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [id, input.lessonId, input.questionId ?? null, input.kind, input.title ?? null, input.url, input.orderIndex ?? 0]
   );
   return r.rows[0];
 }
@@ -585,7 +615,7 @@ export async function listQuestions(lessonId: string) {
   await ensureClassworkSchema();
   const r = await pool.query(
     `SELECT id, lesson_id, course, order_index, question_type, prompt, marking_scheme,
-            ai_grading_guidance, max_marks, options, config, is_extension, created_at
+            ai_grading_guidance, max_marks, options, config, is_extension, passage_id, created_at
        FROM bhs_classwork_questions
       WHERE lesson_id = $1
       ORDER BY order_index ASC, created_at ASC`,
@@ -598,7 +628,7 @@ export async function getQuestion(id: string) {
   await ensureClassworkSchema();
   const r = await pool.query(
     `SELECT id, lesson_id, course, order_index, question_type, prompt, marking_scheme,
-            ai_grading_guidance, max_marks, options, config, is_extension, created_at
+            ai_grading_guidance, max_marks, options, config, is_extension, passage_id, created_at
        FROM bhs_classwork_questions WHERE id = $1`,
     [id]
   );
@@ -617,6 +647,7 @@ export interface CreateQuestionInput {
   config?: any;
   orderIndex?: number;
   isExtension?: boolean;
+  passageId?: string | null;
 }
 
 export async function createQuestion(input: CreateQuestionInput) {
@@ -625,8 +656,8 @@ export async function createQuestion(input: CreateQuestionInput) {
   const r = await pool.query(
     `INSERT INTO bhs_classwork_questions
        (id, lesson_id, course, order_index, question_type, prompt, marking_scheme,
-        ai_grading_guidance, max_marks, options, config, is_extension)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        ai_grading_guidance, max_marks, options, config, is_extension, passage_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
      RETURNING *`,
     [
       id,
@@ -641,6 +672,7 @@ export async function createQuestion(input: CreateQuestionInput) {
       input.options ? JSON.stringify(input.options) : null,
       input.config ? JSON.stringify(input.config) : null,
       input.isExtension === true,
+      input.passageId ?? null,
     ]
   );
   return r.rows[0];
@@ -660,6 +692,7 @@ export async function updateQuestion(id: string, fields: Partial<Omit<CreateQues
   if (fields.config !== undefined) { sets.push(`config = $${i++}`); vals.push(fields.config ? JSON.stringify(fields.config) : null); }
   if (fields.orderIndex !== undefined) { sets.push(`order_index = $${i++}`); vals.push(fields.orderIndex); }
   if (fields.isExtension !== undefined) { sets.push(`is_extension = $${i++}`); vals.push(fields.isExtension === true); }
+  if (fields.passageId !== undefined) { sets.push(`passage_id = $${i++}`); vals.push(fields.passageId ?? null); }
   if (!sets.length) return null;
   vals.push(id);
   const r = await pool.query(
@@ -671,6 +704,10 @@ export async function updateQuestion(id: string, fields: Partial<Omit<CreateQues
 
 export async function deleteQuestion(id: string) {
   await ensureClassworkSchema();
+  // If this is a passage with attached child questions, detach them first
+  // (passage_id has no FK so we have to NULL them out manually). Children
+  // become standalone questions in their original order.
+  await pool.query(`UPDATE bhs_classwork_questions SET passage_id = NULL WHERE passage_id = $1`, [id]);
   await pool.query(`DELETE FROM bhs_classwork_questions WHERE id = $1`, [id]);
 }
 
@@ -765,7 +802,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
        LEFT JOIN (
          SELECT lesson_id, COUNT(*)::int AS question_count
            FROM bhs_classwork_questions
-          WHERE is_extension = FALSE
+          WHERE is_extension = FALSE AND question_type <> 'passage'
           GROUP BY lesson_id
        ) qstat ON qstat.lesson_id = l.id
        LEFT JOIN (
@@ -780,7 +817,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
                 )                                              AS avg_percent
            FROM bhs_classwork_submissions s
            JOIN bhs_classwork_questions q ON q.id = s.question_id
-          WHERE s.course = $1 AND q.is_extension = FALSE
+          WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type <> 'passage'
           GROUP BY s.lesson_id
        ) sstat ON sstat.lesson_id = l.id
       WHERE l.course = $1
@@ -803,7 +840,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
             )                                                    AS avg_percent
        FROM bhs_classwork_submissions s
        JOIN bhs_classwork_questions q ON q.id = s.question_id
-      WHERE s.course = $1 AND q.is_extension = FALSE
+      WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type <> 'passage'
       GROUP BY s.student_id
       ORDER BY MAX(s.student_username) ASC`,
     [course]
@@ -816,7 +853,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
             COUNT(DISTINCT s.student_id)::int          AS distinct_students
        FROM bhs_classwork_submissions s
        JOIN bhs_classwork_questions q ON q.id = s.question_id
-      WHERE s.course = $1 AND q.is_extension = FALSE`,
+      WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type <> 'passage'`,
     [course]
   );
 
@@ -867,7 +904,7 @@ export async function getLessonAnalytics(lessonId: string) {
           WHERE lesson_id = $1
           GROUP BY question_id
        ) s ON s.question_id = q.id
-      WHERE q.lesson_id = $1 AND q.is_extension = FALSE
+      WHERE q.lesson_id = $1 AND q.is_extension = FALSE AND q.question_type <> 'passage'
       ORDER BY q.order_index, q.id`,
     [lessonId]
   );
@@ -884,7 +921,7 @@ export async function getLessonAnalytics(lessonId: string) {
               q.max_marks
          FROM bhs_classwork_submissions s
          JOIN bhs_classwork_questions q ON q.id = s.question_id
-        WHERE s.lesson_id = $1 AND q.is_extension = FALSE
+        WHERE s.lesson_id = $1 AND q.is_extension = FALSE AND q.question_type <> 'passage'
         ORDER BY s.student_id, s.question_id, s.marks_awarded DESC NULLS LAST, s.submitted_at DESC
      )
      SELECT student_id,
@@ -921,7 +958,7 @@ export async function getStudentCourseAnalytics(course: ClassworkCourse, student
        JOIN bhs_classwork_questions q ON q.id = s.question_id
        JOIN bhs_classwork_lessons   l ON l.id = s.lesson_id
        JOIN bhs_classwork_units     u ON u.id = l.unit_id
-      WHERE s.course = $1 AND s.student_id = $2 AND q.is_extension = FALSE
+      WHERE s.course = $1 AND s.student_id = $2 AND q.is_extension = FALSE AND q.question_type <> 'passage'
       ORDER BY u.order_index, l.order_index, q.order_index, s.submitted_at DESC`,
     [course, studentId]
   );
