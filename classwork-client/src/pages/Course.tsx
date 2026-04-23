@@ -14,7 +14,7 @@ interface Lesson {
 
 interface Resource {
   id: string; lesson_id: string;
-  kind: 'image' | 'document' | 'youtube' | 'link';
+  kind: 'image' | 'document' | 'youtube' | 'link' | 'embed';
   title: string | null; url: string; order_index: number;
 }
 
@@ -49,7 +49,7 @@ export default function Course() {
   const [resourceBusy, setResourceBusy] = useState(false);
   const [resourceErr, setResourceErr] = useState<string | null>(null);
   // Inline "add resource" form state inside the Edit lesson modal.
-  const [addResKind, setAddResKind] = useState<'youtube' | 'link' | null>(null);
+  const [addResKind, setAddResKind] = useState<'youtube' | 'link' | 'embed' | null>(null);
   const [addResUrl, setAddResUrl] = useState('');
   const [addResTitle, setAddResTitle] = useState('');
   const [modalErr, setModalErr] = useState<string | null>(null);
@@ -112,6 +112,10 @@ export default function Course() {
     if (!url) { setResourceErr('A URL is required.'); return; }
     if (addResKind === 'youtube' && !/youtu\.?be/i.test(url)) {
       setResourceErr('That doesn\u2019t look like a YouTube URL.');
+      return;
+    }
+    if (addResKind === 'embed' && !/^https:\/\//i.test(url)) {
+      setResourceErr('Embeds must be served over https:// so they can load inside the lesson page.');
       return;
     }
     setResourceBusy(true); setResourceErr(null);
@@ -411,7 +415,7 @@ export default function Course() {
           <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--cw-border)' }}>
             <label style={{ ...modalLabel, marginBottom: 8 }}>Resources for pupils</label>
             <p style={{ margin: '0 0 10px', fontSize: 12, color: 'var(--cw-muted)' }}>
-              Attach images, documents, YouTube videos or web links. Pupils see these above the questions on the lesson page.
+              Attach images, documents, YouTube videos, web links or live embeds (e.g. a Scratch game, a Blooket / Kahoot link, a code.org puzzle). Pupils see these above the questions on the lesson page.
             </p>
 
             {editResources.length === 0 ? (
@@ -476,16 +480,36 @@ export default function Course() {
                   onClick={() => { setAddResKind('link'); setAddResUrl(''); setAddResTitle(''); setResourceErr(null); }}
                   style={modalSecondaryBtn}
                 >Add web link</button>
+                <button
+                  onClick={() => { setAddResKind('embed'); setAddResUrl(''); setAddResTitle(''); setResourceErr(null); }}
+                  style={modalSecondaryBtn}
+                  title="Embed an interactive page (game, simulation, etc.) inside the lesson"
+                >Add embed</button>
               </div>
             ) : (
               <div style={{ marginTop: 4, padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff' }}>
-                <label style={modalLabel}>{addResKind === 'youtube' ? 'YouTube URL' : 'Web link URL'}</label>
+                <label style={modalLabel}>{
+                  addResKind === 'youtube' ? 'YouTube URL'
+                    : addResKind === 'embed' ? 'Embed URL'
+                    : 'Web link URL'
+                }</label>
                 <input
                   autoFocus value={addResUrl}
                   onChange={(e) => setAddResUrl(e.target.value)}
-                  placeholder={addResKind === 'youtube' ? 'https://www.youtube.com/watch?v=...' : 'https://...'}
+                  placeholder={
+                    addResKind === 'youtube' ? 'https://www.youtube.com/watch?v=...'
+                      : addResKind === 'embed' ? 'https://scratch.mit.edu/projects/123456789/embed'
+                      : 'https://...'
+                  }
                   style={modalInput}
                 />
+                {addResKind === 'embed' && (
+                  <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--cw-muted)' }}>
+                    Use the site's "embed" link if it offers one. The page must load over https
+                    and must allow being embedded in an iframe — some sites (e.g. Google search,
+                    BBC) block this.
+                  </p>
+                )}
                 <label style={{ ...modalLabel, marginTop: 8 }}>Title shown to pupils (optional)</label>
                 <input
                   value={addResTitle}

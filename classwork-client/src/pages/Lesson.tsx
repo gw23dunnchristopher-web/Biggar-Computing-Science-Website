@@ -14,7 +14,7 @@ interface LessonInfo {
 interface LessonResource {
   id: string;
   lesson_id: string;
-  kind: 'image' | 'document' | 'youtube' | 'link';
+  kind: 'image' | 'document' | 'youtube' | 'link' | 'embed';
   title: string | null;
   url: string;
   order_index: number;
@@ -930,6 +930,32 @@ function LessonResources({ resources }: { resources: LessonResource[] }) {
                     allowFullScreen
                     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
                   />
+                </div>
+              </figure>
+            );
+          }
+          if (r.kind === 'embed') {
+            return (
+              <figure key={r.id} style={{ margin: 0 }}>
+                {r.title && <figcaption style={{ fontWeight: 600, marginBottom: 6 }}>{r.title}</figcaption>}
+                <div style={{
+                  position: 'relative', borderRadius: 8, overflow: 'hidden',
+                  background: '#000', border: '1px solid var(--cw-border)',
+                  height: 600, maxHeight: '80vh',
+                }}>
+                  <iframe
+                    src={r.url}
+                    title={title}
+                    loading="lazy"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-pointer-lock allow-downloads"
+                    allow="autoplay; fullscreen; clipboard-write; gamepad; microphone; camera; geolocation"
+                    allowFullScreen
+                    referrerPolicy="no-referrer"
+                    style={{ width: '100%', height: '100%', border: 0, display: 'block', background: '#fff' }}
+                  />
+                </div>
+                <div style={{ marginTop: 6, fontSize: 12, color: 'var(--cw-muted)' }}>
+                  Trouble loading? <a href={r.url} target="_blank" rel="noopener noreferrer">Open in a new tab</a>.
                 </div>
               </figure>
             );

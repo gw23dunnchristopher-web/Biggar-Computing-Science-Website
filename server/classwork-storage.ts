@@ -502,8 +502,8 @@ export async function deleteLesson(id: string) {
 
 /* ---------- Lesson resources ---------- */
 
-export type LessonResourceKind = 'image' | 'document' | 'youtube' | 'link';
-const RESOURCE_KINDS: LessonResourceKind[] = ['image', 'document', 'youtube', 'link'];
+export type LessonResourceKind = 'image' | 'document' | 'youtube' | 'link' | 'embed';
+const RESOURCE_KINDS: LessonResourceKind[] = ['image', 'document', 'youtube', 'link', 'embed'];
 export const isLessonResourceKind = (k: any): k is LessonResourceKind =>
   typeof k === 'string' && (RESOURCE_KINDS as string[]).includes(k);
 
