@@ -240,9 +240,9 @@
         overlay.innerHTML =
             '<div class="sa-modal" role="dialog" aria-modal="true" aria-labelledby="saTitle">' +
             '  <h2 id="saTitle">Log in</h2>' +
-            '  <p class="sa-sub">' + escapeHtml(opts.message || 'Use your school revision-app username and password.') + '</p>' +
+            '  <p class="sa-sub">' + escapeHtml(opts.message || 'Students: use your revision-app username and password. Teachers: use your Sandbox dashboard email and password.') + '</p>' +
             '  <form id="saLoginForm" autocomplete="on">' +
-            '    <label for="saUsername">Username</label>' +
+            '    <label for="saUsername">Username or email</label>' +
             '    <input id="saUsername" name="username" type="text" autocomplete="username" required>' +
             '    <label for="saPassword">Password</label>' +
             '    <input id="saPassword" name="password" type="password" autocomplete="current-password" required>' +
@@ -270,14 +270,15 @@
             errEl.textContent = '';
             btn.disabled = true;
             btn.textContent = 'Logging in…';
-            api('/api/student/login', { method: 'POST', body: { username: username, password: password } })
-                .then(function (r) {
-                    if (!r.ok) {
-                        errEl.textContent = (r.data && r.data.error) || 'Login failed';
-                        btn.disabled = false;
-                        btn.textContent = 'Log in';
-                        return;
-                    }
+
+            var looksLikeEmail = username.indexOf('@') !== -1;
+
+            function tryStudent() {
+                return api('/api/student/login', {
+                    method: 'POST',
+                    body: { username: username, password: password }
+                }).then(function (r) {
+                    if (!r.ok) return false;
                     var d = r.data;
                     var expires = Date.now() + 24 * 60 * 60 * 1000;
                     var user = {
@@ -297,12 +298,50 @@
                         }
                         overlay.remove();
                     }
-                })
-                .catch(function () {
-                    errEl.textContent = 'Network error — please try again.';
+                    return true;
+                });
+            }
+
+            function tryTeacher() {
+                return api('/api/teacher-auth', {
+                    method: 'POST',
+                    body: { email: username, password: password }
+                }).then(function (r) {
+                    if (!r.ok || !r.data || !r.data.ok || !r.data.token) return false;
+                    var tok = r.data.token;
+                    var expires = Date.now() + 7 * 24 * 60 * 60 * 1000;
+                    try {
+                        // Same keys the Sandbox dashboard / Classwork SPA use.
+                        localStorage.setItem('bhscs-teacher-token', tok);
+                        localStorage.setItem('bhscs-teacher-auth-email', username.toLowerCase());
+                        localStorage.setItem('teacher_token', tok);
+                        localStorage.setItem('teacher_token_expires', String(expires));
+                        localStorage.setItem('teacherToken', tok);
+                        localStorage.setItem('teacherTokenExpires', String(expires));
+                    } catch (_) {}
+                    overlay.remove();
+                    // Reload so the host page can pick up the teacher state.
+                    window.location.reload();
+                    return true;
+                });
+            }
+
+            var order = looksLikeEmail ? [tryTeacher, tryStudent] : [tryStudent, tryTeacher];
+
+            function runOrder(i) {
+                if (i >= order.length) {
+                    errEl.textContent = 'Invalid username or password.';
                     btn.disabled = false;
                     btn.textContent = 'Log in';
+                    return;
+                }
+                order[i]().then(function (ok) {
+                    if (!ok) runOrder(i + 1);
+                }).catch(function () {
+                    runOrder(i + 1);
                 });
+            }
+            runOrder(0);
         });
 
         function renderChangePassword() {
