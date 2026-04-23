@@ -70,6 +70,10 @@ const TYPE_LABELS: Record<string, string> = {
   sql_task: 'SQL task (Data Sculptor)',
   database_task: 'Database task (Data Sculptor sandbox)',
   passage: 'Reading passage (with attached questions)',
+  info_only: 'Information note (no answer needed)',
+  fill_in_blanks: 'Fill in the blanks',
+  table: 'Complete the table',
+  labeled_inputs: 'Labelled inputs (multi-field answer)',
 };
 
 export default function Lesson() {
@@ -210,10 +214,12 @@ export default function Lesson() {
         // groups share one continuous Q1, Q2, Q3… numbering.
         const renderQuestionCard = (q: Question, label: string, isExt: boolean) => {
           const mySubs = submissions.filter((s) => s.question_id === q.id);
+          const isInfo = q.question_type === 'info_only';
           return (
             <div key={q.id} style={{
               ...card,
               ...(isExt ? { borderColor: '#c084fc', background: '#faf5ff' } : {}),
+              ...(isInfo ? { borderColor: '#93c5fd', background: '#eff6ff' } : {}),
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
@@ -226,7 +232,7 @@ export default function Lesson() {
                   )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  {q.question_type !== 'passage' && (
+                  {q.question_type !== 'passage' && !isInfo && (
                     <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>{q.max_marks} mark{q.max_marks === 1 ? '' : 's'}</div>
                   )}
                   {role === 'teacher' && !previewAsStudent && (
@@ -272,7 +278,7 @@ export default function Lesson() {
                 isTeacher={role === 'teacher' && !previewAsStudent}
               />
 
-              {role === 'teacher' && !previewAsStudent && (
+              {role === 'teacher' && !previewAsStudent && !isInfo && (
                 <details style={{ marginTop: 8, fontSize: 14, color: 'var(--cw-muted)' }}>
                   <summary style={{ cursor: 'pointer' }}>Marking scheme &amp; AI guidance</summary>
                   <div style={{ marginTop: 8 }}>
@@ -282,7 +288,7 @@ export default function Lesson() {
                 </details>
               )}
 
-              {showStudentView && (
+              {showStudentView && !isInfo && (
                 <StudentAnswer
                   question={q}
                   previousSubmissions={mySubs}
@@ -290,14 +296,14 @@ export default function Lesson() {
                   preview={role === 'teacher' && previewAsStudent}
                 />
               )}
-              {role === 'teacher' && !previewAsStudent && (
+              {role === 'teacher' && !previewAsStudent && !isInfo && (
                 <TeacherSubmissions
                   question={q}
                   submissions={allSubs.filter((s) => s.question_id === q.id)}
                   onChanged={refreshSubmissions}
                 />
               )}
-              {role === 'guest' && (
+              {role === 'guest' && !isInfo && (
                 <p style={{ marginTop: 8, color: 'var(--cw-muted)', fontSize: 14 }}>
                   Sign in as a student to answer this question.
                 </p>
@@ -339,6 +345,9 @@ export default function Lesson() {
           const totalPassages = items.filter((it) => it.type === 'group').length;
           return items.map((it) => {
             if (it.type === 'standalone') {
+              if (it.q.question_type === 'info_only') {
+                return renderQuestionCard(it.q, 'Note', isExt);
+              }
               qIdx++;
               return renderQuestionCard(it.q, `${prefix}${qIdx}`, isExt);
             }
@@ -429,6 +438,11 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
   // can pick one and submit its latest code with one click.
   const [codeProjects, setCodeProjects] = useState<{ id: string; name: string; updatedAt: number | null }[] | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  // fill_in_blanks / table / labeled_inputs: a flat object keyed by blank id
+  // ("1", "2") for fill_in_blanks, "row,col" for table, or field index ("0",
+  // "1") for labeled_inputs. Submitted as JSON in textAnswer so the marker
+  // can compare each cell against its expected answers.
+  const [cellAnswers, setCellAnswers] = useState<Record<string, string>>({});
 
   const t = question.question_type;
   const codeProjectKind: 'python' | 'html' | null =
@@ -574,6 +588,10 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
         const data = await r.json();
         body.textAnswer = String(data?.code ?? '');
         body.linkUrl = `${selectedProjectId}|${data?.name || ''}`;
+      } else if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs') {
+        // Send the cell answers as JSON so the deterministic marker can
+        // compare each one against the expected answers in the question config.
+        body.textAnswer = JSON.stringify(cellAnswers);
       } else if (t === 'database_task') {
         // Resolve the pupil's DS embed sandbox from their session key
         // (mirrored to localStorage by the embed app on the same origin).
@@ -607,6 +625,8 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
     ['scratch_link', 'makecode_link', 'google_sites_link'].includes(t) ? !!url :
     codeProjectKind ? !!selectedProjectId :
     t === 'database_task' ? !!dbEmbedToken :
+    (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs')
+      ? Object.values(cellAnswers).some((v) => String(v || '').trim()) :
     !!text.trim();
   return (
     <div style={{ marginTop: 12, padding: 12, border: '1px dashed var(--cw-border)', borderRadius: 8, background: '#fafbfd' }}>
@@ -628,6 +648,136 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
           onChange={(e) => setUrl(e.target.value)}
           style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--cw-border)' }} />
       )}
+
+      {t === 'fill_in_blanks' && (() => {
+        const cfg = (question as any).config;
+        const blanks: { id: string }[] = cfg && Array.isArray(cfg.blanks)
+          ? cfg.blanks.map((b: any) => ({ id: String(b?.id ?? '') })).filter((b: any) => b.id)
+          : [];
+        if (blanks.length === 0) {
+          return <span style={{ color: 'var(--cw-muted)', fontSize: 13 }}>This question has no blanks set up yet. Ask your teacher to fix it.</span>;
+        }
+        // Render the prompt with text inputs substituted in for each {{n}}
+        // marker. Anything between markers is plain text shown around them.
+        const parts = (question.prompt || '').split(/(\{\{\s*[A-Za-z0-9_]+\s*\}\})/g);
+        const usedIds = new Set<string>();
+        return (
+          <div style={{ display: 'block', lineHeight: 2.2, fontSize: 15 }}>
+            {parts.map((part, i) => {
+              const m = part.match(/^\{\{\s*([A-Za-z0-9_]+)\s*\}\}$/);
+              if (!m) return <span key={i} style={{ whiteSpace: 'pre-wrap' }}>{part}</span>;
+              const id = m[1];
+              usedIds.add(id);
+              return (
+                <input
+                  key={i}
+                  type="text"
+                  value={cellAnswers[id] || ''}
+                  onChange={(e) => setCellAnswers({ ...cellAnswers, [id]: e.target.value })}
+                  placeholder={`(${id})`}
+                  style={{
+                    display: 'inline-block', minWidth: 90, margin: '0 4px',
+                    padding: '4px 8px', borderRadius: 6,
+                    border: '2px solid var(--cw-accent)', background: '#fff',
+                    fontSize: 14,
+                  }}
+                />
+              );
+            })}
+            {/* Any blanks that aren't referenced from the prompt still need an input */}
+            {blanks.filter((b) => !usedIds.has(b.id)).length > 0 && (
+              <div style={{ marginTop: 8, fontSize: 13, color: 'var(--cw-muted)' }}>
+                Extra blanks:
+                {blanks.filter((b) => !usedIds.has(b.id)).map((b) => (
+                  <span key={b.id} style={{ marginLeft: 8 }}>
+                    {b.id}:&nbsp;
+                    <input
+                      type="text" value={cellAnswers[b.id] || ''}
+                      onChange={(e) => setCellAnswers({ ...cellAnswers, [b.id]: e.target.value })}
+                      style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid var(--cw-border)' }}
+                    />
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {t === 'table' && (() => {
+        const cfg = (question as any).config;
+        const table = cfg && cfg.table;
+        if (!table || !Array.isArray(table.headers) || !Array.isArray(table.rows)) {
+          return <span style={{ color: 'var(--cw-muted)', fontSize: 13 }}>This table isn't set up yet. Ask your teacher to fix it.</span>;
+        }
+        return (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ borderCollapse: 'collapse', width: '100%', fontSize: 14 }}>
+              <thead>
+                <tr>
+                  {table.headers.map((h: string, i: number) => (
+                    <th key={i} style={{
+                      border: '1px solid var(--cw-border)', padding: '8px 10px',
+                      background: '#1e3a8a', color: '#fff', textAlign: 'left',
+                    }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {table.rows.map((row: any[], r: number) => (
+                  <tr key={r}>
+                    {Array.isArray(row) && row.map((cell: any, c: number) => (
+                      <td key={c} style={{
+                        border: '1px solid var(--cw-border)', padding: '6px 8px',
+                        background: cell?.blank ? '#fffbeb' : '#fff',
+                      }}>
+                        {cell?.blank ? (
+                          <input
+                            type="text"
+                            value={cellAnswers[`${r},${c}`] || ''}
+                            onChange={(e) => setCellAnswers({ ...cellAnswers, [`${r},${c}`]: e.target.value })}
+                            style={{
+                              width: '100%', padding: '4px 6px', borderRadius: 4,
+                              border: '2px solid var(--cw-accent)', background: '#fff', fontSize: 14,
+                            }}
+                          />
+                        ) : (
+                          <span>{String(cell?.value ?? '')}</span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      })()}
+
+      {t === 'labeled_inputs' && (() => {
+        const cfg = (question as any).config;
+        const fields: { label: string }[] = cfg && Array.isArray(cfg.fields)
+          ? cfg.fields.map((f: any) => ({ label: String(f?.label || '') }))
+          : [];
+        if (fields.length === 0) {
+          return <span style={{ color: 'var(--cw-muted)', fontSize: 13 }}>No fields are set up yet. Ask your teacher to fix it.</span>;
+        }
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {fields.map((f, i) => (
+              <label key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14 }}>
+                <span style={{ fontWeight: 600 }}>{f.label || `Field ${i + 1}`}</span>
+                <input
+                  type="text"
+                  value={cellAnswers[String(i)] || ''}
+                  onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}
+                  style={{ padding: '8px 10px', borderRadius: 6, border: '1px solid var(--cw-border)' }}
+                />
+              </label>
+            ))}
+          </div>
+        );
+      })()}
 
       {(t === 'short' || t === 'long' || t === 'code' || t === 'video_question') && (
         <textarea
@@ -943,6 +1093,34 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
       : <span style={muted}>No file uploaded.</span>;
   }
 
+  if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs') {
+    let parsed: Record<string, string> = {};
+    try { parsed = JSON.parse(s.text_answer || '{}') || {}; } catch {}
+    const keys = Object.keys(parsed);
+    if (keys.length === 0) return <span style={muted}>Nothing submitted.</span>;
+    // For labelled inputs we can show field labels alongside the indices.
+    const labels: Record<string, string> = {};
+    if (t === 'labeled_inputs') {
+      const cfg = (question as any).config;
+      const fields = cfg && Array.isArray(cfg.fields) ? cfg.fields : [];
+      fields.forEach((f: any, i: number) => { labels[String(i)] = String(f?.label || `Field ${i + 1}`); });
+    }
+    return (
+      <table style={{ borderCollapse: 'collapse', fontSize: 13 }}>
+        <tbody>
+          {keys.map((k) => (
+            <tr key={k}>
+              <td style={{ padding: '3px 8px', color: 'var(--cw-muted)', verticalAlign: 'top' }}>
+                {labels[k] || k}
+              </td>
+              <td style={{ padding: '3px 8px' }}>{parsed[k] || <em style={muted}>(blank)</em>}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+
   // short / long / code
   const text = s.text_answer || '';
   if (!text) return <span style={muted}>Empty answer.</span>;
@@ -1036,6 +1214,54 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
   const [videoUrl, setVideoUrl] = useState(cfg.video && typeof cfg.video.url === 'string' ? cfg.video.url : '');
   const [videoFileName, setVideoFileName] = useState('');
   const [videoUploading, setVideoUploading] = useState(false);
+  // fill_in_blanks: each blank has an `id` (referenced from the prompt as
+  // `{{id}}`) and a comma-separated list of accepted answers (case- and
+  // whitespace-insensitive on the marker side).
+  const [blanks, setBlanks] = useState<{ id: string; accept: string }[]>(
+    Array.isArray(cfg.blanks)
+      ? cfg.blanks.map((b: any) => ({
+          id: String(b?.id ?? ''),
+          accept: Array.isArray(b?.accept) ? b.accept.join(', ') : '',
+        }))
+      : [{ id: '1', accept: '' }, { id: '2', accept: '' }]
+  );
+  // table: a 2D grid. Each cell is either a fixed value (shown to pupils as
+  // text) or a blank with a comma-separated list of accepted answers.
+  type TblCell = { value: string; blank: boolean; accept: string };
+  const initTable = (() => {
+    const t = cfg.table;
+    if (t && Array.isArray(t.headers) && Array.isArray(t.rows)) {
+      return {
+        headers: t.headers.map((h: any) => String(h || '')),
+        rows: t.rows.map((row: any[]) =>
+          (Array.isArray(row) ? row : []).map((c: any) => ({
+            value: String(c?.value ?? ''),
+            blank: !!c?.blank,
+            accept: Array.isArray(c?.accept) ? c.accept.join(', ') : '',
+          }))
+        ),
+      };
+    }
+    return {
+      headers: ['Column 1', 'Column 2'],
+      rows: [
+        [{ value: '', blank: false, accept: '' }, { value: '', blank: true, accept: '' }],
+        [{ value: '', blank: false, accept: '' }, { value: '', blank: true, accept: '' }],
+      ] as TblCell[][],
+    };
+  })();
+  const [tblHeaders, setTblHeaders] = useState<string[]>(initTable.headers);
+  const [tblRows, setTblRows] = useState<TblCell[][]>(initTable.rows);
+  // labeled_inputs: a list of fields, each with a label and a comma-separated
+  // list of accepted answers.
+  const [fields, setFields] = useState<{ label: string; accept: string }[]>(
+    Array.isArray(cfg.fields)
+      ? cfg.fields.map((f: any) => ({
+          label: String(f?.label || ''),
+          accept: Array.isArray(f?.accept) ? f.accept.join(', ') : '',
+        }))
+      : [{ label: 'Forename', accept: '' }, { label: 'Surname', accept: '' }]
+  );
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -1083,14 +1309,16 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
     setBusy(true);
     setErr(null);
     try {
+      const noAnswerType = type === 'passage' || type === 'info_only';
       const body: any = {
         questionType: type, prompt,
-        // Passages have no marks / marking scheme / AI guidance / answer area —
-        // they're reading material only, so we send neutral defaults so the
-        // server doesn't reject them and analytics ignores them.
-        maxMarks: type === 'passage' ? 0 : maxMarks,
-        markingScheme: type === 'passage' ? '' : markingScheme,
-        aiGradingGuidance: type === 'passage' ? '' : aiGuidance,
+        // Passages and info-only notes have no marks / marking scheme / AI
+        // guidance / answer area — they're reading material only, so we send
+        // neutral defaults so the server doesn't reject them and analytics
+        // ignores them.
+        maxMarks: noAnswerType ? 0 : maxMarks,
+        markingScheme: noAnswerType ? '' : markingScheme,
+        aiGradingGuidance: noAnswerType ? '' : aiGuidance,
         isExtension,
       };
       // Only non-passage types can be attached to a passage (a passage
@@ -1127,6 +1355,43 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           throw new Error('That doesn\u2019t look like a Data Sculptor embed link or token.');
         }
         body.config = { embedToken: token, embedUrl: raw };
+      }
+      if (type === 'fill_in_blanks') {
+        const cleaned = blanks
+          .map((b) => ({
+            id: String(b.id || '').trim(),
+            accept: b.accept.split(',').map((s) => s.trim()).filter(Boolean),
+          }))
+          .filter((b) => b.id);
+        if (cleaned.length === 0) throw new Error('Add at least one blank.');
+        body.config = { blanks: cleaned };
+      }
+      if (type === 'table') {
+        const cleanedHeaders = tblHeaders.map((h) => String(h || '').trim());
+        const cleanedRows = tblRows.map((row) =>
+          row.map((c) => {
+            const cell: any = { value: String(c.value || '') };
+            if (c.blank) {
+              cell.blank = true;
+              const accept = c.accept.split(',').map((s) => s.trim()).filter(Boolean);
+              if (accept.length) cell.accept = accept;
+            }
+            return cell;
+          })
+        );
+        const blankCount = cleanedRows.flat().filter((c: any) => c.blank).length;
+        if (blankCount === 0) throw new Error('Mark at least one cell as a blank for pupils to fill in.');
+        body.config = { table: { headers: cleanedHeaders, rows: cleanedRows } };
+      }
+      if (type === 'labeled_inputs') {
+        const cleaned = fields
+          .map((f) => ({
+            label: String(f.label || '').trim(),
+            accept: f.accept.split(',').map((s) => s.trim()).filter(Boolean),
+          }))
+          .filter((f) => f.label);
+        if (cleaned.length === 0) throw new Error('Add at least one labelled field.');
+        body.config = { fields: cleaned };
       }
       if (type === 'video_question') {
         if (!videoUrl.trim()) {
@@ -1167,7 +1432,11 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </label>
-        <label style={fieldLabel}>{type === 'passage' ? 'Passage text (what pupils read)' : 'Question / prompt'}
+        <label style={fieldLabel}>{
+            type === 'passage' ? 'Passage text (what pupils read)'
+            : type === 'info_only' ? 'Note text (shown to pupils, no answer required)'
+            : type === 'fill_in_blanks' ? 'Sentence (use {{1}}, {{2}} etc. for each blank)'
+            : 'Question / prompt'}
           <textarea
             rows={type === 'passage' ? 8 : 3}
             value={prompt}
@@ -1177,7 +1446,11 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
             {type === 'passage'
               ? 'Type or paste the paragraph pupils have to read. It will sit in a sticky panel beside its attached questions, so pupils can refer back to it as they answer.'
-              : <>Tip: paste a URL (e.g. https://bbc.co.uk/bitesize) and it will appear as a clickable link that opens in a new window. For a friendlier label, write <code>[Bitesize lesson](https://bbc.co.uk/bitesize)</code>.</>}
+              : type === 'info_only'
+                ? 'A non-interactive note. Use it for instructions, a reminder or a sub-heading between questions. Pupils don\u2019t answer it and it doesn\u2019t count for marks.'
+                : type === 'fill_in_blanks'
+                  ? <>Write the sentence/code with placeholders. For example: <code>The capital of France is &#123;&#123;1&#125;&#125;.</code> Each <code>&#123;&#123;id&#125;&#125;</code> becomes a text box pupils fill in.</>
+                  : <>Tip: paste a URL (e.g. https://bbc.co.uk/bitesize) and it will appear as a clickable link that opens in a new window. For a friendlier label, write <code>[Bitesize lesson](https://bbc.co.uk/bitesize)</code>.</>}
           </span>
         </label>
         {type !== 'passage' && passages.length > 0 && (
@@ -1196,9 +1469,14 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             </span>
           </label>
         )}
-        {type !== 'passage' && (
+        {type !== 'passage' && type !== 'info_only' && (
           <label style={fieldLabel}>Max marks
             <input type="number" min={1} value={maxMarks} onChange={(e) => setMaxMarks(parseInt(e.target.value) || 1)} style={input} />
+            {(type === 'fill_in_blanks' || type === 'table' || type === 'labeled_inputs') && (
+              <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
+                Marks are awarded in proportion to how many cells the pupil gets right. Tip: set Max marks to the number of blanks for one mark per cell.
+              </span>
+            )}
           </label>
         )}
         <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 12, cursor: 'pointer' }}>
@@ -1443,7 +1721,179 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             </div>
           </div>
         )}
-        {type !== 'passage' && (
+        {type === 'fill_in_blanks' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Blanks &amp; accepted answers</div>
+            <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 2, marginBottom: 6 }}>
+              Each row matches a <code>&#123;&#123;id&#125;&#125;</code> placeholder in the sentence above.
+              List acceptable answers separated by commas — matching is case-insensitive
+              and ignores extra spaces.
+            </div>
+            {blanks.map((b, i) => (
+              <div key={i} style={{ display: 'flex', gap: 6, marginTop: 6, alignItems: 'center' }}>
+                <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>&#123;&#123;</span>
+                <input
+                  value={b.id}
+                  placeholder="id"
+                  onChange={(e) => { const a = [...blanks]; a[i].id = e.target.value; setBlanks(a); }}
+                  style={{ ...input, width: 70 }}
+                />
+                <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>&#125;&#125;</span>
+                <input
+                  value={b.accept}
+                  placeholder="Paris, paris, PARIS"
+                  onChange={(e) => { const a = [...blanks]; a[i].accept = e.target.value; setBlanks(a); }}
+                  style={{ ...input, flex: 1 }}
+                />
+                <button
+                  onClick={() => setBlanks(blanks.filter((_, j) => j !== i))}
+                  style={{ ...input, width: 40, cursor: 'pointer' }}
+                >×</button>
+              </div>
+            ))}
+            <button
+              onClick={() => {
+                const nextId = String(blanks.length + 1);
+                setBlanks([...blanks, { id: nextId, accept: '' }]);
+              }}
+              style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}
+            >+ Add blank</button>
+          </div>
+        )}
+        {type === 'labeled_inputs' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Labelled fields</div>
+            <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 2, marginBottom: 6 }}>
+              Each field becomes a labelled text box for the pupil. List acceptable answers
+              separated by commas (case-insensitive, ignores extra spaces). Leave Accepted answers
+              blank if you'll mark this field by hand.
+            </div>
+            {fields.map((f, i) => (
+              <div key={i} style={{ display: 'flex', gap: 6, marginTop: 6, alignItems: 'center' }}>
+                <input
+                  value={f.label}
+                  placeholder="Label (e.g. Forename)"
+                  onChange={(e) => { const a = [...fields]; a[i].label = e.target.value; setFields(a); }}
+                  style={{ ...input, width: 180 }}
+                />
+                <input
+                  value={f.accept}
+                  placeholder="Accepted answers, comma-separated"
+                  onChange={(e) => { const a = [...fields]; a[i].accept = e.target.value; setFields(a); }}
+                  style={{ ...input, flex: 1 }}
+                />
+                <button
+                  onClick={() => setFields(fields.filter((_, j) => j !== i))}
+                  style={{ ...input, width: 40, cursor: 'pointer' }}
+                >×</button>
+              </div>
+            ))}
+            <button
+              onClick={() => setFields([...fields, { label: '', accept: '' }])}
+              style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}
+            >+ Add field</button>
+          </div>
+        )}
+        {type === 'table' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Table</div>
+            <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 2, marginBottom: 6 }}>
+              Build the grid pupils will see. Tick "Blank" to turn a cell into an input box; in
+              that case put the accepted answers (comma-separated) in the value field.
+              Otherwise the cell is shown to pupils as fixed text.
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+                <thead>
+                  <tr>
+                    {tblHeaders.map((h, c) => (
+                      <th key={c} style={{ padding: 4, border: '1px solid var(--cw-border)', background: '#f1f5f9' }}>
+                        <input
+                          value={h}
+                          onChange={(e) => {
+                            const a = [...tblHeaders]; a[c] = e.target.value; setTblHeaders(a);
+                          }}
+                          style={{ ...input, width: '100%' }}
+                        />
+                      </th>
+                    ))}
+                    <th style={{ padding: 4, border: '1px solid var(--cw-border)', background: '#f1f5f9', width: 40 }}>
+                      <button
+                        title="Add column"
+                        onClick={() => {
+                          setTblHeaders([...tblHeaders, `Column ${tblHeaders.length + 1}`]);
+                          setTblRows(tblRows.map((row) => [...row, { value: '', blank: false, accept: '' }]));
+                        }}
+                        style={{ ...input, cursor: 'pointer', width: '100%' }}
+                      >+</button>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tblRows.map((row, r) => (
+                    <tr key={r}>
+                      {row.map((cell, c) => (
+                        <td key={c} style={{ padding: 4, border: '1px solid var(--cw-border)', verticalAlign: 'top' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <input
+                              value={cell.blank ? cell.accept : cell.value}
+                              placeholder={cell.blank ? 'Accepted answers (comma-sep)' : 'Cell text'}
+                              onChange={(e) => {
+                                const a = tblRows.map((rr) => rr.map((cc) => ({ ...cc })));
+                                if (a[r][c].blank) a[r][c].accept = e.target.value;
+                                else a[r][c].value = e.target.value;
+                                setTblRows(a);
+                              }}
+                              style={{ ...input, width: '100%' }}
+                            />
+                            <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--cw-muted)' }}>
+                              <input
+                                type="checkbox" checked={cell.blank}
+                                onChange={(e) => {
+                                  const a = tblRows.map((rr) => rr.map((cc) => ({ ...cc })));
+                                  a[r][c].blank = e.target.checked;
+                                  setTblRows(a);
+                                }}
+                              /> Blank for pupil
+                            </label>
+                          </div>
+                        </td>
+                      ))}
+                      <td style={{ padding: 4, border: '1px solid var(--cw-border)', textAlign: 'center' }}>
+                        <button
+                          onClick={() => setTblRows(tblRows.filter((_, i) => i !== r))}
+                          style={{ ...input, cursor: 'pointer', width: '100%' }}
+                          title="Delete row"
+                        >×</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+              <button
+                onClick={() =>
+                  setTblRows([
+                    ...tblRows,
+                    tblHeaders.map(() => ({ value: '', blank: false, accept: '' })),
+                  ])
+                }
+                style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}
+              >+ Add row</button>
+              {tblHeaders.length > 1 && (
+                <button
+                  onClick={() => {
+                    setTblHeaders(tblHeaders.slice(0, -1));
+                    setTblRows(tblRows.map((row) => row.slice(0, -1)));
+                  }}
+                  style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}
+                >− Remove last column</button>
+              )}
+            </div>
+          </div>
+        )}
+        {type !== 'passage' && type !== 'info_only' && (
           <>
             <label style={fieldLabel}>Marking scheme (teacher view only)
               <textarea rows={2} value={markingScheme} onChange={(e) => setMarkingScheme(e.target.value)} style={input} />

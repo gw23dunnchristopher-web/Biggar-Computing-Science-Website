@@ -91,6 +91,15 @@ export async function markSubmission(
         return await markSqlTask(q, s);
       case 'database_task':
         return await markDatabaseTask(q, s);
+      case 'fill_in_blanks':
+        return markFillBlanks(q, s);
+      case 'table':
+        return markTable(q, s);
+      case 'labeled_inputs':
+        return markLabeledInputs(q, s);
+      case 'info_only':
+      case 'passage':
+        return null;
       default:
         return null;
     }
@@ -1058,4 +1067,120 @@ async function markDatabaseTask(q: AIQuestion, s: AISubmission): Promise<AIMarkR
     console.error('[classwork-ai] database_task delegation failed:', err);
     return null;
   }
+}
+
+/* ---------- Cell-based deterministic markers (fill-in-blanks / table / labelled inputs) ---------- */
+
+function normCell(s: any): string {
+  return String(s ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function cellMatches(answer: string, accept: any[]): boolean {
+  if (!Array.isArray(accept) || accept.length === 0) return false;
+  const a = normCell(answer);
+  if (!a) return false;
+  return accept.some((x: any) => normCell(x) === a);
+}
+
+function buildCellResult(correct: number, total: number, maxMarks: number, lines: string[]): AIMarkResult {
+  const ratio = total > 0 ? correct / total : 0;
+  const marks = Math.round(ratio * maxMarks);
+  const head = `${correct} out of ${total} ${total === 1 ? 'cell' : 'cells'} correct.`;
+  return {
+    marksAwarded: Math.max(0, Math.min(maxMarks, marks)),
+    feedback: [head, ...lines].join('\n'),
+    markedBy: 'ai',
+  };
+}
+
+function parseAnswerJson(s: AISubmission): Record<string, string> | null {
+  if (!s.text_answer) return null;
+  try {
+    const v = JSON.parse(s.text_answer);
+    return (v && typeof v === 'object' && !Array.isArray(v)) ? v as Record<string, string> : null;
+  } catch { return null; }
+}
+
+function markFillBlanks(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const cfg = q.config;
+  const blanks = cfg && Array.isArray(cfg.blanks) ? cfg.blanks : null;
+  if (!blanks) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  const lines: string[] = [];
+  let correct = 0; let auto = 0;
+  for (const b of blanks) {
+    const id = String(b?.id ?? '');
+    const accept = Array.isArray(b?.accept) ? b.accept : [];
+    if (!id || accept.length === 0) continue;
+    auto++;
+    const ans = String(parsed[id] || '');
+    if (cellMatches(ans, accept)) {
+      correct++;
+      lines.push(`Blank ${id}: correct ("${ans}")`);
+    } else {
+      lines.push(`Blank ${id}: you wrote "${ans}" — expected "${accept[0]}"`);
+    }
+  }
+  if (auto === 0) return null;
+  return buildCellResult(correct, auto, q.max_marks, lines);
+}
+
+function markTable(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const cfg = q.config;
+  const table = cfg && cfg.table;
+  if (!table || !Array.isArray(table.rows)) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  const headers: string[] = Array.isArray(table.headers) ? table.headers.map((h: any) => String(h || '')) : [];
+  const lines: string[] = [];
+  let correct = 0; let auto = 0;
+  for (let r = 0; r < table.rows.length; r++) {
+    const row = table.rows[r];
+    if (!Array.isArray(row)) continue;
+    for (let c = 0; c < row.length; c++) {
+      const cell = row[c];
+      if (!cell || !cell.blank) continue;
+      const accept = Array.isArray(cell.accept) ? cell.accept : [];
+      if (accept.length === 0) continue;
+      auto++;
+      const key = `${r},${c}`;
+      const ans = String(parsed[key] || '');
+      const colLabel = headers[c] || `Col ${c + 1}`;
+      if (cellMatches(ans, accept)) {
+        correct++;
+        lines.push(`Row ${r + 1} · ${colLabel}: correct ("${ans}")`);
+      } else {
+        lines.push(`Row ${r + 1} · ${colLabel}: you wrote "${ans}" — expected "${accept[0]}"`);
+      }
+    }
+  }
+  if (auto === 0) return null;
+  return buildCellResult(correct, auto, q.max_marks, lines);
+}
+
+function markLabeledInputs(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const cfg = q.config;
+  const fields = cfg && Array.isArray(cfg.fields) ? cfg.fields : null;
+  if (!fields) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  const lines: string[] = [];
+  let correct = 0; let auto = 0;
+  for (let i = 0; i < fields.length; i++) {
+    const f = fields[i];
+    const accept = Array.isArray(f?.accept) ? f.accept : [];
+    if (accept.length === 0) continue;
+    auto++;
+    const ans = String(parsed[String(i)] || '');
+    const label = String(f?.label || `Field ${i + 1}`);
+    if (cellMatches(ans, accept)) {
+      correct++;
+      lines.push(`${label}: correct ("${ans}")`);
+    } else {
+      lines.push(`${label}: you wrote "${ans}" — expected "${accept[0]}"`);
+    }
+  }
+  if (auto === 0) return null;
+  return buildCellResult(correct, auto, q.max_marks, lines);
 }
