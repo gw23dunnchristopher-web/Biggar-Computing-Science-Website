@@ -30,9 +30,10 @@ export default function Home() {
         <p>Loading…</p>
       ) : (
         <div style={{
-          display: 'grid', gap: 16,
-          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', marginTop: 24
-        }}>
+          display: 'grid', gap: 12,
+          gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', marginTop: 24
+        }}
+        className="cw-home-grid">
           {courses.map((c) => (
             <Link
               key={c.key}
@@ -40,15 +41,16 @@ export default function Home() {
               style={{
                 display: 'block', background: '#fff',
                 border: '1px solid var(--cw-border)', borderRadius: 12,
-                padding: 24, textDecoration: 'none', color: 'inherit',
+                padding: '16px 12px', textDecoration: 'none', color: 'inherit',
                 boxShadow: '0 2px 8px rgba(15,23,42,0.04)', transition: 'transform .12s ease',
+                textAlign: 'center',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-2px)')}
               onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
             >
-              <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--cw-accent)' }}>{c.label}</div>
-              <div style={{ marginTop: 8, color: 'var(--cw-muted)', fontSize: 14 }}>
-                Open course
+              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--cw-accent)' }}>{c.label}</div>
+              <div style={{ marginTop: 4, color: 'var(--cw-muted)', fontSize: 12 }}>
+                Open
               </div>
             </Link>
           ))}
