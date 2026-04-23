@@ -20,6 +20,34 @@
     var TOKEN_KEY = 'studentToken';
     var EXPIRES_KEY = 'studentTokenExpires';
     var USER_CACHE_KEY = 'siteAuthUserCache';
+    var TEACHER_TOKEN_KEY = 'bhscs-teacher-token';
+    var TEACHER_EMAIL_KEY = 'bhscs-teacher-auth-email';
+    var TEACHER_EXPIRES_KEY = 'teacher_token_expires';
+
+    function getTeacherSession() {
+        try {
+            var tok = localStorage.getItem(TEACHER_TOKEN_KEY) || localStorage.getItem('teacher_token') || localStorage.getItem('teacherToken');
+            if (!tok) return null;
+            var exp = parseInt(localStorage.getItem(TEACHER_EXPIRES_KEY) || localStorage.getItem('teacherTokenExpires') || '0', 10);
+            if (exp && Date.now() > exp) {
+                clearTeacherSession();
+                return null;
+            }
+            var email = localStorage.getItem(TEACHER_EMAIL_KEY) || 'Teacher';
+            return { isTeacher: true, username: email };
+        } catch (_) { return null; }
+    }
+
+    function clearTeacherSession() {
+        try {
+            localStorage.removeItem(TEACHER_TOKEN_KEY);
+            localStorage.removeItem(TEACHER_EMAIL_KEY);
+            localStorage.removeItem(TEACHER_EXPIRES_KEY);
+            localStorage.removeItem('teacher_token');
+            localStorage.removeItem('teacherToken');
+            localStorage.removeItem('teacherTokenExpires');
+        } catch (_) {}
+    }
 
     var listeners = [];
     var currentUser = null;       // { studentId, username, className, mustChangePassword }
@@ -164,6 +192,33 @@
         // avoids a "Log in" flash for already-signed-in students.
         if (!loaded) {
             barEl.innerHTML = '';
+            return;
+        }
+        var teacher = !currentUser ? getTeacherSession() : null;
+        if (teacher) {
+            barEl.innerHTML =
+                '<div style="position:relative; display:flex; gap:8px; align-items:center;">' +
+                '  <a class="sa-pill sa-classwork-link" href="/classwork/" title="Open BHS Classwork" style="background:#1e40af;color:#fff;border:none;">' +
+                '    <span>BHS Classwork</span>' +
+                '  </a>' +
+                '  <button class="sa-pill" id="saUserBtn" aria-haspopup="true">' +
+                '    <span class="sa-dot"></span>' +
+                '    <span>' + escapeHtml(teacher.username) + '</span>' +
+                '  </button>' +
+                '  <div class="sa-menu" id="saMenu" role="menu">' +
+                '    <div class="sa-menu-meta">Signed in as <strong>' + escapeHtml(teacher.username) + '</strong><br>Teacher</div>' +
+                '    <a class="sa-menu-item" href="/classwork/" style="display:block;text-decoration:none;color:inherit;">Open BHS Classwork</a>' +
+                '    <button class="sa-menu-item" id="saLogout">Log out</button>' +
+                '  </div>' +
+                '</div>';
+            menuEl = barEl.querySelector('#saMenu');
+            barEl.querySelector('#saUserBtn').addEventListener('click', function (e) {
+                e.stopPropagation();
+                menuEl.classList.toggle('open');
+            });
+            barEl.querySelector('#saLogout').addEventListener('click', function () {
+                logout();
+            });
             return;
         }
         if (currentUser) {
@@ -402,7 +457,9 @@
             : Promise.resolve();
         return p.then(function () {
             clearSession();
+            clearTeacherSession();
             setUser(null);
+            renderBar();
         });
     }
 
@@ -453,6 +510,13 @@
         ensureBar();
         renderBar();   // will be empty until loaded=true
         verify().then(renderBar);
+        // Re-render when other tabs (e.g. the Classwork SPA) sign a teacher in/out
+        window.addEventListener('storage', function (e) {
+            if (!e || !e.key) return;
+            if (e.key === TEACHER_TOKEN_KEY || e.key === 'teacher_token' || e.key === 'teacherToken') {
+                renderBar();
+            }
+        });
     }
 
     if (document.readyState === 'loading') {
