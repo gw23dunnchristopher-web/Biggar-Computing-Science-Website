@@ -98,6 +98,7 @@ export async function markSubmission(
       case 'labeled_inputs':
         return await markLabeledInputs(q, s);
       case 'info_only':
+      case 'section_header':
       case 'passage':
         return null;
       default:

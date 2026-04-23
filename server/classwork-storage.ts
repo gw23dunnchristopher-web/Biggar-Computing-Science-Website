@@ -34,6 +34,10 @@ export const CLASSWORK_QUESTION_TYPES = [
   'fill_in_blanks',
   'table',
   'labeled_inputs',
+  // Section divider — purely visual grouping for questions inside a lesson.
+  // Like info_only it has no marks, no answer area, and is excluded from
+  // analytics queries. Pupils see it rendered as a banner ("Section A: …").
+  'section_header',
 ] as const;
 export type ClassworkQuestionType = (typeof CLASSWORK_QUESTION_TYPES)[number];
 
@@ -806,7 +810,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
        LEFT JOIN (
          SELECT lesson_id, COUNT(*)::int AS question_count
            FROM bhs_classwork_questions
-          WHERE is_extension = FALSE AND question_type NOT IN ('passage','info_only')
+          WHERE is_extension = FALSE AND question_type NOT IN ('passage','info_only','section_header')
           GROUP BY lesson_id
        ) qstat ON qstat.lesson_id = l.id
        LEFT JOIN (
@@ -821,7 +825,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
                 )                                              AS avg_percent
            FROM bhs_classwork_submissions s
            JOIN bhs_classwork_questions q ON q.id = s.question_id
-          WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','info_only')
+          WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','info_only','section_header')
           GROUP BY s.lesson_id
        ) sstat ON sstat.lesson_id = l.id
       WHERE l.course = $1
@@ -844,7 +848,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
             )                                                    AS avg_percent
        FROM bhs_classwork_submissions s
        JOIN bhs_classwork_questions q ON q.id = s.question_id
-      WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','info_only')
+      WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','info_only','section_header')
       GROUP BY s.student_id
       ORDER BY MAX(s.student_username) ASC`,
     [course]
@@ -857,7 +861,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
             COUNT(DISTINCT s.student_id)::int          AS distinct_students
        FROM bhs_classwork_submissions s
        JOIN bhs_classwork_questions q ON q.id = s.question_id
-      WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','info_only')`,
+      WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','info_only','section_header')`,
     [course]
   );
 
@@ -908,7 +912,7 @@ export async function getLessonAnalytics(lessonId: string) {
           WHERE lesson_id = $1
           GROUP BY question_id
        ) s ON s.question_id = q.id
-      WHERE q.lesson_id = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','info_only')
+      WHERE q.lesson_id = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','info_only','section_header')
       ORDER BY q.order_index, q.id`,
     [lessonId]
   );
@@ -925,7 +929,7 @@ export async function getLessonAnalytics(lessonId: string) {
               q.max_marks
          FROM bhs_classwork_submissions s
          JOIN bhs_classwork_questions q ON q.id = s.question_id
-        WHERE s.lesson_id = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','info_only')
+        WHERE s.lesson_id = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','info_only','section_header')
         ORDER BY s.student_id, s.question_id, s.marks_awarded DESC NULLS LAST, s.submitted_at DESC
      )
      SELECT student_id,
@@ -962,7 +966,7 @@ export async function getStudentCourseAnalytics(course: ClassworkCourse, student
        JOIN bhs_classwork_questions q ON q.id = s.question_id
        JOIN bhs_classwork_lessons   l ON l.id = s.lesson_id
        JOIN bhs_classwork_units     u ON u.id = l.unit_id
-      WHERE s.course = $1 AND s.student_id = $2 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','info_only')
+      WHERE s.course = $1 AND s.student_id = $2 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','info_only','section_header')
       ORDER BY u.order_index, l.order_index, q.order_index, s.submitted_at DESC`,
     [course, studentId]
   );

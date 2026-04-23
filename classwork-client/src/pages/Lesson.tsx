@@ -74,6 +74,7 @@ const TYPE_LABELS: Record<string, string> = {
   fill_in_blanks: 'Fill in the blanks',
   table: 'Complete the table',
   labeled_inputs: 'Labelled inputs (multi-field answer)',
+  section_header: 'Section divider (groups the questions below)',
 };
 
 export default function Lesson() {
@@ -330,6 +331,31 @@ export default function Lesson() {
           </div>
         );
 
+        // A section divider — purely visual grouping. No marks, no answer area,
+        // no resources. Used by teachers to break a long lesson into "Section A",
+        // "Section B" etc. Question numbering continues across sections so
+        // existing analytics (which key off question_id) stay correct.
+        const renderSectionHeader = (s: Question) => {
+          const title = (s.prompt || '').trim() || 'Section';
+          return (
+            <div key={s.id} style={{
+              marginTop: 18, padding: '10px 14px', borderRadius: 8,
+              background: 'linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%)',
+              border: '1px solid #cbd5e1', borderLeft: '4px solid var(--cw-accent)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap',
+            }}>
+              <div style={{ fontWeight: 700, fontSize: 16, color: '#0f172a' }}>{title}</div>
+              {role === 'teacher' && !previewAsStudent && (
+                <EditQuestionButton
+                  question={s}
+                  passages={questions.filter((x) => x.question_type === 'passage')}
+                  onChanged={refresh}
+                />
+              )}
+            </div>
+          );
+        };
+
         // Run buildItems on main and extension lists separately so extensions stay
         // in their own section. Numbering (qIdx, pIdx) is shared so pupils see
         // a single continuous Q-sequence within each section.
@@ -341,6 +367,9 @@ export default function Lesson() {
             if (it.type === 'standalone') {
               if (it.q.question_type === 'info_only') {
                 return renderQuestionCard(it.q, 'Note', isExt);
+              }
+              if (it.q.question_type === 'section_header') {
+                return renderSectionHeader(it.q);
               }
               qIdx++;
               return renderQuestionCard(it.q, `${prefix}${qIdx}`, isExt);
@@ -1312,7 +1341,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
     setBusy(true);
     setErr(null);
     try {
-      const noAnswerType = type === 'passage' || type === 'info_only';
+      const noAnswerType = type === 'passage' || type === 'info_only' || type === 'section_header';
       const body: any = {
         questionType: type, prompt,
         // Passages and info-only notes have no marks / marking scheme / AI
@@ -1466,6 +1495,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
         <label style={fieldLabel}>{
             type === 'passage' ? 'Passage text (what pupils read)'
             : type === 'info_only' ? 'Note text (shown to pupils, no answer required)'
+            : type === 'section_header' ? 'Section title (shown as a divider, e.g. "Section A: Comprehension")'
             : type === 'fill_in_blanks' ? 'Sentence (use {{1}}, {{2}} etc. for each blank)'
             : 'Question / prompt'}
           <textarea
@@ -1965,20 +1995,22 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             </div>
           </div>
         )}
-        <div style={{ marginTop: 8 }}>
-          <div style={{ ...fieldLabel, marginBottom: 4 }}>Resources for this question</div>
-          <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginBottom: 6 }}>
-            Attach images, documents, YouTube clips, links or embeds. Pupils see them above the answer area on this question only.
+        {type !== 'section_header' && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ ...fieldLabel, marginBottom: 4 }}>Resources for this question</div>
+            <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginBottom: 6 }}>
+              Attach images, documents, YouTube clips, links or embeds. Pupils see them above the answer area on this question only.
+            </div>
+            {isEdit ? (
+              <QuestionResources questionId={existing!.id} isTeacher={true} />
+            ) : (
+              <PendingResourcesEditor
+                items={pendingResources}
+                onChange={setPendingResources}
+              />
+            )}
           </div>
-          {isEdit ? (
-            <QuestionResources questionId={existing!.id} isTeacher={true} />
-          ) : (
-            <PendingResourcesEditor
-              items={pendingResources}
-              onChange={setPendingResources}
-            />
-          )}
-        </div>
+        )}
         {type !== 'passage' && type !== 'info_only' && (
           <>
             <label style={fieldLabel}>Marking scheme (teacher view only)
