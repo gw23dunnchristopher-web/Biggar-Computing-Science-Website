@@ -1,0 +1,491 @@
+import { useEffect, useState } from 'react';
+import { Link, useRoute } from 'wouter';
+import Shell from '@/components/Shell';
+import { api, getCurrentRole } from '@/lib/api';
+
+const COURSE_LABELS: Record<string, string> = {
+  s1: 'S1', s2: 'S2', s3: 'S3', n5: 'National 5', higher: 'Higher',
+};
+
+interface CourseLessonStat {
+  lesson_id: string;
+  lesson_title: string;
+  is_published: boolean;
+  unit_id: string;
+  unit_title: string;
+  question_count: number;
+  submission_count: number;
+  distinct_students: number;
+  marked_count: number;
+  avg_percent: number | null;
+}
+
+interface CourseStudentStat {
+  student_id: string;
+  username: string;
+  submission_count: number;
+  lessons_touched: number;
+  last_submitted_at: string | null;
+  avg_percent: number | null;
+}
+
+interface CourseAnalytics {
+  course: string;
+  totals: { submission_count: number; distinct_students: number };
+  lessons: CourseLessonStat[];
+  students: CourseStudentStat[];
+}
+
+interface LessonAnalytics {
+  lesson: { id: string; title: string; unit_title: string };
+  questions: Array<{
+    id: string;
+    prompt: string;
+    question_type: string;
+    max_marks: number;
+    options: any;
+    submission_count: number;
+    distinct_students: number;
+    avg_mark: number | null;
+    avg_percent: number | null;
+  }>;
+  students: Array<{
+    student_id: string;
+    username: string;
+    total_marks: number;
+    max_marks: number;
+    questions_attempted: number;
+    last_submitted_at: string;
+  }>;
+}
+
+interface StudentAnalytics {
+  course: string;
+  studentId: string;
+  username: string | null;
+  submissions: Array<{
+    id: string;
+    submitted_at: string;
+    marks_awarded: number | null;
+    ai_feedback: string | null;
+    text_answer: string | null;
+    selected_option_label: string | null;
+    link_url: string | null;
+    file_url: string | null;
+    question_prompt: string;
+    question_type: string;
+    question_max_marks: number;
+    lesson_id: string;
+    lesson_title: string;
+    unit_title: string;
+  }>;
+}
+
+export default function Analytics() {
+  const [, params] = useRoute('/analytics/:course');
+  const course = params?.course || '';
+  const role = getCurrentRole();
+
+  if (role !== 'teacher') {
+    return (
+      <Shell title="Analytics" back={{ href: `/course/${course}`, label: COURSE_LABELS[course] || 'Back' }}>
+        <p style={{ color: 'var(--cw-muted)' }}>Analytics are only available to teachers.</p>
+      </Shell>
+    );
+  }
+
+  const [data, setData] = useState<CourseAnalytics | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [tab, setTab] = useState<'lessons' | 'students'>('lessons');
+  const [openLesson, setOpenLesson] = useState<string | null>(null);
+  const [openStudent, setOpenStudent] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setData(null);
+    setErr(null);
+    api<CourseAnalytics>(`/api/classwork/${course}/analytics/overview`)
+      .then((d) => { if (!cancelled) setData(d); })
+      .catch((e) => { if (!cancelled) setErr(e.message || 'Failed to load'); });
+    return () => { cancelled = true; };
+  }, [course]);
+
+  return (
+    <Shell title={`Analytics — ${COURSE_LABELS[course] || course}`} back={{ href: `/course/${course}`, label: 'Back to course' }}>
+      {err && <p style={{ color: 'var(--cw-danger)' }}>{err}</p>}
+      {!data && !err && <p>Loading…</p>}
+      {data && (
+        <>
+          <div style={summaryRow}>
+            <Tile label="Students who submitted" value={data.totals.distinct_students} />
+            <Tile label="Total submissions" value={data.totals.submission_count} />
+            <Tile label="Lessons" value={data.lessons.length} />
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, marginTop: 24, marginBottom: 12 }}>
+            <TabBtn active={tab === 'lessons'} onClick={() => setTab('lessons')}>By lesson</TabBtn>
+            <TabBtn active={tab === 'students'} onClick={() => setTab('students')}>By student</TabBtn>
+          </div>
+
+          {tab === 'lessons' && (
+            <LessonsTable
+              lessons={data.lessons}
+              openLessonId={openLesson}
+              onToggle={(id) => setOpenLesson((cur) => (cur === id ? null : id))}
+            />
+          )}
+
+          {tab === 'students' && (
+            <StudentsTable
+              students={data.students}
+              course={course}
+              openStudentId={openStudent}
+              onToggle={(id) => setOpenStudent((cur) => (cur === id ? null : id))}
+            />
+          )}
+        </>
+      )}
+    </Shell>
+  );
+}
+
+/* ---------- Summary tiles & shared bits ---------- */
+
+function Tile({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div style={tile}>
+      <div style={{ fontSize: 28, fontWeight: 700 }}>{value}</div>
+      <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>{label}</div>
+    </div>
+  );
+}
+
+function TabBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button onClick={onClick} style={{
+      ...secondaryBtn,
+      background: active ? 'var(--cw-accent)' : '#f1f5f9',
+      color: active ? '#fff' : 'var(--cw-ink)',
+      borderColor: active ? 'var(--cw-accent)' : 'var(--cw-border)',
+    }}>{children}</button>
+  );
+}
+
+function PercentBar({ value }: { value: number | null }) {
+  const pct = value == null ? 0 : Math.max(0, Math.min(100, Math.round(value)));
+  const colour = value == null ? '#cbd5e1' : pct >= 70 ? '#16a34a' : pct >= 50 ? '#ca8a04' : '#dc2626';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 120 }}>
+      <div style={{ position: 'relative', flex: 1, height: 8, background: '#e2e8f0', borderRadius: 999 }}>
+        <div style={{ position: 'absolute', inset: 0, width: `${pct}%`, background: colour, borderRadius: 999 }} />
+      </div>
+      <span style={{ fontSize: 13, color: 'var(--cw-muted)', width: 44, textAlign: 'right' }}>
+        {value == null ? '—' : `${pct}%`}
+      </span>
+    </div>
+  );
+}
+
+/* ---------- Lessons table + drill-down ---------- */
+
+function LessonsTable({ lessons, openLessonId, onToggle }: {
+  lessons: CourseLessonStat[];
+  openLessonId: string | null;
+  onToggle: (id: string) => void;
+}) {
+  if (!lessons.length) return <p style={{ color: 'var(--cw-muted)' }}>No lessons in this course yet.</p>;
+
+  // Group lessons by unit so the table mirrors the Course page layout.
+  const grouped = lessons.reduce((acc, l) => {
+    (acc[l.unit_title] ||= []).push(l);
+    return acc;
+  }, {} as Record<string, CourseLessonStat[]>);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {Object.entries(grouped).map(([unitTitle, rows]) => (
+        <div key={unitTitle} style={card}>
+          <h3 style={{ margin: 0, fontSize: 16 }}>{unitTitle}</h3>
+          <table style={tbl}>
+            <thead>
+              <tr>
+                <th style={th}>Lesson</th>
+                <th style={th}>Status</th>
+                <th style={th}>Questions</th>
+                <th style={th}>Submissions</th>
+                <th style={th}>Students</th>
+                <th style={th}>Avg %</th>
+                <th style={th}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <RowGroup key={r.lesson_id}>
+                  <tr>
+                    <td style={td}><Link href={`/lesson/${r.lesson_id}`}>{r.lesson_title}</Link></td>
+                    <td style={td}>
+                      <span style={{
+                        fontSize: 11, padding: '2px 8px', borderRadius: 999,
+                        background: r.is_published ? '#dcfce7' : '#fee2e2',
+                        color: r.is_published ? '#166534' : '#991b1b',
+                      }}>{r.is_published ? 'Published' : 'Draft'}</span>
+                    </td>
+                    <td style={td}>{r.question_count}</td>
+                    <td style={td}>{r.submission_count}</td>
+                    <td style={td}>{r.distinct_students}</td>
+                    <td style={td}><PercentBar value={r.avg_percent} /></td>
+                    <td style={td}>
+                      <button onClick={() => onToggle(r.lesson_id)} style={miniBtn}>
+                        {openLessonId === r.lesson_id ? 'Hide' : 'Detail'}
+                      </button>
+                    </td>
+                  </tr>
+                  {openLessonId === r.lesson_id && (
+                    <tr>
+                      <td colSpan={7} style={{ ...td, background: '#fafbfd' }}>
+                        <LessonDetail lessonId={r.lesson_id} />
+                      </td>
+                    </tr>
+                  )}
+                </RowGroup>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RowGroup({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}
+
+function LessonDetail({ lessonId }: { lessonId: string }) {
+  const [data, setData] = useState<LessonAnalytics | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setData(null);
+    setErr(null);
+    api<LessonAnalytics>(`/api/classwork/lessons/${lessonId}/analytics`)
+      .then((d) => { if (!cancelled) setData(d); })
+      .catch((e) => { if (!cancelled) setErr(e.message || 'Failed to load'); });
+    return () => { cancelled = true; };
+  }, [lessonId]);
+
+  if (err) return <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{err}</p>;
+  if (!data) return <p style={{ color: 'var(--cw-muted)', margin: 0 }}>Loading lesson detail…</p>;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div>
+        <h4 style={{ margin: '4px 0 8px', fontSize: 14 }}>Per-question</h4>
+        {data.questions.length === 0 ? (
+          <p style={{ color: 'var(--cw-muted)', margin: 0 }}>No questions in this lesson.</p>
+        ) : (
+          <table style={tbl}>
+            <thead>
+              <tr>
+                <th style={th}>#</th>
+                <th style={th}>Prompt</th>
+                <th style={th}>Type</th>
+                <th style={th}>Max</th>
+                <th style={th}>Submissions</th>
+                <th style={th}>Avg mark</th>
+                <th style={th}>Avg %</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.questions.map((q, i) => (
+                <tr key={q.id}>
+                  <td style={td}>{i + 1}</td>
+                  <td style={{ ...td, maxWidth: 380 }}>
+                    <span title={q.prompt}>{shorten(q.prompt, 100)}</span>
+                  </td>
+                  <td style={td}>{q.question_type}</td>
+                  <td style={td}>{q.max_marks}</td>
+                  <td style={td}>{q.submission_count}</td>
+                  <td style={td}>{q.avg_mark != null ? Number(q.avg_mark).toFixed(1) : '—'}</td>
+                  <td style={td}><PercentBar value={q.avg_percent} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <div>
+        <h4 style={{ margin: '4px 0 8px', fontSize: 14 }}>Per-student (best attempt)</h4>
+        {data.students.length === 0 ? (
+          <p style={{ color: 'var(--cw-muted)', margin: 0 }}>No submissions yet.</p>
+        ) : (
+          <table style={tbl}>
+            <thead>
+              <tr>
+                <th style={th}>Student</th>
+                <th style={th}>Score</th>
+                <th style={th}>%</th>
+                <th style={th}>Questions answered</th>
+                <th style={th}>Last submitted</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.students.map((s) => {
+                const pct = s.max_marks > 0 ? (s.total_marks / s.max_marks) * 100 : null;
+                return (
+                  <tr key={s.student_id}>
+                    <td style={td}>{s.username}</td>
+                    <td style={td}>{s.total_marks} / {s.max_marks}</td>
+                    <td style={td}><PercentBar value={pct} /></td>
+                    <td style={td}>{s.questions_attempted}</td>
+                    <td style={td}>{s.last_submitted_at ? new Date(s.last_submitted_at).toLocaleString() : '—'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Students table + drill-down ---------- */
+
+function StudentsTable({ students, course, openStudentId, onToggle }: {
+  students: CourseStudentStat[];
+  course: string;
+  openStudentId: string | null;
+  onToggle: (id: string) => void;
+}) {
+  if (!students.length) return <p style={{ color: 'var(--cw-muted)' }}>No students have submitted in this course yet.</p>;
+  return (
+    <div style={card}>
+      <table style={tbl}>
+        <thead>
+          <tr>
+            <th style={th}>Student</th>
+            <th style={th}>Submissions</th>
+            <th style={th}>Lessons touched</th>
+            <th style={th}>Avg %</th>
+            <th style={th}>Last submitted</th>
+            <th style={th}></th>
+          </tr>
+        </thead>
+        <tbody>
+          {students.map((s) => (
+            <RowGroup key={s.student_id}>
+              <tr>
+                <td style={td}>{s.username}</td>
+                <td style={td}>{s.submission_count}</td>
+                <td style={td}>{s.lessons_touched}</td>
+                <td style={td}><PercentBar value={s.avg_percent} /></td>
+                <td style={td}>{s.last_submitted_at ? new Date(s.last_submitted_at).toLocaleString() : '—'}</td>
+                <td style={td}>
+                  <button onClick={() => onToggle(s.student_id)} style={miniBtn}>
+                    {openStudentId === s.student_id ? 'Hide' : 'Detail'}
+                  </button>
+                </td>
+              </tr>
+              {openStudentId === s.student_id && (
+                <tr>
+                  <td colSpan={6} style={{ ...td, background: '#fafbfd' }}>
+                    <StudentDetail course={course} studentId={s.student_id} />
+                  </td>
+                </tr>
+              )}
+            </RowGroup>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function StudentDetail({ course, studentId }: { course: string; studentId: string }) {
+  const [data, setData] = useState<StudentAnalytics | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setData(null);
+    setErr(null);
+    api<StudentAnalytics>(`/api/classwork/${course}/students/${studentId}/analytics`)
+      .then((d) => { if (!cancelled) setData(d); })
+      .catch((e) => { if (!cancelled) setErr(e.message || 'Failed to load'); });
+    return () => { cancelled = true; };
+  }, [course, studentId]);
+
+  if (err) return <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{err}</p>;
+  if (!data) return <p style={{ color: 'var(--cw-muted)', margin: 0 }}>Loading student detail…</p>;
+  if (!data.submissions.length) return <p style={{ color: 'var(--cw-muted)', margin: 0 }}>No submissions yet.</p>;
+
+  // Group by lesson so the timeline reads naturally.
+  const byLesson = data.submissions.reduce((acc, s) => {
+    (acc[s.lesson_id] ||= { title: `${s.unit_title} · ${s.lesson_title}`, rows: [] }).rows.push(s);
+    return acc;
+  }, {} as Record<string, { title: string; rows: typeof data.submissions }>);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {Object.entries(byLesson).map(([lessonId, grp]) => (
+        <div key={lessonId}>
+          <h4 style={{ margin: '4px 0 6px', fontSize: 14 }}>
+            <Link href={`/lesson/${lessonId}`}>{grp.title}</Link>
+          </h4>
+          <table style={tbl}>
+            <thead>
+              <tr>
+                <th style={th}>Question</th>
+                <th style={th}>Type</th>
+                <th style={th}>Mark</th>
+                <th style={th}>%</th>
+                <th style={th}>When</th>
+                <th style={th}>Feedback</th>
+              </tr>
+            </thead>
+            <tbody>
+              {grp.rows.map((s) => {
+                const pct = s.marks_awarded != null && s.question_max_marks > 0
+                  ? (s.marks_awarded / s.question_max_marks) * 100 : null;
+                return (
+                  <tr key={s.id}>
+                    <td style={{ ...td, maxWidth: 320 }} title={s.question_prompt}>{shorten(s.question_prompt, 80)}</td>
+                    <td style={td}>{s.question_type}</td>
+                    <td style={td}>{s.marks_awarded != null ? `${s.marks_awarded} / ${s.question_max_marks}` : 'pending'}</td>
+                    <td style={td}><PercentBar value={pct} /></td>
+                    <td style={td}>{new Date(s.submitted_at).toLocaleString()}</td>
+                    <td style={{ ...td, maxWidth: 280, color: 'var(--cw-muted)' }} title={s.ai_feedback || ''}>
+                      {shorten(s.ai_feedback || '', 80) || '—'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ---------- helpers + styles ---------- */
+
+function shorten(s: string, n: number) {
+  if (!s) return '';
+  return s.length <= n ? s : s.slice(0, n - 1) + '…';
+}
+
+const card: React.CSSProperties = {
+  background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 12, padding: 16,
+  boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
+};
+const summaryRow: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 };
+const tile: React.CSSProperties = { ...card, padding: 16 };
+const tbl: React.CSSProperties = { width: '100%', borderCollapse: 'collapse', marginTop: 8, fontSize: 14 };
+const th: React.CSSProperties = { textAlign: 'left', padding: '8px 8px', borderBottom: '1px solid var(--cw-border)', fontWeight: 600, color: 'var(--cw-muted)', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.4 };
+const td: React.CSSProperties = { padding: '8px 8px', borderBottom: '1px solid var(--cw-border)', verticalAlign: 'top' };
+const secondaryBtn: React.CSSProperties = { background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)', padding: '6px 12px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 13 };
+const miniBtn: React.CSSProperties = { background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)', padding: '4px 10px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 12 };

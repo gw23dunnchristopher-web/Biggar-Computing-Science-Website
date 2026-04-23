@@ -382,6 +382,196 @@ export async function listSubmissionsForLesson(lessonId: string) {
   return r.rows;
 }
 
+/* ---------- Analytics ---------- */
+
+/**
+ * Course-wide overview: per-lesson totals plus the list of students who have
+ * ever submitted anything in the course. Designed for the teacher analytics
+ * landing page.
+ */
+export async function getCourseAnalytics(course: ClassworkCourse) {
+  await ensureClassworkSchema();
+
+  // Per-lesson aggregate. Average percentage is computed from each
+  // submission's marks_awarded / question.max_marks so multi-question lessons
+  // weight every question equally.
+  const lessons = await pool.query(
+    `SELECT
+        l.id              AS lesson_id,
+        l.title           AS lesson_title,
+        l.is_published    AS is_published,
+        u.id              AS unit_id,
+        u.title           AS unit_title,
+        COALESCE(qstat.question_count, 0)        AS question_count,
+        COALESCE(sstat.submission_count, 0)      AS submission_count,
+        COALESCE(sstat.distinct_students, 0)     AS distinct_students,
+        COALESCE(sstat.marked_count, 0)          AS marked_count,
+        sstat.avg_percent                         AS avg_percent
+       FROM bhs_classwork_lessons l
+       JOIN bhs_classwork_units u ON u.id = l.unit_id
+       LEFT JOIN (
+         SELECT lesson_id, COUNT(*)::int AS question_count
+           FROM bhs_classwork_questions
+          GROUP BY lesson_id
+       ) qstat ON qstat.lesson_id = l.id
+       LEFT JOIN (
+         SELECT s.lesson_id,
+                COUNT(*)::int                                 AS submission_count,
+                COUNT(DISTINCT s.student_id)::int             AS distinct_students,
+                COUNT(s.marks_awarded)::int                   AS marked_count,
+                AVG(
+                  CASE WHEN s.marks_awarded IS NOT NULL AND q.max_marks > 0
+                       THEN (s.marks_awarded::float / q.max_marks) * 100
+                  END
+                )                                              AS avg_percent
+           FROM bhs_classwork_submissions s
+           JOIN bhs_classwork_questions q ON q.id = s.question_id
+          WHERE s.course = $1
+          GROUP BY s.lesson_id
+       ) sstat ON sstat.lesson_id = l.id
+      WHERE l.course = $1
+      ORDER BY u.order_index, l.order_index`,
+    [course]
+  );
+
+  // Distinct students who have submitted anything in this course, with their
+  // overall average percentage.
+  const students = await pool.query(
+    `SELECT s.student_id,
+            MAX(s.student_username)                              AS username,
+            COUNT(*)::int                                        AS submission_count,
+            COUNT(DISTINCT s.lesson_id)::int                     AS lessons_touched,
+            MAX(s.submitted_at)                                  AS last_submitted_at,
+            AVG(
+              CASE WHEN s.marks_awarded IS NOT NULL AND q.max_marks > 0
+                   THEN (s.marks_awarded::float / q.max_marks) * 100
+              END
+            )                                                    AS avg_percent
+       FROM bhs_classwork_submissions s
+       JOIN bhs_classwork_questions q ON q.id = s.question_id
+      WHERE s.course = $1
+      GROUP BY s.student_id
+      ORDER BY MAX(s.student_username) ASC`,
+    [course]
+  );
+
+  // Course-wide totals.
+  const totals = await pool.query(
+    `SELECT COUNT(*)::int                              AS submission_count,
+            COUNT(DISTINCT student_id)::int            AS distinct_students
+       FROM bhs_classwork_submissions WHERE course = $1`,
+    [course]
+  );
+
+  return {
+    course,
+    totals: totals.rows[0] || { submission_count: 0, distinct_students: 0 },
+    lessons: lessons.rows,
+    students: students.rows,
+  };
+}
+
+/**
+ * Per-lesson breakdown: each question's stats, plus each student's score on
+ * that lesson. Multi-attempt students are scored on their best attempt.
+ */
+export async function getLessonAnalytics(lessonId: string) {
+  await ensureClassworkSchema();
+
+  const lesson = await pool.query(
+    `SELECT l.*, u.title AS unit_title
+       FROM bhs_classwork_lessons l
+       JOIN bhs_classwork_units u ON u.id = l.unit_id
+      WHERE l.id = $1`,
+    [lessonId]
+  );
+  if (!lesson.rows.length) return null;
+
+  const questions = await pool.query(
+    `SELECT q.id, q.prompt, q.question_type, q.max_marks, q.order_index, q.options,
+            COALESCE(s.submission_count, 0)  AS submission_count,
+            COALESCE(s.distinct_students, 0) AS distinct_students,
+            s.avg_mark                       AS avg_mark,
+            s.avg_percent                    AS avg_percent
+       FROM bhs_classwork_questions q
+       LEFT JOIN (
+         SELECT question_id,
+                COUNT(*)::int                              AS submission_count,
+                COUNT(DISTINCT student_id)::int            AS distinct_students,
+                AVG(marks_awarded)                          AS avg_mark,
+                AVG(
+                  CASE WHEN marks_awarded IS NOT NULL
+                       THEN (marks_awarded::float /
+                             NULLIF((SELECT max_marks FROM bhs_classwork_questions WHERE id = question_id), 0)
+                            ) * 100
+                  END
+                )                                           AS avg_percent
+           FROM bhs_classwork_submissions
+          WHERE lesson_id = $1
+          GROUP BY question_id
+       ) s ON s.question_id = q.id
+      WHERE q.lesson_id = $1
+      ORDER BY q.order_index, q.id`,
+    [lessonId]
+  );
+
+  // Per-student best attempt for each question, summed.
+  const students = await pool.query(
+    `WITH best AS (
+       SELECT DISTINCT ON (s.student_id, s.question_id)
+              s.student_id,
+              s.student_username,
+              s.question_id,
+              s.marks_awarded,
+              s.submitted_at,
+              q.max_marks
+         FROM bhs_classwork_submissions s
+         JOIN bhs_classwork_questions q ON q.id = s.question_id
+        WHERE s.lesson_id = $1
+        ORDER BY s.student_id, s.question_id, s.marks_awarded DESC NULLS LAST, s.submitted_at DESC
+     )
+     SELECT student_id,
+            MAX(student_username)                AS username,
+            SUM(COALESCE(marks_awarded, 0))::int AS total_marks,
+            SUM(max_marks)::int                  AS max_marks,
+            COUNT(*)::int                        AS questions_attempted,
+            MAX(submitted_at)                    AS last_submitted_at
+       FROM best
+      GROUP BY student_id
+      ORDER BY MAX(student_username) ASC`,
+    [lessonId]
+  );
+
+  return { lesson: lesson.rows[0], questions: questions.rows, students: students.rows };
+}
+
+/**
+ * Detailed view of one student's work in one course: every submission, joined
+ * with the parent question/lesson/unit.
+ */
+export async function getStudentCourseAnalytics(course: ClassworkCourse, studentId: string) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `SELECT s.*,
+            q.prompt        AS question_prompt,
+            q.question_type AS question_type,
+            q.max_marks     AS question_max_marks,
+            l.id            AS lesson_id,
+            l.title         AS lesson_title,
+            u.id            AS unit_id,
+            u.title         AS unit_title
+       FROM bhs_classwork_submissions s
+       JOIN bhs_classwork_questions q ON q.id = s.question_id
+       JOIN bhs_classwork_lessons   l ON l.id = s.lesson_id
+       JOIN bhs_classwork_units     u ON u.id = l.unit_id
+      WHERE s.course = $1 AND s.student_id = $2
+      ORDER BY u.order_index, l.order_index, q.order_index, s.submitted_at DESC`,
+    [course, studentId]
+  );
+  const username = r.rows[0]?.student_username || null;
+  return { course, studentId, username, submissions: r.rows };
+}
+
 export async function setSubmissionMark(id: string, marksAwarded: number, aiFeedback: string | null, markedBy: 'ai' | 'teacher') {
   await ensureClassworkSchema();
   const r = await pool.query(

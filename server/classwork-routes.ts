@@ -27,6 +27,9 @@ import {
   listMySubmissionsForLesson,
   listSubmissionsForLesson,
   setSubmissionMark,
+  getCourseAnalytics,
+  getLessonAnalytics,
+  getStudentCourseAnalytics,
 } from './classwork-storage';
 import { markSubmission } from './classwork-ai';
 
@@ -456,6 +459,41 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] manual mark error:', err);
       res.status(500).json({ error: 'Failed to set mark' });
+    }
+  });
+
+  /* ---------- Analytics (teacher only) ---------- */
+
+  app.get('/api/classwork/:course/analytics/overview', requireTeacher, async (req, res) => {
+    const course = req.params.course;
+    if (!isClassworkCourse(course)) return res.status(400).json({ error: 'Invalid course' });
+    try {
+      res.json(await getCourseAnalytics(course));
+    } catch (err) {
+      console.error('[classwork] course analytics error:', err);
+      res.status(500).json({ error: 'Failed to load analytics' });
+    }
+  });
+
+  app.get('/api/classwork/lessons/:lessonId/analytics', requireTeacher, async (req, res) => {
+    try {
+      const data = await getLessonAnalytics(req.params.lessonId);
+      if (!data) return res.status(404).json({ error: 'Lesson not found' });
+      res.json(data);
+    } catch (err) {
+      console.error('[classwork] lesson analytics error:', err);
+      res.status(500).json({ error: 'Failed to load analytics' });
+    }
+  });
+
+  app.get('/api/classwork/:course/students/:studentId/analytics', requireTeacher, async (req, res) => {
+    const course = req.params.course;
+    if (!isClassworkCourse(course)) return res.status(400).json({ error: 'Invalid course' });
+    try {
+      res.json(await getStudentCourseAnalytics(course, req.params.studentId));
+    } catch (err) {
+      console.error('[classwork] student analytics error:', err);
+      res.status(500).json({ error: 'Failed to load analytics' });
     }
   });
 

@@ -93,7 +93,14 @@ export default function Course() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <h1 style={{ margin: 0 }}>Units</h1>
         {role === 'teacher' && (
-          <button onClick={addUnit} style={primaryBtn}>+ New unit</button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Link href={`/analytics/${course}`} style={{
+              display: 'inline-block',
+              background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+              padding: '8px 14px', borderRadius: 8, fontWeight: 600, textDecoration: 'none',
+            }}>Analytics</Link>
+            <button onClick={addUnit} style={primaryBtn}>+ New unit</button>
+          </div>
         )}
       </div>
 
