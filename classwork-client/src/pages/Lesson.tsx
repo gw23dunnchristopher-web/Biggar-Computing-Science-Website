@@ -225,7 +225,18 @@ export default function Lesson() {
                     }}>Extension</span>
                   )}
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>{q.max_marks} mark{q.max_marks === 1 ? '' : 's'}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  {q.question_type !== 'passage' && (
+                    <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>{q.max_marks} mark{q.max_marks === 1 ? '' : 's'}</div>
+                  )}
+                  {role === 'teacher' && !previewAsStudent && (
+                    <EditQuestionButton
+                      question={q}
+                      passages={questions.filter((x) => x.question_type === 'passage')}
+                      onChanged={refresh}
+                    />
+                  )}
+                </div>
               </div>
               <p style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}><PromptText text={q.prompt} /></p>
 
@@ -958,33 +969,71 @@ function NewQuestionButton({ lessonId, passages, onCreated }: { lessonId: string
   );
 }
 
-function NewQuestionModal({ lessonId, passages, onClose, onCreated }: { lessonId: string; passages: Question[]; onClose: () => void; onCreated: () => void }) {
-  const [type, setType] = useState('short');
-  const [prompt, setPrompt] = useState('');
+/* Edit-question entry point: same modal, just pre-populated with the existing
+   values and saving via PATCH instead of POST. Lives next to each question
+   card for teachers (not in pupil-preview mode). */
+function EditQuestionButton({ question, passages, onChanged }: { question: Question; passages: Question[]; onChanged: () => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button onClick={() => setOpen(true)} title="Edit this question" style={{
+        background: '#fff', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+        padding: '4px 10px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+      }}>Edit</button>
+      {open && <NewQuestionModal
+        lessonId={question.lesson_id}
+        passages={passages.filter((p) => p.id !== question.id)}
+        existing={question}
+        onClose={() => setOpen(false)}
+        onCreated={() => { setOpen(false); onChanged(); }}
+      />}
+    </>
+  );
+}
+
+function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: { lessonId: string; passages: Question[]; existing?: Question; onClose: () => void; onCreated: () => void }) {
+  const isEdit = !!existing;
+  const cfg = (existing && existing.config && typeof existing.config === 'object') ? existing.config as any : {};
+  const [type, setType] = useState(existing?.question_type || 'short');
+  const [prompt, setPrompt] = useState(existing?.prompt || '');
   // For non-passage types, optionally attach this new question to an existing
   // passage in the lesson so they render together as a stimulus group.
-  const [passageId, setPassageId] = useState<string>('');
-  const [maxMarks, setMaxMarks] = useState(1);
-  const [markingScheme, setMarkingScheme] = useState('');
-  const [aiGuidance, setAiGuidance] = useState('');
-  const [options, setOptions] = useState<{ label: string; text: string; isCorrect: boolean }[]>([
-    { label: 'A', text: '', isCorrect: false },
-    { label: 'B', text: '', isCorrect: false },
-  ]);
-  const [rubric, setRubric] = useState<{ label: string; marks: number }[]>([]);
-  const [useRubric, setUseRubric] = useState(false);
-  const [visualMarking, setVisualMarking] = useState(false);
+  const [passageId, setPassageId] = useState<string>(existing?.passage_id || '');
+  const [maxMarks, setMaxMarks] = useState(existing?.max_marks ?? 1);
+  const [markingScheme, setMarkingScheme] = useState(existing?.marking_scheme || '');
+  const [aiGuidance, setAiGuidance] = useState(existing?.ai_grading_guidance || '');
+  const [options, setOptions] = useState<{ label: string; text: string; isCorrect: boolean }[]>(
+    Array.isArray(existing?.options) && existing!.options.length
+      ? (existing!.options as any[]).map((o, i) => ({
+          label: String(o?.label || String.fromCharCode(65 + i)),
+          text: String(o?.text || ''),
+          isCorrect: !!o?.isCorrect,
+        }))
+      : [
+          { label: 'A', text: '', isCorrect: false },
+          { label: 'B', text: '', isCorrect: false },
+        ]
+  );
+  const [rubric, setRubric] = useState<{ label: string; marks: number }[]>(
+    Array.isArray(cfg.rubric) ? cfg.rubric.map((r: any) => ({
+      label: String(r?.label || ''), marks: Math.max(0, Math.round(Number(r?.marks) || 0)),
+    })) : []
+  );
+  const [useRubric, setUseRubric] = useState(Array.isArray(cfg.rubric) && cfg.rubric.length > 0);
+  const [visualMarking, setVisualMarking] = useState(!!cfg.visualMarking);
   // Optional starter .pptx for presentation questions: pupils download it,
   // edit it and upload their version. The marker uses it as a baseline so
   // the AI only credits the pupil's additions, not the original starter.
-  const [starterFileUrl, setStarterFileUrl] = useState('');
-  const [starterFileName, setStarterFileName] = useState('');
+  const [starterFileUrl, setStarterFileUrl] = useState(typeof cfg.starterFileUrl === 'string' ? cfg.starterFileUrl : '');
+  const [starterFileName, setStarterFileName] = useState(typeof cfg.starterFileName === 'string' ? cfg.starterFileName : '');
   const [starterUploading, setStarterUploading] = useState(false);
-  const [sqlDatabaseUrl, setSqlDatabaseUrl] = useState('');
-  const [dbEmbedInput, setDbEmbedInput] = useState('');
-  const [isExtension, setIsExtension] = useState(false);
-  const [videoKind, setVideoKind] = useState<'youtube' | 'mp4'>('youtube');
-  const [videoUrl, setVideoUrl] = useState('');
+  const [sqlDatabaseUrl, setSqlDatabaseUrl] = useState(typeof cfg.databaseUrl === 'string' ? cfg.databaseUrl : '');
+  const [dbEmbedInput, setDbEmbedInput] = useState(typeof cfg.embedUrl === 'string' ? cfg.embedUrl : (typeof cfg.embedToken === 'string' ? cfg.embedToken : ''));
+  const [isExtension, setIsExtension] = useState(!!existing?.is_extension);
+  const [videoKind, setVideoKind] = useState<'youtube' | 'mp4'>(
+    cfg.video && cfg.video.kind === 'mp4' ? 'mp4' : 'youtube'
+  );
+  const [videoUrl, setVideoUrl] = useState(cfg.video && typeof cfg.video.url === 'string' ? cfg.video.url : '');
   const [videoFileName, setVideoFileName] = useState('');
   const [videoUploading, setVideoUploading] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -1090,9 +1139,15 @@ function NewQuestionModal({ lessonId, passages, onClose, onCreated }: { lessonId
         }
         body.config = { video: { kind: videoKind, url: videoUrl.trim() } };
       }
-      await api(`/api/classwork/lessons/${lessonId}/questions`, {
-        method: 'POST', body: JSON.stringify(body),
-      });
+      if (isEdit) {
+        await api(`/api/classwork/questions/${existing!.id}`, {
+          method: 'PATCH', body: JSON.stringify(body),
+        });
+      } else {
+        await api(`/api/classwork/lessons/${lessonId}/questions`, {
+          method: 'POST', body: JSON.stringify(body),
+        });
+      }
       onCreated();
     } catch (e: any) {
       setErr(e.message || 'Failed to save');
@@ -1106,7 +1161,7 @@ function NewQuestionModal({ lessonId, passages, onClose, onCreated }: { lessonId
   return (
     <div style={modalOverlay} onClick={onClose}>
       <div style={modal} onClick={(e) => e.stopPropagation()}>
-        <h2 style={{ marginTop: 0 }}>New question</h2>
+        <h2 style={{ marginTop: 0 }}>{isEdit ? 'Edit question' : 'New question'}</h2>
         <label style={fieldLabel}>Type
           <select value={type} onChange={(e) => onTypeChange(e.target.value)} style={input}>
             {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -1403,7 +1458,7 @@ function NewQuestionModal({ lessonId, passages, onClose, onCreated }: { lessonId
           <button onClick={onClose} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid var(--cw-border)', background: '#fff', cursor: 'pointer' }}>Cancel</button>
           <button onClick={save} disabled={busy} style={{
             background: 'var(--cw-accent)', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
-          }}>{busy ? 'Saving…' : 'Save question'}</button>
+          }}>{busy ? 'Saving…' : (isEdit ? 'Save changes' : 'Save question')}</button>
         </div>
       </div>
     </div>
@@ -1516,7 +1571,51 @@ function renderResource(r: LessonResource): React.ReactNode {
       </figure>
     );
   }
-  const isDoc = r.kind === 'document';
+  if (r.kind === 'link') {
+    // Render as a big, obvious clickable card. Younger pupils were struggling
+    // to see plain inline links, so this gives them a button-style preview
+    // with the title (or URL) up top and the URL underneath, and a small
+    // "Open in new tab" hint on the right.
+    let host = '';
+    try { host = new URL(r.url).hostname.replace(/^www\./, ''); } catch { host = r.url; }
+    const display = r.title || host;
+    return (
+      <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer"
+         style={{
+           display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
+           background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 10,
+           color: 'var(--cw-ink)', textDecoration: 'none', maxWidth: 480,
+           boxShadow: '0 1px 2px rgba(0,0,0,0.04)', transition: 'box-shadow .15s, border-color .15s',
+         }}
+         onMouseOver={(e) => {
+           (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+           (e.currentTarget as HTMLElement).style.borderColor = 'var(--cw-accent)';
+         }}
+         onMouseOut={(e) => {
+           (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)';
+           (e.currentTarget as HTMLElement).style.borderColor = 'var(--cw-border)';
+         }}
+      >
+        <div style={{
+          flex: '0 0 auto', width: 40, height: 40, borderRadius: 8,
+          background: '#e0e7ff', color: '#3730a3',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 20, fontWeight: 700,
+        }} aria-hidden="true">↗</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontWeight: 700, color: '#1d4ed8', textDecoration: 'underline',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>{display}</div>
+          <div style={{
+            fontSize: 13, color: 'var(--cw-muted)', marginTop: 2,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>{r.url}</div>
+        </div>
+      </a>
+    );
+  }
+  // Document download — same look so it reads as a clickable button.
   return (
     <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer"
        style={{
@@ -1527,12 +1626,11 @@ function renderResource(r: LessonResource): React.ReactNode {
        }}>
       <span style={{
         fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-        background: isDoc ? '#fef3c7' : '#e0e7ff',
-        color: isDoc ? '#92400e' : '#3730a3',
+        background: '#fef3c7', color: '#92400e',
         textTransform: 'uppercase', flex: '0 0 auto',
-      }}>{isDoc ? 'Document' : 'Link'}</span>
+      }}>Document</span>
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {isDoc ? `Open: ${title}` : title}
+        Open: {title}
       </span>
     </a>
   );
