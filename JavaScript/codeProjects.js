@@ -147,8 +147,18 @@
     function backend() { return isCloud() ? CloudBackend : LocalBackend; }
 
     var listeners = [];
+    // Track the last broadcast mode so we only notify subscribers when the
+    // backend actually flips between cloud and local. Without this, every
+    // SiteAuth change (including the initial verify() resolving with the
+    // same cached user) would re-fire onChange and bounce open editors back
+    // to the dashboard mid-session — see PythonEditor.html / HTMLEditor.html
+    // which use onChange to redirect when the backend switches.
+    var lastMode = isCloud() ? 'cloud' : 'local';
     function emit() {
-        var info = { mode: isCloud() ? 'cloud' : 'local' };
+        var mode = isCloud() ? 'cloud' : 'local';
+        if (mode === lastMode) return;
+        lastMode = mode;
+        var info = { mode: mode };
         listeners.slice().forEach(function (cb) { try { cb(info); } catch (_) {} });
     }
 
@@ -160,6 +170,9 @@
         var t = setInterval(function () {
             if (window.SiteAuth && window.SiteAuth.onChange) {
                 clearInterval(t);
+                // Re-sync lastMode now that SiteAuth has loaded — the cached
+                // currentUser may have flipped isCloud() during the poll.
+                lastMode = isCloud() ? 'cloud' : 'local';
                 window.SiteAuth.onChange(function () { emit(); });
             } else if (++tries > 50) {
                 clearInterval(t);
