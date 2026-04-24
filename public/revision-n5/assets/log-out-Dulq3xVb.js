@@ -1,0 +1,11 @@
+import { c as createLucideIcon } from "./index-DZjJp9Jo.js";
+const __iconNode = [
+  ["path", { d: "m16 17 5-5-5-5", key: "1bji2h" }],
+  ["path", { d: "M21 12H9", key: "dn1m92" }],
+  ["path", { d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", key: "1uf3rs" }]
+];
+const LogOut = createLucideIcon("log-out", __iconNode);
+export {
+  LogOut as L
+};
+//# sourceMappingURL=log-out-Dulq3xVb.js.map
