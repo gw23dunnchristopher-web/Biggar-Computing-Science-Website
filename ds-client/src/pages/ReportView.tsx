@@ -210,7 +210,10 @@ export function ReportView({
     window.print();
   };
 
-  const handleSaveDesign = async (
+  // Memoised so AccessDesignCanvas's auto-save effect (which depends on
+  // onSave) doesn't see a fresh function reference on every render and
+  // bounce data back into local state — root cause of React error #185.
+  const handleSaveDesign = useCallback(async (
     newFields: DesignFieldDef[],
     newImages: DesignImageDef[],
     newFreeLabels: DesignLabelDef[]
@@ -235,7 +238,7 @@ export function ReportView({
     } finally {
       setIsDesignSaving(false);
     }
-  };
+  }, [definition, reportMeta, databaseId, reportId, toast]);
 
   // Sort and group records
   const processedRecords = (() => {

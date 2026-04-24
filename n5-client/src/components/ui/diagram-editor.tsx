@@ -179,28 +179,32 @@ export function DiagramEditor({ initialData, initialDrawing, onChange, disabled,
 
   const onChangeRef = useRef(onChange);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSyncedDataRef = useRef<string | null>(null);
   
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
 
-  // Notify parent of changes with debouncing to prevent text deletion during typing
+  // Notify parent of changes with debouncing to prevent text deletion during typing.
+  // Guarded with lastSyncedDataRef so an unstable onChange prop in a parent
+  // (a fresh arrow on each render) cannot bounce the same data back into our
+  // state and trigger React error #185 ("Maximum update depth exceeded").
   useEffect(() => {
-    if (onChangeRef.current) {
-      // Clear any pending debounce timer
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
-      
-      // Debounce the onChange callback to reduce processing during rapid typing
-      debounceTimerRef.current = setTimeout(() => {
-        if (onChangeRef.current) {
-          const canvas = canvasRef.current;
-          const drawingData = canvas ? canvas.toDataURL() : "";
-          onChangeRef.current(JSON.stringify(items), drawingData);
-        }
-      }, 150); // 150ms debounce
+    if (!onChangeRef.current) return;
+    const data = JSON.stringify(items);
+    if (lastSyncedDataRef.current === data) return;
+    
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
     }
+    
+    debounceTimerRef.current = setTimeout(() => {
+      if (!onChangeRef.current) return;
+      lastSyncedDataRef.current = data;
+      const canvas = canvasRef.current;
+      const drawingData = canvas ? canvas.toDataURL() : "";
+      onChangeRef.current(data, drawingData);
+    }, 150);
     
     return () => {
       if (debounceTimerRef.current) {
@@ -1420,10 +1424,14 @@ export function DiagramEditor({ initialData, initialDrawing, onChange, disabled,
   const stopDrawing = () => {
     if (!isDrawing) return;
     setIsDrawing(false);
-    
-    // Trigger change update
-    if (onChange && canvasRef.current) {
-        onChange(JSON.stringify(items), canvasRef.current.toDataURL());
+
+    // Trigger change update — go through the same guarded ref pathway used
+    // by the items-sync effect so all onChange notifications flow through one
+    // path and stay protected against unstable parent callbacks.
+    if (onChangeRef.current && canvasRef.current) {
+      const data = JSON.stringify(items);
+      lastSyncedDataRef.current = data;
+      onChangeRef.current(data, canvasRef.current.toDataURL());
     }
   };
 
@@ -1434,7 +1442,11 @@ export function DiagramEditor({ initialData, initialDrawing, onChange, disabled,
           if (ctx) {
               ctx.clearRect(0, 0, canvas.width, canvas.height);
               canvasClearedRef.current = true;
-              if (onChange) onChange(JSON.stringify(items), canvas.toDataURL());
+              if (onChangeRef.current) {
+                const data = JSON.stringify(items);
+                lastSyncedDataRef.current = data;
+                onChangeRef.current(data, canvas.toDataURL());
+              }
           }
       }
   };

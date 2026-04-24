@@ -288,23 +288,45 @@ export function DataGrid({
   }, [focusNewRowRef]);
 
   const [lookupRecords, setLookupRecords] = useState<Record<number, any[]>>({});
+  // Ref mirror of `lookupRecords` so the fetch effect can read the latest
+  // cache without listing it as a dependency (which would cause a refetch
+  // loop after every successful fetch).
+  const lookupRecordsRef = useRef(lookupRecords);
+  useEffect(() => { lookupRecordsRef.current = lookupRecords; }, [lookupRecords]);
+
+  // Keyed off a stable string signature of the lookup fields rather than the
+  // raw `table.fields` array reference. Without this, a parent that hands us
+  // a fresh `table` object on every render (e.g. from an unmemoised computation)
+  // would re-fire this effect on each render, flood the network, and — once
+  // the resulting setState propagates back through the parent — could trigger
+  // React error #185 ("Maximum update depth exceeded").
+  const lookupSignature = React.useMemo(() => {
+    const sigs: string[] = [];
+    for (const f of table.fields) {
+      const cfg = parseLookupConfig(f.description);
+      if (cfg?.type === 'table' && cfg.tableId) sigs.push(`${f.name}:${cfg.tableId}`);
+    }
+    return sigs.sort().join('|');
+  }, [table.fields]);
 
   useEffect(() => {
+    if (!lookupSignature) return;
     const lookupFields = table.fields.filter(f => parseLookupConfig(f.description) != null);
+    const cache = lookupRecordsRef.current;
     lookupFields.forEach(f => {
       const cfg = parseLookupConfig(f.description);
-      if (cfg?.type === 'table' && cfg.tableId && !lookupRecords[cfg.tableId]) {
+      if (cfg?.type === 'table' && cfg.tableId && !cache[cfg.tableId]) {
         fetch(`/api/ds/databases/${databaseId}/tables/${cfg.tableId}/records`)
           .then(r => r.json())
           .then(data => {
             if (Array.isArray(data)) {
-              setLookupRecords(prev => ({ ...prev, [cfg.tableId!]: data }));
+              setLookupRecords(p => ({ ...p, [cfg.tableId!]: data }));
             }
           })
           .catch(() => {});
       }
     });
-  }, [table.fields, databaseId]);
+  }, [lookupSignature, databaseId]);
 
   const getLookupOptions = (cfg: LookupConfig | null): { value: string; display: string }[] => {
     if (!cfg) return [];

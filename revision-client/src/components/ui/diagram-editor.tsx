@@ -179,18 +179,25 @@ export function DiagramEditor({ initialData, initialDrawing, onChange, disabled,
   }, [items, showFunctionNumbers]);
 
   const onChangeRef = useRef(onChange);
+  const lastSyncedDataRef = useRef<string | null>(null);
   
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
 
-  // Notify parent of changes
+  // Notify parent of changes. Guarded so that we never call onChange when the
+  // serialized items haven't actually changed — without this an unstable
+  // onChange prop in a parent (a fresh arrow on each render) can end up
+  // bouncing the same data back into our state and trigger React error #185
+  // ("Maximum update depth exceeded").
   useEffect(() => {
-    if (onChangeRef.current) {
-      const canvas = canvasRef.current;
-      const drawingData = canvas ? canvas.toDataURL() : "";
-      onChangeRef.current(JSON.stringify(items), drawingData);
-    }
+    if (!onChangeRef.current) return;
+    const data = JSON.stringify(items);
+    if (lastSyncedDataRef.current === data) return;
+    lastSyncedDataRef.current = data;
+    const canvas = canvasRef.current;
+    const drawingData = canvas ? canvas.toDataURL() : "";
+    onChangeRef.current(data, drawingData);
   }, [items]); 
 
   // Initialize canvas with existing drawing if provided
@@ -1381,10 +1388,14 @@ export function DiagramEditor({ initialData, initialDrawing, onChange, disabled,
   const stopDrawing = () => {
     if (!isDrawing) return;
     setIsDrawing(false);
-    
-    // Trigger change update
-    if (onChange && canvasRef.current) {
-        onChange(JSON.stringify(items), canvasRef.current.toDataURL());
+
+    // Trigger change update — go through the same guarded ref pathway used
+    // by the items-sync effect so all onChange notifications flow through one
+    // path and stay protected against unstable parent callbacks.
+    if (onChangeRef.current && canvasRef.current) {
+      const data = JSON.stringify(items);
+      lastSyncedDataRef.current = data;
+      onChangeRef.current(data, canvasRef.current.toDataURL());
     }
   };
 
@@ -1395,7 +1406,11 @@ export function DiagramEditor({ initialData, initialDrawing, onChange, disabled,
           if (ctx) {
               ctx.clearRect(0, 0, canvas.width, canvas.height);
               canvasClearedRef.current = true;
-              if (onChange) onChange(JSON.stringify(items), canvas.toDataURL());
+              if (onChangeRef.current) {
+                const data = JSON.stringify(items);
+                lastSyncedDataRef.current = data;
+                onChangeRef.current(data, canvas.toDataURL());
+              }
           }
       }
   };

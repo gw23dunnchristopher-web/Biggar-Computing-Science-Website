@@ -433,15 +433,23 @@ export const AccessDesignCanvas = forwardRef<DesignCanvasHandle, Props>(function
     onSave(designFields, designImages, designLabels);
   };
 
+  // Stash onSave in a ref so its (typically unstable) identity from the
+  // parent doesn't enter the auto-save effect's dep list and re-fire the
+  // timer on every parent render. Without this, an inline `onSave={...}` in
+  // the parent would bounce the same data back into local state and trigger
+  // React error #185 ("Maximum update depth exceeded").
+  const onSaveRef = useRef(onSave);
+  useEffect(() => { onSaveRef.current = onSave; }, [onSave]);
+
   const autoSaveRef = useRef(false);
   useEffect(() => {
     if (!autoSave || isSaving) return;
     if (!autoSaveRef.current) { autoSaveRef.current = true; return; }
     const t = setTimeout(() => {
-      onSave(designFields, designImages, designLabels);
+      onSaveRef.current(designFields, designImages, designLabels);
     }, 1500);
     return () => clearTimeout(t);
-  }, [designFields, designImages, designLabels, autoSave]);
+  }, [designFields, designImages, designLabels, autoSave, isSaving]);
 
   const renderHandles = (id: string) => (
     <>

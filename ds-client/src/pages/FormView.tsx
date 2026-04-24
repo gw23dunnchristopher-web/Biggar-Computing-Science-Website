@@ -297,7 +297,10 @@ export function FormView({
     || definition?.fields.find(f => f.fieldName === fieldName)?.fieldType
     || 'text';
 
-  const handleSaveDesign = async (
+  // Memoised so AccessDesignCanvas's auto-save effect (which depends on
+  // onSave) doesn't see a fresh function reference on every render and
+  // bounce data back into local state — root cause of React error #185.
+  const handleSaveDesign = useCallback(async (
     newFields: DesignFieldDef[],
     newImages: DesignImageDef[],
     newFreeLabels: DesignLabelDef[]
@@ -320,7 +323,7 @@ export function FormView({
     } catch {
       toast({ title: 'Failed to save design', variant: 'destructive' });
     } finally { setIsDesignSaving(false); }
-  };
+  }, [definition, formMeta, databaseId, formId, toast]);
 
   const visibleFields = definition?.fields
     .filter(f => f.visible)
