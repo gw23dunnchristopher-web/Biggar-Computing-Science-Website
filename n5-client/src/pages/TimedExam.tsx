@@ -856,9 +856,13 @@ export default function TimedExam() {
   // this, every parent re-render produced fresh arrows, which made child
   // useEffects (e.g. ImagePasteInput's paste-listener effect) re-fire on
   // every keystroke and could feed back into React error #185.
+  // `onDiagramImageChange` is also pre-bound here so the heavy memoised
+  // DiagramImageInput / ImagePasteInput components see a stable onChange
+  // identity and can skip re-renders when unrelated sub-questions change.
   const inputHandlerCacheRef = useRef(new Map<string, {
     onChange: (key: string, val: string) => void;
     onCodeKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+    onDiagramImageChange: (val: string) => void;
   }>());
   const getInputHandlersFor = useCallback((subId: string) => {
     let entry = inputHandlerCacheRef.current.get(subId);
@@ -866,6 +870,7 @@ export default function TimedExam() {
       entry = {
         onChange: (key: string, val: string) => updateInput(subId, key, val),
         onCodeKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => handleCodeKeyDown(e, subId),
+        onDiagramImageChange: (val: string) => updateInput(subId, "diagram_image", val),
       };
       inputHandlerCacheRef.current.set(subId, entry);
     }
@@ -2517,7 +2522,7 @@ export default function TimedExam() {
                             <div className="mt-4">
                                 {(() => {
                                   const h = getInputHandlersFor(subQ.id);
-                                  return renderInput(subQ, userInputs[subQ.id] || {}, h.onChange, h.onCodeKeyDown);
+                                  return renderInput(subQ, userInputs[subQ.id] || {}, h.onChange, h.onCodeKeyDown, h.onDiagramImageChange);
                                 })()}
                             </div>
 
@@ -2686,7 +2691,7 @@ export default function TimedExam() {
                                     <div className="mt-2">
                                       {(() => {
                                         const h = getInputHandlersFor(part.id);
-                                        return renderInput(part, userInputs[part.id] || {}, h.onChange, h.onCodeKeyDown);
+                                        return renderInput(part, userInputs[part.id] || {}, h.onChange, h.onCodeKeyDown, h.onDiagramImageChange);
                                       })()}
                                     </div>
                                   </div>
@@ -2751,8 +2756,14 @@ function renderInput(
   subQ: SubQuestion, 
   currentInput: Record<string, string>, 
   onChange: (key: string, val: string) => void,
-  onCodeKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
+  onCodeKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void,
+  onDiagramImageChange?: (val: string) => void
 ) {
+    // Stable onChange handler for DiagramImageInput; cached per (subId)
+    // by the parent's getInputHandlersFor. Using this instead of an inline
+    // arrow lets the memoised DiagramImageInput skip re-renders when
+    // unrelated sub-question inputs change.
+    const diagramImageOnChange = onDiagramImageChange || ((val: string) => onChange("diagram_image", val));
     if (subQ.maxMarks === 0) return null;
 
     const getRequirementBadge = (req?: "programming-language" | "design-notation" | "either") => {
@@ -2853,7 +2864,7 @@ function renderInput(
                 ) : (
                     <DiagramImageInput
                         value={currentInput["diagram_image"] || ""}
-                        onChange={(val) => onChange("diagram_image", val)}
+                        onChange={diagramImageOnChange}
                         startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
                         hint={DIAGRAM_HINTS["drawing"]}
                     />
@@ -2867,7 +2878,7 @@ function renderInput(
         return (
             <DiagramImageInput
                 value={currentInput["diagram_image"] || ""}
-                onChange={(val) => onChange("diagram_image", val)}
+                onChange={diagramImageOnChange}
                 startingImageUrl={startingImg}
                 hint={DIAGRAM_HINTS["image-paste"]}
             />
@@ -2878,7 +2889,7 @@ function renderInput(
         return (
             <DiagramImageInput
                 value={currentInput["diagram_image"] || ""}
-                onChange={(val) => onChange("diagram_image", val)}
+                onChange={diagramImageOnChange}
                 startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
                 hint={DIAGRAM_HINTS["drawing"]}
             />
@@ -2889,7 +2900,7 @@ function renderInput(
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => onChange("diagram_image", val)}
+          onChange={diagramImageOnChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["erd-annotation"]}
         />
@@ -2900,7 +2911,7 @@ function renderInput(
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => onChange("diagram_image", val)}
+          onChange={diagramImageOnChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["nav-structure"]}
         />
@@ -2911,7 +2922,7 @@ function renderInput(
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => onChange("diagram_image", val)}
+          onChange={diagramImageOnChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["nav-structure-higher"]}
         />
@@ -2922,7 +2933,7 @@ function renderInput(
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => onChange("diagram_image", val)}
+          onChange={diagramImageOnChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["structure-dataflow"]}
         />
@@ -2933,7 +2944,7 @@ function renderInput(
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => onChange("diagram_image", val)}
+          onChange={diagramImageOnChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["form-wireframe"]}
         />
@@ -2944,7 +2955,7 @@ function renderInput(
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => onChange("diagram_image", val)}
+          onChange={diagramImageOnChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["form-wireframe"]}
         />

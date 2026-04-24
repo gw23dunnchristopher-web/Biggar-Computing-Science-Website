@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { ImagePasteInput } from "@/components/ui/image-paste-input";
 
 interface DiagramImageInputProps {
@@ -20,7 +21,7 @@ const DIAGRAM_HINTS: Record<string, string> = {
   "image-paste": "Draw your answer in another application (or on paper and photograph it), then paste the image below.",
 };
 
-export function DiagramImageInput({ value, onChange, startingImageUrl, placeholder, hint }: DiagramImageInputProps) {
+function DiagramImageInputComponent({ value, onChange, startingImageUrl, placeholder, hint }: DiagramImageInputProps) {
   return (
     <ImagePasteInput
       value={value}
@@ -30,5 +31,7 @@ export function DiagramImageInput({ value, onChange, startingImageUrl, placehold
     />
   );
 }
+
+export const DiagramImageInput = memo(DiagramImageInputComponent);
 
 export { DIAGRAM_HINTS };

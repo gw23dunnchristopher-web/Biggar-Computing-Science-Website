@@ -31,7 +31,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import type { DiagramItem } from "@/components/ui/diagram-editor";
 import { DiagramImageInput, DIAGRAM_HINTS } from "@/components/ui/diagram-image-input";
-import { TagMatchingEditor, gradeTagMatching, StudentConnection } from "@/components/ui/tag-matching-editor";
+import { TagMatchingEditor, gradeTagMatching, StudentConnection, SourceTag, TargetZone } from "@/components/ui/tag-matching-editor";
 import { DatabaseSchemaDisplay } from "@/components/ui/database-schema-editor";
 import { RowLayout, RowLayoutItem } from "@/components/ui/row-layout";
 import { Progress } from "@/components/ui/progress";
@@ -256,6 +256,11 @@ function hasScenarioContent(scenario: Question["scenario"]): boolean {
   );
 }
 
+// Stable empty arrays so memoised TagMatchingEditor doesn't re-render
+// just because `tagConfig.sourceTags || []` produced a fresh `[]`.
+const EMPTY_SOURCE_TAGS: SourceTag[] = [];
+const EMPTY_TARGET_ZONES: TargetZone[] = [];
+
 export default function Revision() {
   const [match, params] = useRoute("/revise/:topic");
   const topicId = params?.topic;
@@ -332,6 +337,26 @@ export default function Revision() {
     }
     return h;
   }, [handleInputChange]);
+
+  // Cache parsed tag-matching connections by (subId, raw string) so the
+  // memoised TagMatchingEditor sees a stable studentConnections array
+  // reference across unrelated keystrokes. Without this, every parent
+  // render produces a fresh parsed array and defeats React.memo.
+  const savedConnectionsCacheRef = useRef(new Map<string, { raw: string; parsed: StudentConnection[] }>());
+  const getSavedConnectionsFor = useCallback((subId: string, raw: string): StudentConnection[] => {
+    const cached = savedConnectionsCacheRef.current.get(subId);
+    if (cached && cached.raw === raw) return cached.parsed;
+    let parsed: StudentConnection[] = [];
+    if (raw) {
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        parsed = [];
+      }
+    }
+    savedConnectionsCacheRef.current.set(subId, { raw, parsed });
+    return parsed;
+  }, []);
 
   const calculateMarks = (inputs: Record<string, string>, subQ: SubQuestion): number => {
     // If maxMarks is 0 (e.g. informational placeholder), return 0
@@ -2314,17 +2339,19 @@ export default function Revision() {
 
     if (subQ.inputStyle === "tag-matching") {
       const tagConfig = subQ.inputConfig?.tagMatchingConfig;
-      const savedConnections: StudentConnection[] = currentInput["tag_connections"] 
-        ? JSON.parse(currentInput["tag_connections"]) 
-        : [];
-      
+      const savedConnections = getSavedConnectionsFor(subQ.id, currentInput["tag_connections"] || "");
+      // Use stable empty-array fallbacks so the memoised TagMatchingEditor
+      // doesn't see fresh `[]` references when a tagConfig field is undefined.
+      const sourceTags = tagConfig?.sourceTags || EMPTY_SOURCE_TAGS;
+      const targetZones = tagConfig?.targetZones || EMPTY_TARGET_ZONES;
+
       return (
         <div className="mt-4">
           <TagMatchingEditor
             mode={showResults ? "review" : "student"}
             backgroundUrl={subQ.drawingBackgroundUrl}
-            sourceTags={tagConfig?.sourceTags || []}
-            targetZones={tagConfig?.targetZones || []}
+            sourceTags={sourceTags}
+            targetZones={targetZones}
             studentConnections={savedConnections}
             onStudentConnectionsChange={onTagConnectionsChange}
             disabled={showResults}

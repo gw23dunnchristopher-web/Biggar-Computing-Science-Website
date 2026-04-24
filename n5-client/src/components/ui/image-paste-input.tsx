@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Clipboard, Copy, Image as ImageIcon, Trash2, Upload, Check } from "lucide-react";
 
@@ -67,7 +67,7 @@ function dataUrlToBlob(dataUrl: string): Blob | null {
   }
 }
 
-export function ImagePasteInput({
+function ImagePasteInputComponent({
   value,
   onChange,
   startingImage,
@@ -359,3 +359,5 @@ export function ImagePasteInput({
     </div>
   );
 }
+
+export const ImagePasteInput = memo(ImagePasteInputComponent);

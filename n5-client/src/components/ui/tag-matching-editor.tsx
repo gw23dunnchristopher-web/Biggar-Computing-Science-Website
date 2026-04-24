@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,7 +40,7 @@ interface TagMatchingEditorProps {
   disabled?: boolean;
 }
 
-export function TagMatchingEditor({
+function TagMatchingEditorComponent({
   sourceTags,
   targetZones,
   backgroundUrl,
@@ -475,6 +475,8 @@ export function TagMatchingEditor({
     </div>
   );
 }
+
+export const TagMatchingEditor = memo(TagMatchingEditorComponent);
 
 export function gradeTagMatching(
   connections: StudentConnection[],
