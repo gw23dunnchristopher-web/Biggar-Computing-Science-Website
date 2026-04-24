@@ -1,0 +1,140 @@
+index-C6WKWcU2.css:1  GET https://grainy-gradients.vercel.app/noise.svg 404 (Not Found)
+
+Home.tsx:65  GET https://1b0ccb46-84b3-4339-a290-f5e1468e0440-00-3g6cgevapzqjk.spock.replit.dev/api/assignments 404 (Not Found)
+(anonymous) @ Home.tsx:65
+(anonymous) @ Home.tsx:75
+commitHookEffectListMount @ react-dom-client.production.js:8583
+recursivelyTraverseReconnectPassiveEffects @ react-dom-client.production.js:10276
+recursivelyTraverseReconnectPassiveEffects @ react-dom-client.production.js:10323
+recursivelyTraverseReconnectPassiveEffects @ react-dom-client.production.js:10269
+recursivelyTraverseReconnectPassiveEffects @ react-dom-client.production.js:10269
+commitPassiveMountOnFiber @ react-dom-client.production.js:10221
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10192
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10137
+flushPassiveEffects @ react-dom-client.production.js:11763
+flushPendingEffects @ react-dom-client.production.js:11739
+performSyncWorkOnRoot @ react-dom-client.production.js:12085
+flushSyncWorkAcrossRoots_impl @ react-dom-client.production.js:11956
+flushSpawnedWork @ react-dom-client.production.js:11726
+commitRoot @ react-dom-client.production.js:11521
+commitRootWhenReady @ react-dom-client.production.js:10920
+performWorkOnRoot @ react-dom-client.production.js:10826
+performWorkOnRootViaSchedulerTask @ react-dom-client.production.js:12078
+performWorkUntilDeadline @ scheduler.production.js:151
+postMessage
+(anonymous) @ scheduler.production.js:202
+performWorkUntilDeadline @ scheduler.production.js:187
+postMessage
+(anonymous) @ scheduler.production.js:202
+(anonymous) @ scheduler.production.js:325
+scheduleTaskForRootDuringMicrotask @ react-dom-client.production.js:12055
+processRootScheduleInMicrotask @ react-dom-client.production.js:11978
+(anonymous) @ react-dom-client.production.js:12095
+TeacherDashboard.tsx:47  GET https://1b0ccb46-84b3-4339-a290-f5e1468e0440-00-3g6cgevapzqjk.spock.replit.dev/api/teacher/verify 404 (Not Found)
+(anonymous) @ TeacherDashboard.tsx:47
+(anonymous) @ TeacherDashboard.tsx:59
+commitHookEffectListMount @ react-dom-client.production.js:8583
+commitPassiveMountOnFiber @ react-dom-client.production.js:10126
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10214
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10192
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10241
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10120
+recursivelyTraversePassiveMountEffects @ react-dom-client.production.js:10101
+commitPassiveMountOnFiber @ react-dom-client.production.js:10137
+flushPassiveEffects @ react-dom-client.production.js:11763
+flushPendingEffects @ react-dom-client.production.js:11739
+flushSpawnedWork @ react-dom-client.production.js:11718
+commitRoot @ react-dom-client.production.js:11521
+commitRootWhenReady @ react-dom-client.production.js:10920
+performWorkOnRoot @ react-dom-client.production.js:10826
+performSyncWorkOnRoot @ react-dom-client.production.js:12086
+flushSyncWorkAcrossRoots_impl @ react-dom-client.production.js:11956
+processRootScheduleInMicrotask @ react-dom-client.production.js:11990
+(anonymous) @ react-dom-client.production.js:12095
+react-dom-client.production.js:2414 Uncaught Error: Minified React error #185; visit https://react.dev/errors/185 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at getRootForUpdatedFiber (react-dom-client.production.js:2414:7)
+    at enqueueConcurrentHookUpdate (react-dom-client.production.js:2376:10)
+    at dispatchReducerAction (react-dom-client.production.js:5364:18)
+    at index.mjs:107:7
+    at commitHookEffectListMount (react-dom-client.production.js:8583:24)
+    at commitLayoutEffectOnFiber (react-dom-client.production.js:9015:20)
+    at recursivelyTraverseLayoutEffects (react-dom-client.production.js:9904:7)
+    at commitLayoutEffectOnFiber (react-dom-client.production.js:9126:7)
+    at recursivelyTraverseLayoutEffects (react-dom-client.production.js:9904:7)
+    at commitLayoutEffectOnFiber (react-dom-client.production.js:9014:7)

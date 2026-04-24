@@ -47,7 +47,7 @@ export default function Home() {
         const headers: Record<string, string> = {};
         const studentToken = localStorage.getItem("studentToken");
         if (studentToken) headers["Authorization"] = `Bearer ${studentToken}`;
-        const response = await fetch('/api/questions', { headers });
+        const response = await fetch('/api/n5/questions', { headers });
         if (response.ok) {
           const data = await response.json();
           setQuestions(data.filter((q: Question) => !q.isQuizOnly));
@@ -62,7 +62,7 @@ export default function Home() {
   useEffect(() => {
     const checkPublishedAssignments = async () => {
       try {
-        const response = await fetch('/api/assignments');
+        const response = await fetch('/api/n5/assignments');
         if (response.ok) {
           const data = await response.json();
           const published = data.filter((a: { isPublished: boolean }) => a.isPublished);

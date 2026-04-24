@@ -44,7 +44,7 @@ export default function TeacherDashboard() {
       }
 
       try {
-        const response = await fetch("/api/teacher/verify", {
+        const response = await fetch("/api/n5/teacher/verify", {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!response.ok) {
@@ -63,7 +63,7 @@ export default function TeacherDashboard() {
     const token = localStorage.getItem("teacherToken");
     if (token) {
       try {
-        await fetch("/api/teacher/logout", {
+        await fetch("/api/n5/teacher/logout", {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` }
         });
