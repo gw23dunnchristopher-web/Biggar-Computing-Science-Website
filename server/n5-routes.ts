@@ -3519,15 +3519,26 @@ Format your response as JSON:
           }
         }
 
-        const diagramInputStyles = ["drawing", "structure-dataflow", "erd-annotation", "form-wireframe", "webpage-wireframe", "nav-structure", "design-choice"];
+        const diagramInputStyles = [
+          "image-paste",
+          "drawing", "structure-dataflow", "erd-annotation", "form-wireframe",
+          "webpage-wireframe", "nav-structure", "nav-structure-higher",
+          "structure-diagram", "entity-occurrence-diagram", "tag-matching",
+          "design-choice",
+        ];
         const isDiagramQuestion = diagramInputStyles.includes(inputStyle || "");
         if (isDiagramQuestion && response.userInputs) {
           const inputs = response.userInputs as Record<string, any>;
-          const canvasData = inputs.drawing_canvas || inputs.erd_drawing;
+          // Prefer the unified pasted-image field (used by image-paste and all
+          // migrated legacy diagram styles); fall back to legacy canvas fields
+          // for old responses that pre-date the migration.
+          const canvasData = inputs.diagram_image || inputs.pastedImage || inputs.drawing_canvas || inputs.erd_drawing;
           if (canvasData && typeof canvasData === "string" && canvasData.startsWith("data:")) {
-            const imgData = canvasData.replace(/^data:image\/\w+;base64,/, "");
-            contentParts.push({ inlineData: { data: imgData, mimeType: "image/png" } });
-            contentParts[0] = { text: gradingPrompt + "\n\nIMPORTANT: A screenshot of the student's diagram is attached as the last image. Use this visual to verify the layout, connections, labels, and overall structure of their diagram answer." };
+            const mimeMatch = canvasData.match(/^data:([^;]+)/);
+            const mimeType = mimeMatch ? mimeMatch[1] : "image/png";
+            const imgData = canvasData.replace(/^data:[^;]+;base64,/, "");
+            contentParts.push({ inlineData: { data: imgData, mimeType } });
+            contentParts[0] = { text: gradingPrompt + "\n\nIMPORTANT: A screenshot of the student's diagram is attached as the last image. The student drew their answer in another application and pasted the image here. Grade this visual as their answer — verify the layout, connections, labels, shapes and overall structure against the marking scheme." };
           }
         }
 

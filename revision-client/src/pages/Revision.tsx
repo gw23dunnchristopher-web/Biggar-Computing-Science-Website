@@ -29,7 +29,7 @@ import { ArrowLeft, CheckCircle2, XCircle, ChevronRight, ChevronDown, RefreshCw,
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { DiagramEditor, DiagramItem } from "@/components/ui/diagram-editor";
+import type { DiagramItem } from "@/components/ui/diagram-editor";
 import { DiagramImageInput, DIAGRAM_HINTS } from "@/components/ui/diagram-image-input";
 import { TagMatchingEditor, gradeTagMatching, StudentConnection } from "@/components/ui/tag-matching-editor";
 import { DatabaseSchemaDisplay } from "@/components/ui/database-schema-editor";
@@ -1576,7 +1576,7 @@ export default function Revision() {
 
             console.log("DEBUG: Calling grade API for", sub.id);
             const referenceFiles = sub.markingGuidanceData?.exampleFiles || [];
-            const diagramInputStyles = ["drawing", "erd-annotation", "nav-structure", "nav-structure-higher", "structure-dataflow", "form-wireframe", "webpage-wireframe", "design-choice", "structure-diagram", "entity-occurrence-diagram"];
+            const diagramInputStyles = ["image-paste", "drawing", "erd-annotation", "nav-structure", "nav-structure-higher", "structure-dataflow", "form-wireframe", "webpage-wireframe", "design-choice", "structure-diagram", "entity-occurrence-diagram", "tag-matching"];
             const isDiagramQ = diagramInputStyles.includes(sub.inputStyle || "");
             const studentDiagramImage = isDiagramQ ? (inputs["diagram_image"] || "") : "";
             const response = await fetch("/api/grade-answer", {
@@ -2198,6 +2198,18 @@ export default function Revision() {
             Fill in the blanks to complete the code
           </p>
         </div>
+      );
+    }
+
+    if (subQ.inputStyle === "image-paste") {
+      const startingImg = (subQ.inputConfig as any)?.startingImage || subQ.drawingBackgroundUrl || subQ.imageUrl;
+      return (
+        <DiagramImageInput
+          value={currentInput["diagram_image"] || ""}
+          onChange={(val) => !showResults && handleInputChange(subQ.id, "diagram_image", val)}
+          startingImageUrl={startingImg}
+          hint={DIAGRAM_HINTS["image-paste"]}
+        />
       );
     }
 

@@ -30,7 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { DiagramEditor, DiagramItem } from "@/components/ui/diagram-editor";
+import type { DiagramItem } from "@/components/ui/diagram-editor";
 import { DiagramImageInput, DIAGRAM_HINTS } from "@/components/ui/diagram-image-input";
 import { RowLayout, RowLayoutItem } from "@/components/ui/row-layout";
 import { Progress } from "@/components/ui/progress";
@@ -1107,7 +1107,7 @@ export default function TimedExam() {
         if (studentAnswer.trim()) {
           try {
             const referenceFiles = sub.markingGuidanceData?.exampleFiles || [];
-            const diagramInputStyles = ["drawing", "erd-annotation", "nav-structure", "nav-structure-higher", "structure-dataflow", "form-wireframe", "webpage-wireframe", "design-choice", "structure-diagram", "entity-occurrence-diagram"];
+            const diagramInputStyles = ["image-paste", "drawing", "erd-annotation", "nav-structure", "nav-structure-higher", "structure-dataflow", "form-wireframe", "webpage-wireframe", "design-choice", "structure-diagram", "entity-occurrence-diagram", "tag-matching"];
             const isDiagramQ = diagramInputStyles.includes(sub.inputStyle || "");
             const studentDiagramImage = isDiagramQ ? (inputs["diagram_image"] || "") : "";
             const response = await fetch("/api/grade-answer", {
@@ -2456,6 +2456,18 @@ function renderInput(subQ: SubQuestion, currentInput: Record<string, string>, on
                     />
                 )}
             </div>
+        );
+    }
+
+    if (subQ.inputStyle === "image-paste") {
+        const startingImg = (subQ.inputConfig as any)?.startingImage || subQ.drawingBackgroundUrl || subQ.imageUrl;
+        return (
+            <DiagramImageInput
+                value={currentInput["diagram_image"] || ""}
+                onChange={(val) => onChange("diagram_image", val)}
+                startingImageUrl={startingImg}
+                hint={DIAGRAM_HINTS["image-paste"]}
+            />
         );
     }
 

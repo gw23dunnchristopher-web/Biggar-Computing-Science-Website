@@ -2,7 +2,7 @@ import { Fragment, useCallback, useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { DiagramEditor } from "@/components/ui/diagram-editor";
+import { DiagramImageInput, DIAGRAM_HINTS } from "@/components/ui/diagram-image-input";
 import { Code2, FileEdit, Upload, X, Image as ImageIcon } from "lucide-react";
 
 export function handleTabKey(
@@ -280,209 +280,51 @@ function renderMainInput(
             onKeyDown={(e) => handleTabKey(e, onChange)}
           />
         ) : (
-          <div className="min-h-[500px] border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-visible bg-white dark:bg-neutral-900">
-            <DiagramEditor 
-              key={`struct-diagram-${subQ.id}`}
-              initialData={currentInput["drawing"]}
-              initialDrawing={currentInput["drawing_canvas"]}
-              onChange={(data, drawing) => {
-                onChange("drawing", data);
-                onChange("drawing_canvas", drawing);
-              }}
-              backgroundUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
-              mode="structure-diagram"
-            />
-          </div>
+          <DiagramImageInput
+            value={currentInput["diagram_image"] || ""}
+            onChange={(val) => onChange("diagram_image", val)}
+            startingImageUrl={(subQ.inputConfig as any)?.startingImage || subQ.drawingBackgroundUrl || subQ.imageUrl}
+            hint={DIAGRAM_HINTS["drawing"]}
+          />
         )}
       </div>
     );
   }
 
-  if (subQ.inputStyle === "drawing") {
+  // Unified image-paste input — covers the new "image-paste" style and all
+  // legacy diagram-editor styles which have been retired in favour of pasted
+  // screenshots graded by Gemini Vision.
+  const IMAGE_PASTE_STYLES = new Set([
+    "image-paste",
+    "drawing",
+    "erd-annotation",
+    "nav-structure",
+    "nav-structure-higher",
+    "tag-matching",
+    "structure-dataflow",
+    "form-wireframe",
+    "webpage-wireframe",
+    "structure-diagram",
+    "entity-occurrence-diagram",
+  ]);
+
+  if (subQ.inputStyle && IMAGE_PASTE_STYLES.has(subQ.inputStyle)) {
     if (previewMode) {
       return (
         <div className="mt-4 min-h-[80px] border border-neutral-200 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-900 flex items-center justify-center text-sm text-neutral-400">
-          Drawing / Diagram area
+          Image paste area
         </div>
       );
     }
-
-    const questionText = subQ.questionText.toLowerCase();
-    let diagramMode: "flowchart" | "database" | "wireframe" | "general" = "general";
-    if (questionText.includes("entity") || questionText.includes("relationship") || questionText.includes("database") || questionText.includes("erd")) {
-      diagramMode = "database";
-    } else if (questionText.includes("user interface") || questionText.includes("wireframe") || questionText.includes("ui design") || questionText.includes("browser")) {
-      diagramMode = "wireframe";
-    }
-    
-    const useBackgroundUrl = diagramMode !== "database" ? (subQ.drawingBackgroundUrl || subQ.imageUrl) : undefined;
-    
+    const startingImg = (subQ.inputConfig as any)?.startingImage || subQ.drawingBackgroundUrl || subQ.imageUrl;
+    const hint = DIAGRAM_HINTS[subQ.inputStyle] || DIAGRAM_HINTS["image-paste"];
     return (
-      <div className="space-y-2 mt-4 min-h-[500px] border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-visible bg-white dark:bg-neutral-900">
-        <DiagramEditor 
-          key={`drawing-${subQ.id}`}
-          initialData={currentInput["drawing"]}
-          initialDrawing={currentInput["drawing_canvas"]}
-          onChange={(data, drawing) => {
-            onChange("drawing", data);
-            onChange("drawing_canvas", drawing);
-          }}
-          backgroundUrl={useBackgroundUrl}
-          mode={diagramMode}
-        />
-      </div>
-    );
-  }
-
-  if (subQ.inputStyle === "erd-annotation" && subQ.inputConfig?.baseErdDiagram) {
-    if (previewMode) {
-      return (
-        <div className="mt-4 min-h-[80px] border border-neutral-200 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-900 flex items-center justify-center text-sm text-neutral-400">
-          ERD Annotation area
-        </div>
-      );
-    }
-    return (
-      <div className="space-y-2 mt-4 min-h-[500px] border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-visible bg-white dark:bg-neutral-900">
-        <DiagramEditor 
-          key={`erd-${subQ.id}`}
-          initialData={currentInput["erd_diagram"]}
-          initialDrawing={currentInput["erd_drawing"]}
-          baseDiagram={subQ.inputConfig.baseErdDiagram}
-          onChange={(data, drawing) => {
-            onChange("erd_diagram", data);
-            onChange("erd_drawing", drawing);
-          }}
-          backgroundUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
-          mode="erd-annotation"
-        />
-      </div>
-    );
-  }
-
-  if (subQ.inputStyle === "nav-structure") {
-    if (previewMode) {
-      return (
-        <div className="mt-4 min-h-[80px] border border-neutral-200 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-900 flex items-center justify-center text-sm text-neutral-400">
-          Navigation Structure area
-        </div>
-      );
-    }
-    return (
-      <div className="space-y-2 mt-4 min-h-[500px] border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-visible bg-white dark:bg-neutral-900">
-        <DiagramEditor 
-          key={`nav-${subQ.id}`}
-          initialData={currentInput["drawing"]}
-          initialDrawing={currentInput["drawing_canvas"]}
-          baseDiagram={subQ.inputConfig?.baseNavDiagram}
-          onChange={(data, drawing) => {
-            onChange("drawing", data);
-            onChange("drawing_canvas", drawing);
-          }}
-          backgroundUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
-          mode="nav-structure"
-        />
-      </div>
-    );
-  }
-
-  if (subQ.inputStyle === "nav-structure-higher") {
-    if (previewMode) {
-      return (
-        <div className="mt-4 min-h-[80px] border border-neutral-200 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-900 flex items-center justify-center text-sm text-neutral-400">
-          Navigation Structure area
-        </div>
-      );
-    }
-    return (
-      <div className="space-y-2 mt-4 min-h-[500px] border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-visible bg-white dark:bg-neutral-900">
-        <DiagramEditor 
-          key={`nav-higher-${subQ.id}`}
-          initialData={currentInput["drawing"]}
-          initialDrawing={currentInput["drawing_canvas"]}
-          baseDiagram={subQ.inputConfig?.baseNavDiagram}
-          onChange={(data, drawing) => {
-            onChange("drawing", data);
-            onChange("drawing_canvas", drawing);
-          }}
-          backgroundUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
-          mode="nav-structure-higher"
-        />
-      </div>
-    );
-  }
-
-  if (subQ.inputStyle === "structure-dataflow") {
-    if (previewMode) {
-      return (
-        <div className="mt-4 min-h-[80px] border border-neutral-200 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-900 flex items-center justify-center text-sm text-neutral-400">
-          Structure Dataflow area
-        </div>
-      );
-    }
-    return (
-      <div className="space-y-2 mt-4 min-h-[500px] border border-neutral-200 dark:border-neutral-800 rounded-lg overflow-visible bg-white dark:bg-neutral-900">
-        <DiagramEditor 
-          key={`dataflow-${subQ.id}`}
-          initialData={currentInput["drawing"]}
-          initialDrawing={currentInput["drawing_canvas"]}
-          baseDiagram={subQ.inputConfig?.baseStructureDiagram}
-          onChange={(data, drawing) => {
-            onChange("drawing", data);
-            onChange("drawing_canvas", drawing);
-          }}
-          backgroundUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
-          mode="structure-dataflow"
-        />
-      </div>
-    );
-  }
-
-  if (subQ.inputStyle === "form-wireframe") {
-    if (previewMode) {
-      return (
-        <div className="mt-4 min-h-[80px] border border-neutral-200 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-900 flex items-center justify-center text-sm text-neutral-400">
-          Form Wireframe area
-        </div>
-      );
-    }
-    return (
-      <div className="mt-4">
-        <DiagramEditor 
-          initialData={currentInput["drawing"]}
-          initialDrawing={currentInput["drawing_canvas"]}
-          onChange={(dataStr, drawingStr) => {
-            onChange("drawing", dataStr);
-            onChange("drawing_canvas", drawingStr);
-          }}
-          backgroundUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
-          mode="form-wireframe"
-        />
-      </div>
-    );
-  }
-
-  if (subQ.inputStyle === "webpage-wireframe") {
-    if (previewMode) {
-      return (
-        <div className="mt-4 min-h-[80px] border border-neutral-200 dark:border-neutral-800 rounded-lg bg-white dark:bg-neutral-900 flex items-center justify-center text-sm text-neutral-400">
-          Webpage Wireframe area
-        </div>
-      );
-    }
-    return (
-      <div className="mt-4">
-        <DiagramEditor 
-          initialData={currentInput["drawing"]}
-          initialDrawing={currentInput["drawing_canvas"]}
-          onChange={(dataStr, drawingStr) => {
-            onChange("drawing", dataStr);
-            onChange("drawing_canvas", drawingStr);
-          }}
-          backgroundUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
-          mode="webpage-wireframe"
-        />
-      </div>
+      <DiagramImageInput
+        value={currentInput["diagram_image"] || ""}
+        onChange={(val) => onChange("diagram_image", val)}
+        startingImageUrl={startingImg}
+        hint={hint}
+      />
     );
   }
 

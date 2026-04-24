@@ -30,7 +30,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { DiagramEditor, DiagramItem } from "@/components/ui/diagram-editor";
+import type { DiagramItem } from "@/components/ui/diagram-editor";
 import { DiagramImageInput, DIAGRAM_HINTS } from "@/components/ui/diagram-image-input";
 import { RowLayout, RowLayoutItem } from "@/components/ui/row-layout";
 import { Progress } from "@/components/ui/progress";
@@ -2828,6 +2828,18 @@ function renderInput(
                     />
                 )}
             </div>
+        );
+    }
+
+    if (subQ.inputStyle === "image-paste") {
+        const startingImg = (subQ.inputConfig as any)?.startingImage || subQ.drawingBackgroundUrl || subQ.imageUrl;
+        return (
+            <DiagramImageInput
+                value={currentInput["diagram_image"] || ""}
+                onChange={(val) => onChange("diagram_image", val)}
+                startingImageUrl={startingImg}
+                hint={DIAGRAM_HINTS["image-paste"]}
+            />
         );
     }
 

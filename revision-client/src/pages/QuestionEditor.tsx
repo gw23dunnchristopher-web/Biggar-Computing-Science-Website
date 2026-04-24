@@ -2345,18 +2345,10 @@ export default function QuestionEditor() {
                                         <SelectItem value="text">Text Area</SelectItem>
                                         <SelectItem value="code-editor">Code Editor</SelectItem>
                                         <SelectItem value="design-choice">Design Choice (Pseudocode/Diagram)</SelectItem>
-                                        <SelectItem value="drawing">Diagram/Drawing</SelectItem>
+                                        <SelectItem value="image-paste">Image paste (drawn answer)</SelectItem>
                                         <SelectItem value="table">Table</SelectItem>
                                         <SelectItem value="labeled-inputs">Labeled Inputs</SelectItem>
                                         <SelectItem value="fill-in-blanks">Fill in the Blanks</SelectItem>
-                                        <SelectItem value="erd-annotation">ERD Annotation (Keys)</SelectItem>
-                                        <SelectItem value="nav-structure">Navigation Diagram (N5)</SelectItem>
-                                        <SelectItem value="nav-structure-higher">Navigation Diagram (Higher)</SelectItem>
-                                        <SelectItem value="tag-matching">Tag Matching (Connect to Image)</SelectItem>
-                                        <SelectItem value="structure-dataflow">Structure Diagram (Dataflow)</SelectItem>
-                                        <SelectItem value="form-wireframe">Form Wireframe (Web Form Design)</SelectItem>
-                                        <SelectItem value="structure-diagram">Structure Diagram (Design Notation)</SelectItem>
-                                        <SelectItem value="entity-occurrence-diagram">Entity-Occurrence Diagram (Database)</SelectItem>
                                         <SelectItem value="database-schema">Database Schema Diagram</SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -2375,13 +2367,14 @@ export default function QuestionEditor() {
                             </Button>
                           </CollapsibleTrigger>
                           <CollapsibleContent className="pt-3 space-y-4">
-                        {/* Drawing Background URL - for drawing, ERD annotation, and nav-structure questions */}
-                        {(subQ.inputStyle === "drawing" || subQ.inputStyle === "erd-annotation" || subQ.inputStyle === "nav-structure" || subQ.inputStyle === "nav-structure-higher" || subQ.inputStyle === "tag-matching" || subQ.inputStyle === "structure-dataflow" || subQ.inputStyle === "form-wireframe" || subQ.inputStyle === "structure-diagram" || subQ.inputStyle === "entity-occurrence-diagram") && (
+                        {/* Starting image - shown for image-paste and any surviving legacy diagram styles */}
+                        {(subQ.inputStyle === "image-paste" || subQ.inputStyle === "drawing" || subQ.inputStyle === "erd-annotation" || subQ.inputStyle === "nav-structure" || subQ.inputStyle === "nav-structure-higher" || subQ.inputStyle === "tag-matching" || subQ.inputStyle === "structure-dataflow" || subQ.inputStyle === "form-wireframe" || subQ.inputStyle === "structure-diagram" || subQ.inputStyle === "entity-occurrence-diagram") && (
                           <div className="space-y-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                            <Label className="text-sm font-medium">Drawing Background Image (Optional)</Label>
+                            <Label className="text-sm font-medium">Starting image (optional)</Label>
+                            <p className="text-xs text-neutral-500">If set, students will see a "Copy starting image" button so they can paste it into their drawing app, annotate it, then paste the result back here.</p>
                             <div className="flex gap-2">
                               <Input 
-                                placeholder="URL for image students will annotate..."
+                                placeholder="URL for the image students will start from..."
                                 value={subQ.drawingBackgroundUrl || ""}
                                 onChange={(e) => updateSubQuestion(index, "drawingBackgroundUrl", e.target.value || undefined)}
                                 className="flex-1"
@@ -2416,7 +2409,6 @@ export default function QuestionEditor() {
                                 </Button>
                               </div>
                             )}
-                            <p className="text-xs text-neutral-500">If set, this image will be the background for the drawing canvas. Any other images in the question will be shown separately for reference.</p>
                           </div>
                         )}
 
@@ -4061,16 +4053,10 @@ export default function QuestionEditor() {
                                                                         <SelectItem value="text">Text Area</SelectItem>
                                                                         <SelectItem value="code-editor">Code Editor</SelectItem>
                                                                         <SelectItem value="design-choice">Design Choice</SelectItem>
-                                                                        <SelectItem value="drawing">Drawing</SelectItem>
+                                                                        <SelectItem value="image-paste">Image paste (drawn answer)</SelectItem>
                                                                         <SelectItem value="table">Table</SelectItem>
                                                                         <SelectItem value="labeled-inputs">Labeled Inputs</SelectItem>
                                                                         <SelectItem value="fill-in-blanks">Fill in the Blanks</SelectItem>
-                                                                        <SelectItem value="erd-annotation">ERD Annotation</SelectItem>
-                                                                        <SelectItem value="nav-structure">Navigation Diagram (N5)</SelectItem>
-                                                                        <SelectItem value="nav-structure-higher">Navigation Diagram (Higher)</SelectItem>
-                                                                        <SelectItem value="tag-matching">Tag Matching</SelectItem>
-                                                                        <SelectItem value="structure-dataflow">Structure Diagram (Dataflow)</SelectItem>
-                                                                        <SelectItem value="form-wireframe">Form Wireframe</SelectItem>
                                                                     </SelectContent>
                                                                 </Select>
                                                             </div>
