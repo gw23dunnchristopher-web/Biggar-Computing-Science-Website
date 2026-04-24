@@ -36,9 +36,20 @@ export default function TeacherDashboard() {
       const token = localStorage.getItem("teacherToken");
       const expires = localStorage.getItem("teacherTokenExpires");
 
-      if (!token || !expires || parseInt(expires) < Date.now()) {
+      // Clear BOTH N5 (teacherToken/Expires) and Higher (teacher_token/_expires)
+      // key-pairs whenever auth is rejected. TeacherLogin's "already logged in"
+      // redirect accepts either key-pair, so leaving stale Higher keys behind
+      // creates an infinite redirect loop (dashboard → login → dashboard) that
+      // React kills with error #185 at update depth 50.
+      const clearTeacherTokens = () => {
         localStorage.removeItem("teacherToken");
         localStorage.removeItem("teacherTokenExpires");
+        localStorage.removeItem("teacher_token");
+        localStorage.removeItem("teacher_token_expires");
+      };
+
+      if (!token || !expires || parseInt(expires) < Date.now()) {
+        clearTeacherTokens();
         setLocation("/teacher/login");
         return;
       }
@@ -48,8 +59,7 @@ export default function TeacherDashboard() {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!response.ok) {
-          localStorage.removeItem("teacherToken");
-          localStorage.removeItem("teacherTokenExpires");
+          clearTeacherTokens();
           setLocation("/teacher/login");
         }
       } catch (error) {
