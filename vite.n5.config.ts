@@ -16,6 +16,7 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "public/revision-n5"),
     emptyOutDir: true,
+    sourcemap: true,
   },
   server: {
     host: "0.0.0.0",

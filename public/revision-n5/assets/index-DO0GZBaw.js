@@ -3,3 +3,4 @@ import{r as a,j as i,A as $,n as B,m as y,P as m,o as D,w as E,G as H,q,O as Z,I
 If you want to hide the \`${t.titleName}\`, you can wrap it with our VisuallyHidden component.
 
 For more information, see https://radix-ui.com/primitives/docs/components/${t.docsSlug}`;return a.useEffect(()=>{e&&(document.getElementById(e)||console.error(n))},[n,e]),null},de="DialogDescriptionWarning",fe=({contentRef:e,descriptionId:t})=>{const r=`Warning: Missing \`Description\` or \`aria-describedby={undefined}\` for {${V(de).contentName}}.`;return a.useEffect(()=>{const o=e.current?.getAttribute("aria-describedby");t&&o&&(document.getElementById(t)||console.warn(r))},[r,e,t]),null},Ce=I,xe=A,Re=j,ye=T,Ee=S,he=M,_e=W,Oe=G;export{Ee as C,_e as D,ye as O,Re as P,Ce as R,xe as T,ve as W,Oe as a,he as b,me as c};
+//# sourceMappingURL=index-DO0GZBaw.js.map
