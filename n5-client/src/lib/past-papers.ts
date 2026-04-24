@@ -107,7 +107,7 @@ export interface SubQuestion {
   acceptedAnswers?: string[];
   keywords?: string[];
   aiGuidance?: string; // Additional guidance for AI marking (e.g., answers to reject, special instructions)
-  inputStyle?: "text" | "table" | "labeled-inputs" | "code-editor" | "drawing" | "design-choice" | "fill-in-blanks" | "info-only" | "erd-annotation" | "nav-structure" | "nav-structure-higher" | "tag-matching" | "structure-dataflow" | "form-wireframe" | "webpage-wireframe" | "structure-diagram" | "entity-occurrence-diagram" | "database-schema";
+  inputStyle?: "text" | "table" | "labeled-inputs" | "code-editor" | "drawing" | "design-choice" | "fill-in-blanks" | "info-only" | "erd-annotation" | "nav-structure" | "nav-structure-higher" | "tag-matching" | "structure-dataflow" | "form-wireframe" | "webpage-wireframe" | "structure-diagram" | "entity-occurrence-diagram" | "database-schema" | "image-paste" | "html-upload";
   codeRequirement?: "programming-language" | "design-notation" | "either";
   // Nested sub-questions (e.g., a) with (i), (ii), (iii) under it)
   subParts?: SubQuestion[];

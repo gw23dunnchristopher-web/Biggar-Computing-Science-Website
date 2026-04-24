@@ -107,7 +107,7 @@ export interface SubQuestion {
     exampleImages?: string[];
     exampleFiles?: { url: string; originalName: string }[];
   } | null;
-  inputStyle?: "text" | "table" | "labeled-inputs" | "code-editor" | "drawing" | "design-choice" | "fill-in-blanks" | "info-only" | "erd-annotation" | "nav-structure" | "nav-structure-higher" | "tag-matching" | "structure-dataflow" | "form-wireframe" | "structure-diagram" | "entity-occurrence-diagram" | "database-schema";
+  inputStyle?: "text" | "table" | "labeled-inputs" | "code-editor" | "drawing" | "design-choice" | "fill-in-blanks" | "info-only" | "erd-annotation" | "nav-structure" | "nav-structure-higher" | "tag-matching" | "structure-dataflow" | "form-wireframe" | "structure-diagram" | "entity-occurrence-diagram" | "database-schema" | "image-paste";
   codeRequirement?: "programming-language" | "design-notation" | "either";
   // Nested sub-questions (e.g., a) with (i), (ii), (iii) under it)
   subParts?: SubQuestion[];
