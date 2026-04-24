@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { useRoute, Link } from "wouter";
 import { Question, SubQuestion, TOPICS, ContentBlock, DataTableCell, DataTableCellRole } from "@/lib/past-papers";
 
@@ -280,8 +280,12 @@ export default function Revision() {
   const currentQuestion = allQuestions.find(q => q.id === selectedQuestionId);
   const topicDetails = TOPICS.find(t => t.id === topicId);
 
-  // Helper to update input for a specific sub-question
-  const handleInputChange = (subId: string, key: string, value: string) => {
+  // Helper to update input for a specific sub-question.
+  // Wrapped in useCallback so child components (e.g. DiagramEditor,
+  // TagMatchingEditor) receive a stable reference and don't trigger
+  // dependent useEffects on every parent render — that previously
+  // caused React error #185 ("Maximum update depth exceeded").
+  const handleInputChange = useCallback((subId: string, key: string, value: string) => {
     setUserInputs(prev => ({
       ...prev,
       [subId]: {
@@ -289,7 +293,45 @@ export default function Revision() {
         [key]: value
       }
     }));
-  };
+  }, []);
+
+  // Per-(subId, key) handler caches. Stored in refs so the wrapper
+  // closures handed to heavy editors (DiagramImageInput,
+  // TagMatchingEditor) keep the same identity across renders. Each
+  // cached wrapper reads `showResults` via a ref so it always sees the
+  // latest value without invalidating its identity. Without this,
+  // every parent re-render produced fresh `(val) => ...` arrows, which
+  // re-fired child useEffects (e.g. ImagePasteInput's paste-listener
+  // effect) on every keystroke and could feed back into React error
+  // #185 ("Maximum update depth exceeded").
+  const showResultsRef = useRef(showResults);
+  showResultsRef.current = showResults;
+
+  const diagramImageHandlerCacheRef = useRef(new Map<string, (val: string) => void>());
+  const getDiagramImageHandlerFor = useCallback((subId: string) => {
+    let h = diagramImageHandlerCacheRef.current.get(subId);
+    if (!h) {
+      h = (val: string) => {
+        if (!showResultsRef.current) {
+          handleInputChange(subId, "diagram_image", val);
+        }
+      };
+      diagramImageHandlerCacheRef.current.set(subId, h);
+    }
+    return h;
+  }, [handleInputChange]);
+
+  const tagConnectionsHandlerCacheRef = useRef(new Map<string, (connections: StudentConnection[]) => void>());
+  const getTagConnectionsHandlerFor = useCallback((subId: string) => {
+    let h = tagConnectionsHandlerCacheRef.current.get(subId);
+    if (!h) {
+      h = (connections: StudentConnection[]) => {
+        handleInputChange(subId, "tag_connections", JSON.stringify(connections));
+      };
+      tagConnectionsHandlerCacheRef.current.set(subId, h);
+    }
+    return h;
+  }, [handleInputChange]);
 
   const calculateMarks = (inputs: Record<string, string>, subQ: SubQuestion): number => {
     // If maxMarks is 0 (e.g. informational placeholder), return 0
@@ -1784,7 +1826,7 @@ export default function Revision() {
     setSubQuestionResults({});
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>, subId: string) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>, subId: string) => {
     if (e.key === 'Tab') {
       e.preventDefault();
       const target = e.target as HTMLTextAreaElement;
@@ -1808,7 +1850,7 @@ export default function Revision() {
         }, 0);
       }
     }
-  };
+  }, [handleInputChange]);
 
   const getRequirementBadge = (req?: "programming-language" | "design-notation" | "either") => {
     if (req === "programming-language") {
@@ -1835,6 +1877,11 @@ export default function Revision() {
     if (subQ.maxMarks === 0) return null;
 
     const currentInput = userInputs[subQ.id] || {};
+    // Stable per-subId callbacks for heavy editors. See the cache
+    // declarations above for why these are pulled from a ref-backed
+    // map instead of being declared inline.
+    const onDiagramImageChange = getDiagramImageHandlerFor(subQ.id);
+    const onTagConnectionsChange = getTagConnectionsHandlerFor(subQ.id);
 
     if (subQ.inputStyle === "code-editor") {
       const isProgrammingOnly = subQ.codeRequirement === "programming-language";
@@ -2117,7 +2164,7 @@ export default function Revision() {
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => !showResults && handleInputChange(subQ.id, "diagram_image", val)}
+          onChange={onDiagramImageChange}
           startingImageUrl={startingImg}
           hint={DIAGRAM_HINTS["image-paste"]}
         />
@@ -2128,7 +2175,7 @@ export default function Revision() {
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => !showResults && handleInputChange(subQ.id, "diagram_image", val)}
+          onChange={onDiagramImageChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["drawing"]}
         />
@@ -2183,7 +2230,7 @@ export default function Revision() {
           ) : (
              <DiagramImageInput
                 value={currentInput["diagram_image"] || ""}
-                onChange={(val) => !showResults && handleInputChange(subQ.id, "diagram_image", val)}
+                onChange={onDiagramImageChange}
                 startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
                 hint={DIAGRAM_HINTS["drawing"]}
              />
@@ -2196,7 +2243,7 @@ export default function Revision() {
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => !showResults && handleInputChange(subQ.id, "diagram_image", val)}
+          onChange={onDiagramImageChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["erd-annotation"]}
         />
@@ -2207,7 +2254,7 @@ export default function Revision() {
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => !showResults && handleInputChange(subQ.id, "diagram_image", val)}
+          onChange={onDiagramImageChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["nav-structure"]}
         />
@@ -2218,7 +2265,7 @@ export default function Revision() {
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => !showResults && handleInputChange(subQ.id, "diagram_image", val)}
+          onChange={onDiagramImageChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["nav-structure-higher"]}
         />
@@ -2229,7 +2276,7 @@ export default function Revision() {
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => !showResults && handleInputChange(subQ.id, "diagram_image", val)}
+          onChange={onDiagramImageChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["drawing"]}
         />
@@ -2240,7 +2287,7 @@ export default function Revision() {
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => !showResults && handleInputChange(subQ.id, "diagram_image", val)}
+          onChange={onDiagramImageChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["drawing"]}
         />
@@ -2279,9 +2326,7 @@ export default function Revision() {
             sourceTags={tagConfig?.sourceTags || []}
             targetZones={tagConfig?.targetZones || []}
             studentConnections={savedConnections}
-            onStudentConnectionsChange={(connections) => {
-              handleInputChange(subQ.id, "tag_connections", JSON.stringify(connections));
-            }}
+            onStudentConnectionsChange={onTagConnectionsChange}
             disabled={showResults}
           />
           <p className="text-xs text-neutral-500 mt-2">
@@ -2295,7 +2340,7 @@ export default function Revision() {
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => !showResults && handleInputChange(subQ.id, "diagram_image", val)}
+          onChange={onDiagramImageChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["structure-dataflow"]}
         />
@@ -2306,7 +2351,7 @@ export default function Revision() {
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => !showResults && handleInputChange(subQ.id, "diagram_image", val)}
+          onChange={onDiagramImageChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["form-wireframe"]}
         />
@@ -2317,7 +2362,7 @@ export default function Revision() {
       return (
         <DiagramImageInput
           value={currentInput["diagram_image"] || ""}
-          onChange={(val) => !showResults && handleInputChange(subQ.id, "diagram_image", val)}
+          onChange={onDiagramImageChange}
           startingImageUrl={subQ.drawingBackgroundUrl || subQ.imageUrl}
           hint={DIAGRAM_HINTS["form-wireframe"]}
         />

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, ReactNode, Fragment } from "react";
+import { useState, useEffect, useRef, useCallback, ReactNode, Fragment } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuestions } from "@/lib/QuestionContext";
 import { Question, SubQuestion, ContentBlock, DataTableCell, DataTableCellRole } from "@/lib/past-papers";
@@ -811,7 +811,11 @@ export default function TimedExam() {
     return () => clearInterval(interval);
   }, [studentLoggedIn, authStudentId, examQuestions.length]);
 
-  const updateInput = (subId: string, key: string, value: string) => {
+  // Wrapped in useCallback so the per-input arrows passed to renderInput
+  // (and the editors inside it) only change identity when needed. An
+  // unstable updateInput previously cascaded through child useEffects,
+  // contributing to React error #185 ("Maximum update depth exceeded").
+  const updateInput = useCallback((subId: string, key: string, value: string) => {
     setUserInputs(prev => ({
       ...prev,
       [subId]: {
@@ -819,9 +823,9 @@ export default function TimedExam() {
         [key]: value
       }
     }));
-  };
+  }, []);
 
-  const handleCodeKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>, subId: string) => {
+  const handleCodeKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>, subId: string) => {
     if (e.key === 'Tab') {
       e.preventDefault();
       const target = e.target as HTMLTextAreaElement;
@@ -845,7 +849,28 @@ export default function TimedExam() {
         }, 0);
       }
     }
-  };
+  }, [updateInput]);
+
+  // Per-subId handler cache. Stored in a ref so the wrapper closures
+  // passed to renderInput keep the same identity across renders. Without
+  // this, every parent re-render produced fresh arrows, which made child
+  // useEffects (e.g. ImagePasteInput's paste-listener effect) re-fire on
+  // every keystroke and could feed back into React error #185.
+  const inputHandlerCacheRef = useRef(new Map<string, {
+    onChange: (key: string, val: string) => void;
+    onCodeKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  }>());
+  const getInputHandlersFor = useCallback((subId: string) => {
+    let entry = inputHandlerCacheRef.current.get(subId);
+    if (!entry) {
+      entry = {
+        onChange: (key: string, val: string) => updateInput(subId, key, val),
+        onCodeKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => handleCodeKeyDown(e, subId),
+      };
+      inputHandlerCacheRef.current.set(subId, entry);
+    }
+    return entry;
+  }, [updateInput, handleCodeKeyDown]);
 
   const handleSubmitExam = async () => {
     setIsSubmitting(true);
@@ -2490,7 +2515,10 @@ export default function TimedExam() {
 
                             {/* Input Area */}
                             <div className="mt-4">
-                                {renderInput(subQ, userInputs[subQ.id] || {}, (key, val) => updateInput(subQ.id, key, val), (e) => handleCodeKeyDown(e, subQ.id))}
+                                {(() => {
+                                  const h = getInputHandlersFor(subQ.id);
+                                  return renderInput(subQ, userInputs[subQ.id] || {}, h.onChange, h.onCodeKeyDown);
+                                })()}
                             </div>
 
                             {/* Nested Sub-Parts */}
@@ -2656,7 +2684,10 @@ export default function TimedExam() {
                                       </Badge>
                                     </div>
                                     <div className="mt-2">
-                                      {renderInput(part, userInputs[part.id] || {}, (key, val) => updateInput(part.id, key, val), (e) => handleCodeKeyDown(e, part.id))}
+                                      {(() => {
+                                        const h = getInputHandlersFor(part.id);
+                                        return renderInput(part, userInputs[part.id] || {}, h.onChange, h.onCodeKeyDown);
+                                      })()}
                                     </div>
                                   </div>
                                 ))}
