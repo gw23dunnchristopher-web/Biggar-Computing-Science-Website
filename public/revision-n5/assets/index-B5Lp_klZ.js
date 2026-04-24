@@ -1,2 +1,1 @@
 import{r as s,y as o,Q as u}from"./index-8SUqbs-C.js";var c=u[" useId ".trim().toString()]||(()=>{}),n=0;function i(t){const[r,a]=s.useState(c());return o(()=>{a(e=>e??String(n++))},[t]),t||(r?`radix-${r}`:"")}export{i as u};
-//# sourceMappingURL=index-B5Lp_klZ.js.map
