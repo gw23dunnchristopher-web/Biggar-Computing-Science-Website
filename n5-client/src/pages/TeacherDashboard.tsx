@@ -251,62 +251,62 @@ export default function TeacherDashboard() {
 
       <main className="container mx-auto max-w-6xl p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-          <Card className="cursor-pointer hover:shadow-md transition-shadow border-teal-200 dark:border-teal-800 bg-teal-50/50 dark:bg-teal-950/20" onClick={() => setLocation("/teacher/classes")} data-testid="link-class-manager-card">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-teal-100 dark:bg-teal-900/50 flex items-center justify-center">
-                <svg className="w-6 h-6 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow border-emerald-300 dark:border-emerald-700 bg-emerald-100/80 dark:bg-emerald-950/30" onClick={() => setLocation("/teacher/classes")} data-testid="link-class-manager-card">
+            <CardContent className="p-4 flex items-start gap-4">
+              <div className="w-12 h-12 shrink-0 rounded-lg bg-emerald-200 dark:bg-emerald-900/60 flex items-center justify-center">
+                <svg className="w-6 h-6 text-emerald-700 dark:text-emerald-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
               </div>
               <div>
-                <h3 className="font-semibold text-neutral-900 dark:text-white">Class Manager</h3>
-                <p className="text-sm text-neutral-500">Manage classes and student accounts</p>
+                <h3 className="font-semibold text-neutral-900 dark:text-white leading-tight">Class Manager</h3>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Manage classes and student accounts</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-md transition-shadow border-purple-200 dark:border-purple-800 bg-purple-50/50 dark:bg-purple-950/20" onClick={() => setLocation("/teacher/quizzes")} data-testid="link-quiz-manager-card">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
-                <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow border-violet-300 dark:border-violet-700 bg-violet-100/80 dark:bg-violet-950/30" onClick={() => setLocation("/teacher/quizzes")} data-testid="link-quiz-manager-card">
+            <CardContent className="p-4 flex items-start gap-4">
+              <div className="w-12 h-12 shrink-0 rounded-lg bg-violet-200 dark:bg-violet-900/60 flex items-center justify-center">
+                <svg className="w-6 h-6 text-violet-700 dark:text-violet-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
               </div>
               <div>
-                <h3 className="font-semibold text-neutral-900 dark:text-white">Quiz Manager</h3>
-                <p className="text-sm text-neutral-500">{questions.length} questions across all papers</p>
+                <h3 className="font-semibold text-neutral-900 dark:text-white leading-tight">Quiz Manager</h3>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">{questions.length} questions across all papers</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-md transition-shadow border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-950/20" onClick={() => setLocation("/teacher/assignments")} data-testid="link-assignment-manager-card">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center">
-                <svg className="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow border-sky-300 dark:border-sky-700 bg-sky-100/80 dark:bg-sky-950/30" onClick={() => setLocation("/teacher/assignments")} data-testid="link-assignment-manager-card">
+            <CardContent className="p-4 flex items-start gap-4">
+              <div className="w-12 h-12 shrink-0 rounded-lg bg-sky-200 dark:bg-sky-900/60 flex items-center justify-center">
+                <svg className="w-6 h-6 text-sky-700 dark:text-sky-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
               </div>
               <div>
-                <h3 className="font-semibold text-neutral-900 dark:text-white">Assignment Manager</h3>
-                <p className="text-sm text-neutral-500">Create and manage coursework assignments</p>
+                <h3 className="font-semibold text-neutral-900 dark:text-white leading-tight">Assignment Manager</h3>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Create and manage coursework assignments</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-md transition-shadow border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20" onClick={() => setLocation("/teacher/past-papers")} data-testid="link-past-paper-manager">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-red-100 dark:bg-red-900/50 flex items-center justify-center">
-                <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow border-rose-300 dark:border-rose-700 bg-rose-100/80 dark:bg-rose-950/30" onClick={() => setLocation("/teacher/past-papers")} data-testid="link-past-paper-manager">
+            <CardContent className="p-4 flex items-start gap-4">
+              <div className="w-12 h-12 shrink-0 rounded-lg bg-rose-200 dark:bg-rose-900/60 flex items-center justify-center">
+                <svg className="w-6 h-6 text-rose-700 dark:text-rose-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
               </div>
               <div>
-                <h3 className="font-semibold text-neutral-900 dark:text-white">Past Papers</h3>
-                <p className="text-sm text-neutral-500">{questions.length} questions across all years</p>
+                <h3 className="font-semibold text-neutral-900 dark:text-white leading-tight">Past Papers</h3>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">{questions.length} questions across all years</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="cursor-pointer hover:shadow-md transition-shadow border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20" onClick={() => setLocation("/teacher/analytics")} data-testid="link-analytics-card">
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-                <svg className="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow border-amber-300 dark:border-amber-700 bg-amber-100/80 dark:bg-amber-950/30" onClick={() => setLocation("/teacher/analytics")} data-testid="link-analytics-card">
+            <CardContent className="p-4 flex items-start gap-4">
+              <div className="w-12 h-12 shrink-0 rounded-lg bg-amber-200 dark:bg-amber-900/60 flex items-center justify-center">
+                <svg className="w-6 h-6 text-amber-700 dark:text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
               </div>
               <div>
-                <h3 className="font-semibold text-neutral-900 dark:text-white">Analytics</h3>
-                <p className="text-sm text-neutral-500">View class performance and exam results</p>
+                <h3 className="font-semibold text-neutral-900 dark:text-white leading-tight">Analytics</h3>
+                <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">View class performance and exam results</p>
               </div>
             </CardContent>
           </Card>
