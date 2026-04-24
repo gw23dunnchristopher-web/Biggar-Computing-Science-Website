@@ -34,7 +34,11 @@ app.use((req, res, next) => {
   // Data Sculptor embeds are designed to be iframed from anywhere (the
   // production site, the dev workspace, even external pages), so we skip the
   // SAMEORIGIN restriction for those routes only. Everything else stays locked.
-  const isEmbeddable = req.path.startsWith('/data-sculptor');
+  // In development we also need to allow framing globally so the Replit
+  // workspace preview pane (a cross-origin iframe) can load the dev server —
+  // otherwise the workspace shows "Server artifact encountered an error".
+  const isDev = process.env.NODE_ENV !== 'production';
+  const isEmbeddable = isDev || req.path.startsWith('/data-sculptor');
   if (!isEmbeddable) {
     res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   }
