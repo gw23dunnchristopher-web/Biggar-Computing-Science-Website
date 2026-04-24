@@ -1920,6 +1920,14 @@ function MarkingGuidanceModal({
     setExampleFiles(prev => prev.filter((_, i) => i !== idx));
   };
 
+  const handleErdModelChange = useCallback((data: string) => {
+    setErdModel(data);
+  }, []);
+
+  const handleNavModelChange = useCallback((data: string) => {
+    setNavModel(data);
+  }, []);
+
   const handleSave = () => {
     const diagramModel = inputStyle === "erd-diagram" ? erdModel
       : inputStyle === "nav-structure" ? navModel
@@ -2046,7 +2054,7 @@ function MarkingGuidanceModal({
                   initialData={initialErdModelAnswer || erdStarterDiagram || "[]"}
                   baseDiagram={erdStarterDiagram}
                   mode="erd-annotation"
-                  onChange={(data) => setErdModel(data)}
+                  onChange={handleErdModelChange}
                 />
               </div>
             </div>
@@ -2062,7 +2070,7 @@ function MarkingGuidanceModal({
                   initialData={initialNavModelAnswer || navStarterDiagram || "[]"}
                   baseDiagram={navStarterDiagram}
                   mode="nav-structure-higher"
-                  onChange={(data) => setNavModel(data)}
+                  onChange={handleNavModelChange}
                 />
               </div>
             </div>
@@ -2174,6 +2182,50 @@ function MarkingGuidanceModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function QuestionStarterDiagramEditor({
+  questionId,
+  inputConfig,
+  updateQuestion,
+  mode,
+  fieldName,
+  alsoSetBaseField,
+}: {
+  questionId: string;
+  inputConfig: AssignmentQuestion["inputConfig"];
+  updateQuestion: (id: string, updates: Partial<AssignmentQuestion>) => void;
+  mode: "erd-annotation" | "nav-structure-higher";
+  fieldName: "erdStarterDiagram" | "baseNavDiagram";
+  alsoSetBaseField?: "baseErdDiagram";
+}) {
+  const inputConfigRef = useRef(inputConfig);
+  const updateQuestionRef = useRef(updateQuestion);
+  useEffect(() => {
+    inputConfigRef.current = inputConfig;
+  }, [inputConfig]);
+  useEffect(() => {
+    updateQuestionRef.current = updateQuestion;
+  }, [updateQuestion]);
+
+  const handleChange = useCallback(
+    (data: string) => {
+      const newConfig: any = { ...(inputConfigRef.current || {}), [fieldName]: data };
+      if (alsoSetBaseField) {
+        newConfig[alsoSetBaseField] = data;
+      }
+      updateQuestionRef.current(questionId, { inputConfig: newConfig });
+    },
+    [questionId, fieldName, alsoSetBaseField],
+  );
+
+  return (
+    <DiagramEditor
+      initialData={inputConfig?.[fieldName] || "[]"}
+      mode={mode}
+      onChange={handleChange}
+    />
   );
 }
 
@@ -2423,18 +2475,13 @@ function AssignmentQuestionEditor({
                 <div>
                   <label className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1 block">Starter Diagram (given to students to build on)</label>
                   <div className="border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-950">
-                    <DiagramEditor
-                      initialData={q.inputConfig?.erdStarterDiagram || "[]"}
+                    <QuestionStarterDiagramEditor
+                      questionId={q.id}
+                      inputConfig={q.inputConfig}
+                      updateQuestion={updateQuestion}
                       mode="erd-annotation"
-                      onChange={(data) => {
-                        updateQuestion(q.id, {
-                          inputConfig: {
-                            ...q.inputConfig,
-                            erdStarterDiagram: data,
-                            baseErdDiagram: data,
-                          }
-                        });
-                      }}
+                      fieldName="erdStarterDiagram"
+                      alsoSetBaseField="baseErdDiagram"
                     />
                   </div>
                   <p className="text-xs text-neutral-500 mt-1">The model answer ERD is configured in the Marking Guidance dialog.</p>
@@ -2448,17 +2495,12 @@ function AssignmentQuestionEditor({
                 <div>
                   <label className="text-xs font-medium text-neutral-600 dark:text-neutral-400 mb-1 block">Starter Diagram (optional — given to students to build on)</label>
                   <div className="border border-neutral-200 dark:border-neutral-700 rounded-lg bg-white dark:bg-neutral-950">
-                    <DiagramEditor
-                      initialData={q.inputConfig?.baseNavDiagram || "[]"}
+                    <QuestionStarterDiagramEditor
+                      questionId={q.id}
+                      inputConfig={q.inputConfig}
+                      updateQuestion={updateQuestion}
                       mode="nav-structure-higher"
-                      onChange={(data) => {
-                        updateQuestion(q.id, {
-                          inputConfig: {
-                            ...q.inputConfig,
-                            baseNavDiagram: data,
-                          }
-                        });
-                      }}
+                      fieldName="baseNavDiagram"
                     />
                   </div>
                   <p className="text-xs text-neutral-500 mt-1">The model answer diagram is configured in the Marking Guidance dialog.</p>

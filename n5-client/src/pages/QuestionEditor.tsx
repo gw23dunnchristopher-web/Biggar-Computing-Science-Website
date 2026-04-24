@@ -3287,14 +3287,12 @@ export default function QuestionEditor() {
                               </p>
                             </div>
                             
-                            <DiagramEditor
+                            <SubQuestionDiagramFieldEditor
+                              subIndex={index}
+                              inputConfig={subQ.inputConfig}
+                              updateSubQuestion={updateSubQuestion}
+                              dataField="baseErdDiagram"
                               initialData={subQ.inputConfig?.baseErdDiagram || ""}
-                              onChange={(data) => {
-                                updateSubQuestion(index, "inputConfig", {
-                                  ...subQ.inputConfig,
-                                  baseErdDiagram: data
-                                });
-                              }}
                               mode="database"
                               allowBaseItemDeletion={true}
                             />
@@ -3305,14 +3303,12 @@ export default function QuestionEditor() {
                                 Draw the same ERD with the correct Primary Key (underline) and Foreign Key (star) markings applied. The AI will use this as a reference when grading student answers.
                               </p>
                               
-                              <DiagramEditor
+                              <SubQuestionDiagramFieldEditor
+                                subIndex={index}
+                                inputConfig={subQ.inputConfig}
+                                updateSubQuestion={updateSubQuestion}
+                                dataField="correctErdDiagram"
                                 initialData={subQ.inputConfig?.correctErdDiagram || ""}
-                                onChange={(data) => {
-                                  updateSubQuestion(index, "inputConfig", {
-                                    ...subQ.inputConfig,
-                                    correctErdDiagram: data
-                                  });
-                                }}
                                 mode="erd-annotation"
                                 baseDiagram={subQ.inputConfig?.baseErdDiagram || ""}
                                 allowBaseItemDeletion={true}
@@ -3399,14 +3395,12 @@ export default function QuestionEditor() {
                               </p>
                             </div>
                             
-                            <DiagramEditor
+                            <SubQuestionDiagramFieldEditor
+                              subIndex={index}
+                              inputConfig={subQ.inputConfig}
+                              updateSubQuestion={updateSubQuestion}
+                              dataField="baseNavDiagram"
                               initialData={subQ.inputConfig?.baseNavDiagram || ""}
-                              onChange={(data) => {
-                                updateSubQuestion(index, "inputConfig", {
-                                  ...subQ.inputConfig,
-                                  baseNavDiagram: data
-                                });
-                              }}
                               mode="nav-structure"
                             />
 
@@ -3437,16 +3431,14 @@ export default function QuestionEditor() {
                                 )}
                               </div>
                               
-                              <DiagramEditor
+                              <SubQuestionDiagramFieldEditor
+                                subIndex={index}
+                                inputConfig={subQ.inputConfig}
+                                updateSubQuestion={updateSubQuestion}
+                                dataField="navExampleData"
+                                drawingField="navExampleCanvas"
                                 initialData={subQ.inputConfig?.navExampleData || ""}
                                 initialDrawing={subQ.inputConfig?.navExampleCanvas || ""}
-                                onChange={(dataStr, drawingStr) => {
-                                  updateSubQuestion(index, "inputConfig", {
-                                    ...subQ.inputConfig,
-                                    navExampleData: dataStr,
-                                    navExampleCanvas: drawingStr
-                                  });
-                                }}
                                 mode="nav-structure"
                               />
                             </div>
@@ -3464,14 +3456,12 @@ export default function QuestionEditor() {
                                 </p>
                               </div>
                               
-                              <DiagramEditor
+                              <SubQuestionDiagramFieldEditor
+                                subIndex={index}
+                                inputConfig={subQ.inputConfig}
+                                updateSubQuestion={updateSubQuestion}
+                                dataField="baseNavDiagram"
                                 initialData={subQ.inputConfig?.baseNavDiagram || ""}
-                                onChange={(data) => {
-                                  updateSubQuestion(index, "inputConfig", {
-                                    ...subQ.inputConfig,
-                                    baseNavDiagram: data
-                                  });
-                                }}
                                 mode="nav-structure-higher"
                               />
                             </div>
@@ -3484,14 +3474,12 @@ export default function QuestionEditor() {
                                 </p>
                               </div>
                               
-                              <DiagramEditor
+                              <SubQuestionDiagramFieldEditor
+                                subIndex={index}
+                                inputConfig={subQ.inputConfig}
+                                updateSubQuestion={updateSubQuestion}
+                                dataField="solutionNavDiagram"
                                 initialData={subQ.inputConfig?.solutionNavDiagram || ""}
-                                onChange={(data) => {
-                                  updateSubQuestion(index, "inputConfig", {
-                                    ...subQ.inputConfig,
-                                    solutionNavDiagram: data
-                                  });
-                                }}
                                 mode="nav-structure-higher"
                               />
                             </div>
@@ -3533,14 +3521,12 @@ export default function QuestionEditor() {
                               </p>
                             </div>
                             
-                            <DiagramEditor
+                            <SubQuestionDiagramFieldEditor
+                              subIndex={index}
+                              inputConfig={subQ.inputConfig}
+                              updateSubQuestion={updateSubQuestion}
+                              dataField="baseStructureDiagram"
                               initialData={subQ.inputConfig?.baseStructureDiagram || ""}
-                              onChange={(data) => {
-                                updateSubQuestion(index, "inputConfig", {
-                                  ...subQ.inputConfig,
-                                  baseStructureDiagram: data
-                                });
-                              }}
                               mode="structure-dataflow"
                               showFunctionNumbers={true}
                             />
@@ -3558,14 +3544,12 @@ export default function QuestionEditor() {
                                 </p>
                               </div>
                               
-                              <DiagramEditor
+                              <SubQuestionDiagramFieldEditor
+                                subIndex={index}
+                                inputConfig={subQ.inputConfig}
+                                updateSubQuestion={updateSubQuestion}
+                                dataField="baseStructureDiagram"
                                 initialData={subQ.inputConfig?.baseStructureDiagram || ""}
-                                onChange={(data) => {
-                                  updateSubQuestion(index, "inputConfig", {
-                                    ...subQ.inputConfig,
-                                    baseStructureDiagram: data
-                                  });
-                                }}
                                 mode="structure-diagram"
                               />
                             </div>
@@ -3578,14 +3562,12 @@ export default function QuestionEditor() {
                                 </p>
                               </div>
                               
-                              <DiagramEditor
+                              <SubQuestionDiagramFieldEditor
+                                subIndex={index}
+                                inputConfig={subQ.inputConfig}
+                                updateSubQuestion={updateSubQuestion}
+                                dataField="solutionStructureDiagram"
                                 initialData={subQ.inputConfig?.solutionStructureDiagram || ""}
-                                onChange={(data) => {
-                                  updateSubQuestion(index, "inputConfig", {
-                                    ...subQ.inputConfig,
-                                    solutionStructureDiagram: data
-                                  });
-                                }}
                                 mode="structure-diagram"
                               />
                             </div>
@@ -3603,14 +3585,12 @@ export default function QuestionEditor() {
                                 </p>
                               </div>
                               
-                              <DiagramEditor
+                              <SubQuestionDiagramFieldEditor
+                                subIndex={index}
+                                inputConfig={subQ.inputConfig}
+                                updateSubQuestion={updateSubQuestion}
+                                dataField="baseEntityOccurrenceDiagram"
                                 initialData={subQ.inputConfig?.baseEntityOccurrenceDiagram || ""}
-                                onChange={(data) => {
-                                  updateSubQuestion(index, "inputConfig", {
-                                    ...subQ.inputConfig,
-                                    baseEntityOccurrenceDiagram: data
-                                  });
-                                }}
                                 mode="entity-occurrence"
                               />
                             </div>
@@ -3623,14 +3603,12 @@ export default function QuestionEditor() {
                                 </p>
                               </div>
                               
-                              <DiagramEditor
+                              <SubQuestionDiagramFieldEditor
+                                subIndex={index}
+                                inputConfig={subQ.inputConfig}
+                                updateSubQuestion={updateSubQuestion}
+                                dataField="solutionEntityOccurrenceDiagram"
                                 initialData={subQ.inputConfig?.solutionEntityOccurrenceDiagram || ""}
-                                onChange={(data) => {
-                                  updateSubQuestion(index, "inputConfig", {
-                                    ...subQ.inputConfig,
-                                    solutionEntityOccurrenceDiagram: data
-                                  });
-                                }}
                                 mode="entity-occurrence"
                               />
                             </div>
@@ -4311,16 +4289,14 @@ export default function QuestionEditor() {
                                 )}
                               </div>
                               <p className="text-xs text-neutral-500">Draw an example of what the student's answer should look like. The AI will compare student submissions against this.</p>
-                              <DiagramEditor
+                              <SubQuestionDiagramFieldEditor
+                                subIndex={index}
+                                inputConfig={subQ.inputConfig}
+                                updateSubQuestion={updateSubQuestion}
+                                dataField="wireframeExampleData"
+                                drawingField="wireframeExampleCanvas"
                                 initialData={subQ.inputConfig?.wireframeExampleData}
                                 initialDrawing={subQ.inputConfig?.wireframeExampleCanvas}
-                                onChange={(dataStr, drawingStr) => {
-                                  updateSubQuestion(index, "inputConfig", {
-                                    ...(subQ.inputConfig || {}),
-                                    wireframeExampleData: dataStr,
-                                    wireframeExampleCanvas: drawingStr
-                                  });
-                                }}
                                 mode={subQ.inputStyle === "form-wireframe" ? "form-wireframe" : "webpage-wireframe"}
                               />
                             </div>
@@ -5149,14 +5125,13 @@ export default function QuestionEditor() {
                                                               </p>
                                                             </div>
                                                             
-                                                            <DiagramEditor
+                                                            <SubPartDiagramFieldEditor
+                                                              subIndex={index}
+                                                              partIndex={partIndex}
+                                                              inputConfig={part.inputConfig}
+                                                              updateSubPart={updateSubPart}
+                                                              dataField="baseErdDiagram"
                                                               initialData={part.inputConfig?.baseErdDiagram || ""}
-                                                              onChange={(data) => {
-                                                                updateSubPart(index, partIndex, "inputConfig", {
-                                                                  ...part.inputConfig,
-                                                                  baseErdDiagram: data
-                                                                });
-                                                              }}
                                                               mode="database"
                                                               allowBaseItemDeletion={true}
                                                             />
@@ -5240,14 +5215,13 @@ export default function QuestionEditor() {
                                                               </p>
                                                             </div>
                                                             
-                                                            <DiagramEditor
+                                                            <SubPartDiagramFieldEditor
+                                                              subIndex={index}
+                                                              partIndex={partIndex}
+                                                              inputConfig={part.inputConfig}
+                                                              updateSubPart={updateSubPart}
+                                                              dataField="baseNavDiagram"
                                                               initialData={part.inputConfig?.baseNavDiagram || ""}
-                                                              onChange={(data) => {
-                                                                updateSubPart(index, partIndex, "inputConfig", {
-                                                                  ...part.inputConfig,
-                                                                  baseNavDiagram: data
-                                                                });
-                                                              }}
                                                               mode="nav-structure"
                                                             />
 
@@ -5278,16 +5252,15 @@ export default function QuestionEditor() {
                                                                 )}
                                                               </div>
                                                               
-                                                              <DiagramEditor
+                                                              <SubPartDiagramFieldEditor
+                                                                subIndex={index}
+                                                                partIndex={partIndex}
+                                                                inputConfig={part.inputConfig}
+                                                                updateSubPart={updateSubPart}
+                                                                dataField="navExampleData"
+                                                                drawingField="navExampleCanvas"
                                                                 initialData={part.inputConfig?.navExampleData || ""}
                                                                 initialDrawing={part.inputConfig?.navExampleCanvas || ""}
-                                                                onChange={(dataStr, drawingStr) => {
-                                                                  updateSubPart(index, partIndex, "inputConfig", {
-                                                                    ...part.inputConfig,
-                                                                    navExampleData: dataStr,
-                                                                    navExampleCanvas: drawingStr
-                                                                  });
-                                                                }}
                                                                 mode="nav-structure"
                                                               />
                                                             </div>
@@ -5519,17 +5492,16 @@ export default function QuestionEditor() {
                                                               )}
                                                             </div>
                                                             <p className="text-xs text-neutral-500">Draw an example for the AI to compare against student answers.</p>
-                                                            <DiagramEditor
+                                                            <SubPartDiagramFieldEditor
+                                                              subIndex={index}
+                                                              partIndex={partIndex}
+                                                              inputConfig={part.inputConfig}
+                                                              updateSubPart={updateSubPart}
+                                                              dataField="wireframeExampleData"
+                                                              drawingField="wireframeExampleCanvas"
                                                               initialData={part.inputConfig?.wireframeExampleData}
                                                               initialDrawing={part.inputConfig?.wireframeExampleCanvas}
                                                               backgroundUrl={part.drawingBackgroundUrl}
-                                                              onChange={(dataStr, drawingStr) => {
-                                                                updateSubPart(index, partIndex, "inputConfig", {
-                                                                  ...(part.inputConfig || {}),
-                                                                  wireframeExampleData: dataStr,
-                                                                  wireframeExampleCanvas: drawingStr
-                                                                });
-                                                              }}
                                                               mode={part.inputStyle === "form-wireframe" ? "form-wireframe" : "webpage-wireframe"}
                                                             />
                                                           </div>
@@ -6342,5 +6314,129 @@ export default function QuestionEditor() {
         }}
       />
     </div>
+  );
+}
+
+type SubQDiagramFieldProps = {
+  subIndex: number;
+  inputConfig: any;
+  updateSubQuestion: (index: number, field: string, value: any) => void;
+  dataField: string;
+  drawingField?: string;
+  initialData?: string;
+  initialDrawing?: string;
+  mode: any;
+  baseDiagram?: string;
+  backgroundUrl?: string;
+  allowBaseItemDeletion?: boolean;
+  showFunctionNumbers?: boolean;
+};
+
+function SubQuestionDiagramFieldEditor({
+  subIndex,
+  inputConfig,
+  updateSubQuestion,
+  dataField,
+  drawingField,
+  initialData,
+  initialDrawing,
+  mode,
+  baseDiagram,
+  backgroundUrl,
+  allowBaseItemDeletion,
+  showFunctionNumbers,
+}: SubQDiagramFieldProps) {
+  const inputConfigRef = useRef(inputConfig);
+  const updateFnRef = useRef(updateSubQuestion);
+  useEffect(() => {
+    inputConfigRef.current = inputConfig;
+  }, [inputConfig]);
+  useEffect(() => {
+    updateFnRef.current = updateSubQuestion;
+  }, [updateSubQuestion]);
+
+  const handleChange = useCallback(
+    (dataStr: string, drawingStr: string) => {
+      const updates: any = { ...(inputConfigRef.current || {}), [dataField]: dataStr };
+      if (drawingField) updates[drawingField] = drawingStr;
+      updateFnRef.current(subIndex, "inputConfig", updates);
+    },
+    [subIndex, dataField, drawingField],
+  );
+
+  return (
+    <DiagramEditor
+      initialData={initialData}
+      initialDrawing={initialDrawing}
+      onChange={handleChange}
+      mode={mode}
+      baseDiagram={baseDiagram}
+      backgroundUrl={backgroundUrl}
+      allowBaseItemDeletion={allowBaseItemDeletion}
+      showFunctionNumbers={showFunctionNumbers}
+    />
+  );
+}
+
+type SubPartDiagramFieldProps = {
+  subIndex: number;
+  partIndex: number;
+  inputConfig: any;
+  updateSubPart: (subIndex: number, partIndex: number, field: string, value: any) => void;
+  dataField: string;
+  drawingField?: string;
+  initialData?: string;
+  initialDrawing?: string;
+  mode: any;
+  baseDiagram?: string;
+  backgroundUrl?: string;
+  allowBaseItemDeletion?: boolean;
+  showFunctionNumbers?: boolean;
+};
+
+function SubPartDiagramFieldEditor({
+  subIndex,
+  partIndex,
+  inputConfig,
+  updateSubPart,
+  dataField,
+  drawingField,
+  initialData,
+  initialDrawing,
+  mode,
+  baseDiagram,
+  backgroundUrl,
+  allowBaseItemDeletion,
+  showFunctionNumbers,
+}: SubPartDiagramFieldProps) {
+  const inputConfigRef = useRef(inputConfig);
+  const updateFnRef = useRef(updateSubPart);
+  useEffect(() => {
+    inputConfigRef.current = inputConfig;
+  }, [inputConfig]);
+  useEffect(() => {
+    updateFnRef.current = updateSubPart;
+  }, [updateSubPart]);
+
+  const handleChange = useCallback(
+    (dataStr: string, drawingStr: string) => {
+      const updates: any = { ...(inputConfigRef.current || {}), [dataField]: dataStr };
+      if (drawingField) updates[drawingField] = drawingStr;
+      updateFnRef.current(subIndex, partIndex, "inputConfig", updates);
+    },
+    [subIndex, partIndex, dataField, drawingField],
+  );
+
+  return (
+    <DiagramEditor
+      initialData={initialData}
+      initialDrawing={initialDrawing}
+      onChange={handleChange}
+      mode={mode}
+      baseDiagram={baseDiagram}
+      backgroundUrl={backgroundUrl}
+      allowBaseItemDeletion={allowBaseItemDeletion}
+      showFunctionNumbers={showFunctionNumbers}
+    />
   );
 }

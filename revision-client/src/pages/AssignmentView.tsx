@@ -506,6 +506,32 @@ function QuestionAnswerInput({
   const [uploading, setUploading] = useState(false);
   const dragCounter = useRef(0);
 
+  const answerRef = useRef(answer);
+  const onAnswerChangeRef = useRef(onAnswerChange);
+  useEffect(() => {
+    answerRef.current = answer;
+  }, [answer]);
+  useEffect(() => {
+    onAnswerChangeRef.current = onAnswerChange;
+  }, [onAnswerChange]);
+
+  const handleDiagramAnswerChange = useCallback((data: string) => {
+    onAnswerChangeRef.current({ ...answerRef.current, text: data });
+  }, []);
+
+  const handleDesignChoiceDrawingChange = useCallback((data: string) => {
+    let parsedNow: Record<string, string> = {};
+    if (answerRef.current.text) {
+      try {
+        parsedNow = JSON.parse(answerRef.current.text);
+      } catch {
+        parsedNow = { design_mode: "pseudocode", main: answerRef.current.text };
+      }
+    }
+    const updated = { ...parsedNow, drawing: data };
+    onAnswerChangeRef.current({ ...answerRef.current, text: JSON.stringify(updated) });
+  }, []);
+
   const handleFileUpload = async (files: FileList | File[]) => {
     const fileArray = Array.from(files);
     if (fileArray.length === 0) return;
@@ -751,9 +777,7 @@ function QuestionAnswerInput({
             baseDiagram={inputConfig?.erdStarterDiagram || inputConfig?.baseErdDiagram}
             mode="erd-annotation"
             disabled={disabled}
-            onChange={(data) => {
-              onAnswerChange({ ...answer, text: data });
-            }}
+            onChange={handleDiagramAnswerChange}
           />
         </div>
       )}
@@ -765,9 +789,7 @@ function QuestionAnswerInput({
             baseDiagram={inputConfig?.baseNavDiagram}
             mode="nav-structure-higher"
             disabled={disabled}
-            onChange={(data) => {
-              onAnswerChange({ ...answer, text: data });
-            }}
+            onChange={handleDiagramAnswerChange}
           />
         </div>
       )}
@@ -823,7 +845,7 @@ function QuestionAnswerInput({
                   initialData={parsed["drawing"] || "[]"}
                   mode="structure-diagram"
                   disabled={disabled}
-                  onChange={(data) => updateField("drawing", data)}
+                  onChange={handleDesignChoiceDrawingChange}
                 />
               </div>
             )}

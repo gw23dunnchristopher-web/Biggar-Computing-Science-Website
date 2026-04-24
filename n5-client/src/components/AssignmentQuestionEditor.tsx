@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -1373,17 +1373,10 @@ export default function AssignmentQuestionEditor({
                           Create a starting diagram that students will build upon. Students will add pages and links to complete the navigation structure.
                         </p>
                         <div className="border rounded-lg overflow-hidden bg-white dark:bg-neutral-900" style={{ minHeight: "400px" }}>
-                          <DiagramEditor
-                            initialData={question.inputConfig?.baseNavDiagram || ""}
-                            onChange={(data) => {
-                              updateQuestion(question.id, {
-                                inputConfig: {
-                                  ...question.inputConfig,
-                                  baseNavDiagram: data
-                                }
-                              });
-                            }}
-                            mode="nav-structure"
+                          <BaseNavDiagramFieldEditor
+                            questionId={question.id}
+                            inputConfig={question.inputConfig}
+                            updateQuestion={updateQuestion}
                           />
                         </div>
                       </div>
@@ -1913,75 +1906,164 @@ export default function AssignmentQuestionEditor({
       })()}
 
       {/* Marking Guidance Modal */}
-      {editingMarkingGuidanceQuestion && (() => {
-        const activeQ = findQuestionDeep(questions, editingMarkingGuidanceQuestion);
-        const isWireframe = activeQ?.inputStyle === "webpage-wireframe" || activeQ?.inputStyle === "form-wireframe";
-        const isNavStructure = activeQ?.inputStyle === "nav-structure";
-        const wfMode = activeQ?.inputStyle === "webpage-wireframe" ? "webpage-wireframe" as const
-          : activeQ?.inputStyle === "form-wireframe" ? "form-wireframe" as const
-          : undefined;
-        const diagramMode = isNavStructure ? "nav-structure" as const : undefined;
-        const diagramExampleData = isNavStructure ? activeQ?.inputConfig?.navExampleData : undefined;
-        const diagramExampleCanvas = isNavStructure ? activeQ?.inputConfig?.navExampleCanvas : undefined;
-        return (
-          <MarkingGuidanceModal
-            open={markingGuidanceModalOpen}
-            onClose={() => {
-              setMarkingGuidanceModalOpen(false);
-              setEditingMarkingGuidanceQuestion(null);
-            }}
-            initialData={activeQ?.markingGuidanceData}
-            onSave={(data) => {
-              updateQuestion(editingMarkingGuidanceQuestion, { markingGuidanceData: data });
-            }}
-            questionLabel={activeQ?.label || ""}
-            maxMarks={activeQ?.maxMarks || 0}
-            wireframeMode={wfMode}
-            wireframeExampleData={activeQ?.inputConfig?.wireframeExampleData}
-            wireframeExampleCanvas={activeQ?.inputConfig?.wireframeExampleCanvas}
-            wireframeBackgroundUrl={isWireframe ? activeQ?.drawingBackgroundUrl : undefined}
-            onWireframeChange={isWireframe ? (dataStr: string, drawingStr: string) => {
-              updateQuestion(editingMarkingGuidanceQuestion, {
-                inputConfig: {
-                  ...(activeQ?.inputConfig || {}),
-                  wireframeExampleData: dataStr,
-                  wireframeExampleCanvas: drawingStr
-                }
-              });
-            } : undefined}
-            onWireframeClear={isWireframe ? () => {
-              updateQuestion(editingMarkingGuidanceQuestion, {
-                inputConfig: {
-                  ...(activeQ?.inputConfig || {}),
-                  wireframeExampleData: undefined,
-                  wireframeExampleCanvas: undefined
-                }
-              });
-            } : undefined}
-            diagramMode={diagramMode}
-            diagramExampleData={diagramExampleData}
-            diagramExampleCanvas={diagramExampleCanvas}
-            onDiagramChange={isNavStructure ? (dataStr: string, drawingStr: string) => {
-              updateQuestion(editingMarkingGuidanceQuestion, {
-                inputConfig: {
-                  ...(activeQ?.inputConfig || {}),
-                  navExampleData: dataStr,
-                  navExampleCanvas: drawingStr
-                }
-              });
-            } : undefined}
-            onDiagramClear={isNavStructure ? () => {
-              updateQuestion(editingMarkingGuidanceQuestion, {
-                inputConfig: {
-                  ...(activeQ?.inputConfig || {}),
-                  navExampleData: undefined,
-                  navExampleCanvas: undefined
-                }
-              });
-            } : undefined}
-          />
-        );
-      })()}
+      {editingMarkingGuidanceQuestion && (
+        <MarkingGuidanceModalConnector
+          questionId={editingMarkingGuidanceQuestion}
+          activeQ={findQuestionDeep(questions, editingMarkingGuidanceQuestion)}
+          open={markingGuidanceModalOpen}
+          onClose={() => {
+            setMarkingGuidanceModalOpen(false);
+            setEditingMarkingGuidanceQuestion(null);
+          }}
+          updateQuestion={updateQuestion}
+        />
+      )}
     </div>
+  );
+}
+
+function BaseNavDiagramFieldEditor({
+  questionId,
+  inputConfig,
+  updateQuestion,
+}: {
+  questionId: string;
+  inputConfig: AssignmentQuestion["inputConfig"];
+  updateQuestion: (id: string, updates: Partial<AssignmentQuestion>) => void;
+}) {
+  const inputConfigRef = useRef(inputConfig);
+  const updateQuestionRef = useRef(updateQuestion);
+  useEffect(() => {
+    inputConfigRef.current = inputConfig;
+  }, [inputConfig]);
+  useEffect(() => {
+    updateQuestionRef.current = updateQuestion;
+  }, [updateQuestion]);
+
+  const handleChange = useCallback(
+    (data: string) => {
+      updateQuestionRef.current(questionId, {
+        inputConfig: {
+          ...(inputConfigRef.current || {}),
+          baseNavDiagram: data,
+        },
+      });
+    },
+    [questionId],
+  );
+
+  return (
+    <DiagramEditor
+      initialData={inputConfig?.baseNavDiagram || ""}
+      onChange={handleChange}
+      mode="nav-structure"
+    />
+  );
+}
+
+function MarkingGuidanceModalConnector({
+  questionId,
+  activeQ,
+  open,
+  onClose,
+  updateQuestion,
+}: {
+  questionId: string;
+  activeQ: AssignmentQuestion | undefined;
+  open: boolean;
+  onClose: () => void;
+  updateQuestion: (id: string, updates: Partial<AssignmentQuestion>) => void;
+}) {
+  const activeQRef = useRef(activeQ);
+  const updateQuestionRef = useRef(updateQuestion);
+  useEffect(() => {
+    activeQRef.current = activeQ;
+  }, [activeQ]);
+  useEffect(() => {
+    updateQuestionRef.current = updateQuestion;
+  }, [updateQuestion]);
+
+  const isWireframe = activeQ?.inputStyle === "webpage-wireframe" || activeQ?.inputStyle === "form-wireframe";
+  const isNavStructure = activeQ?.inputStyle === "nav-structure";
+  const wfMode = activeQ?.inputStyle === "webpage-wireframe" ? "webpage-wireframe" as const
+    : activeQ?.inputStyle === "form-wireframe" ? "form-wireframe" as const
+    : undefined;
+  const diagramMode = isNavStructure ? "nav-structure" as const : undefined;
+  const diagramExampleData = isNavStructure ? activeQ?.inputConfig?.navExampleData : undefined;
+  const diagramExampleCanvas = isNavStructure ? activeQ?.inputConfig?.navExampleCanvas : undefined;
+
+  const handleSave = useCallback(
+    (data: MarkingGuidanceData) => {
+      updateQuestionRef.current(questionId, { markingGuidanceData: data });
+    },
+    [questionId],
+  );
+
+  const handleWireframeChange = useCallback(
+    (dataStr: string, drawingStr: string) => {
+      updateQuestionRef.current(questionId, {
+        inputConfig: {
+          ...(activeQRef.current?.inputConfig || {}),
+          wireframeExampleData: dataStr,
+          wireframeExampleCanvas: drawingStr,
+        },
+      });
+    },
+    [questionId],
+  );
+
+  const handleWireframeClear = useCallback(() => {
+    updateQuestionRef.current(questionId, {
+      inputConfig: {
+        ...(activeQRef.current?.inputConfig || {}),
+        wireframeExampleData: undefined,
+        wireframeExampleCanvas: undefined,
+      },
+    });
+  }, [questionId]);
+
+  const handleDiagramChange = useCallback(
+    (dataStr: string, drawingStr: string) => {
+      updateQuestionRef.current(questionId, {
+        inputConfig: {
+          ...(activeQRef.current?.inputConfig || {}),
+          navExampleData: dataStr,
+          navExampleCanvas: drawingStr,
+        },
+      });
+    },
+    [questionId],
+  );
+
+  const handleDiagramClear = useCallback(() => {
+    updateQuestionRef.current(questionId, {
+      inputConfig: {
+        ...(activeQRef.current?.inputConfig || {}),
+        navExampleData: undefined,
+        navExampleCanvas: undefined,
+      },
+    });
+  }, [questionId]);
+
+  return (
+    <MarkingGuidanceModal
+      open={open}
+      onClose={onClose}
+      initialData={activeQ?.markingGuidanceData}
+      onSave={handleSave}
+      questionLabel={activeQ?.label || ""}
+      maxMarks={activeQ?.maxMarks || 0}
+      wireframeMode={wfMode}
+      wireframeExampleData={activeQ?.inputConfig?.wireframeExampleData}
+      wireframeExampleCanvas={activeQ?.inputConfig?.wireframeExampleCanvas}
+      wireframeBackgroundUrl={isWireframe ? activeQ?.drawingBackgroundUrl : undefined}
+      onWireframeChange={isWireframe ? handleWireframeChange : undefined}
+      onWireframeClear={isWireframe ? handleWireframeClear : undefined}
+      diagramMode={diagramMode}
+      diagramExampleData={diagramExampleData}
+      diagramExampleCanvas={diagramExampleCanvas}
+      onDiagramChange={isNavStructure ? handleDiagramChange : undefined}
+      onDiagramClear={isNavStructure ? handleDiagramClear : undefined}
+    />
   );
 }
