@@ -35,10 +35,6 @@ args = "test"
 name = "Serve static"
 author = "agent"
 
-[workflows.workflow.metadata]
-outputType = "console"
-isCanvasWorkflow = true
-
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = """
@@ -47,9 +43,14 @@ To see changes you make, you can hit the refresh button in the preview, you do n
 Console logs are available in the Preview devtools or your browser devtools.\" && static-web-server -w ./.config/static-web-server.toml"""
 waitForPort = 3000
 
+[workflows.workflow.metadata]
+outputType = "console"
+isCanvasWorkflow = true
+
 [[workflows.workflow]]
 name = "Server"
 author = "agent"
+mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
