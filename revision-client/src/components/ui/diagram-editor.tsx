@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Square, Type, X, MousePointer2, Pencil, Eraser, Trash2, Circle, Diamond, Spline, LayoutTemplate, MousePointerClick, FormInput, Image as ImageIcon, ChevronDown, Database, FileText, Hexagon, Route, Minus, List, Link, AlignLeft, AlignCenter, AlignRight, ArrowUp, ArrowDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -76,7 +76,7 @@ interface DiagramEditorProps {
   allowBaseItemDeletion?: boolean; // Override isBaseItem protection (for teacher editing)
 }
 
-export function DiagramEditor({ initialData, initialDrawing, onChange, disabled, backgroundUrl, mode = "general", baseDiagram, showFunctionNumbers = false, allowBaseItemDeletion = false }: DiagramEditorProps) {
+function DiagramEditorComponent({ initialData, initialDrawing, onChange, disabled, backgroundUrl, mode = "general", baseDiagram, showFunctionNumbers = false, allowBaseItemDeletion = false }: DiagramEditorProps) {
   const [items, setItems] = useState<DiagramItem[]>(() => {
     // For ERD annotation, nav-structure, structure-dataflow, structure-diagram, or entity-occurrence mode, merge base diagram (teacher's) with student's additions
     if ((mode === "erd-annotation" || mode === "nav-structure" || mode === "nav-structure-higher" || mode === "structure-dataflow" || mode === "structure-diagram" || mode === "entity-occurrence") && baseDiagram) {
@@ -3516,3 +3516,5 @@ export function DiagramEditor({ initialData, initialDrawing, onChange, disabled,
     </div>
   );
 }
+
+export const DiagramEditor = memo(DiagramEditorComponent);
