@@ -51,3 +51,6 @@ A Node.js/Express server, built with TypeScript, serves static content and provi
 
 ### AI Services
 - **Google Gemini API**
+
+### Testing
+- **Vitest** with **@testing-library/react** and **jsdom** are used for regression tests. Tests live under `tests/` (per-app subfolders: `tests/n5/`, `tests/revision/`, `tests/ds/`) and run via `npm test`. Each app has its own Vitest project so the `@/` alias resolves to the correct client source folder. Current coverage focuses on render-loop regressions in the diagram editor (n5 + revision), `AccessDesignCanvas`, and `DataGrid`, asserting that unstable parent callbacks and re-renders never cause runaway effects (React error #185).
