@@ -702,6 +702,53 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     }
   });
 
+  // Teacher dry-run: run the AI marker against a teacher-supplied answer
+  // WITHOUT writing anything to the submissions table. Used by the
+  // "Preview as student" flow on the lesson page so a teacher can sanity-check
+  // what feedback their pupils would actually get before publishing the lesson.
+  // Mirrors the request body shape of the real /submit endpoint above.
+  app.post('/api/classwork/questions/:questionId/try', requireTeacher, async (req, res) => {
+    try {
+      const q = await getQuestion(req.params.questionId);
+      if (!q) return res.status(404).json({ error: 'Question not found' });
+      if (!isClassworkCourse(q.course)) return res.status(500).json({ error: 'Question has invalid course' });
+      const { textAnswer, selectedOptionLabel, linkUrl, fileUrl } = req.body || {};
+      const fakeSubmission = {
+        text_answer: typeof textAnswer === 'string' ? textAnswer : null,
+        selected_option_label: typeof selectedOptionLabel === 'string' ? selectedOptionLabel : null,
+        link_url: typeof linkUrl === 'string' ? linkUrl : null,
+        file_url: typeof fileUrl === 'string' ? fileUrl : null,
+      };
+      try {
+        const markPromise = markSubmission(q as any, fakeSubmission as any);
+        const result = await Promise.race([
+          markPromise,
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 25000)),
+        ]);
+        if (!result) {
+          return res.json({
+            marksAwarded: null,
+            feedback: null,
+            maxMarks: q.max_marks,
+            note: 'No AI mark was produced (this question type may not be auto-markable, or the model timed out).',
+          });
+        }
+        return res.json({
+          marksAwarded: result.marksAwarded,
+          feedback: result.feedback,
+          maxMarks: q.max_marks,
+          markedBy: result.markedBy,
+        });
+      } catch (err) {
+        console.error('[classwork] try-mark error:', err);
+        return res.status(500).json({ error: 'AI marking failed' });
+      }
+    } catch (err) {
+      console.error('[classwork] try error:', err);
+      res.status(500).json({ error: 'Failed to run preview marking' });
+    }
+  });
+
   // Teacher: override the mark on a submission.
   app.patch('/api/classwork/submissions/:id/mark', requireTeacher, async (req, res) => {
     const { marksAwarded, feedback } = req.body || {};

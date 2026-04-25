@@ -164,7 +164,9 @@ export default function Lesson() {
           marginTop: 12, padding: '8px 12px', background: '#fef3c7', border: '1px solid #fde68a',
           color: '#854d0e', borderRadius: 8, fontSize: 13,
         }}>
-          You are previewing this lesson as a student. Answers won&rsquo;t actually be submitted.
+          You are previewing this lesson as a student. Submit any answer to see
+          the AI feedback your pupils would get &mdash; nothing is saved to the
+          submissions table.
         </div>
       )}
 
@@ -582,13 +584,18 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
     }
   }
 
+  // Holds the AI feedback the teacher sees after pressing Submit in preview
+  // mode. Kept separate from `msg` (the one-line status) and from `last` (the
+  // pupil's real previous submission, which preview must never overwrite).
+  // Cleared whenever the question is re-attempted.
+  const [previewResult, setPreviewResult] = useState<
+    { marksAwarded: number | null; feedback: string | null; maxMarks: number; note?: string } | null
+  >(null);
+
   async function submit() {
-    if (preview) {
-      setMsg('Preview only — your answer wasn\u2019t submitted.');
-      return;
-    }
     setBusy(true);
-    setMsg('Submitting and marking…');
+    setMsg(preview ? 'Running AI marker…' : 'Submitting and marking…');
+    if (preview) setPreviewResult(null);
     try {
       const body: any = {};
       if (t === 'multiple_choice') body.selectedOptionLabel = option;
@@ -599,18 +606,23 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
         if (fileUrl) body.fileUrl = fileUrl;
         if (url) body.linkUrl = url;
       } else if (codeProjectKind) {
-        // python_task / html_task — pull the latest code from the chosen
-        // project and submit it as the text answer; stash the project id in
-        // link_url so the server can re-fetch the latest version at marking time.
-        if (!selectedProjectId) throw new Error('Please pick a project to submit.');
-        const token = localStorage.getItem('studentToken') || '';
-        const r = await fetch(`/api/code-projects/${codeProjectKind}/${encodeURIComponent(selectedProjectId)}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        });
-        if (!r.ok) throw new Error('Could not load that project.');
-        const data = await r.json();
-        body.textAnswer = String(data?.code ?? '');
-        body.linkUrl = `${selectedProjectId}|${data?.name || ''}`;
+        // python_task / html_task — in real submission we pull the latest code
+        // from the chosen project. In preview mode the teacher hasn't picked
+        // (or created) a project, so we just send whatever they've typed in
+        // the textarea below as a quick code sample for the AI to mark.
+        if (preview) {
+          body.textAnswer = text;
+        } else {
+          if (!selectedProjectId) throw new Error('Please pick a project to submit.');
+          const token = localStorage.getItem('studentToken') || '';
+          const r = await fetch(`/api/code-projects/${codeProjectKind}/${encodeURIComponent(selectedProjectId)}`, {
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          });
+          if (!r.ok) throw new Error('Could not load that project.');
+          const data = await r.json();
+          body.textAnswer = String(data?.code ?? '');
+          body.linkUrl = `${selectedProjectId}|${data?.name || ''}`;
+        }
       } else if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs') {
         // Send the cell answers as JSON so the deterministic marker can
         // compare each one against the expected answers in the question config.
@@ -618,11 +630,38 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
       } else if (t === 'database_task') {
         // Resolve the pupil's DS embed sandbox from their session key
         // (mirrored to localStorage by the embed app on the same origin).
+        // In preview mode the teacher has no DS sandbox of their own, so we
+        // skip the AI call and tell them up front rather than 500ing.
+        if (preview) {
+          setPreviewResult({
+            marksAwarded: null, feedback: null, maxMarks: question.max_marks,
+            note: 'Database tasks need a real pupil sandbox to mark, so this question type can\u2019t be tried in preview. Open the database link to sanity-check it manually.',
+          });
+          setMsg(null);
+          return;
+        }
         if (!dbEmbedToken) throw new Error('This task is missing its database link. Ask your teacher to add one.');
         const sessionKey = localStorage.getItem('student_session_key');
         if (!sessionKey) throw new Error('Please open the database first, do your work, then come back and submit.');
         body.linkUrl = `${dbEmbedToken}|${sessionKey}`;
       } else body.textAnswer = text; // short / long / code / video_question / sql_task
+
+      if (preview) {
+        // Dry-run: hit the teacher-only /try endpoint which runs the same AI
+        // marker but does NOT touch the submissions table.
+        const tryResult = await api<{
+          marksAwarded: number | null; feedback: string | null; maxMarks: number; note?: string;
+        }>(`/api/classwork/questions/${question.id}/try`, {
+          method: 'POST', body: JSON.stringify(body),
+        });
+        setPreviewResult(tryResult);
+        setMsg(null);
+        // Note: do NOT clear inputs or call onSubmitted() — the teacher may
+        // want to tweak their answer and re-run the marker to see how the
+        // feedback changes.
+        return;
+      }
+
       const result = await api<Submission>(`/api/classwork/questions/${question.id}/submit`, {
         method: 'POST', body: JSON.stringify(body),
       });
@@ -936,6 +975,27 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
           Last attempt: {new Date(last.submitted_at).toLocaleString()}
           {last.marks_awarded != null && <> · {last.marks_awarded}/{question.max_marks} marks</>}
           {last.ai_feedback && <div style={{ marginTop: 4, color: 'var(--cw-ink)' }}>{last.ai_feedback}</div>}
+        </div>
+      )}
+
+      {preview && previewResult && (
+        <div style={{
+          marginTop: 12, padding: '10px 12px', background: '#ecfeff',
+          border: '1px solid #a5f3fc', borderRadius: 8, fontSize: 13,
+          color: 'var(--cw-ink)',
+        }}>
+          <strong style={{ color: '#155e75' }}>Preview AI feedback</strong>
+          {previewResult.marksAwarded != null && (
+            <> &middot; {previewResult.marksAwarded}/{previewResult.maxMarks} marks</>
+          )}
+          {previewResult.feedback && (
+            <div style={{ marginTop: 6, whiteSpace: 'pre-wrap' }}>{previewResult.feedback}</div>
+          )}
+          {previewResult.note && (
+            <div style={{ marginTop: 6, color: 'var(--cw-muted)', fontStyle: 'italic' }}>
+              {previewResult.note}
+            </div>
+          )}
         </div>
       )}
     </div>
