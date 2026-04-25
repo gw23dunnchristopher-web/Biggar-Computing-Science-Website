@@ -87,6 +87,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { DiagramEditor, DiagramItem } from "@/components/ui/diagram-editor";
+import { ImagePasteInput } from "@/components/ui/image-paste-input";
 import { TagMatchingEditor, SourceTag, TargetZone } from "@/components/ui/tag-matching-editor";
 import { RichTextEditor, RichTextDisplay } from "@/components/ui/rich-text-editor";
 import { DatabaseSchemaEditor, DatabaseSchemaDisplay } from "@/components/ui/database-schema-editor";
@@ -190,7 +191,160 @@ export default function QuestionEditor() {
   });
   
   const [showPreview, setShowPreview] = useState(false);
-  
+
+  // "Try as student" — dry-run AI feedback inside the editor preview
+  const [previewAnswers, setPreviewAnswers] = useState<Record<string, string>>({});
+  const [previewImages, setPreviewImages] = useState<Record<string, string>>({});
+  const [previewFeedback, setPreviewFeedback] = useState<Record<string, { loading?: boolean; marks?: number; maxMarks?: number; feedback?: string; suggestions?: string; error?: string }>>({});
+
+  useEffect(() => {
+    if (!showPreview) {
+      setPreviewAnswers({});
+      setPreviewImages({});
+      setPreviewFeedback({});
+    }
+  }, [showPreview]);
+
+  const buildPreviewContext = useCallback((subQ: SubQuestion, parentSubQ?: SubQuestion) => {
+    const scenarioBlocks = formData.scenario?.contentBlocks || [];
+    const scenarioText = scenarioBlocks
+      .filter((b: ContentBlock) => b.type === "text")
+      .map((b: ContentBlock) => b.content)
+      .filter(Boolean)
+      .join("\n") || formData.scenario?.text || "";
+    const subQText = (subQ.contentBlocks || [])
+      .filter((b: ContentBlock) => b.type === "text")
+      .map((b: ContentBlock) => b.content)
+      .filter(Boolean)
+      .join("\n") || subQ.questionText || "";
+    const parentText = parentSubQ
+      ? ((parentSubQ.contentBlocks || [])
+          .filter((b: ContentBlock) => b.type === "text")
+          .map((b: ContentBlock) => b.content)
+          .filter(Boolean)
+          .join("\n") || parentSubQ.questionText || "")
+      : "";
+    return [
+      `Question: ${formData.title}${subQ.label ? ` Part ${subQ.label}` : ""}`,
+      scenarioText ? `Scenario: ${scenarioText}` : "",
+      parentText ? `Parent Part ${parentSubQ?.label || ""}: ${parentText}` : "",
+      `Question Text: ${subQText}`,
+      `Maximum Marks: ${subQ.maxMarks}`,
+      `Marking Scheme:\n${(subQ.markingScheme || []).map((m: string, i: number) => `  ${i + 1}. ${m}`).join("\n")}`,
+      subQ.aiGuidance ? `Teacher Guidance: ${subQ.aiGuidance}` : "",
+    ].filter(Boolean).join("\n\n");
+  }, [formData]);
+
+  const handlePreviewGrade = useCallback(async (subQ: SubQuestion, parentSubQ?: SubQuestion) => {
+    const studentAnswer = (previewAnswers[subQ.id] || "").trim();
+    const diagramImage = previewImages[subQ.id] || "";
+    if (!studentAnswer && !diagramImage) {
+      setPreviewFeedback(prev => ({ ...prev, [subQ.id]: { error: "Type a sample answer (or paste an image) before submitting." } }));
+      return;
+    }
+    setPreviewFeedback(prev => ({ ...prev, [subQ.id]: { loading: true } }));
+    try {
+      const response = await fetch("/api/grade-answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentAnswer: studentAnswer || "(image only)",
+          markingScheme: subQ.markingScheme || [],
+          maxMarks: subQ.maxMarks,
+          questionContext: buildPreviewContext(subQ, parentSubQ),
+          aiGuidance: subQ.aiGuidance,
+          markingGuidanceData: subQ.markingGuidanceData,
+          diagramImage: diagramImage || undefined,
+        }),
+      });
+      if (!response.ok) {
+        const text = await response.text().catch(() => "");
+        setPreviewFeedback(prev => ({ ...prev, [subQ.id]: { error: `AI grading failed (${response.status}). ${text.slice(0, 160)}` } }));
+        return;
+      }
+      const result = await response.json();
+      setPreviewFeedback(prev => ({
+        ...prev,
+        [subQ.id]: {
+          marks: result.marks,
+          maxMarks: subQ.maxMarks,
+          feedback: result.feedback || "",
+          suggestions: result.suggestions || "",
+        },
+      }));
+    } catch (e: any) {
+      setPreviewFeedback(prev => ({ ...prev, [subQ.id]: { error: e?.message || "Network error" } }));
+    }
+  }, [previewAnswers, previewImages, buildPreviewContext]);
+
+  const renderPreviewTryArea = useCallback((subQ: SubQuestion, parentSubQ?: SubQuestion, compact = false) => {
+    if (!subQ.maxMarks || subQ.maxMarks <= 0) return null;
+    const fb = previewFeedback[subQ.id];
+    return (
+      <div className={cn(
+        "mt-4 rounded-lg border-2 border-dashed border-cyan-300 dark:border-cyan-700 bg-cyan-50 dark:bg-cyan-950/30 space-y-3",
+        compact ? "p-3" : "p-4"
+      )}>
+        <div className="flex items-center justify-between gap-2">
+          <p className={cn("font-semibold uppercase tracking-wider text-cyan-700 dark:text-cyan-300", compact ? "text-[11px]" : "text-xs")}>
+            Try as a student ({subQ.inputStyle || "text"})
+          </p>
+          <span className={cn("italic text-cyan-600 dark:text-cyan-400", compact ? "text-[11px]" : "text-xs")}>Nothing is saved</span>
+        </div>
+        <Textarea
+          value={previewAnswers[subQ.id] || ""}
+          onChange={(e) => setPreviewAnswers(prev => ({ ...prev, [subQ.id]: e.target.value }))}
+          placeholder="Type a sample answer here..."
+          className="min-h-[80px] bg-white dark:bg-neutral-900"
+          data-testid={`preview-answer-${subQ.id}`}
+        />
+        {subQ.inputStyle === "image-paste" && (
+          <ImagePasteInput
+            value={previewImages[subQ.id] || ""}
+            onChange={(val) => setPreviewImages(prev => ({ ...prev, [subQ.id]: val }))}
+            startingImage={subQ.drawingBackgroundUrl || undefined}
+            instructions="Paste, drop or pick a sample diagram answer."
+            testId={`preview-image-${subQ.id}`}
+          />
+        )}
+        <div className="flex justify-end">
+          <Button
+            size="sm"
+            onClick={() => handlePreviewGrade(subQ, parentSubQ)}
+            disabled={!!fb?.loading}
+            className="bg-cyan-600 hover:bg-cyan-700 text-white"
+            data-testid={`preview-grade-${subQ.id}`}
+          >
+            {fb?.loading ? "Marking..." : "Get AI feedback"}
+          </Button>
+        </div>
+        {fb && !fb.loading && (
+          <div className="p-3 rounded-md bg-white dark:bg-neutral-900 border border-cyan-200 dark:border-cyan-800">
+            {fb.error ? (
+              <p className="text-sm text-red-600 dark:text-red-400">{fb.error}</p>
+            ) : (
+              <>
+                <p className="text-sm font-bold text-neutral-900 dark:text-white mb-2">
+                  {fb.marks} / {fb.maxMarks} marks
+                </p>
+                {fb.feedback && (
+                  <ul className="text-sm text-neutral-700 dark:text-neutral-300 space-y-1 list-disc pl-4">
+                    {fb.feedback.split("•").map(s => s.trim()).filter(Boolean).map((p, i) => (
+                      <li key={i}>{p}</li>
+                    ))}
+                  </ul>
+                )}
+                {fb.suggestions && (
+                  <p className="text-xs italic text-neutral-600 dark:text-neutral-400 mt-2">💡 {fb.suggestions}</p>
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }, [previewAnswers, previewImages, previewFeedback, handlePreviewGrade]);
+
   const [additionalPapers, setAdditionalPapers] = useState<AdditionalPaperOption[]>([]);
 
   useEffect(() => {
@@ -5972,14 +6126,8 @@ export default function QuestionEditor() {
                         </>
                       )}
 
-                      {/* Input placeholder */}
-                      {subQ.maxMarks > 0 && (
-                        <div className="mt-4 p-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg border-2 border-dashed border-neutral-300 dark:border-neutral-600">
-                          <p className="text-sm text-neutral-500 dark:text-neutral-400 italic text-center">
-                            Student input area ({subQ.inputStyle || "text"})
-                          </p>
-                        </div>
-                      )}
+                      {/* Try as student — interactive AI-feedback dry run */}
+                      {renderPreviewTryArea(subQ)}
 
                       {/* Nested Sub-Parts */}
                       {subQ.subParts && subQ.subParts.length > 0 && (
@@ -6206,14 +6354,8 @@ export default function QuestionEditor() {
                                     </>
                                   )}
 
-                                  {/* Sub-part input placeholder */}
-                                  {part.maxMarks > 0 && (
-                                    <div className="mt-3 p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg border-2 border-dashed border-neutral-300 dark:border-neutral-600">
-                                      <p className="text-xs text-neutral-500 dark:text-neutral-400 italic text-center">
-                                        Student input area ({part.inputStyle || "text"})
-                                      </p>
-                                    </div>
-                                  )}
+                                  {/* Try as student — interactive AI-feedback dry run for sub-part */}
+                                  {renderPreviewTryArea(part, subQ, true)}
                                 </div>
                               </div>
                             </div>
