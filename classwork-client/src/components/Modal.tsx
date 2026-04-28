@@ -20,12 +20,27 @@ export default function Modal({ open, title, onClose, children, footer, width = 
   if (!open) return null;
   return (
     <div onMouseDown={onClose} style={overlay} role="dialog" aria-modal="true" aria-label={title}>
-      <div onMouseDown={(e) => e.stopPropagation()} style={{ ...dialog, maxWidth: width }}>
+      <div
+        onMouseDown={(e) => e.stopPropagation()}
+        style={{
+          ...dialog,
+          maxWidth: width,
+          // Never allow the dialog to overflow the viewport. The body scrolls
+          // instead, keeping the header and footer pinned in view so users can
+          // always see the title and Save / Done buttons.
+          maxHeight: 'calc(100vh - 32px)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <div style={header}>
           <h3 style={{ margin: 0, fontSize: 17 }}>{title}</h3>
           <button onClick={onClose} aria-label="Close" style={closeBtn}>×</button>
         </div>
-        <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{
+          padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 12,
+          overflowY: 'auto', minHeight: 0, flex: 1,
+        }}>
           {children}
         </div>
         {footer && <div style={footerBar}>{footer}</div>}

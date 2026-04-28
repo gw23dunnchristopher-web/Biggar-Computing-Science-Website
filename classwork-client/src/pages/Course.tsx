@@ -697,7 +697,7 @@ export default function Course() {
               value={notesContent}
               onChange={setNotesContent}
               placeholder={'Jot anything you want to remember about this unit\u2014 definitions, examples, questions to ask your teacher, exam tips, etc.'}
-              minHeight={620}
+              minHeight={360}
               ariaLabel="Unit notes"
             />
           </>
