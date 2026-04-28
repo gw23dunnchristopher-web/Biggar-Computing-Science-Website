@@ -7,9 +7,10 @@ interface Props {
   children: ReactNode;
   footer?: ReactNode;
   width?: number;
+  fillHeight?: boolean;
 }
 
-export default function Modal({ open, title, onClose, children, footer, width = 460 }: Props) {
+export default function Modal({ open, title, onClose, children, footer, width = 460, fillHeight = false }: Props) {
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
@@ -29,6 +30,7 @@ export default function Modal({ open, title, onClose, children, footer, width = 
           // instead, keeping the header and footer pinned in view so users can
           // always see the title and Save / Done buttons.
           maxHeight: 'calc(100vh - 32px)',
+          ...(fillHeight ? { height: 'calc(100vh - 32px)' } : null),
           display: 'flex',
           flexDirection: 'column',
         }}

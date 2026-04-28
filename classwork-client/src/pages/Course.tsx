@@ -667,6 +667,7 @@ export default function Course() {
           ? `${role === 'teacher' ? 'Demo notes' : 'Notes'} for: ${modal.unit.title}`
           : ''}
         width={1100}
+        fillHeight
         onClose={closeModal}
         footer={<>
           <span style={{ flex: 1, fontSize: 12, color: 'var(--cw-muted)' }}>
