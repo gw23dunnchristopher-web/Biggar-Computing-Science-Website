@@ -26,6 +26,10 @@ export default function RichTextEditor({
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState<string | null>(null);
   const [inTableCell, setInTableCell] = useState(false);
+  // Custom right-click menu shown over the editor. Coords are in viewport
+  // (clientX/clientY) because the menu is rendered with position: fixed.
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
+  const [ctxMsg, setCtxMsg] = useState<string | null>(null);
 
   // Track whether the caret is inside a table cell so the table-edit buttons
   // (add row, delete column, etc.) only light up when they make sense.
@@ -270,6 +274,103 @@ export default function RichTextEditor({
     handleInput();
   }
 
+  /* ---- Right-click context menu helpers ---- */
+
+  // Open the friendly Cut/Copy/Paste menu at the click location instead of
+  // the browser's default menu. Pupils who don't use keyboard shortcuts can
+  // do all three from a single right-click.
+  function openContextMenu(e: React.MouseEvent) {
+    e.preventDefault();
+    setCtxMsg(null);
+    // Keep the menu inside the viewport even when the click is near the edge.
+    const menuW = 180, menuH = 130;
+    const x = Math.min(e.clientX, window.innerWidth - menuW - 8);
+    const y = Math.min(e.clientY, window.innerHeight - menuH - 8);
+    setCtxMenu({ x, y });
+  }
+  function closeContextMenu() { setCtxMenu(null); setCtxMsg(null); }
+
+  function ctxCut() {
+    ref.current?.focus();
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) { setCtxMsg('Select some text first.'); return; }
+    try {
+      const ok = document.execCommand('cut');
+      if (!ok) { setCtxMsg('Your browser blocked Cut. Use Ctrl+X instead.'); return; }
+    } catch { setCtxMsg('Cut isn\u2019t available here. Use Ctrl+X instead.'); return; }
+    handleInput();
+    closeContextMenu();
+  }
+  function ctxCopy() {
+    ref.current?.focus();
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) { setCtxMsg('Select some text first.'); return; }
+    try {
+      const ok = document.execCommand('copy');
+      if (!ok) { setCtxMsg('Your browser blocked Copy. Use Ctrl+C instead.'); return; }
+    } catch { setCtxMsg('Copy isn\u2019t available here. Use Ctrl+C instead.'); return; }
+    closeContextMenu();
+  }
+  // execCommand('paste') is blocked in every modern browser for security, so
+  // we read the system clipboard via the async Clipboard API. That requires
+  // a user gesture (the right-click counts) and clipboard-read permission.
+  // If permission is denied or the API is missing, prompt for Ctrl+V — which
+  // routes through the existing onPaste handler that supports images too.
+  async function ctxPaste() {
+    ref.current?.focus();
+    if (!navigator.clipboard || !navigator.clipboard.readText) {
+      setCtxMsg('Your browser doesn\u2019t allow pasting from a menu. Use Ctrl+V instead.');
+      return;
+    }
+    try {
+      // Try image-aware paste first when the API supports it (Chrome / Edge).
+      const anyClipboard: any = navigator.clipboard as any;
+      if (typeof anyClipboard.read === 'function') {
+        try {
+          const items = await anyClipboard.read();
+          for (const item of items) {
+            const imgType = (item.types || []).find((t: string) => t.startsWith('image/'));
+            if (imgType) {
+              const blob = await item.getType(imgType);
+              const file = new File([blob], 'pasted.png', { type: imgType });
+              await uploadAndInsertImage(file);
+              closeContextMenu();
+              return;
+            }
+          }
+        } catch { /* fall through to text */ }
+      }
+      const text = await navigator.clipboard.readText();
+      if (!text) { setCtxMsg('Your clipboard is empty.'); return; }
+      try { document.execCommand('insertText', false, text); } catch { /* ignore */ }
+      handleInput();
+      closeContextMenu();
+    } catch {
+      setCtxMsg('Your browser blocked clipboard access. Use Ctrl+V instead.');
+    }
+  }
+
+  // Dismiss the menu on any outside click or the Escape key — same pattern
+  // every native context menu uses.
+  useEffect(() => {
+    if (!ctxMenu) return;
+    function onDown(e: MouseEvent) {
+      const menu = document.getElementById('cw-rte-ctx-menu');
+      if (menu && menu.contains(e.target as Node)) return;
+      closeContextMenu();
+    }
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') closeContextMenu(); }
+    function onScroll() { closeContextMenu(); }
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('scroll', onScroll, true);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('scroll', onScroll, true);
+    };
+  }, [ctxMenu]);
+
   // Tooltips for the L/C/R buttons change to reflect dual behaviour: when an
   // image is selected they re-align the image; otherwise they align the
   // current paragraph. Saves a whole toolbar row.
@@ -339,6 +440,7 @@ export default function RichTextEditor({
         suppressContentEditableWarning
         onInput={handleInput}
         onBlur={handleInput}
+        onContextMenu={openContextMenu}
         onClick={(e) => {
           const t = e.target as HTMLElement;
           if (t && t.tagName === 'IMG') selectImage(t as HTMLImageElement);
