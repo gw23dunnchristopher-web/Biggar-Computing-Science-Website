@@ -585,6 +585,29 @@ export async function listQuestionResources(questionId: string) {
   return r.rows;
 }
 
+/**
+ * Bulk fetch: every per-question resource attached to any question in a lesson,
+ * grouped by question_id. Avoids the N+1 query the lesson page used to make
+ * (one /resources call per question card on initial render).
+ */
+export async function listAllQuestionResourcesForLesson(lessonId: string) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `SELECT id, lesson_id, question_id, kind, title, url, order_index, created_at
+       FROM bhs_classwork_lesson_resources
+      WHERE lesson_id = $1 AND question_id IS NOT NULL
+      ORDER BY order_index ASC, created_at ASC`,
+    [lessonId]
+  );
+  const byQuestion: Record<string, any[]> = {};
+  for (const row of r.rows) {
+    const qid = row.question_id as string;
+    if (!byQuestion[qid]) byQuestion[qid] = [];
+    byQuestion[qid].push(row);
+  }
+  return byQuestion;
+}
+
 export async function addLessonResource(input: {
   lessonId: string;
   questionId?: string | null;

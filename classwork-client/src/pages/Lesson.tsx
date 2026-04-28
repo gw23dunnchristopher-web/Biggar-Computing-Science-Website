@@ -91,6 +91,10 @@ export default function Lesson() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [allSubs, setAllSubs] = useState<Submission[]>([]);
+  // Pre-fetched per-question resources, keyed by question_id. Populated by a
+  // single bulk request so that each <QuestionResources> card doesn't have to
+  // make its own HTTP call on mount (used to be N+1 — one per question).
+  const [resourcesByQuestion, setResourcesByQuestion] = useState<Record<string, LessonResource[]>>({});
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [previewAsStudent, setPreviewAsStudent] = useState(false);
@@ -100,23 +104,26 @@ export default function Lesson() {
     setLoading(true);
     setErr(null);
     try {
-      const [info, qs] = await Promise.all([
+      // Fire EVERY initial request in parallel — info, questions, the bulk
+      // resource map, AND the role-appropriate submissions list. Previously
+      // submissions were awaited only after info+questions returned, so the
+      // page sat blank for an extra round-trip on slow connections.
+      const submissionsP: Promise<Submission[]> = role === 'student'
+        ? api<Submission[]>(`/api/classwork/lessons/${lessonId}/my-submissions`).catch(() => [])
+        : role === 'teacher'
+          ? api<Submission[]>(`/api/classwork/lessons/${lessonId}/submissions`).catch(() => [])
+          : Promise.resolve([]);
+      const [info, qs, resMap, subs] = await Promise.all([
         api<LessonInfo>(`/api/classwork/lessons/${lessonId}`).catch(() => null),
         api<Question[]>(`/api/classwork/lessons/${lessonId}/questions`),
+        api<Record<string, LessonResource[]>>(`/api/classwork/lessons/${lessonId}/all-question-resources`).catch(() => ({})),
+        submissionsP,
       ]);
       setLesson(info);
       setQuestions(qs);
-      if (role === 'student') {
-        try {
-          const subs = await api<Submission[]>(`/api/classwork/lessons/${lessonId}/my-submissions`);
-          setSubmissions(subs);
-        } catch { /* student may have no submissions */ }
-      } else if (role === 'teacher') {
-        try {
-          const subs = await api<Submission[]>(`/api/classwork/lessons/${lessonId}/submissions`);
-          setAllSubs(subs);
-        } catch { /* none yet */ }
-      }
+      setResourcesByQuestion(resMap || {});
+      if (role === 'student') setSubmissions(subs);
+      else if (role === 'teacher') setAllSubs(subs);
     } catch (e: any) {
       setErr(e.message || 'Failed to load');
     } finally {
@@ -307,6 +314,7 @@ export default function Lesson() {
               <QuestionResources
                 questionId={q.id}
                 isTeacher={role === 'teacher' && !previewAsStudent}
+                initialResources={resourcesByQuestion[q.id] || []}
               />
 
               {role === 'teacher' && !previewAsStudent && !isNoAnswer && (
@@ -391,6 +399,7 @@ export default function Lesson() {
             <QuestionResources
               questionId={p.id}
               isTeacher={role === 'teacher' && !previewAsStudent}
+              initialResources={resourcesByQuestion[p.id] || []}
             />
           </div>
         );
@@ -2462,8 +2471,13 @@ function PendingResourcesEditor({
   );
 }
 
-function QuestionResources({ questionId, isTeacher }: { questionId: string; isTeacher: boolean }) {
-  const [resources, setResources] = useState<LessonResource[] | null>(null);
+function QuestionResources({ questionId, isTeacher, initialResources }: { questionId: string; isTeacher: boolean; initialResources?: LessonResource[] }) {
+  // If the parent has already pre-fetched the bulk resource map for the whole
+  // lesson, seed our state from that and skip the on-mount HTTP call. Without
+  // this every question card would fire its own /resources request — N+1.
+  const [resources, setResources] = useState<LessonResource[] | null>(
+    initialResources !== undefined ? initialResources : null
+  );
   const [showForm, setShowForm] = useState(false);
   const [kind, setKind] = useState<LessonResource['kind']>('image');
   const [title, setTitle] = useState('');
@@ -2479,7 +2493,12 @@ function QuestionResources({ questionId, isTeacher }: { questionId: string; isTe
       setResources([]);
     }
   }
-  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [questionId]);
+  useEffect(() => {
+    // Only fetch when the parent didn't seed us. Teacher add/remove handlers
+    // below still call load() directly to refresh after a write.
+    if (initialResources === undefined) load();
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [questionId]);
 
   async function uploadFile(file: File) {
     setBusy(true); setErr(null);

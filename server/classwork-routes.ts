@@ -48,6 +48,7 @@ import {
   setStudentUsername,
   listLessonResources,
   listQuestionResources,
+  listAllQuestionResourcesForLesson,
   addLessonResource,
   updateLessonResource,
   deleteLessonResource,
@@ -879,6 +880,25 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] remark error:', err);
       res.status(500).json({ error: 'Failed to re-mark' });
+    }
+  });
+
+  // Bulk: every per-question resource for a lesson, grouped by question_id.
+  // Replaces the N+1 pattern where the lesson page used to call
+  // /api/classwork/questions/:id/resources once per question card.
+  app.get('/api/classwork/lessons/:lessonId/all-question-resources', async (req, res) => {
+    try {
+      const lesson = await getLesson(req.params.lessonId);
+      if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
+      const isTeacher = await checkTeacher(req, requireTeacher);
+      if (!lesson.is_published && !isTeacher) {
+        return res.status(403).json({ error: 'Lesson is not published' });
+      }
+      const grouped = await listAllQuestionResourcesForLesson(req.params.lessonId);
+      res.json(grouped);
+    } catch (err) {
+      console.error('[classwork] all-question-resources error:', err);
+      res.status(500).json({ error: 'Failed to load resources' });
     }
   });
 
