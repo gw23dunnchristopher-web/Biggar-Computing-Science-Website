@@ -2396,7 +2396,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             )}
           </div>
         )}
-        {type !== 'passage' && type !== 'info_only' && type !== 'text_only' && (
+        {type !== 'passage' && type !== 'info_only' && type !== 'text_only' && type !== 'section_header' && (
           <>
             <label style={fieldLabel}>Marking scheme (teacher view only)
               <textarea rows={2} value={markingScheme} onChange={(e) => setMarkingScheme(e.target.value)} style={input} />
@@ -2405,6 +2405,22 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
               <textarea rows={2} value={aiGuidance} onChange={(e) => setAiGuidance(e.target.value)} style={input} />
             </label>
           </>
+        )}
+        {type === 'text_only' && (
+          // Friendly explanation so the teacher understands why the marking
+          // scheme and AI guidance fields are deliberately absent for an
+          // offline / jotter task: there's nothing to auto-mark, so neither
+          // field is collected, stored, or required.
+          <div style={{
+            marginTop: 12, padding: '10px 12px', borderRadius: 8,
+            background: '#ecfeff', border: '1px solid #67e8f9',
+            color: '#0e7490', fontSize: 13, lineHeight: 1.45,
+          }}>
+            <strong>No marking needed.</strong> Offline tasks don’t need a
+            marking scheme or AI guidance — pupils do the work in their jotter
+            and there’s nothing for the AI marker to score, so those fields
+            are skipped.
+          </div>
         )}
         {err && <div style={{ color: 'var(--cw-danger)', fontSize: 14, marginTop: 6 }}>{err}</div>}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
