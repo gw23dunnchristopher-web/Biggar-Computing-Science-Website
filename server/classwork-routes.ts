@@ -40,6 +40,7 @@ import {
   getCourseAnalytics,
   getLessonAnalytics,
   getStudentCourseAnalytics,
+  getStudentActivityDays,
   listClassesWithCourse,
   setClassFields,
   getClassSource,
@@ -957,6 +958,23 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] student analytics error:', err);
       res.status(500).json({ error: 'Failed to load analytics' });
+    }
+  });
+
+  // Distinct days in the last 12 months on which the student did anything
+  // for this course (submitted, opened a question card, or saved a draft).
+  // Drives the small activity calendar on the per-student detail panel —
+  // teachers can spot streaks, gaps, and "logged in but did nothing" weeks
+  // at a glance. Read-only; no new schema, derived from existing timestamps.
+  app.get('/api/classwork/:course/students/:studentId/activity-days', requireTeacher, async (req, res) => {
+    const course = req.params.course;
+    if (!isClassworkCourse(course)) return res.status(400).json({ error: 'Invalid course' });
+    try {
+      const days = await getStudentActivityDays(course, req.params.studentId);
+      res.json({ days });
+    } catch (err) {
+      console.error('[classwork] activity days error:', err);
+      res.status(500).json({ error: 'Failed to load activity' });
     }
   });
 

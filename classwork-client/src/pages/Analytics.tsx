@@ -485,7 +485,6 @@ function StudentDetail({ course, studentId }: { course: string; studentId: strin
 
   if (err) return <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{err}</p>;
   if (!data) return <p style={{ color: 'var(--cw-muted)', margin: 0 }}>Loading student detail…</p>;
-  if (!data.submissions.length) return <p style={{ color: 'var(--cw-muted)', margin: 0 }}>No submissions yet.</p>;
 
   // Group by lesson so the timeline reads naturally.
   const byLesson = data.submissions.reduce((acc, s) => {
@@ -495,6 +494,13 @@ function StudentDetail({ course, studentId }: { course: string; studentId: strin
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* Activity calendar always shows, even before the pupil has submitted
+          anything — opening a lesson page already counts as activity, so it
+          gives teachers an "are they engaging at all?" signal. */}
+      <StudentActivityCalendar course={course} studentId={studentId} />
+      {!data.submissions.length && (
+        <p style={{ color: 'var(--cw-muted)', margin: 0 }}>No submissions yet.</p>
+      )}
       {Object.entries(byLesson).map(([lessonId, grp]) => (
         <div key={lessonId}>
           <h4 style={{ margin: '4px 0 6px', fontSize: 14 }}>
@@ -534,6 +540,146 @@ function StudentDetail({ course, studentId }: { course: string; studentId: strin
       ))}
     </div>
   );
+}
+
+/* ---------- Activity calendar ----------
+   Small at-a-glance view of which days the student actually used the app.
+   Activity here means: submitted an answer, opened a question card on a
+   lesson page, or saved a draft — all derived from existing timestamp
+   columns on the server, so this view adds zero new write paths. Teachers
+   can flick prev/next through the last twelve months to spot streaks,
+   gaps, and "logged in but did nothing" weeks. */
+function StudentActivityCalendar({ course, studentId }: { course: string; studentId: string }) {
+  const [days, setDays] = useState<Set<string> | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  // What month is currently shown. Defaults to the current month so the most
+  // recent activity is on screen; prev/next clamp to the 12-month window.
+  const today = new Date();
+  const [view, setView] = useState<{ year: number; month: number }>({
+    year: today.getFullYear(), month: today.getMonth(), // month is 0-indexed
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    setDays(null); setErr(null);
+    api<{ days: string[] }>(`/api/classwork/${course}/students/${studentId}/activity-days`)
+      .then((d) => { if (!cancelled) setDays(new Set(d.days || [])); })
+      .catch((e) => { if (!cancelled) setErr(e.message || 'Failed to load activity'); });
+    return () => { cancelled = true; };
+  }, [course, studentId]);
+
+  // 12-month navigation cap, calculated from "today" so we don't need to
+  // refetch when the teacher pages around. Anything older than that window
+  // wasn't fetched anyway.
+  const earliest = new Date(today.getFullYear(), today.getMonth() - 11, 1);
+  const latest   = new Date(today.getFullYear(), today.getMonth(), 1);
+  const viewStart = new Date(view.year, view.month, 1);
+  const canGoBack = viewStart > earliest;
+  const canGoFwd  = viewStart < latest;
+
+  function shift(delta: number) {
+    setView((v) => {
+      const next = new Date(v.year, v.month + delta, 1);
+      return { year: next.getFullYear(), month: next.getMonth() };
+    });
+  }
+
+  // Build the 6-row grid of cells for the visible month, padded with blanks
+  // for the days of the leading/trailing weeks. Week starts on Monday to
+  // match UK schools.
+  const firstOfMonth = new Date(view.year, view.month, 1);
+  const lastOfMonth  = new Date(view.year, view.month + 1, 0);
+  const daysInMonth  = lastOfMonth.getDate();
+  // JS getDay(): 0=Sun..6=Sat. Convert to Mon=0..Sun=6 for the grid.
+  const leadBlanks = (firstOfMonth.getDay() + 6) % 7;
+  const cells: ({ d: number; iso: string } | null)[] = [];
+  for (let i = 0; i < leadBlanks; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) {
+    const iso = `${view.year}-${String(view.month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    cells.push({ d, iso });
+  }
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const monthLabel = firstOfMonth.toLocaleString(undefined, { month: 'long', year: 'numeric' });
+  const activeInMonth = days
+    ? cells.filter((c) => c && days.has(c.iso)).length
+    : 0;
+  const totalActive = days ? days.size : 0;
+
+  return (
+    <div style={{
+      border: '1px solid var(--cw-border)', borderRadius: 10, padding: 12,
+      background: '#fafbff', display: 'flex', flexDirection: 'column', gap: 8,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ fontSize: 13, fontWeight: 600 }}>Login &amp; activity</div>
+        <div style={{ flex: 1 }} />
+        <button type="button" onClick={() => shift(-1)} disabled={!canGoBack} style={navBtn(!canGoBack)} aria-label="Previous month">‹</button>
+        <div style={{ fontSize: 13, fontWeight: 600, minWidth: 130, textAlign: 'center' }}>{monthLabel}</div>
+        <button type="button" onClick={() => shift(1)} disabled={!canGoFwd} style={navBtn(!canGoFwd)} aria-label="Next month">›</button>
+      </div>
+      {err && <div style={{ fontSize: 12, color: 'var(--cw-danger)' }}>{err}</div>}
+      {!err && days === null && <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>Loading activity…</div>}
+      {!err && days !== null && (
+        <>
+          <div style={{
+            display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4,
+            fontSize: 11, color: 'var(--cw-muted)', textAlign: 'center',
+          }}>
+            {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d) => (
+              <div key={d} style={{ padding: '2px 0', fontWeight: 600 }}>{d}</div>
+            ))}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+            {cells.map((c, i) => {
+              if (!c) return <div key={`b${i}`} style={{ aspectRatio: '1 / 1' }} />;
+              const isActive = days.has(c.iso);
+              const isToday = c.iso === todayIso;
+              const isFuture = c.iso > todayIso;
+              return (
+                <div
+                  key={c.iso}
+                  title={isActive ? `Active on ${c.iso}` : isFuture ? '' : `No activity on ${c.iso}`}
+                  style={{
+                    aspectRatio: '1 / 1',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, fontWeight: isActive ? 700 : 500,
+                    borderRadius: 6,
+                    background: isActive
+                      ? 'var(--cw-accent, #2563eb)'
+                      : isFuture ? 'transparent' : '#fff',
+                    color: isActive ? '#fff' : isFuture ? 'var(--cw-muted)' : 'var(--cw-text, #111827)',
+                    border: isToday
+                      ? '2px solid var(--cw-accent, #2563eb)'
+                      : '1px solid var(--cw-border)',
+                    opacity: isFuture ? 0.4 : 1,
+                  }}
+                >
+                  {c.d}
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+            {activeInMonth} active {activeInMonth === 1 ? 'day' : 'days'} this month
+            {' · '}
+            {totalActive} in the last 12 months
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function navBtn(disabled: boolean): React.CSSProperties {
+  return {
+    width: 28, height: 28, borderRadius: 6,
+    border: '1px solid var(--cw-border)', background: '#fff',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.4 : 1,
+    fontSize: 16, lineHeight: 1, padding: 0,
+  };
 }
 
 /* ---------- helpers + styles ---------- */

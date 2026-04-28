@@ -1203,6 +1203,50 @@ export async function getStudentCourseAnalytics(course: ClassworkCourse, student
   return { course, studentId, username, submissions: r.rows };
 }
 
+/**
+ * Returns the distinct days (YYYY-MM-DD strings, server timezone) on which
+ * a given student did *anything* in the given course over roughly the last
+ * year. We treat any of the following as "the student was active that day":
+ *   - submitted an answer (`bhs_classwork_submissions.submitted_at`)
+ *   - opened a question card on a lesson page
+ *     (`bhs_classwork_question_views.first_viewed_at` / `last_viewed_at`)
+ *   - typed into a draft (`bhs_classwork_drafts.updated_at`)
+ *
+ * No new schema is introduced — every timestamp source already exists. The
+ * 12-month cap keeps the payload tiny (at most ~365 small strings) so the
+ * calendar UI can navigate prev/next months without re-fetching.
+ */
+export async function getStudentActivityDays(course: ClassworkCourse, studentId: string): Promise<string[]> {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `SELECT DISTINCT to_char(ts, 'YYYY-MM-DD') AS day
+       FROM (
+         SELECT submitted_at AS ts FROM bhs_classwork_submissions
+          WHERE course = $1 AND student_id = $2
+            AND submitted_at IS NOT NULL
+            AND submitted_at >= NOW() - INTERVAL '12 months'
+         UNION ALL
+         SELECT first_viewed_at AS ts FROM bhs_classwork_question_views
+          WHERE course = $1 AND student_id = $2
+            AND first_viewed_at IS NOT NULL
+            AND first_viewed_at >= NOW() - INTERVAL '12 months'
+         UNION ALL
+         SELECT last_viewed_at AS ts FROM bhs_classwork_question_views
+          WHERE course = $1 AND student_id = $2
+            AND last_viewed_at IS NOT NULL
+            AND last_viewed_at >= NOW() - INTERVAL '12 months'
+         UNION ALL
+         SELECT updated_at AS ts FROM bhs_classwork_drafts
+          WHERE course = $1 AND student_id = $2
+            AND updated_at IS NOT NULL
+            AND updated_at >= NOW() - INTERVAL '12 months'
+       ) x
+      ORDER BY day DESC`,
+    [course, studentId]
+  );
+  return r.rows.map((row: { day: string }) => row.day);
+}
+
 export async function setSubmissionMark(id: string, marksAwarded: number, aiFeedback: string | null, markedBy: 'ai' | 'teacher') {
   await ensureClassworkSchema();
   const r = await pool.query(
