@@ -1,4 +1,4 @@
-import { Fragment, ReactNode } from 'react';
+import { Fragment, ReactNode, useEffect, useState } from 'react';
 
 // Renders a question prompt as plain text but auto-converts URLs into
 // clickable links that open in a new window. Two link styles are supported:
@@ -56,23 +56,43 @@ export function parsePromptImageAlt(rawAlt: string): { alt: string; align: Promp
   };
 }
 
-function PromptImage({ src, alt, align }: { src: string; alt: string; align: PromptImageAlign }) {
+function PromptImage({
+  src, alt, align, onOpen,
+}: {
+  src: string; alt: string; align: PromptImageAlign;
+  onOpen: (src: string, alt: string) => void;
+}) {
   // Inline image embedded in a prompt. Constrained to a reasonable size so a
   // huge screenshot can't blow out the layout, and clickable so pupils can
-  // open it full-size in a new tab.
+  // open it full-size in an in-page lightbox.
   //
   // Centered images take a full block of their own. Left/right alignment
   // floats the image so the prompt text flows around it; the max width is
   // capped at 50% so there's always enough space for at least one column of
   // text alongside.
-  const linkStyle: React.CSSProperties =
+  //
+  // We use a transparent <button> so the click target is keyboard-focusable
+  // (Enter/Space activate it) and screen-reader-friendly. The visible style
+  // is provided by the inner <img>; the wrapper just owns the float/centre
+  // layout.
+  const wrapStyle: React.CSSProperties =
     align === 'center'
       ? { display: 'block', margin: '8px auto', textAlign: 'center', clear: 'both' }
       : align === 'left'
         ? { float: 'left', margin: '4px 12px 8px 0', maxWidth: '50%' }
         : { float: 'right', margin: '4px 0 8px 12px', maxWidth: '50%' };
   return (
-    <a href={src} target="_blank" rel="noopener noreferrer" style={linkStyle}>
+    <button
+      type="button"
+      onClick={() => onOpen(src, alt)}
+      title="Click to view full size"
+      aria-label={alt ? `Open ${alt} full size` : 'Open image full size'}
+      style={{
+        ...wrapStyle,
+        padding: 0, border: 'none', background: 'transparent',
+        cursor: 'zoom-in',
+      }}
+    >
       <img
         src={src}
         alt={alt || 'Image'}
@@ -80,10 +100,88 @@ function PromptImage({ src, alt, align }: { src: string; alt: string; align: Pro
           display: 'block',
           maxWidth: '100%', maxHeight: 360, height: 'auto',
           borderRadius: 8, border: '1px solid var(--cw-border)',
-          background: '#fff', cursor: 'zoom-in',
+          background: '#fff',
         }}
       />
-    </a>
+    </button>
+  );
+}
+
+// Fullscreen lightbox shown when a pupil clicks an image in a prompt.
+// Closes on backdrop click, the close button, or pressing Escape. The
+// image itself swallows clicks so the pupil can interact with it without
+// dismissing the dialog. Rendered with role="dialog" so assistive
+// technology announces it correctly.
+function ImageLightbox({
+  src, alt, onClose,
+}: { src: string; alt: string; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    // Lock body scroll while the lightbox is open so scrolling the
+    // backdrop doesn't move the page underneath.
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose]);
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={alt ? `${alt} (full size)` : 'Image (full size)'}
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'rgba(0,0,0,0.85)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        padding: 24,
+      }}
+    >
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onClose(); }}
+        aria-label="Close full-size image"
+        style={{
+          position: 'absolute', top: 16, right: 16,
+          width: 40, height: 40, borderRadius: '50%',
+          border: 'none', background: 'rgba(255,255,255,0.15)',
+          color: '#fff', fontSize: 22, lineHeight: 1, cursor: 'pointer',
+        }}
+      >
+        ✕
+      </button>
+      <img
+        src={src}
+        alt={alt || 'Image'}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: '95vw', maxHeight: '85vh',
+          width: 'auto', height: 'auto',
+          objectFit: 'contain',
+          borderRadius: 8, background: '#fff',
+          boxShadow: '0 12px 48px rgba(0,0,0,0.6)',
+        }}
+      />
+      {alt && (
+        <div style={{
+          marginTop: 12, color: '#fff', fontSize: 14,
+          textAlign: 'center', maxWidth: '80vw',
+        }}>
+          {alt}
+        </div>
+      )}
+      <div style={{
+        marginTop: 8, color: 'rgba(255,255,255,0.6)', fontSize: 12,
+      }}>
+        Click anywhere or press Esc to close.
+      </div>
+    </div>
   );
 }
 
@@ -98,6 +196,10 @@ function isSafeImageUrl(u: string): boolean {
 // Walk the text, picking out [label](url) and bare URLs in source order.
 // Avoids double-matching by tracking the next index of each kind.
 export default function PromptText({ text }: { text: string }) {
+  // One lightbox state per PromptText instance: when a pupil clicks an
+  // inline image we stash its source + alt text here, which mounts the
+  // <ImageLightbox> overlay below. Setting it back to null closes it.
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
   if (!text) return null;
   const out: ReactNode[] = [];
   let i = 0;
@@ -140,7 +242,15 @@ export default function PromptText({ text }: { text: string }) {
       const [whole, rawAlt, src] = imgMatch;
       if (isSafeImageUrl(src)) {
         const { alt, align } = parsePromptImageAlt(rawAlt);
-        out.push(<PromptImage key={key++} src={src} alt={alt} align={align} />);
+        out.push(
+          <PromptImage
+            key={key++}
+            src={src}
+            alt={alt}
+            align={align}
+            onOpen={(s, a) => setLightbox({ src: s, alt: a })}
+          />,
+        );
       } else {
         out.push(<Fragment key={key++}>{whole}</Fragment>);
       }
@@ -167,11 +277,20 @@ export default function PromptText({ text }: { text: string }) {
   // Wrap in a block-level span so floated images are contained within the
   // prompt's bounding box: the trailing zero-height div with `clear: both`
   // is a classic float clearfix that stops a tall floated image from
-  // spilling text into the next prompt or UI element below.
+  // spilling text into the next prompt or UI element below. The lightbox
+  // is rendered as a sibling at the end so it sits above everything else
+  // when active.
   return (
     <span style={{ display: 'block' }}>
       {out}
       <span style={{ display: 'block', clear: 'both' }} />
+      {lightbox && (
+        <ImageLightbox
+          src={lightbox.src}
+          alt={lightbox.alt}
+          onClose={() => setLightbox(null)}
+        />
+      )}
     </span>
   );
 }
