@@ -159,6 +159,15 @@ export default function RichTextEditor({
     img.classList.add('cw-img-' + align);
     handleInput();
   }
+
+  // Unified alignment: when an image is selected the L/C/R buttons re-align
+  // the image; otherwise they align the current paragraph. This lets one set
+  // of buttons cover both cases so we don't need a second toolbar row just
+  // for image alignment.
+  function smartAlign(dir: 'left' | 'center' | 'right') {
+    if (hasSelectedImg) alignImage(dir);
+    else exec('justify' + dir.charAt(0).toUpperCase() + dir.slice(1));
+  }
   /* ---- Table helpers ---- */
 
   function currentCell(): HTMLTableCellElement | null {
@@ -261,6 +270,13 @@ export default function RichTextEditor({
     handleInput();
   }
 
+  // Tooltips for the L/C/R buttons change to reflect dual behaviour: when an
+  // image is selected they re-align the image; otherwise they align the
+  // current paragraph. Saves a whole toolbar row.
+  const alignTitle = (dir: 'left' | 'centre' | 'right') => hasSelectedImg
+    ? `Align image ${dir}` + (dir === 'left' ? ' (text wraps right)' : dir === 'right' ? ' (text wraps left)' : '')
+    : `Align text ${dir}`;
+
   return (
     <div style={wrap}>
       <div style={toolbar} role="toolbar" aria-label="Formatting">
@@ -287,41 +303,34 @@ export default function RichTextEditor({
         <ToolBtn onClick={() => { ensureStyleWithCSS(); exec('indent'); }} title="Indent (Tab)">&#x21E5;</ToolBtn>
         <ToolBtn onClick={() => { ensureStyleWithCSS(); exec('outdent'); }} title="Outdent (Shift+Tab)">&#x21E4;</ToolBtn>
         <Sep />
-        <ToolBtn onClick={() => exec('justifyLeft')} title="Align left">&#x2630;&#x2190;</ToolBtn>
-        <ToolBtn onClick={() => exec('justifyCenter')} title="Centre">&#x2261;</ToolBtn>
-        <ToolBtn onClick={() => exec('justifyRight')} title="Align right">&#x2192;&#x2630;</ToolBtn>
-        <ToolBtn onClick={() => exec('justifyFull')} title="Justify">&#x2630;</ToolBtn>
+        {/* L/C/R align an image when one is selected, otherwise the current
+            paragraph. Justify is text-only (no image equivalent). */}
+        <ToolBtn onClick={() => smartAlign('left')} title={alignTitle('left')}>&#x2630;&#x2190;</ToolBtn>
+        <ToolBtn onClick={() => smartAlign('center')} title={alignTitle('centre')}>&#x2261;</ToolBtn>
+        <ToolBtn onClick={() => smartAlign('right')} title={alignTitle('right')}>&#x2192;&#x2630;</ToolBtn>
+        <ToolBtn onClick={() => exec('justifyFull')} title="Justify text" disabled={hasSelectedImg}>&#x2630;</ToolBtn>
+        <ToolBtn onClick={removeImage} title="Remove the selected image" disabled={!hasSelectedImg}>&times; Img</ToolBtn>
         <Sep />
         <ToolBtn onClick={() => exec('formatBlock', '<blockquote>')} title="Quote block">&ldquo; &rdquo;</ToolBtn>
         <ToolBtn onClick={addLink} title="Insert link">Link</ToolBtn>
         <ToolBtn onClick={() => exec('removeFormat')} title="Clear formatting">Clear</ToolBtn>
         <Sep />
+        {/* Table group — Insert is always enabled; the editing buttons light up
+            only when the caret is inside a table cell. */}
         <ToolBtn onClick={insertTable} title="Insert a new table">Table</ToolBtn>
-      </div>
-
-      {/* Table edit row — only lights up when the caret is inside a table cell. */}
-      <div style={imgBar} role="toolbar" aria-label="Table">
-        <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginRight: 4 }}>
-          {inTableCell ? 'In a table — edit it:' : 'Click inside a table to edit it:'}
-        </span>
-        <ToolBtn onClick={addRowBelow} title="Add a new row below this one" disabled={!inTableCell}>+ Row</ToolBtn>
-        <ToolBtn onClick={addColRight} title="Add a new column to the right" disabled={!inTableCell}>+ Column</ToolBtn>
-        <ToolBtn onClick={deleteRow} title="Delete this row" disabled={!inTableCell}>&minus; Row</ToolBtn>
-        <ToolBtn onClick={deleteCol} title="Delete this column" disabled={!inTableCell}>&minus; Column</ToolBtn>
-        <ToolBtn onClick={deleteTable} title="Delete the whole table" disabled={!inTableCell}>Delete table</ToolBtn>
-      </div>
-
-      {/* Image alignment row — only enabled when a pasted image is selected. */}
-      <div style={imgBar} role="toolbar" aria-label="Image">
-        <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginRight: 4 }}>
-          {hasSelectedImg ? 'Image selected — align it:' : 'Paste an image, then click it to align:'}
-        </span>
-        <ToolBtn onClick={() => alignImage('left')} title="Align image left (text wraps right)" disabled={!hasSelectedImg}>Left</ToolBtn>
-        <ToolBtn onClick={() => alignImage('center')} title="Centre image" disabled={!hasSelectedImg}>Centre</ToolBtn>
-        <ToolBtn onClick={() => alignImage('right')} title="Align image right (text wraps left)" disabled={!hasSelectedImg}>Right</ToolBtn>
-        <ToolBtn onClick={removeImage} title="Remove this image" disabled={!hasSelectedImg}>Remove</ToolBtn>
-        {uploading && <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginLeft: 'auto' }}>Uploading image…</span>}
-        {uploadErr && <span style={{ fontSize: 12, color: 'var(--cw-danger)', marginLeft: 'auto' }}>{uploadErr}</span>}
+        <ToolBtn onClick={addRowBelow} title={inTableCell ? 'Add a new row below this one' : 'Click inside a table to add a row'} disabled={!inTableCell}>+ Row</ToolBtn>
+        <ToolBtn onClick={addColRight} title={inTableCell ? 'Add a new column to the right' : 'Click inside a table to add a column'} disabled={!inTableCell}>+ Col</ToolBtn>
+        <ToolBtn onClick={deleteRow} title={inTableCell ? 'Delete this row' : 'Click inside a table to delete a row'} disabled={!inTableCell}>&minus; Row</ToolBtn>
+        <ToolBtn onClick={deleteCol} title={inTableCell ? 'Delete this column' : 'Click inside a table to delete a column'} disabled={!inTableCell}>&minus; Col</ToolBtn>
+        <ToolBtn onClick={deleteTable} title={inTableCell ? 'Delete the whole table' : 'Click inside a table to remove it'} disabled={!inTableCell}>&times; Table</ToolBtn>
+        {(uploading || uploadErr) && (
+          <span style={{
+            marginLeft: 'auto', fontSize: 12,
+            color: uploadErr ? 'var(--cw-danger)' : 'var(--cw-muted)',
+          }}>
+            {uploading ? 'Uploading image\u2026' : uploadErr}
+          </span>
+        )}
       </div>
 
       <div
@@ -505,10 +514,6 @@ const wrap: React.CSSProperties = {
 const toolbar: React.CSSProperties = {
   display: 'flex', flexWrap: 'wrap', gap: 4, padding: 6, alignItems: 'center',
   borderBottom: '1px solid var(--cw-border)', background: '#f8fafc',
-};
-const imgBar: React.CSSProperties = {
-  display: 'flex', flexWrap: 'wrap', gap: 4, padding: '4px 6px', alignItems: 'center',
-  borderBottom: '1px solid var(--cw-border)', background: '#fff',
 };
 const btn: React.CSSProperties = {
   background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 6,
