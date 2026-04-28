@@ -44,6 +44,14 @@ export default function Course() {
   const [err, setErr] = useState<string | null>(null);
 
   const [modal, setModal] = useState<ModalState>({ kind: 'none' });
+  // Drag-and-drop reorder state for lessons (teacher only). We track which
+  // lesson is being dragged + which one we're hovering over so we can show
+  // a clear "this is where it'll land" indicator and persist the new order
+  // when the drop happens. `dragOverPos` tells us whether the indicator
+  // sits above (`'before'`) or below (`'after'`) the hovered lesson row.
+  const [dragLessonId, setDragLessonId] = useState<string | null>(null);
+  const [dragOverLessonId, setDragOverLessonId] = useState<string | null>(null);
+  const [dragOverPos, setDragOverPos] = useState<'before' | 'after'>('before');
   const [titleInput, setTitleInput] = useState('');
   const [editLI, setEditLI] = useState('');
   const [editSC, setEditSC] = useState('');
@@ -254,6 +262,54 @@ export default function Course() {
     } catch (e: any) { setModalErr(e.message); }
   }
 
+  // Persist a new order for a unit's lessons. We update local state first so
+  // the list visibly snaps into place, then PATCH every lesson whose
+  // orderIndex actually changed (parallel for snappiness). If the server
+  // call fails we re-fetch from scratch so the screen matches reality.
+  async function persistLessonOrder(unitId: string, reordered: Lesson[]) {
+    const previous = lessonsByUnit[unitId] || [];
+    setLessonsByUnit((prev) => ({ ...prev, [unitId]: reordered }));
+    try {
+      const before = new Map(previous.map((l, i) => [l.id, i]));
+      await Promise.all(
+        reordered.map((l, i) =>
+          before.get(l.id) === i
+            ? Promise.resolve()
+            : api(`/api/classwork/lessons/${l.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ orderIndex: i }),
+              })
+        )
+      );
+    } catch (e: any) {
+      // Roll back the optimistic order and surface the failure.
+      setLessonsByUnit((prev) => ({ ...prev, [unitId]: previous }));
+      setModal({ kind: 'info', title: 'Could not save new order', message: e.message || 'Reorder failed' });
+    }
+  }
+
+  // Drop handler: move dragLessonId to the position of overLessonId (above
+  // or below, based on `dragOverPos`) within the same unit. Cross-unit
+  // drags are intentionally ignored — units are independent.
+  function handleLessonDrop(unitId: string, overLessonId: string) {
+    const dragId = dragLessonId;
+    setDragLessonId(null);
+    setDragOverLessonId(null);
+    if (!dragId || dragId === overLessonId) return;
+    const lessons = lessonsByUnit[unitId] || [];
+    const fromIdx = lessons.findIndex((l) => l.id === dragId);
+    const overIdx = lessons.findIndex((l) => l.id === overLessonId);
+    if (fromIdx < 0 || overIdx < 0) return;
+    const next = lessons.slice();
+    const [moved] = next.splice(fromIdx, 1);
+    let target = lessons.findIndex((l) => l.id === overLessonId);
+    if (fromIdx < target) target -= 1;
+    const insertAt = dragOverPos === 'after' ? target + 1 : target;
+    next.splice(insertAt, 0, moved);
+    if (next.every((l, i) => l.id === lessons[i].id)) return;
+    persistLessonOrder(unitId, next);
+  }
+
   async function togglePublish(lesson: Lesson) {
     try {
       await api(`/api/classwork/lessons/${lesson.id}`, {
@@ -370,37 +426,112 @@ export default function Course() {
                 </p>
               ) : (
                 <ul style={{ marginTop: 12, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {lessons.map((l) => (
-                    <li key={l.id} style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: 12, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fafbfd'
-                    }}>
-                      <Link href={`/lesson/${l.id}`} style={{ fontWeight: 600 }}>{l.title}</Link>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        {role === 'teacher' && (
-                          <>
-                            <span title={l.is_published ? 'Students can see this lesson' : 'Hidden from students — safe to edit'} style={{
-                              fontSize: 12, padding: '2px 8px', borderRadius: 999,
-                              background: l.is_published ? '#dcfce7' : '#fee2e2',
-                              color: l.is_published ? '#166534' : '#991b1b'
-                            }}>{l.is_published ? 'Published' : 'Locked (draft)'}</span>
-                            <button
-                              onClick={() => togglePublish(l)}
-                              style={secondaryBtn}
-                              title={l.is_published ? 'Lock this lesson so students can\'t see it while you edit' : 'Publish this lesson so students can see it'}
-                            >
-                              {l.is_published ? 'Lock' : 'Publish'}
-                            </button>
-                            <button onClick={() => openEditLesson(l)} style={secondaryBtn}
-                              title="Edit lesson title, learning intentions and success criteria">
-                              Edit
-                            </button>
-                            <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteLesson', lesson: l }); }} style={dangerBtn}>Delete</button>
-                          </>
-                        )}
-                      </div>
-                    </li>
-                  ))}
+                  {lessons.map((l, idx) => {
+                    const isDragging   = dragLessonId === l.id;
+                    const isDragOver   = dragOverLessonId === l.id && dragLessonId && dragLessonId !== l.id;
+                    const showTopLine  = isDragOver && dragOverPos === 'before';
+                    const showBotLine  = isDragOver && dragOverPos === 'after';
+                    return (
+                      <li
+                        key={l.id}
+                        // Only the drag handle is draggable, but we attach the
+                        // drop targets to the whole row so it's an easy aim.
+                        onDragOver={(e) => {
+                          if (role !== 'teacher' || !dragLessonId) return;
+                          e.preventDefault();
+                          e.dataTransfer.dropEffect = 'move';
+                          const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                          const half = r.top + r.height / 2;
+                          setDragOverLessonId(l.id);
+                          setDragOverPos(e.clientY < half ? 'before' : 'after');
+                        }}
+                        onDragLeave={(e) => {
+                          // Only clear if we're actually leaving the row, not
+                          // just moving across one of its children.
+                          const next = e.relatedTarget as Node | null;
+                          if (!next || !(e.currentTarget as HTMLElement).contains(next)) {
+                            setDragOverLessonId((cur) => (cur === l.id ? null : cur));
+                          }
+                        }}
+                        onDrop={(e) => {
+                          if (role !== 'teacher') return;
+                          e.preventDefault();
+                          handleLessonDrop(u.id, l.id);
+                        }}
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                          padding: 12, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fafbfd',
+                          opacity: isDragging ? 0.4 : 1,
+                          // Show a coloured indicator line on the side of the
+                          // row where the dragged lesson will land.
+                          boxShadow: showTopLine
+                            ? 'inset 0 3px 0 0 var(--cw-accent)'
+                            : showBotLine
+                              ? 'inset 0 -3px 0 0 var(--cw-accent)'
+                              : 'none',
+                          transition: 'box-shadow 80ms linear',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
+                          {role === 'teacher' && (
+                            <span
+                              draggable
+                              onDragStart={(e) => {
+                                setDragLessonId(l.id);
+                                e.dataTransfer.effectAllowed = 'move';
+                                // Some browsers require non-empty data to
+                                // start a drag at all.
+                                try { e.dataTransfer.setData('text/plain', l.id); } catch { /* ignore */ }
+                              }}
+                              onDragEnd={() => { setDragLessonId(null); setDragOverLessonId(null); }}
+                              title="Drag to reorder lessons in this unit"
+                              style={{
+                                cursor: 'grab', userSelect: 'none', color: 'var(--cw-muted)',
+                                fontSize: 16, lineHeight: 1, padding: '0 2px',
+                              }}
+                              aria-label="Drag handle"
+                            >⋮⋮</span>
+                          )}
+                          <span style={{
+                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                            minWidth: 26, height: 22, padding: '0 6px',
+                            borderRadius: 6, background: '#e2e8f0', color: '#475569',
+                            fontSize: 12, fontWeight: 700, flexShrink: 0,
+                          }}>{idx + 1}</span>
+                          <Link
+                            href={`/lesson/${l.id}`}
+                            style={{
+                              fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap', minWidth: 0,
+                            }}
+                          >{l.title}</Link>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {role === 'teacher' && (
+                            <>
+                              <span title={l.is_published ? 'Students can see this lesson' : 'Hidden from students — safe to edit'} style={{
+                                fontSize: 12, padding: '2px 8px', borderRadius: 999,
+                                background: l.is_published ? '#dcfce7' : '#fee2e2',
+                                color: l.is_published ? '#166534' : '#991b1b'
+                              }}>{l.is_published ? 'Published' : 'Locked (draft)'}</span>
+                              <button
+                                onClick={() => togglePublish(l)}
+                                style={secondaryBtn}
+                                title={l.is_published ? 'Lock this lesson so students can\'t see it while you edit' : 'Publish this lesson so students can see it'}
+                              >
+                                {l.is_published ? 'Lock' : 'Publish'}
+                              </button>
+                              <button onClick={() => openEditLesson(l)} style={secondaryBtn}
+                                title="Edit lesson title, learning intentions and success criteria">
+                                Edit
+                              </button>
+                              <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteLesson', lesson: l }); }} style={dangerBtn}>Delete</button>
+                            </>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
