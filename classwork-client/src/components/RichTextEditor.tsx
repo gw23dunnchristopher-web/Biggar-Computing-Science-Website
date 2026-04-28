@@ -8,6 +8,10 @@ interface Props {
   minHeight?: number;
   autoFocus?: boolean;
   ariaLabel?: string;
+  // When true the editor stretches to fill its flex parent's remaining
+  // height (toolbar pinned, editable area scrolls internally). Used inside
+  // modals so the writing surface gets as tall as the viewport allows.
+  fillHeight?: boolean;
 }
 
 // Lightweight rich text editor built on a contentEditable div with a small
@@ -17,7 +21,7 @@ interface Props {
 // lib. The output is sanitised both before it leaves the editor (onChange)
 // and when it's rendered elsewhere, so we never trust the raw HTML.
 export default function RichTextEditor({
-  value, onChange, placeholder, minHeight = 320, autoFocus, ariaLabel,
+  value, onChange, placeholder, minHeight = 320, autoFocus, ariaLabel, fillHeight,
 }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
   const lastValueRef = useRef<string>('');
@@ -379,7 +383,7 @@ export default function RichTextEditor({
     : `Align text ${dir}`;
 
   return (
-    <div style={wrap}>
+    <div style={fillHeight ? { ...wrap, ...wrapFill } : wrap}>
       <div style={toolbar} role="toolbar" aria-label="Formatting">
         <ToolBtn onClick={() => exec('undo')} title="Undo (Ctrl+Z)">&#x21B6;</ToolBtn>
         <ToolBtn onClick={() => exec('redo')} title="Redo (Ctrl+Y)">&#x21B7;</ToolBtn>
@@ -514,7 +518,9 @@ export default function RichTextEditor({
         }}
         aria-label={ariaLabel || 'Notes editor'}
         data-placeholder={placeholder || ''}
-        style={{ ...editor, minHeight }}
+        style={fillHeight
+          ? { ...editor, flex: 1, minHeight: 0, overflowY: 'auto' }
+          : { ...editor, minHeight }}
         className="cw-rte"
       />
       {/* Custom right-click menu — three friendly buttons covering the full
@@ -665,6 +671,12 @@ function ColorBtn({
 
 const wrap: React.CSSProperties = {
   border: '1px solid var(--cw-border)', borderRadius: 8, overflow: 'hidden', background: '#fff',
+};
+// Extra styling layered on top of `wrap` when `fillHeight` is true: turns the
+// outer box into a flex column that fills its parent so the editable area
+// (set to flex:1) expands and the toolbar stays pinned at the top.
+const wrapFill: React.CSSProperties = {
+  flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0,
 };
 const toolbar: React.CSSProperties = {
   display: 'flex', flexWrap: 'wrap', gap: 4, padding: 6, alignItems: 'center',
