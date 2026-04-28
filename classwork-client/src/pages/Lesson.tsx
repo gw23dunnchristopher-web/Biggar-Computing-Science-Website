@@ -10,6 +10,11 @@ interface LessonInfo {
   learning_intentions: string | null;
   success_criteria: string | null;
   is_published: boolean;
+  // Returned by GET /api/classwork/lessons/:id (selected by getLesson()) but
+  // previously not declared on the client. Used here to power the "My jotter"
+  // link in the lesson header so teachers can demo it to a class.
+  course?: string;
+  unit_id?: string;
 }
 
 interface LessonResource {
@@ -75,6 +80,7 @@ const TYPE_LABELS: Record<string, string> = {
   table: 'Complete the table',
   labeled_inputs: 'Labelled inputs (multi-field answer)',
   section_header: 'Section divider (groups the questions below)',
+  text_only: 'Offline task (work in your jotter)',
 };
 
 export default function Lesson() {
@@ -135,8 +141,28 @@ export default function Lesson() {
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: lesson ? 16 : 0 }}>
         <h1 style={{ margin: 0 }}>Questions</h1>
-        {role === 'teacher' && (
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* "Open my jotter" — visible to BOTH pupils and teachers. Teachers
+              get their own demo jotter (server keys it as "teacher:demo") so
+              they can model note-taking in front of a class without writing
+              into any pupil's notes. */}
+          {(role === 'student' || role === 'teacher') && (
+            <Link
+              href={role === 'teacher' && lesson?.course ? `/jotter?course=${lesson.course}` : '/jotter'}
+              style={{
+                display: 'inline-block',
+                background: '#ecfeff', color: '#0e7490', border: '1px solid #67e8f9',
+                padding: '8px 14px', borderRadius: 8, fontWeight: 600, textDecoration: 'none',
+              }}
+              title={role === 'teacher'
+                ? 'Open your demo jotter — what pupils see when they click "My jotter"'
+                : 'Open your year-long notes jotter'}
+            >
+              {role === 'teacher' ? 'Open demo jotter' : 'Open my jotter'}
+            </Link>
+          )}
+          {role === 'teacher' && (
+          <>
             <button
               type="button"
               onClick={() => setPreviewAsStudent((v) => !v)}
@@ -155,8 +181,9 @@ export default function Lesson() {
               passages={questions.filter((q) => q.question_type === 'passage')}
               onCreated={refresh}
             />}
-          </div>
-        )}
+          </>
+          )}
+        </div>
       </div>
 
       {role === 'teacher' && previewAsStudent && (
@@ -212,11 +239,18 @@ export default function Lesson() {
         const renderQuestionCard = (q: Question, label: string, isExt: boolean) => {
           const mySubs = submissions.filter((s) => s.question_id === q.id);
           const isInfo = q.question_type === 'info_only';
+          const isTextOnly = q.question_type === 'text_only';
+          // Both info_only and text_only are "no answer" cards. Treat them
+          // uniformly for the gates that hide the answer area, but use a
+          // distinct cyan tint for text_only so pupils can spot offline tasks
+          // at a glance.
+          const isNoAnswer = isInfo || isTextOnly;
           return (
             <div key={q.id} style={{
               ...card,
               ...(isExt ? { borderColor: '#c084fc', background: '#faf5ff' } : {}),
               ...(isInfo ? { borderColor: '#93c5fd', background: '#eff6ff' } : {}),
+              ...(isTextOnly ? { borderColor: '#67e8f9', background: '#ecfeff' } : {}),
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
@@ -275,7 +309,7 @@ export default function Lesson() {
                 isTeacher={role === 'teacher' && !previewAsStudent}
               />
 
-              {role === 'teacher' && !previewAsStudent && !isInfo && (
+              {role === 'teacher' && !previewAsStudent && !isNoAnswer && (
                 <details style={{ marginTop: 8, fontSize: 14, color: 'var(--cw-muted)' }}>
                   <summary style={{ cursor: 'pointer' }}>Marking scheme &amp; AI guidance</summary>
                   <div style={{ marginTop: 8 }}>
@@ -285,7 +319,35 @@ export default function Lesson() {
                 </details>
               )}
 
-              {showStudentView && !isInfo && (
+              {/* Offline-task callout: visible to pupils AND to teachers
+                  (so a teacher previewing or browsing the lesson sees the
+                  exact same prompt-and-jotter-link experience pupils get). */}
+              {isTextOnly && (
+                <div style={{
+                  marginTop: 12, padding: '12px 14px', borderRadius: 8,
+                  background: '#fff', border: '1px dashed #67e8f9',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  gap: 12, flexWrap: 'wrap',
+                }}>
+                  <span style={{ color: '#0e7490', fontSize: 14 }}>
+                    No answer to type here &mdash; do this task in your jotter
+                    (writing, sketches, screenshots&hellip;).
+                  </span>
+                  <Link
+                    href="/jotter"
+                    style={{
+                      display: 'inline-block',
+                      background: '#0891b2', color: '#fff', border: '1px solid #0891b2',
+                      padding: '6px 14px', borderRadius: 6, fontWeight: 600, textDecoration: 'none',
+                      fontSize: 14,
+                    }}
+                  >
+                    {role === 'teacher' ? 'Open demo jotter' : 'Open my jotter'}
+                  </Link>
+                </div>
+              )}
+
+              {showStudentView && !isNoAnswer && (
                 <StudentAnswer
                   question={q}
                   previousSubmissions={mySubs}
@@ -293,14 +355,14 @@ export default function Lesson() {
                   preview={role === 'teacher' && previewAsStudent}
                 />
               )}
-              {role === 'teacher' && !previewAsStudent && !isInfo && (
+              {role === 'teacher' && !previewAsStudent && !isNoAnswer && (
                 <TeacherSubmissions
                   question={q}
                   submissions={allSubs.filter((s) => s.question_id === q.id)}
                   onChanged={refreshSubmissions}
                 />
               )}
-              {role === 'guest' && !isInfo && (
+              {role === 'guest' && !isNoAnswer && (
                 <p style={{ marginTop: 8, color: 'var(--cw-muted)', fontSize: 14 }}>
                   Sign in as a student to answer this question.
                 </p>
@@ -369,6 +431,12 @@ export default function Lesson() {
             if (it.type === 'standalone') {
               if (it.q.question_type === 'info_only') {
                 return renderQuestionCard(it.q, 'Note', isExt);
+              }
+              if (it.q.question_type === 'text_only') {
+                // Use a "Task" label (instead of "Q1, Q2…") so it's clearly
+                // an offline activity, not a markable question. Counter is
+                // not bumped — text_only is ignored in analytics.
+                return renderQuestionCard(it.q, 'Task', isExt);
               }
               if (it.q.question_type === 'section_header') {
                 return renderSectionHeader(it.q);
@@ -1401,7 +1469,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
     setBusy(true);
     setErr(null);
     try {
-      const noAnswerType = type === 'passage' || type === 'info_only' || type === 'section_header';
+      const noAnswerType = type === 'passage' || type === 'info_only' || type === 'section_header' || type === 'text_only';
       const body: any = {
         questionType: type, prompt,
         // Passages and info-only notes have no marks / marking scheme / AI
@@ -1555,6 +1623,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
         <label style={fieldLabel}>{
             type === 'passage' ? 'Passage text (what pupils read)'
             : type === 'info_only' ? 'Note text (shown to pupils, no answer required)'
+            : type === 'text_only' ? 'Task description (what pupils should do in their jotter)'
             : type === 'section_header' ? 'Section title (shown as a divider, e.g. "Section A: Comprehension")'
             : type === 'fill_in_blanks' ? 'Sentence (use {{1}}, {{2}} etc. for each blank)'
             : 'Question / prompt'}
@@ -1590,7 +1659,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             </span>
           </label>
         )}
-        {type !== 'passage' && type !== 'info_only' && (
+        {type !== 'passage' && type !== 'info_only' && type !== 'text_only' && (
           <label style={fieldLabel}>Max marks
             <input type="number" min={1} value={maxMarks} onChange={(e) => setMaxMarks(parseInt(e.target.value) || 1)} style={input} />
             {(type === 'fill_in_blanks' || type === 'table' || type === 'labeled_inputs') && (
@@ -2071,7 +2140,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             )}
           </div>
         )}
-        {type !== 'passage' && type !== 'info_only' && (
+        {type !== 'passage' && type !== 'info_only' && type !== 'text_only' && (
           <>
             <label style={fieldLabel}>Marking scheme (teacher view only)
               <textarea rows={2} value={markingScheme} onChange={(e) => setMarkingScheme(e.target.value)} style={input} />

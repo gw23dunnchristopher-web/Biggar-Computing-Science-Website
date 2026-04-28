@@ -19,11 +19,20 @@ interface Jotter {
 }
 
 export default function JotterPage() {
-  // /jotter            -> the signed-in pupil's own jotter
-  // /jotter/:studentId -> teacher viewing a specific pupil's jotter
+  // /jotter                 -> the signed-in pupil's own jotter
+  // /jotter/:studentId      -> teacher viewing a specific pupil's jotter
+  // /jotter?course=<course> -> teacher's own demo jotter for that course
   const [, params] = useRoute('/jotter/:studentId');
   const studentId = params?.studentId || null;
   const role = getCurrentRole();
+  // Read ?course= directly off the URL (set once on mount; teachers reach
+  // this page via a fresh navigation from the course / lesson header).
+  const teacherCourse = (() => {
+    if (studentId || role !== 'teacher') return null;
+    try { return new URLSearchParams(window.location.search).get('course'); }
+    catch { return null; }
+  })();
+  const isTeacherDemo = role === 'teacher' && !studentId && !!teacherCourse;
   const [jotter, setJotter] = useState<Jotter | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -33,16 +42,20 @@ export default function JotterPage() {
     setErr(null);
     const url = studentId
       ? `/api/classwork/students/${encodeURIComponent(studentId)}/jotter`
-      : `/api/classwork/me/jotter`;
+      : (isTeacherDemo
+          ? `/api/classwork/teacher-jotter/${encodeURIComponent(teacherCourse!)}`
+          : `/api/classwork/me/jotter`);
     api<Jotter>(url)
       .then(setJotter)
       .catch((e: any) => setErr(e.message || 'Failed to load jotter'))
       .finally(() => setLoading(false));
-  }, [studentId]);
+  }, [studentId, isTeacherDemo, teacherCourse]);
 
   const back = studentId
     ? { href: '/students', label: 'Back to students' }
-    : (jotter?.course ? { href: `/course/${jotter.course}`, label: 'Back to your course' } : { href: '/', label: 'Home' });
+    : (isTeacherDemo
+        ? { href: `/course/${teacherCourse}`, label: 'Back to course' }
+        : (jotter?.course ? { href: `/course/${jotter.course}`, label: 'Back to your course' } : { href: '/', label: 'Home' }));
 
   return (
     <Shell title="Notes jotter" back={back}>
@@ -71,7 +84,11 @@ export default function JotterPage() {
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
         <h1 style={{ margin: 0 }}>
-          {studentId ? 'Pupil notes jotter' : 'Your notes jotter for the year'}
+          {studentId
+            ? 'Pupil notes jotter'
+            : isTeacherDemo
+              ? 'Demo jotter (teacher view)'
+              : 'Your notes jotter for the year'}
         </h1>
         <div className="cw-no-print" style={{ display: 'flex', gap: 8 }}>
           <button
@@ -90,7 +107,9 @@ export default function JotterPage() {
         <p style={{ color: 'var(--cw-muted)', marginTop: 0 }}>
           {studentId
             ? <>Viewing {jotter.username ? <strong>{jotter.username}</strong> : 'this pupil'}&rsquo;s notes for <strong>{jotter.courseLabel}</strong>.</>
-            : <>All the notes you&rsquo;ve written across <strong>{jotter.courseLabel}</strong>, gathered into one document.</>}
+            : isTeacherDemo
+              ? <>This is your shared <strong>demo jotter</strong> for <strong>{jotter.courseLabel}</strong> &mdash; use it during lessons to show pupils how their own jotter works. Pupils can&rsquo;t see this.</>
+              : <>All the notes you&rsquo;ve written across <strong>{jotter.courseLabel}</strong>, gathered into one document.</>}
         </p>
       )}
 
@@ -101,7 +120,9 @@ export default function JotterPage() {
         <p style={{ color: 'var(--cw-muted)' }}>
           {studentId
             ? 'This pupil hasn\u2019t written any notes yet.'
-            : 'You haven\u2019t written any notes yet. Open any unit and click "My notes" to start your jotter.'}
+            : isTeacherDemo
+              ? 'No demo notes yet. Open any unit on the course page and click "Demo notes" to write some \u2014 they\u2019ll appear here.'
+              : 'You haven\u2019t written any notes yet. Open any unit and click "My notes" to start your jotter.'}
           {role === 'student' && (
             <> {' '}<Link href="/" style={{ color: 'var(--cw-accent)' }}>Back to home</Link></>
           )}

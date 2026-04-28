@@ -100,6 +100,7 @@ export async function markSubmission(
       case 'info_only':
       case 'section_header':
       case 'passage':
+      case 'text_only':
         return null;
       default:
         return null;

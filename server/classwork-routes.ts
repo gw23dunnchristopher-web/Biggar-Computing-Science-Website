@@ -16,6 +16,9 @@ import {
   getUnitNotes,
   saveUnitNotes,
   getJotterForStudent,
+  getTeacherUnitNotes,
+  saveTeacherUnitNotes,
+  getTeacherJotterForCourse,
   listLessons,
   getLesson,
   createLesson,
@@ -400,6 +403,46 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] getStudentJotter error:', err);
       res.status(500).json({ error: 'Failed to load jotter' });
+    }
+  });
+
+  /* ---------- Teacher demo notes / jotter ----------
+     Mirrors the pupil endpoints above so teachers can demonstrate the
+     note-taking workflow on their own demo jotter. Storage is keyed by a
+     synthetic id so it can never collide with any pupil's notes. */
+
+  app.get('/api/classwork/units/:unitId/teacher-notes', requireTeacher, async (req, res) => {
+    try {
+      res.json(await getTeacherUnitNotes(req.params.unitId));
+    } catch (err) {
+      console.error('[classwork] getTeacherUnitNotes error:', err);
+      res.status(500).json({ error: 'Failed to load teacher notes' });
+    }
+  });
+
+  app.put('/api/classwork/units/:unitId/teacher-notes', requireTeacher, async (req, res) => {
+    try {
+      const raw = req.body?.content;
+      const content = typeof raw === 'string' ? raw : '';
+      if (Buffer.byteLength(content, 'utf8') > 200_000) {
+        return res.status(413).json({ error: 'Notes are too long (max 200 KB).' });
+      }
+      res.json(await saveTeacherUnitNotes(req.params.unitId, content));
+    } catch (err) {
+      console.error('[classwork] saveTeacherUnitNotes error:', err);
+      res.status(500).json({ error: 'Failed to save teacher notes' });
+    }
+  });
+
+  app.get('/api/classwork/teacher-jotter/:course', requireTeacher, async (req, res) => {
+    try {
+      const course = req.params.course;
+      if (!isClassworkCourse(course)) return res.status(400).json({ error: 'Invalid course' });
+      const jotter = await getTeacherJotterForCourse(course);
+      res.json({ ...jotter, courseLabel: CLASSWORK_COURSE_LABELS[course] || course });
+    } catch (err) {
+      console.error('[classwork] getTeacherJotter error:', err);
+      res.status(500).json({ error: 'Failed to load teacher jotter' });
     }
   });
 

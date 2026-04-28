@@ -62,11 +62,20 @@ export default function Course() {
   const [notesStatus, setNotesStatus] = useState<'idle' | 'loading' | 'saving' | 'saved' | 'error'>('idle');
   const closeModal = () => setModal({ kind: 'none' });
 
+  // Route between the pupil notes endpoint (per signed-in pupil) and the
+  // teacher demo notes endpoint (single shared "teacher:demo" jotter on the
+  // server). Both have the same shape so the modal can drive either.
+  function notesEndpoint(unit: Unit) {
+    return role === 'teacher'
+      ? `/api/classwork/units/${unit.id}/teacher-notes`
+      : `/api/classwork/units/${unit.id}/notes`;
+  }
+
   function openNotes(unit: Unit) {
     setNotesContent(''); setNotesSavedAt(null);
     setNotesStatus('loading'); setModalErr(null);
     setModal({ kind: 'notes', unit });
-    api<{ content: string; updatedAt: number | null }>(`/api/classwork/units/${unit.id}/notes`)
+    api<{ content: string; updatedAt: number | null }>(notesEndpoint(unit))
       .then((r) => { setNotesContent(r.content || ''); setNotesSavedAt(r.updatedAt); setNotesStatus('idle'); })
       .catch((e: any) => { setNotesStatus('error'); setModalErr(e.message || 'Failed to load notes'); });
   }
@@ -74,7 +83,7 @@ export default function Course() {
   async function saveNotes(unit: Unit, content: string) {
     setNotesStatus('saving'); setModalErr(null);
     try {
-      const r = await api<{ content: string; updatedAt: number }>(`/api/classwork/units/${unit.id}/notes`, {
+      const r = await api<{ content: string; updatedAt: number }>(notesEndpoint(unit), {
         method: 'PUT', body: JSON.stringify({ content }),
       });
       setNotesSavedAt(r.updatedAt);
@@ -295,6 +304,14 @@ export default function Course() {
           )}
           {role === 'teacher' && (
             <>
+              {/* Teachers get their own demo jotter (course-scoped) so they
+                  can model note-taking in lessons without touching any pupil's
+                  notes. Stored under a synthetic id on the server. */}
+              <Link href={`/jotter?course=${course}`} style={{
+                display: 'inline-block',
+                background: '#ecfeff', color: '#0e7490', border: '1px solid #67e8f9',
+                padding: '8px 14px', borderRadius: 8, fontWeight: 600, textDecoration: 'none',
+              }} title="Open your demo jotter for this course — what pupils see when they click their own 'My jotter'">Demo jotter</Link>
               <Link href={`/analytics/${course}`} style={{
                 display: 'inline-block',
                 background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
@@ -332,6 +349,14 @@ export default function Course() {
                   )}
                   {role === 'teacher' && (
                     <>
+                      {/* Same modal as the pupil's "My notes", but reads/writes
+                          the shared teacher demo jotter — useful for showing a
+                          class how to take notes mid-lesson. */}
+                      <button
+                        onClick={() => openNotes(u)}
+                        style={secondaryBtn}
+                        title="Open the demo notes for this unit — what pupils see when they click their own 'My notes'"
+                      >Demo notes</button>
                       <button onClick={() => openAddLesson(u.id)} style={secondaryBtn}>+ Lesson</button>
                       <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteUnit', unit: u }); }} style={dangerBtn}>Delete unit</button>
                     </>
@@ -638,7 +663,9 @@ export default function Course() {
 
       <Modal
         open={modal.kind === 'notes'}
-        title={modal.kind === 'notes' ? `Notes for: ${modal.unit.title}` : ''}
+        title={modal.kind === 'notes'
+          ? `${role === 'teacher' ? 'Demo notes' : 'Notes'} for: ${modal.unit.title}`
+          : ''}
         onClose={closeModal}
         footer={<>
           <span style={{ flex: 1, fontSize: 12, color: 'var(--cw-muted)' }}>
