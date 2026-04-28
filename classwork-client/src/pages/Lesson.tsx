@@ -282,7 +282,7 @@ export default function Lesson() {
                   )}
                 </div>
               </div>
-              <p style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}><PromptText text={q.prompt} /></p>
+              <div style={{ marginTop: 8 }}><PromptText text={q.prompt} /></div>
 
               {q.question_type === 'video_question' && <VideoQuestionPlayer config={q.config} />}
 
@@ -394,9 +394,9 @@ export default function Lesson() {
               }}>Passage</span>
               <span>{label}</span>
             </div>
-            <p style={{ marginTop: 8, whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>
+            <div style={{ marginTop: 8, lineHeight: 1.55 }}>
               <PromptText text={p.prompt} />
-            </p>
+            </div>
             <QuestionResources
               questionId={p.id}
               isTeacher={role === 'teacher' && !previewAsStudent}
@@ -1494,6 +1494,72 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
     });
   }
 
+  // ─── Prompt formatting helpers ────────────────────────────────────────
+  // Wrap the current textarea selection with prefix/suffix (or, if nothing
+  // is selected, insert prefix + placeholder + suffix and select the
+  // placeholder so the teacher can immediately type over it). Used by the
+  // Bold and Italic toolbar buttons.
+  function wrapPromptSelection(prefix: string, suffix: string, placeholder: string) {
+    const el = promptRef.current;
+    setPrompt((cur) => {
+      if (!el) return cur + prefix + placeholder + suffix;
+      const start = el.selectionStart ?? cur.length;
+      const end = el.selectionEnd ?? cur.length;
+      const selected = cur.slice(start, end);
+      const inner = selected || placeholder;
+      const next = cur.slice(0, start) + prefix + inner + suffix + cur.slice(end);
+      const innerStart = start + prefix.length;
+      const innerEnd = innerStart + inner.length;
+      requestAnimationFrame(() => {
+        if (promptRef.current) {
+          promptRef.current.focus();
+          promptRef.current.setSelectionRange(innerStart, innerEnd);
+        }
+      });
+      return next;
+    });
+  }
+
+  // Toggle a line-leading prefix (like "- " or "## ") on every line that
+  // overlaps the current selection. If a line already has that prefix it
+  // gets stripped (toggle off); otherwise any *other* heading/bullet
+  // prefix is replaced. Used by the Bullet, Heading and Subheading
+  // toolbar buttons.
+  function togglePromptLinePrefix(prefix: string) {
+    const el = promptRef.current;
+    setPrompt((cur) => {
+      const start = el?.selectionStart ?? cur.length;
+      const end = el?.selectionEnd ?? cur.length;
+      const lineStart = cur.lastIndexOf('\n', start - 1) + 1;
+      const lineEndIdx = cur.indexOf('\n', end);
+      const lineEnd = lineEndIdx === -1 ? cur.length : lineEndIdx;
+      const block = cur.slice(lineStart, lineEnd) || '';
+      // For an empty selection on an empty line, give the teacher
+      // something to type into.
+      const sourceLines = block === '' ? [''] : block.split('\n');
+      const transformed = sourceLines.map((line) => {
+        if (line.startsWith(prefix)) {
+          // Already has this prefix → toggle it off.
+          return line.slice(prefix.length);
+        }
+        // Strip any competing heading/bullet prefix first so we don't
+        // end up with "- ## item".
+        const stripped = line.replace(/^(#{1,3}\s+|[-*]\s+)/, '');
+        return prefix + stripped;
+      });
+      const newBlock = transformed.join('\n');
+      const next = cur.slice(0, lineStart) + newBlock + cur.slice(lineEnd);
+      const newCaret = lineStart + newBlock.length;
+      requestAnimationFrame(() => {
+        if (promptRef.current) {
+          promptRef.current.focus();
+          promptRef.current.setSelectionRange(lineStart, newCaret);
+        }
+      });
+      return next;
+    });
+  }
+
   async function handlePromptImageFiles(files: File[]) {
     const images = files.filter((f) => f.type.startsWith('image/'));
     if (!images.length) return;
@@ -1715,6 +1781,62 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             : type === 'section_header' ? 'Section title (shown as a divider, e.g. "Section A: Comprehension")'
             : type === 'fill_in_blanks' ? 'Sentence (use {{1}}, {{2}} etc. for each blank)'
             : 'Task / prompt'}
+          {type !== 'section_header' && type !== 'fill_in_blanks' && (() => {
+            // Lightweight formatting toolbar. Each button uses
+            // `onMouseDown` with `preventDefault` so the textarea keeps its
+            // selection when the teacher clicks (otherwise a normal button
+            // click steals focus, the selection collapses, and "wrap with
+            // **" wraps an empty caret instead of the highlighted text).
+            const toolBtn: React.CSSProperties = {
+              padding: '4px 9px', fontSize: 12, lineHeight: 1.2,
+              borderRadius: 6, border: '1px solid var(--cw-border)',
+              background: '#fff', cursor: 'pointer',
+              color: 'var(--cw-fg)',
+            };
+            const grab = (fn: () => void) => (e: React.MouseEvent) => {
+              e.preventDefault();
+              fn();
+            };
+            return (
+              <div style={{
+                display: 'flex', flexWrap: 'wrap', gap: 4,
+                marginTop: 4, marginBottom: 4,
+              }}>
+                <button type="button" style={{ ...toolBtn, fontWeight: 700 }}
+                  title="Bold (wraps **selection**)"
+                  onMouseDown={grab(() => wrapPromptSelection('**', '**', 'bold text'))}>
+                  B
+                </button>
+                <button type="button" style={{ ...toolBtn, fontStyle: 'italic' }}
+                  title="Italic (wraps _selection_)"
+                  onMouseDown={grab(() => wrapPromptSelection('_', '_', 'italic text'))}>
+                  I
+                </button>
+                <span style={{ width: 1, background: 'var(--cw-border)', margin: '0 4px' }} />
+                <button type="button" style={toolBtn}
+                  title="Bullet list (prefixes each line with -)"
+                  onMouseDown={grab(() => togglePromptLinePrefix('- '))}>
+                  • List
+                </button>
+                <span style={{ width: 1, background: 'var(--cw-border)', margin: '0 4px' }} />
+                <button type="button" style={{ ...toolBtn, fontWeight: 700, fontSize: 14 }}
+                  title="Large heading (prefixes the line with #)"
+                  onMouseDown={grab(() => togglePromptLinePrefix('# '))}>
+                  H
+                </button>
+                <button type="button" style={{ ...toolBtn, fontWeight: 700, fontSize: 12 }}
+                  title="Heading (prefixes the line with ##)"
+                  onMouseDown={grab(() => togglePromptLinePrefix('## '))}>
+                  H₂
+                </button>
+                <button type="button" style={{ ...toolBtn, fontWeight: 700, fontSize: 11 }}
+                  title="Subheading (prefixes the line with ###)"
+                  onMouseDown={grab(() => togglePromptLinePrefix('### '))}>
+                  H₃
+                </button>
+              </div>
+            );
+          })()}
           <textarea
             ref={promptRef}
             rows={type === 'passage' ? 8 : 3}

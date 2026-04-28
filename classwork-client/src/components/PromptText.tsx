@@ -1,11 +1,20 @@
 import { Fragment, ReactNode, useEffect, useState } from 'react';
 
-// Renders a question prompt as plain text but auto-converts URLs into
-// clickable links that open in a new window. Two link styles are supported:
-//   1. Bare URLs:           https://example.com
-//   2. Markdown-style:      [some label](https://example.com)
-// Anything else is rendered as plain text (newlines preserved by the
-// surrounding white-space: pre-wrap on the host element).
+// Renders a question prompt with light Markdown-style formatting:
+//
+//   • Headings:   "# Big",  "## Medium",  "### Small"  (line-leading)
+//   • Bullets:    "- item"  or  "* item"               (line-leading)
+//   • Bold:       **like this**
+//   • Italic:     _like this_
+//   • Links:      [label](https://…) or a bare https:// URL
+//   • Images:     ![alt](https://…) with optional alignment hint
+//                 (alignment: ![alt|left](url) / ![alt|right](url),
+//                  default centred)
+//
+// Anything else falls through as plain text. Newlines inside a paragraph are
+// preserved (rendered with white-space: pre-wrap on each paragraph block).
+// Block elements (headings, bullet lists) need a non-<p> parent to be valid
+// HTML, which is why this component returns a <div> wrapper.
 
 const URL_RE = /https?:\/\/[^\s)<>]+[^\s.,;:!?)<>]/g;
 const MD_LINK_RE = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
@@ -13,6 +22,13 @@ const MD_LINK_RE = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
 // with "/" so teacher-uploaded resources (which come back as
 // "/uploads/..." paths) render inline as well as fully-qualified URLs.
 const MD_IMG_RE = /!\[([^\]]*)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)/g;
+// Inline emphasis. Bold uses doubled asterisks so it doesn't collide with a
+// bare "5 * 5". Italic uses underscores so it doesn't fight the bullet
+// syntax ("* item") or sentence asterisks. Both patterns insist the marker
+// is paired and reject newlines inside, which keeps surprises to a minimum
+// for teachers who haven't read the docs.
+const BOLD_RE = /\*\*([^*\n][^\n]*?)\*\*/g;
+const ITALIC_RE = /(^|[^A-Za-z0-9_])_([^_\n]+?)_(?![A-Za-z0-9_])/g;
 
 function isSafeHttpUrl(u: string): boolean {
   try {
@@ -21,6 +37,14 @@ function isSafeHttpUrl(u: string): boolean {
   } catch {
     return false;
   }
+}
+
+function isSafeImageUrl(u: string): boolean {
+  // Allow http(s) absolute URLs (validated by isSafeHttpUrl) plus same-origin
+  // relative paths beginning with "/" (e.g. "/uploads/..."). Reject anything
+  // else so we never render a `data:` or `javascript:` image source.
+  if (u.startsWith('/')) return !u.startsWith('//');
+  return isSafeHttpUrl(u);
 }
 
 function ExtLink({ href, label }: { href: string; label: string }) {
@@ -62,19 +86,6 @@ function PromptImage({
   src: string; alt: string; align: PromptImageAlign;
   onOpen: (src: string, alt: string) => void;
 }) {
-  // Inline image embedded in a prompt. Constrained to a reasonable size so a
-  // huge screenshot can't blow out the layout, and clickable so pupils can
-  // open it full-size in an in-page lightbox.
-  //
-  // Centered images take a full block of their own. Left/right alignment
-  // floats the image so the prompt text flows around it; the max width is
-  // capped at 50% so there's always enough space for at least one column of
-  // text alongside.
-  //
-  // We use a transparent <button> so the click target is keyboard-focusable
-  // (Enter/Space activate it) and screen-reader-friendly. The visible style
-  // is provided by the inner <img>; the wrapper just owns the float/centre
-  // layout.
   const wrapStyle: React.CSSProperties =
     align === 'center'
       ? { display: 'block', margin: '8px auto', textAlign: 'center', clear: 'both' }
@@ -110,8 +121,7 @@ function PromptImage({
 // Fullscreen lightbox shown when a pupil clicks an image in a prompt.
 // Closes on backdrop click, the close button, or pressing Escape. The
 // image itself swallows clicks so the pupil can interact with it without
-// dismissing the dialog. Rendered with role="dialog" so assistive
-// technology announces it correctly.
+// dismissing the dialog.
 function ImageLightbox({
   src, alt, onClose,
 }: { src: string; alt: string; onClose: () => void }) {
@@ -120,8 +130,6 @@ function ImageLightbox({
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
-    // Lock body scroll while the lightbox is open so scrolling the
-    // backdrop doesn't move the page underneath.
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
@@ -185,58 +193,121 @@ function ImageLightbox({
   );
 }
 
-function isSafeImageUrl(u: string): boolean {
-  // Allow http(s) absolute URLs (validated by isSafeHttpUrl) plus same-origin
-  // relative paths beginning with "/" (e.g. "/uploads/..."). Reject anything
-  // else so we never render a `data:` or `javascript:` image source.
-  if (u.startsWith('/')) return !u.startsWith('//');
-  return isSafeHttpUrl(u);
+// ─── Block parser ──────────────────────────────────────────────────────────
+// Splits a prompt into a stream of blocks: headings (3 sizes), bullet lists
+// (collapsed across consecutive lines), and paragraphs (which may themselves
+// contain manual line breaks). Blank lines act as paragraph separators.
+
+type Block =
+  | { kind: 'heading'; level: 1 | 2 | 3; text: string }
+  | { kind: 'bullets'; items: string[] }
+  | { kind: 'paragraph'; text: string };
+
+function parseBlocks(text: string): Block[] {
+  const lines = text.split(/\r?\n/);
+  const blocks: Block[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    // Heading lines: "# h1", "## h2", "### h3" — anything beyond ### degrades
+    // to a regular paragraph so a stray "####" doesn't disappear silently.
+    const h = /^(#{1,3})\s+(.*\S.*)$/.exec(line);
+    if (h) {
+      blocks.push({
+        kind: 'heading',
+        level: h[1].length as 1 | 2 | 3,
+        text: h[2],
+      });
+      i++;
+      continue;
+    }
+    // Bullet lines: collapse consecutive "- item" / "* item" rows into one
+    // <ul> so they render as a real list rather than three loose paragraphs.
+    if (/^\s*[-*]\s+/.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\s*[-*]\s+/, ''));
+        i++;
+      }
+      blocks.push({ kind: 'bullets', items });
+      continue;
+    }
+    // Blank line — just skip; it's used to separate paragraphs visually.
+    if (line.trim() === '') {
+      i++;
+      continue;
+    }
+    // Otherwise: a paragraph that runs until the next blank line, heading,
+    // or bullet list. Newlines within are preserved as soft line breaks.
+    const paraLines: string[] = [];
+    while (
+      i < lines.length
+      && lines[i].trim() !== ''
+      && !/^(#{1,3})\s+\S/.test(lines[i])
+      && !/^\s*[-*]\s+/.test(lines[i])
+    ) {
+      paraLines.push(lines[i]);
+      i++;
+    }
+    blocks.push({ kind: 'paragraph', text: paraLines.join('\n') });
+  }
+  return blocks;
 }
 
-// Walk the text, picking out [label](url) and bare URLs in source order.
-// Avoids double-matching by tracking the next index of each kind.
-export default function PromptText({ text }: { text: string }) {
-  // One lightbox state per PromptText instance: when a pupil clicks an
-  // inline image we stash its source + alt text here, which mounts the
-  // <ImageLightbox> overlay below. Setting it back to null closes it.
-  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
-  if (!text) return null;
+// ─── Inline parser ─────────────────────────────────────────────────────────
+// Walks a single block of text and produces React children with bold,
+// italic, links, images and bare URLs converted into the right elements.
+// Everything else falls through as plain text. Bold/italic are processed as
+// part of the same source-order walk as links/images so they nest correctly
+// (a bold span won't accidentally swallow an image's alt-text bracket).
+
+type InlineCtx = {
+  onOpenImage: (src: string, alt: string) => void;
+};
+
+function renderInline(text: string, ctx: InlineCtx, keyOffset = 0): ReactNode[] {
   const out: ReactNode[] = [];
   let i = 0;
-  let key = 0;
-  // Reset all three regexes between renders.
-  const md = new RegExp(MD_LINK_RE.source, MD_LINK_RE.flags);
+  let key = keyOffset;
+  // Build fresh regex instances so the per-render lastIndex resets are
+  // confined to this call (avoids the global-flag re-entrancy footgun).
   const img = new RegExp(MD_IMG_RE.source, MD_IMG_RE.flags);
+  const md = new RegExp(MD_LINK_RE.source, MD_LINK_RE.flags);
   const url = new RegExp(URL_RE.source, URL_RE.flags);
+  const bold = new RegExp(BOLD_RE.source, BOLD_RE.flags);
+  const italic = new RegExp(ITALIC_RE.source, ITALIC_RE.flags);
 
   while (i < text.length) {
-    md.lastIndex = i;
     img.lastIndex = i;
+    md.lastIndex = i;
     url.lastIndex = i;
+    bold.lastIndex = i;
+    italic.lastIndex = i;
     const imgMatch = img.exec(text);
     const mdMatch = md.exec(text);
     const urlMatch = url.exec(text);
+    const boldMatch = bold.exec(text);
+    const italicMatch = italic.exec(text);
 
-    // Pick whichever match comes first in source order. Image syntax
-    // (`![alt](url)`) wins ties over the link syntax (`[label](url)`)
-    // because they both start with `[` after the optional `!`.
-    let nextStart = -1;
-    let kind: 'img' | 'md' | 'url' | null = null;
-    const candidates: { start: number; kind: 'img' | 'md' | 'url' }[] = [];
+    type K = 'img' | 'md' | 'url' | 'bold' | 'italic';
+    const candidates: { start: number; kind: K }[] = [];
     if (imgMatch) candidates.push({ start: imgMatch.index, kind: 'img' });
-    if (mdMatch)  candidates.push({ start: mdMatch.index,  kind: 'md'  });
+    if (mdMatch) candidates.push({ start: mdMatch.index, kind: 'md' });
     if (urlMatch) candidates.push({ start: urlMatch.index, kind: 'url' });
-    if (candidates.length) {
-      candidates.sort((a, b) => a.start - b.start || (a.kind === 'img' ? -1 : 1));
-      nextStart = candidates[0].start;
-      kind = candidates[0].kind;
+    if (boldMatch) candidates.push({ start: boldMatch.index, kind: 'bold' });
+    // Italic match index points at the leading boundary character (or 0),
+    // so add 1 (when it's not at the very start) to get the real "_" pos.
+    if (italicMatch) {
+      const pre = italicMatch[1] || '';
+      candidates.push({ start: italicMatch.index + pre.length, kind: 'italic' });
     }
-
-    if (nextStart === -1) {
+    if (!candidates.length) {
       out.push(<Fragment key={key++}>{text.slice(i)}</Fragment>);
       break;
     }
-    if (nextStart > i) out.push(<Fragment key={key++}>{text.slice(i, nextStart)}</Fragment>);
+    candidates.sort((a, b) => a.start - b.start);
+    const { start, kind } = candidates[0];
+    if (start > i) out.push(<Fragment key={key++}>{text.slice(i, start)}</Fragment>);
 
     if (kind === 'img' && imgMatch) {
       const [whole, rawAlt, src] = imgMatch;
@@ -248,13 +319,13 @@ export default function PromptText({ text }: { text: string }) {
             src={src}
             alt={alt}
             align={align}
-            onOpen={(s, a) => setLightbox({ src: s, alt: a })}
+            onOpen={ctx.onOpenImage}
           />,
         );
       } else {
         out.push(<Fragment key={key++}>{whole}</Fragment>);
       }
-      i = nextStart + whole.length;
+      i = start + whole.length;
     } else if (kind === 'md' && mdMatch) {
       const [whole, label, href] = mdMatch;
       if (isSafeHttpUrl(href)) {
@@ -262,7 +333,7 @@ export default function PromptText({ text }: { text: string }) {
       } else {
         out.push(<Fragment key={key++}>{whole}</Fragment>);
       }
-      i = nextStart + whole.length;
+      i = start + whole.length;
     } else if (kind === 'url' && urlMatch) {
       const [href] = urlMatch;
       if (isSafeHttpUrl(href)) {
@@ -270,20 +341,95 @@ export default function PromptText({ text }: { text: string }) {
       } else {
         out.push(<Fragment key={key++}>{href}</Fragment>);
       }
-      i = nextStart + urlMatch[0].length;
+      i = start + urlMatch[0].length;
+    } else if (kind === 'bold' && boldMatch) {
+      const inner = boldMatch[1];
+      // Recurse so a bold span can still contain italic, links, etc.
+      out.push(
+        <strong key={key++} style={{ fontWeight: 700 }}>
+          {renderInline(inner, ctx, key * 100)}
+        </strong>,
+      );
+      i = boldMatch.index + boldMatch[0].length;
+    } else if (kind === 'italic' && italicMatch) {
+      const inner = italicMatch[2];
+      out.push(
+        <em key={key++} style={{ fontStyle: 'italic' }}>
+          {renderInline(inner, ctx, key * 100)}
+        </em>,
+      );
+      i = start + 1 + inner.length + 1;
     }
   }
+  return out;
+}
 
-  // Wrap in a block-level span so floated images are contained within the
-  // prompt's bounding box: the trailing zero-height div with `clear: both`
-  // is a classic float clearfix that stops a tall floated image from
-  // spilling text into the next prompt or UI element below. The lightbox
-  // is rendered as a sibling at the end so it sits above everything else
-  // when active.
+// ─── Main component ────────────────────────────────────────────────────────
+
+export default function PromptText({ text }: { text: string }) {
+  // One lightbox state per PromptText instance: when a pupil clicks an
+  // inline image we stash its source + alt text here, which mounts the
+  // <ImageLightbox> overlay below. Setting it back to null closes it.
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
+  if (!text) return null;
+  const ctx: InlineCtx = {
+    onOpenImage: (src, alt) => setLightbox({ src, alt }),
+  };
+  const blocks = parseBlocks(text);
+
+  // Heading sizes are deliberately modest — pupils read these in the same
+  // visual frame as the regular task prompt, so keeping a tight scale
+  // prevents the page from feeling shouty.
+  const headingStyle = (level: 1 | 2 | 3): React.CSSProperties => ({
+    fontSize: level === 1 ? '1.4em' : level === 2 ? '1.2em' : '1.05em',
+    fontWeight: 700,
+    margin: '10px 0 4px',
+    lineHeight: 1.25,
+  });
+
   return (
-    <span style={{ display: 'block' }}>
-      {out}
-      <span style={{ display: 'block', clear: 'both' }} />
+    <div style={{ display: 'block' }}>
+      {blocks.map((b, idx) => {
+        if (b.kind === 'heading') {
+          const Tag = (b.level === 1 ? 'h2' : b.level === 2 ? 'h3' : 'h4') as 'h2' | 'h3' | 'h4';
+          return (
+            <Tag key={idx} style={headingStyle(b.level)}>
+              {renderInline(b.text, ctx)}
+            </Tag>
+          );
+        }
+        if (b.kind === 'bullets') {
+          return (
+            <ul key={idx} style={{
+              margin: '6px 0 8px',
+              paddingLeft: 22,
+              lineHeight: 1.45,
+            }}>
+              {b.items.map((it, j) => (
+                <li key={j} style={{ marginBottom: 2 }}>
+                  {renderInline(it, ctx)}
+                </li>
+              ))}
+            </ul>
+          );
+        }
+        // Paragraph: pre-wrap preserves manual line breaks within. We use a
+        // <div> rather than <p> so floated images can wrap text as expected
+        // (browsers treat <p> with floated children inconsistently when
+        // pre-wrap is involved).
+        return (
+          <div key={idx} style={{
+            whiteSpace: 'pre-wrap',
+            margin: '4px 0',
+            lineHeight: 1.5,
+          }}>
+            {renderInline(b.text, ctx)}
+          </div>
+        );
+      })}
+      {/* Float clearfix so a tall floated image can't spill into the next
+          question or UI element below the prompt. */}
+      <div style={{ clear: 'both' }} />
       {lightbox && (
         <ImageLightbox
           src={lightbox.src}
@@ -291,6 +437,6 @@ export default function PromptText({ text }: { text: string }) {
           onClose={() => setLightbox(null)}
         />
       )}
-    </span>
+    </div>
   );
 }
