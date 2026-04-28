@@ -517,6 +517,32 @@ export default function RichTextEditor({
         style={{ ...editor, minHeight }}
         className="cw-rte"
       />
+      {/* Custom right-click menu — three friendly buttons covering the full
+          edit/share workflow without requiring keyboard shortcuts. */}
+      {ctxMenu && (
+        <div
+          id="cw-rte-ctx-menu"
+          role="menu"
+          aria-label="Editing actions"
+          style={{
+            position: 'fixed', top: ctxMenu.y, left: ctxMenu.x,
+            background: '#fff', border: '1px solid var(--cw-border)',
+            borderRadius: 10, boxShadow: '0 8px 24px rgba(15,23,42,0.18)',
+            padding: 6, minWidth: 180, zIndex: 9999,
+            display: 'flex', flexDirection: 'column', gap: 2,
+          }}
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          <CtxItem onClick={ctxCut} icon="\u2702" label="Cut" hint="Ctrl+X" />
+          <CtxItem onClick={ctxCopy} icon="\u29C9" label="Copy" hint="Ctrl+C" />
+          <CtxItem onClick={ctxPaste} icon="\u{1F4CB}" label="Paste" hint="Ctrl+V" />
+          {ctxMsg && (
+            <div style={{ fontSize: 12, color: 'var(--cw-danger)', padding: '6px 10px 2px' }}>
+              {ctxMsg}
+            </div>
+          )}
+        </div>
+      )}
       <style>{`
         .cw-rte:empty:before {
           content: attr(data-placeholder);
@@ -558,6 +584,33 @@ function ToolBtn({ children, onClick, title, disabled }: { children: React.React
   );
 }
 function Sep() { return <span style={{ width: 1, alignSelf: 'stretch', background: '#e2e8f0', margin: '0 2px' }} />; }
+
+// Single row in the right-click menu — wide click target, label on the left,
+// keyboard hint greyed out on the right (so pupils gradually learn the
+// shortcut). onMouseDown stops the surrounding "click outside" handler from
+// firing before the action runs.
+function CtxItem({ icon, label, hint, onClick }: { icon: string; label: string; hint: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '8px 10px', border: 'none', background: 'transparent',
+        borderRadius: 6, cursor: 'pointer', textAlign: 'left',
+        color: 'var(--cw-ink)', fontSize: 14, width: '100%',
+      }}
+      onMouseOver={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#f1f5f9'; }}
+      onMouseOut={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+    >
+      <span style={{ width: 20, textAlign: 'center', fontSize: 14 }} aria-hidden="true">{icon}</span>
+      <span style={{ flex: 1 }}>{label}</span>
+      <span style={{ fontSize: 11, color: 'var(--cw-muted)' }}>{hint}</span>
+    </button>
+  );
+}
 
 // A toolbar button that pairs a label (e.g. "A" for text colour, square for
 // highlight) with the OS-native colour picker. The button itself applies the
