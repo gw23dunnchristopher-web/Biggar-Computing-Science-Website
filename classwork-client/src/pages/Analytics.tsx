@@ -48,6 +48,11 @@ interface LessonAnalytics {
     distinct_students: number;
     avg_mark: number | null;
     avg_percent: number | null;
+    // Distinct pupils whose lesson page actually rendered this question
+    // card (set by the IntersectionObserver in Lesson.tsx). Lets the
+    // teacher distinguish "couldn't access it" from "opened it but
+    // didn't finish".
+    distinct_viewers: number;
   }>;
   students: Array<{
     student_id: string;
@@ -342,6 +347,11 @@ function LessonDetail({ lessonId }: { lessonId: string }) {
                 <th style={th}>Prompt</th>
                 <th style={th}>Type</th>
                 <th style={th}>Max</th>
+                {/* "Opened" = distinct pupils who actually scrolled this
+                    task into view in the lesson page. Combined with the
+                    Submissions column it tells you who tried but didn't
+                    finish vs. who never even saw the task. */}
+                <th style={th} title="Pupils who opened this task on the lesson page (whether or not they submitted).">Opened</th>
                 <th style={th}>Submissions</th>
                 <th style={th}>Avg mark</th>
                 <th style={th}>Avg %</th>
@@ -356,6 +366,11 @@ function LessonDetail({ lessonId }: { lessonId: string }) {
                   </td>
                   <td style={td}>{q.question_type}</td>
                   <td style={td}>{q.max_marks}</td>
+                  <td style={td} title={
+                    q.distinct_viewers > q.distinct_students
+                      ? `${q.distinct_viewers - q.distinct_students} pupil(s) opened but didn\u2019t submit.`
+                      : undefined
+                  }>{q.distinct_viewers}</td>
                   <td style={td}>{q.submission_count}</td>
                   <td style={td}>{q.avg_mark != null ? Number(q.avg_mark).toFixed(1) : '—'}</td>
                   <td style={td}><PercentBar value={q.avg_percent} /></td>

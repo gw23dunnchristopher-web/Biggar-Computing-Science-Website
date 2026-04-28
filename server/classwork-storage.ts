@@ -196,6 +196,49 @@ export function ensureClassworkSchema(): Promise<void> {
       // question_id is NULL for legacy lesson-level resources. Idempotent.
       await client.query(`ALTER TABLE IF EXISTS bhs_classwork_lesson_resources ADD COLUMN IF NOT EXISTS question_id VARCHAR(64) REFERENCES bhs_classwork_questions(id) ON DELETE CASCADE;`);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_resources_question ON bhs_classwork_lesson_resources(question_id);`);
+
+      // Per-pupil "I opened this task" log. One row per (student, question)
+      // — `first_viewed_at` is the first time the student rendered the
+      // question on the lesson page, `last_viewed_at` is the most recent,
+      // and `view_count` is how many distinct lesson loads have included
+      // it. Lets a teacher distinguish "couldn't access the task" from
+      // "opened it but didn't finish". Idempotent.
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS bhs_classwork_question_views (
+          student_id      VARCHAR(64) NOT NULL,
+          question_id     VARCHAR(64) NOT NULL REFERENCES bhs_classwork_questions(id) ON DELETE CASCADE,
+          lesson_id       VARCHAR(64) NOT NULL,
+          course          VARCHAR(16) NOT NULL,
+          first_viewed_at TIMESTAMP DEFAULT NOW(),
+          last_viewed_at  TIMESTAMP DEFAULT NOW(),
+          view_count      INTEGER NOT NULL DEFAULT 1,
+          PRIMARY KEY (student_id, question_id)
+        );
+      `);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_views_lesson ON bhs_classwork_question_views(lesson_id);`);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_views_student ON bhs_classwork_question_views(student_id);`);
+
+      // Per-pupil draft answers. Saved automatically as the pupil types so
+      // that closing the tab, losing a connection, or wandering off mid-
+      // task doesn't lose their work. One row per (student, question);
+      // wiped automatically when a real submission for that pair lands
+      // (see createSubmission). text_answer also doubles as the JSON blob
+      // for fill_in_blanks / table / labeled_inputs draft state. Idempotent.
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS bhs_classwork_drafts (
+          student_id            VARCHAR(64) NOT NULL,
+          question_id           VARCHAR(64) NOT NULL REFERENCES bhs_classwork_questions(id) ON DELETE CASCADE,
+          lesson_id             VARCHAR(64) NOT NULL,
+          course                VARCHAR(16) NOT NULL,
+          text_answer           TEXT,
+          selected_option_label TEXT,
+          link_url              TEXT,
+          file_url              TEXT,
+          updated_at            TIMESTAMP DEFAULT NOW(),
+          PRIMARY KEY (student_id, question_id)
+        );
+      `);
+      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_drafts_lesson_student ON bhs_classwork_drafts(lesson_id, student_id);`);
     } finally {
       client.release();
     }
@@ -784,7 +827,134 @@ export async function createSubmission(input: CreateSubmissionInput) {
       input.fileUrl ?? null,
     ]
   );
+  // A real submission supersedes any in-progress draft for this pupil on
+  // this question — clear it so it doesn't ghost the input next time the
+  // lesson loads.
+  try {
+    await pool.query(
+      `DELETE FROM bhs_classwork_drafts WHERE student_id = $1 AND question_id = $2`,
+      [input.studentId, input.questionId],
+    );
+  } catch (err) {
+    // Non-fatal: the submission is the source of truth, the draft is a
+    // pure convenience. Don't fail the user-facing submit on a draft
+    // cleanup hiccup.
+    console.error('[classwork] draft cleanup error:', err);
+  }
   return r.rows[0];
+}
+
+/* ---------- Question views (opened-by-pupil tracking) ---------------- */
+
+// Record (or upsert) that this pupil has opened this question. The first
+// call inserts the row; later calls bump `last_viewed_at` and `view_count`.
+// Cheap enough that we don't need to debounce it on the client beyond
+// the once-per-page-load Set already in Lesson.tsx.
+export async function recordQuestionView(input: {
+  questionId: string;
+  lessonId: string;
+  course: string;
+  studentId: string;
+}) {
+  await ensureClassworkSchema();
+  await pool.query(
+    `INSERT INTO bhs_classwork_question_views
+        (student_id, question_id, lesson_id, course, first_viewed_at, last_viewed_at, view_count)
+     VALUES ($1, $2, $3, $4, NOW(), NOW(), 1)
+     ON CONFLICT (student_id, question_id) DO UPDATE
+        SET last_viewed_at = NOW(),
+            view_count     = bhs_classwork_question_views.view_count + 1`,
+    [input.studentId, input.questionId, input.lessonId, input.course],
+  );
+}
+
+// Per-question view stats for one lesson, used by the teacher analytics
+// page to surface "opened but never submitted" pupils.
+export async function getLessonViewStats(lessonId: string) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `SELECT question_id,
+            COUNT(*)::int                      AS distinct_viewers,
+            MIN(first_viewed_at)               AS earliest_view,
+            MAX(last_viewed_at)                AS latest_view
+       FROM bhs_classwork_question_views
+      WHERE lesson_id = $1
+      GROUP BY question_id`,
+    [lessonId],
+  );
+  return r.rows as Array<{
+    question_id: string;
+    distinct_viewers: number;
+    earliest_view: string;
+    latest_view: string;
+  }>;
+}
+
+/* ---------- Per-pupil draft answers (auto-save) --------------------- */
+
+export interface UpsertDraftInput {
+  questionId: string;
+  lessonId: string;
+  course: string;
+  studentId: string;
+  textAnswer?: string | null;
+  selectedOptionLabel?: string | null;
+  linkUrl?: string | null;
+  fileUrl?: string | null;
+}
+
+export async function upsertDraft(input: UpsertDraftInput) {
+  await ensureClassworkSchema();
+  await pool.query(
+    `INSERT INTO bhs_classwork_drafts
+        (student_id, question_id, lesson_id, course,
+         text_answer, selected_option_label, link_url, file_url, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+     ON CONFLICT (student_id, question_id) DO UPDATE
+        SET text_answer           = EXCLUDED.text_answer,
+            selected_option_label = EXCLUDED.selected_option_label,
+            link_url              = EXCLUDED.link_url,
+            file_url              = EXCLUDED.file_url,
+            updated_at            = NOW()`,
+    [
+      input.studentId,
+      input.questionId,
+      input.lessonId,
+      input.course,
+      input.textAnswer ?? null,
+      input.selectedOptionLabel ?? null,
+      input.linkUrl ?? null,
+      input.fileUrl ?? null,
+    ],
+  );
+}
+
+export async function deleteDraft(studentId: string, questionId: string) {
+  await ensureClassworkSchema();
+  await pool.query(
+    `DELETE FROM bhs_classwork_drafts WHERE student_id = $1 AND question_id = $2`,
+    [studentId, questionId],
+  );
+}
+
+// Bulk fetch of every draft this pupil currently has on a single lesson,
+// used at lesson-page load time to repopulate the answer inputs.
+export async function getMyLessonDrafts(lessonId: string, studentId: string) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `SELECT question_id, text_answer, selected_option_label, link_url, file_url, updated_at
+       FROM bhs_classwork_drafts
+      WHERE lesson_id = $1 AND student_id = $2`,
+    [lessonId, studentId],
+  );
+  return r.rows as Array<{
+    question_id: string;
+    text_answer: string | null;
+    selected_option_label: string | null;
+    link_url: string | null;
+    file_url: string | null;
+    updated_at: string;
+  }>;
 }
 
 export async function listMySubmissionsForLesson(lessonId: string, studentId: string) {
@@ -923,7 +1093,8 @@ export async function getLessonAnalytics(lessonId: string) {
             COALESCE(s.submission_count, 0)  AS submission_count,
             COALESCE(s.distinct_students, 0) AS distinct_students,
             s.avg_mark                       AS avg_mark,
-            s.avg_percent                    AS avg_percent
+            s.avg_percent                    AS avg_percent,
+            COALESCE(v.distinct_viewers, 0)  AS distinct_viewers
        FROM bhs_classwork_questions q
        LEFT JOIN (
          SELECT question_id,
@@ -941,6 +1112,17 @@ export async function getLessonAnalytics(lessonId: string) {
           WHERE lesson_id = $1
           GROUP BY question_id
        ) s ON s.question_id = q.id
+       LEFT JOIN (
+         -- "Opened it" tally per question: one row per distinct pupil who
+         -- has ever rendered the question on the lesson page. Used to
+         -- distinguish "couldn't access" from "opened but didn't finish"
+         -- in the teacher analytics drill-down.
+         SELECT question_id,
+                COUNT(DISTINCT student_id)::int AS distinct_viewers
+           FROM bhs_classwork_question_views
+          WHERE lesson_id = $1
+          GROUP BY question_id
+       ) v ON v.question_id = q.id
       WHERE q.lesson_id = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','info_only','section_header','text_only')
       ORDER BY q.order_index, q.id`,
     [lessonId]

@@ -33,6 +33,10 @@ import {
   listMySubmissionsForLesson,
   listSubmissionsForLesson,
   setSubmissionMark,
+  recordQuestionView,
+  upsertDraft,
+  deleteDraft,
+  getMyLessonDrafts,
   getCourseAnalytics,
   getLessonAnalytics,
   getStudentCourseAnalytics,
@@ -743,6 +747,90 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] submit error:', err);
       res.status(500).json({ error: 'Failed to submit answer' });
+    }
+  });
+
+  // ─── Task open / "viewed" tracking ──────────────────────────────────
+  // Pupils ping this endpoint the first time a question scrolls into
+  // their viewport on the lesson page. The DB upserts a single row per
+  // (student, question), bumping last_viewed_at + view_count on repeat
+  // pings. Teachers see the aggregated "X pupils opened this task" stat
+  // in the lesson analytics drill-down so they can tell who couldn't
+  // get to a task vs. who opened it but didn't finish.
+  app.post('/api/classwork/questions/:questionId/view', requireStudent, async (req, res) => {
+    try {
+      const q = await getQuestion(req.params.questionId);
+      if (!q) return res.status(404).json({ error: 'Question not found' });
+      if (!isClassworkCourse(q.course)) return res.status(500).json({ error: 'Question has invalid course' });
+      await recordQuestionView({
+        questionId: q.id,
+        lessonId: q.lesson_id,
+        course: q.course,
+        studentId: (req as any).studentId,
+      });
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('[classwork] view tracking error:', err);
+      // Don't 500 on this — it's a best-effort signal. A failure here
+      // should never block the pupil from working.
+      res.json({ ok: false });
+    }
+  });
+
+  // ─── Auto-saved drafts ──────────────────────────────────────────────
+  // The student-side answer inputs save themselves here in the
+  // background so closing the tab, losing wifi, or wandering off
+  // mid-task doesn't cost the pupil their work. Drafts are wiped
+  // automatically when a real submission lands (see createSubmission)
+  // so there's no risk of a stale draft ghosting a finished task.
+
+  // Bulk fetch every draft this pupil has on a single lesson — called
+  // once at lesson load alongside /my-submissions.
+  app.get('/api/classwork/lessons/:lessonId/my-drafts', requireStudent, async (req, res) => {
+    try {
+      const drafts = await getMyLessonDrafts(req.params.lessonId, (req as any).studentId);
+      res.json(drafts);
+    } catch (err) {
+      console.error('[classwork] list drafts error:', err);
+      res.json([]); // never block lesson load on a draft fetch hiccup
+    }
+  });
+
+  // Upsert a single question's draft. Body mirrors the /submit body
+  // (textAnswer / selectedOptionLabel / linkUrl / fileUrl) so the
+  // client's existing answer-state shape can be reused verbatim.
+  app.put('/api/classwork/questions/:questionId/draft', requireStudent, async (req, res) => {
+    try {
+      const q = await getQuestion(req.params.questionId);
+      if (!q) return res.status(404).json({ error: 'Question not found' });
+      if (!isClassworkCourse(q.course)) return res.status(500).json({ error: 'Question has invalid course' });
+      const { textAnswer, selectedOptionLabel, linkUrl, fileUrl } = req.body || {};
+      await upsertDraft({
+        questionId: q.id,
+        lessonId: q.lesson_id,
+        course: q.course,
+        studentId: (req as any).studentId,
+        textAnswer: typeof textAnswer === 'string' ? textAnswer : null,
+        selectedOptionLabel: typeof selectedOptionLabel === 'string' ? selectedOptionLabel : null,
+        linkUrl: typeof linkUrl === 'string' ? linkUrl : null,
+        fileUrl: typeof fileUrl === 'string' ? fileUrl : null,
+      });
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('[classwork] draft upsert error:', err);
+      res.status(500).json({ error: 'Failed to save draft' });
+    }
+  });
+
+  // Explicit clear — used when the pupil deletes their answer back to
+  // empty (so an empty draft doesn't reappear next time).
+  app.delete('/api/classwork/questions/:questionId/draft', requireStudent, async (req, res) => {
+    try {
+      await deleteDraft((req as any).studentId, req.params.questionId);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('[classwork] draft delete error:', err);
+      res.status(500).json({ error: 'Failed to clear draft' });
     }
   });
 

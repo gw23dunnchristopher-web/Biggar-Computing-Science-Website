@@ -58,6 +58,20 @@ interface Submission {
   submitted_at: string;
 }
 
+// In-progress, auto-saved answer for one (pupil, question). Mirrors the
+// shape of a submission's answer fields so StudentAnswer can rehydrate
+// directly without remapping. The server clears the draft as soon as a
+// real submission lands, so a draft showing up here always means
+// "unsubmitted work I started but didn't finish".
+interface Draft {
+  question_id: string;
+  text_answer: string | null;
+  selected_option_label: string | null;
+  link_url: string | null;
+  file_url: string | null;
+  updated_at: string;
+}
+
 const TYPE_LABELS: Record<string, string> = {
   short: 'Short answer',
   long: 'Long answer',
@@ -91,6 +105,10 @@ export default function Lesson() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [allSubs, setAllSubs] = useState<Submission[]>([]);
+  // Pupil-only auto-saved drafts, keyed by question_id for O(1) lookup.
+  // Loaded once at lesson open; from then on each StudentAnswer manages
+  // its own write-back so we don't need to refetch on every save.
+  const [draftsByQuestion, setDraftsByQuestion] = useState<Record<string, Draft>>({});
   // Pre-fetched per-question resources, keyed by question_id. Populated by a
   // single bulk request so that each <QuestionResources> card doesn't have to
   // make its own HTTP call on mount (used to be N+1 — one per question).
@@ -113,17 +131,29 @@ export default function Lesson() {
         : role === 'teacher'
           ? api<Submission[]>(`/api/classwork/lessons/${lessonId}/submissions`).catch(() => [])
           : Promise.resolve([]);
-      const [info, qs, resMap, subs] = await Promise.all([
+      // Pupils additionally pull every auto-saved draft they have on
+      // this lesson, in the same parallel batch so a slow draft fetch
+      // never delays the page paint. Teachers don't have drafts.
+      const draftsP: Promise<Draft[]> = role === 'student'
+        ? api<Draft[]>(`/api/classwork/lessons/${lessonId}/my-drafts`).catch(() => [])
+        : Promise.resolve([]);
+      const [info, qs, resMap, subs, drafts] = await Promise.all([
         api<LessonInfo>(`/api/classwork/lessons/${lessonId}`).catch(() => null),
         api<Question[]>(`/api/classwork/lessons/${lessonId}/questions`),
         api<Record<string, LessonResource[]>>(`/api/classwork/lessons/${lessonId}/all-question-resources`).catch(() => ({})),
         submissionsP,
+        draftsP,
       ]);
       setLesson(info);
       setQuestions(qs);
       setResourcesByQuestion(resMap || {});
       if (role === 'student') setSubmissions(subs);
       else if (role === 'teacher') setAllSubs(subs);
+      if (role === 'student') {
+        const map: Record<string, Draft> = {};
+        for (const d of drafts) map[d.question_id] = d;
+        setDraftsByQuestion(map);
+      }
     } catch (e: any) {
       setErr(e.message || 'Failed to load');
     } finally {
@@ -140,6 +170,48 @@ export default function Lesson() {
   }
 
   useEffect(() => { refresh(); }, [lessonId]);
+
+  // ─── Mark questions "viewed" when they scroll into the pupil's
+  // viewport ────────────────────────────────────────────────────────────
+  // Lets teachers tell, on the analytics page, who just couldn't access
+  // a task from who actually opened it but didn't finish. We only fire
+  // ONE POST per (question, page-load), tracked via a ref-set. Teachers
+  // and the teacher's "preview as student" toggle are excluded so they
+  // don't pollute pupil view counts.
+  const viewedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (role !== 'student') return;
+    if (questions.length === 0) return;
+    if (typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const qid = (entry.target as HTMLElement).dataset.classworkQuestionId;
+          if (!qid || viewedRef.current.has(qid)) continue;
+          viewedRef.current.add(qid);
+          // Stop watching this card — we only need the first sighting.
+          io.unobserve(entry.target);
+          // Best-effort POST. Failures are silently swallowed by the
+          // server route too; nothing here should ever block the pupil.
+          const token = localStorage.getItem('studentToken') || '';
+          void fetch(`/api/classwork/questions/${qid}/view`, {
+            method: 'POST',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            keepalive: true,
+          }).catch(() => {});
+        }
+      },
+      // Fire once at least 30% of the card is on screen — generous
+      // enough that pupils who scroll past quickly still get counted,
+      // strict enough that a question barely peeking from the bottom
+      // doesn't count as "opened".
+      { threshold: 0.3 }
+    );
+    const nodes = document.querySelectorAll<HTMLElement>('[data-classwork-question-id]');
+    nodes.forEach((n) => io.observe(n));
+    return () => io.disconnect();
+  }, [role, questions]);
 
   return (
     <Shell title="Lesson" back={{ href: '/', label: 'All courses' }}>
@@ -253,7 +325,10 @@ export default function Lesson() {
           // at a glance.
           const isNoAnswer = isInfo || isTextOnly;
           return (
-            <div key={q.id} style={{
+            // data-classwork-question-id is the hook the IntersectionObserver
+            // uses to record "pupil has seen this task" — see the
+            // viewedRef effect higher up in this file.
+            <div key={q.id} data-classwork-question-id={q.id} style={{
               ...card,
               ...(isExt ? { borderColor: '#c084fc', background: '#faf5ff' } : {}),
               ...(isInfo ? { borderColor: '#93c5fd', background: '#eff6ff' } : {}),
@@ -360,7 +435,18 @@ export default function Lesson() {
                 <StudentAnswer
                   question={q}
                   previousSubmissions={mySubs}
-                  onSubmitted={refresh}
+                  draft={role === 'student' ? (draftsByQuestion[q.id] || null) : null}
+                  onSubmitted={() => {
+                    // The server clears the draft as part of createSubmission,
+                    // so drop it locally too — otherwise the next render of
+                    // this card would try to rehydrate from a stale draft.
+                    setDraftsByQuestion((m) => {
+                      if (!m[q.id]) return m;
+                      const { [q.id]: _, ...rest } = m;
+                      return rest;
+                    });
+                    refresh();
+                  }}
                   preview={role === 'teacher' && previewAsStudent}
                 />
               )}
@@ -522,9 +608,14 @@ export default function Lesson() {
   );
 }
 
-function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = false }: {
+function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, preview = false }: {
   question: Question;
   previousSubmissions: Submission[];
+  // The pupil's auto-saved in-progress answer for this question, if any.
+  // Loaded once at lesson open by the parent; mutations from this
+  // component don't need to update it because we own the latest state
+  // locally from then on.
+  draft?: Draft | null;
   onSubmitted: () => void;
   preview?: boolean;
 }) {
@@ -537,6 +628,10 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  // "Saved · just now" indicator under the answer area. Driven by the
+  // auto-save effect below so the pupil can see at a glance that their
+  // work is safely on the server.
+  const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   // python_task / html_task: list the pupil's saved code projects so they
   // can pick one and submit its latest code with one click.
   const [codeProjects, setCodeProjects] = useState<{ id: string; name: string; updatedAt: number | null }[] | null>(null);
@@ -670,6 +765,175 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
     { marksAwarded: number | null; feedback: string | null; maxMarks: number; note?: string } | null
   >(null);
 
+  // ─── Auto-save in-progress drafts ────────────────────────────────────
+  // Question types whose answer surface is a normal field that we own
+  // (text/option/url/file/cell-grid). For everything else — code editor
+  // tasks, the database sandbox, no-answer notes — the data either
+  // persists in its own store already or there's nothing to save.
+  const draftableTypes: string[] = [
+    'short', 'long', 'code', 'multiple_choice', 'video_question', 'sql_task',
+    'scratch_link', 'makecode_link', 'google_sites_link',
+    'screenshot', 'project', 'presentation',
+    'fill_in_blanks', 'table', 'labeled_inputs',
+  ];
+  const draftEnabled = !preview && draftableTypes.includes(t);
+
+  // Compute what would be saved right now from the live input state.
+  // Mirrors the field-routing in submit() so a draft round-trips back
+  // into exactly the same input slots when the pupil reloads.
+  function currentDraftPayload(): {
+    textAnswer: string | null;
+    selectedOptionLabel: string | null;
+    linkUrl: string | null;
+    fileUrl: string | null;
+  } {
+    const empty = { textAnswer: null, selectedOptionLabel: null, linkUrl: null, fileUrl: null };
+    if (t === 'multiple_choice') return { ...empty, selectedOptionLabel: option || null };
+    if (['scratch_link', 'makecode_link', 'google_sites_link'].includes(t)) {
+      return { ...empty, linkUrl: url || null };
+    }
+    if (t === 'screenshot' || t === 'presentation') {
+      return { ...empty, fileUrl: fileUrl || null };
+    }
+    if (t === 'project') {
+      return { ...empty, fileUrl: fileUrl || null, linkUrl: url || null };
+    }
+    if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs') {
+      const filled = Object.values(cellAnswers).some((v) => String(v || '').trim());
+      return { ...empty, textAnswer: filled ? JSON.stringify(cellAnswers) : null };
+    }
+    // short / long / code / video_question / sql_task — plain textarea.
+    return { ...empty, textAnswer: text || null };
+  }
+  function isPayloadEmpty(p: ReturnType<typeof currentDraftPayload>): boolean {
+    return !p.textAnswer && !p.selectedOptionLabel && !p.linkUrl && !p.fileUrl;
+  }
+
+  // Tracks "have we copied the server-side draft into our inputs yet"
+  // so the auto-save effect doesn't immediately re-PUT the same data
+  // back, and so a late draft prop arrival doesn't clobber what the
+  // pupil has just started typing.
+  const draftHydrated = useRef(false);
+  // JSON of the most recent payload we sent — used to short-circuit
+  // identical re-saves and to power the visibility/unload flush check.
+  const lastSavedJson = useRef<string>(JSON.stringify({
+    textAnswer: null, selectedOptionLabel: null, linkUrl: null, fileUrl: null,
+  }));
+
+  // One-shot draft → inputs hydration. Runs the first time we see the
+  // draft prop after mount. If there's no draft, we simply mark
+  // ourselves hydrated so the auto-save effect can take over.
+  useEffect(() => {
+    if (!draftEnabled || draftHydrated.current) return;
+    if (draft) {
+      if (draft.text_answer != null) {
+        if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs') {
+          try {
+            const parsed = JSON.parse(draft.text_answer);
+            if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
+          } catch { /* malformed — discard silently */ }
+        } else {
+          setText(draft.text_answer);
+        }
+      }
+      if (draft.selected_option_label != null) setOption(draft.selected_option_label);
+      if (draft.link_url != null) setUrl(draft.link_url);
+      if (draft.file_url != null) {
+        setFileUrl(draft.file_url);
+        setFileName(draft.file_url.split('/').pop() || 'attachment');
+      }
+      lastSavedJson.current = JSON.stringify({
+        textAnswer: draft.text_answer,
+        selectedOptionLabel: draft.selected_option_label,
+        linkUrl: draft.link_url,
+        fileUrl: draft.file_url,
+      });
+      setDraftStatus('saved');
+    }
+    draftHydrated.current = true;
+  }, [draft, draftEnabled, t]);
+
+  // Centralised draft writer used by both the debounced save and the
+  // visibility/unload flush. `keepalive` lets the request finish even
+  // when the page is being torn down.
+  async function writeDraft(payload: ReturnType<typeof currentDraftPayload>, keepalive: boolean): Promise<boolean> {
+    const token = localStorage.getItem('studentToken') || '';
+    const empty = isPayloadEmpty(payload);
+    try {
+      const res = await fetch(`/api/classwork/questions/${question.id}/draft`, {
+        method: empty ? 'DELETE' : 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: empty ? undefined : JSON.stringify(payload),
+        keepalive,
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  // Debounced auto-save — fires ~1.2 s after the pupil's last keystroke
+  // or input change. Skips identical resaves so an idle textarea never
+  // hits the server.
+  const draftTimer = useRef<number | null>(null);
+  useEffect(() => {
+    if (!draftEnabled || !draftHydrated.current) return;
+    const payload = currentDraftPayload();
+    const json = JSON.stringify(payload);
+    if (json === lastSavedJson.current) return;
+    setDraftStatus('saving');
+    if (draftTimer.current) window.clearTimeout(draftTimer.current);
+    draftTimer.current = window.setTimeout(async () => {
+      const ok = await writeDraft(payload, false);
+      if (ok) {
+        lastSavedJson.current = json;
+        setDraftStatus('saved');
+      } else {
+        setDraftStatus('error');
+      }
+    }, 1200);
+    return () => {
+      if (draftTimer.current) window.clearTimeout(draftTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text, option, url, fileUrl, fileName, cellAnswers, draftEnabled]);
+
+  // Force-flush on tab close / page hide so a pupil who slams the lid
+  // mid-sentence still keeps their work. Listeners are registered once;
+  // the flush function reads the current input state via a ref so we
+  // don't need to re-attach on every keystroke.
+  const flushRef = useRef<() => void>(() => {});
+  flushRef.current = () => {
+    if (!draftEnabled || !draftHydrated.current) return;
+    if (draftTimer.current) {
+      window.clearTimeout(draftTimer.current);
+      draftTimer.current = null;
+    }
+    const payload = currentDraftPayload();
+    const json = JSON.stringify(payload);
+    if (json === lastSavedJson.current) return;
+    // keepalive = true so the request survives the navigation/unload.
+    void writeDraft(payload, true);
+    lastSavedJson.current = json;
+  };
+  useEffect(() => {
+    if (!draftEnabled) return;
+    const onPageHide = () => flushRef.current();
+    const onVisibility = () => { if (document.visibilityState === 'hidden') flushRef.current(); };
+    window.addEventListener('pagehide', onPageHide);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      // Final flush when the answer card unmounts (e.g. the lesson
+      // re-renders after a sibling submit) so nothing in flight is lost.
+      flushRef.current();
+      window.removeEventListener('pagehide', onPageHide);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [draftEnabled]);
+
   async function submit() {
     setBusy(true);
     setMsg(preview ? 'Running AI marker…' : 'Submitting and marking…');
@@ -749,6 +1013,15 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
         setMsg('Submitted — your teacher will mark this soon.');
       }
       setText(''); setOption(''); setUrl(''); setFileUrl(''); setFileName('');
+      setCellAnswers({});
+      // The server's createSubmission() already wiped the draft row, so
+      // reset our local "what did we last save" trackers to match. That
+      // way the auto-save effect doesn't try to PUT an empty draft on
+      // top of nothing on the next render.
+      lastSavedJson.current = JSON.stringify({
+        textAnswer: null, selectedOptionLabel: null, linkUrl: null, fileUrl: null,
+      });
+      setDraftStatus('idle');
       onSubmitted();
     } catch (e: any) {
       setMsg(e.message || 'Failed to submit');
@@ -1038,7 +1311,7 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
         </div>
       )}
 
-      <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <button onClick={submit} disabled={busy || uploading || !canSubmit} style={{
           background: 'var(--cw-accent)', color: '#fff', border: 'none',
           padding: '8px 14px', borderRadius: 8, fontWeight: 600,
@@ -1046,6 +1319,25 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
           opacity: (busy || uploading || !canSubmit) ? 0.6 : 1,
         }}>{busy ? 'Submitting…' : uploading ? 'Uploading…' : 'Submit'}</button>
         {msg && <span style={{ fontSize: 14, color: 'var(--cw-muted)' }}>{msg}</span>}
+        {/* "Your draft is safe" indicator. Only shown for question types
+            where we actually run the auto-save (draftEnabled), and only
+            once we've started saving — otherwise idle answer cards would
+            sport a confusing perpetual badge. */}
+        {draftEnabled && draftStatus !== 'idle' && (
+          <span style={{
+            fontSize: 12,
+            padding: '3px 8px',
+            borderRadius: 999,
+            border: '1px solid',
+            ...(draftStatus === 'saving'
+              ? { color: '#92400e', background: '#fffbeb', borderColor: '#fcd34d' }
+              : draftStatus === 'saved'
+                ? { color: '#166534', background: '#f0fdf4', borderColor: '#86efac' }
+                : { color: '#991b1b', background: '#fef2f2', borderColor: '#fca5a5' }),
+          }} title="Your work is saved automatically as you type. If you close the tab, your answer will still be here when you come back.">
+            {draftStatus === 'saving' ? 'Saving…' : draftStatus === 'saved' ? 'Draft saved' : 'Couldn\u2019t save draft'}
+          </span>
+        )}
       </div>
 
       {last && (
