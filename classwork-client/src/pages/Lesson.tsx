@@ -74,12 +74,12 @@ const TYPE_LABELS: Record<string, string> = {
   html_task: 'HTML/CSS project (in-site editor)',
   sql_task: 'SQL task (Data Sculptor)',
   database_task: 'Database task (Data Sculptor sandbox)',
-  passage: 'Reading passage (with attached questions)',
+  passage: 'Reading passage (with attached tasks)',
   info_only: 'Information note (no answer needed)',
   fill_in_blanks: 'Fill in the blanks',
   table: 'Complete the table',
   labeled_inputs: 'Labelled inputs (multi-field answer)',
-  section_header: 'Section divider (groups the questions below)',
+  section_header: 'Section divider (groups the tasks below)',
   text_only: 'Offline task (work in your jotter)',
 };
 
@@ -140,7 +140,7 @@ export default function Lesson() {
         <LessonHeader lesson={lesson} />
       )}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginTop: lesson ? 16 : 0 }}>
-        <h1 style={{ margin: 0 }}>Questions</h1>
+        <h1 style={{ margin: 0 }}>Tasks</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           {/* "Open my jotter" — visible to BOTH pupils and teachers. Teachers
               get their own demo jotter (server keys it as "teacher:demo") so
@@ -201,7 +201,7 @@ export default function Lesson() {
       {err && <p style={{ color: 'var(--cw-danger)' }}>{err}</p>}
       {!loading && !err && questions.length === 0 && (
         <p style={{ color: 'var(--cw-muted)', marginTop: 24 }}>
-          {role === 'teacher' ? 'No questions yet — add the first one above.' : 'Your teacher hasn\u2019t added any questions yet.'}
+          {role === 'teacher' ? 'No tasks yet — add the first one above.' : 'Your teacher hasn\u2019t added any tasks yet.'}
         </p>
       )}
 
@@ -364,7 +364,7 @@ export default function Lesson() {
               )}
               {role === 'guest' && !isNoAnswer && (
                 <p style={{ marginTop: 8, color: 'var(--cw-muted)', fontSize: 14 }}>
-                  Sign in as a student to answer this question.
+                  Sign in as a student to answer this task.
                 </p>
               )}
             </div>
@@ -466,7 +466,7 @@ export default function Lesson() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   {it.children.length === 0 ? (
                     <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0 }}>
-                      No questions are attached to this passage yet.
+                      No tasks are attached to this passage yet.
                     </p>
                   ) : it.children.map((c) => {
                     qIdx++;
@@ -703,7 +703,7 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
         if (preview) {
           setPreviewResult({
             marksAwarded: null, feedback: null, maxMarks: question.max_marks,
-            note: 'Database tasks need a real pupil sandbox to mark, so this question type can\u2019t be tried in preview. Open the database link to sanity-check it manually.',
+            note: 'Database tasks need a real pupil sandbox to mark, so this task type can\u2019t be tried in preview. Open the database link to sanity-check it manually.',
           });
           setMsg(null);
           return;
@@ -785,7 +785,7 @@ function StudentAnswer({ question, previousSubmissions, onSubmitted, preview = f
           ? cfg.blanks.map((b: any) => ({ id: String(b?.id ?? '') })).filter((b: any) => b.id)
           : [];
         if (blanks.length === 0) {
-          return <span style={{ color: 'var(--cw-muted)', fontSize: 13 }}>This question has no blanks set up yet. Ask your teacher to fix it.</span>;
+          return <span style={{ color: 'var(--cw-muted)', fontSize: 13 }}>This task has no blanks set up yet. Ask your teacher to fix it.</span>;
         }
         // Render the prompt with text inputs substituted in for each {{n}}
         // marker. Anything between markers is plain text shown around them.
@@ -1292,7 +1292,7 @@ function NewQuestionButton({ lessonId, passages, onCreated }: { lessonId: string
       <button onClick={() => setOpen(true)} style={{
         background: 'var(--cw-accent)', color: '#fff', border: 'none',
         padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
-      }}>+ New question</button>
+      }}>+ New task</button>
       {open && <NewQuestionModal lessonId={lessonId} passages={passages} onClose={() => setOpen(false)} onCreated={() => { setOpen(false); onCreated(); }} />}
     </>
   );
@@ -1305,7 +1305,7 @@ function EditQuestionButton({ question, passages, onChanged }: { question: Quest
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button onClick={() => setOpen(true)} title="Edit this question" style={{
+      <button onClick={() => setOpen(true)} title="Edit this task" style={{
         background: '#fff', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
         padding: '4px 10px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
       }}>Edit</button>
@@ -1614,7 +1614,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
   return (
     <div style={modalOverlay} onClick={onClose}>
       <div style={modal} onClick={(e) => e.stopPropagation()}>
-        <h2 style={{ marginTop: 0 }}>{isEdit ? 'Edit question' : 'New question'}</h2>
+        <h2 style={{ marginTop: 0 }}>{isEdit ? 'Edit task' : 'New task'}</h2>
         <label style={fieldLabel}>Type
           <select value={type} onChange={(e) => onTypeChange(e.target.value)} style={input}>
             {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
@@ -1626,7 +1626,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             : type === 'text_only' ? 'Task description (what pupils should do in their jotter)'
             : type === 'section_header' ? 'Section title (shown as a divider, e.g. "Section A: Comprehension")'
             : type === 'fill_in_blanks' ? 'Sentence (use {{1}}, {{2}} etc. for each blank)'
-            : 'Question / prompt'}
+            : 'Task / prompt'}
           <textarea
             rows={type === 'passage' ? 8 : 3}
             value={prompt}
@@ -1635,9 +1635,9 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           />
           <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
             {type === 'passage'
-              ? 'Type or paste the paragraph pupils have to read. It will sit in a sticky panel beside its attached questions, so pupils can refer back to it as they answer.'
+              ? 'Type or paste the paragraph pupils have to read. It will sit in a sticky panel beside its attached tasks, so pupils can refer back to it as they answer.'
               : type === 'info_only'
-                ? 'A non-interactive note. Use it for instructions, a reminder or a sub-heading between questions. Pupils don\u2019t answer it and it doesn\u2019t count for marks.'
+                ? 'A non-interactive note. Use it for instructions, a reminder or a sub-heading between tasks. Pupils don\u2019t answer it and it doesn\u2019t count for marks.'
                 : type === 'fill_in_blanks'
                   ? <>Write the sentence/code with placeholders. For example: <code>The capital of France is &#123;&#123;1&#125;&#125;.</code> Each <code>&#123;&#123;id&#125;&#125;</code> becomes a text box pupils fill in.</>
                   : <>Tip: paste a URL (e.g. https://bbc.co.uk/bitesize) and it will appear as a clickable link that opens in a new window. For a friendlier label, write <code>[Bitesize lesson](https://bbc.co.uk/bitesize)</code>.</>}
@@ -1646,7 +1646,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
         {type !== 'passage' && passages.length > 0 && (
           <label style={fieldLabel}>Attach to passage (optional)
             <select value={passageId} onChange={(e) => setPassageId(e.target.value)} style={input}>
-              <option value="">— None (standalone question) —</option>
+              <option value="">— None (standalone task) —</option>
               {passages.map((p, i) => (
                 <option key={p.id} value={p.id}>
                   {passages.length > 1 ? `Passage ${i + 1}: ` : 'Passage: '}
@@ -1655,7 +1655,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
               ))}
             </select>
             <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
-              Group this question with a reading passage so pupils see the passage in a sticky panel beside it while they answer.
+              Group this task with a reading passage so pupils see the passage in a sticky panel beside it while they answer.
             </span>
           </label>
         )}
@@ -1674,7 +1674,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           <span>
             <span style={{ fontWeight: 600 }}>Extension activity</span>
             <span style={{ display: 'block', fontSize: 12, color: 'var(--cw-muted)' }}>
-              Pupils still get AI feedback and a mark, but this question is hidden from class
+              Pupils still get AI feedback and a mark, but this task is hidden from class
               analytics — it won't drag the class average down or count as missing work.
             </span>
           </span>
@@ -1716,7 +1716,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
               style={input}
             />
             <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
-              Tip: write your task instructions as a bullet-pointed list in the Question field
+              Tip: write your task instructions as a bullet-pointed list in the Task field
               above and (optionally) a data dictionary in the marking scheme — that's what gives
               the AI marker its rubric.
             </div>
@@ -1726,7 +1726,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           <div style={fieldLabel as any}>
             <div style={{ fontSize: 13, color: 'var(--cw-muted)', marginBottom: 6 }}>
               Pupils write a SQL query against a Data Sculptor database. Paste the database's
-              share link below — it will appear as an "Open the database" button on the question
+              share link below — it will appear as an "Open the database" button on the task
               so pupils can run their query in DS, then paste the SQL back to submit.
             </div>
             <input
@@ -2126,9 +2126,9 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
         )}
         {type !== 'section_header' && (
           <div style={{ marginTop: 8 }}>
-            <div style={{ ...fieldLabel, marginBottom: 4 }}>Resources for this question</div>
+            <div style={{ ...fieldLabel, marginBottom: 4 }}>Resources for this task</div>
             <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginBottom: 6 }}>
-              Attach images, documents, YouTube clips, links or embeds. Pupils see them above the answer area on this question only.
+              Attach images, documents, YouTube clips, links or embeds. Pupils see them above the answer area on this task only.
             </div>
             {isEdit ? (
               <QuestionResources questionId={existing!.id} isTeacher={true} />
@@ -2155,7 +2155,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           <button onClick={onClose} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid var(--cw-border)', background: '#fff', cursor: 'pointer' }}>Cancel</button>
           <button onClick={save} disabled={busy} style={{
             background: 'var(--cw-accent)', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
-          }}>{busy ? 'Saving…' : (isEdit ? 'Save changes' : 'Save question')}</button>
+          }}>{busy ? 'Saving…' : (isEdit ? 'Save changes' : 'Save task')}</button>
         </div>
       </div>
     </div>
@@ -2179,7 +2179,7 @@ function VideoQuestionPlayer({ config }: { config: any }) {
   if (!v || typeof v !== 'object' || !v.url) {
     return (
       <div style={{ marginTop: 10, padding: 10, border: '1px dashed var(--cw-border)', borderRadius: 8, fontSize: 14, color: 'var(--cw-muted)' }}>
-        No video has been attached to this question yet.
+        No video has been attached to this task yet.
       </div>
     );
   }
@@ -2196,7 +2196,7 @@ function VideoQuestionPlayer({ config }: { config: any }) {
       <div style={{ marginTop: 10, position: 'relative', paddingTop: '56.25%', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
         <iframe
           src={`https://www.youtube.com/embed/${id}`}
-          title="Video question"
+          title="Video task"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
@@ -2404,14 +2404,14 @@ function PendingResourcesEditor({
                 }}>×</button>
             </div>
           ))}
-          <div style={{ fontSize: 11, color: 'var(--cw-muted)' }}>These will be attached when you click <em>Save question</em>.</div>
+          <div style={{ fontSize: 11, color: 'var(--cw-muted)' }}>These will be attached when you click <em>Save task</em>.</div>
         </div>
       )}
       {!showForm ? (
         <button type="button" onClick={() => setShowForm(true)} style={{
           fontSize: 13, padding: '6px 10px', border: '1px dashed var(--cw-border)',
           background: '#fff', borderRadius: 6, cursor: 'pointer', color: 'var(--cw-muted)',
-        }}>+ Add resource to this question</button>
+        }}>+ Add resource to this task</button>
       ) : (
         <div style={{ padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff' }}>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -2560,7 +2560,7 @@ function QuestionResources({ questionId, isTeacher }: { questionId: string; isTe
             <button onClick={() => setShowForm(true)} style={{
               fontSize: 13, padding: '6px 10px', border: '1px dashed var(--cw-border)',
               background: '#fff', borderRadius: 6, cursor: 'pointer', color: 'var(--cw-muted)',
-            }}>+ Add resource to this question</button>
+            }}>+ Add resource to this task</button>
           ) : (
             <div style={{ padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff' }}>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
