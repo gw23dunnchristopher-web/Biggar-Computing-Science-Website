@@ -666,6 +666,7 @@ export default function Course() {
         title={modal.kind === 'notes'
           ? `${role === 'teacher' ? 'Demo notes' : 'Notes'} for: ${modal.unit.title}`
           : ''}
+        width={1100}
         onClose={closeModal}
         footer={<>
           <span style={{ flex: 1, fontSize: 12, color: 'var(--cw-muted)' }}>
@@ -696,7 +697,7 @@ export default function Course() {
               value={notesContent}
               onChange={setNotesContent}
               placeholder={'Jot anything you want to remember about this unit\u2014 definitions, examples, questions to ask your teacher, exam tips, etc.'}
-              minHeight={320}
+              minHeight={620}
               ariaLabel="Unit notes"
             />
           </>
