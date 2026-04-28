@@ -2766,7 +2766,10 @@ function LessonHeader({ lesson }: { lesson: LessonInfo }) {
               <h2 style={{ margin: 0, fontSize: 14, color: '#1e3a8a', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                 Learning intentions
               </h2>
-              <ul style={{ margin: '8px 0 0', paddingLeft: 20, color: 'var(--cw-ink)', fontSize: 14, lineHeight: 1.5 }}>
+              <p style={{ margin: '6px 0 0', fontSize: 13, color: '#1e3a8a', fontStyle: 'italic' }}>
+                We are learning about…
+              </p>
+              <ul style={{ margin: '4px 0 0', paddingLeft: 20, color: 'var(--cw-ink)', fontSize: 14, lineHeight: 1.5 }}>
                 {li.map((line, i) => <li key={i}>{line}</li>)}
               </ul>
             </section>
@@ -2779,7 +2782,10 @@ function LessonHeader({ lesson }: { lesson: LessonInfo }) {
               <h2 style={{ margin: 0, fontSize: 14, color: '#065f46', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                 Success criteria
               </h2>
-              <ul style={{ margin: '8px 0 0', paddingLeft: 20, color: 'var(--cw-ink)', fontSize: 14, lineHeight: 1.5 }}>
+              <p style={{ margin: '6px 0 0', fontSize: 13, color: '#065f46', fontStyle: 'italic' }}>
+                I am looking for you to…
+              </p>
+              <ul style={{ margin: '4px 0 0', paddingLeft: 20, color: 'var(--cw-ink)', fontSize: 14, lineHeight: 1.5 }}>
                 {sc.map((line, i) => <li key={i}>{line}</li>)}
               </ul>
             </section>
