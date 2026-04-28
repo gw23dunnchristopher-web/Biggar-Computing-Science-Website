@@ -69,11 +69,16 @@ export function ensureClassworkSchema(): Promise<void> {
           course VARCHAR(16) NOT NULL,
           title TEXT NOT NULL,
           description TEXT,
+          image_url TEXT,
           order_index INTEGER DEFAULT 0,
           created_at TIMESTAMP DEFAULT NOW()
         );
       `);
       await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_units_course ON bhs_classwork_units(course);`);
+      // Back-compat for installs that pre-date the image_url field. Same
+      // additive pattern used elsewhere in this schema (see the
+      // n5_classes course column further down). Idempotent.
+      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS image_url TEXT;`);
 
       await client.query(`
         CREATE TABLE IF NOT EXISTS bhs_classwork_lessons (
@@ -477,7 +482,7 @@ export function newId(prefix: string): string {
 export async function listUnits(course: ClassworkCourse) {
   await ensureClassworkSchema();
   const r = await pool.query(
-    `SELECT id, course, title, description, order_index, created_at
+    `SELECT id, course, title, description, image_url, order_index, created_at
        FROM bhs_classwork_units
       WHERE course = $1
       ORDER BY order_index ASC, created_at ASC`,
@@ -486,19 +491,30 @@ export async function listUnits(course: ClassworkCourse) {
   return r.rows;
 }
 
-export async function createUnit(course: ClassworkCourse, title: string, description?: string, orderIndex?: number) {
+export async function createUnit(
+  course: ClassworkCourse,
+  title: string,
+  description?: string,
+  orderIndex?: number,
+  imageUrl?: string | null,
+) {
   await ensureClassworkSchema();
   const id = newId('unit');
   const r = await pool.query(
-    `INSERT INTO bhs_classwork_units (id, course, title, description, order_index)
-     VALUES ($1, $2, $3, $4, $5)
-     RETURNING id, course, title, description, order_index, created_at`,
-    [id, course, title, description ?? null, orderIndex ?? 0]
+    `INSERT INTO bhs_classwork_units (id, course, title, description, image_url, order_index)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     RETURNING id, course, title, description, image_url, order_index, created_at`,
+    [id, course, title, description ?? null, imageUrl ?? null, orderIndex ?? 0]
   );
   return r.rows[0];
 }
 
-export async function updateUnit(id: string, fields: { title?: string; description?: string; orderIndex?: number }) {
+export async function updateUnit(id: string, fields: {
+  title?: string;
+  description?: string | null;
+  orderIndex?: number;
+  imageUrl?: string | null;
+}) {
   await ensureClassworkSchema();
   const sets: string[] = [];
   const vals: any[] = [];
@@ -506,6 +522,8 @@ export async function updateUnit(id: string, fields: { title?: string; descripti
   if (fields.title !== undefined) { sets.push(`title = $${i++}`); vals.push(fields.title); }
   if (fields.description !== undefined) { sets.push(`description = $${i++}`); vals.push(fields.description); }
   if (fields.orderIndex !== undefined) { sets.push(`order_index = $${i++}`); vals.push(fields.orderIndex); }
+  // imageUrl: pass `null` to clear the unit thumbnail, a URL to set it.
+  if (fields.imageUrl !== undefined) { sets.push(`image_url = $${i++}`); vals.push(fields.imageUrl); }
   if (!sets.length) return null;
   vals.push(id);
   const r = await pool.query(

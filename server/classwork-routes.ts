@@ -317,10 +317,18 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
   app.post('/api/classwork/:course/units', requireTeacher, async (req, res) => {
     const course = req.params.course;
     if (!isClassworkCourse(course)) return res.status(400).json({ error: 'Invalid course' });
-    const { title, description, orderIndex } = req.body || {};
+    const { title, description, orderIndex, imageUrl } = req.body || {};
     if (!title || typeof title !== 'string') return res.status(400).json({ error: 'title required' });
     try {
-      const unit = await createUnit(course, title.trim(), description, orderIndex);
+      const unit = await createUnit(
+        course,
+        title.trim(),
+        description,
+        orderIndex,
+        // Normalise empty strings to null so the DB doesn't store an
+        // "" that the client then has to special-case.
+        typeof imageUrl === 'string' && imageUrl.trim() ? imageUrl.trim() : null,
+      );
       res.json(unit);
     } catch (err) {
       console.error('[classwork] createUnit error:', err);

@@ -5,7 +5,17 @@ import RichTextEditor from '@/components/RichTextEditor';
 import Modal, { modalPrimaryBtn, modalSecondaryBtn, modalDangerBtn, modalLabel, modalInput } from '@/components/Modal';
 import { api, getCurrentRole } from '@/lib/api';
 
-interface Unit { id: string; title: string; description: string | null; course: string; }
+interface Unit {
+  id: string;
+  title: string;
+  description: string | null;
+  course: string;
+  // Optional small thumbnail rendered to the left of the unit title in
+  // the course view. Set by teachers via the New/Edit unit modal — they
+  // can either paste an existing URL or upload a fresh image which the
+  // server stores under /uploads.
+  image_url: string | null;
+}
 interface Lesson {
   id: string; unit_id: string; title: string; description: string | null;
   learning_intentions?: string | null;
@@ -26,6 +36,7 @@ const COURSE_LABELS: Record<string, string> = {
 type ModalState =
   | { kind: 'none' }
   | { kind: 'addUnit' }
+  | { kind: 'editUnit'; unit: Unit }
   | { kind: 'addLesson'; unitId: string }
   | { kind: 'editLesson'; lesson: Lesson }
   | { kind: 'deleteUnit'; unit: Unit }
@@ -53,6 +64,13 @@ export default function Course() {
   const [dragOverLessonId, setDragOverLessonId] = useState<string | null>(null);
   const [dragOverPos, setDragOverPos] = useState<'before' | 'after'>('before');
   const [titleInput, setTitleInput] = useState('');
+  // Shared by both the New unit and Edit unit modals — these capture the
+  // optional description and thumbnail image that decorate each unit
+  // header on the course page. `unitImageUploading` drives the disabled
+  // state on the upload button while a file is in flight.
+  const [unitDescInput, setUnitDescInput] = useState('');
+  const [unitImageUrl, setUnitImageUrl] = useState('');
+  const [unitImageUploading, setUnitImageUploading] = useState(false);
   const [editLI, setEditLI] = useState('');
   const [editSC, setEditSC] = useState('');
   const [editResources, setEditResources] = useState<Resource[]>([]);
@@ -134,8 +152,53 @@ export default function Course() {
   useEffect(() => { refresh(); }, [course]);
 
   function openAddUnit() {
-    setTitleInput(''); setModalErr(null);
+    setTitleInput(''); setUnitDescInput(''); setUnitImageUrl('');
+    setModalErr(null);
     setModal({ kind: 'addUnit' });
+  }
+  function openEditUnit(unit: Unit) {
+    setTitleInput(unit.title);
+    setUnitDescInput(unit.description || '');
+    setUnitImageUrl(unit.image_url || '');
+    setModalErr(null);
+    setModal({ kind: 'editUnit', unit });
+  }
+
+  // Reuses the same teacher resource upload endpoint used elsewhere on
+  // this page — returns a public /uploads URL we can persist as the
+  // unit's `image_url`. Surfaces failures via `modalErr` so the
+  // currently-open New/Edit unit modal shows the message inline.
+  async function uploadUnitImage(file: File) {
+    setModalErr(null);
+    if (!file.type.startsWith('image/')) {
+      setModalErr('Please choose an image file (PNG, JPG, GIF, …).');
+      return;
+    }
+    setUnitImageUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const teacherToken = (() => {
+        try { return localStorage.getItem('teacher_token') || localStorage.getItem('teacherToken') || ''; }
+        catch { return ''; }
+      })();
+      const headers: Record<string, string> = {};
+      if (teacherToken) headers['x-teacher-password'] = teacherToken;
+      const res = await fetch('/api/classwork/teacher/upload/resource', {
+        method: 'POST', headers, body: fd,
+      });
+      if (!res.ok) {
+        let msg = `Upload failed (${res.status})`;
+        try { const j = await res.json(); if (j?.error) msg = j.error; } catch {}
+        throw new Error(msg);
+      }
+      const up = await res.json() as { url: string; filename: string };
+      setUnitImageUrl(up.url);
+    } catch (e: any) {
+      setModalErr(e.message || 'Upload failed');
+    } finally {
+      setUnitImageUploading(false);
+    }
   }
   function openAddLesson(unitId: string) {
     setTitleInput(''); setModalErr(null);
@@ -243,7 +306,32 @@ export default function Course() {
     if (!title) { setModalErr('Title is required.'); return; }
     try {
       await api(`/api/classwork/${course}/units`, {
-        method: 'POST', body: JSON.stringify({ title, orderIndex: units.length }),
+        method: 'POST',
+        body: JSON.stringify({
+          title,
+          description: unitDescInput.trim() || null,
+          imageUrl: unitImageUrl.trim() || null,
+          orderIndex: units.length,
+        }),
+      });
+      closeModal();
+      refresh();
+    } catch (e: any) { setModalErr(e.message); }
+  }
+
+  async function submitEditUnit(unit: Unit) {
+    const title = titleInput.trim();
+    if (!title) { setModalErr('Title is required.'); return; }
+    try {
+      await api(`/api/classwork/units/${unit.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          title,
+          description: unitDescInput.trim() || null,
+          // Pass `null` to clear, a URL to set. The server's updateUnit
+          // whitelists this field.
+          imageUrl: unitImageUrl.trim() || null,
+        }),
       });
       closeModal();
       refresh();
@@ -393,9 +481,17 @@ export default function Course() {
           const lessons = lessonsByUnit[u.id] || [];
           return (
             <div key={u.id} style={card}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <h2 style={{ margin: 0, fontSize: 20 }}>{u.title}</h2>
-                <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                {/* Title + thumbnail. The image sits flush to the left of
+                    the heading so the unit list reads like a card grid even
+                    on a single column. If a unit has no image_url we render
+                    a soft placeholder square (initial letter) so every row
+                    keeps the same alignment and rhythm. */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+                  <UnitThumb url={u.image_url} title={u.title} />
+                  <h2 style={{ margin: 0, fontSize: 20, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.title}</h2>
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                   {role === 'student' && (
                     <button
                       onClick={() => openNotes(u)}
@@ -414,6 +510,11 @@ export default function Course() {
                         title="Open the demo notes for this unit — what pupils see when they click their own 'My notes'"
                       >Demo notes</button>
                       <button onClick={() => openAddLesson(u.id)} style={secondaryBtn}>+ Lesson</button>
+                      <button
+                        onClick={() => openEditUnit(u)}
+                        style={secondaryBtn}
+                        title="Change the unit title, description or image"
+                      >Edit unit</button>
                       <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteUnit', unit: u }); }} style={dangerBtn}>Delete unit</button>
                     </>
                   )}
@@ -547,7 +648,7 @@ export default function Course() {
         onClose={closeModal}
         footer={<>
           <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
-          <button onClick={submitAddUnit} style={modalPrimaryBtn}>Create unit</button>
+          <button onClick={submitAddUnit} style={modalPrimaryBtn} disabled={unitImageUploading}>Create unit</button>
         </>}
       >
         <div>
@@ -560,6 +661,63 @@ export default function Course() {
             style={modalInput}
           />
         </div>
+        <div style={{ marginTop: 12 }}>
+          <label style={modalLabel}>Description (optional)</label>
+          <input
+            value={unitDescInput}
+            onChange={(e) => setUnitDescInput(e.target.value)}
+            placeholder="A short blurb shown under the unit title"
+            style={modalInput}
+          />
+        </div>
+        <UnitImageField
+          imageUrl={unitImageUrl}
+          uploading={unitImageUploading}
+          onUrlChange={setUnitImageUrl}
+          onPickFile={uploadUnitImage}
+          onClear={() => setUnitImageUrl('')}
+        />
+        {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
+      </Modal>
+
+      <Modal
+        open={modal.kind === 'editUnit'}
+        title={modal.kind === 'editUnit' ? `Edit "${modal.unit.title}"` : ''}
+        onClose={closeModal}
+        footer={<>
+          <button onClick={closeModal} style={modalSecondaryBtn}>Cancel</button>
+          <button
+            onClick={() => modal.kind === 'editUnit' && submitEditUnit(modal.unit)}
+            style={modalPrimaryBtn}
+            disabled={unitImageUploading}
+          >Save unit</button>
+        </>}
+      >
+        <div>
+          <label style={modalLabel}>Unit title</label>
+          <input
+            autoFocus value={titleInput}
+            onChange={(e) => setTitleInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter' && modal.kind === 'editUnit') submitEditUnit(modal.unit); }}
+            style={modalInput}
+          />
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <label style={modalLabel}>Description (optional)</label>
+          <input
+            value={unitDescInput}
+            onChange={(e) => setUnitDescInput(e.target.value)}
+            placeholder="A short blurb shown under the unit title"
+            style={modalInput}
+          />
+        </div>
+        <UnitImageField
+          imageUrl={unitImageUrl}
+          uploading={unitImageUploading}
+          onUrlChange={setUnitImageUrl}
+          onPickFile={uploadUnitImage}
+          onClear={() => setUnitImageUrl('')}
+        />
         {modalErr && <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{modalErr}</p>}
       </Modal>
 
@@ -866,3 +1024,115 @@ const dangerBtn: React.CSSProperties = {
   background: '#fee2e2', color: 'var(--cw-danger)', border: '1px solid #fecaca',
   padding: '6px 12px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 13,
 };
+
+// Small square thumbnail rendered to the left of every unit title on the
+// course page. When a unit has no image set we fall back to a soft
+// placeholder showing the unit's first letter so every row stays visually
+// aligned (no awkward "missing image" gap).
+function UnitThumb({ url, title }: { url: string | null; title: string }) {
+  const size = 56;
+  const base: React.CSSProperties = {
+    width: size, height: size, borderRadius: 10, flexShrink: 0,
+    border: '1px solid var(--cw-border)', overflow: 'hidden',
+  };
+  if (url) {
+    return (
+      <img
+        src={url}
+        alt=""
+        style={{ ...base, objectFit: 'cover', display: 'block', background: '#f8fafc' }}
+      />
+    );
+  }
+  const letter = (title || '?').trim().charAt(0).toUpperCase() || '?';
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        ...base,
+        background: 'linear-gradient(135deg, #e2e8f0, #cbd5e1)',
+        color: '#475569',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontWeight: 700, fontSize: 22,
+      }}
+    >{letter}</div>
+  );
+}
+
+// The shared image-picker block used inside both the New unit and Edit
+// unit modals. Teachers can either paste an existing URL or upload a
+// fresh image file (which goes through the standard teacher upload
+// endpoint). A live preview reassures them the URL actually resolves
+// before they hit Save.
+function UnitImageField(props: {
+  imageUrl: string;
+  uploading: boolean;
+  onUrlChange: (url: string) => void;
+  onPickFile: (file: File) => void;
+  onClear: () => void;
+}) {
+  const { imageUrl, uploading, onUrlChange, onPickFile, onClear } = props;
+  return (
+    <div style={{ marginTop: 12 }}>
+      <label style={modalLabel}>Unit image (optional)</label>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt="Unit thumbnail preview"
+            style={{
+              width: 56, height: 56, borderRadius: 10,
+              border: '1px solid var(--cw-border)', objectFit: 'cover',
+              background: '#f8fafc', flexShrink: 0,
+            }}
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            style={{
+              width: 56, height: 56, borderRadius: 10, flexShrink: 0,
+              border: '1px dashed var(--cw-border)',
+              background: '#f8fafc', color: '#94a3b8',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 12, textAlign: 'center', padding: 4,
+            }}
+          >No image</div>
+        )}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <input
+            value={imageUrl}
+            onChange={(e) => onUrlChange(e.target.value)}
+            placeholder="Paste an image URL, or use Upload →"
+            style={modalInput}
+          />
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <label style={{ ...modalSecondaryBtn, cursor: uploading ? 'wait' : 'pointer', opacity: uploading ? 0.6 : 1 }}>
+              {uploading ? 'Uploading…' : 'Upload image'}
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                disabled={uploading}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  // Reset the input so the same file can be re-picked
+                  // after a failed upload.
+                  e.target.value = '';
+                  if (f) onPickFile(f);
+                }}
+              />
+            </label>
+            {imageUrl && (
+              <button type="button" onClick={onClear} style={modalSecondaryBtn} disabled={uploading}>
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+      <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--cw-muted)' }}>
+        Shown as a small thumbnail beside the unit title. Square or landscape images work best.
+      </p>
+    </div>
+  );
+}
