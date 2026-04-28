@@ -32,17 +32,52 @@ function ExtLink({ href, label }: { href: string; label: string }) {
   );
 }
 
-function PromptImage({ src, alt }: { src: string; alt: string }) {
+// Image alignment options exposed to teachers. "center" is the default and
+// renders as a full-width block with the text breaking before and after the
+// image. "left" / "right" float the image so surrounding text wraps around
+// it, like a typical word-processor inline image.
+export type PromptImageAlign = 'center' | 'left' | 'right';
+
+// Pull an optional alignment hint off the end of the alt text. Teachers
+// shouldn't have to learn this syntax — the prompt editor manages it for
+// them — but it's deliberately simple so a teacher who *does* read the
+// markdown can tweak it by hand. Examples:
+//   ![diagram|left](url)   → wrap text on the right
+//   ![diagram|right](url)  → wrap text on the left
+//   ![diagram](url)        → centered block (default)
+// Both UK ("centre") and US ("center") spellings are accepted on input.
+export function parsePromptImageAlt(rawAlt: string): { alt: string; align: PromptImageAlign } {
+  const m = /^(.*?)\s*\|\s*(left|right|center|centre)\s*$/i.exec(rawAlt);
+  if (!m) return { alt: rawAlt, align: 'center' };
+  const a = m[2].toLowerCase();
+  return {
+    alt: m[1],
+    align: a === 'left' ? 'left' : a === 'right' ? 'right' : 'center',
+  };
+}
+
+function PromptImage({ src, alt, align }: { src: string; alt: string; align: PromptImageAlign }) {
   // Inline image embedded in a prompt. Constrained to a reasonable size so a
   // huge screenshot can't blow out the layout, and clickable so pupils can
   // open it full-size in a new tab.
+  //
+  // Centered images take a full block of their own. Left/right alignment
+  // floats the image so the prompt text flows around it; the max width is
+  // capped at 50% so there's always enough space for at least one column of
+  // text alongside.
+  const linkStyle: React.CSSProperties =
+    align === 'center'
+      ? { display: 'block', margin: '8px auto', textAlign: 'center', clear: 'both' }
+      : align === 'left'
+        ? { float: 'left', margin: '4px 12px 8px 0', maxWidth: '50%' }
+        : { float: 'right', margin: '4px 0 8px 12px', maxWidth: '50%' };
   return (
-    <a href={src} target="_blank" rel="noopener noreferrer"
-      style={{ display: 'block', margin: '8px 0' }}>
+    <a href={src} target="_blank" rel="noopener noreferrer" style={linkStyle}>
       <img
         src={src}
         alt={alt || 'Image'}
         style={{
+          display: 'block',
           maxWidth: '100%', maxHeight: 360, height: 'auto',
           borderRadius: 8, border: '1px solid var(--cw-border)',
           background: '#fff', cursor: 'zoom-in',
@@ -102,9 +137,10 @@ export default function PromptText({ text }: { text: string }) {
     if (nextStart > i) out.push(<Fragment key={key++}>{text.slice(i, nextStart)}</Fragment>);
 
     if (kind === 'img' && imgMatch) {
-      const [whole, alt, src] = imgMatch;
+      const [whole, rawAlt, src] = imgMatch;
       if (isSafeImageUrl(src)) {
-        out.push(<PromptImage key={key++} src={src} alt={alt} />);
+        const { alt, align } = parsePromptImageAlt(rawAlt);
+        out.push(<PromptImage key={key++} src={src} alt={alt} align={align} />);
       } else {
         out.push(<Fragment key={key++}>{whole}</Fragment>);
       }
@@ -128,5 +164,14 @@ export default function PromptText({ text }: { text: string }) {
     }
   }
 
-  return <>{out}</>;
+  // Wrap in a block-level span so floated images are contained within the
+  // prompt's bounding box: the trailing zero-height div with `clear: both`
+  // is a classic float clearfix that stops a tall floated image from
+  // spilling text into the next prompt or UI element below.
+  return (
+    <span style={{ display: 'block' }}>
+      {out}
+      <span style={{ display: 'block', clear: 'both' }} />
+    </span>
+  );
 }

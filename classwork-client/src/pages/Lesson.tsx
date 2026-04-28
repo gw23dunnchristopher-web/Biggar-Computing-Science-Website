@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
-import PromptText from '@/components/PromptText';
+import PromptText, { parsePromptImageAlt, type PromptImageAlign } from '@/components/PromptText';
 import { api, getCurrentRole } from '@/lib/api';
 
 interface LessonInfo {
@@ -1774,8 +1774,120 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
               {promptImageBusy ? 'Uploading image…' : promptImageErr}
             </span>
           )}
+          {(() => {
+            // Find every image markdown tag currently in the prompt and
+            // render a small row of alignment controls per image. We
+            // re-scan on every render (the prompt is short, and this keeps
+            // the controls perfectly in sync with manual edits to the
+            // markdown). The teacher can preview the image, see its alt
+            // text and pick one of three layouts: centered (block, the
+            // default), wrap left (image floats left, text wraps right) or
+            // wrap right (mirror).
+            const re = /!\[([^\]]*)\]\((https?:\/\/[^\s)]+|\/[^\s)]+)\)/g;
+            const found: { whole: string; alt: string; src: string; align: PromptImageAlign }[] = [];
+            let m: RegExpExecArray | null;
+            while ((m = re.exec(prompt)) !== null) {
+              const { alt, align } = parsePromptImageAlt(m[1]);
+              found.push({ whole: m[0], alt, src: m[2], align });
+            }
+            if (!found.length) return null;
+            const setAlign = (img: { whole: string; alt: string; src: string }, next: PromptImageAlign) => {
+              const altPiece = img.alt || 'image';
+              const newAlt = next === 'center' ? altPiece : `${altPiece}|${next}`;
+              const replacement = `![${newAlt}](${img.src})`;
+              setPrompt((cur) => cur.replace(img.whole, replacement));
+            };
+            const removeImage = (img: { whole: string }) => {
+              setPrompt((cur) => {
+                // Strip the markdown plus a single trailing newline if
+                // present so removal doesn't leave an empty line behind.
+                const idx = cur.indexOf(img.whole);
+                if (idx === -1) return cur;
+                const end = idx + img.whole.length;
+                const swallowNewline = cur[end] === '\n' ? 1 : 0;
+                return cur.slice(0, idx) + cur.slice(end + swallowNewline);
+              });
+            };
+            const btnBase: React.CSSProperties = {
+              padding: '4px 8px', fontSize: 11, borderRadius: 6,
+              border: '1px solid var(--cw-border)', background: '#fff',
+              cursor: 'pointer', lineHeight: 1.2,
+            };
+            const btnActive: React.CSSProperties = {
+              ...btnBase,
+              background: 'var(--cw-accent)', color: '#0b1220',
+              borderColor: 'var(--cw-accent)', fontWeight: 600,
+            };
+            return (
+              <div style={{
+                marginTop: 8, padding: 8, borderRadius: 8,
+                border: '1px solid var(--cw-border)', background: 'rgba(15,23,42,0.02)',
+                display: 'flex', flexDirection: 'column', gap: 8,
+              }}>
+                <span style={{ fontSize: 12, color: 'var(--cw-muted)', fontWeight: 600 }}>
+                  Image layout ({found.length} image{found.length === 1 ? '' : 's'} in this task)
+                </span>
+                {found.map((img, idx) => (
+                  <div key={`${img.src}-${idx}`} style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: 6, borderRadius: 6, background: '#fff',
+                    border: '1px solid var(--cw-border)',
+                  }}>
+                    <img
+                      src={img.src}
+                      alt=""
+                      style={{
+                        width: 56, height: 40, objectFit: 'cover',
+                        borderRadius: 4, border: '1px solid var(--cw-border)',
+                        background: '#fff', flexShrink: 0,
+                      }}
+                    />
+                    <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--cw-muted)' }}>
+                      <div style={{
+                        whiteSpace: 'nowrap', overflow: 'hidden',
+                        textOverflow: 'ellipsis', color: 'var(--cw-fg)',
+                      }}>
+                        {img.alt || <em>image</em>}
+                      </div>
+                      <div style={{
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {img.src}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                      <button type="button"
+                        onClick={() => setAlign(img, 'left')}
+                        title="Wrap text on the right (image floats left)"
+                        style={img.align === 'left' ? btnActive : btnBase}>
+                        ⇦ Left
+                      </button>
+                      <button type="button"
+                        onClick={() => setAlign(img, 'center')}
+                        title="Centered, full-width block"
+                        style={img.align === 'center' ? btnActive : btnBase}>
+                        ▭ Centre
+                      </button>
+                      <button type="button"
+                        onClick={() => setAlign(img, 'right')}
+                        title="Wrap text on the left (image floats right)"
+                        style={img.align === 'right' ? btnActive : btnBase}>
+                        Right ⇨
+                      </button>
+                      <button type="button"
+                        onClick={() => removeImage(img)}
+                        title="Remove this image from the task"
+                        style={{ ...btnBase, color: 'var(--cw-danger, #b91c1c)' }}>
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
           <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
-            <strong>Tip:</strong> paste a screenshot (Ctrl/Cmd+V) or drag an image file straight into this box and it will be uploaded and inserted automatically.
+            <strong>Tip:</strong> paste a screenshot (Ctrl/Cmd+V) or drag an image file straight into this box and it will be uploaded and inserted automatically. Each image gets its own layout chooser below — pick centred, wrap-left or wrap-right.
           </span>
           <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
             {type === 'passage'
