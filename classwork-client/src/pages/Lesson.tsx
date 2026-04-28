@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useRoute } from 'wouter';
+import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
 import PromptText from '@/components/PromptText';
 import { api, getCurrentRole } from '@/lib/api';
