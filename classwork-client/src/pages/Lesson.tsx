@@ -80,7 +80,7 @@ const TYPE_LABELS: Record<string, string> = {
   table: 'Complete the table',
   labeled_inputs: 'Labelled inputs (multi-field answer)',
   section_header: 'Section divider (groups the tasks below)',
-  text_only: 'Offline task (work in your jotter)',
+  text_only: 'Jotter task (write the answer in your jotter)',
 };
 
 export default function Lesson() {
@@ -249,7 +249,7 @@ export default function Lesson() {
           const isTextOnly = q.question_type === 'text_only';
           // Both info_only and text_only are "no answer" cards. Treat them
           // uniformly for the gates that hide the answer area, but use a
-          // distinct cyan tint for text_only so pupils can spot offline tasks
+          // distinct cyan tint for text_only so pupils can spot jotter tasks
           // at a glance.
           const isNoAnswer = isInfo || isTextOnly;
           return (
@@ -338,8 +338,9 @@ export default function Lesson() {
                   gap: 12, flexWrap: 'wrap',
                 }}>
                   <span style={{ color: '#0e7490', fontSize: 14 }}>
-                    No answer to type here &mdash; do this task in your jotter
-                    (writing, sketches, screenshots&hellip;).
+                    <strong>Jotter task</strong> &mdash; write your answer in
+                    your jotter (typed notes, sketches, screenshots&hellip;)
+                    instead of typing it here.
                   </span>
                   <Link
                     href="/jotter"
@@ -2416,10 +2417,10 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             background: '#ecfeff', border: '1px solid #67e8f9',
             color: '#0e7490', fontSize: 13, lineHeight: 1.45,
           }}>
-            <strong>No marking needed.</strong> Offline tasks don’t need a
-            marking scheme or AI guidance — pupils do the work in their jotter
-            and there’s nothing for the AI marker to score, so those fields
-            are skipped.
+            <strong>No marking needed.</strong> Jotter tasks don’t need a
+            marking scheme or AI guidance — pupils write the answer in their
+            jotter and there’s nothing for the AI marker to score, so those
+            fields are skipped.
           </div>
         )}
         {err && <div style={{ color: 'var(--cw-danger)', fontSize: 14, marginTop: 6 }}>{err}</div>}

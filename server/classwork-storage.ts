@@ -38,11 +38,11 @@ export const CLASSWORK_QUESTION_TYPES = [
   // Like info_only it has no marks, no answer area, and is excluded from
   // analytics queries. Pupils see it rendered as a banner ("Section A: …").
   'section_header',
-  // Offline task — student does the work in their jotter (write a note,
-  // draw a diagram, paste a screenshot, etc.). No digital answer collected,
-  // no marks, hidden from analytics — same family as info_only and
-  // section_header but framed as a task to do, with the jotter link
-  // surfaced prominently next to it.
+  // Jotter task — pupil writes the answer in their jotter (typed notes,
+  // sketches, screenshots, etc.) instead of typing it into the page. No
+  // digital answer collected, no marks, hidden from analytics — same family
+  // as info_only and section_header but framed as a task to do, with the
+  // jotter link surfaced prominently next to it.
   'text_only',
 ] as const;
 export type ClassworkQuestionType = (typeof CLASSWORK_QUESTION_TYPES)[number];
