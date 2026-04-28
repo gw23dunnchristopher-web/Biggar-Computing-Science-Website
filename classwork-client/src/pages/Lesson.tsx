@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
 import PromptText, { parsePromptImageAlt, type PromptImageAlign } from '@/components/PromptText';
@@ -1673,6 +1673,11 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
   // this state is unused — we mount the live <QuestionResources> panel for
   // the existing question id instead.
   const [pendingResources, setPendingResources] = useState<{ kind: LessonResource['kind']; title: string; url: string }[]>([]);
+  // Lets save() sweep up any in-progress draft (e.g. a teacher pasted a
+  // YouTube URL but never clicked the inner "Add" button) before POSTing
+  // resources to the freshly-created question. See PendingResourcesEditor
+  // for the flush() contract.
+  const pendingEditorRef = useRef<PendingResourcesEditorHandle>(null);
   // fill_in_blanks: each blank has an `id` (referenced from the prompt as
   // `{{id}}`) and a comma-separated list of accepted answers (case- and
   // whitespace-insensitive on the marker side).
@@ -2027,6 +2032,11 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           method: 'PATCH', body: JSON.stringify(body),
         });
       } else {
+        // Sweep up any in-progress draft from the resources editor (e.g. a
+        // teacher pasted a YouTube URL but never clicked the inner "Add"
+        // button). flush() returns the final list synchronously so we don't
+        // race React's setState batching here.
+        const finalResources = pendingEditorRef.current?.flush() ?? pendingResources;
         const created = await api<{ id: string }>(`/api/classwork/lessons/${lessonId}/questions`, {
           method: 'POST', body: JSON.stringify(body),
         });
@@ -2034,8 +2044,8 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
         // saving. Failures are surfaced but the question itself is already
         // created, so we still close the modal and let them retry from the
         // per-question resources panel on the lesson page.
-        if (created?.id && pendingResources.length > 0) {
-          for (const r of pendingResources) {
+        if (created?.id && finalResources.length > 0) {
+          for (const r of finalResources) {
             try {
               await api(`/api/classwork/questions/${created.id}/resources`, {
                 method: 'POST',
@@ -2805,6 +2815,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
               <QuestionResources questionId={existing!.id} isTeacher={true} />
             ) : (
               <PendingResourcesEditor
+                ref={pendingEditorRef}
                 items={pendingResources}
                 onChange={setPendingResources}
               />
@@ -3023,20 +3034,53 @@ function renderResource(r: LessonResource): React.ReactNode {
 /* Lightweight resources editor used inside the New-question modal where the
    question doesn't have an id yet. Mirrors the look of <QuestionResources>
    but stages everything in local state; the parent modal POSTs each entry
-   to /api/classwork/questions/:newId/resources after the question is saved. */
-function PendingResourcesEditor({
-  items,
-  onChange,
-}: {
-  items: { kind: LessonResource['kind']; title: string; url: string }[];
-  onChange: (next: { kind: LessonResource['kind']; title: string; url: string }[]) => void;
-}) {
+   to /api/classwork/questions/:newId/resources after the question is saved.
+
+   Two safety nets prevent the "I added a resource but it didn't appear"
+   bug class:
+     - Uploaded files (image/document) are auto-staged the moment the
+       upload succeeds — picking a file IS the "I want this" signal, so
+       making teachers click an extra "Add" button is needless friction.
+     - The parent modal can call `flush()` via the exposed ref right
+       before saving the task; that grabs the open URL/embed/youtube
+       form's draft (if any) and appends it to the staged list, so a
+       teacher who types a URL and hits Save without clicking Add still
+       gets their resource attached. flush() returns the final list
+       synchronously so the parent doesn't have to wait on a setState. */
+type PendingResource = { kind: LessonResource['kind']; title: string; url: string };
+export type PendingResourcesEditorHandle = { flush: () => PendingResource[] };
+
+const PendingResourcesEditor = forwardRef<PendingResourcesEditorHandle, {
+  items: PendingResource[];
+  onChange: (next: PendingResource[]) => void;
+}>(function PendingResourcesEditor({ items, onChange }, ref) {
   const [showForm, setShowForm] = useState(false);
   const [kind, setKind] = useState<LessonResource['kind']>('image');
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  // Expose a flush handle so the parent's Save handler can sweep up any
+  // resource the teacher composed but never clicked "Add" on. Returns the
+  // resulting list synchronously so the parent doesn't have to dance
+  // around setState batching.
+  useImperativeHandle(ref, () => ({
+    flush: () => {
+      const trimmedUrl = url.trim();
+      // Only flush a draft for the URL-paste kinds. Image/document drafts
+      // are auto-staged at upload time, so a leftover `url` here would
+      // already be in `items`.
+      const draftable = kind === 'youtube' || kind === 'link' || kind === 'embed';
+      if (showForm && draftable && trimmedUrl) {
+        const next = [...items, { kind, title: title.trim(), url: trimmedUrl }];
+        onChange(next);
+        setShowForm(false); setUrl(''); setTitle(''); setKind('image'); setErr(null);
+        return next;
+      }
+      return items;
+    },
+  }), [items, showForm, url, kind, title, onChange]);
 
   async function uploadFile(file: File) {
     setBusy(true); setErr(null);
@@ -3051,8 +3095,13 @@ function PendingResourcesEditor({
       const r = await fetch('/api/classwork/teacher/upload/resource', { method: 'POST', headers, body: fd });
       const data = await r.json();
       if (!r.ok) throw new Error(data?.error || 'Upload failed');
-      setUrl(data.url);
-      if (!title) setTitle(data.filename || file.name);
+      // Auto-stage: a successful upload IS the "Add" action for files.
+      // Without this, teachers commonly upload a file then click the
+      // outer Save without hitting the inner Add button, and the
+      // resource silently never gets attached.
+      const stagedTitle = (title.trim() || data.filename || file.name);
+      onChange([...items, { kind, title: stagedTitle, url: data.url }]);
+      setShowForm(false); setKind('image'); setTitle(''); setUrl('');
     } catch (e: any) {
       setErr(e.message || 'Upload failed');
     } finally {
@@ -3147,7 +3196,7 @@ function PendingResourcesEditor({
       )}
     </div>
   );
-}
+});
 
 function QuestionResources({ questionId, isTeacher, initialResources }: { questionId: string; isTeacher: boolean; initialResources?: LessonResource[] }) {
   // If the parent has already pre-fetched the bulk resource map for the whole
