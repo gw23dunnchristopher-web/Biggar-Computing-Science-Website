@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
 import PromptText from '@/components/PromptText';
@@ -1433,6 +1433,84 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
   );
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  // Inline image upload state for the prompt textarea: lets a teacher paste
+  // (Ctrl/Cmd+V) or drag-and-drop an image straight into the prompt and have
+  // it inserted as ![image](url) at the cursor position. The flag drives a
+  // "Uploading…" hint and disables Save while in flight; promptDragOver
+  // shows a dashed outline when the teacher hovers a file over the box.
+  const [promptImageBusy, setPromptImageBusy] = useState(false);
+  const [promptImageErr, setPromptImageErr] = useState<string | null>(null);
+  const [promptDragOver, setPromptDragOver] = useState(false);
+  const promptRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // Shared upload helper for prompt images: hits the same teacher resource
+  // upload endpoint already used elsewhere in the modal, returns the public
+  // URL of the saved image. Throws on any non-OK response.
+  async function uploadPromptImage(file: File): Promise<string> {
+    const fd = new FormData();
+    fd.append('file', file, file.name || 'pasted-image.png');
+    const teacherToken = (() => {
+      try { return localStorage.getItem('teacher_token') || localStorage.getItem('teacherToken') || ''; } catch { return ''; }
+    })();
+    const headers: Record<string, string> = {};
+    if (teacherToken) headers['x-teacher-password'] = teacherToken;
+    const r = await fetch('/api/classwork/teacher/upload/resource', {
+      method: 'POST', headers, body: fd,
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data?.error || 'Upload failed');
+    return data.url as string;
+  }
+
+  // Insert markdown for the uploaded image at the textarea's caret. If the
+  // ref isn't available (theoretically impossible, but TS still wants the
+  // guard) we fall back to appending at the end so the teacher never loses
+  // their pasted image.
+  function insertImageMarkdown(url: string, alt: string) {
+    const md = `![${alt || 'image'}](${url})`;
+    const el = promptRef.current;
+    setPrompt((cur) => {
+      if (!el) return (cur ? cur + (cur.endsWith('\n') ? '' : '\n') : '') + md + '\n';
+      const start = el.selectionStart ?? cur.length;
+      const end   = el.selectionEnd   ?? cur.length;
+      const before = cur.slice(0, start);
+      const after  = cur.slice(end);
+      // Add a leading newline if we're mid-line so the image sits on its own
+      // line (cleaner rendering and matches what teachers expect from the
+      // similar paste behaviour in the rich text editor elsewhere).
+      const sep = before && !before.endsWith('\n') ? '\n' : '';
+      const next = before + sep + md + '\n' + after;
+      // Restore the caret after the inserted markdown on the next tick so
+      // the teacher can keep typing where they left off.
+      const caret = (before + sep + md + '\n').length;
+      requestAnimationFrame(() => {
+        if (promptRef.current) {
+          promptRef.current.focus();
+          promptRef.current.setSelectionRange(caret, caret);
+        }
+      });
+      return next;
+    });
+  }
+
+  async function handlePromptImageFiles(files: File[]) {
+    const images = files.filter((f) => f.type.startsWith('image/'));
+    if (!images.length) return;
+    setPromptImageErr(null);
+    setPromptImageBusy(true);
+    try {
+      // Upload sequentially so the inserted markdown lines up in the order
+      // the teacher dropped/pasted the files.
+      for (const file of images) {
+        const url = await uploadPromptImage(file);
+        insertImageMarkdown(url, file.name?.replace(/\.[a-z0-9]+$/i, '') || 'image');
+      }
+    } catch (e: any) {
+      setPromptImageErr(e?.message || 'Could not upload image.');
+    } finally {
+      setPromptImageBusy(false);
+    }
+  }
 
   async function uploadVideo(file: File) {
     setVideoUploading(true);
@@ -1637,11 +1715,68 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             : type === 'fill_in_blanks' ? 'Sentence (use {{1}}, {{2}} etc. for each blank)'
             : 'Task / prompt'}
           <textarea
+            ref={promptRef}
             rows={type === 'passage' ? 8 : 3}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            style={input}
+            onPaste={(e) => {
+              // Hunt for image data on the clipboard. We only intercept the
+              // paste when an image is actually present so plain text paste
+              // continues to behave normally.
+              const items = Array.from(e.clipboardData?.items || []);
+              const files: File[] = [];
+              for (const it of items) {
+                if (it.kind === 'file') {
+                  const f = it.getAsFile();
+                  if (f && f.type.startsWith('image/')) files.push(f);
+                }
+              }
+              if (files.length) {
+                e.preventDefault();
+                handlePromptImageFiles(files);
+              }
+            }}
+            onDragEnter={(e) => {
+              if (Array.from(e.dataTransfer?.types || []).includes('Files')) {
+                e.preventDefault();
+                setPromptDragOver(true);
+              }
+            }}
+            onDragOver={(e) => {
+              if (Array.from(e.dataTransfer?.types || []).includes('Files')) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                setPromptDragOver(true);
+              }
+            }}
+            onDragLeave={() => setPromptDragOver(false)}
+            onDrop={(e) => {
+              const files = Array.from(e.dataTransfer?.files || []);
+              const images = files.filter((f) => f.type.startsWith('image/'));
+              if (images.length) {
+                e.preventDefault();
+                setPromptDragOver(false);
+                handlePromptImageFiles(images);
+              }
+            }}
+            style={{
+              ...input,
+              outline: promptDragOver ? '2px dashed var(--cw-accent)' : undefined,
+              outlineOffset: promptDragOver ? 2 : undefined,
+              background: promptDragOver ? 'rgba(34,211,238,0.06)' : (input as any).background,
+            }}
           />
+          {(promptImageBusy || promptImageErr) && (
+            <span style={{
+              fontSize: 12, marginTop: 4,
+              color: promptImageErr ? 'var(--cw-danger, #b91c1c)' : 'var(--cw-accent)',
+            }}>
+              {promptImageBusy ? 'Uploading image…' : promptImageErr}
+            </span>
+          )}
+          <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
+            <strong>Tip:</strong> paste a screenshot (Ctrl/Cmd+V) or drag an image file straight into this box and it will be uploaded and inserted automatically.
+          </span>
           <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
             {type === 'passage'
               ? 'Type or paste the paragraph pupils have to read. It will sit in a sticky panel beside its attached tasks, so pupils can refer back to it as they answer.'
