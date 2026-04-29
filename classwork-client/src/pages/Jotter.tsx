@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
+import Modal, { modalPrimaryBtn, modalSecondaryBtn } from '@/components/Modal';
+import RichTextEditor from '@/components/RichTextEditor';
 import { api, getCurrentRole } from '@/lib/api';
 import { sanitizeHtml, plainTextToHtml, looksLikeHtml } from '@/lib/sanitizeHtml';
 
@@ -100,6 +102,81 @@ export default function JotterPage() {
   }, [jotter]);
 
   const activeUnit = jotter?.units.find((u) => u.unitId === activeUnitId) || null;
+
+  // Edit-in-place: pupils editing their own jotter, or teachers editing the
+  // shared demo jotter. Teachers viewing a specific pupil's jotter cannot
+  // edit (no PUT endpoint exists for that, and it shouldn't — pupil notes
+  // are theirs). The endpoint shape and auto-save behaviour mirror the
+  // notes modal on the Course page so both surfaces feel identical.
+  const canEdit = !studentId && (role === 'student' || isTeacherDemo);
+  const [editing, setEditing] = useState<{ unitId: string; title: string } | null>(null);
+  const [editContent, setEditContent] = useState('');
+  const [editSavedAt, setEditSavedAt] = useState<number | null>(null);
+  const [editStatus, setEditStatus] = useState<'idle' | 'loading' | 'saving' | 'saved' | 'error'>('idle');
+  const [editErr, setEditErr] = useState<string | null>(null);
+
+  function notesEndpoint(unitId: string): string {
+    return isTeacherDemo
+      ? `/api/classwork/units/${encodeURIComponent(unitId)}/teacher-notes`
+      : `/api/classwork/units/${encodeURIComponent(unitId)}/notes`;
+  }
+
+  function openEditNotes(unitId: string, unitTitle: string) {
+    if (!canEdit) return;
+    setEditContent(''); setEditSavedAt(null); setEditErr(null);
+    setEditStatus('loading');
+    setEditing({ unitId, title: unitTitle });
+    api<{ content: string; updatedAt: number | null }>(notesEndpoint(unitId))
+      .then((r) => { setEditContent(r.content || ''); setEditSavedAt(r.updatedAt); setEditStatus('idle'); })
+      .catch((e: any) => { setEditStatus('error'); setEditErr(e.message || 'Failed to load notes'); });
+  }
+
+  async function saveEditNotes(unitId: string, content: string) {
+    setEditStatus('saving'); setEditErr(null);
+    try {
+      const r = await api<{ content: string; updatedAt: number }>(notesEndpoint(unitId), {
+        method: 'PUT', body: JSON.stringify({ content }),
+      });
+      setEditSavedAt(r.updatedAt);
+      setEditStatus('saved');
+    } catch (e: any) {
+      setEditStatus('error');
+      setEditErr(e.message || 'Failed to save notes');
+    }
+  }
+
+  // Debounced auto-save while the pupil types in the editor.
+  useEffect(() => {
+    if (!editing) return;
+    if (editStatus === 'loading') return;
+    const unitId = editing.unitId;
+    const handle = window.setTimeout(() => { saveEditNotes(unitId, editContent); }, 1200);
+    return () => window.clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editContent, editing?.unitId]);
+
+  function closeEditNotes() {
+    // Persist any pending edit synchronously, then refresh the read-only
+    // jotter so the active unit immediately shows the new content + TOC.
+    const wasEditing = editing;
+    const lastContent = editContent;
+    setEditing(null);
+    if (wasEditing) {
+      // Best-effort flush of the latest text (covers the case where the
+      // user closed within the 1.2s debounce window).
+      saveEditNotes(wasEditing.unitId, lastContent).finally(() => {
+        // Patch the jotter in place so we don't need a full re-fetch.
+        setJotter((prev) => prev && {
+          ...prev,
+          units: prev.units.map((u) =>
+            u.unitId === wasEditing.unitId
+              ? { ...u, content: lastContent, updatedAt: Date.now() }
+              : u
+          ),
+        });
+      });
+    }
+  }
 
   // Re-build the active unit's HTML + lesson TOC whenever the selection
   // (or the underlying notes content) changes. The processed HTML carries
@@ -335,11 +412,27 @@ export default function JotterPage() {
                 >
                   <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
                     <h2 style={{ margin: 0, fontSize: 20 }}>{u.unitTitle}</h2>
-                    {u.updatedAt && (
-                      <span style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
-                        Last updated {new Date(u.updatedAt).toLocaleString()}
-                      </span>
-                    )}
+                    <div className="cw-no-print" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      {u.updatedAt && (
+                        <span style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+                          Last updated {new Date(u.updatedAt).toLocaleString()}
+                        </span>
+                      )}
+                      {canEdit && isActive && (
+                        <button
+                          type="button"
+                          onClick={() => openEditNotes(u.unitId, u.unitTitle)}
+                          style={{
+                            background: 'var(--cw-accent, #2563eb)', color: '#fff',
+                            border: 'none', borderRadius: 8, padding: '6px 12px',
+                            fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                          }}
+                          title={isTeacherDemo
+                            ? 'Edit the demo notes for this unit'
+                            : 'Edit your notes for this unit'}
+                        >Edit notes</button>
+                      )}
+                    </div>
                   </div>
                   <div
                     className="cw-jotter-body"
@@ -357,6 +450,54 @@ export default function JotterPage() {
           </div>
         </div>
       )}
+
+      {/* Edit-notes modal — same RichTextEditor and auto-save behaviour as
+          the unit "My notes" / "Demo notes" buttons on the Course page, so
+          pupils don't have to leave the jotter to amend their notes. */}
+      <Modal
+        open={!!editing}
+        title={editing ? `${isTeacherDemo ? 'Demo notes' : 'Notes'} for: ${editing.title}` : ''}
+        width={1100}
+        fillHeight
+        onClose={closeEditNotes}
+        footer={<>
+          <span style={{ flex: 1, fontSize: 12, color: 'var(--cw-muted)' }}>
+            {editStatus === 'saving' ? 'Saving…'
+              : editStatus === 'saved' && editSavedAt ? `Saved at ${new Date(editSavedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+              : editStatus === 'error' ? 'Couldn\u2019t save'
+              : editSavedAt ? `Last saved ${new Date(editSavedAt).toLocaleString()}`
+              : 'Not saved yet'}
+          </span>
+          <button
+            onClick={() => editing && saveEditNotes(editing.unitId, editContent)}
+            disabled={editStatus === 'loading' || editStatus === 'saving'}
+            style={modalSecondaryBtn}
+          >Save now</button>
+          <button onClick={closeEditNotes} style={modalPrimaryBtn}>Done</button>
+        </>}
+      >
+        {editStatus === 'loading' ? (
+          <p style={{ margin: 0, color: 'var(--cw-muted)' }}>Loading your notes…</p>
+        ) : (
+          <>
+            <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--cw-muted)' }}>
+              {isTeacherDemo
+                ? 'These are the shared demo notes pupils see when you model note-taking in class. They save automatically as you type.'
+                : 'Your notes for this unit. Use the toolbar to add headings, bold, lists and links. Your notes save automatically as you type.'}
+            </p>
+            <RichTextEditor
+              autoFocus
+              value={editContent}
+              onChange={setEditContent}
+              placeholder={'Jot anything you want to remember about this unit \u2014 definitions, examples, questions to ask your teacher, exam tips, etc.'}
+              fillHeight
+              minHeight={360}
+              ariaLabel="Unit notes"
+            />
+          </>
+        )}
+        {editErr && <p style={{ color: 'var(--cw-danger)', margin: '8px 0 0' }}>{editErr}</p>}
+      </Modal>
 
       {/* Image lightbox: dark fullscreen overlay; click backdrop or press
           Escape to close; click image to toggle 1:1 zoom (with scroll-to-pan
