@@ -577,13 +577,24 @@ function StudentDetail({ course, studentId }: { course: string; studentId: strin
                             ? (s.marks_awarded / s.question_max_marks) * 100 : null;
                           return (
                             <tr key={s.id}>
-                              <td style={{ ...td, maxWidth: 320 }} title={s.question_prompt}>{shorten(s.question_prompt, 80)}</td>
+                              {/* Long prompts (real exam-style questions can run to a paragraph)
+                                  used to push the column out and squash everything else. We
+                                  cap each cell with an inner div + ellipsis so the row
+                                  height stays consistent — full text is always available on
+                                  hover via the title tooltip. */}
+                              <td style={td}>
+                                <div style={ellipsisCell(360)} title={s.question_prompt}>
+                                  {s.question_prompt}
+                                </div>
+                              </td>
                               <td style={td}>{s.question_type}</td>
                               <td style={td}>{s.marks_awarded != null ? `${s.marks_awarded} / ${s.question_max_marks}` : 'pending'}</td>
                               <td style={td}><PercentBar value={pct} /></td>
                               <td style={td}>{new Date(s.submitted_at).toLocaleString()}</td>
-                              <td style={{ ...td, maxWidth: 280, color: 'var(--cw-muted)' }} title={s.ai_feedback || ''}>
-                                {shorten(s.ai_feedback || '', 80) || '—'}
+                              <td style={{ ...td, color: 'var(--cw-muted)' }}>
+                                <div style={ellipsisCell(280)} title={s.ai_feedback || ''}>
+                                  {s.ai_feedback || '—'}
+                                </div>
                               </td>
                             </tr>
                           );
@@ -778,3 +789,10 @@ const th: React.CSSProperties = { textAlign: 'left', padding: '8px 8px', borderB
 const td: React.CSSProperties = { padding: '8px 8px', borderBottom: '1px solid var(--cw-border)', verticalAlign: 'top' };
 const secondaryBtn: React.CSSProperties = { background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)', padding: '6px 12px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 13 };
 const miniBtn: React.CSSProperties = { background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)', padding: '4px 10px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 12 };
+// Single-line ellipsis cell. `<td>` `maxWidth` is unreliable on its own —
+// browsers happily widen table columns to fit content. Wrapping the cell's
+// contents in a fixed-width inner div with overflow:hidden + ellipsis is
+// what actually keeps long question prompts and AI feedback in their lane.
+function ellipsisCell(maxPx: number): React.CSSProperties {
+  return { maxWidth: maxPx, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+}
