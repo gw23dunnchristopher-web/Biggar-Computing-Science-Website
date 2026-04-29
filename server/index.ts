@@ -20,6 +20,7 @@ import { registerClassworkRoutes } from './classwork-routes';
 import { registerContentRoutes } from './content-routes';
 import { registerCodeProjectsRoutes } from './code-projects-routes';
 import { registerDsWorkspaceRoutes } from './ds-workspace-routes';
+import { ensureFontsAvailable } from './font-setup';
 import { eq } from 'drizzle-orm';
 import { sessions as revSessionsTable, users as revUsersTable } from '@shared/revision-schema';
 
@@ -1326,6 +1327,13 @@ if (fs.existsSync(classworkBuildDir)) {
 registerContentRoutes(app, requireTeacher);
 registerCodeProjectsRoutes(app);
 registerDsWorkspaceRoutes(app);
+
+try {
+  const fontResult = ensureFontsAvailable(true);
+  console.log(`[startup] fonts ready (${fontResult.linked} new symlinks, ${fontResult.sources.length} nix sources)`);
+} catch (err) {
+  console.warn('[startup] font setup failed:', err);
+}
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
