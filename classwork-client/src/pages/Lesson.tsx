@@ -4611,8 +4611,8 @@ function LessonHeader({ lesson }: { lesson: LessonInfo }) {
               <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--cw-tint-info-ink)', fontStyle: 'italic' }}>
                 We are learning about…
               </p>
-              <ul style={{ margin: '4px 0 0', paddingLeft: 20, color: 'var(--cw-ink)', fontSize: 14, lineHeight: 1.5 }}>
-                {li.map((line, i) => <li key={i}>{line}</li>)}
+              <ul style={{ margin: '8px 0 0', paddingLeft: 22, color: 'var(--cw-ink)', fontSize: 15, lineHeight: 1.5 }}>
+                {li.map((line, i) => <li key={i} style={{ marginBottom: i < li.length - 1 ? 10 : 0 }}>{line}</li>)}
               </ul>
             </section>
           )}
@@ -4627,8 +4627,8 @@ function LessonHeader({ lesson }: { lesson: LessonInfo }) {
               <p style={{ margin: '6px 0 0', fontSize: 13, color: '#065f46', fontStyle: 'italic' }}>
                 I am looking for you to…
               </p>
-              <ul style={{ margin: '4px 0 0', paddingLeft: 20, color: 'var(--cw-ink)', fontSize: 14, lineHeight: 1.5 }}>
-                {sc.map((line, i) => <li key={i}>{line}</li>)}
+              <ul style={{ margin: '8px 0 0', paddingLeft: 22, color: 'var(--cw-ink)', fontSize: 15, lineHeight: 1.5 }}>
+                {sc.map((line, i) => <li key={i} style={{ marginBottom: i < sc.length - 1 ? 10 : 0 }}>{line}</li>)}
               </ul>
             </section>
           )}
