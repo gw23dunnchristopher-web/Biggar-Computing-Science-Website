@@ -230,6 +230,21 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
       root.style.setProperty("--card", hsl);
       root.style.setProperty("--popover", hsl);
       root.setAttribute("data-custom-bg", settings.customBgColour);
+
+      // Auto-pair a light foreground when the chosen background is dark
+      // and the user hasn't explicitly picked a text colour. Without this
+      // the page bg goes dark while --cw-ink stays at its light-mode dark
+      // value, leaving every block of inherited body text unreadable.
+      const lightness = parseInt(hsl.split(" ")[2], 10) || 0;
+      if (lightness < 50 && !settings.customTextColour) {
+        root.style.setProperty("--foreground", "0 0% 100%");
+        root.style.setProperty("--card-foreground", "0 0% 100%");
+        root.style.setProperty("--popover-foreground", "0 0% 100%");
+        root.style.setProperty("--secondary-foreground", "0 0% 100%");
+        root.style.setProperty("--accent-foreground", "0 0% 100%");
+        root.style.setProperty("--muted-foreground", "0 0% 75%");
+        root.setAttribute("data-custom-text", "#FFFFFF");
+      }
     } else {
       root.style.removeProperty("--background");
       root.style.removeProperty("--card");
