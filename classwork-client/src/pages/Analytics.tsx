@@ -607,33 +607,41 @@ function StudentActivityCalendar({ course, studentId }: { course: string; studen
     : 0;
   const totalActive = days ? days.size : 0;
 
+  // Fixed cell size keeps the whole grid compact regardless of how wide the
+  // surrounding StudentDetail panel happens to be — without this the cells
+  // stretch to fill the row and the calendar dominates the panel.
+  const CELL = 22;
+  const GAP = 3;
+  const gridWidth = CELL * 7 + GAP * 6;
+
   return (
     <div style={{
-      border: '1px solid var(--cw-border)', borderRadius: 10, padding: 12,
-      background: '#fafbff', display: 'flex', flexDirection: 'column', gap: 8,
+      border: '1px solid var(--cw-border)', borderRadius: 8, padding: 8,
+      background: '#fafbff', display: 'inline-flex', flexDirection: 'column', gap: 6,
+      alignSelf: 'flex-start',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ fontSize: 13, fontWeight: 600 }}>Login &amp; activity</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: gridWidth }}>
+        <div style={{ fontSize: 12, fontWeight: 600 }}>Activity</div>
         <div style={{ flex: 1 }} />
         <button type="button" onClick={() => shift(-1)} disabled={!canGoBack} style={navBtn(!canGoBack)} aria-label="Previous month">‹</button>
-        <div style={{ fontSize: 13, fontWeight: 600, minWidth: 130, textAlign: 'center' }}>{monthLabel}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, minWidth: 88, textAlign: 'center' }}>{monthLabel}</div>
         <button type="button" onClick={() => shift(1)} disabled={!canGoFwd} style={navBtn(!canGoFwd)} aria-label="Next month">›</button>
       </div>
-      {err && <div style={{ fontSize: 12, color: 'var(--cw-danger)' }}>{err}</div>}
-      {!err && days === null && <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>Loading activity…</div>}
+      {err && <div style={{ fontSize: 11, color: 'var(--cw-danger)' }}>{err}</div>}
+      {!err && days === null && <div style={{ fontSize: 11, color: 'var(--cw-muted)' }}>Loading activity…</div>}
       {!err && days !== null && (
         <>
           <div style={{
-            display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4,
-            fontSize: 11, color: 'var(--cw-muted)', textAlign: 'center',
+            display: 'grid', gridTemplateColumns: `repeat(7, ${CELL}px)`, gap: GAP,
+            fontSize: 9, color: 'var(--cw-muted)', textAlign: 'center',
           }}>
-            {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d) => (
-              <div key={d} style={{ padding: '2px 0', fontWeight: 600 }}>{d}</div>
+            {['M','T','W','T','F','S','S'].map((d, i) => (
+              <div key={i} style={{ padding: '1px 0', fontWeight: 600 }}>{d}</div>
             ))}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(7, ${CELL}px)`, gap: GAP }}>
             {cells.map((c, i) => {
-              if (!c) return <div key={`b${i}`} style={{ aspectRatio: '1 / 1' }} />;
+              if (!c) return <div key={`b${i}`} style={{ width: CELL, height: CELL }} />;
               const isActive = days.has(c.iso);
               const isToday = c.iso === todayIso;
               const isFuture = c.iso > todayIso;
@@ -642,10 +650,10 @@ function StudentActivityCalendar({ course, studentId }: { course: string; studen
                   key={c.iso}
                   title={isActive ? `Active on ${c.iso}` : isFuture ? '' : `No activity on ${c.iso}`}
                   style={{
-                    aspectRatio: '1 / 1',
+                    width: CELL, height: CELL,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 12, fontWeight: isActive ? 700 : 500,
-                    borderRadius: 6,
+                    fontSize: 10, fontWeight: isActive ? 700 : 500,
+                    borderRadius: 4,
                     background: isActive
                       ? 'var(--cw-accent, #2563eb)'
                       : isFuture ? 'transparent' : '#fff',
@@ -661,10 +669,8 @@ function StudentActivityCalendar({ course, studentId }: { course: string; studen
               );
             })}
           </div>
-          <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
-            {activeInMonth} active {activeInMonth === 1 ? 'day' : 'days'} this month
-            {' · '}
-            {totalActive} in the last 12 months
+          <div style={{ fontSize: 10, color: 'var(--cw-muted)', width: gridWidth, lineHeight: 1.3 }}>
+            {activeInMonth} {activeInMonth === 1 ? 'day' : 'days'} this month · {totalActive} in 12 months
           </div>
         </>
       )}
@@ -674,11 +680,11 @@ function StudentActivityCalendar({ course, studentId }: { course: string; studen
 
 function navBtn(disabled: boolean): React.CSSProperties {
   return {
-    width: 28, height: 28, borderRadius: 6,
+    width: 20, height: 20, borderRadius: 4,
     border: '1px solid var(--cw-border)', background: '#fff',
     cursor: disabled ? 'not-allowed' : 'pointer',
     opacity: disabled ? 0.4 : 1,
-    fontSize: 16, lineHeight: 1, padding: 0,
+    fontSize: 13, lineHeight: 1, padding: 0,
   };
 }
 
