@@ -97,6 +97,14 @@ export async function markSubmission(
         return await markTable(q, s);
       case 'labeled_inputs':
         return await markLabeledInputs(q, s);
+      case 'crossword':
+        return markCrossword(q, s);
+      case 'word_search':
+        return markWordSearch(q, s);
+      case 'matching':
+        return markMatching(q, s);
+      case 'anagrams':
+        return markAnagrams(q, s);
       case 'info_only':
       case 'section_header':
       case 'passage':
@@ -1273,4 +1281,160 @@ async function markLabeledInputs(q: AIQuestion, s: AISubmission): Promise<AIMark
     });
   }
   return gradeCellList(q, cells);
+}
+
+/* ============================================================
+ * Game-style fun activities (auto-marked, deterministic)
+ * Each one stores its config in q.config and the pupil's answers
+ * as a JSON string in s.text_answer (same shape as fill_in_blanks).
+ * ============================================================ */
+
+function normaliseAnswer(v: any): string {
+  return String(v == null ? '' : v).trim().toUpperCase().replace(/\s+/g, ' ');
+}
+
+function buildGameResult(correct: number, total: number, maxMarks: number, breakdown: string): AIMarkResult {
+  const ratio = total > 0 ? correct / total : 0;
+  const marks = Math.round(ratio * maxMarks);
+  return {
+    marksAwarded: Math.max(0, Math.min(maxMarks, marks)),
+    feedback: `${correct} / ${total} correct${breakdown ? ` — ${breakdown}` : ''}.`,
+    markedBy: 'ai',
+  };
+}
+
+/* ---------- Crossword ---------- */
+
+interface CrosswordEntry { id: string; row: number; col: number; direction: 'across' | 'down'; answer: string; clue: string; }
+
+function markCrossword(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const cfg = q.config && q.config.crossword;
+  if (!cfg || !Array.isArray(cfg.entries)) return null;
+  const entries: CrosswordEntry[] = cfg.entries
+    .map((e: any) => ({
+      id: String(e?.id || ''),
+      row: Math.max(0, Math.round(Number(e?.row) || 0)),
+      col: Math.max(0, Math.round(Number(e?.col) || 0)),
+      direction: e?.direction === 'down' ? 'down' : 'across',
+      answer: normaliseAnswer(e?.answer),
+      clue: String(e?.clue || ''),
+    }))
+    .filter((e: CrosswordEntry) => e.id && e.answer);
+  if (entries.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  // Pupil submission is keyed by "r,c" (one letter per cell). We
+  // reconstruct each entry's answer by walking from its start cell in the
+  // entry's direction. Letters typed by the pupil into shared cells count
+  // for every entry that overlaps that cell, which mirrors how a real
+  // crossword is solved.
+  let correct = 0;
+  const wrong: string[] = [];
+  for (const e of entries) {
+    let pupil = '';
+    for (let k = 0; k < e.answer.length; k++) {
+      const rr = e.direction === 'down' ? e.row + k : e.row;
+      const cc = e.direction === 'across' ? e.col + k : e.col;
+      pupil += String(parsed[`${rr},${cc}`] || '');
+    }
+    if (normaliseAnswer(pupil) === e.answer) correct++;
+    else wrong.push(e.id);
+  }
+  const breakdown = wrong.length === 0 ? 'a clean sweep' : `still to fix: ${wrong.slice(0, 5).join(', ')}${wrong.length > 5 ? '…' : ''}`;
+  return buildGameResult(correct, entries.length, q.max_marks, breakdown);
+}
+
+/* ---------- Word search ---------- */
+
+function markWordSearch(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const cfg = q.config && q.config.wordSearch;
+  if (!cfg || !Array.isArray(cfg.words)) return null;
+  const words = cfg.words.map(normaliseAnswer).filter(Boolean);
+  if (words.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  // Pupil submission shape: { found: ["WORD1", "WORD2", ...] }
+  const foundRaw = Array.isArray((parsed as any).found) ? (parsed as any).found : [];
+  const found = new Set(foundRaw.map(normaliseAnswer));
+  let correct = 0;
+  const missed: string[] = [];
+  for (const w of words) {
+    if (found.has(w)) correct++;
+    else missed.push(w);
+  }
+  const breakdown = missed.length === 0 ? 'all words found' : `still to find: ${missed.slice(0, 5).join(', ')}${missed.length > 5 ? '…' : ''}`;
+  return buildGameResult(correct, words.length, q.max_marks, breakdown);
+}
+
+/* ---------- Matching pairs ---------- */
+
+function markMatching(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const cfg = q.config && q.config.matching;
+  const pairs = cfg && Array.isArray(cfg.pairs) ? cfg.pairs : null;
+  if (!pairs || pairs.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  for (let i = 0; i < pairs.length; i++) {
+    const picked = String(parsed[String(i)] ?? '');
+    if (String(picked) === String(i)) correct++;
+  }
+  const breakdown = correct === pairs.length ? 'every pair matched' : `${pairs.length - correct} pair${pairs.length - correct === 1 ? '' : 's'} left to match`;
+  return buildGameResult(correct, pairs.length, q.max_marks, breakdown);
+}
+
+/* ---------- Anagrams ---------- */
+
+function markAnagrams(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const cfg = q.config && q.config.anagrams;
+  const items = cfg && Array.isArray(cfg.items) ? cfg.items : null;
+  if (!items || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  const wrong: string[] = [];
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    const expected = normaliseAnswer(it?.answer);
+    const got = normaliseAnswer(parsed[String(i)]);
+    if (expected && got === expected) correct++;
+    else if (it?.scrambled) wrong.push(String(it.scrambled));
+  }
+  const breakdown = wrong.length === 0 ? 'every word unscrambled' : `still to crack: ${wrong.slice(0, 5).join(', ')}${wrong.length > 5 ? '…' : ''}`;
+  return buildGameResult(correct, items.length, q.max_marks, breakdown);
+}
+
+/* ---------- Crossword AI clue suggester ---------- */
+// Exposed so the teacher's editor can pre-fill clues for a list of answer
+// words. Returns a parallel array of clue strings (one per word). On failure
+// or when Gemini isn't configured returns nulls so the UI can fall back to
+// teacher-written clues.
+export async function suggestCrosswordClues(words: string[], topic: string): Promise<(string | null)[]> {
+  const cleaned = words.map((w) => String(w || '').trim().toUpperCase()).filter(Boolean);
+  if (cleaned.length === 0) return [];
+  if (!gemini) return cleaned.map(() => null);
+  const prompt = [
+    `You are writing crossword clues for a Scottish secondary school Computing Science class.`,
+    topic ? `Topic / context: ${topic}` : '',
+    `Write a short, age-appropriate clue (S1-S6) for EACH of these answer words. Each clue should be one sentence, ideally under 12 words, and must NOT contain the answer word itself.`,
+    `Answer words: ${JSON.stringify(cleaned)}`,
+    `Return ONLY a JSON object: { "clues": ["<clue for word 1>", "<clue for word 2>", ...] } in the same order.`,
+  ].filter(Boolean).join('\n');
+  try {
+    const resp = await gemini.models.generateContent({
+      model: MODEL,
+      contents: prompt,
+      config: { responseMimeType: 'application/json', thinkingConfig: { thinkingBudget: 0 } },
+    });
+    const parsed = safeParseJson(resp.text || '');
+    const arr = parsed && Array.isArray(parsed.clues) ? parsed.clues : null;
+    if (!arr) return cleaned.map(() => null);
+    return cleaned.map((_, i) => {
+      const c = arr[i];
+      return typeof c === 'string' && c.trim() ? c.trim() : null;
+    });
+  } catch (err) {
+    console.error('[classwork-ai] suggestCrosswordClues failed:', err);
+    return cleaned.map(() => null);
+  }
 }

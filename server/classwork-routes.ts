@@ -63,7 +63,7 @@ import {
   moveStudentToClass,
   usernameTakenAnywhere,
 } from './classwork-storage';
-import { markSubmission } from './classwork-ai';
+import { markSubmission, suggestCrosswordClues } from './classwork-ai';
 import { storage as n5Storage } from './n5-storage';
 import bcrypt from 'bcryptjs';
 
@@ -1051,6 +1051,27 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] list classes error:', err);
       res.status(500).json({ error: 'Failed to list classes' });
+    }
+  });
+
+  // Crossword AI clue suggestion. Used by the teacher question editor: the
+  // teacher types in a list of answer words (and an optional topic) and we
+  // ask Gemini to draft a one-sentence clue for each. Returns nulls in the
+  // matching slot when the AI couldn't generate a particular clue (or when
+  // GEMINI_API_KEY isn't configured) so the teacher can fall back to writing
+  // it manually without losing their place.
+  app.post('/api/classwork/teacher/ai-crossword-clues', requireTeacher, async (req, res) => {
+    try {
+      const wordsRaw = req.body?.words;
+      const topic = String(req.body?.topic || '').trim();
+      if (!Array.isArray(wordsRaw) || wordsRaw.length === 0) {
+        return res.status(400).json({ error: 'Provide a non-empty array of answer words.' });
+      }
+      const clues = await suggestCrosswordClues(wordsRaw.map(String), topic);
+      res.json({ clues });
+    } catch (err) {
+      console.error('[classwork] ai-crossword-clues error:', err);
+      res.status(500).json({ error: 'Failed to generate clues' });
     }
   });
 

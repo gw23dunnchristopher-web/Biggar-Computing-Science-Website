@@ -44,6 +44,14 @@ export const CLASSWORK_QUESTION_TYPES = [
   // as info_only and section_header but framed as a task to do, with the
   // jotter link surfaced prominently next to it.
   'text_only',
+  // Fun activity types — auto-marked deterministically from the question's
+  // config + the pupil's JSON-encoded answers (same shape as fill_in_blanks).
+  // Crossword has an optional AI-clue suggester to help teachers draft
+  // clues; the others are pure config + grid logic.
+  'crossword',
+  'word_search',
+  'matching',
+  'anagrams',
 ] as const;
 export type ClassworkQuestionType = (typeof CLASSWORK_QUESTION_TYPES)[number];
 

@@ -95,6 +95,10 @@ const TYPE_LABELS: Record<string, string> = {
   labeled_inputs: 'Labelled inputs (multi-field answer)',
   section_header: 'Section divider (groups the tasks below)',
   text_only: 'Jotter task (write the answer in your jotter)',
+  crossword: 'Crossword puzzle',
+  word_search: 'Word search',
+  matching: 'Matching pairs',
+  anagrams: 'Anagrams',
 };
 
 export default function Lesson() {
@@ -640,7 +644,11 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
   // ("1", "2") for fill_in_blanks, "row,col" for table, or field index ("0",
   // "1") for labeled_inputs. Submitted as JSON in textAnswer so the marker
   // can compare each cell against its expected answers.
-  const [cellAnswers, setCellAnswers] = useState<Record<string, string>>({});
+  // Generic per-cell answer bag used by every JSON-into-text_answer task type
+  // (fill_in_blanks, table, labeled_inputs, plus the four fun-activity types).
+  // Loosely typed because word_search stores an array of found words and the
+  // matching/anagrams renderers store strings — JSON.stringify handles both.
+  const [cellAnswers, setCellAnswers] = useState<Record<string, any>>({});
 
   const t = question.question_type;
   const codeProjectKind: 'python' | 'html' | null =
@@ -775,6 +783,9 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
     'scratch_link', 'makecode_link', 'google_sites_link',
     'screenshot', 'project', 'presentation',
     'fill_in_blanks', 'table', 'labeled_inputs',
+    // Fun-activity types — same JSON-into-text_answer storage as fill-in-blanks
+    // so the cell-grid draft path picks them up for free.
+    'crossword', 'word_search', 'matching', 'anagrams',
   ];
   const draftEnabled = !preview && draftableTypes.includes(t);
 
@@ -798,8 +809,12 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
     if (t === 'project') {
       return { ...empty, fileUrl: fileUrl || null, linkUrl: url || null };
     }
-    if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs') {
-      const filled = Object.values(cellAnswers).some((v) => String(v || '').trim());
+    if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
+        || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams') {
+      const filled = Object.values(cellAnswers).some((v) => {
+        if (Array.isArray(v)) return v.length > 0;
+        return String(v || '').trim();
+      });
       return { ...empty, textAnswer: filled ? JSON.stringify(cellAnswers) : null };
     }
     // short / long / code / video_question / sql_task — plain textarea.
@@ -827,7 +842,8 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
     if (!draftEnabled || draftHydrated.current) return;
     if (draft) {
       if (draft.text_answer != null) {
-        if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs') {
+        if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
+            || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams') {
           try {
             const parsed = JSON.parse(draft.text_answer);
             if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
@@ -965,9 +981,12 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
           body.textAnswer = String(data?.code ?? '');
           body.linkUrl = `${selectedProjectId}|${data?.name || ''}`;
         }
-      } else if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs') {
+      } else if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
+                 || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams') {
         // Send the cell answers as JSON so the deterministic marker can
         // compare each one against the expected answers in the question config.
+        // Same path serves the four fun-activity types — each renderer above
+        // packs its own shape into cellAnswers and the server picks it apart.
         body.textAnswer = JSON.stringify(cellAnswers);
       } else if (t === 'database_task') {
         // Resolve the pupil's DS embed sandbox from their session key
@@ -1038,8 +1057,12 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
     ['scratch_link', 'makecode_link', 'google_sites_link'].includes(t) ? !!url :
     codeProjectKind ? !!selectedProjectId :
     t === 'database_task' ? !!dbEmbedToken :
-    (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs')
-      ? Object.values(cellAnswers).some((v) => String(v || '').trim()) :
+    (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
+      || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams')
+      ? Object.values(cellAnswers).some((v) => {
+          if (Array.isArray(v)) return v.length > 0;
+          return !!String(v || '').trim();
+        }) :
     !!text.trim();
   return (
     <div style={{ marginTop: 12, padding: 12, border: '1px dashed var(--cw-border)', borderRadius: 8, background: '#fafbfd' }}>
@@ -1191,6 +1214,36 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
           </div>
         );
       })()}
+
+      {/* ---- Fun activities (auto-marked) ---------------------------- */}
+      {t === 'crossword' && (
+        <CrosswordPupilGrid
+          config={(question as any).config}
+          cellAnswers={cellAnswers}
+          setCellAnswers={setCellAnswers}
+        />
+      )}
+      {t === 'word_search' && (
+        <WordSearchPupilGrid
+          config={(question as any).config}
+          cellAnswers={cellAnswers}
+          setCellAnswers={setCellAnswers}
+        />
+      )}
+      {t === 'matching' && (
+        <MatchingPupilUI
+          config={(question as any).config}
+          cellAnswers={cellAnswers}
+          setCellAnswers={setCellAnswers}
+        />
+      )}
+      {t === 'anagrams' && (
+        <AnagramsPupilUI
+          config={(question as any).config}
+          cellAnswers={cellAnswers}
+          setCellAnswers={setCellAnswers}
+        />
+      )}
 
       {(t === 'short' || t === 'long' || t === 'code' || t === 'video_question') && (
         <textarea
@@ -1368,6 +1421,702 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ============================================================================
+   Fun-activity components (crossword / word search / matching / anagrams)
+
+   Each activity has two surfaces:
+     – A pupil-facing renderer used inside <StudentAnswer/> and only ever reads
+       from `config` and writes into the shared `cellAnswers` bag.
+     – A teacher-facing editor used inside <NewQuestionModal/> that builds the
+       config that the pupil renderer will eventually consume.
+
+   Pupil submissions are JSON-serialised into `text_answer` (same path as
+   fill_in_blanks/table/labeled_inputs); the server-side markers in
+   classwork-ai.ts are the source of truth for awarded marks.
+   ============================================================================ */
+
+// Tiny seedable PRNG so generated word-search grids and shuffled matching
+// definitions are stable across renders (avoids React thrash and means a
+// pupil sees the same layout if they reload mid-task).
+function _gameRng(seed: string): () => number {
+  let s = 0;
+  for (const ch of String(seed)) s = (s * 31 + ch.charCodeAt(0)) | 0;
+  return () => {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+}
+
+function _scrambleWord(word: string, salt = ''): string {
+  const letters = String(word).toUpperCase().replace(/[^A-Z]/g, '').split('');
+  if (letters.length < 2) return letters.join('');
+  const rng = _gameRng(word + '|' + salt);
+  // Keep scrambling until we get a different ordering than the original
+  // (otherwise a 4-letter word can land on itself and look unscrambled).
+  for (let attempt = 0; attempt < 8; attempt++) {
+    const arr = letters.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    if (arr.join('') !== letters.join('')) return arr.join('');
+  }
+  // Fallback: rotate by one
+  return letters.slice(1).concat(letters[0]).join('');
+}
+
+interface WSPlacement { word: string; r: number; c: number; dr: number; dc: number; reversed: boolean; }
+function _generateWordSearchGrid(
+  rows: number, cols: number, words: string[],
+  opts: { allowDiagonals?: boolean; allowReverse?: boolean; seed?: string } = {},
+): { grid: string[][]; placements: WSPlacement[]; skipped: string[] } {
+  const allowDiagonals = opts.allowDiagonals !== false;
+  const allowReverse = opts.allowReverse !== false;
+  const rng = _gameRng(opts.seed || (rows + 'x' + cols + ':' + words.join('|')));
+  const grid: string[][] = Array.from({ length: rows }, () => Array(cols).fill(''));
+  const placements: WSPlacement[] = [];
+  const skipped: string[] = [];
+  const baseDirs: [number, number][] = allowDiagonals
+    ? [[0, 1], [1, 0], [1, 1], [1, -1]]
+    : [[0, 1], [1, 0]];
+  // Try the longer words first — they're harder to place, fewer collisions.
+  const ordered = words
+    .map((w) => String(w).toUpperCase().replace(/[^A-Z]/g, ''))
+    .filter((w) => w.length >= 2 && w.length <= Math.max(rows, cols))
+    .sort((a, b) => b.length - a.length);
+  for (const word of ordered) {
+    let placed = false;
+    for (let attempt = 0; attempt < 250 && !placed; attempt++) {
+      const [dr, dc] = baseDirs[Math.floor(rng() * baseDirs.length)];
+      const reversed = allowReverse && rng() < 0.5;
+      const w = reversed ? word.split('').reverse().join('') : word;
+      const r0 = Math.floor(rng() * rows);
+      const c0 = Math.floor(rng() * cols);
+      const r1 = r0 + dr * (w.length - 1);
+      const c1 = c0 + dc * (w.length - 1);
+      if (r1 < 0 || r1 >= rows || c1 < 0 || c1 >= cols) continue;
+      let ok = true;
+      for (let k = 0; k < w.length; k++) {
+        const cell = grid[r0 + dr * k][c0 + dc * k];
+        if (cell && cell !== w[k]) { ok = false; break; }
+      }
+      if (!ok) continue;
+      for (let k = 0; k < w.length; k++) grid[r0 + dr * k][c0 + dc * k] = w[k];
+      placements.push({ word, r: r0, c: c0, dr, dc, reversed });
+      placed = true;
+    }
+    if (!placed) skipped.push(word);
+  }
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (!grid[r][c]) grid[r][c] = alphabet[Math.floor(rng() * 26)];
+    }
+  }
+  return { grid, placements, skipped };
+}
+
+const _gameMutedStyle: React.CSSProperties = { color: 'var(--cw-muted)', fontStyle: 'italic', fontSize: 13 };
+
+/* ---- Crossword (pupil) ---- */
+function CrosswordPupilGrid({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: Record<string, any>; setCellAnswers: (v: Record<string, any>) => void;
+}) {
+  const cw = config?.crossword;
+  const entries: any[] = cw && Array.isArray(cw.entries) ? cw.entries : [];
+  if (entries.length === 0) {
+    return <span style={_gameMutedStyle}>This crossword isn't set up yet — ask your teacher to add some clues.</span>;
+  }
+  let maxR = 0, maxC = 0;
+  for (const e of entries) {
+    const len = String(e?.answer || '').length;
+    const rEnd = e?.direction === 'down' ? Number(e.row) + len : Number(e.row) + 1;
+    const cEnd = e?.direction === 'across' ? Number(e.col) + len : Number(e.col) + 1;
+    if (rEnd > maxR) maxR = rEnd;
+    if (cEnd > maxC) maxC = cEnd;
+  }
+  const rows = Math.max(Number(cw.rows) || 0, maxR);
+  const cols = Math.max(Number(cw.cols) || 0, maxC);
+  const active: Record<string, true> = {};
+  const starts: Record<string, number> = {};
+  for (const e of entries) {
+    const len = String(e?.answer || '').length;
+    for (let k = 0; k < len; k++) {
+      const r = e?.direction === 'down' ? Number(e.row) + k : Number(e.row);
+      const c = e?.direction === 'across' ? Number(e.col) + k : Number(e.col);
+      active[`${r},${c}`] = true;
+    }
+    const sk = `${e.row},${e.col}`;
+    if (e?.number != null && starts[sk] == null) starts[sk] = Number(e.number);
+  }
+  return (
+    <div>
+      <div style={{ display: 'inline-block', border: '2px solid #1e293b', background: '#1e293b' }}>
+        {Array.from({ length: rows }, (_, r) => (
+          <div key={r} style={{ display: 'flex' }}>
+            {Array.from({ length: cols }, (_, c) => {
+              const key = `${r},${c}`;
+              if (!active[key]) {
+                return <div key={c} style={{ width: 32, height: 32, background: '#1e293b' }} />;
+              }
+              return (
+                <div key={c} style={{ position: 'relative', width: 32, height: 32, background: '#fff', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1' }}>
+                  {starts[key] != null && (
+                    <span style={{ position: 'absolute', top: 1, left: 2, fontSize: 9, color: '#64748b', fontWeight: 700, lineHeight: 1, pointerEvents: 'none' }}>
+                      {starts[key]}
+                    </span>
+                  )}
+                  <input
+                    type="text" maxLength={1}
+                    value={String(cellAnswers[key] || '')}
+                    onChange={(ev) => {
+                      const v = ev.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(-1);
+                      setCellAnswers({ ...cellAnswers, [key]: v });
+                    }}
+                    style={{
+                      width: '100%', height: '100%', textAlign: 'center',
+                      border: 'none', outline: 'none',
+                      fontSize: 16, fontWeight: 600,
+                      textTransform: 'uppercase', background: 'transparent',
+                      padding: 0,
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        {(['across', 'down'] as const).map((dir) => {
+          const list = entries.filter((e) => e.direction === dir).sort((a, b) => Number(a.number) - Number(b.number));
+          if (list.length === 0) return <div key={dir} />;
+          return (
+            <div key={dir}>
+              <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4, textTransform: 'capitalize', color: '#1e293b' }}>{dir}</div>
+              {list.map((e, i) => (
+                <div key={`${e.number}-${dir}-${i}`} style={{ fontSize: 13, marginBottom: 2 }}>
+                  <strong>{e.number}.</strong> {e.clue || <em style={{ color: 'var(--cw-muted)' }}>(no clue)</em>}
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ---- Word search (pupil) ---- */
+function WordSearchPupilGrid({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: Record<string, any>; setCellAnswers: (v: Record<string, any>) => void;
+}) {
+  const ws = config?.wordSearch;
+  const grid: string[][] = ws && Array.isArray(ws.grid) ? ws.grid : [];
+  const words: string[] = ws && Array.isArray(ws.words) ? ws.words.map((w: any) => String(w).toUpperCase()) : [];
+  const found: string[] = Array.isArray(cellAnswers.found) ? cellAnswers.found : [];
+  const paths: Record<string, { r: number; c: number }[]> = (cellAnswers.paths && typeof cellAnswers.paths === 'object') ? cellAnswers.paths : {};
+  const [selecting, setSelecting] = useState<{ r: number; c: number }[]>([]);
+  const [dragging, setDragging] = useState(false);
+
+  if (grid.length === 0 || words.length === 0) {
+    return <span style={_gameMutedStyle}>This word search isn't set up yet — ask your teacher to add some words.</span>;
+  }
+
+  function pathBetween(start: { r: number; c: number }, end: { r: number; c: number }) {
+    const dr = Math.sign(end.r - start.r);
+    const dc = Math.sign(end.c - start.c);
+    if (dr === 0 && dc === 0) return [{ r: start.r, c: start.c }];
+    if (dr !== 0 && dc !== 0 && Math.abs(end.r - start.r) !== Math.abs(end.c - start.c)) return null;
+    const len = Math.max(Math.abs(end.r - start.r), Math.abs(end.c - start.c)) + 1;
+    const out: { r: number; c: number }[] = [];
+    for (let k = 0; k < len; k++) out.push({ r: start.r + dr * k, c: start.c + dc * k });
+    return out;
+  }
+  function commit() {
+    setDragging(false);
+    if (selecting.length < 2) { setSelecting([]); return; }
+    const word = selecting.map((p) => grid[p.r]?.[p.c] || '').join('').toUpperCase();
+    const reversed = word.split('').reverse().join('');
+    const matched = words.includes(word) ? word : (words.includes(reversed) ? reversed : null);
+    if (matched && !found.includes(matched)) {
+      setCellAnswers({
+        ...cellAnswers,
+        found: [...found, matched],
+        paths: { ...paths, [matched]: selecting.slice() },
+      });
+    }
+    setSelecting([]);
+  }
+  // Latest-state ref so the global mouseup listener always reads fresh values.
+  const commitRef = useRef(commit);
+  commitRef.current = commit;
+  useEffect(() => {
+    const fn = () => { if (dragging) commitRef.current(); };
+    window.addEventListener('mouseup', fn);
+    return () => window.removeEventListener('mouseup', fn);
+  }, [dragging]);
+
+  const inSelecting = (r: number, c: number) => selecting.some((p) => p.r === r && p.c === c);
+  const inFound = (r: number, c: number) => {
+    for (const w of found) {
+      const path = paths[w];
+      if (Array.isArray(path)) {
+        for (const p of path) if (p.r === r && p.c === c) return true;
+      }
+    }
+    return false;
+  };
+
+  return (
+    <div>
+      <div
+        style={{ display: 'inline-block', userSelect: 'none', border: '1px solid #cbd5e1', background: '#fff' }}
+        onMouseLeave={() => { if (dragging) commit(); }}
+      >
+        {grid.map((row, r) => (
+          <div key={r} style={{ display: 'flex' }}>
+            {row.map((ch, c) => {
+              const sel = inSelecting(r, c);
+              const fnd = inFound(r, c);
+              return (
+                <div key={c}
+                  onMouseDown={(e) => { e.preventDefault(); setDragging(true); setSelecting([{ r, c }]); }}
+                  onMouseEnter={() => {
+                    if (!dragging || selecting.length === 0) return;
+                    const p = pathBetween(selecting[0], { r, c });
+                    if (p) setSelecting(p);
+                  }}
+                  style={{
+                    width: 28, height: 28, lineHeight: '28px', textAlign: 'center',
+                    fontSize: 15, fontWeight: 600, fontFamily: 'JetBrains Mono, monospace',
+                    background: sel ? '#fde68a' : fnd ? '#bbf7d0' : '#fff',
+                    borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0',
+                    cursor: 'pointer',
+                  }}
+                >{ch}</div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+      <div style={{ marginTop: 8, fontSize: 13 }}>
+        <strong>Find:</strong>{' '}
+        {words.map((w) => (
+          <span key={w} style={{
+            display: 'inline-block', margin: '2px 4px', padding: '2px 8px',
+            borderRadius: 999, fontSize: 12, fontWeight: 600,
+            background: found.includes(w) ? '#dcfce7' : '#f1f5f9',
+            color: found.includes(w) ? '#166534' : '#0f172a',
+            textDecoration: found.includes(w) ? 'line-through' : 'none',
+          }}>{w}</span>
+        ))}
+      </div>
+      <div style={{ marginTop: 4, fontSize: 11, color: 'var(--cw-muted)' }}>
+        Click and drag across the letters to select a word. Across, down or diagonal.
+      </div>
+    </div>
+  );
+}
+
+/* ---- Matching pairs (pupil) ---- */
+function MatchingPupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: Record<string, any>; setCellAnswers: (v: Record<string, any>) => void;
+}) {
+  const m = config?.matching;
+  const pairs: any[] = m && Array.isArray(m.pairs) ? m.pairs : [];
+  const seed = pairs.map((p) => String(p?.term || '')).join('|') || 'matching';
+  const order = useMemo(() => {
+    const idx = pairs.map((_, i) => i);
+    const rng = _gameRng(seed);
+    for (let i = idx.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [idx[i], idx[j]] = [idx[j], idx[i]];
+    }
+    return idx;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seed, pairs.length]);
+
+  if (pairs.length === 0) {
+    return <span style={_gameMutedStyle}>This matching task isn't set up yet — ask your teacher to add some pairs.</span>;
+  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {pairs.map((p, i) => (
+        <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ minWidth: 160, fontWeight: 600 }}>{p.term}</span>
+          <select
+            value={String(cellAnswers[String(i)] ?? '')}
+            onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}
+            style={{ flex: 1, padding: '6px 8px', border: '2px solid var(--cw-accent)', borderRadius: 6, background: '#fff' }}
+          >
+            <option value="">— pick a definition —</option>
+            {order.map((j) => (
+              <option key={j} value={String(j)}>{pairs[j]?.definition}</option>
+            ))}
+          </select>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ---- Anagrams (pupil) ---- */
+function AnagramsPupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: Record<string, any>; setCellAnswers: (v: Record<string, any>) => void;
+}) {
+  const a = config?.anagrams;
+  const items: any[] = a && Array.isArray(a.items) ? a.items : [];
+  if (items.length === 0) {
+    return <span style={_gameMutedStyle}>This anagrams task isn't set up yet — ask your teacher to add some words.</span>;
+  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {items.map((it, i) => (
+        <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <span style={{
+              minWidth: 160, fontFamily: 'JetBrains Mono, monospace', letterSpacing: 4,
+              fontSize: 17, fontWeight: 700, color: '#1e293b',
+            }}>{it?.scrambled}</span>
+            <input
+              type="text"
+              placeholder="unscrambled answer"
+              value={String(cellAnswers[String(i)] || '')}
+              onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value.toUpperCase() })}
+              style={{ flex: 1, padding: '6px 10px', border: '2px solid var(--cw-accent)', borderRadius: 6, textTransform: 'uppercase', fontSize: 14 }}
+            />
+          </div>
+          {it?.hint && <div style={{ fontSize: 12, color: 'var(--cw-muted)', paddingLeft: 4 }}>Hint: {it.hint}</div>}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ============================================================================
+   Teacher editors for the four fun-activity types.
+   Each one takes a controlled `cfg` + `setCfg` pair so the parent modal
+   keeps the source of truth and can serialise it straight into the question
+   config at save time.
+   ============================================================================ */
+
+interface CrosswordEntryDraft { number: number; direction: 'across' | 'down'; row: number; col: number; answer: string; clue: string; }
+
+function CrosswordEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiErr, setAiErr] = useState<string | null>(null);
+  const [aiTopic, setAiTopic] = useState('');
+  const rows = Math.max(3, Number(cfg?.rows) || 10);
+  const cols = Math.max(3, Number(cfg?.cols) || 10);
+  const entries: CrosswordEntryDraft[] = Array.isArray(cfg?.entries) ? cfg.entries : [];
+
+  function update(patch: any) { setCfg({ rows, cols, entries, ...cfg, ...patch }); }
+  function setEntries(next: CrosswordEntryDraft[]) { setCfg({ ...cfg, rows, cols, entries: next }); }
+
+  async function suggestClues() {
+    setAiErr(null);
+    const targets = entries.filter((e) => String(e?.answer || '').trim());
+    if (targets.length === 0) { setAiErr('Add some answer words first.'); return; }
+    setAiBusy(true);
+    try {
+      const teacherToken = (() => {
+        try { return localStorage.getItem('teacher_token') || localStorage.getItem('teacherToken') || ''; } catch { return ''; }
+      })();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (teacherToken) headers['x-teacher-password'] = teacherToken;
+      const r = await fetch('/api/classwork/teacher/ai-crossword-clues', {
+        method: 'POST', headers,
+        body: JSON.stringify({ words: targets.map((e) => e.answer), topic: aiTopic }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data?.error || 'AI clue suggestion failed');
+      const clues: (string | null)[] = Array.isArray(data?.clues) ? data.clues : [];
+      // Splice each suggested clue back into the matching entry, leaving any
+      // clue the teacher had already written untouched (so a re-run only
+      // fills the empty ones).
+      let ti = 0;
+      const next = entries.map((e) => {
+        if (!String(e?.answer || '').trim()) return e;
+        const suggestion = clues[ti++];
+        if (suggestion && !String(e.clue || '').trim()) return { ...e, clue: suggestion };
+        return e;
+      });
+      setEntries(next);
+    } catch (err: any) {
+      setAiErr(err?.message || 'AI clue suggestion failed');
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
+  const inputStyle: React.CSSProperties = { padding: '4px 8px', border: '1px solid var(--cw-border)', borderRadius: 6, fontSize: 13 };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+        Build the crossword by listing each word's start cell, direction and answer. The grid auto-sizes to fit.
+        Numbers shown to pupils come from the "Number" column — share a number across an across+down pair that starts on the same square (e.g. 1A and 1D).
+      </div>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <label style={{ fontSize: 12 }}>Rows
+          <input type="number" min={3} max={25} value={rows}
+            onChange={(e) => update({ rows: Math.max(3, Math.min(25, Number(e.target.value) || rows)) })}
+            style={{ ...inputStyle, width: 60, marginLeft: 4 }} />
+        </label>
+        <label style={{ fontSize: 12 }}>Cols
+          <input type="number" min={3} max={25} value={cols}
+            onChange={(e) => update({ cols: Math.max(3, Math.min(25, Number(e.target.value) || cols)) })}
+            style={{ ...inputStyle, width: 60, marginLeft: 4 }} />
+        </label>
+      </div>
+      <table style={{ borderCollapse: 'collapse', fontSize: 13 }}>
+        <thead>
+          <tr style={{ background: '#f1f5f9' }}>
+            <th style={{ padding: 4, textAlign: 'left', width: 50 }}>#</th>
+            <th style={{ padding: 4, textAlign: 'left', width: 80 }}>Direction</th>
+            <th style={{ padding: 4, textAlign: 'left', width: 50 }}>Row</th>
+            <th style={{ padding: 4, textAlign: 'left', width: 50 }}>Col</th>
+            <th style={{ padding: 4, textAlign: 'left' }}>Answer</th>
+            <th style={{ padding: 4, textAlign: 'left' }}>Clue</th>
+            <th style={{ padding: 4, width: 30 }} />
+          </tr>
+        </thead>
+        <tbody>
+          {entries.map((e, i) => (
+            <tr key={i}>
+              <td style={{ padding: 2 }}>
+                <input type="number" min={1} value={e.number ?? ''} onChange={(ev) => {
+                  const next = entries.slice(); next[i] = { ...e, number: Number(ev.target.value) || 0 }; setEntries(next);
+                }} style={{ ...inputStyle, width: 50 }} />
+              </td>
+              <td style={{ padding: 2 }}>
+                <select value={e.direction || 'across'} onChange={(ev) => {
+                  const next = entries.slice(); next[i] = { ...e, direction: ev.target.value as any }; setEntries(next);
+                }} style={{ ...inputStyle, width: 80 }}>
+                  <option value="across">Across</option>
+                  <option value="down">Down</option>
+                </select>
+              </td>
+              <td style={{ padding: 2 }}>
+                <input type="number" min={0} value={e.row ?? 0} onChange={(ev) => {
+                  const next = entries.slice(); next[i] = { ...e, row: Math.max(0, Number(ev.target.value) || 0) }; setEntries(next);
+                }} style={{ ...inputStyle, width: 50 }} />
+              </td>
+              <td style={{ padding: 2 }}>
+                <input type="number" min={0} value={e.col ?? 0} onChange={(ev) => {
+                  const next = entries.slice(); next[i] = { ...e, col: Math.max(0, Number(ev.target.value) || 0) }; setEntries(next);
+                }} style={{ ...inputStyle, width: 50 }} />
+              </td>
+              <td style={{ padding: 2 }}>
+                <input type="text" value={e.answer || ''} placeholder="ANSWER"
+                  onChange={(ev) => {
+                    const next = entries.slice(); next[i] = { ...e, answer: ev.target.value.toUpperCase().replace(/[^A-Z]/g, '') }; setEntries(next);
+                  }}
+                  style={{ ...inputStyle, width: '100%', textTransform: 'uppercase', fontFamily: 'JetBrains Mono, monospace' }} />
+              </td>
+              <td style={{ padding: 2 }}>
+                <input type="text" value={e.clue || ''} placeholder="Clue shown to pupils"
+                  onChange={(ev) => {
+                    const next = entries.slice(); next[i] = { ...e, clue: ev.target.value }; setEntries(next);
+                  }}
+                  style={{ ...inputStyle, width: '100%' }} />
+              </td>
+              <td style={{ padding: 2 }}>
+                <button type="button" onClick={() => setEntries(entries.filter((_, j) => j !== i))}
+                  style={{ ...inputStyle, cursor: 'pointer' }} title="Remove this entry">×</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        <button type="button" onClick={() => {
+          const nextNum = (entries.reduce((m, e) => Math.max(m, Number(e.number) || 0), 0) || 0) + 1;
+          setEntries([...entries, { number: nextNum, direction: 'across', row: 0, col: 0, answer: '', clue: '' }]);
+        }} style={{ padding: '6px 12px', border: '1px solid var(--cw-border)', borderRadius: 6, cursor: 'pointer', background: '#fff' }}>
+          + Add entry
+        </button>
+        <span style={{ width: 1, alignSelf: 'stretch', background: 'var(--cw-border)' }} />
+        <input type="text" placeholder="Topic for AI clues (optional, e.g. 'binary numbers')"
+          value={aiTopic} onChange={(e) => setAiTopic(e.target.value)} style={{ ...inputStyle, flex: 1, minWidth: 200 }} />
+        <button type="button" onClick={suggestClues} disabled={aiBusy}
+          style={{
+            padding: '6px 12px', border: 'none', borderRadius: 6,
+            background: aiBusy ? '#94a3b8' : '#7c3aed', color: '#fff', cursor: aiBusy ? 'wait' : 'pointer',
+            fontWeight: 600, fontSize: 13,
+          }}>{aiBusy ? 'Asking AI…' : 'Suggest clues with AI'}</button>
+      </div>
+      {aiErr && <div style={{ fontSize: 12, color: '#991b1b' }}>{aiErr}</div>}
+    </div>
+  );
+}
+
+function WordSearchEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const rows = Math.max(5, Number(cfg?.rows) || 12);
+  const cols = Math.max(5, Number(cfg?.cols) || 12);
+  const allowDiagonals = cfg?.allowDiagonals !== false;
+  const allowReverse = cfg?.allowReverse !== false;
+  const wordsText: string = typeof cfg?._wordsText === 'string'
+    ? cfg._wordsText
+    : (Array.isArray(cfg?.words) ? cfg.words.join('\n') : '');
+  const grid: string[][] = Array.isArray(cfg?.grid) ? cfg.grid : [];
+  const skipped: string[] = Array.isArray(cfg?.skipped) ? cfg.skipped : [];
+
+  function update(patch: any) { setCfg({ rows, cols, allowDiagonals, allowReverse, _wordsText: wordsText, ...cfg, ...patch }); }
+  function regenerate() {
+    const words = wordsText.split(/[\n,]/).map((w) => w.trim()).filter(Boolean);
+    const out = _generateWordSearchGrid(rows, cols, words, {
+      allowDiagonals, allowReverse, seed: Date.now() + ':' + words.join('|'),
+    });
+    update({
+      grid: out.grid,
+      words: out.placements.map((p) => p.word),
+      skipped: out.skipped,
+    });
+  }
+
+  const inputStyle: React.CSSProperties = { padding: '4px 8px', border: '1px solid var(--cw-border)', borderRadius: 6, fontSize: 13 };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+        Type one word per line (or comma-separated). Click "Regenerate" to lay them out — pupils select letters by dragging across the grid.
+      </div>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <label style={{ fontSize: 12 }}>Rows
+          <input type="number" min={5} max={20} value={rows}
+            onChange={(e) => update({ rows: Math.max(5, Math.min(20, Number(e.target.value) || rows)) })}
+            style={{ ...inputStyle, width: 60, marginLeft: 4 }} />
+        </label>
+        <label style={{ fontSize: 12 }}>Cols
+          <input type="number" min={5} max={20} value={cols}
+            onChange={(e) => update({ cols: Math.max(5, Math.min(20, Number(e.target.value) || cols)) })}
+            style={{ ...inputStyle, width: 60, marginLeft: 4 }} />
+        </label>
+        <label style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <input type="checkbox" checked={allowDiagonals} onChange={(e) => update({ allowDiagonals: e.target.checked })} />
+          Allow diagonals
+        </label>
+        <label style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <input type="checkbox" checked={allowReverse} onChange={(e) => update({ allowReverse: e.target.checked })} />
+          Allow reversed
+        </label>
+        <button type="button" onClick={regenerate}
+          style={{ padding: '6px 12px', border: 'none', borderRadius: 6, background: 'var(--cw-accent)', color: '#fff', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+          Regenerate grid
+        </button>
+      </div>
+      <textarea
+        rows={6}
+        placeholder={'PYTHON\nVARIABLE\nLOOP\nBOOLEAN'}
+        value={wordsText}
+        onChange={(e) => update({ _wordsText: e.target.value })}
+        style={{ ...inputStyle, width: '100%', fontFamily: 'JetBrains Mono, monospace' }}
+      />
+      {grid.length > 0 && (
+        <div>
+          <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginBottom: 4 }}>Preview:</div>
+          <div style={{ display: 'inline-block', border: '1px solid #cbd5e1' }}>
+            {grid.map((row, r) => (
+              <div key={r} style={{ display: 'flex' }}>
+                {row.map((ch, c) => (
+                  <div key={c} style={{
+                    width: 22, height: 22, lineHeight: '22px', textAlign: 'center',
+                    fontSize: 12, fontFamily: 'JetBrains Mono, monospace',
+                    borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0',
+                  }}>{ch}</div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {skipped.length > 0 && (
+        <div style={{ fontSize: 12, color: '#92400e', background: '#fef3c7', padding: '6px 8px', borderRadius: 6 }}>
+          Couldn't fit these into the grid (try a bigger grid or shorter words): {skipped.join(', ')}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MatchingEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const pairs: { term: string; definition: string }[] = Array.isArray(cfg?.pairs) ? cfg.pairs : [];
+  function setPairs(next: { term: string; definition: string }[]) { setCfg({ ...cfg, pairs: next }); }
+  const inputStyle: React.CSSProperties = { padding: '4px 8px', border: '1px solid var(--cw-border)', borderRadius: 6, fontSize: 13, width: '100%' };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+        Pupils see each term in order with a dropdown of definitions in shuffled order. Each row = one matching pair.
+      </div>
+      {pairs.map((p, i) => (
+        <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <input type="text" value={p.term || ''} placeholder="Term"
+            onChange={(e) => { const a = pairs.slice(); a[i] = { ...p, term: e.target.value }; setPairs(a); }}
+            style={{ ...inputStyle, width: 180, flex: 'none' }} />
+          <span style={{ color: 'var(--cw-muted)' }}>↔</span>
+          <input type="text" value={p.definition || ''} placeholder="Definition"
+            onChange={(e) => { const a = pairs.slice(); a[i] = { ...p, definition: e.target.value }; setPairs(a); }}
+            style={{ ...inputStyle, flex: 1 }} />
+          <button type="button" onClick={() => setPairs(pairs.filter((_, j) => j !== i))}
+            style={{ ...inputStyle, cursor: 'pointer', width: 36, flex: 'none' }} title="Remove this pair">×</button>
+        </div>
+      ))}
+      <button type="button" onClick={() => setPairs([...pairs, { term: '', definition: '' }])}
+        style={{ padding: '6px 12px', border: '1px solid var(--cw-border)', borderRadius: 6, cursor: 'pointer', background: '#fff', alignSelf: 'flex-start' }}>
+        + Add pair
+      </button>
+    </div>
+  );
+}
+
+function AnagramsEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const items: { answer: string; scrambled: string; hint: string }[] = Array.isArray(cfg?.items) ? cfg.items : [];
+  function setItems(next: { answer: string; scrambled: string; hint: string }[]) { setCfg({ ...cfg, items: next }); }
+  function reshuffle(i: number) {
+    const a = items.slice();
+    a[i] = { ...a[i], scrambled: _scrambleWord(a[i].answer || '', String(Date.now() + i)) };
+    setItems(a);
+  }
+  const inputStyle: React.CSSProperties = { padding: '4px 8px', border: '1px solid var(--cw-border)', borderRadius: 6, fontSize: 13 };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+        Type each answer word — the scrambled version is generated automatically. Hit "Re-scramble" if you want a different jumble.
+      </div>
+      {items.map((it, i) => (
+        <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, border: '1px solid var(--cw-border)', borderRadius: 6, background: '#fff' }}>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <input type="text" value={it.answer || ''} placeholder="Answer (e.g. PYTHON)"
+              onChange={(e) => {
+                const a = items.slice();
+                const ans = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+                a[i] = { ...it, answer: ans, scrambled: _scrambleWord(ans, String(i)) };
+                setItems(a);
+              }}
+              style={{ ...inputStyle, width: 180, textTransform: 'uppercase', fontFamily: 'JetBrains Mono, monospace' }} />
+            <span style={{ color: 'var(--cw-muted)', fontSize: 13 }}>→</span>
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', letterSpacing: 3, fontSize: 14, fontWeight: 700, color: '#1e293b' }}>
+              {it.scrambled || '—'}
+            </span>
+            <button type="button" onClick={() => reshuffle(i)}
+              style={{ ...inputStyle, cursor: 'pointer' }}>Re-scramble</button>
+            <span style={{ flex: 1 }} />
+            <button type="button" onClick={() => setItems(items.filter((_, j) => j !== i))}
+              style={{ ...inputStyle, cursor: 'pointer', width: 36 }} title="Remove">×</button>
+          </div>
+          <input type="text" value={it.hint || ''} placeholder="Optional hint (shown beneath the scrambled letters)"
+            onChange={(e) => { const a = items.slice(); a[i] = { ...it, hint: e.target.value }; setItems(a); }}
+            style={{ ...inputStyle, width: '100%' }} />
+        </div>
+      ))}
+      <button type="button" onClick={() => setItems([...items, { answer: '', scrambled: '', hint: '' }])}
+        style={{ padding: '6px 12px', border: '1px solid var(--cw-border)', borderRadius: 6, cursor: 'pointer', background: '#fff', alignSelf: 'flex-start' }}>
+        + Add anagram
+      </button>
     </div>
   );
 }
@@ -1574,6 +2323,105 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
     );
   }
 
+  if (t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams') {
+    let parsed: Record<string, any> = {};
+    try { parsed = JSON.parse(s.text_answer || '{}') || {}; } catch {}
+    const cfg = (question as any).config;
+    if (t === 'crossword') {
+      const entries = cfg?.crossword?.entries || [];
+      if (!Array.isArray(entries) || entries.length === 0) return <span style={muted}>No clues set up.</span>;
+      return (
+        <table style={{ borderCollapse: 'collapse', fontSize: 13 }}>
+          <tbody>
+            {entries.map((e: any) => {
+              let pupil = '';
+              const len = String(e?.answer || '').length;
+              for (let k = 0; k < len; k++) {
+                const rr = e?.direction === 'down' ? Number(e.row) + k : Number(e.row);
+                const cc = e?.direction === 'across' ? Number(e.col) + k : Number(e.col);
+                pupil += String(parsed[`${rr},${cc}`] || '·');
+              }
+              const ok = pupil.toUpperCase() === String(e?.answer || '').toUpperCase();
+              return (
+                <tr key={e.id}>
+                  <td style={{ padding: '3px 8px', color: 'var(--cw-muted)' }}>{e.id}</td>
+                  <td style={{ padding: '3px 8px', fontFamily: 'JetBrains Mono, monospace' }}>{pupil || '—'}</td>
+                  <td style={{ padding: '3px 8px', color: ok ? '#166534' : '#991b1b' }}>{ok ? '✓' : `✗ ${e.answer}`}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      );
+    }
+    if (t === 'word_search') {
+      const target: string[] = (cfg?.wordSearch?.words || []).map((w: any) => String(w).toUpperCase());
+      const found: string[] = Array.isArray(parsed.found) ? parsed.found.map((w: any) => String(w).toUpperCase()) : [];
+      if (target.length === 0) return <span style={muted}>No words to find.</span>;
+      return (
+        <div style={{ fontSize: 13 }}>
+          <div style={{ marginBottom: 4, color: 'var(--cw-muted)' }}>Found {found.length} of {target.length}:</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            {target.map((w) => {
+              const ok = found.includes(w);
+              return (
+                <span key={w} style={{
+                  padding: '2px 8px', borderRadius: 999, fontSize: 12,
+                  background: ok ? '#dcfce7' : '#fee2e2',
+                  color: ok ? '#166534' : '#991b1b',
+                  textDecoration: ok ? 'none' : 'line-through',
+                }}>{w}</span>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+    if (t === 'matching') {
+      const pairs: any[] = cfg?.matching?.pairs || [];
+      if (!pairs.length) return <span style={muted}>No pairs set up.</span>;
+      return (
+        <table style={{ borderCollapse: 'collapse', fontSize: 13 }}>
+          <tbody>
+            {pairs.map((p, i) => {
+              const pickedIdx = parseInt(String(parsed[String(i)] ?? ''), 10);
+              const pickedDef = isNaN(pickedIdx) ? '—' : (pairs[pickedIdx]?.definition || '?');
+              const ok = pickedIdx === i;
+              return (
+                <tr key={i}>
+                  <td style={{ padding: '3px 8px', fontWeight: 600 }}>{p.term}</td>
+                  <td style={{ padding: '3px 8px' }}>→ {pickedDef}</td>
+                  <td style={{ padding: '3px 8px', color: ok ? '#166534' : '#991b1b' }}>{ok ? '✓' : '✗'}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      );
+    }
+    // anagrams
+    const items: any[] = cfg?.anagrams?.items || [];
+    if (!items.length) return <span style={muted}>No anagrams set up.</span>;
+    return (
+      <table style={{ borderCollapse: 'collapse', fontSize: 13 }}>
+        <tbody>
+          {items.map((it, i) => {
+            const got = String(parsed[String(i)] || '');
+            const expected = String(it?.answer || '').toUpperCase();
+            const ok = got.toUpperCase().trim() === expected;
+            return (
+              <tr key={i}>
+                <td style={{ padding: '3px 8px', fontFamily: 'JetBrains Mono, monospace' }}>{it.scrambled}</td>
+                <td style={{ padding: '3px 8px' }}>{got || <em style={muted}>(blank)</em>}</td>
+                <td style={{ padding: '3px 8px', color: ok ? '#166534' : '#991b1b' }}>{ok ? '✓' : `✗ ${expected}`}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    );
+  }
+
   // short / long / code
   const text = s.text_answer || '';
   if (!text) return <span style={muted}>Empty answer.</span>;
@@ -1728,6 +2576,42 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           aiGuidance: String(f?.aiGuidance || ''),
         }))
       : [{ label: 'Forename', accept: '', aiGuidance: '' }, { label: 'Surname', accept: '', aiGuidance: '' }]
+  );
+  // ─── Fun-activity config slots ────────────────────────────────────────
+  // Each one is the controlled state for the matching editor component
+  // above; they live as separate `useState`s so save() can serialise just
+  // the relevant slot for the chosen question type.
+  const [crosswordCfg, setCrosswordCfg] = useState<any>(() =>
+    cfg.crossword && typeof cfg.crossword === 'object'
+      ? { rows: cfg.crossword.rows || 10, cols: cfg.crossword.cols || 10, entries: Array.isArray(cfg.crossword.entries) ? cfg.crossword.entries : [] }
+      : { rows: 10, cols: 10, entries: [] }
+  );
+  const [wordSearchCfg, setWordSearchCfg] = useState<any>(() =>
+    cfg.wordSearch && typeof cfg.wordSearch === 'object'
+      ? {
+          rows: cfg.wordSearch.rows || 12,
+          cols: cfg.wordSearch.cols || 12,
+          allowDiagonals: cfg.wordSearch.allowDiagonals !== false,
+          allowReverse: cfg.wordSearch.allowReverse !== false,
+          words: Array.isArray(cfg.wordSearch.words) ? cfg.wordSearch.words : [],
+          grid: Array.isArray(cfg.wordSearch.grid) ? cfg.wordSearch.grid : [],
+          _wordsText: Array.isArray(cfg.wordSearch.words) ? cfg.wordSearch.words.join('\n') : '',
+        }
+      : { rows: 12, cols: 12, allowDiagonals: true, allowReverse: true, words: [], grid: [], _wordsText: '' }
+  );
+  const [matchingCfg, setMatchingCfg] = useState<any>(() =>
+    cfg.matching && Array.isArray(cfg.matching.pairs)
+      ? { pairs: cfg.matching.pairs.map((p: any) => ({ term: String(p?.term || ''), definition: String(p?.definition || '') })) }
+      : { pairs: [{ term: '', definition: '' }, { term: '', definition: '' }] }
+  );
+  const [anagramsCfg, setAnagramsCfg] = useState<any>(() =>
+    cfg.anagrams && Array.isArray(cfg.anagrams.items)
+      ? { items: cfg.anagrams.items.map((it: any) => ({
+          answer: String(it?.answer || '').toUpperCase(),
+          scrambled: String(it?.scrambled || ''),
+          hint: String(it?.hint || ''),
+        })) }
+      : { items: [{ answer: '', scrambled: '', hint: '' }] }
   );
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -2026,6 +2910,90 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           throw new Error('That doesn\u2019t look like a YouTube URL.');
         }
         body.config = { video: { kind: videoKind, url: videoUrl.trim() } };
+      }
+      if (type === 'crossword') {
+        const entries = (Array.isArray(crosswordCfg.entries) ? crosswordCfg.entries : [])
+          .map((e: any) => ({
+            number: Math.max(1, Number(e?.number) || 0),
+            direction: e?.direction === 'down' ? 'down' : 'across',
+            row: Math.max(0, Number(e?.row) || 0),
+            col: Math.max(0, Number(e?.col) || 0),
+            answer: String(e?.answer || '').toUpperCase().replace(/[^A-Z]/g, ''),
+            clue: String(e?.clue || '').trim(),
+          }))
+          .filter((e: any) => e.answer.length >= 2 && e.number > 0);
+        if (entries.length === 0) throw new Error('Add at least one crossword entry with an answer of 2 or more letters.');
+        const missingClues = entries.filter((e: any) => !e.clue);
+        if (missingClues.length > 0) {
+          throw new Error(`Every entry needs a clue (missing ${missingClues.length}). Type one in or hit "Suggest clues with AI".`);
+        }
+        body.config = {
+          crossword: {
+            rows: Math.max(3, Number(crosswordCfg.rows) || 10),
+            cols: Math.max(3, Number(crosswordCfg.cols) || 10),
+            entries,
+          },
+        };
+      }
+      if (type === 'word_search') {
+        // Resolve the editor-only `_wordsText` textarea into the actual word
+        // list that gets stored — mirrors what the WordSearchEditor regenerate
+        // button would do, in case the teacher edited the text but never hit
+        // "Regenerate grid" before saving.
+        const wordsFromText = String(wordSearchCfg._wordsText || '').split(/[\n,]/).map((w: string) => w.trim()).filter(Boolean);
+        let grid: string[][] = Array.isArray(wordSearchCfg.grid) ? wordSearchCfg.grid : [];
+        let placedWords: string[] = Array.isArray(wordSearchCfg.words) ? wordSearchCfg.words : [];
+        let skipped: string[] = Array.isArray(wordSearchCfg.skipped) ? wordSearchCfg.skipped : [];
+        // Regenerate if the text doesn't match what's been placed, or there's
+        // no grid yet — saves the teacher one click.
+        const placedSet = new Set(placedWords.map((w) => String(w).toUpperCase()));
+        const desiredSet = new Set(wordsFromText.map((w) => w.toUpperCase().replace(/[^A-Z]/g, '')));
+        const drift = grid.length === 0 || placedSet.size !== desiredSet.size || [...desiredSet].some((w) => !placedSet.has(w));
+        if (drift) {
+          const out = _generateWordSearchGrid(
+            Math.max(5, Number(wordSearchCfg.rows) || 12),
+            Math.max(5, Number(wordSearchCfg.cols) || 12),
+            wordsFromText,
+            {
+              allowDiagonals: wordSearchCfg.allowDiagonals !== false,
+              allowReverse: wordSearchCfg.allowReverse !== false,
+              seed: 'save:' + wordsFromText.join('|'),
+            },
+          );
+          grid = out.grid;
+          placedWords = out.placements.map((p) => p.word);
+          skipped = out.skipped;
+        }
+        if (placedWords.length === 0) throw new Error('Add at least one word for the word search.');
+        body.config = {
+          wordSearch: {
+            rows: grid.length,
+            cols: grid[0]?.length || 0,
+            allowDiagonals: wordSearchCfg.allowDiagonals !== false,
+            allowReverse: wordSearchCfg.allowReverse !== false,
+            words: placedWords,
+            grid,
+            skipped,
+          },
+        };
+      }
+      if (type === 'matching') {
+        const cleaned = (Array.isArray(matchingCfg.pairs) ? matchingCfg.pairs : [])
+          .map((p: any) => ({ term: String(p?.term || '').trim(), definition: String(p?.definition || '').trim() }))
+          .filter((p: any) => p.term && p.definition);
+        if (cleaned.length < 2) throw new Error('Add at least two complete term/definition pairs.');
+        body.config = { matching: { pairs: cleaned } };
+      }
+      if (type === 'anagrams') {
+        const cleaned = (Array.isArray(anagramsCfg.items) ? anagramsCfg.items : [])
+          .map((it: any, i: number) => {
+            const answer = String(it?.answer || '').toUpperCase().replace(/[^A-Z]/g, '');
+            const scrambled = String(it?.scrambled || '').toUpperCase().replace(/[^A-Z]/g, '') || _scrambleWord(answer, String(i));
+            return { answer, scrambled, hint: String(it?.hint || '').trim() };
+          })
+          .filter((it: any) => it.answer.length >= 2);
+        if (cleaned.length === 0) throw new Error('Add at least one anagram with an answer of 2 or more letters.');
+        body.config = { anagrams: { items: cleaned } };
       }
       if (isEdit) {
         await api(`/api/classwork/questions/${existing!.id}`, {
@@ -2803,6 +3771,30 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
                 >− Remove last column</button>
               )}
             </div>
+          </div>
+        )}
+        {type === 'crossword' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Crossword</div>
+            <CrosswordEditor cfg={crosswordCfg} setCfg={setCrosswordCfg} />
+          </div>
+        )}
+        {type === 'word_search' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Word search</div>
+            <WordSearchEditor cfg={wordSearchCfg} setCfg={setWordSearchCfg} />
+          </div>
+        )}
+        {type === 'matching' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Matching pairs</div>
+            <MatchingEditor cfg={matchingCfg} setCfg={setMatchingCfg} />
+          </div>
+        )}
+        {type === 'anagrams' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Anagrams</div>
+            <AnagramsEditor cfg={anagramsCfg} setCfg={setAnagramsCfg} />
           </div>
         )}
         {type !== 'section_header' && (
