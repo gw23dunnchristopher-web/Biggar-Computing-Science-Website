@@ -609,22 +609,24 @@ function StudentActivityCalendar({ course, studentId }: { course: string; studen
 
   // Fixed cell size keeps the whole grid compact regardless of how wide the
   // surrounding StudentDetail panel happens to be — without this the cells
-  // stretch to fill the row and the calendar dominates the panel.
-  const CELL = 22;
-  const GAP = 3;
+  // stretch to fill the row and the calendar dominates the panel. We size
+  // the panel to fit its grid exactly and use `margin: 0 auto` so it sits
+  // centred within whatever StudentDetail column it's rendered into.
+  const CELL = 28;
+  const GAP = 4;
   const gridWidth = CELL * 7 + GAP * 6;
 
   return (
     <div style={{
-      border: '1px solid var(--cw-border)', borderRadius: 8, padding: 8,
-      background: '#fafbff', display: 'inline-flex', flexDirection: 'column', gap: 6,
-      alignSelf: 'flex-start',
+      border: '1px solid var(--cw-border)', borderRadius: 8, padding: 10,
+      background: '#fafbff', display: 'flex', flexDirection: 'column', gap: 6,
+      width: 'fit-content', margin: '0 auto',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: gridWidth }}>
         <div style={{ fontSize: 12, fontWeight: 600 }}>Activity</div>
         <div style={{ flex: 1 }} />
         <button type="button" onClick={() => shift(-1)} disabled={!canGoBack} style={navBtn(!canGoBack)} aria-label="Previous month">‹</button>
-        <div style={{ fontSize: 11, fontWeight: 600, minWidth: 88, textAlign: 'center' }}>{monthLabel}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, minWidth: 96, textAlign: 'center' }}>{monthLabel}</div>
         <button type="button" onClick={() => shift(1)} disabled={!canGoFwd} style={navBtn(!canGoFwd)} aria-label="Next month">›</button>
       </div>
       {err && <div style={{ fontSize: 11, color: 'var(--cw-danger)' }}>{err}</div>}
