@@ -82,6 +82,7 @@ interface StudentAnalytics {
     question_max_marks: number;
     lesson_id: string;
     lesson_title: string;
+    unit_id: string;
     unit_title: string;
   }>;
 }
@@ -486,14 +487,46 @@ function StudentDetail({ course, studentId }: { course: string; studentId: strin
   if (err) return <p style={{ color: 'var(--cw-danger)', margin: 0 }}>{err}</p>;
   if (!data) return <p style={{ color: 'var(--cw-muted)', margin: 0 }}>Loading student detail…</p>;
 
-  // Group by lesson so the timeline reads naturally.
-  const byLesson = data.submissions.reduce((acc, s) => {
-    (acc[s.lesson_id] ||= { title: `${s.unit_title} · ${s.lesson_title}`, rows: [] }).rows.push(s);
-    return acc;
-  }, {} as Record<string, { title: string; rows: typeof data.submissions }>);
+  // Build a two-level grouping (unit → lesson → submissions) while
+  // preserving the natural curriculum order. The server already returns
+  // submissions sorted by `unit.order_index, lesson.order_index,
+  // question.order_index`, so iterating once and appending to the most
+  // recently-seen unit / lesson keeps everything in syllabus order without
+  // a second sort pass.
+  type Row = StudentAnalytics['submissions'][number];
+  type LessonGroup = { lessonId: string; lessonTitle: string; rows: Row[] };
+  type UnitGroup = { unitId: string; unitTitle: string; lessons: LessonGroup[]; lessonIndex: Map<string, LessonGroup> };
+  const units: UnitGroup[] = [];
+  const unitIndex = new Map<string, UnitGroup>();
+  for (const s of data.submissions) {
+    let u = unitIndex.get(s.unit_id);
+    if (!u) {
+      u = { unitId: s.unit_id, unitTitle: s.unit_title, lessons: [], lessonIndex: new Map() };
+      unitIndex.set(s.unit_id, u);
+      units.push(u);
+    }
+    let l = u.lessonIndex.get(s.lesson_id);
+    if (!l) {
+      l = { lessonId: s.lesson_id, lessonTitle: s.lesson_title, rows: [] };
+      u.lessonIndex.set(s.lesson_id, l);
+      u.lessons.push(l);
+    }
+    l.rows.push(s);
+  }
+
+  // Quick per-unit roll-up so the unit heading can show "X / Y marks · Z%"
+  // at a glance — saves the teacher having to add columns up by eye.
+  function rollUp(rows: Row[]) {
+    let got = 0, max = 0;
+    for (const r of rows) {
+      if (r.marks_awarded != null) { got += r.marks_awarded; max += r.question_max_marks; }
+    }
+    const pct = max > 0 ? (got / max) * 100 : null;
+    return { got, max, pct };
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Activity calendar always shows, even before the pupil has submitted
           anything — opening a lesson page already counts as activity, so it
           gives teachers an "are they engaging at all?" signal. */}
@@ -501,46 +534,83 @@ function StudentDetail({ course, studentId }: { course: string; studentId: strin
       {!data.submissions.length && (
         <p style={{ color: 'var(--cw-muted)', margin: 0 }}>No submissions yet.</p>
       )}
-      {Object.entries(byLesson).map(([lessonId, grp]) => (
-        <div key={lessonId}>
-          <h4 style={{ margin: '4px 0 6px', fontSize: 14 }}>
-            <Link href={`/lesson/${lessonId}`}>{grp.title}</Link>
-          </h4>
-          <table style={tbl}>
-            <thead>
-              <tr>
-                <th style={th}>Question</th>
-                <th style={th}>Type</th>
-                <th style={th}>Mark</th>
-                <th style={th}>%</th>
-                <th style={th}>When</th>
-                <th style={th}>Feedback</th>
-              </tr>
-            </thead>
-            <tbody>
-              {grp.rows.map((s) => {
-                const pct = s.marks_awarded != null && s.question_max_marks > 0
-                  ? (s.marks_awarded / s.question_max_marks) * 100 : null;
+      {units.map((u) => {
+        const unitRoll = rollUp(u.lessons.flatMap((l) => l.rows));
+        return (
+          <div key={u.unitId} style={unitGroupStyle}>
+            <div style={unitHeaderStyle}>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--cw-ink)' }}>{u.unitTitle}</h3>
+              <span style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+                {unitRoll.max > 0
+                  ? <>{unitRoll.got} / {unitRoll.max} marks · {unitRoll.pct!.toFixed(0)}%</>
+                  : <>No marks yet</>}
+              </span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 12 }}>
+              {u.lessons.map((l) => {
+                const lessonRoll = rollUp(l.rows);
                 return (
-                  <tr key={s.id}>
-                    <td style={{ ...td, maxWidth: 320 }} title={s.question_prompt}>{shorten(s.question_prompt, 80)}</td>
-                    <td style={td}>{s.question_type}</td>
-                    <td style={td}>{s.marks_awarded != null ? `${s.marks_awarded} / ${s.question_max_marks}` : 'pending'}</td>
-                    <td style={td}><PercentBar value={pct} /></td>
-                    <td style={td}>{new Date(s.submitted_at).toLocaleString()}</td>
-                    <td style={{ ...td, maxWidth: 280, color: 'var(--cw-muted)' }} title={s.ai_feedback || ''}>
-                      {shorten(s.ai_feedback || '', 80) || '—'}
-                    </td>
-                  </tr>
+                  <div key={l.lessonId}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
+                      <h4 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>
+                        <Link href={`/lesson/${l.lessonId}`} style={{ color: 'var(--cw-accent)' }}>{l.lessonTitle}</Link>
+                      </h4>
+                      <span style={{ fontSize: 11, color: 'var(--cw-muted)' }}>
+                        {l.rows.length} {l.rows.length === 1 ? 'question' : 'questions'}
+                        {lessonRoll.max > 0 && <> · {lessonRoll.got} / {lessonRoll.max} · {lessonRoll.pct!.toFixed(0)}%</>}
+                      </span>
+                    </div>
+                    <table style={tbl}>
+                      <thead>
+                        <tr>
+                          <th style={th}>Question</th>
+                          <th style={th}>Type</th>
+                          <th style={th}>Mark</th>
+                          <th style={th}>%</th>
+                          <th style={th}>When</th>
+                          <th style={th}>Feedback</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {l.rows.map((s) => {
+                          const pct = s.marks_awarded != null && s.question_max_marks > 0
+                            ? (s.marks_awarded / s.question_max_marks) * 100 : null;
+                          return (
+                            <tr key={s.id}>
+                              <td style={{ ...td, maxWidth: 320 }} title={s.question_prompt}>{shorten(s.question_prompt, 80)}</td>
+                              <td style={td}>{s.question_type}</td>
+                              <td style={td}>{s.marks_awarded != null ? `${s.marks_awarded} / ${s.question_max_marks}` : 'pending'}</td>
+                              <td style={td}><PercentBar value={pct} /></td>
+                              <td style={td}>{new Date(s.submitted_at).toLocaleString()}</td>
+                              <td style={{ ...td, maxWidth: 280, color: 'var(--cw-muted)' }} title={s.ai_feedback || ''}>
+                                {shorten(s.ai_feedback || '', 80) || '—'}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
-      ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
+
+const unitGroupStyle: React.CSSProperties = {
+  border: '1px solid var(--cw-border)', borderRadius: 10, background: '#fff',
+  overflow: 'hidden',
+};
+const unitHeaderStyle: React.CSSProperties = {
+  display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
+  flexWrap: 'wrap', gap: 8,
+  padding: '8px 12px',
+  background: '#eef2ff', borderBottom: '1px solid var(--cw-border)',
+};
 
 /* ---------- Activity calendar ----------
    Small at-a-glance view of which days the student actually used the app.
