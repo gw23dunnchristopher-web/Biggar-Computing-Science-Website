@@ -241,7 +241,7 @@ export default function Lesson() {
                 ? 'Open your demo jotter — what pupils see when they click "My jotter"'
                 : 'Open your year-long notes jotter'}
             >
-              {role === 'teacher' ? 'Open demo jotter' : 'Open my jotter'}
+              Open Jotter View
             </Link>
           )}
           {role === 'teacher' && (
@@ -439,7 +439,7 @@ export default function Lesson() {
                       fontSize: 14,
                     }}
                   >
-                    {role === 'teacher' ? 'Open demo jotter' : 'Open my jotter'}
+                    My Jotter
                   </Link>
                 </div>
               )}
