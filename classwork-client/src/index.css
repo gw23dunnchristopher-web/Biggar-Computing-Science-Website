@@ -62,6 +62,17 @@
   --cw-accent-hover: #1d4ed8;
   --cw-danger:       #b91c1c;
 
+  /* Task-card variant tints. Surface inline backgrounds that used to
+     be hardcoded so dark mode (and custom themes) can override them. */
+  --cw-tint-info-bg:        #eff6ff;
+  --cw-tint-info-border:    #93c5fd;
+  --cw-tint-info-ink:       #1e40af;
+  --cw-tint-textonly-bg:    #ecfeff;
+  --cw-tint-textonly-border:#67e8f9;
+  --cw-tint-textonly-ink:   #0e7490;
+  --cw-tint-extension-bg:   #faf5ff;
+  --cw-tint-extension-border:#c084fc;
+
   /* shadcn-style HSL tokens — match the classwork palette so the
      accessibility panel and its trigger button feel native to this SPA */
   --background: 0 0% 100%;          /* white panel surface */
@@ -111,6 +122,17 @@ html.dark {
   --cw-accent:       #3b82f6;      /* brighter blue for dark bg */
   --cw-accent-hover: #60a5fa;
   --cw-danger:       #f87171;
+
+  /* Task-card variant tints — darkened backgrounds with brightened
+     ink so the cyan/blue/purple identity survives on dark slate. */
+  --cw-tint-info-bg:        #122236;
+  --cw-tint-info-border:    #1e3a5f;
+  --cw-tint-info-ink:       #93c5fd;
+  --cw-tint-textonly-bg:    #0e2230;
+  --cw-tint-textonly-border:#155e75;
+  --cw-tint-textonly-ink:   #67e8f9;
+  --cw-tint-extension-bg:   #1e1733;
+  --cw-tint-extension-border:#6d28d9;
 
   --background: 222 47% 8%;        /* matches --cw-bg */
   --foreground: 210 40% 96%;
@@ -234,6 +256,15 @@ html.high-contrast {
   --cw-border-strong: #000000;
   --cw-accent: #0000aa;
   --cw-accent-hover: #000077;
+
+  --cw-tint-info-bg: #ffffff;
+  --cw-tint-info-border: #000000;
+  --cw-tint-info-ink: #000000;
+  --cw-tint-textonly-bg: #ffffff;
+  --cw-tint-textonly-border: #000000;
+  --cw-tint-textonly-ink: #000000;
+  --cw-tint-extension-bg: #ffffff;
+  --cw-tint-extension-border: #000000;
 }
 html.high-contrast .text-muted-foreground,
 html.high-contrast [class*="text-neutral-"],
@@ -290,6 +321,14 @@ html[data-custom-bg] {
   --cw-bg: hsl(var(--background));
   --cw-surface: hsl(var(--background));
   --cw-card: hsl(var(--background));
+  /* Variant tints fold into the user's chosen background so the
+     hardcoded cyan/blue/purple don't clash with custom themes. */
+  --cw-tint-info-bg: hsl(var(--background));
+  --cw-tint-info-border: hsl(var(--border));
+  --cw-tint-textonly-bg: hsl(var(--background));
+  --cw-tint-textonly-border: hsl(var(--border));
+  --cw-tint-extension-bg: hsl(var(--background));
+  --cw-tint-extension-border: hsl(var(--border));
 }
 html[data-custom-bg] body,
 html[data-custom-bg] #root {
@@ -298,6 +337,8 @@ html[data-custom-bg] #root {
 html[data-custom-text] {
   --cw-ink: hsl(var(--foreground));
   --cw-muted: hsl(var(--muted-foreground));
+  --cw-tint-info-ink: hsl(var(--foreground));
+  --cw-tint-textonly-ink: hsl(var(--foreground));
 }
 html[data-custom-text] body,
 html[data-custom-text] #root {

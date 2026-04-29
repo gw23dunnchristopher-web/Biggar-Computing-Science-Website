@@ -234,7 +234,7 @@ export default function Lesson() {
               href={role === 'teacher' && lesson?.course ? `/jotter?course=${lesson.course}` : '/jotter'}
               style={{
                 display: 'inline-block',
-                background: '#ecfeff', color: '#0e7490', border: '1px solid #67e8f9',
+                background: 'var(--cw-tint-textonly-bg)', color: 'var(--cw-tint-textonly-ink)', border: '1px solid var(--cw-tint-textonly-border)',
                 padding: '8px 14px', borderRadius: 8, fontWeight: 600, textDecoration: 'none',
               }}
               title={role === 'teacher'
@@ -334,9 +334,9 @@ export default function Lesson() {
             // viewedRef effect higher up in this file.
             <div key={q.id} data-classwork-question-id={q.id} style={{
               ...card,
-              ...(isExt ? { borderColor: '#c084fc', background: '#faf5ff' } : {}),
-              ...(isInfo ? { borderColor: '#93c5fd', background: '#eff6ff' } : {}),
-              ...(isTextOnly ? { borderColor: '#67e8f9', background: '#ecfeff' } : {}),
+              ...(isExt ? { borderColor: 'var(--cw-tint-extension-border)', background: 'var(--cw-tint-extension-bg)' } : {}),
+              ...(isInfo ? { borderColor: 'var(--cw-tint-info-border)', background: 'var(--cw-tint-info-bg)' } : {}),
+              ...(isTextOnly ? { borderColor: 'var(--cw-tint-textonly-border)', background: 'var(--cw-tint-textonly-bg)' } : {}),
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
@@ -368,7 +368,7 @@ export default function Lesson() {
               {q.question_type === 'presentation' && q.config && typeof q.config === 'object' && (q.config as any).starterFileUrl && (
                 <div style={{
                   marginTop: 8, padding: '10px 12px', borderRadius: 8,
-                  background: '#eff6ff', border: '1px solid #bfdbfe',
+                  background: 'var(--cw-tint-info-bg)', border: '1px solid var(--cw-tint-info-border)',
                   display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
                 }}>
                   <span style={{ fontWeight: 600 }}>Starter presentation:</span>
@@ -378,8 +378,8 @@ export default function Lesson() {
                     style={{
                       display: 'inline-flex', alignItems: 'center', gap: 6,
                       padding: '6px 12px', borderRadius: 6,
-                      background: 'var(--cw-surface)', border: '1px solid #bfdbfe',
-                      color: '#1e40af', fontWeight: 600, textDecoration: 'none',
+                      background: 'var(--cw-surface)', border: '1px solid var(--cw-tint-info-border)',
+                      color: 'var(--cw-tint-info-ink)', fontWeight: 600, textDecoration: 'none',
                     }}
                   >
                     Download {((q.config as any).starterFileName as string | undefined) || 'starter.pptx'}
@@ -412,11 +412,11 @@ export default function Lesson() {
               {isTextOnly && (
                 <div style={{
                   marginTop: 12, padding: '12px 14px', borderRadius: 8,
-                  background: 'var(--cw-surface)', border: '1px dashed #67e8f9',
+                  background: 'var(--cw-surface)', border: '1px dashed var(--cw-tint-textonly-border)',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   gap: 12, flexWrap: 'wrap',
                 }}>
-                  <span style={{ color: '#0e7490', fontSize: 14 }}>
+                  <span style={{ color: 'var(--cw-tint-textonly-ink)', fontSize: 14 }}>
                     <strong>Jotter task</strong> &mdash; write your answer in
                     your jotter (typed notes, sketches, screenshots&hellip;)
                     instead of typing it here.
@@ -1412,11 +1412,11 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
 
       {preview && previewResult && (
         <div style={{
-          marginTop: 12, padding: '10px 12px', background: '#ecfeff',
-          border: '1px solid #a5f3fc', borderRadius: 8, fontSize: 13,
+          marginTop: 12, padding: '10px 12px', background: 'var(--cw-tint-textonly-bg)',
+          border: '1px solid var(--cw-tint-textonly-border)', borderRadius: 8, fontSize: 13,
           color: 'var(--cw-ink)',
         }}>
-          <strong style={{ color: '#155e75' }}>Preview AI feedback</strong>
+          <strong style={{ color: 'var(--cw-tint-textonly-ink)' }}>Preview AI feedback</strong>
           {previewResult.marksAwarded != null && (
             <> &middot; {previewResult.marksAwarded}/{previewResult.maxMarks} marks</>
           )}
@@ -3840,8 +3840,8 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           // field is collected, stored, or required.
           <div style={{
             marginTop: 12, padding: '10px 12px', borderRadius: 8,
-            background: '#ecfeff', border: '1px solid #67e8f9',
-            color: '#0e7490', fontSize: 13, lineHeight: 1.45,
+            background: 'var(--cw-tint-textonly-bg)', border: '1px solid var(--cw-tint-textonly-border)',
+            color: 'var(--cw-tint-textonly-ink)', fontSize: 13, lineHeight: 1.45,
           }}>
             <strong>No marking needed.</strong> Jotter tasks don’t need a
             marking scheme or AI guidance — pupils write the answer in their
@@ -4488,13 +4488,13 @@ function LessonHeader({ lesson }: { lesson: LessonInfo }) {
         }}>
           {li.length > 0 && (
             <section style={{
-              background: '#eff6ff', border: '1px solid #bfdbfe',
+              background: 'var(--cw-tint-info-bg)', border: '1px solid var(--cw-tint-info-border)',
               borderRadius: 8, padding: '12px 14px',
             }}>
-              <h2 style={{ margin: 0, fontSize: 14, color: '#1e3a8a', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              <h2 style={{ margin: 0, fontSize: 14, color: 'var(--cw-tint-info-ink)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                 Learning intentions
               </h2>
-              <p style={{ margin: '6px 0 0', fontSize: 13, color: '#1e3a8a', fontStyle: 'italic' }}>
+              <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--cw-tint-info-ink)', fontStyle: 'italic' }}>
                 We are learning about…
               </p>
               <ul style={{ margin: '4px 0 0', paddingLeft: 20, color: 'var(--cw-ink)', fontSize: 14, lineHeight: 1.5 }}>
