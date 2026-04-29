@@ -481,6 +481,15 @@ function StudentDetail({ course, studentId }: { course: string; studentId: strin
   function toggleRow(id: string) {
     setExpanded((e) => ({ ...e, [id]: !e[id] }));
   }
+  // Per-unit collapse state. Default behaviour: only the first unit is open
+  // when the panel mounts — subsequent units stay collapsed because a busy
+  // course can have a dozen+ units and rendering every lesson table at
+  // once buries the headers. `null` means "use default", `true`/`false`
+  // means the teacher has explicitly toggled it.
+  const [unitOpen, setUnitOpen] = useState<Record<string, boolean>>({});
+  function toggleUnit(id: string, defaultOpen: boolean) {
+    setUnitOpen((u) => ({ ...u, [id]: !(id in u ? u[id] : defaultOpen) }));
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -543,18 +552,44 @@ function StudentDetail({ course, studentId }: { course: string; studentId: strin
       {!data.submissions.length && (
         <p style={{ color: 'var(--cw-muted)', margin: 0 }}>No submissions yet.</p>
       )}
-      {units.map((u) => {
+      {units.map((u, uIdx) => {
         const unitRoll = rollUp(u.lessons.flatMap((l) => l.rows));
+        // First unit is open by default to give an immediate at-a-glance
+        // view; later units stay collapsed until the teacher clicks them.
+        const defaultOpen = uIdx === 0;
+        const isUnitOpen = u.unitId in unitOpen ? unitOpen[u.unitId] : defaultOpen;
+        const lessonCount = u.lessons.length;
         return (
           <div key={u.unitId} style={unitGroupStyle}>
-            <div style={unitHeaderStyle}>
-              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--cw-ink)' }}>{u.unitTitle}</h3>
+            {/* Whole header is one big button so the entire bar is a click
+                target — easier than aiming at a tiny chevron when there are
+                a dozen units stacked up. */}
+            <button
+              type="button"
+              onClick={() => toggleUnit(u.unitId, defaultOpen)}
+              aria-expanded={isUnitOpen}
+              style={{
+                ...unitHeaderStyle,
+                width: '100%', textAlign: 'left',
+                border: 'none', cursor: 'pointer', font: 'inherit',
+                display: 'flex', alignItems: 'center', gap: 10,
+              }}
+            >
+              <span aria-hidden="true" style={{
+                display: 'inline-block', width: 14, color: 'var(--cw-muted)',
+                fontSize: 11, transform: isUnitOpen ? 'rotate(90deg)' : 'rotate(0deg)',
+                transition: 'transform 120ms ease',
+              }}>▶</span>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--cw-ink)', flex: 1 }}>{u.unitTitle}</h3>
               <span style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+                {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
+                {' · '}
                 {unitRoll.max > 0
                   ? <>{unitRoll.got} / {unitRoll.max} marks · {unitRoll.pct!.toFixed(0)}%</>
                   : <>No marks yet</>}
               </span>
-            </div>
+            </button>
+            {isUnitOpen && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 12 }}>
               {u.lessons.map((l) => {
                 const lessonRoll = rollUp(l.rows);
@@ -635,6 +670,7 @@ function StudentDetail({ course, studentId }: { course: string; studentId: strin
                 );
               })}
             </div>
+            )}
           </div>
         );
       })}
