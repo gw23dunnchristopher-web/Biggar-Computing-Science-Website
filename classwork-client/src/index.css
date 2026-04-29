@@ -1,6 +1,44 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Tailwind 4 theme tokens used by the AccessibilityPanel
+   (and any other shadcn-style utility we might reach for).
+   These are mapped to HSL custom properties below so that the
+   AccessibilityContext can override --foreground / --background
+   at runtime when the user picks a custom text/background colour.
+   ============================================================ */
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+}
+
 :root {
+  /* Existing classwork palette */
   --cw-bg: #f6f7fb;
   --cw-ink: #0f172a;
   --cw-muted: #64748b;
@@ -9,6 +47,28 @@
   --cw-accent: #1e40af;
   --cw-accent-hover: #1d4ed8;
   --cw-danger: #b91c1c;
+
+  /* shadcn-style HSL tokens — match the classwork palette so the
+     accessibility panel and its trigger button feel native to this SPA */
+  --background: 0 0% 100%;          /* white panel surface */
+  --foreground: 222 47% 11%;        /* #0f172a ish */
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 224 76% 38%;           /* navy, matches --cw-accent */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 215 16% 47%;  /* #64748b ish */
+  --accent: 220 14% 96%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 72% 42%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 213 27% 87%;            /* #e2e8f0 ish */
+  --input: 213 27% 87%;
+  --ring: 224 76% 38%;
 }
 
 html, body, #root {
@@ -19,7 +79,144 @@ html, body, #root {
   color: var(--cw-ink);
 }
 
+body {
+  /* Honour the AccessibilityContext font-size / line-spacing scales.
+     Defaults to 1.0 so behaviour is unchanged when no settings are saved. */
+  font-size: calc(1rem * var(--a11y-font-scale, 1));
+  line-height: calc(1.5 * var(--a11y-line-scale, 1));
+}
+
 * { box-sizing: border-box; }
 
 a { color: var(--cw-accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
+
+/* ============================================================
+   Accessibility — same vocabulary as the static site and n5 SPA
+   so settings sync across all of them via the a11y-settings
+   localStorage key.
+   ============================================================ */
+
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('/Fonts/OpenDyslexic-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('/Fonts/OpenDyslexic-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+html.dyslexia-font,
+html.dyslexia-font * {
+  font-family: 'OpenDyslexic', sans-serif !important;
+}
+html.dyslexia-font code,
+html.dyslexia-font pre,
+html.dyslexia-font .font-mono,
+html.dyslexia-font [class*="mono"] {
+  font-family: 'OpenDyslexic', monospace !important;
+}
+
+/* High contrast — re-skin the shadcn tokens. Because every
+   classwork surface is built from these tokens (or from the
+   --cw-* vars below), this single block flips the whole UI. */
+html.high-contrast {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 0%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 0%;
+  --primary: 240 100% 30%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 92%;
+  --secondary-foreground: 0 0% 0%;
+  --muted: 0 0% 92%;
+  --muted-foreground: 0 0% 15%;
+  --accent: 0 0% 92%;
+  --accent-foreground: 0 0% 0%;
+  --border: 0 0% 0%;
+  --input: 0 0% 0%;
+  --ring: 240 100% 30%;
+
+  --cw-bg: #ffffff;
+  --cw-ink: #000000;
+  --cw-muted: #1a1a1a;
+  --cw-card: #ffffff;
+  --cw-border: #000000;
+  --cw-accent: #0000aa;
+  --cw-accent-hover: #000077;
+}
+html.high-contrast .text-muted-foreground,
+html.high-contrast [class*="text-neutral-"],
+html.high-contrast [class*="text-slate-"],
+html.high-contrast [class*="text-gray-"] {
+  color: hsl(var(--foreground)) !important;
+}
+html.high-contrast [class*="border-neutral-"],
+html.high-contrast [class*="border-slate-"],
+html.high-contrast [class*="border-gray-"] {
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Reduced motion — same selector vocabulary as the rest of the site */
+html.reduced-motion,
+html.reduced-motion * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Colour overlay — full-viewport tint sitting beneath the panel
+   (which uses z-[9998]) and the reading guide (z-[9990]) */
+html[data-colour-overlay="cream"]::after,
+html[data-colour-overlay="blue"]::after,
+html[data-colour-overlay="pink"]::after,
+html[data-colour-overlay="green"]::after,
+html[data-colour-overlay="yellow"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9989;
+  mix-blend-mode: multiply;
+}
+html[data-colour-overlay="cream"]::after  { background-color: rgba(255, 243, 220, 0.30); }
+html[data-colour-overlay="blue"]::after   { background-color: rgba(200, 220, 255, 0.25); }
+html[data-colour-overlay="pink"]::after   { background-color: rgba(255, 210, 220, 0.25); }
+html[data-colour-overlay="green"]::after  { background-color: rgba(210, 255, 220, 0.25); }
+html[data-colour-overlay="yellow"]::after { background-color: rgba(255, 255, 200, 0.25); }
+html[data-colour-overlay="none"]::after   { display: none; }
+
+/* Reading guide cursor — the moving bar itself is rendered by ReadingGuide.tsx */
+html.reading-guide-active,
+html.reading-guide-active * {
+  cursor: crosshair !important;
+}
+
+/* Custom text/background colour overrides apply via the shadcn tokens
+   the AccessibilityContext writes onto <html>; bridge them to the
+   existing --cw-* vars so classwork's bespoke buttons/cards follow too. */
+html[data-custom-bg] {
+  --cw-bg: hsl(var(--background));
+  --cw-card: hsl(var(--background));
+}
+html[data-custom-bg] body,
+html[data-custom-bg] #root {
+  background: hsl(var(--background)) !important;
+}
+html[data-custom-text] {
+  --cw-ink: hsl(var(--foreground));
+  --cw-muted: hsl(var(--muted-foreground));
+}
+html[data-custom-text] body,
+html[data-custom-text] #root {
+  color: hsl(var(--foreground)) !important;
+}
