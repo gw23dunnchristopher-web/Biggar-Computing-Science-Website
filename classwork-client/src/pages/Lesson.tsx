@@ -422,7 +422,16 @@ export default function Lesson() {
                     instead of typing it here.
                   </span>
                   <Link
-                    href="/jotter"
+                    href={(() => {
+                      // Open the editable jotter for THIS lesson's unit so the
+                      // right tab is pre-selected. Teachers also need the
+                      // course param to load their demo jotter for that course.
+                      const params = new URLSearchParams();
+                      if (role === 'teacher' && lesson?.course) params.set('course', lesson.course);
+                      if (lesson?.unit_id) params.set('unit', lesson.unit_id);
+                      const qs = params.toString();
+                      return qs ? `/jotter?${qs}` : '/jotter';
+                    })()}
                     style={{
                       display: 'inline-block',
                       background: '#0891b2', color: '#fff', border: '1px solid #0891b2',

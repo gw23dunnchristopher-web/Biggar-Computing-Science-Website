@@ -59,11 +59,17 @@ export default function JotterPage() {
   const [, params] = useRoute('/jotter/:studentId');
   const studentId = params?.studentId || null;
   const role = getCurrentRole();
-  // Read ?course= directly off the URL (set once on mount; teachers reach
-  // this page via a fresh navigation from the course / lesson header).
+  // Read ?course= and ?unit= directly off the URL (set once on mount; teachers
+  // reach this page via a fresh navigation from the course / lesson header).
+  // ?unit=<unitId> lets the in-lesson "Open my/demo jotter" buttons drop the
+  // user straight onto the right unit tab so they don't have to hunt for it.
   const teacherCourse = (() => {
     if (studentId || role !== 'teacher') return null;
     try { return new URLSearchParams(window.location.search).get('course'); }
+    catch { return null; }
+  })();
+  const requestedUnitId = (() => {
+    try { return new URLSearchParams(window.location.search).get('unit'); }
     catch { return null; }
   })();
   const isTeacherDemo = role === 'teacher' && !studentId && !!teacherCourse;
@@ -81,9 +87,14 @@ export default function JotterPage() {
   useEffect(() => {
     if (!jotter) { setActiveUnitId(null); return; }
     if (jotter.units.length === 0) { setActiveUnitId(null); return; }
-    // Keep current selection if it still exists, otherwise jump to the first unit.
+    // Keep current selection if it still exists, otherwise honour the
+    // ?unit=<unitId> query param (so the in-lesson "Open my jotter" button
+    // lands the user on the correct unit tab); falling back to the first unit.
     if (!jotter.units.some((u) => u.unitId === activeUnitId)) {
-      setActiveUnitId(jotter.units[0].unitId);
+      const fromUrl = requestedUnitId && jotter.units.some((u) => u.unitId === requestedUnitId)
+        ? requestedUnitId
+        : null;
+      setActiveUnitId(fromUrl || jotter.units[0].unitId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jotter]);
