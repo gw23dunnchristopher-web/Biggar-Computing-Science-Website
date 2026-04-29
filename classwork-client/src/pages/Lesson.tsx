@@ -1,4 +1,5 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import confetti from 'canvas-confetti';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
 import Modal, { modalPrimaryBtn, modalSecondaryBtn } from '@/components/Modal';
@@ -91,6 +92,7 @@ const TYPE_LABELS: Record<string, string> = {
   sql_task: 'SQL task (Data Sculptor)',
   database_task: 'Database task (Data Sculptor sandbox)',
   passage: 'Reading passage (with attached tasks)',
+  video_group: 'Video with attached tasks',
   info_only: 'Information note (no answer needed)',
   fill_in_blanks: 'Fill in the blanks',
   table: 'Complete the table',
@@ -128,6 +130,12 @@ export default function Lesson() {
   // and useState for the hover target so the drop-zone indicator updates.
   const dragSrcIdRef = useRef<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
+
+  // Tab-based navigation — one question card at a time in student view.
+  const [tabIdx, setTabIdx] = useState(0);
+
+  // Confetti fires once when the lesson is fully answered.
+  const confettiFiredRef = useRef(false);
 
   // Edit-notes modal: opens directly from the in-lesson "My Jotter" button so
   // pupils don't have to leave the lesson to jot something into their unit
@@ -190,6 +198,18 @@ export default function Lesson() {
   }
   const showStudentView = role === 'student' || (role === 'teacher' && previewAsStudent);
 
+  // Progress tracking — counts answerable, non-extension questions only.
+  // Excludes: passage, video_group (container cards), info_only, section_header, text_only.
+  const mainCountableQs = questions.filter(
+    (q) => !q.is_extension && !['passage', 'video_group', 'info_only', 'section_header', 'text_only'].includes(q.question_type)
+  );
+  const mainAnsweredCount = mainCountableQs.filter(
+    (q) => submissions.some((s) => s.question_id === q.id)
+  ).length;
+  const progressPct = mainCountableQs.length > 0
+    ? Math.round(mainAnsweredCount / mainCountableQs.length * 100)
+    : 0;
+
   async function refresh() {
     setLoading(true);
     setErr(null);
@@ -242,6 +262,22 @@ export default function Lesson() {
   }
 
   useEffect(() => { refresh(); }, [lessonId]);
+
+  // Fire confetti once when a student reaches 100% completion.
+  // Reset the "fired" flag if questions change (e.g. teacher removes a question).
+  useEffect(() => {
+    if (!showStudentView) return;
+    if (progressPct >= 100 && mainCountableQs.length > 0 && !confettiFiredRef.current) {
+      confettiFiredRef.current = true;
+      confetti({
+        particleCount: 180,
+        spread: 110,
+        origin: { y: 0.35 },
+        colors: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#ec4899'],
+      });
+    }
+    if (progressPct < 100) confettiFiredRef.current = false;
+  }, [progressPct, mainCountableQs.length, showStudentView]);
 
   // Reorders questions within one section (main or extension) by computing
   // new order_index values from the drag-and-drop result and PATCHing the
@@ -386,7 +422,7 @@ export default function Lesson() {
             </button>
             {!previewAsStudent && <NewQuestionButton
               lessonId={lessonId}
-              passages={questions.filter((q) => q.question_type === 'passage')}
+              passages={questions.filter((q) => q.question_type === 'passage' || q.question_type === 'video_group')}
               onCreated={refresh}
             />}
           </>
@@ -427,9 +463,9 @@ export default function Lesson() {
           const items: Item[] = [];
           for (const q of qs) {
             if (consumed.has(q.id)) continue;
-            if (q.question_type === 'passage') {
+            if (q.question_type === 'passage' || q.question_type === 'video_group') {
               const children = qs.filter((c) =>
-                c.id !== q.id && c.question_type !== 'passage' && c.passage_id === q.id && !consumed.has(c.id)
+                c.id !== q.id && c.question_type !== 'passage' && c.question_type !== 'video_group' && c.passage_id === q.id && !consumed.has(c.id)
               );
               children.forEach((c) => consumed.add(c.id));
               consumed.add(q.id);
@@ -490,7 +526,7 @@ export default function Lesson() {
                   {role === 'teacher' && !previewAsStudent && (
                     <EditQuestionButton
                       question={q}
-                      passages={questions.filter((x) => x.question_type === 'passage')}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group')}
                       onChanged={refresh}
                     />
                   )}
@@ -619,28 +655,46 @@ export default function Lesson() {
 
         // The passage panel: a card with the passage prompt + its own resources.
         // No marks, no marking scheme, no answer area — it's reading material only.
-        const renderPassagePanel = (p: Question, label: string) => (
-          <div style={{
-            ...card,
-            background: '#fffbeb', borderColor: '#fcd34d',
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#92400e' }}>
-              <span style={{
-                fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase',
-                padding: '2px 8px', borderRadius: 999, background: '#f59e0b', color: '#fff',
-              }}>Passage</span>
-              <span>{label}</span>
+        const renderPassagePanel = (p: Question, label: string) => {
+          const isVG = p.question_type === 'video_group';
+          return (
+            <div style={{
+              ...card,
+              background: isVG ? 'var(--cw-surface)' : '#fffbeb',
+              borderColor: isVG ? 'var(--cw-border)' : '#fcd34d',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: isVG ? 'var(--cw-ink)' : '#92400e' }}>
+                <span style={{
+                  fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase',
+                  padding: '2px 8px', borderRadius: 999,
+                  background: isVG ? '#6366f1' : '#f59e0b', color: '#fff',
+                }}>{isVG ? '▶ Video' : 'Passage'}</span>
+                <span>{label}</span>
+                {role === 'teacher' && !previewAsStudent && (
+                  <EditQuestionButton
+                    question={p}
+                    passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group').filter((x) => x.id !== p.id)}
+                    onChanged={refresh}
+                  />
+                )}
+              </div>
+              {isVG ? (
+                <VideoQuestionPlayer config={p.config} />
+              ) : (
+                <>
+                  <div style={{ marginTop: 8, lineHeight: 1.55 }}>
+                    <PromptText text={p.prompt} />
+                  </div>
+                  <QuestionResources
+                    questionId={p.id}
+                    isTeacher={role === 'teacher' && !previewAsStudent}
+                    initialResources={resourcesByQuestion[p.id] || []}
+                  />
+                </>
+              )}
             </div>
-            <div style={{ marginTop: 8, lineHeight: 1.55 }}>
-              <PromptText text={p.prompt} />
-            </div>
-            <QuestionResources
-              questionId={p.id}
-              isTeacher={role === 'teacher' && !previewAsStudent}
-              initialResources={resourcesByQuestion[p.id] || []}
-            />
-          </div>
-        );
+          );
+        };
 
         // A section divider — purely visual grouping. No marks, no answer area,
         // no resources. Used by teachers to break a long lesson into "Section A",
@@ -824,29 +878,249 @@ export default function Lesson() {
           );
         };
 
+        // ────────────────────────────────────────────────────────────────────
+        // Teacher vertical scroll view (unchanged layout)
+        // ────────────────────────────────────────────────────────────────────
+        if (!showStudentView) {
+          return (
+            <>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 }}>
+                {renderItems(mainItems, false, 'Q')}
+              </div>
+              <DropTail items={mainItems} sentinel="__tail_main__" />
+              {extQs.length > 0 && (
+                <div style={{ marginTop: 28 }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10,
+                    paddingBottom: 8, borderBottom: '2px solid #e9d5ff',
+                  }}>
+                    <h2 style={{ margin: 0, fontSize: 18, color: '#6b21a8' }}>Extension activities</h2>
+                    <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
+                      Optional — these are marked but don't count towards class analytics.
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {renderItems(extItems, true, 'E')}
+                  </div>
+                  <DropTail items={extItems} sentinel="__tail_ext__" />
+                </div>
+              )}
+            </>
+          );
+        }
+
+        // ────────────────────────────────────────────────────────────────────
+        // Student tab navigation view — one card at a time
+        // ────────────────────────────────────────────────────────────────────
+
+        // Clamp the current index to valid range (handles question removal).
+        const safeIdx = mainItems.length === 0 ? 0 : Math.max(0, Math.min(tabIdx, mainItems.length - 1));
+
+        // Build tab labels and answered state in a single pass.
+        let qCount = 0;
+        const tabLabels: string[]  = [];
+        const tabAnswered: (boolean | null)[] = []; // null = non-answerable
+
+        for (const it of mainItems) {
+          if (it.type === 'standalone') {
+            const qt = it.q.question_type;
+            if (qt === 'info_only')       { tabLabels.push('Note');    tabAnswered.push(null); }
+            else if (qt === 'text_only')  { tabLabels.push('Task');    tabAnswered.push(null); }
+            else if (qt === 'section_header') { tabLabels.push('—');   tabAnswered.push(null); }
+            else {
+              qCount++;
+              tabLabels.push(`Q${qCount}`);
+              tabAnswered.push(submissions.some((s) => s.question_id === it.q.id));
+            }
+          } else {
+            // Group (passage / video_group): one tab, children are answerable.
+            const lbl = it.passage.question_type === 'video_group' ? 'Video' : 'Passage';
+            tabLabels.push(lbl);
+            qCount += it.children.length;
+            tabAnswered.push(
+              it.children.length === 0
+                ? null
+                : it.children.every((c) => submissions.some((s) => s.question_id === c.id))
+            );
+          }
+        }
+
+        // Q-number offset for the current item (so group children get the right labels).
+        let qOffset = 0;
+        for (let i = 0; i < safeIdx; i++) {
+          const it = mainItems[i];
+          if (it.type === 'standalone') {
+            if (!['info_only', 'text_only', 'section_header'].includes(it.q.question_type)) qOffset++;
+          } else {
+            qOffset += it.children.length;
+          }
+        }
+
+        // Render the card for the currently-active tab.
+        let curContent: React.ReactNode = null;
+        if (mainItems.length > 0) {
+          const curItem = mainItems[safeIdx];
+          const curLabel = tabLabels[safeIdx];
+          if (curItem.type === 'standalone') {
+            if (curItem.q.question_type === 'section_header') {
+              curContent = renderSectionHeader(curItem.q);
+            } else {
+              curContent = renderQuestionCard(curItem.q, curLabel, false);
+            }
+          } else {
+            // Group: header panel (passage text OR video), then children stacked.
+            curContent = (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {renderPassagePanel(curItem.passage, curLabel)}
+                {curItem.children.length === 0 ? (
+                  <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0, fontSize: 14 }}>
+                    No questions are attached to this {curItem.passage.question_type === 'video_group' ? 'video' : 'passage'} yet.
+                  </p>
+                ) : curItem.children.map((c, ci) => renderQuestionCard(c, `Q${qOffset + ci + 1}`, false))}
+              </div>
+            );
+          }
+        }
+
+        // Shared nav-button style helper.
+        const navBtnStyle = (disabled: boolean): React.CSSProperties => ({
+          padding: '7px 16px', borderRadius: 8, fontSize: 14, fontWeight: 600,
+          border: '1px solid var(--cw-border)',
+          background: disabled ? 'var(--cw-surface)' : 'var(--cw-surface)',
+          color: disabled ? 'var(--cw-muted)' : 'var(--cw-ink)',
+          cursor: disabled ? 'default' : 'pointer',
+          opacity: disabled ? 0.4 : 1,
+          transition: 'opacity 150ms',
+          userSelect: 'none',
+          flexShrink: 0,
+        });
+
+        const extSection = extQs.length > 0 && (
+          <div style={{ marginTop: 36 }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10,
+              paddingBottom: 8, borderBottom: '2px solid #e9d5ff',
+            }}>
+              <h2 style={{ margin: 0, fontSize: 18, color: '#6b21a8' }}>Extension activities</h2>
+              <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
+                Optional — not counted in your progress.
+              </span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {renderItems(extItems, true, 'E')}
+            </div>
+          </div>
+        );
+
         return (
           <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 }}>
-              {renderItems(mainItems, false, 'Q')}
-            </div>
-            <DropTail items={mainItems} sentinel="__tail_main__" />
-            {extQs.length > 0 && (
-              <div style={{ marginTop: 28 }}>
+            {/* ── Progress bar ── */}
+            {mainCountableQs.length > 0 && (
+              <div style={{ marginTop: 16 }}>
                 <div style={{
-                  display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10,
-                  paddingBottom: 8, borderBottom: '2px solid #e9d5ff',
+                  display: 'flex', justifyContent: 'space-between',
+                  fontSize: 13, color: 'var(--cw-muted)', marginBottom: 5,
                 }}>
-                  <h2 style={{ margin: 0, fontSize: 18, color: '#6b21a8' }}>Extension activities</h2>
-                  <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
-                    Optional — these are marked but don't count towards class analytics.
+                  <span style={{ fontWeight: 600 }}>Lesson progress</span>
+                  <span style={{ fontWeight: 600, color: progressPct >= 100 ? '#10b981' : 'inherit' }}>
+                    {mainAnsweredCount} / {mainCountableQs.length} answered
+                    {progressPct >= 100 ? ' · 100% ✓' : ` · ${progressPct}%`}
                   </span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {renderItems(extItems, true, 'E')}
+                <div style={{
+                  background: 'var(--cw-border)', borderRadius: 999,
+                  height: 10, overflow: 'hidden',
+                }}>
+                  <div style={{
+                    width: `${progressPct}%`, height: '100%',
+                    background: progressPct >= 100 ? '#10b981' : 'var(--cw-accent)',
+                    borderRadius: 999,
+                    transition: 'width 500ms ease, background 300ms ease',
+                  }} />
                 </div>
-                <DropTail items={extItems} sentinel="__tail_ext__" />
+                {progressPct >= 100 && (
+                  <div style={{
+                    textAlign: 'center', marginTop: 10,
+                    color: '#10b981', fontWeight: 700, fontSize: 15,
+                  }}>
+                    🎉 All done — great work!
+                  </div>
+                )}
               </div>
             )}
+
+            {/* ── Tab navigation strip ── */}
+            {mainItems.length > 0 && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                marginTop: mainCountableQs.length > 0 ? 14 : 16,
+                flexWrap: 'wrap',
+              }}>
+                {/* Prev button */}
+                <button
+                  disabled={safeIdx === 0}
+                  onClick={() => setTabIdx(Math.max(0, safeIdx - 1))}
+                  style={navBtnStyle(safeIdx === 0)}
+                >← Prev</button>
+
+                {/* Dot strip */}
+                <div style={{
+                  display: 'flex', gap: 5, flex: 1,
+                  flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center',
+                }}>
+                  {mainItems.map((_, i) => {
+                    const isCurrent  = i === safeIdx;
+                    const ans        = tabAnswered[i];
+                    const lbl        = tabLabels[i];
+                    const isSection  = lbl === '—';
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setTabIdx(i)}
+                        title={lbl}
+                        style={{
+                          minWidth: isSection ? 22 : 34, height: 34,
+                          borderRadius: isSection ? 4 : '50%',
+                          padding: '0 5px',
+                          border: isCurrent
+                            ? '2px solid var(--cw-accent)'
+                            : ans === true
+                              ? '2px solid #10b981'
+                              : '2px solid var(--cw-border)',
+                          background: isCurrent
+                            ? 'var(--cw-accent)'
+                            : ans === true
+                              ? '#10b981'
+                              : 'var(--cw-surface)',
+                          color: (isCurrent || ans === true) ? '#fff' : 'var(--cw-muted)',
+                          fontSize: 11, fontWeight: 700,
+                          cursor: 'pointer',
+                          transition: 'all 150ms',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0,
+                          opacity: ans === null && !isCurrent ? 0.7 : 1,
+                        }}
+                      >
+                        {ans === true && !isCurrent ? '✓' : lbl}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Next button */}
+                <button
+                  disabled={safeIdx === mainItems.length - 1}
+                  onClick={() => setTabIdx(Math.min(mainItems.length - 1, safeIdx + 1))}
+                  style={navBtnStyle(safeIdx === mainItems.length - 1)}
+                >Next →</button>
+              </div>
+            )}
+
+            {/* ── Current question card ── */}
+            <div style={{ marginTop: 16 }}>{curContent}</div>
+
+            {/* ── Extension activities (not tabbed) ── */}
+            {extSection}
           </>
         );
       })()}
@@ -3113,7 +3387,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
     setBusy(true);
     setErr(null);
     try {
-      const noAnswerType = type === 'passage' || type === 'info_only' || type === 'section_header' || type === 'text_only';
+      const noAnswerType = type === 'passage' || type === 'video_group' || type === 'info_only' || type === 'section_header' || type === 'text_only';
       const body: any = {
         questionType: type, prompt,
         // Passages and info-only notes have no marks / marking scheme / AI
@@ -3210,7 +3484,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
         if (cleaned.length === 0) throw new Error('Add at least one labelled field.');
         body.config = { fields: cleaned };
       }
-      if (type === 'video_question') {
+      if (type === 'video_question' || type === 'video_group') {
         if (!videoUrl.trim()) {
           throw new Error(videoKind === 'youtube'
             ? 'Please paste a YouTube URL.'
@@ -3711,12 +3985,21 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             </div>
           </div>
         )}
-        {type === 'video_question' && (
+        {(type === 'video_question' || type === 'video_group') && (
           <div style={fieldLabel as any}>
             <div style={{ fontSize: 13, color: 'var(--cw-muted)', marginBottom: 6 }}>
-              Pupils watch the video then type their answer below it. The AI marker reads the
-              pupil's written answer against your marking scheme — it does not watch the video,
-              so make sure your marking points are clear.
+              {type === 'video_group' ? (
+                <>
+                  Students watch the video then answer the questions attached to this card.
+                  Save it first, then add questions to it using <strong>Add question → Attach to passage</strong>.
+                </>
+              ) : (
+                <>
+                  Pupils watch the video then type their answer below it. The AI marker reads the
+                  pupil's written answer against your marking scheme — it does not watch the video,
+                  so make sure your marking points are clear.
+                </>
+              )}
             </div>
             <div style={{ display: 'flex', gap: 14, marginBottom: 6 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14 }}>
