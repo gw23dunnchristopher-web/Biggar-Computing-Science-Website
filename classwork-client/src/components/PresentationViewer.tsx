@@ -61,6 +61,10 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
   const stageRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const linkLayerRef = useRef<HTMLDivElement | null>(null);
+  // Wraps the slide stage + controls so we can request the browser's
+  // native fullscreen on just the viewer (not the whole page).
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   // Bumped on every render request so a stale render that finishes after
   // the user has paged away can detect it should drop its results instead
   // of painting over the new slide.
@@ -282,12 +286,52 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
     else setJumpInput(String(slideIdx + 1));
   }
 
-  const headerTitle = filename ? `${unitTitle} — ${filename}` : `${unitTitle} — Presentation`;
+  // Track native fullscreen state so the toggle button label/icon stays in
+  // sync even when the user exits via Esc or the browser UI.
+  useEffect(() => {
+    function onFsChange() {
+      setIsFullscreen(document.fullscreenElement === containerRef.current);
+    }
+    document.addEventListener('fullscreenchange', onFsChange);
+    return () => document.removeEventListener('fullscreenchange', onFsChange);
+  }, []);
+
+  // Make sure we exit fullscreen when the modal closes — otherwise the
+  // browser keeps the now-empty container fullscreened.
+  useEffect(() => {
+    if (open) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => { /* ignore */ });
+    }
+  }, [open]);
+
+  async function toggleFullscreen() {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else if (containerRef.current?.requestFullscreen) {
+        await containerRef.current.requestFullscreen();
+      }
+    } catch {
+      /* user cancelled or unsupported; nothing else to do */
+    }
+  }
 
   // v1 fallback: legacy <img> renderer for decks uploaded before the PDF
-  // pipeline existed.
+  // pipeline existed. Computed up here so popOut() can reference it.
   const isLegacy = manifest && (manifest.version ?? 1) < 2;
   const legacySlide = isLegacy && manifest?.slides ? manifest.slides[slideIdx] : null;
+
+  function popOut() {
+    // Prefer the underlying PDF for v2 decks (full browser PDF viewer with
+    // built-in zoom, search, print). Fall back to the current slide image
+    // for legacy v1 uploads so kids can still get a standalone tab.
+    const target = manifest?.pdfUrl || legacySlide?.url;
+    if (!target) return;
+    window.open(target, '_blank', 'noopener,noreferrer');
+  }
+
+  const headerTitle = filename ? `${unitTitle} — ${filename}` : `${unitTitle} — Presentation`;
 
   return (
     <Modal open={open} title={headerTitle} onClose={onClose} width={1200} fillHeight>
@@ -297,7 +341,21 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
         <p style={{ color: 'var(--cw-muted)' }}>This presentation has no slides.</p>
       )}
       {manifest && slideCount > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%', minHeight: 0 }}>
+        <div
+          ref={containerRef}
+          style={{
+            display: 'flex', flexDirection: 'column', gap: 12,
+            height: '100%', minHeight: 0,
+            // When the browser hands us a fullscreen surface it has no
+            // styling of its own, so we paint our own background and add a
+            // little padding to keep slides from touching the edges.
+            ...(isFullscreen ? {
+              background: 'var(--cw-surface, #0f172a)',
+              padding: 16,
+              boxSizing: 'border-box',
+            } : null),
+          }}
+        >
           {/* Slide stage. The flex:1 + minHeight:0 combo is what lets the
               ResizeObserver report a real height inside a flex column. */}
           <div
@@ -412,6 +470,24 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
                 </select>
               </span>
             )}
+
+            {/* Spacer pushes the view-mode controls to the right side. */}
+            <span style={{ flex: 1 }} />
+
+            <button
+              type="button"
+              onClick={popOut}
+              style={modalSecondaryBtn}
+              title="Open the presentation in a new browser tab"
+              aria-label="Open in new tab"
+            >⤴ Pop out</button>
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              style={modalSecondaryBtn}
+              title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen'}
+              aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            >{isFullscreen ? '⤡ Exit fullscreen' : '⛶ Fullscreen'}</button>
           </div>
         </div>
       )}
