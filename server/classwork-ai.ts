@@ -26,6 +26,7 @@ import { spawn } from 'child_process';
 import crypto from 'crypto';
 import { pool, hasDatabase } from './db';
 import { gradeSandboxSql, gradeDatabaseStructure } from './ds-routes';
+import { downloadClassworkUploadToTemp } from './classwork-uploads-store';
 
 const gemini = process.env.GEMINI_API_KEY
   ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
@@ -537,17 +538,6 @@ function extractTextRuns(xml: string): string {
   return out.join(' ').replace(/\s+/g, ' ').trim();
 }
 
-// Resolve /classwork-uploads/<file> to an absolute path on disk.
-function resolveUploadPath(fileUrl: string): string | null {
-  // Accept full URLs too (strip origin).
-  let p = fileUrl;
-  try { const u = new URL(fileUrl); p = u.pathname; } catch { /* relative */ }
-  if (!p.startsWith('/classwork-uploads/')) return null;
-  const base = path.join(process.cwd(), 'public', 'classwork-uploads');
-  const name = path.basename(p);
-  return path.join(base, name);
-}
-
 async function summarisePptx(filePath: string): Promise<PptxSummary | null> {
   try {
     const buf = await fs.readFile(filePath);
@@ -774,18 +764,22 @@ async function markPresentationVisual(
 
 async function markPresentation(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {
   if (!s.file_url || !gemini) return null;
-  const onDisk = resolveUploadPath(s.file_url);
-  if (!onDisk) {
-    return { marksAwarded: 0, feedback: 'The uploaded file couldn\u2019t be located on the server.', markedBy: 'ai' };
-  }
-  // Quick sanity check on the extension.
-  if (!/\.pptx$/i.test(onDisk)) {
+  // Sanity check on the extension *before* spending time downloading bytes.
+  if (!/\.pptx(\?|$)/i.test(s.file_url)) {
     return {
       marksAwarded: 0,
       feedback: 'Please upload a PowerPoint (.pptx) file. Other formats can\u2019t be auto-marked.',
       markedBy: 'ai',
     };
   }
+  const cleanups: Array<() => Promise<void>> = [];
+  try {
+  const downloaded = await downloadClassworkUploadToTemp(s.file_url);
+  if (!downloaded) {
+    return { marksAwarded: 0, feedback: 'The uploaded file couldn\u2019t be located on the server.', markedBy: 'ai' };
+  }
+  cleanups.push(downloaded.cleanup);
+  const onDisk = downloaded.path;
   const summary = await summarisePptx(onDisk);
   if (!summary || summary.slideCount === 0) {
     return {
@@ -805,16 +799,16 @@ async function markPresentation(q: AIQuestion, s: AISubmission): Promise<AIMarkR
     : '';
   let starterSummary: PptxSummary | null = null;
   let starterImages: Buffer[] | null = null;
-  if (starterUrl) {
-    const starterPath = resolveUploadPath(starterUrl);
-    if (starterPath && /\.pptx$/i.test(starterPath)) {
+  let starterOnDisk: string | null = null;
+  if (starterUrl && /\.pptx(\?|$)/i.test(starterUrl)) {
+    const starterDl = await downloadClassworkUploadToTemp(starterUrl);
+    if (starterDl) {
+      cleanups.push(starterDl.cleanup);
+      starterOnDisk = starterDl.path;
       try {
-        starterSummary = await summarisePptx(starterPath);
+        starterSummary = await summarisePptx(starterOnDisk);
       } catch { starterSummary = null; }
     }
-    // Visual rendering of the starter is only useful if we're also doing the
-    // visual path; we render it lazily below.
-    void starterPath;
   }
   // Visual marking is opt-in per question (config.visualMarking === true).
   // It renders every slide to a PNG via LibreOffice headless + pdftoppm and
@@ -824,13 +818,10 @@ async function markPresentation(q: AIQuestion, s: AISubmission): Promise<AIMarkR
   const wantVisual = !!(q.config && typeof q.config === 'object' && (q.config as any).visualMarking === true);
   if (wantVisual) {
     let starterPair: { summary: PptxSummary; images: Buffer[] } | null = null;
-    if (starterUrl && starterSummary) {
-      const starterPath = resolveUploadPath(starterUrl);
-      if (starterPath) {
-        starterImages = await renderPptxToImages(starterPath, { dpi: 100, maxSlides: 25 });
-        if (starterImages && starterImages.length) {
-          starterPair = { summary: starterSummary, images: starterImages };
-        }
+    if (starterOnDisk && starterSummary) {
+      starterImages = await renderPptxToImages(starterOnDisk, { dpi: 100, maxSlides: 25 });
+      if (starterImages && starterImages.length) {
+        starterPair = { summary: starterSummary, images: starterImages };
       }
     }
     const visual = await markPresentationVisual(q, onDisk, summary, rubricRows, visualCappedTotal, starterPair);
@@ -892,6 +883,11 @@ async function markPresentation(q: AIQuestion, s: AISubmission): Promise<AIMarkR
   ].filter(Boolean).join('\n');
 
   return await callGeminiForMark(prompt, Math.min(q.max_marks, cappedTotal));
+  } finally {
+    for (const c of cleanups) {
+      try { await c(); } catch { /* best-effort temp cleanup */ }
+    }
+  }
 }
 
 async function markGenericLink(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {

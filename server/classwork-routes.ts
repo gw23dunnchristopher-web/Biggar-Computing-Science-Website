@@ -1,7 +1,7 @@
 import express, { type Express, type Request, type Response, type NextFunction } from 'express';
 import path from 'path';
-import fs from 'fs';
 import multer from 'multer';
+import { saveClassworkUpload, streamClassworkUpload } from './classwork-uploads-store';
 import { pool, hasDatabase } from './db';
 import {
   ensureClassworkSchema,
@@ -129,19 +129,14 @@ async function requireStudent(req: Request, res: Response, next: NextFunction) {
 
 /* ---------- File uploads ---------- */
 
-const classworkUploadDir = path.join(process.cwd(), 'public', 'classwork-uploads');
-if (!fs.existsSync(classworkUploadDir)) {
-  fs.mkdirSync(classworkUploadDir, { recursive: true });
-}
-
-const classworkFileStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, classworkUploadDir),
-  filename: (_req, file, cb) => {
-    const safeBase = path.basename(file.originalname).replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 60);
-    const stamp = Date.now() + '_' + Math.round(Math.random() * 1e9);
-    cb(null, stamp + '_' + safeBase);
-  },
-});
+// Files used to live on the per-container local disk under
+// public/classwork-uploads/, but that disk is wiped on every redeploy of the
+// published app, so any image a teacher attached would silently disappear the
+// next time we shipped a build. We now store uploads in Replit Object Storage
+// (a persistent bucket shared by dev + production) and stream them back
+// through the same /classwork-uploads/<name> URL surface so existing prompt
+// references in the database keep working without any data migration.
+const classworkFileStorage = multer.memoryStorage();
 
 // Two upload presets: images-only for screenshot questions, broader file
 // types for project questions.
@@ -172,27 +167,27 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     console.error('[classwork] schema init failed:', err);
   });
 
-  // Serve uploaded files at /classwork-uploads/<filename>.
-  app.use('/classwork-uploads', (req, res, next) => {
-    // Disallow path traversal and dotfiles defensively.
-    if (req.path.includes('..') || req.path.startsWith('/.')) {
-      return res.status(400).send('Bad request');
-    }
-    next();
+  // Serve uploaded files at /classwork-uploads/<filename>. We stream them out
+  // of Object Storage rather than reading from local disk, so files persist
+  // across redeploys of the published app.
+  app.get('/classwork-uploads/:name', async (req, res) => {
+    await streamClassworkUpload(req.params.name, res);
   });
-  app.use('/classwork-uploads', express.static(classworkUploadDir, {
-    dotfiles: 'deny',
-    index: false,
-    maxAge: '1d',
-  }));
 
   // Student upload endpoints. Both return { url, filename, size, mimeType }.
+  // multer is in memory mode now — the uploaded bytes arrive on req.file.buffer
+  // and we hand them to the object-storage helper to persist.
   function handleUpload(kind: 'screenshot' | 'project') {
-    return (req: Request, res: Response) => {
+    return async (req: Request, res: Response) => {
       const f = (req as any).file as Express.Multer.File | undefined;
-      if (!f) return res.status(400).json({ error: 'No file received' });
-      const url = `/classwork-uploads/${path.basename(f.path)}`;
-      res.json({ url, filename: f.originalname, size: f.size, mimeType: f.mimetype, kind });
+      if (!f || !f.buffer) return res.status(400).json({ error: 'No file received' });
+      try {
+        const { url } = await saveClassworkUpload(f.buffer, f.originalname, f.mimetype);
+        res.json({ url, filename: f.originalname, size: f.size, mimeType: f.mimetype, kind });
+      } catch (err) {
+        console.error('[classwork] save upload failed:', err);
+        res.status(500).json({ error: 'Upload failed' });
+      }
     };
   }
 
