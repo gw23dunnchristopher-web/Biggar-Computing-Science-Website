@@ -734,8 +734,12 @@ function getRubric(q: AIQuestion): RubricRow[] {
  * model. Conversion happens inside an isolated temp directory which is
  * cleaned up before returning.
  */
-async function renderPptxToImages(pptxPath: string, opts: { dpi?: number; maxSlides?: number } = {}): Promise<Buffer[] | null> {
+export async function renderPptxToImages(pptxPath: string, opts: { dpi?: number; maxSlides?: number } = {}): Promise<Buffer[] | null> {
   const dpi = opts.dpi ?? 100;
+  // `maxSlides: 0` means "no cap, render every slide" — used by the
+  // per-unit presentation viewer where pupils need access to the whole deck.
+  // Existing AI-marking callers keep their default cap of 25 by passing
+  // nothing, which preserves the old behaviour.
   const maxSlides = opts.maxSlides ?? 25;
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'cw-pptx-'));
   const profile = path.join(tmp, 'lo-profile');
@@ -767,10 +771,13 @@ async function renderPptxToImages(pptxPath: string, opts: { dpi?: number; maxSli
       console.error('[classwork-ai] expected pdf not found:', pdfPath);
       return null;
     }
-    const ppmRes = await run('pdftoppm', [
-      '-png', '-r', String(dpi), '-l', String(maxSlides),
-      pdfPath, path.join(tmp, 'slide'),
-    ], 60_000);
+    // Omit `-l` when maxSlides is 0/falsy so every slide is rendered.
+    // Uncapped runs get a longer timeout because LibreOffice/pdftoppm scale
+    // with deck size — a 60s budget covers a few hundred slides comfortably.
+    const ppmArgs = ['-png', '-r', String(dpi)];
+    if (maxSlides && maxSlides > 0) ppmArgs.push('-l', String(maxSlides));
+    ppmArgs.push(pdfPath, path.join(tmp, 'slide'));
+    const ppmRes = await run('pdftoppm', ppmArgs, maxSlides && maxSlides > 0 ? 60_000 : 180_000);
     if (ppmRes.code !== 0) {
       console.error('[classwork-ai] pdftoppm failed:', ppmRes.stderr.slice(0, 400));
       return null;
@@ -792,6 +799,87 @@ async function renderPptxToImages(pptxPath: string, opts: { dpi?: number; maxSli
     return null;
   } finally {
     fs.rm(tmp, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+export interface PptxSection {
+  /** Display name shown in the section dropdown. */
+  name: string;
+  /** 1-based slide index where this section starts. */
+  startSlide: number;
+}
+
+/**
+ * Read a .pptx and pull out PowerPoint's "section" markers (the optional
+ * groupings teachers add via View → Sections in PowerPoint). Returns an
+ * empty array when the deck has no sections defined or anything goes wrong —
+ * the caller treats "no sections" as a normal case (no section dropdown).
+ *
+ * Implementation note: section data lives in ppt/presentation.xml under
+ * <p:extLst>/<p:ext>/<p14:sectionLst>. Each <p14:section> references slides
+ * by their slide-id (an integer matching <p:sldId id="..."/> in the same
+ * file's <p:sldIdLst>), NOT by slide order. We map id→1-based index by
+ * walking the slide list once.
+ */
+export async function extractPptxSections(pptxPath: string): Promise<PptxSection[]> {
+  try {
+    const buf = await fs.readFile(pptxPath);
+    if (buf.length > 50 * 1024 * 1024) return [];
+    const zip = await JSZip.loadAsync(buf);
+    const presFile = zip.file('ppt/presentation.xml');
+    if (!presFile) return [];
+    const xml = await presFile.async('string');
+
+    // Build slideId → 1-based index from <p:sldIdLst><p:sldId id="..."/>...
+    const sldIdLstMatch = xml.match(/<p:sldIdLst[^>]*>([\s\S]*?)<\/p:sldIdLst>/);
+    if (!sldIdLstMatch) return [];
+    const idToIndex = new Map<string, number>();
+    const slideIdRe = /<p:sldId\s+id="(\d+)"/g;
+    let m: RegExpExecArray | null;
+    let i = 1;
+    while ((m = slideIdRe.exec(sldIdLstMatch[1])) !== null) {
+      idToIndex.set(m[1], i++);
+    }
+    if (idToIndex.size === 0) return [];
+
+    // Pull every <p14:section …>…</p14:section> in document order. Section
+    // names occasionally use entity-encoded characters; decode the common
+    // ones the same way extractTextRuns does.
+    const sectionLstMatch = xml.match(/<p14:sectionLst[^>]*>([\s\S]*?)<\/p14:sectionLst>/);
+    if (!sectionLstMatch) return [];
+    const sectionRe = /<p14:section\b[^>]*\bname="([^"]*)"[^>]*>([\s\S]*?)<\/p14:section>/g;
+    const sections: PptxSection[] = [];
+    while ((m = sectionRe.exec(sectionLstMatch[1])) !== null) {
+      const rawName = m[1] || '';
+      const body = m[2] || '';
+      // Find the smallest slide index referenced by this section so we know
+      // where it starts on the slide ribbon.
+      const refRe = /<p14:sldId\s+id="(\d+)"/g;
+      let firstIdx = Number.POSITIVE_INFINITY;
+      let r: RegExpExecArray | null;
+      while ((r = refRe.exec(body)) !== null) {
+        const idx = idToIndex.get(r[1]);
+        if (idx != null && idx < firstIdx) firstIdx = idx;
+      }
+      // Sections with zero referenced slides are common as a "Default Section"
+      // header at the start of a deck — treat them as starting at slide 1 so
+      // the dropdown still gets an entry.
+      if (firstIdx === Number.POSITIVE_INFINITY) firstIdx = sections.length === 0 ? 1 : 0;
+      if (firstIdx > 0) {
+        const name = rawName
+          .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&apos;/g, "'")
+          .trim() || 'Untitled section';
+        sections.push({ name, startSlide: firstIdx });
+      }
+    }
+    // PowerPoint allows sections in any order in the XML but they should be
+    // contiguous in the slide ribbon. Sort by startSlide just in case.
+    sections.sort((a, b) => a.startSlide - b.startSlide);
+    return sections;
+  } catch (err) {
+    console.error('[classwork-ai] extractPptxSections error:', err);
+    return [];
   }
 }
 

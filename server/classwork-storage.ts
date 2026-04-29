@@ -88,6 +88,18 @@ export function ensureClassworkSchema(): Promise<void> {
       // n5_classes course column further down). Idempotent.
       await client.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS image_url TEXT;`);
 
+      // Per-unit PowerPoint presentation. Teachers upload a .pptx which we
+      // (a) store as-is in object storage so it can be re-downloaded, and
+      // (b) render to one PNG per slide via LibreOffice + a JSON manifest
+      // describing the slide URLs and any PowerPoint sections. Pupils only
+      // see a "View presentation" button when `presentation_url` is set.
+      // All four columns nullable + additive — same idempotent pattern as
+      // image_url above.
+      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_url        TEXT;`);
+      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_pages_url  TEXT;`);
+      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_filename   TEXT;`);
+      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_uploaded_at TIMESTAMP;`);
+
       await client.query(`
         CREATE TABLE IF NOT EXISTS bhs_classwork_lessons (
           id VARCHAR(64) PRIMARY KEY,
@@ -490,13 +502,55 @@ export function newId(prefix: string): string {
 export async function listUnits(course: ClassworkCourse) {
   await ensureClassworkSchema();
   const r = await pool.query(
-    `SELECT id, course, title, description, image_url, order_index, created_at
+    `SELECT id, course, title, description, image_url, order_index, created_at,
+            presentation_url, presentation_pages_url, presentation_filename,
+            presentation_uploaded_at
        FROM bhs_classwork_units
       WHERE course = $1
       ORDER BY order_index ASC, created_at ASC`,
     [course]
   );
   return r.rows;
+}
+
+// Persist a freshly-rendered presentation against the unit. Called once the
+// upload route has stored the .pptx + per-slide PNGs + manifest JSON in
+// object storage. `pagesUrl` points at the manifest JSON (slides + sections).
+export async function setUnitPresentation(unitId: string, fields: {
+  url: string;
+  pagesUrl: string;
+  filename: string;
+}) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `UPDATE bhs_classwork_units
+        SET presentation_url        = $1,
+            presentation_pages_url  = $2,
+            presentation_filename   = $3,
+            presentation_uploaded_at = NOW()
+      WHERE id = $4
+      RETURNING *`,
+    [fields.url, fields.pagesUrl, fields.filename, unitId]
+  );
+  return r.rows[0] || null;
+}
+
+// Clear the presentation columns on a unit. We don't try to garbage-collect
+// the old object-storage blobs — they're cheap and keeping the URLs reachable
+// means any stale browser tab still showing the viewer can finish loading.
+export async function clearUnitPresentation(unitId: string) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `UPDATE bhs_classwork_units
+        SET presentation_url = NULL,
+            presentation_pages_url = NULL,
+            presentation_filename = NULL,
+            presentation_uploaded_at = NULL
+      WHERE id = $1
+      RETURNING *`,
+    [unitId]
+  );
+  return r.rows[0] || null;
 }
 
 export async function createUnit(

@@ -3,6 +3,7 @@ import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
 import RichTextEditor from '@/components/RichTextEditor';
 import Modal, { modalPrimaryBtn, modalSecondaryBtn, modalDangerBtn, modalLabel, modalInput } from '@/components/Modal';
+import PresentationViewer from '@/components/PresentationViewer';
 import { api, getCurrentRole } from '@/lib/api';
 
 interface Unit {
@@ -15,6 +16,14 @@ interface Unit {
   // can either paste an existing URL or upload a fresh image which the
   // server stores under /uploads.
   image_url: string | null;
+  // Per-unit PowerPoint presentation. `presentation_url` points at the
+  // original .pptx (download for teachers); `presentation_pages_url`
+  // points at the rendered slide manifest used by the viewer. Both are
+  // null until a teacher uploads a deck.
+  presentation_url?: string | null;
+  presentation_pages_url?: string | null;
+  presentation_filename?: string | null;
+  presentation_uploaded_at?: string | null;
 }
 interface Lesson {
   id: string; unit_id: string; title: string; description: string | null;
@@ -87,6 +96,16 @@ export default function Course() {
   const [notesSavedAt, setNotesSavedAt] = useState<number | null>(null);
   const [notesStatus, setNotesStatus] = useState<'idle' | 'loading' | 'saving' | 'saved' | 'error'>('idle');
   const closeModal = () => setModal({ kind: 'none' });
+
+  // Per-unit presentation viewer + upload state. `presViewerUnit` is set
+  // when the slide modal is open. `presBusy` is keyed by unit id so the
+  // page can show a per-unit "Uploading…" state without locking up other
+  // units (a teacher might queue uploads on multiple units in different
+  // tabs). `presErr` likewise stores per-unit error messages for inline
+  // display under the upload button.
+  const [presViewerUnit, setPresViewerUnit] = useState<Unit | null>(null);
+  const [presBusy, setPresBusy] = useState<Record<string, boolean>>({});
+  const [presErr, setPresErr] = useState<Record<string, string>>({});
 
   // Per-unit collapse state. Stored client-side only and persisted in
   // localStorage scoped per course so each user's chosen layout (e.g.
@@ -239,6 +258,74 @@ export default function Course() {
       setUnitImageUploading(false);
     }
   }
+  // Read the teacher token (used for x-teacher-password on direct fetch
+  // calls that don't go through the `api()` helper). Same lookup as
+  // uploadUnitImage above.
+  function teacherTokenHeader(): Record<string, string> {
+    try {
+      const t = localStorage.getItem('teacher_token') || localStorage.getItem('teacherToken') || '';
+      return t ? { 'x-teacher-password': t } : {};
+    } catch { return {}; }
+  }
+
+  // Teacher: upload (or replace) a unit's PowerPoint deck. The server does
+  // the heavy work — convert .pptx → per-slide PNGs via LibreOffice, parse
+  // section markers, build a manifest JSON, persist everything in object
+  // storage and write the URLs back to the unit row. We then patch the
+  // unit in local state so the "View presentation" button appears
+  // immediately without a full refresh.
+  async function uploadPresentation(unitId: string, file: File) {
+    if (!/\.pptx$/i.test(file.name)) {
+      setPresErr((e) => ({ ...e, [unitId]: 'Please choose a PowerPoint file ending in .pptx.' }));
+      return;
+    }
+    setPresBusy((b) => ({ ...b, [unitId]: true }));
+    setPresErr((e) => { const n = { ...e }; delete n[unitId]; return n; });
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(`/api/classwork/units/${unitId}/presentation`, {
+        method: 'POST',
+        headers: teacherTokenHeader(),
+        body: fd,
+      });
+      if (!res.ok) {
+        let msg = `Upload failed (${res.status})`;
+        try { const j = await res.json(); if (j?.error) msg = j.error; } catch {}
+        throw new Error(msg);
+      }
+      const data = await res.json() as { unit: Unit };
+      setUnits((us) => us.map((u) => (u.id === unitId ? { ...u, ...data.unit } : u)));
+    } catch (e: any) {
+      setPresErr((er) => ({ ...er, [unitId]: e?.message || 'Upload failed' }));
+    } finally {
+      setPresBusy((b) => { const n = { ...b }; delete n[unitId]; return n; });
+    }
+  }
+
+  async function removePresentation(unitId: string) {
+    if (!window.confirm('Remove the presentation from this unit? Pupils will no longer see the View presentation button.')) return;
+    setPresBusy((b) => ({ ...b, [unitId]: true }));
+    setPresErr((e) => { const n = { ...e }; delete n[unitId]; return n; });
+    try {
+      const res = await fetch(`/api/classwork/units/${unitId}/presentation`, {
+        method: 'DELETE',
+        headers: teacherTokenHeader(),
+      });
+      if (!res.ok) {
+        let msg = `Remove failed (${res.status})`;
+        try { const j = await res.json(); if (j?.error) msg = j.error; } catch {}
+        throw new Error(msg);
+      }
+      const data = await res.json() as { unit: Unit };
+      setUnits((us) => us.map((u) => (u.id === unitId ? { ...u, ...data.unit } : u)));
+    } catch (e: any) {
+      setPresErr((er) => ({ ...er, [unitId]: e?.message || 'Remove failed' }));
+    } finally {
+      setPresBusy((b) => { const n = { ...b }; delete n[unitId]; return n; });
+    }
+  }
+
   function openAddLesson(unitId: string) {
     setTitleInput(''); setModalErr(null);
     setModal({ kind: 'addLesson', unitId });
@@ -617,6 +704,89 @@ export default function Course() {
                   the lessons list) and link it to the toggle via aria-controls. */}
               <div id={bodyId} hidden={collapsed}>
               {u.description && <p style={{ color: 'var(--cw-muted)', marginTop: 6 }}>{u.description}</p>}
+
+              {/* Per-unit PowerPoint strip. Pupils only see this band when
+                  a deck has actually been uploaded — otherwise the strip is
+                  hidden so empty-state placeholders don't clutter their
+                  course page. Teachers always see the band so they can
+                  upload, replace or remove a deck. */}
+              {(u.presentation_url || role === 'teacher') && (
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+                  marginTop: 12, padding: '10px 12px',
+                  border: '1px solid var(--cw-border)', borderRadius: 8,
+                  background: 'var(--cw-surface-soft)',
+                }}>
+                  <span style={{ fontSize: 18, lineHeight: 1 }} aria-hidden>📊</span>
+                  {u.presentation_url ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setPresViewerUnit(u)}
+                        style={primaryBtn}
+                        title="Open the slides in a viewer"
+                      >View presentation</button>
+                      <span style={{ color: 'var(--cw-muted)', fontSize: 13, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {u.presentation_filename || 'Slides'}
+                      </span>
+                      {role === 'teacher' && (
+                        <>
+                          <a
+                            href={u.presentation_url}
+                            download={u.presentation_filename || true}
+                            style={{ ...secondaryBtn, textDecoration: 'none' }}
+                            title="Download the original .pptx"
+                          >Download</a>
+                          <label style={{ ...secondaryBtn, cursor: presBusy[u.id] ? 'wait' : 'pointer', opacity: presBusy[u.id] ? 0.6 : 1 }}>
+                            {presBusy[u.id] ? 'Uploading…' : 'Replace'}
+                            <input
+                              type="file"
+                              accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                              hidden
+                              disabled={!!presBusy[u.id]}
+                              onChange={(e) => {
+                                const f = e.currentTarget.files?.[0];
+                                e.currentTarget.value = '';
+                                if (f) uploadPresentation(u.id, f);
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => removePresentation(u.id)}
+                            style={dangerBtn}
+                            disabled={!!presBusy[u.id]}
+                          >Remove</button>
+                        </>
+                      )}
+                    </>
+                  ) : role === 'teacher' && (
+                    <>
+                      <span style={{ fontWeight: 600, color: 'var(--cw-ink)' }}>No presentation uploaded</span>
+                      <label style={{ ...secondaryBtn, cursor: presBusy[u.id] ? 'wait' : 'pointer', opacity: presBusy[u.id] ? 0.6 : 1 }}
+                             title="Convert a PowerPoint deck so pupils can flip through the slides on this page">
+                        {presBusy[u.id] ? 'Uploading… (this can take a minute on big decks)' : 'Upload PowerPoint (.pptx)'}
+                        <input
+                          type="file"
+                          accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                          hidden
+                          disabled={!!presBusy[u.id]}
+                          onChange={(e) => {
+                            const f = e.currentTarget.files?.[0];
+                            e.currentTarget.value = '';
+                            if (f) uploadPresentation(u.id, f);
+                          }}
+                        />
+                      </label>
+                    </>
+                  )}
+                  {presErr[u.id] && (
+                    <span style={{ color: 'var(--cw-danger)', fontSize: 13, width: '100%' }}>
+                      {presErr[u.id]}
+                    </span>
+                  )}
+                </div>
+              )}
               {lessons.length === 0 ? (
                 <p style={{ color: 'var(--cw-muted)', marginTop: 12 }}>
                   {role === 'teacher' ? 'No lessons in this unit yet.' : 'No lessons here yet.'}
@@ -1101,6 +1271,17 @@ export default function Course() {
       >
         <p style={{ margin: 0 }}>{modal.kind === 'info' ? modal.message : ''}</p>
       </Modal>
+
+      {/* Slide viewer. Mounted at the page root so it overlays everything
+          else; controlled by `presViewerUnit` so opening/closing is just
+          state on this component. */}
+      <PresentationViewer
+        open={!!presViewerUnit && !!presViewerUnit.presentation_pages_url}
+        pagesUrl={presViewerUnit?.presentation_pages_url || null}
+        unitTitle={presViewerUnit?.title || ''}
+        filename={presViewerUnit?.presentation_filename || null}
+        onClose={() => setPresViewerUnit(null)}
+      />
     </Shell>
   );
 }

@@ -1,7 +1,7 @@
 import express, { type Express, type Request, type Response, type NextFunction } from 'express';
 import path from 'path';
 import multer from 'multer';
-import { saveClassworkUpload, streamClassworkUpload } from './classwork-uploads-store';
+import { saveClassworkUpload, streamClassworkUpload, downloadClassworkUploadToTemp } from './classwork-uploads-store';
 import { pool, hasDatabase } from './db';
 import {
   ensureClassworkSchema,
@@ -62,8 +62,10 @@ import {
   deleteClassAnywhere,
   moveStudentToClass,
   usernameTakenAnywhere,
+  setUnitPresentation,
+  clearUnitPresentation,
 } from './classwork-storage';
-import { markSubmission, suggestCrosswordClues } from './classwork-ai';
+import { markSubmission, suggestCrosswordClues, renderPptxToImages, extractPptxSections } from './classwork-ai';
 import { storage as n5Storage } from './n5-storage';
 import bcrypt from 'bcryptjs';
 
@@ -158,6 +160,19 @@ const projectUpload = multer({
   fileFilter: (_req, file, cb) => {
     if (PROJECT_EXT.test(path.extname(file.originalname))) cb(null, true);
     else cb(new Error('That file type isn\u2019t allowed.'));
+  },
+});
+
+// Per-unit PowerPoint upload. .pptx only, larger limit because slide decks
+// with embedded images can easily run past the project upload's 20 MB cap.
+// Memory storage — the buffer is written straight to object storage and
+// dropped on the floor afterwards, so we never touch local disk.
+const pptxUpload = multer({
+  storage: classworkFileStorage,
+  limits: { fileSize: 80 * 1024 * 1024 }, // 80 MB
+  fileFilter: (_req, file, cb) => {
+    if (/\.pptx$/i.test(path.extname(file.originalname))) cb(null, true);
+    else cb(new Error('Only PowerPoint .pptx files are accepted.'));
   },
 });
 
@@ -350,6 +365,124 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] deleteUnit error:', err);
       res.status(500).json({ error: 'Failed to delete unit' });
+    }
+  });
+
+  /* ---------- Per-unit presentation (.pptx upload + slide viewer) ----------
+     Teachers upload a PowerPoint file for the unit. We:
+       1. Persist the .pptx in object storage (so teachers can download the
+          original later if they need to re-edit).
+       2. Render every slide to a PNG via LibreOffice + pdftoppm and upload
+          each PNG to object storage.
+       3. Parse PPTX section markers (View → Sections in PowerPoint) so the
+          viewer can offer a section dropdown.
+       4. Save a tiny manifest JSON listing slide URLs + sections, also in
+          object storage. The unit row holds the URL of that manifest.
+     Pupils never see the upload UI — the SPA just renders a "View
+     presentation" button when `presentation_url` is set on the unit. */
+  app.post(
+    '/api/classwork/units/:unitId/presentation',
+    requireTeacher,
+    (req, res, next) => {
+      pptxUpload.single('file')(req, res, (err: any) => {
+        if (err) return res.status(400).json({ error: err.message || 'Upload failed' });
+        next();
+      });
+    },
+    async (req: Request, res: Response) => {
+      const f = (req as any).file as Express.Multer.File | undefined;
+      if (!f || !f.buffer) return res.status(400).json({ error: 'No file received' });
+      const unitId = req.params.unitId;
+      let downloaded: { path: string; cleanup: () => Promise<void> } | null = null;
+      try {
+        // Step 1: persist the .pptx itself.
+        const saved = await saveClassworkUpload(
+          f.buffer,
+          f.originalname,
+          f.mimetype || 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        );
+
+        // Step 2: download to a temp path so LibreOffice + JSZip can read it.
+        downloaded = await downloadClassworkUploadToTemp(saved.url);
+        if (!downloaded) {
+          // Should never happen — we just saved it. But fail clearly if so.
+          return res.status(500).json({ error: 'Could not stage uploaded file for conversion' });
+        }
+
+        // Step 3: render every slide to PNG (uncapped). This can take 30+
+        // seconds on a 50-slide deck, which is fine for a one-off teacher
+        // action but means we don't want to do it on every page view.
+        const slides = await renderPptxToImages(downloaded.path, { maxSlides: 0, dpi: 110 });
+        if (!slides || slides.length === 0) {
+          return res.status(500).json({
+            error: 'Could not convert presentation. Please try saving the file again from PowerPoint and re-uploading.',
+          });
+        }
+
+        // Step 4: extract section markers (empty array if the deck has none).
+        const sections = await extractPptxSections(downloaded.path);
+
+        // Step 5: upload each slide PNG and collect URLs.
+        const baseName = f.originalname.replace(/\.pptx$/i, '') || 'slides';
+        const slideUrls: string[] = [];
+        for (let i = 0; i < slides.length; i++) {
+          const num = String(i + 1).padStart(3, '0');
+          const up = await saveClassworkUpload(
+            slides[i],
+            `${baseName}-slide-${num}.png`,
+            'image/png',
+          );
+          slideUrls.push(up.url);
+        }
+
+        // Step 6: persist the manifest. JSON is tiny — a couple of KB even
+        // for a hundred-slide deck — so storing it in object storage is fine
+        // and lets the SPA cache it like any other file.
+        const manifest = {
+          version: 1,
+          slideCount: slideUrls.length,
+          slides: slideUrls.map((url, idx) => ({ index: idx + 1, url })),
+          sections,
+          filename: f.originalname,
+          uploadedAt: new Date().toISOString(),
+        };
+        const manifestUp = await saveClassworkUpload(
+          Buffer.from(JSON.stringify(manifest), 'utf8'),
+          `${baseName}-pages.json`,
+          'application/json',
+        );
+
+        // Step 7: write the URLs to the unit row.
+        const updated = await setUnitPresentation(unitId, {
+          url: saved.url,
+          pagesUrl: manifestUp.url,
+          filename: f.originalname,
+        });
+        if (!updated) return res.status(404).json({ error: 'Unit not found' });
+
+        res.json({
+          ok: true,
+          unit: updated,
+          slideCount: slideUrls.length,
+          sectionCount: sections.length,
+        });
+      } catch (err) {
+        console.error('[classwork] presentation upload failed:', err);
+        res.status(500).json({ error: 'Failed to process presentation' });
+      } finally {
+        if (downloaded) downloaded.cleanup().catch(() => {});
+      }
+    }
+  );
+
+  app.delete('/api/classwork/units/:unitId/presentation', requireTeacher, async (req, res) => {
+    try {
+      const updated = await clearUnitPresentation(req.params.unitId);
+      if (!updated) return res.status(404).json({ error: 'Unit not found' });
+      res.json({ ok: true, unit: updated });
+    } catch (err) {
+      console.error('[classwork] clear presentation error:', err);
+      res.status(500).json({ error: 'Failed to remove presentation' });
     }
   });
 
