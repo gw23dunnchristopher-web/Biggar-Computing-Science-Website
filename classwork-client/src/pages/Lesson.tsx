@@ -1315,23 +1315,33 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
 
       {t === 'labeled_inputs' && (() => {
         const cfg = (question as any).config;
-        const fields: { label: string }[] = cfg && Array.isArray(cfg.fields)
-          ? cfg.fields.map((f: any) => ({ label: String(f?.label || '') }))
+        const fields: { label: string; multiline?: boolean } [] = cfg && Array.isArray(cfg.fields)
+          ? cfg.fields.map((f: any) => ({ label: String(f?.label || ''), multiline: !!f?.multiline }))
           : [];
         if (fields.length === 0) {
           return <span style={{ color: 'var(--cw-muted)', fontSize: 13 }}>No fields are set up yet. Ask your teacher to fix it.</span>;
         }
         return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {fields.map((f, i) => (
               <label key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14 }}>
                 <span style={{ fontWeight: 600 }}>{f.label || `Field ${i + 1}`}</span>
-                <input
-                  type="text"
-                  value={cellAnswers[String(i)] || ''}
-                  onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}
-                  style={{ padding: '8px 10px', borderRadius: 6, border: '1px solid var(--cw-border)' }}
-                />
+                {f.multiline ? (
+                  <textarea
+                    rows={3}
+                    value={cellAnswers[String(i)] || ''}
+                    onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}
+                    placeholder="List one or more programs, e.g. Zoom, Microsoft Teams"
+                    style={{ padding: '8px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', resize: 'vertical', fontFamily: 'inherit', fontSize: 14 }}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={cellAnswers[String(i)] || ''}
+                    onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}
+                    style={{ padding: '8px 10px', borderRadius: 6, border: '1px solid var(--cw-border)' }}
+                  />
+                )}
               </label>
             ))}
           </div>
@@ -2689,16 +2699,18 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
   })();
   const [tblHeaders, setTblHeaders] = useState<string[]>(initTable.headers);
   const [tblRows, setTblRows] = useState<TblCell[][]>(initTable.rows);
-  // labeled_inputs: a list of fields, each with a label and a comma-separated
-  // list of accepted answers.
-  const [fields, setFields] = useState<{ label: string; accept: string; aiGuidance: string }[]>(
+  // labeled_inputs: a list of fields, each with a label, optional accepted
+  // answers (exact match), AI guidance note, and a multiline flag that
+  // switches the student UI from a single-line input to a textarea.
+  const [fields, setFields] = useState<{ label: string; accept: string; aiGuidance: string; multiline: boolean }[]>(
     Array.isArray(cfg.fields)
       ? cfg.fields.map((f: any) => ({
           label: String(f?.label || ''),
           accept: Array.isArray(f?.accept) ? f.accept.join(', ') : '',
           aiGuidance: String(f?.aiGuidance || ''),
+          multiline: !!f?.multiline,
         }))
-      : [{ label: 'Forename', accept: '', aiGuidance: '' }, { label: 'Surname', accept: '', aiGuidance: '' }]
+      : [{ label: 'Forename', accept: '', aiGuidance: '', multiline: false }, { label: 'Surname', accept: '', aiGuidance: '', multiline: false }]
   );
   // ─── Fun-activity config slots ────────────────────────────────────────
   // Each one is the controlled state for the matching editor component
@@ -3017,6 +3029,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             };
             const ai = String(f.aiGuidance || '').trim();
             if (ai) row.aiGuidance = ai;
+            if (f.multiline) row.multiline = true;
             return row;
           })
           .filter((f) => f.label);
@@ -3740,11 +3753,23 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           <div style={fieldLabel as any}>
             <div style={{ fontWeight: 600 }}>Labelled fields</div>
             <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 2, marginBottom: 6 }}>
-              Each field becomes a labelled text box for the pupil. For short answers, list
-              acceptable answers separated by commas (case-insensitive, ignores extra spaces).
-              For sentence-style answers, leave Accepted answers blank and add a marking note
-              in the AI judge box; otherwise leave both blank to mark by hand.
+              Each field becomes a labelled input for the pupil. Tick <strong>Multi-line</strong> to
+              show a text area instead of a single-line box — useful when pupils may list several
+              items per field (e.g. multiple programs per category). For short exact answers, list
+              accepted values separated by commas. For open answers, leave that blank and add an
+              AI judge note; leave both blank to mark by hand.
             </div>
+            <button
+              type="button"
+              onClick={() => setFields([
+                { label: 'Communication', accept: '', multiline: true, aiGuidance: 'Award 1 mark if the student names at least one real software application used for communication (e.g. Zoom, Teams, Gmail, WhatsApp, Skype). Any genuine relevant example counts.' },
+                { label: 'Education', accept: '', multiline: true, aiGuidance: 'Award 1 mark if the student names at least one real software application used in education (e.g. Google Classroom, Moodle, Duolingo, Khan Academy, Microsoft Teams). Any genuine relevant example counts.' },
+                { label: 'Healthcare', accept: '', multiline: true, aiGuidance: 'Award 1 mark if the student names at least one real software application used in healthcare (e.g. SystmOne, EMIS, MyChart, NHS App, Babylon Health). Any genuine relevant example counts.' },
+                { label: 'Finance', accept: '', multiline: true, aiGuidance: 'Award 1 mark if the student names at least one real software application used in finance (e.g. Xero, QuickBooks, Sage, Monzo, PayPal, Barclays app). Any genuine relevant example counts.' },
+                { label: 'Entertainment', accept: '', multiline: true, aiGuidance: 'Award 1 mark if the student names at least one real software application used for entertainment (e.g. Netflix, Spotify, Steam, YouTube, Disney+, iPlayer). Any genuine relevant example counts.' },
+              ])}
+              style={{ marginBottom: 8, padding: '5px 10px', borderRadius: 6, border: '1px solid var(--cw-accent)', color: 'var(--cw-accent)', background: 'transparent', cursor: 'pointer', fontSize: 13 }}
+            >⚡ Quick setup: Technology categories</button>
             {fields.map((f, i) => (
               <div key={i} style={{
                 display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8,
@@ -3753,32 +3778,40 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   <input
                     value={f.label}
-                    placeholder="Label (e.g. Forename)"
-                    onChange={(e) => { const a = [...fields]; a[i].label = e.target.value; setFields(a); }}
-                    style={{ ...input, width: 180 }}
+                    placeholder="Label (e.g. Communication)"
+                    onChange={(e) => { const a = [...fields]; a[i] = { ...a[i], label: e.target.value }; setFields(a); }}
+                    style={{ ...input, width: 160 }}
                   />
                   <input
                     value={f.accept}
-                    placeholder="Accepted answers (comma-sep) — for short answers"
-                    onChange={(e) => { const a = [...fields]; a[i].accept = e.target.value; setFields(a); }}
+                    placeholder="Accepted answers (comma-sep) — for short exact answers"
+                    onChange={(e) => { const a = [...fields]; a[i] = { ...a[i], accept: e.target.value }; setFields(a); }}
                     style={{ ...input, flex: 1 }}
                   />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={!!f.multiline}
+                      onChange={(e) => { const a = [...fields]; a[i] = { ...a[i], multiline: e.target.checked }; setFields(a); }}
+                    />
+                    Multi-line
+                  </label>
                   <button
                     onClick={() => setFields(fields.filter((_, j) => j !== i))}
                     style={{ ...input, width: 40, cursor: 'pointer' }}
                   >×</button>
                 </div>
                 <textarea
-                  rows={1}
+                  rows={2}
                   value={f.aiGuidance}
-                  placeholder="AI judge note (optional) — e.g. 'Award if the explanation mentions binary'"
-                  onChange={(e) => { const a = [...fields]; a[i].aiGuidance = e.target.value; setFields(a); }}
+                  placeholder="AI judge note (optional) — e.g. 'Award 1 mark if the student names at least one relevant program for this category'"
+                  onChange={(e) => { const a = [...fields]; a[i] = { ...a[i], aiGuidance: e.target.value }; setFields(a); }}
                   style={{ ...input, fontSize: 13 }}
                 />
               </div>
             ))}
             <button
-              onClick={() => setFields([...fields, { label: '', accept: '', aiGuidance: '' }])}
+              onClick={() => setFields([...fields, { label: '', accept: '', aiGuidance: '', multiline: false }])}
               style={{ marginTop: 8, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}
             >+ Add field</button>
           </div>
