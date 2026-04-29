@@ -1,6 +1,8 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { Link, useRoute } from 'wouter';
+import { useRoute } from 'wouter';
 import Shell from '@/components/Shell';
+import Modal, { modalPrimaryBtn, modalSecondaryBtn } from '@/components/Modal';
+import RichTextEditor from '@/components/RichTextEditor';
 import PromptText, { parsePromptImageAlt, type PromptImageAlign } from '@/components/PromptText';
 import { api, getCurrentRole } from '@/lib/api';
 
@@ -120,6 +122,66 @@ export default function Lesson() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [previewAsStudent, setPreviewAsStudent] = useState(false);
+
+  // Edit-notes modal: opens directly from the in-lesson "My Jotter" button so
+  // pupils don't have to leave the lesson to jot something into their unit
+  // notes. Pupils edit their own per-unit notes; teachers (browsing or
+  // previewing the lesson) edit the shared demo notes for the unit.
+  const [editing, setEditing] = useState<{ unitId: string; title: string } | null>(null);
+  const [editContent, setEditContent] = useState('');
+  const [editSavedAt, setEditSavedAt] = useState<number | null>(null);
+  const [editStatus, setEditStatus] = useState<'idle' | 'loading' | 'saving' | 'saved' | 'error'>('idle');
+  const [editErr, setEditErr] = useState<string | null>(null);
+
+  function notesEndpoint(unitId: string): string {
+    return role === 'teacher'
+      ? `/api/classwork/units/${encodeURIComponent(unitId)}/teacher-notes`
+      : `/api/classwork/units/${encodeURIComponent(unitId)}/notes`;
+  }
+
+  function openEditNotes(unitId: string, unitTitle: string) {
+    setEditContent(''); setEditSavedAt(null); setEditErr(null);
+    setEditStatus('loading');
+    setEditing({ unitId, title: unitTitle });
+    api<{ content: string; updatedAt: number | null }>(notesEndpoint(unitId))
+      .then((r) => { setEditContent(r.content || ''); setEditSavedAt(r.updatedAt); setEditStatus('idle'); })
+      .catch((e: any) => { setEditStatus('error'); setEditErr(e.message || 'Failed to load notes'); });
+  }
+
+  async function saveEditNotes(unitId: string, content: string) {
+    setEditStatus('saving'); setEditErr(null);
+    try {
+      const r = await api<{ content: string; updatedAt: number }>(notesEndpoint(unitId), {
+        method: 'PUT', body: JSON.stringify({ content }),
+      });
+      setEditSavedAt(r.updatedAt);
+      setEditStatus('saved');
+    } catch (e: any) {
+      setEditStatus('error');
+      setEditErr(e.message || 'Failed to save notes');
+    }
+  }
+
+  // Debounced auto-save while typing in the editor.
+  useEffect(() => {
+    if (!editing) return;
+    if (editStatus === 'loading') return;
+    const unitId = editing.unitId;
+    const handle = window.setTimeout(() => { saveEditNotes(unitId, editContent); }, 1200);
+    return () => window.clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editContent, editing?.unitId]);
+
+  function closeEditNotes() {
+    const wasEditing = editing;
+    const lastContent = editContent;
+    setEditing(null);
+    if (wasEditing) {
+      // Best-effort flush of the latest text in case the user closed within
+      // the 1.2s debounce window.
+      saveEditNotes(wasEditing.unitId, lastContent);
+    }
+  }
   const showStudentView = role === 'student' || (role === 'teacher' && previewAsStudent);
 
   async function refresh() {
@@ -421,26 +483,29 @@ export default function Lesson() {
                     your jotter (typed notes, sketches, screenshots&hellip;)
                     instead of typing it here.
                   </span>
-                  <Link
-                    href={(() => {
-                      // Open the editable jotter for THIS lesson's unit so the
-                      // right tab is pre-selected. Teachers also need the
-                      // course param to load their demo jotter for that course.
-                      const params = new URLSearchParams();
-                      if (role === 'teacher' && lesson?.course) params.set('course', lesson.course);
-                      if (lesson?.unit_id) params.set('unit', lesson.unit_id);
-                      const qs = params.toString();
-                      return qs ? `/jotter?${qs}` : '/jotter';
-                    })()}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Open the editable notes modal for THIS lesson's unit
+                      // so pupils can jot something straight away without
+                      // navigating away from the lesson.
+                      if (!lesson?.unit_id) return;
+                      openEditNotes(lesson.unit_id, lesson.title || 'this unit');
+                    }}
+                    disabled={!lesson?.unit_id}
+                    title={role === 'teacher'
+                      ? 'Edit the demo notes for this unit'
+                      : 'Open your jotter notes for this unit'}
                     style={{
                       display: 'inline-block',
                       background: '#0891b2', color: '#fff', border: '1px solid #0891b2',
-                      padding: '6px 14px', borderRadius: 6, fontWeight: 600, textDecoration: 'none',
-                      fontSize: 14,
+                      padding: '6px 14px', borderRadius: 6, fontWeight: 600,
+                      fontSize: 14, cursor: lesson?.unit_id ? 'pointer' : 'not-allowed',
+                      opacity: lesson?.unit_id ? 1 : 0.6,
                     }}
                   >
                     My Jotter
-                  </Link>
+                  </button>
                 </div>
               )}
 
@@ -617,6 +682,55 @@ export default function Lesson() {
           .cw-passage-group > div:first-child { position: static !important; }
         }
       `}</style>
+
+      {/* Edit-notes modal opened from the in-lesson "My Jotter" button so the
+          pupil can jot something into their unit notes without leaving the
+          lesson. Same RichTextEditor and auto-save behaviour as the Course
+          and Jotter pages. */}
+      <Modal
+        open={!!editing}
+        title={editing ? `${role === 'teacher' ? 'Demo notes' : 'My jotter notes'} \u2014 ${editing.title}` : ''}
+        width={1100}
+        fillHeight
+        onClose={closeEditNotes}
+        footer={<>
+          <span style={{ flex: 1, fontSize: 12, color: 'var(--cw-muted)' }}>
+            {editStatus === 'saving' ? 'Saving\u2026'
+              : editStatus === 'saved' && editSavedAt ? `Saved at ${new Date(editSavedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+              : editStatus === 'error' ? 'Couldn\u2019t save'
+              : editSavedAt ? `Last saved ${new Date(editSavedAt).toLocaleString()}`
+              : 'Not saved yet'}
+          </span>
+          <button
+            onClick={() => editing && saveEditNotes(editing.unitId, editContent)}
+            disabled={editStatus === 'loading' || editStatus === 'saving'}
+            style={modalSecondaryBtn}
+          >Save now</button>
+          <button onClick={closeEditNotes} style={modalPrimaryBtn}>Done</button>
+        </>}
+      >
+        {editStatus === 'loading' ? (
+          <p style={{ margin: 0, color: 'var(--cw-muted)' }}>Loading your notes…</p>
+        ) : (
+          <>
+            <p style={{ margin: '0 0 8px', fontSize: 13, color: 'var(--cw-muted)' }}>
+              {role === 'teacher'
+                ? 'These are the shared demo notes pupils see when you model note-taking in class. They save automatically as you type.'
+                : 'Your notes for this unit. Use the toolbar to add headings, bold, lists and links. Notes save automatically as you type.'}
+            </p>
+            <RichTextEditor
+              autoFocus
+              value={editContent}
+              onChange={setEditContent}
+              placeholder={'Jot anything you want to remember about this unit \u2014 definitions, examples, questions to ask your teacher, exam tips, etc.'}
+              fillHeight
+              minHeight={360}
+              ariaLabel="Unit notes"
+            />
+          </>
+        )}
+        {editErr && <p style={{ color: 'var(--cw-danger)', margin: '8px 0 0' }}>{editErr}</p>}
+      </Modal>
     </Shell>
   );
 }
