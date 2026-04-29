@@ -248,18 +248,26 @@ export default function Lesson() {
   // server. The local questions state is updated optimistically so the UI
   // doesn't flicker, with a refresh() fallback on network error.
   type DragItem = { type: 'standalone'; q: Question } | { type: 'group'; passage: Question; children: Question[] };
-  async function handleReorder(items: DragItem[], srcId: string, destId: string) {
+  // destId = null means "move to the very end of the list".
+  async function handleReorder(items: DragItem[], srcId: string, destId: string | null) {
     const getId = (it: DragItem) => it.type === 'standalone' ? it.q.id : it.passage.id;
     const srcIdx = items.findIndex((it) => getId(it) === srcId);
-    const destIdx = items.findIndex((it) => getId(it) === destId);
-    if (srcIdx === -1 || destIdx === -1 || srcIdx === destIdx) return;
+    if (srcIdx === -1) return;
 
     const newItems = [...items];
     const [moved] = newItems.splice(srcIdx, 1);
-    // When dragging forward the splice shifts everything left by one,
-    // so the insertion index is already correct after the splice.
-    const insertAt = srcIdx < destIdx ? destIdx - 1 : destIdx;
-    newItems.splice(insertAt, 0, moved);
+
+    if (destId === null) {
+      // Append to the very end.
+      newItems.push(moved);
+    } else {
+      const destIdx = items.findIndex((it) => getId(it) === destId);
+      if (destIdx === -1 || srcIdx === destIdx) return;
+      // When dragging forward the splice shifts everything left by one,
+      // so the insertion index is already correct after the splice.
+      const insertAt = srcIdx < destIdx ? destIdx - 1 : destIdx;
+      newItems.splice(insertAt, 0, moved);
+    }
 
     // Flatten to an ordered list of question IDs (passage children immediately
     // follow their passage so they stay grouped).
@@ -769,11 +777,59 @@ export default function Lesson() {
           });
         };
 
+        const mainItems = buildItems(mainQs);
+        const extItems  = buildItems(extQs);
+        const isTeacherDrag = role === 'teacher' && !previewAsStudent;
+
+        // A drop zone rendered after the last card so teachers can drag
+        // any question to the very bottom of a section.
+        const DropTail = ({ items, sentinel }: { items: DragItem[]; sentinel: string }) => {
+          if (!isTeacherDrag) return null;
+          const isOver = dragOverId === sentinel;
+          return (
+            <div
+              onDragOver={(e) => {
+                if (!dragSrcIdRef.current) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (dragOverId !== sentinel) setDragOverId(sentinel);
+              }}
+              onDragLeave={(e) => {
+                if ((e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) return;
+                if (dragOverId === sentinel) setDragOverId(null);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                const src = dragSrcIdRef.current;
+                dragSrcIdRef.current = null;
+                setDragOverId(null);
+                if (!src) return;
+                handleReorder(items, src, null);
+              }}
+              style={{
+                marginTop: 8,
+                height: isOver ? 40 : 20,
+                borderRadius: 8,
+                border: isOver ? '2px dashed var(--cw-accent, #4f46e5)' : '2px dashed transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--cw-accent, #4f46e5)',
+                fontSize: 12,
+                transition: 'height 80ms, border-color 80ms',
+              }}
+            >
+              {isOver && 'Move to bottom'}
+            </div>
+          );
+        };
+
         return (
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 }}>
-              {renderItems(buildItems(mainQs), false, 'Q')}
+              {renderItems(mainItems, false, 'Q')}
             </div>
+            <DropTail items={mainItems} sentinel="__tail_main__" />
             {extQs.length > 0 && (
               <div style={{ marginTop: 28 }}>
                 <div style={{
@@ -786,8 +842,9 @@ export default function Lesson() {
                   </span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {renderItems(buildItems(extQs), true, 'E')}
+                  {renderItems(extItems, true, 'E')}
                 </div>
+                <DropTail items={extItems} sentinel="__tail_ext__" />
               </div>
             )}
           </>
@@ -4156,14 +4213,22 @@ function VideoQuestionPlayer({ config }: { config: any }) {
       );
     }
     return (
-      <div style={{ marginTop: 10, position: 'relative', paddingTop: '56.25%', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
-        <iframe
-          src={`https://www.youtube.com/embed/${id}`}
-          title="Video task"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
-        />
+      <div style={{ marginTop: 10 }}>
+        <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${id}`}
+            title="Video task"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
+          />
+        </div>
+        <div style={{ marginTop: 6, fontSize: 12, color: 'var(--cw-muted)' }}>
+          Can't see the video?{' '}
+          <a href={v.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--cw-accent)' }}>
+            Open it in YouTube ↗
+          </a>
+        </div>
       </div>
     );
   }
@@ -4198,10 +4263,16 @@ function renderResource(r: LessonResource): React.ReactNode {
       <figure key={r.id} style={{ margin: 0 }}>
         {r.title && <figcaption style={{ fontWeight: 600, marginBottom: 6 }}>{r.title}</figcaption>}
         <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
-          <iframe src={`https://www.youtube.com/embed/${id}`} title={title}
+          <iframe src={`https://www.youtube-nocookie.com/embed/${id}`} title={title}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }} />
+        </div>
+        <div style={{ marginTop: 4, fontSize: 12, color: 'var(--cw-muted)' }}>
+          Can't see the video?{' '}
+          <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--cw-accent)' }}>
+            Open in YouTube ↗
+          </a>
         </div>
       </figure>
     );
@@ -4652,7 +4723,7 @@ function _LessonResources_legacy({ resources }: { resources: LessonResource[] })
                 {r.title && <figcaption style={{ fontWeight: 600, marginBottom: 6 }}>{r.title}</figcaption>}
                 <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
                   <iframe
-                    src={`https://www.youtube.com/embed/${id}`}
+                    src={`https://www.youtube-nocookie.com/embed/${id}`}
                     title={title}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
