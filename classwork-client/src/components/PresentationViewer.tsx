@@ -1,12 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import * as pdfjsLib from 'pdfjs-dist';
+import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
+// Vite resolves `?url` to a final asset URL at build time; the worker is
+// shipped as a separate file so the main thread isn't blocked while pages
+// rasterise.
+import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import Modal, { modalSecondaryBtn, modalPrimaryBtn } from './Modal';
 
-interface ManifestSlide { index: number; url: string }
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
+
 interface ManifestSection { name: string; startSlide: number }
+interface ManifestV1Slide { index: number; url: string }
 interface Manifest {
   version: number;
-  slideCount: number;
-  slides: ManifestSlide[];
+  // v2 (current uploads): single PDF rendered with PDF.js for fidelity +
+  // clickable links.
+  pdfUrl?: string;
+  // v1 (legacy uploads): per-slide PNG URLs + total count.
+  slides?: ManifestV1Slide[];
+  slideCount?: number;
   sections: ManifestSection[];
   filename?: string;
   uploadedAt?: string;
@@ -21,82 +33,230 @@ interface Props {
 }
 
 /**
- * Modal slide viewer for a unit's PowerPoint presentation. Loads a manifest
- * JSON listing every slide image (and any PowerPoint section markers), then
- * renders a slide at a time with prev/next, page-jump and a section
- * dropdown. Keyboard nav: ←/→ for prev/next, Home/End for first/last,
- * PageUp/PageDown also work.
+ * Modal slide viewer. Loads the per-unit manifest JSON and either:
+ *   - v2: renders the linked PDF one page at a time with PDF.js, sized to
+ *     the available stage and overlaid with transparent <a> tags so any
+ *     hyperlinks the teacher placed in PowerPoint stay clickable.
+ *   - v1 (legacy): falls back to <img> rendering of the per-slide PNGs we
+ *     used to ship before the PDF pipeline existed, so old uploads keep
+ *     working without re-uploading.
  *
- * Lazy: the manifest only loads on first open, then the slide images load
- * one at a time as the user navigates. We also pre-fetch the next slide so
- * arrow-key paging feels instant.
+ * Keyboard nav while the modal is open: ←/→/PageUp/PageDown/Space and
+ * Home/End. The page-jump number input doesn't hijack arrow keys (so users
+ * can edit the value) but Enter still commits the jump.
  */
 export default function PresentationViewer({ open, pagesUrl, unitTitle, filename, onClose }: Props) {
   const [manifest, setManifest] = useState<Manifest | null>(null);
-  const [loadErr, setLoadErr] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [slideIdx, setSlideIdx] = useState(0); // 0-based into manifest.slides
+  const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
+  const [slideCount, setSlideCount] = useState(0);
+  const [slideIdx, setSlideIdx] = useState(0);
   const [jumpInput, setJumpInput] = useState('1');
+  const [loading, setLoading] = useState(false);
+  const [loadErr, setLoadErr] = useState<string | null>(null);
+  const [pageRendering, setPageRendering] = useState(false);
 
-  // Reset when the modal opens against a new file.
+  // Refs for the DOM nodes we draw into. The stage div is what
+  // ResizeObserver watches; the canvas + link layer are sized to fit
+  // inside it.
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const linkLayerRef = useRef<HTMLDivElement | null>(null);
+  // Bumped on every render request so a stale render that finishes after
+  // the user has paged away can detect it should drop its results instead
+  // of painting over the new slide.
+  const renderTokenRef = useRef(0);
+  const [stageSize, setStageSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
+
+  // Load manifest (and PDF for v2) on open or when the URL changes.
   useEffect(() => {
     if (!open || !pagesUrl) return;
     let cancelled = false;
     setManifest(null);
-    setLoadErr(null);
-    setLoading(true);
+    setPdfDoc((prev) => { if (prev) prev.destroy(); return null; });
+    setSlideCount(0);
     setSlideIdx(0);
     setJumpInput('1');
-    fetch(pagesUrl, { credentials: 'same-origin' })
-      .then((r) => {
+    setLoadErr(null);
+    setLoading(true);
+    (async () => {
+      try {
+        const r = await fetch(pagesUrl, { credentials: 'same-origin' });
         if (!r.ok) throw new Error(`Failed to load slides (${r.status})`);
-        return r.json();
-      })
-      .then((m: Manifest) => {
+        const m: Manifest = await r.json();
         if (cancelled) return;
         setManifest(m);
-      })
-      .catch((e: any) => { if (!cancelled) setLoadErr(e.message || 'Could not load slides'); })
-      .finally(() => { if (!cancelled) setLoading(false); });
+        if ((m.version ?? 1) >= 2 && m.pdfUrl) {
+          const loadingTask = pdfjsLib.getDocument({
+            url: m.pdfUrl,
+            // useSystemFonts defaults to true in the browser build, which
+            // covers the standard PostScript fonts LibreOffice typically
+            // embeds. We deliberately omit cMapUrl/standardFontDataUrl
+            // here to avoid an extra CDN dependency; if a deck ever needs
+            // them we can copy them out of node_modules at build time.
+          });
+          const doc = await loadingTask.promise;
+          if (cancelled) { doc.destroy(); return; }
+          setPdfDoc(doc);
+          setSlideCount(doc.numPages);
+        } else {
+          setSlideCount(m.slideCount || m.slides?.length || 0);
+        }
+      } catch (e: any) {
+        if (!cancelled) setLoadErr(e?.message || 'Could not load slides');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
     return () => { cancelled = true; };
   }, [open, pagesUrl]);
 
-  // Keep the jump input in sync as the user navigates by other means.
+  // Tear the PDF doc down when the modal closes for good. We keep it
+  // alive while open so paging between slides is instant.
+  useEffect(() => {
+    if (open) return;
+    setPdfDoc((prev) => { if (prev) prev.destroy(); return null; });
+  }, [open]);
+
+  // Sync the page-jump input when the user navigates by other means.
   useEffect(() => { setJumpInput(String(slideIdx + 1)); }, [slideIdx]);
 
-  // Derived: what section does the current slide belong to?
-  const currentSectionIdx = useMemo(() => {
+  // Track the stage's available size so we can scale the slide to fit.
+  // ResizeObserver fires once on attach so this also seeds the initial
+  // size — no need for a separate measurement pass.
+  useEffect(() => {
+    const node = stageRef.current;
+    if (!node) return;
+    const ro = new ResizeObserver((entries) => {
+      for (const e of entries) {
+        const r = e.contentRect;
+        setStageSize({ w: r.width, h: r.height });
+      }
+    });
+    ro.observe(node);
+    return () => ro.disconnect();
+  }, [pdfDoc, manifest]); // re-attach if we swap renderers
+
+  // Render the current PDF page (v2 only) onto the canvas + build the
+  // link overlay. v1 (img-based) doesn't run this effect because pdfDoc
+  // stays null.
+  useEffect(() => {
+    if (!pdfDoc) return;
+    if (stageSize.w <= 0 || stageSize.h <= 0) return;
+    const canvas = canvasRef.current;
+    const linkLayer = linkLayerRef.current;
+    if (!canvas || !linkLayer) return;
+    const token = ++renderTokenRef.current;
+    let renderTask: RenderTask | null = null;
+    setPageRendering(true);
+    (async () => {
+      try {
+        const page = await pdfDoc.getPage(slideIdx + 1);
+        if (token !== renderTokenRef.current) return;
+        // Fit the page inside the stage (preserve aspect ratio). Pick the
+        // smaller scale of width-fit vs height-fit so the slide is always
+        // fully visible without scrolling inside the stage.
+        const baseViewport = page.getViewport({ scale: 1 });
+        const fitScale = Math.min(
+          stageSize.w / baseViewport.width,
+          stageSize.h / baseViewport.height,
+        );
+        const viewport = page.getViewport({ scale: fitScale });
+        // Use devicePixelRatio for sharp text on hi-dpi screens, then size
+        // the canvas via CSS to the on-screen viewport size so layout
+        // measurements match.
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.max(1, Math.round(viewport.width * dpr));
+        canvas.height = Math.max(1, Math.round(viewport.height * dpr));
+        canvas.style.width = `${viewport.width}px`;
+        canvas.style.height = `${viewport.height}px`;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        renderTask = page.render({ canvasContext: ctx as any, viewport, canvas });
+        await renderTask.promise;
+        if (token !== renderTokenRef.current) return;
+
+        // Build the link overlay. We deliberately don't use PDF.js's
+        // AnnotationLayer here — we only need link annotations and the
+        // overlay is much simpler (and sturdier across pdfjs versions)
+        // when we just position our own <a> elements.
+        const annotations = await page.getAnnotations();
+        if (token !== renderTokenRef.current) return;
+        linkLayer.innerHTML = '';
+        linkLayer.style.width = `${viewport.width}px`;
+        linkLayer.style.height = `${viewport.height}px`;
+        for (const ann of annotations as any[]) {
+          if (ann.subtype !== 'Link') continue;
+          const url: string | undefined = ann.url;
+          if (!url) continue; // skip internal Goto/Named destinations for now
+          const [x1, y1, x2, y2] = viewport.convertToViewportRectangle(ann.rect);
+          const left = Math.min(x1, x2);
+          const top = Math.min(y1, y2);
+          const w = Math.abs(x2 - x1);
+          const h = Math.abs(y2 - y1);
+          const a = document.createElement('a');
+          a.href = url;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.title = url;
+          a.setAttribute('aria-label', `Open link: ${url}`);
+          a.style.cssText = [
+            'position:absolute',
+            `left:${left}px`,
+            `top:${top}px`,
+            `width:${w}px`,
+            `height:${h}px`,
+            'pointer-events:auto',
+            'border:1px solid transparent',
+            'border-radius:3px',
+            'transition:background-color 120ms,border-color 120ms',
+            'cursor:pointer',
+          ].join(';');
+          a.onmouseenter = () => {
+            a.style.backgroundColor = 'rgba(37, 99, 235, 0.16)';
+            a.style.borderColor = 'rgba(37, 99, 235, 0.55)';
+          };
+          a.onmouseleave = () => {
+            a.style.backgroundColor = '';
+            a.style.borderColor = 'transparent';
+          };
+          linkLayer.appendChild(a);
+        }
+      } catch (e: any) {
+        if (e?.name === 'RenderingCancelledException') return;
+        // eslint-disable-next-line no-console
+        console.error('[PresentationViewer] render error:', e);
+      } finally {
+        if (token === renderTokenRef.current) setPageRendering(false);
+      }
+    })();
+    return () => { try { renderTask?.cancel(); } catch { /* noop */ } };
+  }, [pdfDoc, slideIdx, stageSize.w, stageSize.h]);
+
+  // Derive the current section index for the dropdown highlight. Uses a
+  // sequential scan rather than binary search because section lists are
+  // tiny in practice (rarely >10 entries).
+  const currentSectionIdx = (() => {
     if (!manifest || manifest.sections.length === 0) return -1;
-    const slideNum = slideIdx + 1; // 1-based
+    const slideNum = slideIdx + 1;
     let idx = -1;
     for (let i = 0; i < manifest.sections.length; i++) {
       if (manifest.sections[i].startSlide <= slideNum) idx = i;
       else break;
     }
     return idx;
-  }, [manifest, slideIdx]);
+  })();
 
-  // Pre-fetch the next slide image so paging feels instant.
-  const preloadRef = useRef<HTMLImageElement | null>(null);
+  // Keyboard nav while the modal is open. We bail out when the user is
+  // typing in the page-jump input so number keys don't get hijacked.
   useEffect(() => {
-    if (!manifest) return;
-    const next = manifest.slides[slideIdx + 1];
-    if (!next) return;
-    const img = new Image();
-    img.src = next.url;
-    preloadRef.current = img;
-  }, [manifest, slideIdx]);
-
-  // Keyboard nav while the modal is open.
-  useEffect(() => {
-    if (!open || !manifest) return;
+    if (!open || slideCount <= 0) return;
     function onKey(e: KeyboardEvent) {
-      // Don't hijack typing inside the page-jump input.
       const t = e.target as HTMLElement | null;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) return;
       if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
         e.preventDefault();
-        setSlideIdx((i) => Math.min(manifest!.slideCount - 1, i + 1));
+        setSlideIdx((i) => Math.min(slideCount - 1, i + 1));
       } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
         e.preventDefault();
         setSlideIdx((i) => Math.max(0, i - 1));
@@ -105,60 +265,93 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
         setSlideIdx(0);
       } else if (e.key === 'End') {
         e.preventDefault();
-        setSlideIdx(manifest!.slideCount - 1);
+        setSlideIdx(slideCount - 1);
       }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, manifest]);
+  }, [open, slideCount]);
 
   function go(n: number) {
-    if (!manifest) return;
-    const clamped = Math.max(0, Math.min(manifest.slideCount - 1, n));
-    setSlideIdx(clamped);
+    if (slideCount <= 0) return;
+    setSlideIdx(Math.max(0, Math.min(slideCount - 1, n)));
   }
-
   function commitJump() {
     const n = parseInt(jumpInput, 10);
     if (Number.isFinite(n) && n >= 1) go(n - 1);
     else setJumpInput(String(slideIdx + 1));
   }
 
-  // Title shows the deck filename when we have one, otherwise the unit title.
-  const headerTitle = filename
-    ? `${unitTitle} — ${filename}`
-    : `${unitTitle} — Presentation`;
+  const headerTitle = filename ? `${unitTitle} — ${filename}` : `${unitTitle} — Presentation`;
+
+  // v1 fallback: legacy <img> renderer for decks uploaded before the PDF
+  // pipeline existed.
+  const isLegacy = manifest && (manifest.version ?? 1) < 2;
+  const legacySlide = isLegacy && manifest?.slides ? manifest.slides[slideIdx] : null;
 
   return (
     <Modal open={open} title={headerTitle} onClose={onClose} width={1200} fillHeight>
       {loading && <p>Loading slides…</p>}
       {loadErr && <p style={{ color: 'var(--cw-danger)' }}>{loadErr}</p>}
-      {manifest && manifest.slideCount === 0 && (
+      {!loading && manifest && slideCount === 0 && (
         <p style={{ color: 'var(--cw-muted)' }}>This presentation has no slides.</p>
       )}
-      {manifest && manifest.slideCount > 0 && (
+      {manifest && slideCount > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%', minHeight: 0 }}>
-          {/* Slide canvas */}
-          <div style={{
-            flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: '#0f172a', borderRadius: 8, overflow: 'hidden', padding: 8,
-          }}>
-            <img
-              key={slideIdx}
-              src={manifest.slides[slideIdx].url}
-              alt={`Slide ${slideIdx + 1} of ${manifest.slideCount}`}
-              style={{
-                maxWidth: '100%', maxHeight: '100%', objectFit: 'contain',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.4)', background: '#fff',
-              }}
-            />
+          {/* Slide stage. The flex:1 + minHeight:0 combo is what lets the
+              ResizeObserver report a real height inside a flex column. */}
+          <div
+            ref={stageRef}
+            style={{
+              flex: 1, minHeight: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: '#0f172a', borderRadius: 8, overflow: 'hidden', padding: 8,
+              position: 'relative',
+            }}
+          >
+            {pdfDoc ? (
+              // PDF.js path: canvas with absolutely-positioned link overlay
+              // sitting on top of it. The wrapping div keeps them perfectly
+              // aligned regardless of the stage's flex centering.
+              <div style={{ position: 'relative', display: 'inline-block', maxWidth: '100%', maxHeight: '100%' }}>
+                <canvas
+                  ref={canvasRef}
+                  aria-label={`Slide ${slideIdx + 1} of ${slideCount}`}
+                  style={{
+                    display: 'block', background: '#fff',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+                  }}
+                />
+                <div
+                  ref={linkLayerRef}
+                  aria-hidden={false}
+                  style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}
+                />
+                {pageRendering && (
+                  <div style={{
+                    position: 'absolute', top: 8, right: 8,
+                    background: 'rgba(15,23,42,0.7)', color: '#fff',
+                    padding: '2px 8px', borderRadius: 4, fontSize: 12,
+                  }}>Rendering…</div>
+                )}
+              </div>
+            ) : legacySlide ? (
+              // v1 legacy renderer (per-slide PNG). No clickable links —
+              // teachers can re-upload the deck to get them back.
+              <img
+                key={slideIdx}
+                src={legacySlide.url}
+                alt={`Slide ${slideIdx + 1} of ${slideCount}`}
+                style={{
+                  maxWidth: '100%', maxHeight: '100%', objectFit: 'contain',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.4)', background: '#fff',
+                }}
+              />
+            ) : null}
           </div>
 
           {/* Controls row */}
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-            padding: '4px 0',
-          }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', padding: '4px 0' }}>
             <button
               type="button"
               onClick={() => go(slideIdx - 1)}
@@ -170,20 +363,18 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
             <button
               type="button"
               onClick={() => go(slideIdx + 1)}
-              disabled={slideIdx >= manifest.slideCount - 1}
-              style={{ ...modalPrimaryBtn, opacity: slideIdx >= manifest.slideCount - 1 ? 0.5 : 1 }}
+              disabled={slideIdx >= slideCount - 1}
+              style={{ ...modalPrimaryBtn, opacity: slideIdx >= slideCount - 1 ? 0.5 : 1 }}
               title="Next slide (→ key)"
               aria-label="Next slide"
             >Next ›</button>
 
-            {/* Page jump. Submit on Enter or blur; clamps invalid values back
-                to the current slide so users see their bad input rejected. */}
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
               <span style={{ color: 'var(--cw-muted)', fontSize: 14 }}>Slide</span>
               <input
                 type="number"
                 min={1}
-                max={manifest.slideCount}
+                max={slideCount}
                 value={jumpInput}
                 onChange={(e) => setJumpInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitJump(); } }}
@@ -194,10 +385,9 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
                 }}
                 aria-label="Jump to slide"
               />
-              <span style={{ color: 'var(--cw-muted)', fontSize: 14 }}>of {manifest.slideCount}</span>
+              <span style={{ color: 'var(--cw-muted)', fontSize: 14 }}>of {slideCount}</span>
             </span>
 
-            {/* Section dropdown only appears when the deck has sections. */}
             {manifest.sections.length > 0 && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
                 <label htmlFor="cw-pres-section" style={{ color: 'var(--cw-muted)', fontSize: 14 }}>Section</label>
@@ -206,9 +396,7 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
                   value={currentSectionIdx >= 0 ? currentSectionIdx : ''}
                   onChange={(e) => {
                     const i = parseInt(e.target.value, 10);
-                    if (Number.isFinite(i) && manifest.sections[i]) {
-                      go(manifest.sections[i].startSlide - 1);
-                    }
+                    if (Number.isFinite(i) && manifest.sections[i]) go(manifest.sections[i].startSlide - 1);
                   }}
                   style={{
                     padding: '6px 8px', borderRadius: 6,
@@ -219,9 +407,7 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
                     <option value="">— before first section —</option>
                   )}
                   {manifest.sections.map((s, i) => (
-                    <option key={i} value={i}>
-                      {s.name} (slide {s.startSlide})
-                    </option>
+                    <option key={i} value={i}>{s.name} (slide {s.startSlide})</option>
                   ))}
                 </select>
               </span>

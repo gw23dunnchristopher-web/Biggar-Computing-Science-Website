@@ -728,6 +728,49 @@ function getRubric(q: AIQuestion): RubricRow[] {
 }
 
 /**
+ * Convert a .pptx to a single PDF buffer using LibreOffice headless. PDFs
+ * preserve text/vector graphics and hyperlink annotations exactly as
+ * LibreOffice rendered them, which is much higher fidelity than rasterising
+ * to PNG and also keeps clicks on links working in the SPA viewer
+ * (PDF.js exposes link annotations to the page so we can overlay <a> tags).
+ * Returns the PDF bytes or null on any failure.
+ */
+export async function convertPptxToPdf(pptxPath: string): Promise<Buffer | null> {
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'cw-pptxpdf-'));
+  const profile = path.join(tmp, 'lo-profile');
+  await fs.mkdir(profile, { recursive: true });
+  try {
+    const { code, stderr } = await new Promise<{ code: number; stderr: string }>((resolve) => {
+      const child = spawn('soffice', [
+        '--headless', '--norestore', '--nolockcheck', '--nodefault', '--nofirststartwizard',
+        `-env:UserInstallation=file://${profile}`,
+        '--convert-to', 'pdf', '--outdir', tmp, pptxPath,
+      ], { env: { ...process.env, HOME: tmp }, stdio: ['ignore', 'pipe', 'pipe'] });
+      let err = '';
+      child.stderr.on('data', (d) => { err += d.toString(); });
+      const t = setTimeout(() => { try { child.kill('SIGKILL'); } catch {} }, 120_000);
+      child.on('exit', (c) => { clearTimeout(t); resolve({ code: c ?? 1, stderr: err }); });
+      child.on('error', () => { clearTimeout(t); resolve({ code: 1, stderr: 'spawn error' }); });
+    });
+    if (code !== 0) {
+      console.error('[classwork-ai] convertPptxToPdf soffice failed:', stderr.slice(0, 400));
+      return null;
+    }
+    const pdfPath = path.join(tmp, path.basename(pptxPath).replace(/\.pptx$/i, '.pdf'));
+    try { await fs.access(pdfPath); } catch {
+      console.error('[classwork-ai] expected pdf not found:', pdfPath);
+      return null;
+    }
+    return await fs.readFile(pdfPath);
+  } catch (err) {
+    console.error('[classwork-ai] convertPptxToPdf error:', err);
+    return null;
+  } finally {
+    fs.rm(tmp, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+/**
  * Render a .pptx to one PNG per slide using LibreOffice headless + pdftoppm.
  * Returns an array of PNG buffers (in slide order), or null on any failure.
  * Caller is responsible for capping how many slides actually get sent to the

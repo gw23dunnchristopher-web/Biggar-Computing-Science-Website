@@ -65,7 +65,7 @@ import {
   setUnitPresentation,
   clearUnitPresentation,
 } from './classwork-storage';
-import { markSubmission, suggestCrosswordClues, renderPptxToImages, extractPptxSections } from './classwork-ai';
+import { markSubmission, suggestCrosswordClues, renderPptxToImages, extractPptxSections, convertPptxToPdf } from './classwork-ai';
 import { storage as n5Storage } from './n5-storage';
 import bcrypt from 'bcryptjs';
 
@@ -372,12 +372,17 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
      Teachers upload a PowerPoint file for the unit. We:
        1. Persist the .pptx in object storage (so teachers can download the
           original later if they need to re-edit).
-       2. Render every slide to a PNG via LibreOffice + pdftoppm and upload
-          each PNG to object storage.
+       2. Convert it to a PDF with LibreOffice headless. PDFs preserve
+          fonts, vector graphics and — crucially — hyperlink annotations
+          exactly as PowerPoint laid them out. The SPA viewer renders the
+          PDF with PDF.js, which gives sharp text and lets us overlay
+          clickable <a> tags on link annotations. Earlier versions of this
+          code rasterised every slide to PNG, which lost both formatting
+          fidelity and click targets.
        3. Parse PPTX section markers (View → Sections in PowerPoint) so the
-          viewer can offer a section dropdown.
-       4. Save a tiny manifest JSON listing slide URLs + sections, also in
-          object storage. The unit row holds the URL of that manifest.
+          viewer can offer a section dropdown — PDFs don't carry this info.
+       4. Save a tiny manifest JSON pointing at the PDF + sections; the unit
+          row stores the manifest URL.
      Pupils never see the upload UI — the SPA just renders a "View
      presentation" button when `presentation_url` is set on the unit. */
   app.post(
@@ -409,11 +414,12 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
           return res.status(500).json({ error: 'Could not stage uploaded file for conversion' });
         }
 
-        // Step 3: render every slide to PNG (uncapped). This can take 30+
-        // seconds on a 50-slide deck, which is fine for a one-off teacher
-        // action but means we don't want to do it on every page view.
-        const slides = await renderPptxToImages(downloaded.path, { maxSlides: 0, dpi: 110 });
-        if (!slides || slides.length === 0) {
+        // Step 3: convert to PDF. This is the one expensive step (LibreOffice
+        // headless can take 5-30s depending on deck size) but produces a
+        // single file we can stream to the viewer; per-slide rendering is
+        // unnecessary now that PDF.js handles per-page paint on the client.
+        const pdfBuffer = await convertPptxToPdf(downloaded.path);
+        if (!pdfBuffer) {
           return res.status(500).json({
             error: 'Could not convert presentation. Please try saving the file again from PowerPoint and re-uploading.',
           });
@@ -422,26 +428,21 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
         // Step 4: extract section markers (empty array if the deck has none).
         const sections = await extractPptxSections(downloaded.path);
 
-        // Step 5: upload each slide PNG and collect URLs.
+        // Step 5: upload the PDF.
         const baseName = f.originalname.replace(/\.pptx$/i, '') || 'slides';
-        const slideUrls: string[] = [];
-        for (let i = 0; i < slides.length; i++) {
-          const num = String(i + 1).padStart(3, '0');
-          const up = await saveClassworkUpload(
-            slides[i],
-            `${baseName}-slide-${num}.png`,
-            'image/png',
-          );
-          slideUrls.push(up.url);
-        }
+        const pdfUp = await saveClassworkUpload(
+          pdfBuffer,
+          `${baseName}.pdf`,
+          'application/pdf',
+        );
 
-        // Step 6: persist the manifest. JSON is tiny — a couple of KB even
-        // for a hundred-slide deck — so storing it in object storage is fine
-        // and lets the SPA cache it like any other file.
+        // Step 6: persist the manifest. Bumped to version 2 because the
+        // shape changed from per-slide image URLs to a single PDF URL. The
+        // SPA viewer accepts both shapes so any decks uploaded under v1
+        // keep working without re-uploading.
         const manifest = {
-          version: 1,
-          slideCount: slideUrls.length,
-          slides: slideUrls.map((url, idx) => ({ index: idx + 1, url })),
+          version: 2,
+          pdfUrl: pdfUp.url,
           sections,
           filename: f.originalname,
           uploadedAt: new Date().toISOString(),
@@ -463,7 +464,6 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
         res.json({
           ok: true,
           unit: updated,
-          slideCount: slideUrls.length,
           sectionCount: sections.length,
         });
       } catch (err) {
