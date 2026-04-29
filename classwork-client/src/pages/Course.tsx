@@ -88,6 +88,45 @@ export default function Course() {
   const [notesStatus, setNotesStatus] = useState<'idle' | 'loading' | 'saving' | 'saved' | 'error'>('idle');
   const closeModal = () => setModal({ kind: 'none' });
 
+  // Per-unit collapse state. Stored client-side only and persisted in
+  // localStorage scoped per course so each user's chosen layout (e.g.
+  // collapse all but the unit they're currently teaching) survives refreshes
+  // and navigations within the SPA. Defaults to "everything expanded" so
+  // the page looks the same on first visit as it always did.
+  const collapseStorageKey = course ? `cw-course-collapsed:${course}` : null;
+  const [collapsedUnits, setCollapsedUnits] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!collapseStorageKey) { setCollapsedUnits(new Set()); return; }
+    try {
+      const raw = localStorage.getItem(collapseStorageKey);
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) {
+          setCollapsedUnits(new Set(arr.filter((x): x is string => typeof x === 'string')));
+          return;
+        }
+      }
+    } catch { /* ignore corrupt storage */ }
+    setCollapsedUnits(new Set());
+  }, [collapseStorageKey]);
+  function toggleUnitCollapsed(unitId: string) {
+    setCollapsedUnits((prev) => {
+      const next = new Set(prev);
+      if (next.has(unitId)) next.delete(unitId); else next.add(unitId);
+      try {
+        if (collapseStorageKey) localStorage.setItem(collapseStorageKey, JSON.stringify([...next]));
+      } catch { /* localStorage may be full or disabled */ }
+      return next;
+    });
+  }
+  function setAllUnitsCollapsed(collapsed: boolean) {
+    const next: Set<string> = collapsed ? new Set(units.map((u) => u.id)) : new Set();
+    setCollapsedUnits(next);
+    try {
+      if (collapseStorageKey) localStorage.setItem(collapseStorageKey, JSON.stringify([...next]));
+    } catch { /* ignore */ }
+  }
+
   // Route between the pupil notes endpoint (per signed-in pupil) and the
   // teacher demo notes endpoint (single shared "teacher:demo" jotter on the
   // server). Both have the same shape so the modal can drive either.
@@ -478,18 +517,69 @@ export default function Course() {
         </p>
       )}
 
+      {/* Expand-all / Collapse-all convenience controls. Only shown once
+          there's more than one unit — for a single-unit course the per-unit
+          chevron is enough and these would just be noise. */}
+      {units.length > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, margin: '4px 0 8px' }}>
+          <button
+            type="button"
+            onClick={() => setAllUnitsCollapsed(false)}
+            disabled={collapsedUnits.size === 0}
+            style={{ ...secondaryBtn, padding: '4px 10px', fontSize: 13 }}
+            title="Show every unit's lessons"
+          >Expand all</button>
+          <button
+            type="button"
+            onClick={() => setAllUnitsCollapsed(true)}
+            disabled={collapsedUnits.size === units.length}
+            style={{ ...secondaryBtn, padding: '4px 10px', fontSize: 13 }}
+            title="Hide every unit's lessons"
+          >Collapse all</button>
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {units.map((u) => {
           const lessons = lessonsByUnit[u.id] || [];
+          const collapsed = collapsedUnits.has(u.id);
+          const bodyId = `cw-unit-body-${u.id}`;
           return (
             <div key={u.id} style={card}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                {/* Collapse/expand toggle. Keyboard-accessible button on the
+                    far left handles a11y; clicking the title block also
+                    toggles for sighted mouse users (purely a UX nicety,
+                    the button is the canonical interactive control). */}
+                <button
+                  type="button"
+                  onClick={() => toggleUnitCollapsed(u.id)}
+                  aria-expanded={!collapsed}
+                  aria-controls={bodyId}
+                  aria-label={collapsed ? `Expand ${u.title}` : `Collapse ${u.title}`}
+                  title={collapsed ? 'Expand unit to show its lessons' : 'Collapse unit to hide its lessons'}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    width: 28, height: 28, flexShrink: 0,
+                    background: 'transparent', border: '1px solid var(--cw-border)', borderRadius: 6,
+                    color: 'var(--cw-muted)', cursor: 'pointer', padding: 0,
+                  }}
+                >
+                  <span aria-hidden="true" style={{
+                    display: 'inline-block', fontSize: 14, lineHeight: 1,
+                    transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                    transition: 'transform 120ms ease',
+                  }}>▾</span>
+                </button>
                 {/* Title + thumbnail. The image sits flush to the left of
                     the heading so the unit list reads like a card grid even
                     on a single column. If a unit has no image_url we render
                     a soft placeholder square (initial letter) so every row
                     keeps the same alignment and rhythm. */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+                <div
+                  onClick={() => toggleUnitCollapsed(u.id)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1, cursor: 'pointer' }}
+                >
                   <UnitThumb url={u.image_url} title={u.title} />
                   <h2 style={{ margin: 0, fontSize: 20, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.title}</h2>
                 </div>
@@ -522,6 +612,10 @@ export default function Course() {
                   )}
                 </div>
               </div>
+              {/* Collapsible body — wrapped in a div so we can hide it via
+                  the `hidden` attribute (preserves DOM/state, doesn't unmount
+                  the lessons list) and link it to the toggle via aria-controls. */}
+              <div id={bodyId} hidden={collapsed}>
               {u.description && <p style={{ color: 'var(--cw-muted)', marginTop: 6 }}>{u.description}</p>}
               {lessons.length === 0 ? (
                 <p style={{ color: 'var(--cw-muted)', marginTop: 12 }}>
@@ -637,6 +731,7 @@ export default function Course() {
                   })}
                 </ul>
               )}
+              </div>
             </div>
           );
         })}
