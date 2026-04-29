@@ -3172,8 +3172,8 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
   const rubricTotal = rubric.reduce((a, r) => a + (Number(r.marks) || 0), 0);
 
   return (
-    <div style={modalOverlay} onClick={onClose}>
-      <div style={modal} onClick={(e) => e.stopPropagation()}>
+    <div style={modalOverlay}>
+      <div style={modal}>
         <h2 style={{ marginTop: 0 }}>{isEdit ? 'Edit task' : 'New task'}</h2>
         <label style={fieldLabel}>Type
           <select value={type} onChange={(e) => onTypeChange(e.target.value)} style={input}>
