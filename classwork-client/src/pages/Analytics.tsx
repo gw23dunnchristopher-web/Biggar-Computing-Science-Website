@@ -77,6 +77,7 @@ interface StudentAnalytics {
     selected_option_label: string | null;
     link_url: string | null;
     file_url: string | null;
+    question_id: string;
     question_prompt: string;
     question_type: string;
     question_max_marks: number;
@@ -473,11 +474,19 @@ function StudentsTable({ students, course, openStudentId, onToggle }: {
 function StudentDetail({ course, studentId }: { course: string; studentId: string }) {
   const [data, setData] = useState<StudentAnalytics | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  // Tracks which submission rows have their question text / answer / feedback
+  // expanded. Keyed by submission id so resubmissions of the same question
+  // toggle independently. Survives across re-renders within the panel.
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  function toggleRow(id: string) {
+    setExpanded((e) => ({ ...e, [id]: !e[id] }));
+  }
 
   useEffect(() => {
     let cancelled = false;
     setData(null);
     setErr(null);
+    setExpanded({});
     api<StudentAnalytics>(`/api/classwork/${course}/students/${studentId}/analytics`)
       .then((d) => { if (!cancelled) setData(d); })
       .catch((e) => { if (!cancelled) setErr(e.message || 'Failed to load'); });
@@ -549,6 +558,16 @@ function StudentDetail({ course, studentId }: { course: string; studentId: strin
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 12 }}>
               {u.lessons.map((l) => {
                 const lessonRoll = rollUp(l.rows);
+                // Each unique question_id gets a stable 1-based number within
+                // its lesson, matching the Q1 / Q2 / Q3 numbering pupils see
+                // when they open the lesson page itself. We assign by first
+                // appearance — server already returns rows in question
+                // order_index — so a question that was resubmitted twice
+                // shares the same number across both rows.
+                const qNumByQid = new Map<string, number>();
+                for (const r of l.rows) {
+                  if (!qNumByQid.has(r.question_id)) qNumByQid.set(r.question_id, qNumByQid.size + 1);
+                }
                 return (
                   <div key={l.lessonId}>
                     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 4 }}>
@@ -563,40 +582,51 @@ function StudentDetail({ course, studentId }: { course: string; studentId: strin
                     <table style={tbl}>
                       <thead>
                         <tr>
-                          <th style={th}>Question</th>
+                          <th style={{ ...th, width: 56 }}>Q</th>
                           <th style={th}>Type</th>
                           <th style={th}>Mark</th>
                           <th style={th}>%</th>
                           <th style={th}>When</th>
-                          <th style={th}>Feedback</th>
+                          <th style={{ ...th, width: 72 }}></th>
                         </tr>
                       </thead>
                       <tbody>
                         {l.rows.map((s) => {
                           const pct = s.marks_awarded != null && s.question_max_marks > 0
                             ? (s.marks_awarded / s.question_max_marks) * 100 : null;
+                          const isOpen = !!expanded[s.id];
+                          const qNum = qNumByQid.get(s.question_id);
                           return (
-                            <tr key={s.id}>
-                              {/* Long prompts (real exam-style questions can run to a paragraph)
-                                  used to push the column out and squash everything else. We
-                                  cap each cell with an inner div + ellipsis so the row
-                                  height stays consistent — full text is always available on
-                                  hover via the title tooltip. */}
-                              <td style={td}>
-                                <div style={ellipsisCell(360)} title={s.question_prompt}>
-                                  {s.question_prompt}
-                                </div>
-                              </td>
-                              <td style={td}>{s.question_type}</td>
-                              <td style={td}>{s.marks_awarded != null ? `${s.marks_awarded} / ${s.question_max_marks}` : 'pending'}</td>
-                              <td style={td}><PercentBar value={pct} /></td>
-                              <td style={td}>{new Date(s.submitted_at).toLocaleString()}</td>
-                              <td style={{ ...td, color: 'var(--cw-muted)' }}>
-                                <div style={ellipsisCell(280)} title={s.ai_feedback || ''}>
-                                  {s.ai_feedback || '—'}
-                                </div>
-                              </td>
-                            </tr>
+                            <RowGroup key={s.id}>
+                              <tr>
+                                <td style={td}>
+                                  <strong style={{ fontSize: 14 }}>Q{qNum}</strong>
+                                </td>
+                                <td style={td}>{s.question_type}</td>
+                                <td style={td}>{s.marks_awarded != null ? `${s.marks_awarded} / ${s.question_max_marks}` : 'pending'}</td>
+                                <td style={td}><PercentBar value={pct} /></td>
+                                <td style={td}>{new Date(s.submitted_at).toLocaleString()}</td>
+                                <td style={td}>
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleRow(s.id)}
+                                    style={miniBtn}
+                                    aria-expanded={isOpen}
+                                    aria-label={isOpen ? 'Hide question details' : 'Show question, answer and feedback'}
+                                    title={isOpen ? 'Hide details' : 'Show question, answer and feedback'}
+                                  >
+                                    {isOpen ? '▾ Hide' : '▸ Show'}
+                                  </button>
+                                </td>
+                              </tr>
+                              {isOpen && (
+                                <tr>
+                                  <td colSpan={6} style={{ ...td, background: '#fafbfd', padding: '10px 12px' }}>
+                                    <SubmissionDetails s={s} />
+                                  </td>
+                                </tr>
+                              )}
+                            </RowGroup>
                           );
                         })}
                       </tbody>
@@ -622,6 +652,73 @@ const unitHeaderStyle: React.CSSProperties = {
   padding: '8px 12px',
   background: '#eef2ff', borderBottom: '1px solid var(--cw-border)',
 };
+
+/* ---------- Per-submission expanded details ---------- */
+
+// Renders the full question prompt, the student's actual answer (whatever
+// shape it took for that question type) and the AI feedback in a clean
+// label/value grid. Shown inside a row that's been expanded via the "Show"
+// toggle — kept collapsed by default so the table stays compact and the
+// teacher only loads the heavy text for whichever questions they're
+// actually inspecting.
+function SubmissionDetails({ s }: { s: StudentAnalytics['submissions'][number] }) {
+  const labelStyle: React.CSSProperties = {
+    fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5,
+    color: 'var(--cw-muted)',
+  };
+  const valueStyle: React.CSSProperties = {
+    fontSize: 13, color: 'var(--cw-ink)', whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+  };
+
+  // Stitch together whichever answer field(s) the question type populated.
+  // Most question types use exactly one of these; a few (e.g. link + note)
+  // use two, hence the array-and-join approach instead of a switch.
+  const answerParts: React.ReactNode[] = [];
+  if (s.text_answer) {
+    answerParts.push(<div key="t" style={valueStyle}>{s.text_answer}</div>);
+  }
+  if (s.selected_option_label) {
+    answerParts.push(
+      <div key="o" style={valueStyle}>
+        <em style={{ color: 'var(--cw-muted)' }}>Selected option:</em> {s.selected_option_label}
+      </div>
+    );
+  }
+  if (s.link_url) {
+    answerParts.push(
+      <div key="l" style={valueStyle}>
+        <a href={s.link_url} target="_blank" rel="noreferrer" style={{ color: 'var(--cw-accent)' }}>{s.link_url}</a>
+      </div>
+    );
+  }
+  if (s.file_url) {
+    answerParts.push(
+      <div key="f" style={valueStyle}>
+        <a href={s.file_url} target="_blank" rel="noreferrer" style={{ color: 'var(--cw-accent)' }}>View uploaded file</a>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      display: 'grid', gridTemplateColumns: 'minmax(80px, max-content) 1fr',
+      gap: '6px 14px', alignItems: 'start',
+    }}>
+      <div style={labelStyle}>Question</div>
+      <div style={valueStyle}>{s.question_prompt || <em style={{ color: 'var(--cw-muted)' }}>(no prompt)</em>}</div>
+      <div style={labelStyle}>Answer</div>
+      <div>
+        {answerParts.length > 0
+          ? answerParts
+          : <em style={{ color: 'var(--cw-muted)', fontSize: 13 }}>No answer recorded.</em>}
+      </div>
+      <div style={labelStyle}>Feedback</div>
+      <div style={valueStyle}>
+        {s.ai_feedback || <em style={{ color: 'var(--cw-muted)' }}>No feedback recorded.</em>}
+      </div>
+    </div>
+  );
+}
 
 /* ---------- Activity calendar ----------
    Small at-a-glance view of which days the student actually used the app.
