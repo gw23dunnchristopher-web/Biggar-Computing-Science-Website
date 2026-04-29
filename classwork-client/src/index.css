@@ -64,14 +64,17 @@
 
   /* Task-card variant tints. Surface inline backgrounds that used to
      be hardcoded so dark mode (and custom themes) can override them. */
-  --cw-tint-info-bg:        #eff6ff;
-  --cw-tint-info-border:    #93c5fd;
-  --cw-tint-info-ink:       #1e40af;
-  --cw-tint-textonly-bg:    #ecfeff;
-  --cw-tint-textonly-border:#67e8f9;
-  --cw-tint-textonly-ink:   #0e7490;
-  --cw-tint-extension-bg:   #faf5ff;
-  --cw-tint-extension-border:#c084fc;
+  --cw-tint-info-bg:           #dbeafe;
+  --cw-tint-info-border:       #93c5fd;
+  --cw-tint-info-ink:          #1e40af;
+  --cw-tint-textonly-bg:       #ecfeff;
+  --cw-tint-textonly-border:   #67e8f9;
+  --cw-tint-textonly-ink:      #0e7490;
+  --cw-tint-extension-bg:      #faf5ff;
+  --cw-tint-extension-border:  #c084fc;
+  --cw-tint-success-bg:        #d1fae5;
+  --cw-tint-success-border:    #6ee7b7;
+  --cw-tint-success-ink:       #065f46;
 
   /* shadcn-style HSL tokens — match the classwork palette so the
      accessibility panel and its trigger button feel native to this SPA */
@@ -125,14 +128,17 @@ html.dark {
 
   /* Task-card variant tints — darkened backgrounds with brightened
      ink so the cyan/blue/purple identity survives on dark slate. */
-  --cw-tint-info-bg:        #122236;
-  --cw-tint-info-border:    #1e3a5f;
-  --cw-tint-info-ink:       #93c5fd;
-  --cw-tint-textonly-bg:    #0e2230;
-  --cw-tint-textonly-border:#155e75;
-  --cw-tint-textonly-ink:   #67e8f9;
-  --cw-tint-extension-bg:   #1e1733;
-  --cw-tint-extension-border:#6d28d9;
+  --cw-tint-info-bg:           #122236;
+  --cw-tint-info-border:       #1e3a5f;
+  --cw-tint-info-ink:          #93c5fd;
+  --cw-tint-textonly-bg:       #0e2230;
+  --cw-tint-textonly-border:   #155e75;
+  --cw-tint-textonly-ink:      #67e8f9;
+  --cw-tint-extension-bg:      #1e1733;
+  --cw-tint-extension-border:  #6d28d9;
+  --cw-tint-success-bg:        #0d2b1e;
+  --cw-tint-success-border:    #166534;
+  --cw-tint-success-ink:       #6ee7b7;
 
   --background: 222 47% 8%;        /* matches --cw-bg */
   --foreground: 210 40% 96%;

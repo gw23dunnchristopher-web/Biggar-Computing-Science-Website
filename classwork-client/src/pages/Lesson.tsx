@@ -4618,13 +4618,13 @@ function LessonHeader({ lesson }: { lesson: LessonInfo }) {
           )}
           {sc.length > 0 && (
             <section style={{
-              background: '#ecfdf5', border: '1px solid #a7f3d0',
+              background: 'var(--cw-tint-success-bg)', border: '1px solid var(--cw-tint-success-border)',
               borderRadius: 8, padding: '12px 14px',
             }}>
-              <h2 style={{ margin: 0, fontSize: 14, color: '#065f46', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              <h2 style={{ margin: 0, fontSize: 14, color: 'var(--cw-tint-success-ink)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                 Success criteria
               </h2>
-              <p style={{ margin: '6px 0 0', fontSize: 13, color: '#065f46', fontStyle: 'italic' }}>
+              <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--cw-tint-success-ink)', fontStyle: 'italic' }}>
                 I am looking for you to…
               </p>
               <ul style={{ margin: '8px 0 0', paddingLeft: 22, color: 'var(--cw-ink)', fontSize: 15, lineHeight: 1.5 }}>
