@@ -448,14 +448,16 @@ export default function Course() {
           )}
           {role === 'teacher' && (
             <>
-              {/* Teachers get their own demo jotter (course-scoped) so they
-                  can model note-taking in lessons without touching any pupil's
-                  notes. Stored under a synthetic id on the server. */}
+              {/* Teachers get their own course-scoped jotter so they can
+                  model note-taking in lessons without touching any pupil's
+                  notes. Stored under a synthetic id on the server. The
+                  label matches the pupil's button so the teacher experience
+                  is symmetric — for them, this *is* "My jotter". */}
               <Link href={`/jotter?course=${course}`} style={{
                 display: 'inline-block',
                 background: '#ecfeff', color: '#0e7490', border: '1px solid #67e8f9',
                 padding: '8px 14px', borderRadius: 8, fontWeight: 600, textDecoration: 'none',
-              }} title="Open your demo jotter for this course — what pupils see when they click their own 'My jotter'">Demo jotter</Link>
+              }} title="Open your own jotter for this course — the same notes view your pupils get when they click 'My jotter'">My jotter</Link>
               <Link href={`/analytics/${course}`} style={{
                 display: 'inline-block',
                 background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
