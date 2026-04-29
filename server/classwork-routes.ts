@@ -1,5 +1,7 @@
 import express, { type Express, type Request, type Response, type NextFunction } from 'express';
 import path from 'path';
+import os from 'os';
+import { promises as fsp } from 'fs';
 import multer from 'multer';
 import { saveClassworkUpload, streamClassworkUpload, downloadClassworkUploadToTemp } from './classwork-uploads-store';
 import { pool, hasDatabase } from './db';
@@ -398,48 +400,47 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
       const f = (req as any).file as Express.Multer.File | undefined;
       if (!f || !f.buffer) return res.status(400).json({ error: 'No file received' });
       const unitId = req.params.unitId;
-      let downloaded: { path: string; cleanup: () => Promise<void> } | null = null;
+      const tStart = Date.now();
+      // We hold the buffer in memory already; staging it to a local temp
+      // file is far cheaper than uploading to object storage and then
+      // downloading it back just so LibreOffice has a path to point at.
+      let tmpDir: string | null = null;
+      let localPptxPath: string | null = null;
       try {
-        // Step 1: persist the .pptx itself.
-        const saved = await saveClassworkUpload(
-          f.buffer,
-          f.originalname,
-          f.mimetype || 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        );
+        tmpDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'cw-upload-'));
+        const safeBase = (f.originalname || 'slides.pptx').replace(/[^A-Za-z0-9._-]/g, '_');
+        localPptxPath = path.join(tmpDir, safeBase.toLowerCase().endsWith('.pptx') ? safeBase : `${safeBase}.pptx`);
+        await fsp.writeFile(localPptxPath, f.buffer);
+        const tStaged = Date.now();
 
-        // Step 2: download to a temp path so LibreOffice + JSZip can read it.
-        downloaded = await downloadClassworkUploadToTemp(saved.url);
-        if (!downloaded) {
-          // Should never happen — we just saved it. But fail clearly if so.
-          return res.status(500).json({ error: 'Could not stage uploaded file for conversion' });
-        }
-
-        // Step 3: convert to PDF. This is the one expensive step (LibreOffice
-        // headless can take 5-30s depending on deck size) but produces a
-        // single file we can stream to the viewer; per-slide rendering is
-        // unnecessary now that PDF.js handles per-page paint on the client.
-        const pdfBuffer = await convertPptxToPdf(downloaded.path);
+        // Step 1: convert to PDF + extract sections in parallel — they both
+        // read the same local file and don't depend on each other.
+        const [pdfBuffer, sections] = await Promise.all([
+          convertPptxToPdf(localPptxPath),
+          extractPptxSections(localPptxPath),
+        ]);
         if (!pdfBuffer) {
           return res.status(500).json({
             error: 'Could not convert presentation. Please try saving the file again from PowerPoint and re-uploading.',
           });
         }
+        const tConverted = Date.now();
 
-        // Step 4: extract section markers (empty array if the deck has none).
-        const sections = await extractPptxSections(downloaded.path);
-
-        // Step 5: upload the PDF.
+        // Step 2: upload .pptx and PDF to object storage in parallel — they
+        // don't depend on each other and were the second-slowest step.
         const baseName = f.originalname.replace(/\.pptx$/i, '') || 'slides';
-        const pdfUp = await saveClassworkUpload(
-          pdfBuffer,
-          `${baseName}.pdf`,
-          'application/pdf',
-        );
+        const [saved, pdfUp] = await Promise.all([
+          saveClassworkUpload(
+            f.buffer,
+            f.originalname,
+            f.mimetype || 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+          ),
+          saveClassworkUpload(pdfBuffer, `${baseName}.pdf`, 'application/pdf'),
+        ]);
 
-        // Step 6: persist the manifest. Bumped to version 2 because the
-        // shape changed from per-slide image URLs to a single PDF URL. The
-        // SPA viewer accepts both shapes so any decks uploaded under v1
-        // keep working without re-uploading.
+        // Step 3: build + upload the manifest. v2 shape: single PDF URL +
+        // sections. The SPA viewer still accepts the v1 per-slide-image
+        // shape so older uploads keep working without re-uploading.
         const manifest = {
           version: 2,
           pdfUrl: pdfUp.url,
@@ -452,8 +453,9 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
           `${baseName}-pages.json`,
           'application/json',
         );
+        const tUploaded = Date.now();
 
-        // Step 7: write the URLs to the unit row.
+        // Step 4: write the URLs to the unit row.
         const updated = await setUnitPresentation(unitId, {
           url: saved.url,
           pagesUrl: manifestUp.url,
@@ -461,6 +463,11 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
         });
         if (!updated) return res.status(404).json({ error: 'Unit not found' });
 
+        console.log(
+          `[classwork] presentation upload OK in ${tUploaded - tStart}ms ` +
+            `(stage:${tStaged - tStart}ms, convert:${tConverted - tStaged}ms, upload:${tUploaded - tConverted}ms, ` +
+            `pdf:${pdfBuffer.length}B, sections:${sections.length})`,
+        );
         res.json({
           ok: true,
           unit: updated,
@@ -470,7 +477,7 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
         console.error('[classwork] presentation upload failed:', err);
         res.status(500).json({ error: 'Failed to process presentation' });
       } finally {
-        if (downloaded) downloaded.cleanup().catch(() => {});
+        if (tmpDir) fsp.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
       }
     }
   );

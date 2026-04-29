@@ -735,9 +735,50 @@ function getRubric(q: AIQuestion): RubricRow[] {
  * (PDF.js exposes link annotations to the page so we can overlay <a> tags).
  * Returns the PDF bytes or null on any failure.
  */
+/**
+ * Pre-warm the LibreOffice user profile so the *first* PPTX upload after a
+ * cold container start doesn't pay the ~5-15s LO bootstrap cost. Call this
+ * once at server startup; subsequent calls are no-ops if already warmed.
+ * Safe to fire-and-forget — failures only log, never throw.
+ */
+let loProfileWarmed = false;
+let loProfileWarming: Promise<void> | null = null;
+export function prewarmLibreOfficeProfile(): Promise<void> {
+  if (loProfileWarmed) return Promise.resolve();
+  if (loProfileWarming) return loProfileWarming;
+  loProfileWarming = (async () => {
+    const t0 = Date.now();
+    const profile = path.join(os.tmpdir(), 'cw-lo-profile');
+    try {
+      await fs.mkdir(profile, { recursive: true });
+      await new Promise<void>((resolve) => {
+        const child = spawn('soffice', [
+          '--headless', '--norestore', '--nolockcheck', '--nodefault', '--nofirststartwizard',
+          `-env:UserInstallation=file://${profile}`,
+          '--terminate_after_init',
+        ], { env: process.env, stdio: ['ignore', 'ignore', 'ignore'] });
+        const t = setTimeout(() => { try { child.kill('SIGKILL'); } catch {} resolve(); }, 60_000);
+        child.on('exit', () => { clearTimeout(t); resolve(); });
+        child.on('error', () => { clearTimeout(t); resolve(); });
+      });
+      loProfileWarmed = true;
+      console.log(`[classwork-ai] LibreOffice profile warmed in ${Date.now() - t0}ms`);
+    } catch (err) {
+      console.warn('[classwork-ai] LibreOffice prewarm failed (will warm on first upload):', err);
+    } finally {
+      loProfileWarming = null;
+    }
+  })();
+  return loProfileWarming;
+}
+
 export async function convertPptxToPdf(pptxPath: string): Promise<Buffer | null> {
+  const t0 = Date.now();
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'cw-pptxpdf-'));
-  const profile = path.join(tmp, 'lo-profile');
+  // Reuse a single LibreOffice user profile across uploads so the office
+  // doesn't reinitialise from scratch on every conversion. Initial setup
+  // takes ~3-5s; subsequent runs reuse the warmed profile in milliseconds.
+  const profile = path.join(os.tmpdir(), 'cw-lo-profile');
   await fs.mkdir(profile, { recursive: true });
   try {
     const { code, stderr } = await new Promise<{ code: number; stderr: string }>((resolve) => {
@@ -745,7 +786,14 @@ export async function convertPptxToPdf(pptxPath: string): Promise<Buffer | null>
         '--headless', '--norestore', '--nolockcheck', '--nodefault', '--nofirststartwizard',
         `-env:UserInstallation=file://${profile}`,
         '--convert-to', 'pdf', '--outdir', tmp, pptxPath,
-      ], { env: { ...process.env, HOME: tmp }, stdio: ['ignore', 'pipe', 'pipe'] });
+      ], {
+        // Inherit env (incl. real HOME and XDG_CACHE_HOME) so fontconfig can
+        // reuse its cached scan of the 2.5k+ system fonts. Overriding HOME
+        // to a fresh tmp dir forces a full fontconfig rebuild on every call,
+        // which adds 30-60s per upload.
+        env: process.env,
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
       let err = '';
       child.stderr.on('data', (d) => { err += d.toString(); });
       const t = setTimeout(() => { try { child.kill('SIGKILL'); } catch {} }, 120_000);
@@ -761,7 +809,9 @@ export async function convertPptxToPdf(pptxPath: string): Promise<Buffer | null>
       console.error('[classwork-ai] expected pdf not found:', pdfPath);
       return null;
     }
-    return await fs.readFile(pdfPath);
+    const buf = await fs.readFile(pdfPath);
+    console.log(`[classwork-ai] convertPptxToPdf OK: ${buf.length} bytes in ${Date.now() - t0}ms`);
+    return buf;
   } catch (err) {
     console.error('[classwork-ai] convertPptxToPdf error:', err);
     return null;
@@ -785,11 +835,14 @@ export async function renderPptxToImages(pptxPath: string, opts: { dpi?: number;
   // nothing, which preserves the old behaviour.
   const maxSlides = opts.maxSlides ?? 25;
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'cw-pptx-'));
-  const profile = path.join(tmp, 'lo-profile');
+  // Reuse a stable LibreOffice profile (shared with convertPptxToPdf) so the
+  // office doesn't reinitialise per call. See convertPptxToPdf for why we
+  // also keep the inherited HOME — fontconfig caching depends on it.
+  const profile = path.join(os.tmpdir(), 'cw-lo-profile');
   await fs.mkdir(profile, { recursive: true });
   const run = (cmd: string, args: string[], timeoutMs: number) => new Promise<{ code: number; stderr: string }>((resolve) => {
     const child = spawn(cmd, args, {
-      env: { ...process.env, HOME: tmp },
+      env: process.env,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     let stderr = '';
