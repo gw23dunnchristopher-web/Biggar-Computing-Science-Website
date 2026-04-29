@@ -1,8 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
 import { api, getCurrentRole } from '@/lib/api';
 import { sanitizeHtml, plainTextToHtml, looksLikeHtml } from '@/lib/sanitizeHtml';
+
+// Walk a sanitised HTML string, inject stable ids onto every h1/h2/h3 and
+// return both the rewritten HTML and a flat table-of-contents the unit's
+// "Lessons" sidebar can render as jump-links. Each unit's notes blob is
+// authored by the pupil so the headings naturally carry lesson titles —
+// e.g. "Lesson 3: Loops" — which makes them ideal sub-navigation without
+// needing any new server-side per-lesson storage.
+function buildToc(html: string): { html: string; toc: { id: string; level: number; text: string }[] } {
+  if (!html) return { html: '', toc: [] };
+  if (typeof DOMParser === 'undefined') return { html, toc: [] };
+  try {
+    const doc = new DOMParser().parseFromString(`<div id="cw-toc-root">${html}</div>`, 'text/html');
+    const root = doc.getElementById('cw-toc-root');
+    if (!root) return { html, toc: [] };
+    const toc: { id: string; level: number; text: string }[] = [];
+    const headings = Array.from(root.querySelectorAll('h1, h2, h3'));
+    headings.forEach((h, i) => {
+      const id = `cw-jh-${i + 1}`;
+      h.setAttribute('id', id);
+      toc.push({
+        id,
+        level: parseInt(h.tagName.substring(1), 10) || 2,
+        text: (h.textContent || '').trim(),
+      });
+    });
+    return { html: root.innerHTML, toc };
+  } catch {
+    return { html, toc: [] };
+  }
+}
 
 // State for the image lightbox (declared outside the component definition so
 // the hook's useState typing stays simple). null = closed; { src, alt } = open.
@@ -44,6 +74,35 @@ export default function JotterPage() {
   // Track whether the lightbox is showing the image at its full natural size
   // (zoomed) or fitted to the screen. Toggled by clicking the image.
   const [zoomed, setZoomed] = useState(false);
+  // Which unit tab is currently shown on screen. `null` means "not chosen
+  // yet" — reset to the first available unit whenever the jotter loads.
+  // Print mode ignores this and renders every unit in document order.
+  const [activeUnitId, setActiveUnitId] = useState<string | null>(null);
+  useEffect(() => {
+    if (!jotter) { setActiveUnitId(null); return; }
+    if (jotter.units.length === 0) { setActiveUnitId(null); return; }
+    // Keep current selection if it still exists, otherwise jump to the first unit.
+    if (!jotter.units.some((u) => u.unitId === activeUnitId)) {
+      setActiveUnitId(jotter.units[0].unitId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jotter]);
+
+  const activeUnit = jotter?.units.find((u) => u.unitId === activeUnitId) || null;
+
+  // Re-build the active unit's HTML + lesson TOC whenever the selection
+  // (or the underlying notes content) changes. The processed HTML carries
+  // ids on every heading so the sidebar's jump-links can scroll to them.
+  const activeProcessed = useMemo(() => {
+    if (!activeUnit) return { html: '', toc: [] as { id: string; level: number; text: string }[] };
+    const safe = sanitizeHtml(looksLikeHtml(activeUnit.content) ? activeUnit.content : plainTextToHtml(activeUnit.content));
+    return buildToc(safe);
+  }, [activeUnit?.unitId, activeUnit?.content]);
+
+  function jumpToHeading(id: string) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   // Close the lightbox with Escape — standard expectation for any modal.
   useEffect(() => {
@@ -113,6 +172,36 @@ export default function JotterPage() {
         .cw-jotter-body table.cw-table { border-collapse: collapse; margin: 8px 0; width: auto; max-width: 100%; }
         .cw-jotter-body table.cw-table th, .cw-jotter-body table.cw-table td { border: 1px solid #cbd5e1; padding: 6px 10px; vertical-align: top; }
         .cw-jotter-body table.cw-table th { background: #f1f5f9; text-align: left; font-weight: 600; }
+
+        /* Tab + sidebar layout. On screen we hide every unit except the
+           active one. Print mode reveals every unit so a printout is still
+           the full year's notes (which is what teachers and pupils want
+           when saving a PDF for revision). The sidebar and tab strip are
+           always hidden in print. */
+        .cw-jotter-tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 2px solid var(--cw-border); margin: 8px 0 12px; }
+        .cw-jotter-tab { background: transparent; border: 1px solid transparent; border-bottom: none; padding: 8px 14px; font-size: 14px; font-weight: 600; color: var(--cw-muted); cursor: pointer; border-radius: 8px 8px 0 0; margin-bottom: -2px; }
+        .cw-jotter-tab:hover { color: var(--cw-ink); background: #f1f5f9; }
+        .cw-jotter-tab.active { color: var(--cw-accent, #2563eb); border-color: var(--cw-border); border-bottom-color: #fff; background: #fff; }
+        .cw-jotter-layout { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: start; }
+        .cw-jotter-sidebar { position: sticky; top: 12px; background: #fafbff; border: 1px solid var(--cw-border); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+        .cw-jotter-sidebar h3 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--cw-muted); font-weight: 700; }
+        .cw-jotter-sidebar ul { list-style: none; margin: 0; padding: 0; }
+        .cw-jotter-sidebar li { margin: 0; }
+        .cw-jotter-sidebar button { display: block; width: 100%; text-align: left; background: transparent; border: none; padding: 4px 6px; border-radius: 4px; cursor: pointer; color: var(--cw-ink); font-size: 13px; line-height: 1.35; }
+        .cw-jotter-sidebar button:hover { background: #e0e7ff; color: var(--cw-accent, #2563eb); }
+        .cw-jotter-sidebar .lvl-2 { padding-left: 14px; font-size: 12px; }
+        .cw-jotter-sidebar .lvl-3 { padding-left: 26px; font-size: 12px; color: var(--cw-muted); }
+        .cw-jotter-sidebar .empty { color: var(--cw-muted); font-style: italic; font-size: 12px; }
+        .cw-jotter-hidden { display: none; }
+        @media (max-width: 720px) {
+          .cw-jotter-layout { grid-template-columns: 1fr; }
+          .cw-jotter-sidebar { position: static; }
+        }
+        @media print {
+          .cw-jotter-layout { display: block; }
+          .cw-jotter-hidden { display: block !important; }
+          .cw-jotter-sidebar { display: none; }
+        }
       `}</style>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
@@ -162,32 +251,101 @@ export default function JotterPage() {
         </p>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 12 }}>
-        {(jotter?.units || []).map((u) => (
-          <div key={u.unitId} className="cw-jotter-card" style={card}>
-            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-              <h2 style={{ margin: 0, fontSize: 20 }}>{u.unitTitle}</h2>
-              {u.updatedAt && (
-                <span style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
-                  Last updated {new Date(u.updatedAt).toLocaleString()}
-                </span>
-              )}
-            </div>
-            <div
-              className="cw-jotter-body"
-              style={{
-                marginTop: 12, wordBreak: 'break-word',
-                fontFamily: 'inherit', fontSize: 15, lineHeight: 1.6, color: 'var(--cw-ink)',
-              }}
-              onDoubleClick={onBodyDoubleClick}
-              title="Double-click an image to zoom in"
-              dangerouslySetInnerHTML={{
-                __html: sanitizeHtml(looksLikeHtml(u.content) ? u.content : plainTextToHtml(u.content)),
-              }}
-            />
+      {/* Tab strip — one tab per unit. Hidden when there's only one unit
+          (no point) and entirely hidden in print. */}
+      {jotter && jotter.units.length > 1 && (
+        <div className="cw-jotter-tabs cw-no-print" role="tablist" aria-label="Units">
+          {jotter.units.map((u) => {
+            const isActive = u.unitId === activeUnitId;
+            return (
+              <button
+                key={u.unitId}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                className={`cw-jotter-tab${isActive ? ' active' : ''}`}
+                onClick={() => setActiveUnitId(u.unitId)}
+                title={u.unitTitle}
+              >
+                {u.unitTitle}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Two-column layout: lessons sidebar + active unit content. The
+          sidebar is auto-built from the H1/H2/H3 headings the pupil writes
+          inside their notes — pupils typically use these for lesson titles
+          (e.g. "Lesson 3 – Loops"), so the result reads as a lesson index
+          for the unit without needing any new server-side storage. */}
+      {jotter && jotter.units.length > 0 && (
+        <div className="cw-jotter-layout">
+          <aside className="cw-jotter-sidebar cw-no-print" aria-label="Lessons in this unit">
+            <h3>Lessons in this unit</h3>
+            {activeProcessed.toc.length === 0 ? (
+              <div className="empty">
+                Add headings to your notes (Heading 1 / 2 / 3) and they&rsquo;ll appear here as lesson links.
+              </div>
+            ) : (
+              <ul>
+                {activeProcessed.toc.map((h) => (
+                  <li key={h.id}>
+                    <button
+                      type="button"
+                      className={`lvl-${h.level}`}
+                      onClick={() => jumpToHeading(h.id)}
+                      title={h.text}
+                    >
+                      {h.text || '(untitled heading)'}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </aside>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
+            {jotter.units.map((u) => {
+              const isActive = u.unitId === activeUnitId;
+              // The active unit renders the heading-id-injected HTML so the
+              // sidebar's jump-links can find their targets; non-active units
+              // render the plain sanitised HTML (only ever visible in print).
+              const html = isActive
+                ? activeProcessed.html
+                : sanitizeHtml(looksLikeHtml(u.content) ? u.content : plainTextToHtml(u.content));
+              return (
+                <div
+                  key={u.unitId}
+                  className={`cw-jotter-card${isActive ? '' : ' cw-jotter-hidden'}`}
+                  style={card}
+                  role={isActive ? 'tabpanel' : undefined}
+                  aria-labelledby={isActive ? `cw-unit-tab-${u.unitId}` : undefined}
+                >
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                    <h2 style={{ margin: 0, fontSize: 20 }}>{u.unitTitle}</h2>
+                    {u.updatedAt && (
+                      <span style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+                        Last updated {new Date(u.updatedAt).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  <div
+                    className="cw-jotter-body"
+                    style={{
+                      marginTop: 12, wordBreak: 'break-word',
+                      fontFamily: 'inherit', fontSize: 15, lineHeight: 1.6, color: 'var(--cw-ink)',
+                    }}
+                    onDoubleClick={onBodyDoubleClick}
+                    title="Double-click an image to zoom in"
+                    dangerouslySetInnerHTML={{ __html: html }}
+                  />
+                </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       {/* Image lightbox: dark fullscreen overlay; click backdrop or press
           Escape to close; click image to toggle 1:1 zoom (with scroll-to-pan
