@@ -13,23 +13,20 @@ import path from "path";
 import fs from "fs";
 import { sendPasswordResetEmail } from "./email";
 import { objectStorageClient } from "./replit_integrations/object_storage";
+import { saveBufferToBucket } from "./object-uploads-store";
 
-const uploadDir = path.join(process.cwd(), "public", "assets");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// All uploads (image assets + resource files for both teachers and students)
+// stream straight into Object Storage via memory multer — nothing is written
+// to local disk anymore. Keys are written under `public/assets/` and
+// `public/resources/` to match the bucket layout the legacy uploadToCloud /
+// downloadFromCloud helpers already use, so AI grading code that does a disk
+// check then falls back to downloadFromCloud keeps working unchanged.
+// The disk-resident `public/resources/` folder remains as a read-only fallback
+// for the 29 git-tracked legacy resources (handled by the shared
+// `/resources/:name` handler in server/index.ts).
+const fileStorage = multer.memoryStorage();
 
-const fileStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + "_" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "_" + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ 
+const upload = multer({
   storage: fileStorage,
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
@@ -44,21 +41,8 @@ const upload = multer({
   }
 });
 
-const resourceUploadDir = path.join(process.cwd(), "public", "resources");
-if (!fs.existsSync(resourceUploadDir)) {
-  fs.mkdirSync(resourceUploadDir, { recursive: true });
-}
-
-const resourceStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, resourceUploadDir),
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + "_" + Math.round(Math.random() * 1e9);
-    cb(null, "resource_" + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
 const resourceUpload = multer({
-  storage: resourceStorage,
+  storage: fileStorage,
   limits: { fileSize: 20 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     const allowedExts = /\.(accdb|mdb|html|htm|css|js|sql|txt|pdf|zip|py|vb|csv|json|xml|jpg|jpeg|png|gif|webp)$/i;
@@ -208,21 +192,12 @@ function hashGradingRequest(studentAnswer: string, markingScheme: string[], maxM
 export async function registerRoutes(
   app: Express
 ): Promise<void> {
-  // Serve static files from public directory
-  app.use("/assets", (await import("express")).default.static(uploadDir));
-  app.use("/resources", (await import("express")).default.static(resourceUploadDir, {
-    setHeaders: (res, filePath) => {
-      const ext = path.extname(filePath).toLowerCase();
-      const forcedMimeTypes: Record<string, string> = {
-        ".txt": "text/plain", ".sql": "text/plain", ".py": "text/plain",
-        ".vb": "text/plain", ".css": "text/css", ".js": "application/javascript",
-        ".csv": "text/csv", ".json": "application/json", ".xml": "application/xml",
-      };
-      if (forcedMimeTypes[ext]) {
-        res.setHeader("Content-Type", forcedMimeTypes[ext]);
-      }
-    },
-  }));
+  // /assets/<name> and /resources/<name> are now served by single shared
+  // handlers registered in server/index.ts that stream from Object Storage
+  // with disk fallback to attached_assets/, public/assets/ and
+  // public/resources/. We deliberately do NOT mount any express.static here
+  // so the URL surface stays unambiguous across N5, Higher Revision and the
+  // static site.
 
   app.get("/api/download-resource", async (req, res) => {
     const url = req.query.url as string;
@@ -309,23 +284,37 @@ export async function registerRoutes(
     return res.status(404).json({ error: "File not found" });
   });
 
-  // File upload endpoint (teacher-only)
+  // File upload endpoint (teacher-only) — bytes go straight to Object Storage
+  // at public/assets/<key>; the returned URL keeps the legacy /assets/<key>
+  // shape so existing DB references and front-end code stay unchanged.
   app.post("/api/upload", requireAuth, upload.single("file"), async (req, res) => {
-    if (!req.file) {
+    if (!req.file || !req.file.buffer) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    await uploadToCloud(req.file.path, `assets/${req.file.filename}`);
-    const url = `/assets/${req.file.filename}`;
-    res.json({ url, filename: req.file.filename });
+    try {
+      const { key } = await saveBufferToBucket(
+        "public/assets/", req.file.buffer, req.file.originalname, req.file.mimetype,
+      );
+      res.json({ url: `/assets/${key}`, filename: key });
+    } catch (err) {
+      console.error("[revision] /api/upload failed:", err);
+      res.status(500).json({ message: "Upload failed" });
+    }
   });
 
   app.post("/api/upload-resource", requireAuth, resourceUpload.single("file"), async (req, res) => {
-    if (!req.file) {
+    if (!req.file || !req.file.buffer) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    await uploadToCloud(req.file.path, `resources/${req.file.filename}`);
-    const url = `/resources/${req.file.filename}`;
-    res.json({ url, originalName: req.file.originalname });
+    try {
+      const { key } = await saveBufferToBucket(
+        "public/resources/", req.file.buffer, req.file.originalname, req.file.mimetype,
+      );
+      res.json({ url: `/resources/${key}`, originalName: req.file.originalname });
+    } catch (err) {
+      console.error("[revision] /api/upload-resource failed:", err);
+      res.status(500).json({ message: "Upload failed" });
+    }
   });
 
   const studentUploadLimiter = rateLimit({
@@ -335,16 +324,8 @@ export async function registerRoutes(
     validate: false,
   });
 
-  const studentUploadStorage = multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, resourceUploadDir),
-    filename: (_req, file, cb) => {
-      const uniqueSuffix = Date.now() + "_" + Math.round(Math.random() * 1e9);
-      cb(null, "student_" + uniqueSuffix + path.extname(file.originalname));
-    }
-  });
-
   const studentUpload = multer({
-    storage: studentUploadStorage,
+    storage: fileStorage,
     limits: { fileSize: 10 * 1024 * 1024 },
     fileFilter: (_req, file, cb) => {
       const allowedExts = /\.(jpg|jpeg|png|gif|webp|pdf|txt|csv|sql|py|vb|html|htm|css|js|json|xml|accdb|mdb|zip)$/i;
@@ -357,12 +338,18 @@ export async function registerRoutes(
   });
 
   app.post("/api/upload-student-file", studentUploadLimiter, studentUpload.single("file"), async (req, res) => {
-    if (!req.file) {
+    if (!req.file || !req.file.buffer) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    await uploadToCloud(req.file.path, `resources/${req.file.filename}`);
-    const url = `/resources/${req.file.filename}`;
-    res.json({ url, originalName: req.file.originalname });
+    try {
+      const { key } = await saveBufferToBucket(
+        "public/resources/", req.file.buffer, req.file.originalname, req.file.mimetype,
+      );
+      res.json({ url: `/resources/${key}`, originalName: req.file.originalname });
+    } catch (err) {
+      console.error("[revision] /api/upload-student-file failed:", err);
+      res.status(500).json({ message: "Upload failed" });
+    }
   });
 
   // Teacher login endpoint - accepts username OR email with password
@@ -1641,8 +1628,10 @@ ${studentAnswer}`;
       if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
       }
-      await uploadToCloud(req.file.path, `resources/${req.file.filename}`);
-      const fileUrl = `/resources/${req.file.filename}`;
+      const { key } = await saveBufferToBucket(
+        "public/resources/", req.file.buffer, req.file.originalname, req.file.mimetype,
+      );
+      const fileUrl = `/resources/${key}`;
       const resource = await storage.createAssignmentResource({
         partId: req.params.partId,
         fileName: req.file.originalname,

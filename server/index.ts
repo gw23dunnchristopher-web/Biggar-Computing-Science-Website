@@ -1,8 +1,16 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import { promises as fsp } from 'fs';
 import crypto from 'crypto';
 import { db, pool, hasDatabase } from './db';
+import {
+  streamObjectOrFallback,
+  readBucketObjectAsString,
+  writeBucketObjectFromString,
+  deleteBucketObject,
+  listBucketKeys,
+} from './object-uploads-store';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { registerRoutes as registerRevisionRoutes } from './revision-routes';
 import { registerN5Routes, n5Sessions, n5AddSession } from './n5-routes';
@@ -288,10 +296,38 @@ Use QUESTION_2_START/END for question 2, etc.
 });
 
 // ---------------------------------------------------------------------------
-// Sandbox API — named collections of starter files for the code runner
+// Sandbox API — named collections of starter files for the code runner.
+// Sandboxes live in Object Storage at the `sandboxes/` prefix so teacher
+// edits and brand-new sandboxes survive every container redeploy. The
+// `starters/` directory in git is treated as a one-time seed source: on
+// startup, any starter JSON that does NOT yet exist in the bucket is copied
+// over. Starters that already exist in the bucket are left alone, so a
+// teacher's edited copy is never overwritten by the disk template.
 // ---------------------------------------------------------------------------
 const STARTERS_DIR = path.join(process.cwd(), 'starters');
-if (!fs.existsSync(STARTERS_DIR)) fs.mkdirSync(STARTERS_DIR, { recursive: true });
+const SANDBOX_PREFIX = 'sandboxes/';
+
+async function seedSandboxesFromDiskIfMissing() {
+  try {
+    const dirEntries = await fsp.readdir(STARTERS_DIR).catch(() => [] as string[]);
+    const jsonFiles = dirEntries.filter((f) => f.endsWith('.json'));
+    if (jsonFiles.length === 0) return;
+    let seeded = 0;
+    for (const f of jsonFiles) {
+      const key = SANDBOX_PREFIX + f;
+      const existing = await readBucketObjectAsString(key);
+      if (existing != null) continue;
+      const body = await fsp.readFile(path.join(STARTERS_DIR, f), 'utf8');
+      await writeBucketObjectFromString(key, body);
+      seeded += 1;
+    }
+    if (seeded > 0) console.log(`[sandboxes] seeded ${seeded} starter sandbox(es) from disk into Object Storage`);
+  } catch (err) {
+    console.error('[sandboxes] seed-from-disk failed:', err);
+  }
+}
+// Fire-and-forget; failure here is logged but must never block startup.
+seedSandboxesFromDiskIfMissing();
 
 const TEACHER_PASSWORD = process.env.TEACHER_PASSWORD || 'bhs-computing';
 
@@ -425,31 +461,34 @@ function safeName(raw: string): string {
   return raw.replace(/[^a-z0-9_-]/gi, '').substring(0, 80);
 }
 
-app.get('/api/sandboxes', requireTeacher, (_req, res) => {
+app.get('/api/sandboxes', requireTeacher, async (_req, res) => {
   try {
-    const entries = fs.readdirSync(STARTERS_DIR)
-      .filter(f => f.endsWith('.json'))
-      .map(f => {
-        const name = f.replace('.json', '');
-        try {
-          const data = JSON.parse(fs.readFileSync(path.join(STARTERS_DIR, f), 'utf8'));
-          return { name, type: data.type || 'html', title: data.title || name };
-        } catch { return { name, type: 'html', title: name }; }
-      });
+    const keys = await listBucketKeys(SANDBOX_PREFIX);
+    const jsonKeys = keys.filter((k) => k.endsWith('.json'));
+    const entries = await Promise.all(jsonKeys.map(async (k) => {
+      const name = k.slice(SANDBOX_PREFIX.length, -'.json'.length);
+      const body = await readBucketObjectAsString(k);
+      try {
+        const data = JSON.parse(body || '{}');
+        return { name, type: data.type || 'html', title: data.title || name };
+      } catch { return { name, type: 'html', title: name }; }
+    }));
     res.json(entries);
   } catch (err) {
+    console.error('[sandboxes] list failed:', err);
     res.status(500).json({ error: 'Could not list sandboxes' });
   }
 });
 
-app.get('/api/sandboxes/:name', (req, res) => {
+app.get('/api/sandboxes/:name', async (req, res) => {
   const name = safeName(req.params.name);
-  const filePath = path.join(STARTERS_DIR, name + '.json');
-  if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Sandbox not found' });
+  if (!name) return res.status(404).json({ error: 'Sandbox not found' });
   try {
-    const data = fs.readFileSync(filePath, 'utf8');
+    const data = await readBucketObjectAsString(`${SANDBOX_PREFIX}${name}.json`);
+    if (data == null) return res.status(404).json({ error: 'Sandbox not found' });
     res.type('application/json').send(data);
-  } catch {
+  } catch (err) {
+    console.error('[sandboxes] read failed for', name, err);
     res.status(500).json({ error: 'Could not read sandbox' });
   }
 });
@@ -540,10 +579,9 @@ app.post('/api/teacher-update', async (req, res) => {
   }
 });
 
-app.post('/api/sandboxes/:name', requireTeacher, (req, res) => {
+app.post('/api/sandboxes/:name', requireTeacher, async (req, res) => {
   const name = safeName(req.params.name);
   if (!name) return res.status(400).json({ error: 'Invalid sandbox name' });
-  const filePath = path.join(STARTERS_DIR, name + '.json');
   try {
     const sbType = req.body.type || 'html';
     const payload: Record<string, unknown> = { type: sbType, title: req.body.title || name };
@@ -552,18 +590,63 @@ app.post('/api/sandboxes/:name', requireTeacher, (req, res) => {
     } else {
       payload.files = req.body.files || {};
     }
-    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf8');
+    await writeBucketObjectFromString(`${SANDBOX_PREFIX}${name}.json`, JSON.stringify(payload, null, 2));
     res.json({ ok: true, name });
-  } catch {
+  } catch (err) {
+    console.error('[sandboxes] save failed for', name, err);
     res.status(500).json({ error: 'Could not save sandbox' });
   }
 });
 
-app.delete('/api/sandboxes/:name', requireTeacher, (req, res) => {
+app.delete('/api/sandboxes/:name', requireTeacher, async (req, res) => {
   const name = safeName(req.params.name);
-  const filePath = path.join(STARTERS_DIR, name + '.json');
-  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  if (!name) return res.json({ ok: true });
+  try {
+    await deleteBucketObject(`${SANDBOX_PREFIX}${name}.json`);
+  } catch (err) {
+    console.error('[sandboxes] delete failed for', name, err);
+  }
   res.json({ ok: true });
+});
+
+// ---------------------------------------------------------------------------
+// Shared /assets/<name> and /resources/<name> handlers backed by Object
+// Storage. These replace the per-route express.static mounts that used to live
+// inside registerRevisionRoutes / registerN5Routes (which would have raced
+// each other and only served disk files anyway). Read order is bucket first,
+// then a chain of disk fallbacks for git-tracked legacy files (so the 29
+// checked-in resources and the attached_assets references still resolve
+// without re-uploading anything).
+// ---------------------------------------------------------------------------
+const RESOURCES_FORCED_MIME: Record<string, string> = {
+  '.txt': 'text/plain', '.sql': 'text/plain', '.py': 'text/plain',
+  '.vb': 'text/plain', '.css': 'text/css', '.js': 'application/javascript',
+  '.csv': 'text/csv', '.json': 'application/json', '.xml': 'application/xml',
+};
+
+app.get('/assets/:name', async (req, res) => {
+  const name = req.params.name;
+  await streamObjectOrFallback(
+    'public/assets/',
+    name,
+    res,
+    [
+      path.join(process.cwd(), 'attached_assets', name),
+      path.join(process.cwd(), 'public', 'assets', name),
+    ],
+  );
+});
+
+app.get('/resources/:name', async (req, res) => {
+  const name = req.params.name;
+  const ext = path.extname(name).toLowerCase();
+  await streamObjectOrFallback(
+    'public/resources/',
+    name,
+    res,
+    [path.join(process.cwd(), 'public', 'resources', name)],
+    { forcedContentType: RESOURCES_FORCED_MIME[ext] },
+  );
 });
 
 const publicRoot = path.resolve('.');

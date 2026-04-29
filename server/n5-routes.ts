@@ -12,22 +12,13 @@ import path from "path";
 import fs from "fs";
 import { sendPasswordResetEmail } from "./email";
 import mammoth from "mammoth";
+import { saveBufferToBucket, readBucketObjectAsBuffer } from "./object-uploads-store";
 
-const uploadDir = path.join(process.cwd(), "public", "assets");
-const attachedAssetsDir = path.join(process.cwd(), "attached_assets");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const fileStorage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + "_" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "_" + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Uploads land in Object Storage at the `public/assets/` prefix so the bytes
+// survive every container redeploy. The disk-resident `public/assets/` and
+// `attached_assets/` folders are still consulted as read-only fallbacks for
+// legacy references (see the shared `/assets/:name` handler in server/index.ts).
+const fileStorage = multer.memoryStorage();
 
 const upload = multer({ 
   storage: fileStorage,
@@ -145,19 +136,28 @@ const CACHE_TTL = 24 * 60 * 60 * 1000;
 
 const CODE_FILE_EXTENSIONS = new Set([".py", ".css", ".html", ".htm", ".js", ".sql", ".txt", ".vb", ".json", ".xml", ".csv"]);
 
-function readExampleFileContents(exampleFiles: Array<{ url: string; originalName: string }>): string {
+async function readExampleFileContents(exampleFiles: Array<{ url: string; originalName: string }>): Promise<string> {
   if (!exampleFiles || exampleFiles.length === 0) return "";
   let content = "\n\n--- TEACHER'S EXAMPLE FILES ---\n";
   content += "The teacher has provided the following example files showing what a correct answer should contain. Compare the student's work against these:\n\n";
   for (const file of exampleFiles) {
     try {
       const relativePath = file.url.replace(/^\/assets\//, "");
-      let filePath = path.join(process.cwd(), "public", "assets", relativePath);
-      if (!fs.existsSync(filePath)) {
-        filePath = path.join(process.cwd(), "attached_assets", relativePath);
+      // Read order matches the shared /assets handler: bucket first, then the
+      // git-tracked disk fallbacks (attached_assets, public/assets).
+      let fileContent: string | null = null;
+      const bucketBytes = await readBucketObjectAsBuffer(`public/assets/${relativePath}`);
+      if (bucketBytes) {
+        fileContent = bucketBytes.toString("utf-8");
+      } else {
+        for (const candidate of [
+          path.join(process.cwd(), "attached_assets", relativePath),
+          path.join(process.cwd(), "public", "assets", relativePath),
+        ]) {
+          if (fs.existsSync(candidate)) { fileContent = fs.readFileSync(candidate, "utf-8"); break; }
+        }
       }
-      if (fs.existsSync(filePath)) {
-        const fileContent = fs.readFileSync(filePath, "utf-8");
+      if (fileContent != null) {
         content += `=== File: ${file.originalName} ===\n`;
         content += fileContent;
         content += `\n=== End of ${file.originalName} ===\n\n`;
@@ -209,10 +209,11 @@ export async function registerN5Routes(
   /* Restore teacher sessions that survived across restarts */
   restoreN5SessionsFromDb();
 
-  // Serve static files from public/assets directory, with fallback to attached_assets
-  const expressStatic = (await import("express")).default.static;
-  app.use("/assets", expressStatic(uploadDir));
-  app.use("/assets", expressStatic(attachedAssetsDir));
+  // /assets/<name> is now served by a single shared handler registered in
+  // server/index.ts that streams from Object Storage with disk fallback to
+  // attached_assets/ and public/assets/. We deliberately do NOT mount any
+  // express.static here so the URL surface stays unambiguous across N5,
+  // Higher Revision and the static site.
 
   // Text-to-Speech endpoint using Google Cloud TTS
   app.post("/api/tts", async (req, res) => {
@@ -274,46 +275,47 @@ export async function registerN5Routes(
     }
   });
 
-  // File upload endpoint
-  app.post("/api/upload", upload.single("file"), (req, res) => {
-    if (!req.file) {
+  // File upload endpoint — bytes go straight to Object Storage so they survive
+  // a redeploy. The returned URL still looks like /assets/<key> so existing DB
+  // references and front-end code keep working unchanged.
+  app.post("/api/upload", upload.single("file"), async (req, res) => {
+    if (!req.file || !req.file.buffer) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    const url = `/assets/${req.file.filename}`;
-    res.json({ url, filename: req.file.filename, originalName: req.file.originalname });
+    try {
+      const { key } = await saveBufferToBucket(
+        "public/assets/",
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype,
+      );
+      res.json({ url: `/assets/${key}`, filename: key, originalName: req.file.originalname });
+    } catch (err) {
+      console.error("[n5] /api/upload failed:", err);
+      res.status(500).json({ message: "Upload failed" });
+    }
   });
 
-  // Word document upload and parse endpoint for AI guidance
+  // Word document upload and parse endpoint for AI guidance — parses straight
+  // from the buffer in memory; nothing is persisted, no temp file needed.
   app.post("/api/upload-word-document", upload.single("file"), async (req, res) => {
-    if (!req.file) {
+    if (!req.file || !req.file.buffer) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
     const ext = path.extname(req.file.originalname).toLowerCase();
     if (ext !== ".docx" && ext !== ".doc") {
-      // Clean up the uploaded file
-      fs.unlinkSync(req.file.path);
       return res.status(400).json({ message: "Only Word documents (.docx, .doc) are allowed" });
     }
 
     try {
-      // Parse the Word document using mammoth
-      const result = await mammoth.extractRawText({ path: req.file.path });
-      const extractedText = result.value;
-
-      // Clean up the uploaded file after extraction
-      fs.unlinkSync(req.file.path);
-
-      res.json({ 
-        text: extractedText, 
+      const result = await mammoth.extractRawText({ buffer: req.file.buffer });
+      res.json({
+        text: result.value,
         filename: req.file.originalname,
-        messages: result.messages 
+        messages: result.messages,
       });
     } catch (error) {
-      // Clean up the uploaded file on error
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
       console.error("Error parsing Word document:", error);
       res.status(500).json({ message: "Failed to parse Word document" });
     }
@@ -1900,7 +1902,7 @@ SQL QUESTIONS - BE STRICT:
 
 Return JSON: {"marks": number, "feedback": "string", "suggestions": "string (empty if full marks)"}`;
 
-      const exampleFilesContent = readExampleFileContents(markingGuidanceData?.exampleFiles || []);
+      const exampleFilesContent = await readExampleFileContents(markingGuidanceData?.exampleFiles || []);
 
       const userPrompt = `Question: ${questionContext || "N/A"}
 
@@ -3427,7 +3429,7 @@ ${studentAnswer}`;
       }
     }
 
-    const exampleFilesContent = readExampleFileContents(opts.markingGuidanceData?.exampleFiles || []);
+    const exampleFilesContent = await readExampleFileContents(opts.markingGuidanceData?.exampleFiles || []);
     if (exampleFilesContent) {
       fullGuidance += exampleFilesContent;
     }
