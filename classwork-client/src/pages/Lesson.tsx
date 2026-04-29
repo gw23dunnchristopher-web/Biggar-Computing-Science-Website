@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
 import Modal, { modalPrimaryBtn, modalSecondaryBtn } from '@/components/Modal';
@@ -123,6 +123,12 @@ export default function Lesson() {
   const [err, setErr] = useState<string | null>(null);
   const [previewAsStudent, setPreviewAsStudent] = useState(false);
 
+  // Drag-and-drop reordering state (teacher mode only).
+  // We use a ref for the source so it doesn't trigger re-renders mid-drag,
+  // and useState for the hover target so the drop-zone indicator updates.
+  const dragSrcIdRef = useRef<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+
   // Edit-notes modal: opens directly from the in-lesson "My Jotter" button so
   // pupils don't have to leave the lesson to jot something into their unit
   // notes. Pupils edit their own per-unit notes; teachers (browsing or
@@ -236,6 +242,55 @@ export default function Lesson() {
   }
 
   useEffect(() => { refresh(); }, [lessonId]);
+
+  // Reorders questions within one section (main or extension) by computing
+  // new order_index values from the drag-and-drop result and PATCHing the
+  // server. The local questions state is updated optimistically so the UI
+  // doesn't flicker, with a refresh() fallback on network error.
+  type DragItem = { type: 'standalone'; q: Question } | { type: 'group'; passage: Question; children: Question[] };
+  async function handleReorder(items: DragItem[], srcId: string, destId: string) {
+    const getId = (it: DragItem) => it.type === 'standalone' ? it.q.id : it.passage.id;
+    const srcIdx = items.findIndex((it) => getId(it) === srcId);
+    const destIdx = items.findIndex((it) => getId(it) === destId);
+    if (srcIdx === -1 || destIdx === -1 || srcIdx === destIdx) return;
+
+    const newItems = [...items];
+    const [moved] = newItems.splice(srcIdx, 1);
+    // When dragging forward the splice shifts everything left by one,
+    // so the insertion index is already correct after the splice.
+    const insertAt = srcIdx < destIdx ? destIdx - 1 : destIdx;
+    newItems.splice(insertAt, 0, moved);
+
+    // Flatten to an ordered list of question IDs (passage children immediately
+    // follow their passage so they stay grouped).
+    const orderedIds: string[] = [];
+    for (const it of newItems) {
+      if (it.type === 'standalone') {
+        orderedIds.push(it.q.id);
+      } else {
+        orderedIds.push(it.passage.id);
+        it.children.forEach((c) => orderedIds.push(c.id));
+      }
+    }
+
+    // Optimistic update so the card moves instantly.
+    const idToOrder = new Map(orderedIds.map((id, i) => [id, i * 10]));
+    setQuestions((prev) =>
+      [...prev]
+        .map((q) => idToOrder.has(q.id) ? { ...q, order_index: idToOrder.get(q.id)! } : q)
+        .sort((a, b) => a.order_index - b.order_index || a.created_at.localeCompare(b.created_at))
+    );
+
+    try {
+      await api(`/api/classwork/lessons/${lessonId}/questions/reorder`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: orderedIds }),
+      });
+    } catch {
+      refresh();
+    }
+  }
 
   // ─── Mark questions "viewed" when they scroll into the pupil's
   // viewport ────────────────────────────────────────────────────────────
@@ -402,6 +457,16 @@ export default function Lesson() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700 }}>
+                  {role === 'teacher' && !previewAsStudent && (
+                    <span
+                      title="Drag to reorder"
+                      style={{
+                        cursor: 'grab', color: 'var(--cw-muted)', fontSize: 16,
+                        lineHeight: 1, userSelect: 'none', opacity: 0.55,
+                        letterSpacing: -1,
+                      }}
+                    >⠿</span>
+                  )}
                   <span>{label} · {TYPE_LABELS[q.question_type] || q.question_type}</span>
                   {isExt && (
                     <span style={{
@@ -601,52 +666,104 @@ export default function Lesson() {
           let qIdx = 0;
           let pIdx = 0;
           const totalPassages = items.filter((it) => it.type === 'group').length;
+          const isTeacherDrag = role === 'teacher' && !previewAsStudent;
+
           return items.map((it) => {
+            const itemId = it.type === 'standalone' ? it.q.id : it.passage.id;
+            const isDragOver = dragOverId === itemId;
+
+            let content: React.ReactNode;
             if (it.type === 'standalone') {
               if (it.q.question_type === 'info_only') {
-                return renderQuestionCard(it.q, 'Note', isExt);
-              }
-              if (it.q.question_type === 'text_only') {
+                content = renderQuestionCard(it.q, 'Note', isExt);
+              } else if (it.q.question_type === 'text_only') {
                 // Use a "Task" label (instead of "Q1, Q2…") so it's clearly
                 // an offline activity, not a markable question. Counter is
                 // not bumped — text_only is ignored in analytics.
-                return renderQuestionCard(it.q, 'Task', isExt);
+                content = renderQuestionCard(it.q, 'Task', isExt);
+              } else if (it.q.question_type === 'section_header') {
+                content = renderSectionHeader(it.q);
+              } else {
+                qIdx++;
+                content = renderQuestionCard(it.q, `${prefix}${qIdx}`, isExt);
               }
-              if (it.q.question_type === 'section_header') {
-                return renderSectionHeader(it.q);
-              }
-              qIdx++;
-              return renderQuestionCard(it.q, `${prefix}${qIdx}`, isExt);
+            } else {
+              pIdx++;
+              const passageLabel = totalPassages > 1 ? `Passage ${pIdx}` : 'Passage';
+              // Two-column sticky layout on desktop; stacks on narrow screens via
+              // the global @media block at the bottom of this file. Passage stays
+              // visible on the left while pupils scroll the questions on the right.
+              content = (
+                <div
+                  className="cw-passage-group"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(280px, 38%) 1fr',
+                    gap: 16,
+                    alignItems: 'start',
+                  }}
+                >
+                  <div style={{ position: 'sticky', top: 16 }}>
+                    {renderPassagePanel(it.passage, passageLabel)}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {it.children.length === 0 ? (
+                      <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0 }}>
+                        No tasks are attached to this passage yet.
+                      </p>
+                    ) : it.children.map((c) => {
+                      qIdx++;
+                      return renderQuestionCard(c, `${prefix}${qIdx}`, isExt);
+                    })}
+                  </div>
+                </div>
+              );
             }
-            pIdx++;
-            const passageLabel = totalPassages > 1 ? `Passage ${pIdx}` : 'Passage';
-            // Two-column sticky layout on desktop; stacks on narrow screens via
-            // the global @media block at the bottom of this file. Passage stays
-            // visible on the left while pupils scroll the questions on the right.
+
+            // In teacher mode wrap each item so it can be dragged to a new position.
+            // Students see a plain fragment with no extra DOM node.
+            if (!isTeacherDrag) return <React.Fragment key={itemId}>{content}</React.Fragment>;
+
             return (
               <div
-                key={it.passage.id}
-                className="cw-passage-group"
+                key={itemId}
+                draggable
+                onDragStart={(e) => {
+                  dragSrcIdRef.current = itemId;
+                  e.dataTransfer.effectAllowed = 'move';
+                }}
+                onDragOver={(e) => {
+                  if (!dragSrcIdRef.current || dragSrcIdRef.current === itemId) return;
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                  if (dragOverId !== itemId) setDragOverId(itemId);
+                }}
+                onDragLeave={(e) => {
+                  // Only clear when the pointer actually leaves this wrapper,
+                  // not when it moves into a child element.
+                  if ((e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) return;
+                  if (dragOverId === itemId) setDragOverId(null);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const src = dragSrcIdRef.current;
+                  dragSrcIdRef.current = null;
+                  setDragOverId(null);
+                  if (!src || src === itemId) return;
+                  handleReorder(items, src, itemId);
+                }}
+                onDragEnd={() => {
+                  dragSrcIdRef.current = null;
+                  setDragOverId(null);
+                }}
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'minmax(280px, 38%) 1fr',
-                  gap: 16,
-                  alignItems: 'start',
+                  borderRadius: 12,
+                  outline: isDragOver ? '2px dashed var(--cw-accent, #4f46e5)' : 'none',
+                  outlineOffset: 3,
+                  transition: 'outline 80ms',
                 }}
               >
-                <div style={{ position: 'sticky', top: 16 }}>
-                  {renderPassagePanel(it.passage, passageLabel)}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {it.children.length === 0 ? (
-                    <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0 }}>
-                      No tasks are attached to this passage yet.
-                    </p>
-                  ) : it.children.map((c) => {
-                    qIdx++;
-                    return renderQuestionCard(c, `${prefix}${qIdx}`, isExt);
-                  })}
-                </div>
+                {content}
               </div>
             );
           });

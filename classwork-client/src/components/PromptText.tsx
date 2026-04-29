@@ -404,9 +404,10 @@ export default function PromptText({ text }: { text: string }) {
               margin: '6px 0 8px',
               paddingLeft: 22,
               lineHeight: 1.45,
+              listStyleType: 'disc',
             }}>
               {b.items.map((it, j) => (
-                <li key={j} style={{ marginBottom: 2 }}>
+                <li key={j} style={{ marginBottom: 4, display: 'list-item' }}>
                   {renderInline(it, ctx)}
                 </li>
               ))}

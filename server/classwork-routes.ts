@@ -31,6 +31,7 @@ import {
   createQuestion,
   updateQuestion,
   deleteQuestion,
+  reorderQuestions,
   createSubmission,
   listMySubmissionsForLesson,
   listSubmissionsForLesson,
@@ -834,6 +835,20 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] updateQuestion error:', err);
       res.status(500).json({ error: 'Failed to update question' });
+    }
+  });
+
+  app.patch('/api/classwork/lessons/:lessonId/questions/reorder', requireTeacher, async (req, res) => {
+    try {
+      const { ids } = req.body || {};
+      if (!Array.isArray(ids) || ids.some((x: any) => typeof x !== 'string')) {
+        return res.status(400).json({ error: 'ids must be an array of strings' });
+      }
+      await reorderQuestions(ids);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('[classwork] reorderQuestions error:', err);
+      res.status(500).json({ error: 'Failed to reorder questions' });
     }
   });
 

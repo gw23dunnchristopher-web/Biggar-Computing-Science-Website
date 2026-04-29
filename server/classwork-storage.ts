@@ -795,6 +795,19 @@ export async function getQuestion(id: string) {
   return r.rows[0] || null;
 }
 
+export async function reorderQuestions(orderedIds: string[]) {
+  await ensureClassworkSchema();
+  if (!orderedIds.length) return;
+  await Promise.all(
+    orderedIds.map((id, idx) =>
+      pool.query(
+        `UPDATE bhs_classwork_questions SET order_index = $1 WHERE id = $2`,
+        [idx * 10, id]
+      )
+    )
+  );
+}
+
 export interface CreateQuestionInput {
   lessonId: string;
   course: ClassworkCourse;
