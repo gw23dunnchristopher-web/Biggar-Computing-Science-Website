@@ -250,7 +250,7 @@ export default function Lesson() {
               type="button"
               onClick={() => setPreviewAsStudent((v) => !v)}
               style={{
-                background: previewAsStudent ? 'var(--cw-accent)' : '#f1f5f9',
+                background: previewAsStudent ? 'var(--cw-accent)' : 'var(--cw-surface-muted)',
                 color: previewAsStudent ? '#fff' : 'var(--cw-ink)',
                 border: '1px solid ' + (previewAsStudent ? 'var(--cw-accent)' : 'var(--cw-border)'),
                 padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
@@ -378,7 +378,7 @@ export default function Lesson() {
                     style={{
                       display: 'inline-flex', alignItems: 'center', gap: 6,
                       padding: '6px 12px', borderRadius: 6,
-                      background: '#fff', border: '1px solid #bfdbfe',
+                      background: 'var(--cw-surface)', border: '1px solid #bfdbfe',
                       color: '#1e40af', fontWeight: 600, textDecoration: 'none',
                     }}
                   >
@@ -412,7 +412,7 @@ export default function Lesson() {
               {isTextOnly && (
                 <div style={{
                   marginTop: 12, padding: '12px 14px', borderRadius: 8,
-                  background: '#fff', border: '1px dashed #67e8f9',
+                  background: 'var(--cw-surface)', border: '1px dashed #67e8f9',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   gap: 12, flexWrap: 'wrap',
                 }}>
@@ -504,11 +504,11 @@ export default function Lesson() {
           return (
             <div key={s.id} style={{
               marginTop: 18, padding: '10px 14px', borderRadius: 8,
-              background: 'linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%)',
-              border: '1px solid #cbd5e1', borderLeft: '4px solid var(--cw-accent)',
+              background: 'linear-gradient(180deg, var(--cw-surface-muted) 0%, var(--cw-border) 100%)',
+              border: '1px solid var(--cw-border-strong)', borderLeft: '4px solid var(--cw-accent)',
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap',
             }}>
-              <div style={{ fontWeight: 700, fontSize: 16, color: '#0f172a' }}>{title}</div>
+              <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--cw-ink)' }}>{title}</div>
               {role === 'teacher' && !previewAsStudent && (
                 <EditQuestionButton
                   question={s}
@@ -1065,7 +1065,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
         }) :
     !!text.trim();
   return (
-    <div style={{ marginTop: 12, padding: 12, border: '1px dashed var(--cw-border)', borderRadius: 8, background: '#fafbfd' }}>
+    <div style={{ marginTop: 12, padding: 12, border: '1px dashed var(--cw-border)', borderRadius: 8, background: 'var(--cw-surface-soft)' }}>
       {t === 'multiple_choice' && Array.isArray(question.options) && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {question.options.map((opt: any, i: number) => (
@@ -1114,7 +1114,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
                   style={{
                     display: 'inline-block', minWidth: 90, margin: '0 4px',
                     padding: '4px 8px', borderRadius: 6,
-                    border: '2px solid var(--cw-accent)', background: '#fff',
+                    border: '2px solid var(--cw-accent)', background: 'var(--cw-surface)',
                     fontSize: 14,
                   }}
                 />
@@ -1165,7 +1165,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
                     {Array.isArray(row) && row.map((cell: any, c: number) => (
                       <td key={c} style={{
                         border: '1px solid var(--cw-border)', padding: '6px 8px',
-                        background: cell?.blank ? '#fffbeb' : '#fff',
+                        background: cell?.blank ? '#fffbeb' : 'var(--cw-surface)',
                       }}>
                         {cell?.blank ? (
                           <input
@@ -1174,7 +1174,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
                             onChange={(e) => setCellAnswers({ ...cellAnswers, [`${r},${c}`]: e.target.value })}
                             style={{
                               width: '100%', padding: '4px 6px', borderRadius: 4,
-                              border: '2px solid var(--cw-accent)', background: '#fff', fontSize: 14,
+                              border: '2px solid var(--cw-accent)', background: 'var(--cw-surface)', fontSize: 14,
                             }}
                           />
                         ) : (
@@ -1266,7 +1266,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
             <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>Loading your editor…</div>
           ) : (
             <>
-              <div style={{ width: '100%', height: 560, border: '1px solid var(--cw-border)', borderRadius: 8, overflow: 'hidden', background: '#fff' }}>
+              <div style={{ width: '100%', height: 560, border: '1px solid var(--cw-border)', borderRadius: 8, overflow: 'hidden', background: 'var(--cw-surface)' }}>
                 <iframe
                   src={`${editorHref(selectedProjectId)}&embed=1`}
                   title={`${codeProjectKind === 'python' ? 'Python' : 'HTML/CSS'} editor`}
@@ -1564,9 +1564,9 @@ function CrosswordPupilGrid({ config, cellAnswers, setCellAnswers }: {
                 return <div key={c} style={{ width: 32, height: 32, background: '#1e293b' }} />;
               }
               return (
-                <div key={c} style={{ position: 'relative', width: 32, height: 32, background: '#fff', borderRight: '1px solid #cbd5e1', borderBottom: '1px solid #cbd5e1' }}>
+                <div key={c} style={{ position: 'relative', width: 32, height: 32, background: 'var(--cw-surface)', borderRight: '1px solid var(--cw-border-strong)', borderBottom: '1px solid var(--cw-border-strong)' }}>
                   {starts[key] != null && (
-                    <span style={{ position: 'absolute', top: 1, left: 2, fontSize: 9, color: '#64748b', fontWeight: 700, lineHeight: 1, pointerEvents: 'none' }}>
+                    <span style={{ position: 'absolute', top: 1, left: 2, fontSize: 9, color: 'var(--cw-muted)', fontWeight: 700, lineHeight: 1, pointerEvents: 'none' }}>
                       {starts[key]}
                     </span>
                   )}
@@ -1597,7 +1597,7 @@ function CrosswordPupilGrid({ config, cellAnswers, setCellAnswers }: {
           if (list.length === 0) return <div key={dir} />;
           return (
             <div key={dir}>
-              <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4, textTransform: 'capitalize', color: '#1e293b' }}>{dir}</div>
+              <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4, textTransform: 'capitalize', color: 'var(--cw-ink)' }}>{dir}</div>
               {list.map((e, i) => (
                 <div key={`${e.number}-${dir}-${i}`} style={{ fontSize: 13, marginBottom: 2 }}>
                   <strong>{e.number}.</strong> {e.clue || <em style={{ color: 'var(--cw-muted)' }}>(no clue)</em>}
@@ -1675,7 +1675,7 @@ function WordSearchPupilGrid({ config, cellAnswers, setCellAnswers }: {
   return (
     <div>
       <div
-        style={{ display: 'inline-block', userSelect: 'none', border: '1px solid #cbd5e1', background: '#fff' }}
+        style={{ display: 'inline-block', userSelect: 'none', border: '1px solid var(--cw-border-strong)', background: 'var(--cw-surface)' }}
         onMouseLeave={() => { if (dragging) commit(); }}
       >
         {grid.map((row, r) => (
@@ -1694,8 +1694,8 @@ function WordSearchPupilGrid({ config, cellAnswers, setCellAnswers }: {
                   style={{
                     width: 28, height: 28, lineHeight: '28px', textAlign: 'center',
                     fontSize: 15, fontWeight: 600, fontFamily: 'JetBrains Mono, monospace',
-                    background: sel ? '#fde68a' : fnd ? '#bbf7d0' : '#fff',
-                    borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0',
+                    background: sel ? '#fde68a' : fnd ? '#bbf7d0' : 'var(--cw-surface)',
+                    borderRight: '1px solid var(--cw-border)', borderBottom: '1px solid var(--cw-border)',
                     cursor: 'pointer',
                   }}
                 >{ch}</div>
@@ -1710,8 +1710,8 @@ function WordSearchPupilGrid({ config, cellAnswers, setCellAnswers }: {
           <span key={w} style={{
             display: 'inline-block', margin: '2px 4px', padding: '2px 8px',
             borderRadius: 999, fontSize: 12, fontWeight: 600,
-            background: found.includes(w) ? '#dcfce7' : '#f1f5f9',
-            color: found.includes(w) ? '#166534' : '#0f172a',
+            background: found.includes(w) ? '#dcfce7' : 'var(--cw-surface-muted)',
+            color: found.includes(w) ? '#166534' : 'var(--cw-ink)',
             textDecoration: found.includes(w) ? 'line-through' : 'none',
           }}>{w}</span>
         ))}
@@ -1752,7 +1752,7 @@ function MatchingPupilUI({ config, cellAnswers, setCellAnswers }: {
           <select
             value={String(cellAnswers[String(i)] ?? '')}
             onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}
-            style={{ flex: 1, padding: '6px 8px', border: '2px solid var(--cw-accent)', borderRadius: 6, background: '#fff' }}
+            style={{ flex: 1, padding: '6px 8px', border: '2px solid var(--cw-accent)', borderRadius: 6, background: 'var(--cw-surface)' }}
           >
             <option value="">— pick a definition —</option>
             {order.map((j) => (
@@ -1781,7 +1781,7 @@ function AnagramsPupilUI({ config, cellAnswers, setCellAnswers }: {
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <span style={{
               minWidth: 160, fontFamily: 'JetBrains Mono, monospace', letterSpacing: 4,
-              fontSize: 17, fontWeight: 700, color: '#1e293b',
+              fontSize: 17, fontWeight: 700, color: 'var(--cw-ink)',
             }}>{it?.scrambled}</span>
             <input
               type="text"
@@ -1875,7 +1875,7 @@ function CrosswordEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }
       </div>
       <table style={{ borderCollapse: 'collapse', fontSize: 13 }}>
         <thead>
-          <tr style={{ background: '#f1f5f9' }}>
+          <tr style={{ background: 'var(--cw-surface-muted)' }}>
             <th style={{ padding: 4, textAlign: 'left', width: 50 }}>#</th>
             <th style={{ padding: 4, textAlign: 'left', width: 80 }}>Direction</th>
             <th style={{ padding: 4, textAlign: 'left', width: 50 }}>Row</th>
@@ -1937,7 +1937,7 @@ function CrosswordEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }
         <button type="button" onClick={() => {
           const nextNum = (entries.reduce((m, e) => Math.max(m, Number(e.number) || 0), 0) || 0) + 1;
           setEntries([...entries, { number: nextNum, direction: 'across', row: 0, col: 0, answer: '', clue: '' }]);
-        }} style={{ padding: '6px 12px', border: '1px solid var(--cw-border)', borderRadius: 6, cursor: 'pointer', background: '#fff' }}>
+        }} style={{ padding: '6px 12px', border: '1px solid var(--cw-border)', borderRadius: 6, cursor: 'pointer', background: 'var(--cw-surface)' }}>
           + Add entry
         </button>
         <span style={{ width: 1, alignSelf: 'stretch', background: 'var(--cw-border)' }} />
@@ -1946,7 +1946,7 @@ function CrosswordEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }
         <button type="button" onClick={suggestClues} disabled={aiBusy}
           style={{
             padding: '6px 12px', border: 'none', borderRadius: 6,
-            background: aiBusy ? '#94a3b8' : '#7c3aed', color: '#fff', cursor: aiBusy ? 'wait' : 'pointer',
+            background: aiBusy ? 'var(--cw-muted-soft)' : '#7c3aed', color: '#fff', cursor: aiBusy ? 'wait' : 'pointer',
             fontWeight: 600, fontSize: 13,
           }}>{aiBusy ? 'Asking AI…' : 'Suggest clues with AI'}</button>
       </div>
@@ -2019,14 +2019,14 @@ function WordSearchEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void 
       {grid.length > 0 && (
         <div>
           <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginBottom: 4 }}>Preview:</div>
-          <div style={{ display: 'inline-block', border: '1px solid #cbd5e1' }}>
+          <div style={{ display: 'inline-block', border: '1px solid var(--cw-border-strong)' }}>
             {grid.map((row, r) => (
               <div key={r} style={{ display: 'flex' }}>
                 {row.map((ch, c) => (
                   <div key={c} style={{
                     width: 22, height: 22, lineHeight: '22px', textAlign: 'center',
                     fontSize: 12, fontFamily: 'JetBrains Mono, monospace',
-                    borderRight: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0',
+                    borderRight: '1px solid var(--cw-border)', borderBottom: '1px solid var(--cw-border)',
                   }}>{ch}</div>
                 ))}
               </div>
@@ -2066,7 +2066,7 @@ function MatchingEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void })
         </div>
       ))}
       <button type="button" onClick={() => setPairs([...pairs, { term: '', definition: '' }])}
-        style={{ padding: '6px 12px', border: '1px solid var(--cw-border)', borderRadius: 6, cursor: 'pointer', background: '#fff', alignSelf: 'flex-start' }}>
+        style={{ padding: '6px 12px', border: '1px solid var(--cw-border)', borderRadius: 6, cursor: 'pointer', background: 'var(--cw-surface)', alignSelf: 'flex-start' }}>
         + Add pair
       </button>
     </div>
@@ -2088,7 +2088,7 @@ function AnagramsEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void })
         Type each answer word — the scrambled version is generated automatically. Hit "Re-scramble" if you want a different jumble.
       </div>
       {items.map((it, i) => (
-        <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, border: '1px solid var(--cw-border)', borderRadius: 6, background: '#fff' }}>
+        <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, border: '1px solid var(--cw-border)', borderRadius: 6, background: 'var(--cw-surface)' }}>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             <input type="text" value={it.answer || ''} placeholder="Answer (e.g. PYTHON)"
               onChange={(e) => {
@@ -2099,7 +2099,7 @@ function AnagramsEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void })
               }}
               style={{ ...inputStyle, width: 180, textTransform: 'uppercase', fontFamily: 'JetBrains Mono, monospace' }} />
             <span style={{ color: 'var(--cw-muted)', fontSize: 13 }}>→</span>
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', letterSpacing: 3, fontSize: 14, fontWeight: 700, color: '#1e293b' }}>
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', letterSpacing: 3, fontSize: 14, fontWeight: 700, color: 'var(--cw-ink)' }}>
               {it.scrambled || '—'}
             </span>
             <button type="button" onClick={() => reshuffle(i)}
@@ -2114,7 +2114,7 @@ function AnagramsEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void })
         </div>
       ))}
       <button type="button" onClick={() => setItems([...items, { answer: '', scrambled: '', hint: '' }])}
-        style={{ padding: '6px 12px', border: '1px solid var(--cw-border)', borderRadius: 6, cursor: 'pointer', background: '#fff', alignSelf: 'flex-start' }}>
+        style={{ padding: '6px 12px', border: '1px solid var(--cw-border)', borderRadius: 6, cursor: 'pointer', background: 'var(--cw-surface)', alignSelf: 'flex-start' }}>
         + Add anagram
       </button>
     </div>
@@ -2197,7 +2197,7 @@ function SubmissionRow({ question, submission, onChanged }: {
   }
 
   return (
-    <div style={{ border: '1px solid var(--cw-border)', borderRadius: 8, padding: 12, background: '#fff' }}>
+    <div style={{ border: '1px solid var(--cw-border)', borderRadius: 8, padding: 12, background: 'var(--cw-surface)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, fontSize: 13 }}>
         <div style={{ fontWeight: 700 }}>
           {s.student_username || s.student_id || 'Unknown student'}
@@ -2233,7 +2233,7 @@ function SubmissionRow({ question, submission, onChanged }: {
           padding: '6px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 13,
         }}>{busy ? 'Working…' : 'Save override'}</button>
         <button onClick={remark} disabled={busy} style={{
-          background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+          background: 'var(--cw-surface-muted)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
           padding: '6px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 13,
         }}>Re-mark with AI</button>
         {msg && <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>{msg}</span>}
@@ -2428,7 +2428,7 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
   return (
     <pre style={{
       whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, padding: 8,
-      background: '#f8fafc', border: '1px solid var(--cw-border)', borderRadius: 6,
+      background: 'var(--cw-surface-soft)', border: '1px solid var(--cw-border)', borderRadius: 6,
       fontFamily: t === 'code' ? 'JetBrains Mono, monospace' : 'inherit',
       fontSize: t === 'code' ? 13 : 14, maxHeight: 280, overflow: 'auto',
     }}>{text}</pre>
@@ -2456,7 +2456,7 @@ function EditQuestionButton({ question, passages, onChanged }: { question: Quest
   return (
     <>
       <button onClick={() => setOpen(true)} title="Edit this task" style={{
-        background: '#fff', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+        background: 'var(--cw-surface)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
         padding: '4px 10px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
       }}>Edit</button>
       {open && <NewQuestionModal
@@ -3060,7 +3060,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             const toolBtn: React.CSSProperties = {
               padding: '4px 9px', fontSize: 12, lineHeight: 1.2,
               borderRadius: 6, border: '1px solid var(--cw-border)',
-              background: '#fff', cursor: 'pointer',
+              background: 'var(--cw-surface)', cursor: 'pointer',
               color: 'var(--cw-fg)',
             };
             const grab = (fn: () => void) => (e: React.MouseEvent) => {
@@ -3203,7 +3203,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             };
             const btnBase: React.CSSProperties = {
               padding: '4px 8px', fontSize: 11, borderRadius: 6,
-              border: '1px solid var(--cw-border)', background: '#fff',
+              border: '1px solid var(--cw-border)', background: 'var(--cw-surface)',
               cursor: 'pointer', lineHeight: 1.2,
             };
             const btnActive: React.CSSProperties = {
@@ -3223,7 +3223,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
                 {found.map((img, idx) => (
                   <div key={`${img.src}-${idx}`} style={{
                     display: 'flex', alignItems: 'center', gap: 10,
-                    padding: 6, borderRadius: 6, background: '#fff',
+                    padding: 6, borderRadius: 6, background: 'var(--cw-surface)',
                     border: '1px solid var(--cw-border)',
                   }}>
                     <img
@@ -3232,7 +3232,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
                       style={{
                         width: 56, height: 40, objectFit: 'cover',
                         borderRadius: 4, border: '1px solid var(--cw-border)',
-                        background: '#fff', flexShrink: 0,
+                        background: 'var(--cw-surface)', flexShrink: 0,
                       }}
                     />
                     <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'var(--cw-muted)' }}>
@@ -3508,7 +3508,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
                 Without a rubric the AI gives one holistic mark out of {maxMarks}.
               </div>
             )}
-            <div style={{ marginTop: 12, padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff' }}>
+            <div style={{ marginTop: 12, padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: 'var(--cw-surface)' }}>
               <div style={{ fontWeight: 600, marginBottom: 4 }}>Starter presentation (optional)</div>
               <div style={{ fontSize: 12, color: 'var(--cw-muted)', marginBottom: 8 }}>
                 Upload a PowerPoint (.pptx) for pupils to download and edit. The AI marker
@@ -3522,7 +3522,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
                   </a>
                   <button
                     onClick={() => { setStarterFileUrl(''); setStarterFileName(''); }}
-                    style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid var(--cw-border)', background: '#fff', cursor: 'pointer', fontSize: 12 }}
+                    style={{ padding: '4px 8px', borderRadius: 6, border: '1px solid var(--cw-border)', background: 'var(--cw-surface)', cursor: 'pointer', fontSize: 12 }}
                   >Remove</button>
                 </div>
               ) : (
@@ -3573,7 +3573,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             {blanks.map((b, i) => (
               <div key={i} style={{
                 display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8,
-                padding: 8, border: '1px solid var(--cw-border)', borderRadius: 6, background: '#fff',
+                padding: 8, border: '1px solid var(--cw-border)', borderRadius: 6, background: 'var(--cw-surface)',
               }}>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>&#123;&#123;</span>
@@ -3625,7 +3625,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             {fields.map((f, i) => (
               <div key={i} style={{
                 display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8,
-                padding: 8, border: '1px solid var(--cw-border)', borderRadius: 6, background: '#fff',
+                padding: 8, border: '1px solid var(--cw-border)', borderRadius: 6, background: 'var(--cw-surface)',
               }}>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   <input
@@ -3674,7 +3674,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
                 <thead>
                   <tr>
                     {tblHeaders.map((h, c) => (
-                      <th key={c} style={{ padding: 4, border: '1px solid var(--cw-border)', background: '#f1f5f9' }}>
+                      <th key={c} style={{ padding: 4, border: '1px solid var(--cw-border)', background: 'var(--cw-surface-muted)' }}>
                         <input
                           value={h}
                           onChange={(e) => {
@@ -3684,7 +3684,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
                         />
                       </th>
                     ))}
-                    <th style={{ padding: 4, border: '1px solid var(--cw-border)', background: '#f1f5f9', width: 40 }}>
+                    <th style={{ padding: 4, border: '1px solid var(--cw-border)', background: 'var(--cw-surface-muted)', width: 40 }}>
                       <button
                         title="Add column"
                         onClick={() => {
@@ -3842,7 +3842,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
         )}
         {err && <div style={{ color: 'var(--cw-danger)', fontSize: 14, marginTop: 6 }}>{err}</div>}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-          <button onClick={onClose} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid var(--cw-border)', background: '#fff', cursor: 'pointer' }}>Cancel</button>
+          <button onClick={onClose} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid var(--cw-border)', background: 'var(--cw-surface)', cursor: 'pointer' }}>Cancel</button>
           <button onClick={save} disabled={busy} style={{
             background: 'var(--cw-accent)', color: '#fff', border: 'none', padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
           }}>{busy ? 'Saving…' : (isEdit ? 'Save changes' : 'Save task')}</button>
@@ -3942,7 +3942,7 @@ function renderResource(r: LessonResource): React.ReactNode {
             sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms allow-pointer-lock allow-downloads"
             allow="autoplay; fullscreen; clipboard-write; gamepad; microphone; camera; geolocation"
             allowFullScreen referrerPolicy="no-referrer"
-            style={{ width: '100%', height: '100%', border: 0, display: 'block', background: '#fff' }} />
+            style={{ width: '100%', height: '100%', border: 0, display: 'block', background: 'var(--cw-surface)' }} />
         </div>
         <div style={{ marginTop: 6, fontSize: 12, color: 'var(--cw-muted)' }}>
           Trouble loading? <a href={r.url} target="_blank" rel="noopener noreferrer">Open in a new tab</a>.
@@ -3970,7 +3970,7 @@ function renderResource(r: LessonResource): React.ReactNode {
       <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer"
          style={{
            display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
-           background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 10,
+           background: 'var(--cw-surface)', border: '1px solid var(--cw-border)', borderRadius: 10,
            color: 'var(--cw-ink)', textDecoration: 'none', maxWidth: 480,
            boxShadow: '0 1px 2px rgba(0,0,0,0.04)', transition: 'box-shadow .15s, border-color .15s',
          }}
@@ -4007,7 +4007,7 @@ function renderResource(r: LessonResource): React.ReactNode {
     <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer"
        style={{
          display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 14px',
-         background: '#f8fafc', border: '1px solid var(--cw-border)', borderRadius: 8,
+         background: 'var(--cw-surface-soft)', border: '1px solid var(--cw-border)', borderRadius: 8,
          color: 'var(--cw-ink)', textDecoration: 'none', fontWeight: 600,
          alignSelf: 'flex-start', maxWidth: '100%',
        }}>
@@ -4116,7 +4116,7 @@ const PendingResourcesEditor = forwardRef<PendingResourcesEditorHandle, {
       {items.length > 0 && (
         <div style={{
           display: 'flex', flexDirection: 'column', gap: 8,
-          padding: 10, background: '#f8fafc', border: '1px solid var(--cw-border)', borderRadius: 8,
+          padding: 10, background: 'var(--cw-surface-soft)', border: '1px solid var(--cw-border)', borderRadius: 8,
           marginBottom: 8,
         }}>
           {items.map((r, i) => (
@@ -4127,7 +4127,7 @@ const PendingResourcesEditor = forwardRef<PendingResourcesEditorHandle, {
               </div>
               <button onClick={() => remove(i)} title="Remove"
                 style={{
-                  border: '1px solid var(--cw-border)', background: '#fff', borderRadius: 6,
+                  border: '1px solid var(--cw-border)', background: 'var(--cw-surface)', borderRadius: 6,
                   padding: '4px 8px', cursor: 'pointer', color: 'var(--cw-danger)', fontWeight: 700,
                 }}>×</button>
             </div>
@@ -4138,10 +4138,10 @@ const PendingResourcesEditor = forwardRef<PendingResourcesEditorHandle, {
       {!showForm ? (
         <button type="button" onClick={() => setShowForm(true)} style={{
           fontSize: 13, padding: '6px 10px', border: '1px dashed var(--cw-border)',
-          background: '#fff', borderRadius: 6, cursor: 'pointer', color: 'var(--cw-muted)',
+          background: 'var(--cw-surface)', borderRadius: 6, cursor: 'pointer', color: 'var(--cw-muted)',
         }}>+ Add resource to this task</button>
       ) : (
-        <div style={{ padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff' }}>
+        <div style={{ padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: 'var(--cw-surface)' }}>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             <select value={kind} onChange={(e) => { setKind(e.target.value as any); setUrl(''); }} style={input}>
               <option value="image">Image (upload)</option>
@@ -4176,7 +4176,7 @@ const PendingResourcesEditor = forwardRef<PendingResourcesEditorHandle, {
           {err && <div style={{ color: 'var(--cw-danger)', fontSize: 13, marginTop: 6 }}>{err}</div>}
           <div style={{ marginTop: 8, display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
             <button type="button" onClick={() => { setShowForm(false); setErr(null); setUrl(''); setTitle(''); }}
-              style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', background: '#fff', cursor: 'pointer' }}>
+              style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', background: 'var(--cw-surface)', cursor: 'pointer' }}>
               Cancel
             </button>
             <button type="button" onClick={add} disabled={busy} style={{
@@ -4276,7 +4276,7 @@ function QuestionResources({ questionId, isTeacher, initialResources }: { questi
       {resources.length > 0 && (
         <div style={{
           display: 'flex', flexDirection: 'column', gap: 12,
-          padding: 12, background: '#f8fafc', border: '1px solid var(--cw-border)', borderRadius: 8,
+          padding: 12, background: 'var(--cw-surface-soft)', border: '1px solid var(--cw-border)', borderRadius: 8,
         }}>
           {resources.map((r) => (
             <div key={r.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
@@ -4284,7 +4284,7 @@ function QuestionResources({ questionId, isTeacher, initialResources }: { questi
               {isTeacher && (
                 <button onClick={() => remove(r.id)} title="Remove resource"
                   style={{
-                    border: '1px solid var(--cw-border)', background: '#fff', borderRadius: 6,
+                    border: '1px solid var(--cw-border)', background: 'var(--cw-surface)', borderRadius: 6,
                     padding: '4px 8px', cursor: 'pointer', color: 'var(--cw-danger)', fontWeight: 700,
                   }}>×</button>
               )}
@@ -4297,10 +4297,10 @@ function QuestionResources({ questionId, isTeacher, initialResources }: { questi
           {!showForm ? (
             <button onClick={() => setShowForm(true)} style={{
               fontSize: 13, padding: '6px 10px', border: '1px dashed var(--cw-border)',
-              background: '#fff', borderRadius: 6, cursor: 'pointer', color: 'var(--cw-muted)',
+              background: 'var(--cw-surface)', borderRadius: 6, cursor: 'pointer', color: 'var(--cw-muted)',
             }}>+ Add resource to this task</button>
           ) : (
-            <div style={{ padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff' }}>
+            <div style={{ padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: 'var(--cw-surface)' }}>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
                 <select value={kind} onChange={(e) => setKind(e.target.value as any)} style={input}>
                   <option value="image">Image (upload)</option>
@@ -4335,7 +4335,7 @@ function QuestionResources({ questionId, isTeacher, initialResources }: { questi
               {err && <div style={{ color: 'var(--cw-danger)', fontSize: 13, marginTop: 6 }}>{err}</div>}
               <div style={{ marginTop: 8, display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
                 <button onClick={() => { setShowForm(false); setErr(null); setUrl(''); setTitle(''); }}
-                  style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', background: '#fff', cursor: 'pointer' }}>
+                  style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', background: 'var(--cw-surface)', cursor: 'pointer' }}>
                   Cancel
                 </button>
                 <button onClick={add} disabled={busy} style={{
@@ -4357,7 +4357,7 @@ function QuestionResources({ questionId, isTeacher, initialResources }: { questi
 function _LessonResources_legacy({ resources }: { resources: LessonResource[] }) {
   return (
     <div style={{
-      background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 12,
+      background: 'var(--cw-surface)', border: '1px solid var(--cw-border)', borderRadius: 12,
       padding: 18, marginTop: 14, boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
     }}>
       <h2 style={{ margin: '0 0 12px', fontSize: 14, color: 'var(--cw-muted)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
@@ -4406,7 +4406,7 @@ function _LessonResources_legacy({ resources }: { resources: LessonResource[] })
                     allow="autoplay; fullscreen; clipboard-write; gamepad; microphone; camera; geolocation"
                     allowFullScreen
                     referrerPolicy="no-referrer"
-                    style={{ width: '100%', height: '100%', border: 0, display: 'block', background: '#fff' }}
+                    style={{ width: '100%', height: '100%', border: 0, display: 'block', background: 'var(--cw-surface)' }}
                   />
                 </div>
                 <div style={{ marginTop: 6, fontSize: 12, color: 'var(--cw-muted)' }}>
@@ -4434,7 +4434,7 @@ function _LessonResources_legacy({ resources }: { resources: LessonResource[] })
             <a key={r.id} href={r.url} target="_blank" rel="noopener noreferrer"
                style={{
                  display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 14px',
-                 background: '#f8fafc', border: '1px solid var(--cw-border)', borderRadius: 8,
+                 background: 'var(--cw-surface-soft)', border: '1px solid var(--cw-border)', borderRadius: 8,
                  color: 'var(--cw-ink)', textDecoration: 'none', fontWeight: 600,
                  alignSelf: 'flex-start', maxWidth: '100%',
                }}>
@@ -4468,7 +4468,7 @@ function LessonHeader({ lesson }: { lesson: LessonInfo }) {
   const sc = toLines(lesson.success_criteria);
   return (
     <div style={{
-      background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 12,
+      background: 'var(--cw-surface)', border: '1px solid var(--cw-border)', borderRadius: 12,
       padding: 18, boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
     }}>
       <h1 style={{ margin: 0, fontSize: 22 }}>{lesson.title}</h1>
@@ -4516,7 +4516,7 @@ function LessonHeader({ lesson }: { lesson: LessonInfo }) {
 }
 
 const card: React.CSSProperties = {
-  background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 12, padding: 20,
+  background: 'var(--cw-surface)', border: '1px solid var(--cw-border)', borderRadius: 12, padding: 20,
   boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
 };
 const modalOverlay: React.CSSProperties = {
@@ -4524,7 +4524,7 @@ const modalOverlay: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
 };
 const modal: React.CSSProperties = {
-  background: '#fff', borderRadius: 12, padding: 24, maxWidth: 560, width: '92%',
+  background: 'var(--cw-surface)', borderRadius: 12, padding: 24, maxWidth: 560, width: '92%',
   maxHeight: '90vh', overflow: 'auto', boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
 };
 const fieldLabel: React.CSSProperties = {

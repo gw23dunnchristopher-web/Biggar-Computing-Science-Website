@@ -56,7 +56,7 @@ export const modalPrimaryBtn: React.CSSProperties = {
   padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
 };
 export const modalSecondaryBtn: React.CSSProperties = {
-  background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+  background: 'var(--cw-surface-muted)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
   padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
 };
 export const modalDangerBtn: React.CSSProperties = {
@@ -77,7 +77,7 @@ const overlay: React.CSSProperties = {
   zIndex: 9999, padding: 16,
 };
 const dialog: React.CSSProperties = {
-  width: '100%', background: '#fff', borderRadius: 12,
+  width: '100%', background: 'var(--cw-surface)', borderRadius: 12,
   boxShadow: '0 20px 60px rgba(15,23,42,0.25)', overflow: 'hidden',
 };
 const header: React.CSSProperties = {
@@ -90,5 +90,5 @@ const closeBtn: React.CSSProperties = {
 };
 const footerBar: React.CSSProperties = {
   display: 'flex', justifyContent: 'flex-end', gap: 8,
-  padding: '12px 18px', borderTop: '1px solid var(--cw-border)', background: '#f8fafc',
+  padding: '12px 18px', borderTop: '1px solid var(--cw-border)', background: 'var(--cw-surface-soft)',
 };

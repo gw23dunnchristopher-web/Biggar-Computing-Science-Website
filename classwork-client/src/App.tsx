@@ -11,7 +11,7 @@ const Students = lazy(() => import('@/pages/Students'));
 const Jotter = lazy(() => import('@/pages/Jotter'));
 
 function Loading() {
-  return <div style={{ padding: 40, textAlign: 'center', color: '#64748b' }}>Loading…</div>;
+  return <div style={{ padding: 40, textAlign: 'center', color: 'var(--cw-muted)' }}>Loading…</div>;
 }
 
 /**
@@ -35,14 +35,14 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
       const msg = this.state.error.message || String(this.state.error);
       const isChunkError = /Loading chunk|Failed to fetch dynamically imported module|importing a module script failed/i.test(msg);
       return (
-        <div style={{ maxWidth: 720, margin: '40px auto', padding: 24, fontFamily: 'Inter, system-ui, sans-serif', color: '#0f172a' }}>
+        <div style={{ maxWidth: 720, margin: '40px auto', padding: 24, fontFamily: 'Inter, system-ui, sans-serif', color: 'var(--cw-ink)' }}>
           <h1 style={{ fontSize: 22, marginTop: 0 }}>Something went wrong loading this page</h1>
-          <p style={{ color: '#475569', lineHeight: 1.5 }}>
+          <p style={{ color: 'var(--cw-ink-soft)', lineHeight: 1.5 }}>
             {isChunkError
               ? 'This page tried to load some files that are no longer available — usually because a new version of the site was just deployed and your browser still has the old version cached. Reloading should fix it.'
               : 'A problem stopped the page from rendering. The details below may help your teacher report this.'}
           </p>
-          <pre style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: 8, padding: 12, fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg}</pre>
+          <pre style={{ background: 'var(--cw-surface-muted)', border: '1px solid var(--cw-border-strong)', borderRadius: 8, padding: 12, fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg}</pre>
           <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
             <button
               onClick={() => { window.location.reload(); }}
@@ -50,7 +50,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
             >Reload page</button>
             <button
               onClick={() => { window.location.href = '/classwork/'; }}
-              style={{ padding: '8px 14px', borderRadius: 8, background: '#fff', color: '#0c2d8a', border: '1px solid #0c2d8a', fontWeight: 600, cursor: 'pointer' }}
+              style={{ padding: '8px 14px', borderRadius: 8, background: 'var(--cw-surface)', color: '#0c2d8a', border: '1px solid #0c2d8a', fontWeight: 600, cursor: 'pointer' }}
             >Back to dashboard</button>
           </div>
         </div>

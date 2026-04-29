@@ -321,7 +321,7 @@ export default function Students() {
                       onClick={() => { setSelectedId(c.id); setLastCreated([]); }}
                       style={{
                         flex: 1, textAlign: 'left', minWidth: 0,
-                        background: isSel ? 'var(--cw-accent)' : '#f1f5f9',
+                        background: isSel ? 'var(--cw-accent)' : 'var(--cw-surface-muted)',
                         color: isSel ? '#fff' : 'var(--cw-ink)',
                         border: '1px solid var(--cw-border)', borderRadius: 6,
                         padding: '8px 10px', cursor: 'pointer', fontWeight: 600,
@@ -369,7 +369,7 @@ export default function Students() {
                       if (!items || items.length === 0) return null;
                       return (
                         <details key={g.key} style={{
-                          border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff',
+                          border: '1px solid var(--cw-border)', borderRadius: 8, background: 'var(--cw-surface)',
                         }}>
                           <summary style={{
                             cursor: 'pointer', padding: '8px 10px', fontWeight: 700,
@@ -405,7 +405,7 @@ export default function Students() {
                   {archived.length > 0 && (
                     <details style={{
                       border: '1px dashed var(--cw-border)', borderRadius: 8,
-                      background: '#f8fafc', padding: '4px 6px',
+                      background: 'var(--cw-surface-soft)', padding: '4px 6px',
                     }}>
                       <summary style={{
                         cursor: 'pointer', padding: '6px 6px', fontWeight: 700,
@@ -470,7 +470,7 @@ export default function Students() {
                   ) : (
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
                       <thead>
-                        <tr style={{ background: '#f8fafc' }}>
+                        <tr style={{ background: 'var(--cw-surface-soft)' }}>
                           <th align="left" style={th}>Username</th>
                           <th align="left" style={th}>Initial password</th>
                           <th align="left" style={th}>Status</th>
@@ -710,7 +710,7 @@ export default function Students() {
         </p>
         <div style={{
           padding: 12, fontFamily: 'monospace', fontSize: 18, fontWeight: 700,
-          background: '#f1f5f9', border: '1px solid var(--cw-border)', borderRadius: 8, textAlign: 'center',
+          background: 'var(--cw-surface-muted)', border: '1px solid var(--cw-border)', borderRadius: 8, textAlign: 'center',
         }}>{modal.kind === 'showPassword' ? modal.password : ''}</div>
         <p style={{ margin: 0, fontSize: 13, color: 'var(--cw-muted)' }}>
           Write this down now — they'll be asked to set their own password the next time they log in.
@@ -730,7 +730,7 @@ export default function Students() {
 }
 
 const card: React.CSSProperties = {
-  background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 12, padding: 16,
+  background: 'var(--cw-surface)', border: '1px solid var(--cw-border)', borderRadius: 12, padding: 16,
   boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
 };
 const primaryBtn: React.CSSProperties = {
@@ -738,7 +738,7 @@ const primaryBtn: React.CSSProperties = {
   padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
 };
 const secondaryBtn: React.CSSProperties = {
-  background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+  background: 'var(--cw-surface-muted)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
   padding: '6px 10px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 13,
 };
 const dangerBtn: React.CSSProperties = {

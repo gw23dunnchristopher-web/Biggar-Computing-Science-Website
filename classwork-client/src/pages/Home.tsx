@@ -35,7 +35,7 @@ export default function Home() {
         <h1 style={{ margin: 0 }}>Choose a course</h1>
         {role === 'teacher' && (
           <Link href="/students" style={{
-            background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+            background: 'var(--cw-surface-muted)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
             padding: '8px 14px', borderRadius: 8, fontWeight: 600, textDecoration: 'none', fontSize: 14,
           }}>Manage students &amp; classes</Link>
         )}
@@ -63,7 +63,7 @@ export default function Home() {
               key={c.key}
               href={`/course/${c.key}`}
               style={{
-                display: 'block', background: '#fff',
+                display: 'block', background: 'var(--cw-surface)',
                 border: '1px solid var(--cw-border)', borderRadius: 12,
                 padding: '16px 12px', textDecoration: 'none', color: 'inherit',
                 boxShadow: '0 2px 8px rgba(15,23,42,0.04)', transition: 'transform .12s ease',

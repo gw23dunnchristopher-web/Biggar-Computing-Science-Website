@@ -442,7 +442,7 @@ export default function Course() {
           {role === 'student' && (
             <Link href="/jotter" style={{
               display: 'inline-block',
-              background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+              background: 'var(--cw-surface-muted)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
               padding: '8px 14px', borderRadius: 8, fontWeight: 600, textDecoration: 'none',
             }} title="Open all your notes for the year in one place">My jotter</Link>
           )}
@@ -460,7 +460,7 @@ export default function Course() {
               }} title="Open your own jotter for this course — the same notes view your pupils get when they click 'My jotter'">My jotter</Link>
               <Link href={`/analytics/${course}`} style={{
                 display: 'inline-block',
-                background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+                background: 'var(--cw-surface-muted)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
                 padding: '8px 14px', borderRadius: 8, fontWeight: 600, textDecoration: 'none',
               }}>Analytics</Link>
               <button onClick={() => { setModalErr(null); setModal({ kind: 'lockAll' }); }} style={dangerBtn} title="Hide every lesson from students at once">Lock all</button>
@@ -563,7 +563,7 @@ export default function Course() {
                         }}
                         style={{
                           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
-                          padding: 12, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fafbfd',
+                          padding: 12, border: '1px solid var(--cw-border)', borderRadius: 8, background: 'var(--cw-surface-soft)',
                           opacity: isDragging ? 0.4 : 1,
                           // Show a coloured indicator line on the side of the
                           // row where the dragged lesson will land.
@@ -598,7 +598,7 @@ export default function Course() {
                           <span style={{
                             display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                             minWidth: 26, height: 22, padding: '0 6px',
-                            borderRadius: 6, background: '#e2e8f0', color: '#475569',
+                            borderRadius: 6, background: 'var(--cw-border)', color: 'var(--cw-ink-soft)',
                             fontSize: 12, fontWeight: 700, flexShrink: 0,
                           }}>{idx + 1}</span>
                           <Link
@@ -798,11 +798,11 @@ export default function Course() {
                 {editResources.map((r) => (
                   <li key={r.id} style={{
                     display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '6px 10px', border: '1px solid var(--cw-border)', borderRadius: 8, background: '#f8fafc',
+                    padding: '6px 10px', border: '1px solid var(--cw-border)', borderRadius: 8, background: 'var(--cw-surface-soft)',
                   }}>
                     <span style={{
                       fontSize: 11, fontWeight: 600, padding: '2px 6px', borderRadius: 4,
-                      background: '#e2e8f0', color: 'var(--cw-ink)', textTransform: 'uppercase',
+                      background: 'var(--cw-border)', color: 'var(--cw-ink)', textTransform: 'uppercase',
                     }}>{r.kind}</span>
                     <a href={r.url} target="_blank" rel="noopener noreferrer" style={{
                       flex: 1, color: 'var(--cw-accent)', textDecoration: 'none',
@@ -860,7 +860,7 @@ export default function Course() {
                 >Add embed</button>
               </div>
             ) : (
-              <div style={{ marginTop: 4, padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: '#fff' }}>
+              <div style={{ marginTop: 4, padding: 10, border: '1px solid var(--cw-border)', borderRadius: 8, background: 'var(--cw-surface)' }}>
                 <label style={modalLabel}>{
                   addResKind === 'youtube' ? 'YouTube URL'
                     : addResKind === 'embed' ? 'Embed URL'
@@ -1011,7 +1011,7 @@ export default function Course() {
 }
 
 const card: React.CSSProperties = {
-  background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 12, padding: 20,
+  background: 'var(--cw-surface)', border: '1px solid var(--cw-border)', borderRadius: 12, padding: 20,
   boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
 };
 const primaryBtn: React.CSSProperties = {
@@ -1019,7 +1019,7 @@ const primaryBtn: React.CSSProperties = {
   padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
 };
 const secondaryBtn: React.CSSProperties = {
-  background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+  background: 'var(--cw-surface-muted)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
   padding: '6px 12px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 13,
 };
 const dangerBtn: React.CSSProperties = {
@@ -1042,7 +1042,7 @@ function UnitThumb({ url, title }: { url: string | null; title: string }) {
       <img
         src={url}
         alt=""
-        style={{ ...base, objectFit: 'cover', display: 'block', background: '#f8fafc' }}
+        style={{ ...base, objectFit: 'cover', display: 'block', background: 'var(--cw-surface-soft)' }}
       />
     );
   }
@@ -1052,8 +1052,8 @@ function UnitThumb({ url, title }: { url: string | null; title: string }) {
       aria-hidden="true"
       style={{
         ...base,
-        background: 'linear-gradient(135deg, #e2e8f0, #cbd5e1)',
-        color: '#475569',
+        background: 'linear-gradient(135deg, var(--cw-border), var(--cw-border-strong))',
+        color: 'var(--cw-ink-soft)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontWeight: 700, fontSize: 22,
       }}
@@ -1085,7 +1085,7 @@ function UnitImageField(props: {
             style={{
               width: 56, height: 56, borderRadius: 10,
               border: '1px solid var(--cw-border)', objectFit: 'cover',
-              background: '#f8fafc', flexShrink: 0,
+              background: 'var(--cw-surface-soft)', flexShrink: 0,
             }}
           />
         ) : (
@@ -1094,7 +1094,7 @@ function UnitImageField(props: {
             style={{
               width: 56, height: 56, borderRadius: 10, flexShrink: 0,
               border: '1px dashed var(--cw-border)',
-              background: '#f8fafc', color: '#94a3b8',
+              background: 'var(--cw-surface-soft)', color: 'var(--cw-muted-soft)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 12, textAlign: 'center', padding: 4,
             }}

@@ -49,7 +49,7 @@ export default function Shell({ title, back, children }: Props) {
         )}
       </header>
       {back && (
-        <div style={{ padding: '8px 24px', background: '#fff', borderBottom: '1px solid var(--cw-border)' }}>
+        <div style={{ padding: '8px 24px', background: 'var(--cw-surface)', borderBottom: '1px solid var(--cw-border)' }}>
           <Link href={back.href} style={{ fontSize: 14 }}>← {back.label}</Link>
         </div>
       )}

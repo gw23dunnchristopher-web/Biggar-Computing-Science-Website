@@ -38,15 +38,29 @@
 }
 
 :root {
-  /* Existing classwork palette */
-  --cw-bg: #f6f7fb;
-  --cw-ink: #0f172a;
-  --cw-muted: #64748b;
-  --cw-card: #ffffff;
-  --cw-border: #e2e8f0;
-  --cw-accent: #1e40af;
+  /* ----------------------------------------------------------
+     Classwork palette — split into a *semantic* set of vars so
+     html.dark below can flip the whole UI by re-defining them
+     in one place. The legacy `--cw-card` / `--cw-bg` names are
+     kept as aliases of the semantic vars for backwards-compat.
+     ---------------------------------------------------------- */
+  --cw-bg:            #f6f7fb;  /* page background */
+  --cw-surface:       #ffffff;  /* cards, panels */
+  --cw-surface-soft:  #f8fafc;  /* hover/highlighted surfaces (slate-50) */
+  --cw-surface-muted: #f1f5f9;  /* section bands, table headers (slate-100) */
+  --cw-card:          var(--cw-surface);  /* legacy alias */
+
+  --cw-ink:        #0f172a;     /* primary text (slate-900) */
+  --cw-ink-soft:   #475569;     /* secondary text (slate-600) */
+  --cw-muted:      #64748b;     /* muted/help text (slate-500) */
+  --cw-muted-soft: #94a3b8;     /* placeholder / disabled (slate-400) */
+
+  --cw-border:        #e2e8f0;  /* default 1px borders (slate-200) */
+  --cw-border-strong: #cbd5e1;  /* heavier dividers / outlines (slate-300) */
+
+  --cw-accent:       #1e40af;
   --cw-accent-hover: #1d4ed8;
-  --cw-danger: #b91c1c;
+  --cw-danger:       #b91c1c;
 
   /* shadcn-style HSL tokens — match the classwork palette so the
      accessibility panel and its trigger button feel native to this SPA */
@@ -71,6 +85,54 @@
   --ring: 224 76% 38%;
 }
 
+/* ============================================================
+   Dark mode — toggled via `document.documentElement.classList`
+   from the AccessibilityContext, persisted under the shared
+   `vite-ui-theme` localStorage key so the static site, n5,
+   revision and data-sculptor SPAs stay in sync.
+   ============================================================ */
+html.dark {
+  color-scheme: dark;
+
+  --cw-bg:            #0b1220;
+  --cw-surface:       #1e293b;     /* slate-800 — card surfaces */
+  --cw-surface-soft:  #243149;     /* slightly lighter for hover */
+  --cw-surface-muted: #131c30;     /* darker for section bands */
+  --cw-card:          var(--cw-surface);
+
+  --cw-ink:        #f1f5f9;        /* slate-100 */
+  --cw-ink-soft:   #cbd5e1;        /* slate-300 */
+  --cw-muted:      #94a3b8;        /* slate-400 */
+  --cw-muted-soft: #64748b;        /* slate-500 */
+
+  --cw-border:        #334155;     /* slate-700 */
+  --cw-border-strong: #475569;     /* slate-600 */
+
+  --cw-accent:       #3b82f6;      /* brighter blue for dark bg */
+  --cw-accent-hover: #60a5fa;
+  --cw-danger:       #f87171;
+
+  --background: 222 47% 8%;        /* matches --cw-bg */
+  --foreground: 210 40% 96%;
+  --card: 217 33% 17%;             /* matches --cw-surface */
+  --card-foreground: 210 40% 96%;
+  --popover: 217 33% 17%;
+  --popover-foreground: 210 40% 96%;
+  --primary: 217 91% 60%;          /* brighter navy/blue */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 217 19% 27%;
+  --secondary-foreground: 210 40% 96%;
+  --muted: 217 19% 27%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 217 19% 27%;
+  --accent-foreground: 210 40% 96%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 215 28% 25%;
+  --input: 215 28% 25%;
+  --ring: 217 91% 60%;
+}
+
 html, body, #root {
   height: 100%;
   margin: 0;
@@ -90,6 +152,20 @@ body {
 
 a { color: var(--cw-accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
+
+/* In dark mode, soften pure-white text inside the inputs/textareas
+   that don't get a styled wrapper by relying on the surface var. */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background: var(--cw-surface);
+  color: var(--cw-ink);
+  border-color: var(--cw-border);
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: var(--cw-muted-soft);
+}
 
 /* ============================================================
    Accessibility — same vocabulary as the static site and n5 SPA
@@ -146,10 +222,16 @@ html.high-contrast {
   --ring: 240 100% 30%;
 
   --cw-bg: #ffffff;
-  --cw-ink: #000000;
-  --cw-muted: #1a1a1a;
+  --cw-surface: #ffffff;
+  --cw-surface-soft: #ffffff;
+  --cw-surface-muted: #f0f0f0;
   --cw-card: #ffffff;
+  --cw-ink: #000000;
+  --cw-ink-soft: #000000;
+  --cw-muted: #1a1a1a;
+  --cw-muted-soft: #333333;
   --cw-border: #000000;
+  --cw-border-strong: #000000;
   --cw-accent: #0000aa;
   --cw-accent-hover: #000077;
 }
@@ -206,6 +288,7 @@ html.reading-guide-active * {
    existing --cw-* vars so classwork's bespoke buttons/cards follow too. */
 html[data-custom-bg] {
   --cw-bg: hsl(var(--background));
+  --cw-surface: hsl(var(--background));
   --cw-card: hsl(var(--background));
 }
 html[data-custom-bg] body,

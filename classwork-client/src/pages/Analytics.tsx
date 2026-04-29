@@ -164,7 +164,7 @@ export default function Analytics() {
               disabled={downloading}
               style={{
                 padding: '8px 14px', borderRadius: 8, border: '1px solid var(--cw-border)',
-                background: downloading ? '#e2e8f0' : 'var(--cw-accent)',
+                background: downloading ? 'var(--cw-border)' : 'var(--cw-accent)',
                 color: downloading ? 'var(--cw-muted)' : '#fff',
                 cursor: downloading ? 'wait' : 'pointer', fontWeight: 600, fontSize: 13,
               }}
@@ -221,7 +221,7 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
   return (
     <button onClick={onClick} style={{
       ...secondaryBtn,
-      background: active ? 'var(--cw-accent)' : '#f1f5f9',
+      background: active ? 'var(--cw-accent)' : 'var(--cw-surface-muted)',
       color: active ? '#fff' : 'var(--cw-ink)',
       borderColor: active ? 'var(--cw-accent)' : 'var(--cw-border)',
     }}>{children}</button>
@@ -230,10 +230,10 @@ function TabBtn({ active, onClick, children }: { active: boolean; onClick: () =>
 
 function PercentBar({ value }: { value: number | null }) {
   const pct = value == null ? 0 : Math.max(0, Math.min(100, Math.round(value)));
-  const colour = value == null ? '#cbd5e1' : pct >= 70 ? '#16a34a' : pct >= 50 ? '#ca8a04' : '#dc2626';
+  const colour = value == null ? 'var(--cw-border-strong)' : pct >= 70 ? '#16a34a' : pct >= 50 ? '#ca8a04' : '#dc2626';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 120 }}>
-      <div style={{ position: 'relative', flex: 1, height: 8, background: '#e2e8f0', borderRadius: 999 }}>
+      <div style={{ position: 'relative', flex: 1, height: 8, background: 'var(--cw-border)', borderRadius: 999 }}>
         <div style={{ position: 'absolute', inset: 0, width: `${pct}%`, background: colour, borderRadius: 999 }} />
       </div>
       <span style={{ fontSize: 13, color: 'var(--cw-muted)', width: 44, textAlign: 'right' }}>
@@ -299,7 +299,7 @@ function LessonsTable({ lessons, openLessonId, onToggle }: {
                   </tr>
                   {openLessonId === r.lesson_id && (
                     <tr>
-                      <td colSpan={7} style={{ ...td, background: '#fafbfd' }}>
+                      <td colSpan={7} style={{ ...td, background: 'var(--cw-surface-soft)' }}>
                         <LessonDetail lessonId={r.lesson_id} />
                       </td>
                     </tr>
@@ -458,7 +458,7 @@ function StudentsTable({ students, course, openStudentId, onToggle }: {
               </tr>
               {openStudentId === s.student_id && (
                 <tr>
-                  <td colSpan={6} style={{ ...td, background: '#fafbfd' }}>
+                  <td colSpan={6} style={{ ...td, background: 'var(--cw-surface-soft)' }}>
                     <StudentDetail course={course} studentId={s.student_id} />
                   </td>
                 </tr>
@@ -656,7 +656,7 @@ function StudentDetail({ course, studentId }: { course: string; studentId: strin
                               </tr>
                               {isOpen && (
                                 <tr>
-                                  <td colSpan={6} style={{ ...td, background: '#fafbfd', padding: '10px 12px' }}>
+                                  <td colSpan={6} style={{ ...td, background: 'var(--cw-surface-soft)', padding: '10px 12px' }}>
                                     <SubmissionDetails s={s} />
                                   </td>
                                 </tr>
@@ -679,7 +679,7 @@ function StudentDetail({ course, studentId }: { course: string; studentId: strin
 }
 
 const unitGroupStyle: React.CSSProperties = {
-  border: '1px solid var(--cw-border)', borderRadius: 10, background: '#fff',
+  border: '1px solid var(--cw-border)', borderRadius: 10, background: 'var(--cw-surface)',
   overflow: 'hidden',
 };
 const unitHeaderStyle: React.CSSProperties = {
@@ -833,7 +833,7 @@ function StudentActivityCalendar({ course, studentId }: { course: string; studen
   return (
     <div style={{
       border: '1px solid var(--cw-border)', borderRadius: 8, padding: 10,
-      background: '#fafbff', display: 'flex', flexDirection: 'column', gap: 6,
+      background: 'var(--cw-surface-soft)', display: 'flex', flexDirection: 'column', gap: 6,
       width: 'fit-content', margin: '0 auto',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: gridWidth }}>
@@ -897,7 +897,7 @@ function StudentActivityCalendar({ course, studentId }: { course: string; studen
 function navBtn(disabled: boolean): React.CSSProperties {
   return {
     width: 20, height: 20, borderRadius: 4,
-    border: '1px solid var(--cw-border)', background: '#fff',
+    border: '1px solid var(--cw-border)', background: 'var(--cw-surface)',
     cursor: disabled ? 'not-allowed' : 'pointer',
     opacity: disabled ? 0.4 : 1,
     fontSize: 13, lineHeight: 1, padding: 0,
@@ -912,7 +912,7 @@ function shorten(s: string, n: number) {
 }
 
 const card: React.CSSProperties = {
-  background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 12, padding: 16,
+  background: 'var(--cw-surface)', border: '1px solid var(--cw-border)', borderRadius: 12, padding: 16,
   boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
 };
 const summaryRow: React.CSSProperties = { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 };
@@ -920,8 +920,8 @@ const tile: React.CSSProperties = { ...card, padding: 16 };
 const tbl: React.CSSProperties = { width: '100%', borderCollapse: 'collapse', marginTop: 8, fontSize: 14 };
 const th: React.CSSProperties = { textAlign: 'left', padding: '8px 8px', borderBottom: '1px solid var(--cw-border)', fontWeight: 600, color: 'var(--cw-muted)', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.4 };
 const td: React.CSSProperties = { padding: '8px 8px', borderBottom: '1px solid var(--cw-border)', verticalAlign: 'top' };
-const secondaryBtn: React.CSSProperties = { background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)', padding: '6px 12px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 13 };
-const miniBtn: React.CSSProperties = { background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)', padding: '4px 10px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 12 };
+const secondaryBtn: React.CSSProperties = { background: 'var(--cw-surface-muted)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)', padding: '6px 12px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 13 };
+const miniBtn: React.CSSProperties = { background: 'var(--cw-surface-muted)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)', padding: '4px 10px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 12 };
 // Single-line ellipsis cell. `<td>` `maxWidth` is unreliable on its own —
 // browsers happily widen table columns to fit content. Wrapping the cell's
 // contents in a fixed-width inner div with overflow:hidden + ellipsis is

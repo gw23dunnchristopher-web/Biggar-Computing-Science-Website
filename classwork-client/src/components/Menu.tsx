@@ -34,7 +34,7 @@ export default function Menu({ items, label = '⋯', title = 'Actions', buttonSt
   }, [open]);
 
   const defaultBtn: CSSProperties = {
-    background: '#f1f5f9', color: 'var(--cw-ink)',
+    background: 'var(--cw-surface-muted)', color: 'var(--cw-ink)',
     border: '1px solid var(--cw-border)', borderRadius: 6,
     padding: '4px 8px', fontSize: 14, fontWeight: 700,
     cursor: 'pointer', lineHeight: 1, minWidth: 28,
@@ -58,7 +58,7 @@ export default function Menu({ items, label = '⋯', title = 'Actions', buttonSt
           style={{
             position: 'absolute', top: 'calc(100% + 4px)', zIndex: 50,
             [align]: 0,
-            minWidth: 160, background: '#fff',
+            minWidth: 160, background: 'var(--cw-surface)',
             border: '1px solid var(--cw-border)', borderRadius: 8,
             boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
             padding: 4, display: 'flex', flexDirection: 'column',
@@ -77,7 +77,7 @@ export default function Menu({ items, label = '⋯', title = 'Actions', buttonSt
                 color: it.danger ? 'var(--cw-danger)' : 'var(--cw-ink)',
                 fontSize: 13, fontWeight: 600, opacity: it.disabled ? 0.5 : 1,
               }}
-              onMouseEnter={(e) => { if (!it.disabled) (e.currentTarget.style.background = '#f1f5f9'); }}
+              onMouseEnter={(e) => { if (!it.disabled) (e.currentTarget.style.background = 'var(--cw-surface-muted)'); }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
             >
               {it.label}

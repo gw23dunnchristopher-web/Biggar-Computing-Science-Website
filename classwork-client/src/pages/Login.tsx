@@ -82,7 +82,7 @@ export default function Login() {
   return (
     <Shell title="Sign in">
       <div style={{
-        maxWidth: 460, margin: '40px auto', background: '#fff',
+        maxWidth: 460, margin: '40px auto', background: 'var(--cw-surface)',
         border: '1px solid var(--cw-border)', borderRadius: 12, padding: 28,
         boxShadow: '0 4px 14px rgba(15,23,42,0.05)',
       }}>

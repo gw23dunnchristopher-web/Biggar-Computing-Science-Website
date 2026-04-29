@@ -12,6 +12,7 @@ import {
   Sparkles,
   SlidersHorizontal,
   Paintbrush,
+  Moon,
 } from "lucide-react";
 
 const OVERLAY_OPTIONS = [
@@ -45,11 +46,11 @@ const BG_COLOUR_PRESETS = [
 
 export default function AccessibilityPanel() {
   const [isOpen, setIsOpen] = useState(false);
-  const { settings, updateSetting, resetAll } = useAccessibility();
+  const { settings, updateSetting, resetAll, darkMode, setDarkMode } = useAccessibility();
 
   const hasChanges = settings.highContrast || settings.fontSize !== 100 || settings.lineSpacing !== 100 ||
     settings.dyslexiaFont || settings.reducedMotion || settings.colourOverlay !== "none" ||
-    settings.ttsEnabled || settings.readingGuide || settings.customTextColour !== "" || settings.customBgColour !== "";
+    settings.ttsEnabled || settings.readingGuide || settings.customTextColour !== "" || settings.customBgColour !== "" || darkMode;
 
   return (
     <>
@@ -95,6 +96,15 @@ export default function AccessibilityPanel() {
         </div>
 
         <div className="overflow-y-auto h-[calc(100%-65px)] p-4 space-y-5">
+          <ToggleRow
+            icon={<Moon className="w-4 h-4" />}
+            label="Dark Mode"
+            description="Use a dark colour scheme across the site"
+            checked={darkMode}
+            onChange={(v) => setDarkMode(v)}
+            testId="toggle-dark-mode"
+          />
+
           <ToggleRow
             icon={<Eye className="w-4 h-4" />}
             label="High Contrast"

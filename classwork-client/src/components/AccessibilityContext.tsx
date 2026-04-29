@@ -72,11 +72,26 @@ interface AccessibilityContextType {
   speak: (text: string, onDone?: () => void) => void;
   stopSpeaking: () => void;
   isSpeaking: boolean;
+  darkMode: boolean;
+  setDarkMode: (value: boolean) => void;
 }
 
 const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
 
 const STORAGE_KEY = "a11y-settings";
+const THEME_KEY = "vite-ui-theme";
+
+function loadDarkMode(): boolean {
+  try {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored === "dark") return true;
+    if (stored === "light") return false;
+    if (stored === "system") {
+      return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+    }
+  } catch {}
+  return false;
+}
 
 function loadSettings(): AccessibilitySettings {
   try {
@@ -91,6 +106,7 @@ function loadSettings(): AccessibilitySettings {
 
 export function AccessibilityProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<AccessibilitySettings>(loadSettings);
+  const [darkMode, setDarkModeState] = useState<boolean>(loadDarkMode);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const resumeTimerRef = useRef<number | null>(null);
@@ -102,6 +118,15 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
     } catch {}
   }, [settings]);
 
+  // Apply / remove the `dark` class on <html> whenever darkMode changes.
+  // The same class is toggled by the static site, n5, revision and
+  // data-sculptor SPAs so all CSS rules keyed off `html.dark` stay consistent.
+  useEffect(() => {
+    const root = document.documentElement;
+    if (darkMode) root.classList.add("dark");
+    else root.classList.remove("dark");
+  }, [darkMode]);
+
   // Keep in sync when settings are changed in another tab or the main website
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
@@ -110,10 +135,24 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
           const parsed = JSON.parse(e.newValue);
           setSettings(prev => ({ ...prev, ...parsed }));
         } catch {}
+      } else if (e.key === THEME_KEY) {
+        // Cross-tab / cross-app dark-mode sync via the shared vite-ui-theme key
+        if (e.newValue === "dark") setDarkModeState(true);
+        else if (e.newValue === "light") setDarkModeState(false);
+        else if (e.newValue === "system") {
+          setDarkModeState(window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false);
+        }
       }
     };
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  const setDarkMode = useCallback((value: boolean) => {
+    try {
+      localStorage.setItem(THEME_KEY, value ? "dark" : "light");
+    } catch {}
+    setDarkModeState(value);
   }, []);
 
   useEffect(() => {
@@ -292,7 +331,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
   }, []);
 
   return (
-    <AccessibilityContext.Provider value={{ settings, updateSetting, resetAll, speak, stopSpeaking, isSpeaking }}>
+    <AccessibilityContext.Provider value={{ settings, updateSetting, resetAll, speak, stopSpeaking, isSpeaking, darkMode, setDarkMode }}>
       {children}
     </AccessibilityContext.Provider>
   );

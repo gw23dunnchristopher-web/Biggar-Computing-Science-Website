@@ -154,14 +154,14 @@ export default function JotterPage() {
         @media print {
           .cw-no-print { display: none !important; }
           body { background: #fff !important; }
-          .cw-jotter-card { break-inside: avoid; box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+          .cw-jotter-card { break-inside: avoid; box-shadow: none !important; border: 1px solid var(--cw-border-strong) !important; }
         }
         .cw-jotter-body h2 { font-size: 22px; margin: 12px 0 6px; }
         .cw-jotter-body h3 { font-size: 18px; margin: 10px 0 6px; }
         .cw-jotter-body h4 { font-size: 16px; margin: 10px 0 6px; }
         .cw-jotter-body p  { margin: 6px 0; }
         .cw-jotter-body ul, .cw-jotter-body ol { padding-left: 24px; margin: 6px 0; }
-        .cw-jotter-body blockquote { margin: 8px 0; padding: 4px 12px; border-left: 3px solid #cbd5e1; color: #475569; }
+        .cw-jotter-body blockquote { margin: 8px 0; padding: 4px 12px; border-left: 3px solid var(--cw-border-strong); color: var(--cw-ink-soft); }
         .cw-jotter-body a { color: var(--cw-accent); text-decoration: underline; }
         .cw-jotter-body img { max-width: 100%; height: auto; border-radius: 4px; cursor: zoom-in; }
         @media print { .cw-jotter-body img { cursor: auto; } }
@@ -170,8 +170,8 @@ export default function JotterPage() {
         .cw-jotter-body img.cw-img-center { display: block; margin: 8px auto; max-width: 100%; clear: both; }
         .cw-jotter-body::after { content: ''; display: block; clear: both; }
         .cw-jotter-body table.cw-table { border-collapse: collapse; margin: 8px 0; width: auto; max-width: 100%; }
-        .cw-jotter-body table.cw-table th, .cw-jotter-body table.cw-table td { border: 1px solid #cbd5e1; padding: 6px 10px; vertical-align: top; }
-        .cw-jotter-body table.cw-table th { background: #f1f5f9; text-align: left; font-weight: 600; }
+        .cw-jotter-body table.cw-table th, .cw-jotter-body table.cw-table td { border: 1px solid var(--cw-border-strong); padding: 6px 10px; vertical-align: top; }
+        .cw-jotter-body table.cw-table th { background: var(--cw-surface-muted); text-align: left; font-weight: 600; }
 
         /* Tab + sidebar layout. On screen we hide every unit except the
            active one. Print mode reveals every unit so a printout is still
@@ -180,10 +180,10 @@ export default function JotterPage() {
            always hidden in print. */
         .cw-jotter-tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 2px solid var(--cw-border); margin: 8px 0 12px; }
         .cw-jotter-tab { background: transparent; border: 1px solid transparent; border-bottom: none; padding: 8px 14px; font-size: 14px; font-weight: 600; color: var(--cw-muted); cursor: pointer; border-radius: 8px 8px 0 0; margin-bottom: -2px; }
-        .cw-jotter-tab:hover { color: var(--cw-ink); background: #f1f5f9; }
-        .cw-jotter-tab.active { color: var(--cw-accent, #2563eb); border-color: var(--cw-border); border-bottom-color: #fff; background: #fff; }
+        .cw-jotter-tab:hover { color: var(--cw-ink); background: var(--cw-surface-muted); }
+        .cw-jotter-tab.active { color: var(--cw-accent, #2563eb); border-color: var(--cw-border); border-bottom-color: var(--cw-surface); background: var(--cw-surface); }
         .cw-jotter-layout { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: start; }
-        .cw-jotter-sidebar { position: sticky; top: 12px; background: #fafbff; border: 1px solid var(--cw-border); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
+        .cw-jotter-sidebar { position: sticky; top: 12px; background: var(--cw-surface-soft); border: 1px solid var(--cw-border); border-radius: 10px; padding: 10px 12px; font-size: 13px; }
         .cw-jotter-sidebar h3 { margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--cw-muted); font-weight: 700; }
         .cw-jotter-sidebar ul { list-style: none; margin: 0; padding: 0; }
         .cw-jotter-sidebar li { margin: 0; }
@@ -217,7 +217,7 @@ export default function JotterPage() {
             type="button"
             onClick={() => window.print()}
             style={{
-              background: '#f1f5f9', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+              background: 'var(--cw-surface-muted)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
               padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer', fontSize: 14,
             }}
             title="Print or save as PDF"
@@ -400,6 +400,6 @@ export default function JotterPage() {
 }
 
 const card: React.CSSProperties = {
-  background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 12, padding: 20,
+  background: 'var(--cw-surface)', border: '1px solid var(--cw-border)', borderRadius: 12, padding: 20,
   boxShadow: '0 2px 8px rgba(15,23,42,0.04)',
 };

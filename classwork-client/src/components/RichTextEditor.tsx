@@ -395,7 +395,7 @@ export default function RichTextEditor({
         <ToolBtn onClick={() => exec('superscript')} title="Superscript">x<sup>2</sup></ToolBtn>
         <ToolBtn onClick={() => exec('subscript')} title="Subscript">x<sub>2</sub></ToolBtn>
         <Sep />
-        <ColorBtn label="A" title="Text colour" onPick={setColor} onReset={() => setColor('#0f172a')} />
+        <ColorBtn label="A" title="Text colour" onPick={setColor} onReset={() => setColor('var(--cw-ink)')} />
         <ColorBtn label={'\u25A0'} title="Highlight colour" defaultColor="#fff59d" onPick={setHighlight} onReset={clearHighlight} />
         <Sep />
         <ToolBtn onClick={() => exec('formatBlock', '<h2>')} title="Big heading">H1</ToolBtn>
@@ -532,7 +532,7 @@ export default function RichTextEditor({
           aria-label="Editing actions"
           style={{
             position: 'fixed', top: ctxMenu.y, left: ctxMenu.x,
-            background: '#fff', border: '1px solid var(--cw-border)',
+            background: 'var(--cw-surface)', border: '1px solid var(--cw-border)',
             borderRadius: 10, boxShadow: '0 8px 24px rgba(15,23,42,0.18)',
             padding: 6, minWidth: 180, zIndex: 9999,
             display: 'flex', flexDirection: 'column', gap: 2,
@@ -552,7 +552,7 @@ export default function RichTextEditor({
       <style>{`
         .cw-rte:empty:before {
           content: attr(data-placeholder);
-          color: #94a3b8;
+          color: var(--cw-muted-soft);
           pointer-events: none;
         }
         .cw-rte:focus { outline: 2px solid var(--cw-accent); outline-offset: -2px; }
@@ -561,7 +561,7 @@ export default function RichTextEditor({
         .cw-rte h4 { font-size: 16px; margin: 10px 0 6px; }
         .cw-rte p  { margin: 6px 0; }
         .cw-rte ul, .cw-rte ol { padding-left: 24px; margin: 6px 0; }
-        .cw-rte blockquote { margin: 8px 0; padding: 4px 12px; border-left: 3px solid #cbd5e1; color: #475569; }
+        .cw-rte blockquote { margin: 8px 0; padding: 4px 12px; border-left: 3px solid var(--cw-border-strong); color: var(--cw-ink-soft); }
         .cw-rte a { color: var(--cw-accent); text-decoration: underline; }
         .cw-rte img { max-width: 100%; height: auto; cursor: pointer; border-radius: 4px; }
         .cw-rte img.cw-img-left   { float: left;  margin: 4px 12px 4px 0; max-width: 50%; }
@@ -570,8 +570,8 @@ export default function RichTextEditor({
         .cw-rte img.cw-img-selected { outline: 2px solid var(--cw-accent); outline-offset: 2px; }
         .cw-rte::after { content: ''; display: block; clear: both; }
         .cw-rte table.cw-table { border-collapse: collapse; margin: 8px 0; width: auto; max-width: 100%; }
-        .cw-rte table.cw-table th, .cw-rte table.cw-table td { border: 1px solid #cbd5e1; padding: 6px 10px; vertical-align: top; min-width: 40px; }
-        .cw-rte table.cw-table th { background: #f1f5f9; text-align: left; font-weight: 600; }
+        .cw-rte table.cw-table th, .cw-rte table.cw-table td { border: 1px solid var(--cw-border-strong); padding: 6px 10px; vertical-align: top; min-width: 40px; }
+        .cw-rte table.cw-table th { background: var(--cw-surface-muted); text-align: left; font-weight: 600; }
       `}</style>
     </div>
   );
@@ -589,7 +589,7 @@ function ToolBtn({ children, onClick, title, disabled }: { children: React.React
     >{children}</button>
   );
 }
-function Sep() { return <span style={{ width: 1, alignSelf: 'stretch', background: '#e2e8f0', margin: '0 2px' }} />; }
+function Sep() { return <span style={{ width: 1, alignSelf: 'stretch', background: 'var(--cw-border)', margin: '0 2px' }} />; }
 
 // Single row in the right-click menu — wide click target, label on the left,
 // keyboard hint greyed out on the right (so pupils gradually learn the
@@ -608,7 +608,7 @@ function CtxItem({ icon, label, hint, onClick }: { icon: string; label: string; 
         borderRadius: 6, cursor: 'pointer', textAlign: 'left',
         color: 'var(--cw-ink)', fontSize: 14, width: '100%',
       }}
-      onMouseOver={(e) => { (e.currentTarget as HTMLButtonElement).style.background = '#f1f5f9'; }}
+      onMouseOver={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--cw-surface-muted)'; }}
       onMouseOut={(e) => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
     >
       <span style={{ width: 20, textAlign: 'center', fontSize: 14 }} aria-hidden="true">{icon}</span>
@@ -670,7 +670,7 @@ function ColorBtn({
 }
 
 const wrap: React.CSSProperties = {
-  border: '1px solid var(--cw-border)', borderRadius: 8, overflow: 'hidden', background: '#fff',
+  border: '1px solid var(--cw-border)', borderRadius: 8, overflow: 'hidden', background: 'var(--cw-surface)',
 };
 // Extra styling layered on top of `wrap` when `fillHeight` is true: turns the
 // outer box into a flex column that fills its parent so the editable area
@@ -680,10 +680,10 @@ const wrapFill: React.CSSProperties = {
 };
 const toolbar: React.CSSProperties = {
   display: 'flex', flexWrap: 'wrap', gap: 4, padding: 6, alignItems: 'center',
-  borderBottom: '1px solid var(--cw-border)', background: '#f8fafc',
+  borderBottom: '1px solid var(--cw-border)', background: 'var(--cw-surface-soft)',
 };
 const btn: React.CSSProperties = {
-  background: '#fff', border: '1px solid var(--cw-border)', borderRadius: 6,
+  background: 'var(--cw-surface)', border: '1px solid var(--cw-border)', borderRadius: 6,
   padding: '4px 8px', fontSize: 13, color: 'var(--cw-ink)',
   minWidth: 28,
 };

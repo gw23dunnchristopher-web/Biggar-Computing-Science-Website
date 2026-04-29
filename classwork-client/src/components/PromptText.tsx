@@ -111,7 +111,7 @@ function PromptImage({
           display: 'block',
           maxWidth: '100%', maxHeight: 360, height: 'auto',
           borderRadius: 8, border: '1px solid var(--cw-border)',
-          background: '#fff',
+          background: 'var(--cw-surface)',
         }}
       />
     </button>
@@ -172,7 +172,7 @@ function ImageLightbox({
           maxWidth: '95vw', maxHeight: '85vh',
           width: 'auto', height: 'auto',
           objectFit: 'contain',
-          borderRadius: 8, background: '#fff',
+          borderRadius: 8, background: 'var(--cw-surface)',
           boxShadow: '0 12px 48px rgba(0,0,0,0.6)',
         }}
       />

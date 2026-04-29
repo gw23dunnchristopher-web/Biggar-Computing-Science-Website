@@ -8,8 +8,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/classwork/assets/index-D9DZzs3q.js"></script>
-    <link rel="stylesheet" crossorigin href="/classwork/assets/index-LkeGp-9s.css">
+    <script>
+      // Anti-flash: apply the dark class before React mounts so the user
+      // never sees a light flash when reloading a dark-mode page. Reads
+      // the same `vite-ui-theme` key the AccessibilityContext writes.
+      (function () {
+        try {
+          var stored = localStorage.getItem('vite-ui-theme');
+          var dark = stored === 'dark' ||
+            (stored === 'system' && window.matchMedia &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) document.documentElement.classList.add('dark');
+        } catch (_) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/classwork/assets/index-DKH2ehtf.js"></script>
+    <link rel="stylesheet" crossorigin href="/classwork/assets/index-CSqdNAHe.css">
   </head>
   <body>
     <div id="root"></div>
