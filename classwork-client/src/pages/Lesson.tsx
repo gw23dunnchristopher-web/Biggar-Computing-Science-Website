@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { useRoute } from 'wouter';
+import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
 import Modal, { modalPrimaryBtn, modalSecondaryBtn } from '@/components/Modal';
 import RichTextEditor from '@/components/RichTextEditor';
