@@ -82,6 +82,7 @@ const TYPE_LABELS: Record<string, string> = {
   code: 'Code',
   multiple_choice: 'Multiple choice',
   screenshot: 'Screenshot upload',
+  file_upload: 'File upload (text/code files)',
   scratch_link: 'Scratch project link',
   makecode_link: 'MakeCode project link',
   google_sites_link: 'Google Sites link',
@@ -1440,6 +1441,8 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
     // Fun-activity types — same JSON-into-text_answer storage as fill-in-blanks
     // so the cell-grid draft path picks them up for free.
     'crossword', 'word_search', 'matching', 'anagrams',
+    // File upload — file content stored as JSON in text_answer.
+    'file_upload',
   ];
   const draftEnabled = !preview && draftableTypes.includes(t);
 
@@ -1471,6 +1474,12 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
       });
       return { ...empty, textAnswer: filled ? JSON.stringify(cellAnswers) : null };
     }
+    if (t === 'file_upload') {
+      return {
+        ...empty,
+        textAnswer: (fileName && text) ? JSON.stringify({ filename: fileName, content: text }) : null,
+      };
+    }
     // short / long / code / video_question / sql_task — plain textarea.
     return { ...empty, textAnswer: text || null };
   }
@@ -1501,6 +1510,12 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
           try {
             const parsed = JSON.parse(draft.text_answer);
             if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
+          } catch { /* malformed — discard silently */ }
+        } else if (t === 'file_upload') {
+          try {
+            const parsed = JSON.parse(draft.text_answer);
+            if (parsed?.filename) setFileName(parsed.filename);
+            if (parsed?.content) setText(parsed.content);
           } catch { /* malformed — discard silently */ }
         } else {
           setText(draft.text_answer);
@@ -1659,6 +1674,9 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
         const sessionKey = localStorage.getItem('student_session_key');
         if (!sessionKey) throw new Error('Please open the database first, do your work, then come back and submit.');
         body.linkUrl = `${dbEmbedToken}|${sessionKey}`;
+      } else if (t === 'file_upload') {
+        if (!fileName || !text) throw new Error('Please select a file to upload.');
+        body.textAnswer = JSON.stringify({ filename: fileName, content: text });
       } else body.textAnswer = text; // short / long / code / video_question / sql_task
 
       if (preview) {
@@ -1708,6 +1726,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
     t === 'screenshot' ? !!fileUrl :
     t === 'presentation' ? !!fileUrl :
     t === 'project' ? !!(fileUrl || url) :
+    t === 'file_upload' ? !!(fileName && text) :
     ['scratch_link', 'makecode_link', 'google_sites_link'].includes(t) ? !!url :
     codeProjectKind ? !!selectedProjectId :
     t === 'database_task' ? !!dbEmbedToken :
@@ -2024,6 +2043,62 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
               onChange={(e) => setUrl(e.target.value)}
               style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--cw-border)' }}
             />
+          )}
+        </div>
+      )}
+
+      {t === 'file_upload' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--cw-muted)' }}>
+            Upload a file — accepted types: <strong>.txt .py .csv .html .js</strong> (max 200 KB)
+          </p>
+          <input
+            type="file"
+            accept=".txt,.py,.csv,.html,.htm,.js"
+            disabled={busy}
+            onChange={async (e) => {
+              const f = e.target.files?.[0];
+              if (!f) return;
+              if (f.size > 200 * 1024) {
+                setMsg('File too large — please keep it under 200 KB.');
+                return;
+              }
+              try {
+                const content = await f.text();
+                setText(content);
+                setFileName(f.name);
+                setMsg(null);
+              } catch {
+                setMsg('Could not read the file. Make sure it is a plain text or code file.');
+              }
+            }}
+          />
+          {fileName && (
+            <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
+              Attached: <strong>{fileName}</strong>{' '}
+              <button
+                type="button"
+                onClick={() => { setText(''); setFileName(''); setMsg(null); }}
+                style={{ marginLeft: 8, background: 'none', border: 'none', color: 'var(--cw-accent)', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+              >
+                remove
+              </button>
+            </div>
+          )}
+          {text && fileName && (
+            <details style={{ marginTop: 4 }}>
+              <summary style={{ cursor: 'pointer', fontSize: 13, color: 'var(--cw-muted)' }}>
+                Preview contents ({text.length.toLocaleString()} characters)
+              </summary>
+              <pre style={{
+                marginTop: 6, padding: '10px 12px', borderRadius: 8,
+                background: 'var(--cw-surface)', border: '1px solid var(--cw-border)',
+                fontSize: 12, lineHeight: 1.5, overflow: 'auto', maxHeight: 200,
+                whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+              }}>
+                {text.length > 2000 ? text.slice(0, 2000) + '\n… (preview truncated)' : text}
+              </pre>
+            </details>
           )}
         </div>
       )}
@@ -2962,6 +3037,37 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
           <img src={s.file_url} alt="Screenshot" style={{ maxWidth: '100%', maxHeight: 280, borderRadius: 6, border: '1px solid var(--cw-border)' }} />
         </a>
       : <span style={muted}>No screenshot uploaded.</span>;
+  }
+
+  if (t === 'file_upload') {
+    if (!s.text_answer) return <span style={muted}>No file uploaded.</span>;
+    let filename = 'file';
+    let content = '';
+    try {
+      const parsed = JSON.parse(s.text_answer);
+      filename = String(parsed.filename || 'file');
+      content = String(parsed.content || '');
+    } catch {
+      content = s.text_answer;
+    }
+    return (
+      <div>
+        <div style={{ fontSize: 13, marginBottom: 6 }}>
+          <strong>File:</strong> {filename}
+          {content && <span style={{ marginLeft: 8, color: 'var(--cw-muted)' }}>({content.length.toLocaleString()} characters)</span>}
+        </div>
+        {content && (
+          <pre style={{
+            padding: '10px 12px', borderRadius: 8, margin: 0,
+            background: 'var(--cw-surface)', border: '1px solid var(--cw-border)',
+            fontSize: 12, lineHeight: 1.5, overflow: 'auto', maxHeight: 320,
+            whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+          }}>
+            {content.length > 4000 ? content.slice(0, 4000) + '\n… (truncated for display)' : content}
+          </pre>
+        )}
+      </div>
+    );
   }
 
   if (t === 'project') {
