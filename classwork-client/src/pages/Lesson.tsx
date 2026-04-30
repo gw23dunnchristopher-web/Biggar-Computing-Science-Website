@@ -737,7 +737,7 @@ export default function Lesson() {
         // answer area instead of reading text.  Child questions appear below it.
         const renderFileTaskPanel = (p: Question, label: string) => {
           const mySubs = submissions.filter((s) => s.question_id === p.id);
-          const myDraft = drafts[p.id];
+          const myDraft = draftsByQuestion[p.id] ?? null;
           return (
             <div style={{
               ...card,
