@@ -4705,7 +4705,7 @@ function VideoQuestionPlayer({ config, compact }: { config: any; compact?: boole
       </div>
     );
   }
-  const maxW = 800;
+  const maxW = 560;
   if (v.kind === 'youtube') {
     const id = youtubeIdFromUrl(String(v.url));
     if (!id) {
