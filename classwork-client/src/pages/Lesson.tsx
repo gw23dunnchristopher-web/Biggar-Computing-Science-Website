@@ -918,6 +918,7 @@ export default function Lesson() {
 
         // Build tab labels and answered state in a single pass.
         let qCount = 0;
+        let tCount = 0;
         const tabLabels: string[]  = [];
         const tabAnswered: (boolean | null)[] = []; // null = non-answerable
 
@@ -925,7 +926,7 @@ export default function Lesson() {
           if (it.type === 'standalone') {
             const qt = it.q.question_type;
             if (qt === 'info_only')       { tabLabels.push('Note');    tabAnswered.push(null); }
-            else if (qt === 'text_only')  { tabLabels.push('Task');    tabAnswered.push(null); }
+            else if (qt === 'text_only')  { tCount++; tabLabels.push(`T${tCount}`); tabAnswered.push(null); }
             else if (qt === 'section_header') { tabLabels.push('—');   tabAnswered.push(null); }
             else {
               qCount++;
