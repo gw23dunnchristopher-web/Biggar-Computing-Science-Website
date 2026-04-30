@@ -83,6 +83,7 @@ const TYPE_LABELS: Record<string, string> = {
   multiple_choice: 'Multiple choice',
   screenshot: 'Screenshot upload',
   file_upload: 'File upload (text/code files)',
+  file_task: 'File task (upload + follow-up questions)',
   scratch_link: 'Scratch project link',
   makecode_link: 'MakeCode project link',
   google_sites_link: 'Google Sites link',
@@ -214,7 +215,7 @@ export default function Lesson() {
   // Progress tracking — counts answerable, non-extension questions only.
   // Excludes: passage, video_group (container cards), info_only, section_header, text_only.
   const mainCountableQs = questions.filter(
-    (q) => !q.is_extension && !['passage', 'video_group', 'info_only', 'section_header', 'text_only'].includes(q.question_type)
+    (q) => !q.is_extension && !['passage', 'video_group', 'file_task', 'info_only', 'section_header', 'text_only'].includes(q.question_type)
   );
   const mainAnsweredCount = mainCountableQs.filter(
     (q) => submissions.some((s) => s.question_id === q.id)
@@ -435,7 +436,7 @@ export default function Lesson() {
             </button>
             {!previewAsStudent && <NewQuestionButton
               lessonId={lessonId}
-              passages={questions.filter((q) => q.question_type === 'passage' || q.question_type === 'video_group')}
+              passages={questions.filter((q) => q.question_type === 'passage' || q.question_type === 'video_group' || q.question_type === 'file_task')}
               onCreated={refresh}
             />}
           </>
@@ -476,9 +477,9 @@ export default function Lesson() {
           const items: Item[] = [];
           for (const q of qs) {
             if (consumed.has(q.id)) continue;
-            if (q.question_type === 'passage' || q.question_type === 'video_group') {
+            if (q.question_type === 'passage' || q.question_type === 'video_group' || q.question_type === 'file_task') {
               const children = qs.filter((c) =>
-                c.id !== q.id && c.question_type !== 'passage' && c.question_type !== 'video_group' && c.passage_id === q.id && !consumed.has(c.id)
+                c.id !== q.id && c.question_type !== 'passage' && c.question_type !== 'video_group' && c.question_type !== 'file_task' && c.passage_id === q.id && !consumed.has(c.id)
               );
               children.forEach((c) => consumed.add(c.id));
               consumed.add(q.id);
@@ -534,7 +535,7 @@ export default function Lesson() {
                     <>
                       <EditQuestionButton
                         question={q}
-                        passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group')}
+                        passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task')}
                         onChanged={refresh}
                       />
                       {lesson?.unit_id && (
@@ -705,7 +706,7 @@ export default function Lesson() {
                     )}
                     <NewQuestionButton
                       lessonId={lessonId}
-                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group')}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task')}
                       initialPassageId={p.id}
                       label={isVG ? '+ Add question to this video' : '+ Add question to this passage'}
                       compact
@@ -732,6 +733,87 @@ export default function Lesson() {
           );
         };
 
+        // The file task panel: like a passage card but with a file upload student
+        // answer area instead of reading text.  Child questions appear below it.
+        const renderFileTaskPanel = (p: Question, label: string) => {
+          const mySubs = submissions.filter((s) => s.question_id === p.id);
+          const myDraft = drafts[p.id];
+          return (
+            <div style={{
+              ...card,
+              background: 'var(--cw-tint-success-bg)',
+              borderColor: 'var(--cw-tint-success-border)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, flexWrap: 'wrap' }}>
+                <span style={{
+                  fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase',
+                  padding: '2px 8px', borderRadius: 999,
+                  background: '#16a34a', color: '#fff',
+                }}>📎 File task</span>
+                <span style={{ color: 'var(--cw-tint-success-ink)' }}>{label}</span>
+                {role === 'teacher' && !previewAsStudent && (
+                  <>
+                    <EditQuestionButton
+                      question={p}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task').filter((x) => x.id !== p.id)}
+                      onChanged={refresh}
+                    />
+                    {lesson?.unit_id && (
+                      <MoveQuestionButton
+                        questionId={p.id}
+                        unitId={lesson.unit_id}
+                        currentLessonId={lessonId}
+                        isGroup
+                        onMoved={refresh}
+                      />
+                    )}
+                    <NewQuestionButton
+                      lessonId={lessonId}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task')}
+                      initialPassageId={p.id}
+                      label="+ Add question to this file task"
+                      compact
+                      onCreated={refresh}
+                    />
+                  </>
+                )}
+              </div>
+              {p.prompt && (
+                <div style={{ marginTop: 8, lineHeight: 1.55 }}>
+                  <PromptText text={p.prompt} />
+                </div>
+              )}
+              <QuestionResources
+                questionId={p.id}
+                isTeacher={role === 'teacher' && !previewAsStudent}
+                initialResources={resourcesByQuestion[p.id] || []}
+              />
+              {/* Student and preview-as-student: show the file upload answer area */}
+              {(role === 'student' || previewAsStudent) && (
+                <div style={{ marginTop: 12 }}>
+                  <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: 'var(--cw-tint-success-ink)' }}>
+                    Step 1 — upload your file or paste a share link below before answering the questions.
+                  </p>
+                  <StudentAnswer
+                    question={p}
+                    previousSubmissions={mySubs}
+                    draft={myDraft}
+                    onSubmitted={refresh}
+                    preview={previewAsStudent}
+                  />
+                </div>
+              )}
+              {/* Teacher viewing a student's work: show the submitted file */}
+              {role === 'teacher' && !previewAsStudent && mySubs.length > 0 && (
+                <div style={{ marginTop: 12, borderTop: '1px solid var(--cw-border)', paddingTop: 12 }}>
+                  <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 600, color: 'var(--cw-muted)', textTransform: 'uppercase', letterSpacing: 0.4 }}>Uploaded file</p>
+                  <TeacherSubmissions question={p} submissions={mySubs} onChanged={refresh} />
+                </div>
+              )}
+            </div>
+          );
+        };
+
         // A section divider — purely visual grouping. No marks, no answer area,
         // no resources. Used by teachers to break a long lesson into "Section A",
         // "Section B" etc. Question numbering continues across sections so
@@ -749,7 +831,7 @@ export default function Lesson() {
               {role === 'teacher' && !previewAsStudent && (
                 <EditQuestionButton
                   question={s}
-                  passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group')}
+                  passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task')}
                   onChanged={refresh}
                 />
               )}
@@ -796,7 +878,9 @@ export default function Lesson() {
               const childCount = it.children.length;
               content = (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {renderPassagePanel(it.passage, groupLabel)}
+                  {it.passage.question_type === 'file_task'
+                    ? renderFileTaskPanel(it.passage, groupLabel)
+                    : renderPassagePanel(it.passage, groupLabel)}
                   {/* Collapse toggle — teacher only */}
                   {isTeacherDrag && childCount > 0 && (
                     <button
@@ -817,7 +901,7 @@ export default function Lesson() {
                   {!collapsed && (
                     it.children.length === 0 ? (
                       <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0 }}>
-                        No tasks are attached to this {it.passage.question_type === 'video_group' ? 'video' : 'passage'} yet.
+                        No tasks are attached to this {it.passage.question_type === 'video_group' ? 'video' : it.passage.question_type === 'file_task' ? 'file task' : 'passage'} yet.
                       </p>
                     ) : it.children.map((c, ci) =>
                       renderQuestionCard(c, `${String.fromCharCode(97 + ci)})`, isExt)
@@ -997,17 +1081,20 @@ export default function Lesson() {
             // For video_group: one child question at a time with prev/next nav.
             // For passage: all children shown at once (unchanged behaviour).
             const isVG = curItem.passage.question_type === 'video_group';
+            const isFT = curItem.passage.question_type === 'file_task';
             const totalChildren = curItem.children.length;
             const rawStep = vgStep[curItem.passage.id] ?? 0;
             const curStep = Math.min(rawStep, Math.max(0, totalChildren - 1));
             curContent = (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div style={{ position: 'sticky', top: 0, zIndex: 10 }}>
-                  {renderPassagePanel(curItem.passage, curIsExt ? 'Extension' : curLabel)}
+                  {isFT
+                    ? renderFileTaskPanel(curItem.passage, curIsExt ? 'Extension' : curLabel)
+                    : renderPassagePanel(curItem.passage, curIsExt ? 'Extension' : curLabel)}
                 </div>
                 {totalChildren === 0 ? (
                   <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0, fontSize: 14 }}>
-                    No questions are attached to this {isVG ? 'video' : 'passage'} yet.
+                    No questions are attached to this {isVG ? 'video' : isFT ? 'file task' : 'passage'} yet.
                   </p>
                 ) : isVG ? (
                   <>
@@ -1443,7 +1530,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
       });
       return { ...empty, textAnswer: filled ? JSON.stringify(cellAnswers) : null };
     }
-    if (t === 'file_upload') {
+    if (t === 'file_upload' || t === 'file_task') {
       return {
         ...empty,
         textAnswer: (fileName && text) ? JSON.stringify({ filename: fileName, content: text }) : null,
@@ -1644,7 +1731,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
         const sessionKey = localStorage.getItem('student_session_key');
         if (!sessionKey) throw new Error('Please open the database first, do your work, then come back and submit.');
         body.linkUrl = `${dbEmbedToken}|${sessionKey}`;
-      } else if (t === 'file_upload') {
+      } else if (t === 'file_upload' || t === 'file_task') {
         if (!fileName && !url.trim()) throw new Error('Please upload a file or paste a share link.');
         if (fileName && text) body.textAnswer = JSON.stringify({ filename: fileName, content: text });
         if (url.trim()) body.linkUrl = url.trim();
@@ -1697,7 +1784,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
     t === 'screenshot' ? !!fileUrl :
     t === 'presentation' ? !!fileUrl :
     t === 'project' ? !!(fileUrl || url) :
-    t === 'file_upload' ? !!(fileName && text) || !!url.trim() :
+    t === 'file_upload' || t === 'file_task' ? !!(fileName && text) || !!url.trim() :
     ['scratch_link', 'makecode_link', 'google_sites_link'].includes(t) ? !!url :
     codeProjectKind ? !!selectedProjectId :
     t === 'database_task' ? !!dbEmbedToken :
@@ -2018,7 +2105,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
         </div>
       )}
 
-      {t === 'file_upload' && (() => {
+      {(t === 'file_upload' || t === 'file_task') && (() => {
         const ACCEPTED = '.txt,.py,.csv,.html,.htm,.js';
         async function handleFile(f: File) {
           if (f.size > 200 * 1024) {
@@ -3750,7 +3837,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
     setBusy(true);
     setErr(null);
     try {
-      const noAnswerType = type === 'passage' || type === 'video_group' || type === 'info_only' || type === 'section_header' || type === 'text_only';
+      const noAnswerType = type === 'passage' || type === 'video_group' || type === 'file_task' || type === 'info_only' || type === 'section_header' || type === 'text_only';
       const body: any = {
         questionType: type, prompt,
         // Passages and info-only notes have no marks / marking scheme / AI
@@ -3764,7 +3851,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
       };
       // Only non-passage types can be attached to a passage (a passage
       // attaching to itself doesn't make sense).
-      if (type !== 'passage' && type !== 'video_group' && passageId) body.passageId = passageId;
+      if (type !== 'passage' && type !== 'video_group' && type !== 'file_task' && passageId) body.passageId = passageId;
       if (type === 'multiple_choice') body.options = options;
       if (type === 'presentation') {
         const cfg: any = {};
@@ -4243,28 +4330,29 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
                   : <>Tip: paste a URL (e.g. https://bbc.co.uk/bitesize) and it will appear as a clickable link that opens in a new window. For a friendlier label, write <code>[Bitesize lesson](https://bbc.co.uk/bitesize)</code>.</>}
           </span>
         </label>
-        {type !== 'passage' && type !== 'video_group' && passages.length > 0 && (
-          <label style={fieldLabel}>Attach to passage or video (optional)
+        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && passages.length > 0 && (
+          <label style={fieldLabel}>Attach to passage, video, or file task (optional)
             <select value={passageId} onChange={(e) => setPassageId(e.target.value)} style={input}>
               <option value="">— None (standalone task) —</option>
               {passages.map((p) => {
                 const isVid = p.question_type === 'video_group';
+                const isFT = p.question_type === 'file_task';
                 const preview = (p.prompt || '').slice(0, 60);
+                const prefix = isVid ? '▶ Video: ' : isFT ? '📎 File task: ' : 'Passage: ';
+                const fallback = isVid ? '(no description)' : isFT ? '(no description)' : '(no preview)';
                 return (
                   <option key={p.id} value={p.id}>
-                    {isVid ? '▶ Video: ' : 'Passage: '}
-                    {preview || (isVid ? '(no description)' : '(no preview)')}
-                    {(p.prompt || '').length > 60 ? '…' : ''}
+                    {prefix}{preview || fallback}{(p.prompt || '').length > 60 ? '…' : ''}
                   </option>
                 );
               })}
             </select>
             <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
-              Group this task with a reading passage or video so pupils see the stimulus alongside their answer area.
+              Group this task with a reading passage, video, or file task so pupils see the stimulus alongside their answer area.
             </span>
           </label>
         )}
-        {type !== 'passage' && type !== 'video_group' && type !== 'info_only' && type !== 'text_only' && (
+        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'info_only' && type !== 'text_only' && (
           <label style={fieldLabel}>Max marks
             <input type="number" min={1} value={maxMarks} onChange={(e) => setMaxMarks(parseInt(e.target.value) || 1)} style={input} />
             {(type === 'fill_in_blanks' || type === 'table' || type === 'labeled_inputs') && (
@@ -4799,7 +4887,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
             )}
           </div>
         )}
-        {type !== 'passage' && type !== 'video_group' && type !== 'info_only' && type !== 'text_only' && type !== 'section_header' && (
+        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'info_only' && type !== 'text_only' && type !== 'section_header' && (
           <>
             <label style={fieldLabel}>Marking scheme (teacher view only)
               <textarea rows={2} value={markingScheme} onChange={(e) => setMarkingScheme(e.target.value)} style={input} />

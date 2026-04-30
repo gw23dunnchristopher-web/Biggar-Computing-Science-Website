@@ -68,8 +68,9 @@ import {
   usernameTakenAnywhere,
   setUnitPresentation,
   clearUnitPresentation,
+  getStudentSubmissionForQuestion,
 } from './classwork-storage';
-import { markSubmission, suggestCrosswordClues, renderPptxToImages, extractPptxSections, convertPptxToPdf } from './classwork-ai';
+import { markSubmission, suggestCrosswordClues, renderPptxToImages, extractPptxSections, convertPptxToPdf, fetchGoogleDocText } from './classwork-ai';
 import { storage as n5Storage } from './n5-storage';
 import bcrypt from 'bcryptjs';
 
@@ -901,10 +902,32 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
         fileUrl,
       });
 
+      // If this question belongs to a file_task group, fetch the student's
+      // uploaded file from the parent submission so the AI can mark in context.
+      let parentFileContent: string | null = null;
+      if (q.passage_id) {
+        const parent = await getQuestion(q.passage_id);
+        if (parent?.question_type === 'file_task') {
+          const parentSub = await getStudentSubmissionForQuestion(q.passage_id, (req as any).studentId);
+          if (parentSub?.text_answer) {
+            try {
+              const parsed = JSON.parse(parentSub.text_answer);
+              parentFileContent = typeof parsed.content === 'string' ? parsed.content : parentSub.text_answer;
+            } catch {
+              parentFileContent = parentSub.text_answer;
+            }
+          } else if (parentSub?.link_url) {
+            const doc = await fetchGoogleDocText(parentSub.link_url).catch(() => null);
+            if (doc?.text) parentFileContent = doc.text;
+          }
+        }
+      }
+
       // Try to AI-mark within ~25 s; fall back to "pending teacher mark"
       // if the model takes too long or no key is configured.
       try {
-        const markPromise = markSubmission(q as any, sub as any);
+        const subWithContext = parentFileContent ? { ...sub, parentFileContent } : sub;
+        const markPromise = markSubmission(q as any, subWithContext as any);
         const result = await Promise.race([
           markPromise,
           new Promise<null>((resolve) => setTimeout(() => resolve(null), 25000)),
