@@ -2069,11 +2069,20 @@ function _gameRng(seed: string): () => number {
 }
 
 function _scrambleWord(word: string, salt = ''): string {
-  const letters = String(word).toUpperCase().replace(/[^A-Z]/g, '').split('');
+  const upper = String(word).toUpperCase();
+  // Multi-word: scramble each word independently so spaces are preserved and
+  // each word's letters stay within that word (same length, same letters).
+  if (upper.includes(' ')) {
+    return upper
+      .split(' ')
+      .map((w, idx) => _scrambleWord(w, salt + idx))
+      .join(' ');
+  }
+  const letters = upper.replace(/[^A-Z]/g, '').split('');
   if (letters.length < 2) return letters.join('');
   const rng = _gameRng(word + '|' + salt);
   // Keep scrambling until we get a different ordering than the original
-  // (otherwise a 4-letter word can land on itself and look unscrambled).
+  // (otherwise a short word can land on itself and look unscrambled).
   for (let attempt = 0; attempt < 8; attempt++) {
     const arr = letters.slice();
     for (let i = arr.length - 1; i > 0; i--) {
@@ -2707,14 +2716,15 @@ function AnagramsEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void })
       {items.map((it, i) => (
         <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, border: '1px solid var(--cw-border)', borderRadius: 6, background: 'var(--cw-surface)' }}>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <input type="text" value={it.answer || ''} placeholder="Answer (e.g. PYTHON)"
+            <input type="text" value={it.answer || ''} placeholder="Answer (e.g. PYTHON or WATER CYCLE)"
               onChange={(e) => {
                 const a = items.slice();
-                const ans = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
-                a[i] = { ...it, answer: ans, scrambled: _scrambleWord(ans, String(i)) };
+                // Allow spaces for multi-word answers; strip everything else non-alpha.
+                const ans = e.target.value.toUpperCase().replace(/[^A-Z ]/g, '').replace(/  +/g, ' ');
+                a[i] = { ...it, answer: ans, scrambled: _scrambleWord(ans.trim(), String(i)) };
                 setItems(a);
               }}
-              style={{ ...inputStyle, width: 180, textTransform: 'uppercase', fontFamily: 'JetBrains Mono, monospace' }} />
+              style={{ ...inputStyle, width: 200, textTransform: 'uppercase', fontFamily: 'JetBrains Mono, monospace' }} />
             <span style={{ color: 'var(--cw-muted)', fontSize: 13 }}>→</span>
             <span style={{ fontFamily: 'JetBrains Mono, monospace', letterSpacing: 3, fontSize: 14, fontWeight: 700, color: 'var(--cw-ink)' }}>
               {it.scrambled || '—'}
@@ -3714,11 +3724,12 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
       if (type === 'anagrams') {
         const cleaned = (Array.isArray(anagramsCfg.items) ? anagramsCfg.items : [])
           .map((it: any, i: number) => {
-            const answer = String(it?.answer || '').toUpperCase().replace(/[^A-Z]/g, '');
-            const scrambled = String(it?.scrambled || '').toUpperCase().replace(/[^A-Z]/g, '') || _scrambleWord(answer, String(i));
+            // Preserve spaces for multi-word answers; strip other non-alpha chars.
+            const answer = String(it?.answer || '').toUpperCase().replace(/[^A-Z ]/g, '').replace(/  +/g, ' ').trim();
+            const scrambled = (String(it?.scrambled || '').toUpperCase().replace(/[^A-Z ]/g, '').trim()) || _scrambleWord(answer, String(i));
             return { answer, scrambled, hint: String(it?.hint || '').trim() };
           })
-          .filter((it: any) => it.answer.length >= 2);
+          .filter((it: any) => it.answer.replace(/\s/g, '').length >= 2);
         if (cleaned.length === 0) throw new Error('Add at least one anagram with an answer of 2 or more letters.');
         body.config = { anagrams: { items: cleaned } };
       }
