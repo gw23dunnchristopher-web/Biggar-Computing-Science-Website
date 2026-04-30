@@ -663,7 +663,7 @@ export default function Lesson() {
               background: isVG ? 'var(--cw-surface)' : '#fffbeb',
               borderColor: isVG ? 'var(--cw-border)' : '#fcd34d',
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: isVG ? 'var(--cw-ink)' : '#92400e' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: isVG ? 'var(--cw-ink)' : '#92400e', flexWrap: 'wrap' }}>
                 <span style={{
                   fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase',
                   padding: '2px 8px', borderRadius: 999,
@@ -671,11 +671,21 @@ export default function Lesson() {
                 }}>{isVG ? '▶ Video' : 'Passage'}</span>
                 <span>{label}</span>
                 {role === 'teacher' && !previewAsStudent && (
-                  <EditQuestionButton
-                    question={p}
-                    passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group').filter((x) => x.id !== p.id)}
-                    onChanged={refresh}
-                  />
+                  <>
+                    <EditQuestionButton
+                      question={p}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group').filter((x) => x.id !== p.id)}
+                      onChanged={refresh}
+                    />
+                    <NewQuestionButton
+                      lessonId={lessonId}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group')}
+                      initialPassageId={p.id}
+                      label={isVG ? '+ Add question to this video' : '+ Add question to this passage'}
+                      compact
+                      onCreated={refresh}
+                    />
+                  </>
                 )}
               </div>
               {isVG ? (
@@ -713,7 +723,7 @@ export default function Lesson() {
               {role === 'teacher' && !previewAsStudent && (
                 <EditQuestionButton
                   question={s}
-                  passages={questions.filter((x) => x.question_type === 'passage')}
+                  passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group')}
                   onChanged={refresh}
                 />
               )}
@@ -3017,15 +3027,23 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
   );
 }
 
-function NewQuestionButton({ lessonId, passages, onCreated }: { lessonId: string; passages: Question[]; onCreated: () => void }) {
+function NewQuestionButton({ lessonId, passages, onCreated, initialPassageId, label, compact }: { lessonId: string; passages: Question[]; onCreated: () => void; initialPassageId?: string; label?: string; compact?: boolean }) {
   const [open, setOpen] = useState(false);
+  const btnStyle: React.CSSProperties = compact
+    ? { background: 'var(--cw-surface)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+        padding: '4px 10px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer' }
+    : { background: 'var(--cw-accent)', color: '#fff', border: 'none',
+        padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer' };
   return (
     <>
-      <button onClick={() => setOpen(true)} style={{
-        background: 'var(--cw-accent)', color: '#fff', border: 'none',
-        padding: '8px 14px', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
-      }}>+ New task</button>
-      {open && <NewQuestionModal lessonId={lessonId} passages={passages} onClose={() => setOpen(false)} onCreated={() => { setOpen(false); onCreated(); }} />}
+      <button onClick={() => setOpen(true)} style={btnStyle}>{label ?? '+ New task'}</button>
+      {open && <NewQuestionModal
+        lessonId={lessonId}
+        passages={passages}
+        initialPassageId={initialPassageId}
+        onClose={() => setOpen(false)}
+        onCreated={() => { setOpen(false); onCreated(); }}
+      />}
     </>
   );
 }
@@ -3052,14 +3070,16 @@ function EditQuestionButton({ question, passages, onChanged }: { question: Quest
   );
 }
 
-function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: { lessonId: string; passages: Question[]; existing?: Question; onClose: () => void; onCreated: () => void }) {
+function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onClose, onCreated }: { lessonId: string; passages: Question[]; existing?: Question; initialPassageId?: string; onClose: () => void; onCreated: () => void }) {
   const isEdit = !!existing;
   const cfg = (existing && existing.config && typeof existing.config === 'object') ? existing.config as any : {};
   const [type, setType] = useState(existing?.question_type || 'short');
   const [prompt, setPrompt] = useState(existing?.prompt || '');
   // For non-passage types, optionally attach this new question to an existing
-  // passage in the lesson so they render together as a stimulus group.
-  const [passageId, setPassageId] = useState<string>(existing?.passage_id || '');
+  // passage / video_group in the lesson so they render together as a stimulus
+  // group. `initialPassageId` lets the "+ Add question" button on a passage
+  // or video panel pre-select that container.
+  const [passageId, setPassageId] = useState<string>(existing?.passage_id || initialPassageId || '');
   const [maxMarks, setMaxMarks] = useState(existing?.max_marks ?? 1);
   const [markingScheme, setMarkingScheme] = useState(existing?.marking_scheme || '');
   const [aiGuidance, setAiGuidance] = useState(existing?.ai_grading_guidance || '');
@@ -3402,7 +3422,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
       };
       // Only non-passage types can be attached to a passage (a passage
       // attaching to itself doesn't make sense).
-      if (type !== 'passage' && passageId) body.passageId = passageId;
+      if (type !== 'passage' && type !== 'video_group' && passageId) body.passageId = passageId;
       if (type === 'multiple_choice') body.options = options;
       if (type === 'presentation') {
         const cfg: any = {};
@@ -3631,6 +3651,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
         </label>
         <label style={fieldLabel}>{
             type === 'passage' ? 'Passage text (what pupils read)'
+            : type === 'video_group' ? 'Description (optional — shown above the video)'
             : type === 'info_only' ? 'Note text (shown to pupils, no answer required)'
             : type === 'text_only' ? 'Task description (what pupils should do in their jotter)'
             : type === 'section_header' ? 'Section title (shown as a divider, e.g. "Section A: Comprehension")'
@@ -3870,6 +3891,8 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
           <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
             {type === 'passage'
               ? 'Type or paste the paragraph pupils have to read. It will sit in a sticky panel beside its attached tasks, so pupils can refer back to it as they answer.'
+              : type === 'video_group'
+                ? <>This card is just the video — there\u2019s no answer area on it. <strong>After saving</strong>, click <strong>+ Add question to this video</strong> on the video panel (or use <em>+ New task</em> and pick this video in <em>Attach to passage or video</em>) to add the questions pupils answer underneath it.</>
               : type === 'info_only'
                 ? 'A non-interactive note. Use it for instructions, a reminder or a sub-heading between tasks. Pupils don\u2019t answer it and it doesn\u2019t count for marks.'
                 : type === 'fill_in_blanks'
@@ -3877,23 +3900,28 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
                   : <>Tip: paste a URL (e.g. https://bbc.co.uk/bitesize) and it will appear as a clickable link that opens in a new window. For a friendlier label, write <code>[Bitesize lesson](https://bbc.co.uk/bitesize)</code>.</>}
           </span>
         </label>
-        {type !== 'passage' && passages.length > 0 && (
-          <label style={fieldLabel}>Attach to passage (optional)
+        {type !== 'passage' && type !== 'video_group' && passages.length > 0 && (
+          <label style={fieldLabel}>Attach to passage or video (optional)
             <select value={passageId} onChange={(e) => setPassageId(e.target.value)} style={input}>
               <option value="">— None (standalone task) —</option>
-              {passages.map((p, i) => (
-                <option key={p.id} value={p.id}>
-                  {passages.length > 1 ? `Passage ${i + 1}: ` : 'Passage: '}
-                  {(p.prompt || '').slice(0, 60)}{(p.prompt || '').length > 60 ? '…' : ''}
-                </option>
-              ))}
+              {passages.map((p) => {
+                const isVid = p.question_type === 'video_group';
+                const preview = (p.prompt || '').slice(0, 60);
+                return (
+                  <option key={p.id} value={p.id}>
+                    {isVid ? '▶ Video: ' : 'Passage: '}
+                    {preview || (isVid ? '(no description)' : '(no preview)')}
+                    {(p.prompt || '').length > 60 ? '…' : ''}
+                  </option>
+                );
+              })}
             </select>
             <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
-              Group this task with a reading passage so pupils see the passage in a sticky panel beside it while they answer.
+              Group this task with a reading passage or video so pupils see the stimulus alongside their answer area.
             </span>
           </label>
         )}
-        {type !== 'passage' && type !== 'info_only' && type !== 'text_only' && (
+        {type !== 'passage' && type !== 'video_group' && type !== 'info_only' && type !== 'text_only' && (
           <label style={fieldLabel}>Max marks
             <input type="number" min={1} value={maxMarks} onChange={(e) => setMaxMarks(parseInt(e.target.value) || 1)} style={input} />
             {(type === 'fill_in_blanks' || type === 'table' || type === 'labeled_inputs') && (
@@ -4428,7 +4456,7 @@ function NewQuestionModal({ lessonId, passages, existing, onClose, onCreated }: 
             )}
           </div>
         )}
-        {type !== 'passage' && type !== 'info_only' && type !== 'text_only' && type !== 'section_header' && (
+        {type !== 'passage' && type !== 'video_group' && type !== 'info_only' && type !== 'text_only' && type !== 'section_header' && (
           <>
             <label style={fieldLabel}>Marking scheme (teacher view only)
               <textarea rows={2} value={markingScheme} onChange={(e) => setMarkingScheme(e.target.value)} style={input} />
