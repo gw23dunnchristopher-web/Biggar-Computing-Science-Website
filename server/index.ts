@@ -59,7 +59,7 @@ app.use((req, res, next) => {
   // frame-src now includes the production domain so pages served from dev /
   // local hosts can also embed iframes that point at the live data-sculptor.
   // frame-ancestors '*' on data-sculptor responses lets it be framed anywhere.
-  const frameSrc = "frame-src 'self' https://trinket.io https://www.bhs-computing.co.uk https://bhs-computing.co.uk";
+  const frameSrc = "frame-src 'self' https://trinket.io https://www.bhs-computing.co.uk https://bhs-computing.co.uk https://www.youtube-nocookie.com https://www.youtube.com";
   const frameAncestors = isEmbeddable ? "frame-ancestors *" : "frame-ancestors 'self'";
   res.setHeader('Content-Security-Policy', `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://static.cloudflareinsights.com blob:; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://texttospeech.googleapis.com https://generativelanguage.googleapis.com https://api.groq.com; ${frameSrc}; ${frameAncestors}; media-src 'self' blob: data: https:; worker-src 'self' blob:;`);
   res.setHeader('Cache-Control', 'no-cache');
