@@ -190,6 +190,21 @@ body {
      Defaults to 1.0 so behaviour is unchanged when no settings are saved. */
   font-size: calc(1rem * var(--a11y-font-scale, 1));
   line-height: calc(1.5 * var(--a11y-line-scale, 1));
+
+}
+
+/* Subtle circuit-board background pattern on the root container.
+   Applied to #root (not body) because #root fills the viewport and
+   would otherwise cover a body-level background-image.
+   Swaps automatically for dark mode. */
+#root {
+  background-image: url('/public/images/cs-bg-light.svg');
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
+
+html.dark #root {
+  background-image: url('/public/images/cs-bg-dark.svg');
 }
 
 * { box-sizing: border-box; }
