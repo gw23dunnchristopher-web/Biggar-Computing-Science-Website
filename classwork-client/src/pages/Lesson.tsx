@@ -3774,6 +3774,38 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
     });
   }
 
+  // Add/remove ordered-list prefixes (1. 2. 3. …) on the selected lines.
+  // Toggles off if every selected line already starts with a number+dot.
+  function toggleOrderedList() {
+    const el = promptRef.current;
+    setPrompt((cur) => {
+      const start = el?.selectionStart ?? cur.length;
+      const end = el?.selectionEnd ?? cur.length;
+      const lineStart = cur.lastIndexOf('\n', start - 1) + 1;
+      const lineEndIdx = cur.indexOf('\n', end);
+      const lineEnd = lineEndIdx === -1 ? cur.length : lineEndIdx;
+      const block = cur.slice(lineStart, lineEnd) || '';
+      const sourceLines = block === '' ? [''] : block.split('\n');
+      const allNumbered = sourceLines.every((l) => /^\s*\d+\.\s+/.test(l));
+      const transformed = allNumbered
+        ? sourceLines.map((l) => l.replace(/^\s*\d+\.\s+/, ''))
+        : sourceLines.map((l, idx) => {
+            const stripped = l.replace(/^(#{1,3}\s+|[-*]\s+|\d+\.\s+)/, '');
+            return `${idx + 1}. ${stripped}`;
+          });
+      const newBlock = transformed.join('\n');
+      const next = cur.slice(0, lineStart) + newBlock + cur.slice(lineEnd);
+      const newCaret = lineStart + newBlock.length;
+      requestAnimationFrame(() => {
+        if (promptRef.current) {
+          promptRef.current.focus();
+          promptRef.current.setSelectionRange(lineStart, newCaret);
+        }
+      });
+      return next;
+    });
+  }
+
   async function handlePromptImageFiles(files: File[]) {
     const images = files.filter((f) => f.type.startsWith('image/'));
     if (!images.length) return;
@@ -4123,6 +4155,11 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
                   title="Bullet list (prefixes each line with -)"
                   onMouseDown={grab(() => togglePromptLinePrefix('- '))}>
                   • List
+                </button>
+                <button type="button" style={toolBtn}
+                  title="Numbered list (prefixes each selected line with 1. 2. 3. …)"
+                  onMouseDown={grab(() => toggleOrderedList())}>
+                  1. List
                 </button>
                 <span style={{ width: 1, background: 'var(--cw-border)', margin: '0 4px' }} />
                 <button type="button" style={{ ...toolBtn, fontWeight: 700, fontSize: 14 }}

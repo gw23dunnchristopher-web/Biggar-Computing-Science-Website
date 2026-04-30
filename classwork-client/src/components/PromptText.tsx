@@ -201,7 +201,11 @@ function ImageLightbox({
 type Block =
   | { kind: 'heading'; level: 1 | 2 | 3; text: string }
   | { kind: 'bullets'; items: string[] }
+  | { kind: 'ordered'; items: string[] }
   | { kind: 'paragraph'; text: string };
+
+const BULLET_RE = /^\s*[-*]\s+/;
+const ORDERED_RE = /^\s*\d+\.\s+/;
 
 function parseBlocks(text: string): Block[] {
   const lines = text.split(/\r?\n/);
@@ -221,12 +225,22 @@ function parseBlocks(text: string): Block[] {
       i++;
       continue;
     }
+    // Numbered list lines: collapse consecutive "1. item" rows into one <ol>.
+    if (ORDERED_RE.test(line)) {
+      const items: string[] = [];
+      while (i < lines.length && ORDERED_RE.test(lines[i])) {
+        items.push(lines[i].replace(ORDERED_RE, ''));
+        i++;
+      }
+      blocks.push({ kind: 'ordered', items });
+      continue;
+    }
     // Bullet lines: collapse consecutive "- item" / "* item" rows into one
     // <ul> so they render as a real list rather than three loose paragraphs.
-    if (/^\s*[-*]\s+/.test(line)) {
+    if (BULLET_RE.test(line)) {
       const items: string[] = [];
-      while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
-        items.push(lines[i].replace(/^\s*[-*]\s+/, ''));
+      while (i < lines.length && BULLET_RE.test(lines[i])) {
+        items.push(lines[i].replace(BULLET_RE, ''));
         i++;
       }
       blocks.push({ kind: 'bullets', items });
@@ -238,13 +252,14 @@ function parseBlocks(text: string): Block[] {
       continue;
     }
     // Otherwise: a paragraph that runs until the next blank line, heading,
-    // or bullet list. Newlines within are preserved as soft line breaks.
+    // or list. Newlines within are preserved as soft line breaks.
     const paraLines: string[] = [];
     while (
       i < lines.length
       && lines[i].trim() !== ''
       && !/^(#{1,3})\s+\S/.test(lines[i])
-      && !/^\s*[-*]\s+/.test(lines[i])
+      && !BULLET_RE.test(lines[i])
+      && !ORDERED_RE.test(lines[i])
     ) {
       paraLines.push(lines[i]);
       i++;
@@ -412,6 +427,22 @@ export default function PromptText({ text }: { text: string }) {
                 </li>
               ))}
             </ul>
+          );
+        }
+        if (b.kind === 'ordered') {
+          return (
+            <ol key={idx} style={{
+              margin: '6px 0 8px',
+              paddingLeft: 22,
+              lineHeight: 1.45,
+              listStyleType: 'decimal',
+            }}>
+              {b.items.map((it, j) => (
+                <li key={j} style={{ marginBottom: 4, display: 'list-item' }}>
+                  {renderInline(it, ctx)}
+                </li>
+              ))}
+            </ol>
           );
         }
         // Paragraph: pre-wrap preserves manual line breaks within. We use a
