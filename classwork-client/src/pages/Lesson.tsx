@@ -4704,9 +4704,8 @@ function VideoQuestionPlayer({ config, compact }: { config: any; compact?: boole
       </div>
     );
   }
-  // compact: cap height at 220px while preserving 16:9 on narrow screens
-  const paddingTop = compact ? 'min(56.25%, 220px)' : '56.25%';
-  const maxVideoHeight = compact ? 480 : 480;
+  // Max width: compact (inside video_group) keeps things tighter.
+  const maxW = compact ? 400 : 640;
   if (v.kind === 'youtube') {
     const id = youtubeIdFromUrl(String(v.url));
     if (!id) {
@@ -4718,16 +4717,14 @@ function VideoQuestionPlayer({ config, compact }: { config: any; compact?: boole
     }
     return (
       <div style={{ marginTop: 10 }}>
-        <div style={{ position: 'relative', paddingTop, borderRadius: 8, overflow: 'hidden', background: '#000' }}>
-          <iframe
-            src={`https://www.youtube-nocookie.com/embed/${id}`}
-            title="Video task"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
-          />
-        </div>
-        <div style={{ marginTop: 6, fontSize: 12, color: 'var(--cw-muted)' }}>
+        <iframe
+          src={`https://www.youtube-nocookie.com/embed/${id}`}
+          title="Video task"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          style={{ display: 'block', width: '100%', maxWidth: maxW, aspectRatio: '16 / 9', border: 0, borderRadius: 8, background: '#000' }}
+        />
+        <div style={{ marginTop: 6, fontSize: 12, color: 'var(--cw-muted)', maxWidth: maxW }}>
           Can't see the video?{' '}
           <a href={v.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--cw-accent)' }}>
             Open it in YouTube ↗
@@ -4736,13 +4733,13 @@ function VideoQuestionPlayer({ config, compact }: { config: any; compact?: boole
       </div>
     );
   }
-  // mp4 / webm / mov
+  // mp4 / webm / mov — browser preserves native aspect ratio automatically
   return (
     <video
       controls
       preload="metadata"
       src={v.url}
-      style={{ marginTop: 10, width: '100%', maxHeight: maxVideoHeight, borderRadius: 8, background: '#000' }}
+      style={{ display: 'block', marginTop: 10, width: '100%', maxWidth: maxW, borderRadius: 8, background: '#000' }}
     >
       Your browser can't play this video. <a href={v.url} target="_blank" rel="noopener noreferrer">Download it</a>.
     </video>
