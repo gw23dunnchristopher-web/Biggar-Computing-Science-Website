@@ -759,34 +759,20 @@ export default function Lesson() {
               }
             } else {
               // Group (passage / video_group): the group itself counts as one Q.
-              // Children are sub-labelled a, b, c … within that Q.
+              // Children are sub-labelled a), b), c) … within that Q.
+              // Single stacked layout so the whole block is clearly one draggable unit.
               qIdx++;
               const groupLabel = `${prefix}${qIdx}`;
-              // Two-column sticky layout on desktop; stacks on narrow screens via
-              // the global @media block at the bottom of this file. Passage/video
-              // stays visible on the left while pupils scroll the questions on the right.
               content = (
-                <div
-                  className="cw-passage-group"
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'minmax(280px, 38%) 1fr',
-                    gap: 16,
-                    alignItems: 'start',
-                  }}
-                >
-                  <div style={{ position: 'sticky', top: 16 }}>
-                    {renderPassagePanel(it.passage, groupLabel)}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {it.children.length === 0 ? (
-                      <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0 }}>
-                        No tasks are attached to this {it.passage.question_type === 'video_group' ? 'video' : 'passage'} yet.
-                      </p>
-                    ) : it.children.map((c, ci) =>
-                      renderQuestionCard(c, `${String.fromCharCode(97 + ci)})`, isExt)
-                    )}
-                  </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {renderPassagePanel(it.passage, groupLabel)}
+                  {it.children.length === 0 ? (
+                    <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0 }}>
+                      No tasks are attached to this {it.passage.question_type === 'video_group' ? 'video' : 'passage'} yet.
+                    </p>
+                  ) : it.children.map((c, ci) =>
+                    renderQuestionCard(c, `${String.fromCharCode(97 + ci)})`, isExt)
+                  )}
                 </div>
               );
             }
