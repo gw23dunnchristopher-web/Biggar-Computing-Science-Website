@@ -777,7 +777,7 @@ export default function Lesson() {
                 content = renderSectionHeader(it.q);
               } else if (isExt) {
                 exIdx++;
-                content = renderQuestionCard(it.q, `Ex${exIdx}`, isExt);
+                content = renderQuestionCard(it.q, 'Extension', isExt);
               } else if (it.q.question_type === 'info_only') {
                 content = renderQuestionCard(it.q, 'Note', isExt);
               } else if (it.q.question_type === 'text_only') {
@@ -790,7 +790,7 @@ export default function Lesson() {
               // Group (passage / video_group): counts as one Q or Ex.
               // Children are sub-labelled a), b), c) … within that Q.
               if (isExt) { exIdx++; } else { qIdx++; }
-              const groupLabel = isExt ? `Ex${exIdx}` : `Q${qIdx}`;
+              const groupLabel = isExt ? 'Extension' : `Q${qIdx}`;
               const gid = it.passage.id;
               const collapsed = isTeacherDrag && collapsedGroups.has(gid);
               const childCount = it.children.length;
@@ -990,7 +990,7 @@ export default function Lesson() {
             if (curItem.q.question_type === 'section_header') {
               curContent = renderSectionHeader(curItem.q);
             } else {
-              curContent = renderQuestionCard(curItem.q, curLabel, curIsExt);
+              curContent = renderQuestionCard(curItem.q, curIsExt ? 'Extension' : curLabel, curIsExt);
             }
           } else {
             // Group: video/passage pinned to the top, questions scroll below.
@@ -1003,7 +1003,7 @@ export default function Lesson() {
             curContent = (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div style={{ position: 'sticky', top: 0, zIndex: 10 }}>
-                  {renderPassagePanel(curItem.passage, curLabel)}
+                  {renderPassagePanel(curItem.passage, curIsExt ? 'Extension' : curLabel)}
                 </div>
                 {totalChildren === 0 ? (
                   <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0, fontSize: 14 }}>
