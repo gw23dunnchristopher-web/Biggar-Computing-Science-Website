@@ -390,7 +390,7 @@ export default function Lesson() {
   }, [role, questions]);
 
   return (
-    <Shell title="Lesson" back={{ href: '/', label: 'All courses' }}>
+    <Shell title="Lesson" back={{ href: lesson?.course ? `/course/${lesson.course}` : '/', label: 'Units' }}>
       {lesson && (lesson.title || lesson.learning_intentions || lesson.success_criteria) && (
         <LessonHeader lesson={lesson} />
       )}
