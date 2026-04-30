@@ -926,7 +926,7 @@ export default function Lesson() {
           if (it.type === 'standalone') {
             const qt = it.q.question_type;
             if (qt === 'info_only')       { tabLabels.push('Note');    tabAnswered.push(null); }
-            else if (qt === 'text_only')  { tCount++; tabLabels.push(`T${tCount}`); tabAnswered.push(null); }
+            else if (qt === 'text_only')  { tCount++; tabLabels.push(`Task ${tCount}`); tabAnswered.push(null); }
             else if (qt === 'section_header') { tabLabels.push('—');   tabAnswered.push(null); }
             else {
               qCount++;
