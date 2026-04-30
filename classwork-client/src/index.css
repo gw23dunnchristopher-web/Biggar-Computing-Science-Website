@@ -181,22 +181,14 @@ html, body, #root {
   height: 100%;
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, Segoe UI, sans-serif;
-  background: var(--cw-bg);
   color: var(--cw-ink);
 }
 
-body {
-  /* Honour the AccessibilityContext font-size / line-spacing scales.
-     Defaults to 1.0 so behaviour is unchanged when no settings are saved. */
-  font-size: calc(1rem * var(--a11y-font-scale, 1));
-  line-height: calc(1.5 * var(--a11y-line-scale, 1));
-
-}
-
-/* Circuit-board background — fills the root container, stays fixed while
-   content scrolls over it, swaps automatically for dark mode.
-   The custom-bg override below clears this when a user picks their own colour. */
-#root {
+/* Circuit-board background lives on <html> so it stays fixed to the viewport
+   for the full document height no matter how tall the page is.
+   body and #root are transparent so it shows through everywhere. */
+html {
+  background-color: var(--cw-bg);
   background-image: url('/public/images/cs-bg-light.png');
   background-size: cover;
   background-position: center;
@@ -204,8 +196,19 @@ body {
   background-attachment: fixed;
 }
 
-html.dark #root {
+html.dark {
   background-image: url('/public/images/cs-bg-dark.png');
+}
+
+body, #root {
+  background: transparent;
+}
+
+body {
+  /* Honour the AccessibilityContext font-size / line-spacing scales.
+     Defaults to 1.0 so behaviour is unchanged when no settings are saved. */
+  font-size: calc(1rem * var(--a11y-font-scale, 1));
+  line-height: calc(1.5 * var(--a11y-line-scale, 1));
 }
 
 * { box-sizing: border-box; }
@@ -364,6 +367,7 @@ html.reading-guide-active * {
    the AccessibilityContext writes onto <html>; bridge them to the
    existing --cw-* vars so classwork's bespoke buttons/cards follow too. */
 html[data-custom-bg] {
+  background-image: none;
   --cw-bg: hsl(var(--background));
   --cw-surface: hsl(var(--background));
   --cw-card: hsl(var(--background));
