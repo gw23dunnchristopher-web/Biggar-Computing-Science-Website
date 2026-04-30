@@ -1453,6 +1453,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
       return {
         ...empty,
         textAnswer: (fileName && text) ? JSON.stringify({ filename: fileName, content: text }) : null,
+        linkUrl: url.trim() || null,
       };
     }
     // short / long / code / video_question / sql_task — plain textarea.
@@ -1650,8 +1651,9 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
         if (!sessionKey) throw new Error('Please open the database first, do your work, then come back and submit.');
         body.linkUrl = `${dbEmbedToken}|${sessionKey}`;
       } else if (t === 'file_upload') {
-        if (!fileName || !text) throw new Error('Please select a file to upload.');
-        body.textAnswer = JSON.stringify({ filename: fileName, content: text });
+        if (!fileName && !url.trim()) throw new Error('Please upload a file or paste a share link.');
+        if (fileName && text) body.textAnswer = JSON.stringify({ filename: fileName, content: text });
+        if (url.trim()) body.linkUrl = url.trim();
       } else body.textAnswer = text; // short / long / code / video_question / sql_task
 
       if (preview) {
@@ -1701,7 +1703,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
     t === 'screenshot' ? !!fileUrl :
     t === 'presentation' ? !!fileUrl :
     t === 'project' ? !!(fileUrl || url) :
-    t === 'file_upload' ? !!(fileName && text) :
+    t === 'file_upload' ? !!(fileName && text) || !!url.trim() :
     ['scratch_link', 'makecode_link', 'google_sites_link'].includes(t) ? !!url :
     codeProjectKind ? !!selectedProjectId :
     t === 'database_task' ? !!dbEmbedToken :
@@ -2110,6 +2112,32 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
                 </pre>
               </details>
             )}
+
+            {/* Google Docs / Sheets / Drive share link alternative */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '4px 0' }}>
+              <div style={{ flex: 1, height: 1, background: 'var(--cw-border)' }} />
+              <span style={{ fontSize: 12, color: 'var(--cw-muted)', whiteSpace: 'nowrap' }}>OR paste a share link</span>
+              <div style={{ flex: 1, height: 1, background: 'var(--cw-border)' }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <input
+                type="url"
+                placeholder="Paste a Google Docs, Sheets or Drive share link…"
+                value={url}
+                disabled={busy}
+                onChange={(e) => setUrl(e.target.value)}
+                style={{
+                  width: '100%', padding: '9px 12px', borderRadius: 8, fontSize: 14,
+                  border: `1.5px solid ${url.trim() ? 'var(--cw-accent)' : 'var(--cw-border)'}`,
+                  background: 'var(--cw-surface)', color: 'var(--cw-ink)',
+                  outline: 'none', boxSizing: 'border-box',
+                  transition: 'border-color 150ms',
+                }}
+              />
+              <p style={{ margin: 0, fontSize: 12, color: 'var(--cw-muted)' }}>
+                Make sure sharing is set to <strong>"Anyone with the link can view"</strong> before submitting.
+              </p>
+            </div>
           </div>
         );
       })()}
@@ -3051,22 +3079,26 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
   }
 
   if (t === 'file_upload') {
-    if (!s.text_answer) return <span style={muted}>No file uploaded.</span>;
-    let filename = 'file';
+    if (!s.text_answer && !s.link_url) return <span style={muted}>No file or link submitted.</span>;
+    let filename = '';
     let content = '';
-    try {
-      const parsed = JSON.parse(s.text_answer);
-      filename = String(parsed.filename || 'file');
-      content = String(parsed.content || '');
-    } catch {
-      content = s.text_answer;
+    if (s.text_answer) {
+      try {
+        const parsed = JSON.parse(s.text_answer);
+        filename = String(parsed.filename || 'file');
+        content = String(parsed.content || '');
+      } catch {
+        content = s.text_answer;
+      }
     }
     return (
-      <div>
-        <div style={{ fontSize: 13, marginBottom: 6 }}>
-          <strong>File:</strong> {filename}
-          {content && <span style={{ marginLeft: 8, color: 'var(--cw-muted)' }}>({content.length.toLocaleString()} characters)</span>}
-        </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {filename && (
+          <div style={{ fontSize: 13 }}>
+            <strong>File:</strong> {filename}
+            {content && <span style={{ marginLeft: 8, color: 'var(--cw-muted)' }}>({content.length.toLocaleString()} characters)</span>}
+          </div>
+        )}
         {content && (
           <pre style={{
             padding: '10px 12px', borderRadius: 8, margin: 0,
@@ -3076,6 +3108,15 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
           }}>
             {content.length > 4000 ? content.slice(0, 4000) + '\n… (truncated for display)' : content}
           </pre>
+        )}
+        {s.link_url && (
+          <div style={{ fontSize: 13 }}>
+            <strong>Shared link:</strong>{' '}
+            <a href={s.link_url} target="_blank" rel="noopener noreferrer"
+              style={{ color: 'var(--cw-accent)', wordBreak: 'break-all' }}>
+              {s.link_url}
+            </a>
+          </div>
         )}
       </div>
     );
