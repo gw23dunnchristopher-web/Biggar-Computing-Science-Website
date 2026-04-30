@@ -966,15 +966,23 @@ export default function Lesson() {
               curContent = renderQuestionCard(curItem.q, curLabel, false);
             }
           } else {
-            // Group: header panel (passage text OR video), then children stacked.
+            // Group: two-column sticky layout — passage/video stays on screen
+            // as the student scrolls through the attached questions.
             curContent = (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {renderPassagePanel(curItem.passage, curLabel)}
-                {curItem.children.length === 0 ? (
-                  <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0, fontSize: 14 }}>
-                    No questions are attached to this {curItem.passage.question_type === 'video_group' ? 'video' : 'passage'} yet.
-                  </p>
-                ) : curItem.children.map((c, ci) => renderQuestionCard(c, `${curLabel}${String.fromCharCode(97 + ci)}`, false))}
+              <div
+                className="cw-passage-group"
+                style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 42%) 1fr', gap: 16, alignItems: 'start' }}
+              >
+                <div style={{ position: 'sticky', top: 16 }}>
+                  {renderPassagePanel(curItem.passage, curLabel)}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {curItem.children.length === 0 ? (
+                    <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0, fontSize: 14 }}>
+                      No questions are attached to this {curItem.passage.question_type === 'video_group' ? 'video' : 'passage'} yet.
+                    </p>
+                  ) : curItem.children.map((c, ci) => renderQuestionCard(c, `${curLabel}${String.fromCharCode(97 + ci)}`, false))}
+                </div>
               </div>
             );
           }
