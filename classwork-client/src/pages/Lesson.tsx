@@ -732,12 +732,10 @@ export default function Lesson() {
         };
 
         // Run buildItems on main and extension lists separately so extensions stay
-        // in their own section. Numbering (qIdx, pIdx) is shared so pupils see
-        // a single continuous Q-sequence within each section.
+        // in their own section. Numbering is shared so pupils see a single
+        // continuous Q-sequence: groups count as one Q, their children are a/b/c.
         const renderItems = (items: Item[], isExt: boolean, prefix: 'Q' | 'E') => {
           let qIdx = 0;
-          let pIdx = 0;
-          const totalPassages = items.filter((it) => it.type === 'group').length;
           const isTeacherDrag = role === 'teacher' && !previewAsStudent;
 
           return items.map((it) => {
@@ -760,11 +758,13 @@ export default function Lesson() {
                 content = renderQuestionCard(it.q, `${prefix}${qIdx}`, isExt);
               }
             } else {
-              pIdx++;
-              const passageLabel = totalPassages > 1 ? `Passage ${pIdx}` : 'Passage';
+              // Group (passage / video_group): the group itself counts as one Q.
+              // Children are sub-labelled a, b, c … within that Q.
+              qIdx++;
+              const groupLabel = `${prefix}${qIdx}`;
               // Two-column sticky layout on desktop; stacks on narrow screens via
-              // the global @media block at the bottom of this file. Passage stays
-              // visible on the left while pupils scroll the questions on the right.
+              // the global @media block at the bottom of this file. Passage/video
+              // stays visible on the left while pupils scroll the questions on the right.
               content = (
                 <div
                   className="cw-passage-group"
@@ -776,17 +776,16 @@ export default function Lesson() {
                   }}
                 >
                   <div style={{ position: 'sticky', top: 16 }}>
-                    {renderPassagePanel(it.passage, passageLabel)}
+                    {renderPassagePanel(it.passage, groupLabel)}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     {it.children.length === 0 ? (
                       <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0 }}>
-                        No tasks are attached to this passage yet.
+                        No tasks are attached to this {it.passage.question_type === 'video_group' ? 'video' : 'passage'} yet.
                       </p>
-                    ) : it.children.map((c) => {
-                      qIdx++;
-                      return renderQuestionCard(c, `${prefix}${qIdx}`, isExt);
-                    })}
+                    ) : it.children.map((c, ci) =>
+                      renderQuestionCard(c, `${groupLabel}${String.fromCharCode(97 + ci)}`, isExt)
+                    )}
                   </div>
                 </div>
               );
@@ -935,35 +934,23 @@ export default function Lesson() {
         for (const it of mainItems) {
           if (it.type === 'standalone') {
             const qt = it.q.question_type;
-            if (qt === 'info_only')       { tabLabels.push('Note');    tabAnswered.push(null); }
-            else if (qt === 'text_only')  { tCount++; tabLabels.push(`Task ${tCount}`); tabAnswered.push(null); }
-            else if (qt === 'section_header') { tabLabels.push('—');   tabAnswered.push(null); }
+            if (qt === 'info_only')           { tabLabels.push('Note');           tabAnswered.push(null); }
+            else if (qt === 'text_only')      { tCount++; tabLabels.push(`Task ${tCount}`); tabAnswered.push(null); }
+            else if (qt === 'section_header') { tabLabels.push('—');              tabAnswered.push(null); }
             else {
               qCount++;
               tabLabels.push(`Q${qCount}`);
               tabAnswered.push(submissions.some((s) => s.question_id === it.q.id));
             }
           } else {
-            // Group (passage / video_group): one tab, children are answerable.
-            const lbl = it.passage.question_type === 'video_group' ? 'Video' : 'Passage';
-            tabLabels.push(lbl);
-            qCount += it.children.length;
+            // Group counts as ONE Q number; children get sub-labels a/b/c on the same tab.
+            qCount++;
+            tabLabels.push(`Q${qCount}`);
             tabAnswered.push(
               it.children.length === 0
                 ? null
                 : it.children.every((c) => submissions.some((s) => s.question_id === c.id))
             );
-          }
-        }
-
-        // Q-number offset for the current item (so group children get the right labels).
-        let qOffset = 0;
-        for (let i = 0; i < safeIdx; i++) {
-          const it = mainItems[i];
-          if (it.type === 'standalone') {
-            if (!['info_only', 'text_only', 'section_header'].includes(it.q.question_type)) qOffset++;
-          } else {
-            qOffset += it.children.length;
           }
         }
 
@@ -987,7 +974,7 @@ export default function Lesson() {
                   <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0, fontSize: 14 }}>
                     No questions are attached to this {curItem.passage.question_type === 'video_group' ? 'video' : 'passage'} yet.
                   </p>
-                ) : curItem.children.map((c, ci) => renderQuestionCard(c, `Q${qOffset + ci + 1}`, false))}
+                ) : curItem.children.map((c, ci) => renderQuestionCard(c, `${curLabel}${String.fromCharCode(97 + ci)}`, false))}
               </div>
             );
           }
