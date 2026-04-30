@@ -75,6 +75,14 @@
   --cw-tint-success-bg:        #d1fae5;
   --cw-tint-success-border:    #6ee7b7;
   --cw-tint-success-ink:       #065f46;
+  --cw-tint-amber-bg:          #fffbeb;
+  --cw-tint-amber-border:      #fcd34d;
+  --cw-tint-amber-ink:         #92400e;
+  --cw-tint-indigo-bg:         #e0e7ff;
+  --cw-tint-indigo-ink:        #3730a3;
+  --cw-tint-danger-bg:         #fef2f2;
+  --cw-tint-danger-border:     #fca5a5;
+  --cw-tint-danger-ink:        #991b1b;
 
   /* shadcn-style HSL tokens — match the classwork palette so the
      accessibility panel and its trigger button feel native to this SPA */
@@ -139,6 +147,14 @@ html.dark {
   --cw-tint-success-bg:        #0d2b1e;
   --cw-tint-success-border:    #166534;
   --cw-tint-success-ink:       #6ee7b7;
+  --cw-tint-amber-bg:          #241a00;
+  --cw-tint-amber-border:      #78450c;
+  --cw-tint-amber-ink:         #fbbf24;
+  --cw-tint-indigo-bg:         #1e1b4b;
+  --cw-tint-indigo-ink:        #a5b4fc;
+  --cw-tint-danger-bg:         #2d0e0e;
+  --cw-tint-danger-border:     #7f1d1d;
+  --cw-tint-danger-ink:        #fca5a5;
 
   --background: 222 47% 8%;        /* matches --cw-bg */
   --foreground: 210 40% 96%;
@@ -271,6 +287,14 @@ html.high-contrast {
   --cw-tint-textonly-ink: #000000;
   --cw-tint-extension-bg: #ffffff;
   --cw-tint-extension-border: #000000;
+  --cw-tint-amber-bg:     #ffffff;
+  --cw-tint-amber-border: #000000;
+  --cw-tint-amber-ink:    #000000;
+  --cw-tint-indigo-bg:    #ffffff;
+  --cw-tint-indigo-ink:   #000000;
+  --cw-tint-danger-bg:    #ffffff;
+  --cw-tint-danger-border: #000000;
+  --cw-tint-danger-ink:   #000000;
 }
 html.high-contrast .text-muted-foreground,
 html.high-contrast [class*="text-neutral-"],
@@ -335,6 +359,12 @@ html[data-custom-bg] {
   --cw-tint-textonly-border: hsl(var(--border));
   --cw-tint-extension-bg: hsl(var(--background));
   --cw-tint-extension-border: hsl(var(--border));
+  --cw-tint-amber-bg: hsl(var(--background));
+  --cw-tint-amber-border: hsl(var(--border));
+  --cw-tint-indigo-bg: hsl(var(--background));
+  --cw-tint-indigo-ink: hsl(var(--foreground));
+  --cw-tint-danger-bg: hsl(var(--background));
+  --cw-tint-danger-border: hsl(var(--border));
 }
 html[data-custom-bg] body,
 html[data-custom-bg] #root {

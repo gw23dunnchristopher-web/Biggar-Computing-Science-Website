@@ -679,10 +679,10 @@ export default function Lesson() {
           return (
             <div style={{
               ...card,
-              background: isVG ? 'var(--cw-surface)' : '#fffbeb',
-              borderColor: isVG ? 'var(--cw-border)' : '#fcd34d',
+              background: isVG ? 'var(--cw-surface)' : 'var(--cw-tint-amber-bg)',
+              borderColor: isVG ? 'var(--cw-border)' : 'var(--cw-tint-amber-border)',
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: isVG ? 'var(--cw-ink)' : '#92400e', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: isVG ? 'var(--cw-ink)' : 'var(--cw-tint-amber-ink)', flexWrap: 'wrap' }}>
                 <span style={{
                   fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase',
                   padding: '2px 8px', borderRadius: 999,
@@ -1772,7 +1772,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
                     {Array.isArray(row) && row.map((cell: any, c: number) => (
                       <td key={c} style={{
                         border: '1px solid var(--cw-border)', padding: '6px 8px',
-                        background: cell?.blank ? '#fffbeb' : 'var(--cw-surface)',
+                        background: cell?.blank ? 'var(--cw-tint-amber-bg)' : 'var(--cw-surface)',
                       }}>
                         {cell?.blank ? (
                           <input
@@ -2000,10 +2000,10 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
             borderRadius: 999,
             border: '1px solid',
             ...(draftStatus === 'saving'
-              ? { color: '#92400e', background: '#fffbeb', borderColor: '#fcd34d' }
+              ? { color: 'var(--cw-tint-amber-ink)', background: 'var(--cw-tint-amber-bg)', borderColor: 'var(--cw-tint-amber-border)' }
               : draftStatus === 'saved'
-                ? { color: '#166534', background: '#f0fdf4', borderColor: '#86efac' }
-                : { color: '#991b1b', background: '#fef2f2', borderColor: '#fca5a5' }),
+                ? { color: 'var(--cw-tint-success-ink)', background: 'var(--cw-tint-success-bg)', borderColor: 'var(--cw-tint-success-border)' }
+                : { color: 'var(--cw-tint-danger-ink)', background: 'var(--cw-tint-danger-bg)', borderColor: 'var(--cw-tint-danger-border)' }),
           }} title="Your work is saved automatically as you type. If you close the tab, your answer will still be here when you come back.">
             {draftStatus === 'saving' ? 'Saving…' : draftStatus === 'saved' ? 'Draft saved' : 'Couldn\u2019t save draft'}
           </span>
@@ -2672,7 +2672,7 @@ function WordSearchEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void 
         </div>
       )}
       {skipped.length > 0 && (
-        <div style={{ fontSize: 12, color: '#92400e', background: '#fef3c7', padding: '6px 8px', borderRadius: 6 }}>
+        <div style={{ fontSize: 12, color: 'var(--cw-tint-amber-ink)', background: 'var(--cw-tint-amber-bg)', border: '1px solid var(--cw-tint-amber-border)', padding: '6px 8px', borderRadius: 6 }}>
           Couldn't fit these into the grid (try a bigger grid or shorter words): {skipped.join(', ')}
         </div>
       )}
@@ -4813,7 +4813,8 @@ function renderResource(r: LessonResource): React.ReactNode {
        }}>
       <span style={{
         fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-        background: '#fef3c7', color: '#92400e',
+        background: 'var(--cw-tint-amber-bg)', color: 'var(--cw-tint-amber-ink)',
+        border: '1px solid var(--cw-tint-amber-border)',
         textTransform: 'uppercase', flex: '0 0 auto',
       }}>Document</span>
       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -5240,8 +5241,9 @@ function _LessonResources_legacy({ resources }: { resources: LessonResource[] })
                }}>
               <span style={{
                 fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
-                background: isDoc ? '#fef3c7' : '#e0e7ff',
-                color: isDoc ? '#92400e' : '#3730a3',
+                background: isDoc ? 'var(--cw-tint-amber-bg)' : 'var(--cw-tint-indigo-bg)',
+                color: isDoc ? 'var(--cw-tint-amber-ink)' : 'var(--cw-tint-indigo-ink)',
+                border: `1px solid ${isDoc ? 'var(--cw-tint-amber-border)' : 'var(--cw-tint-indigo-ink)'}`,
                 textTransform: 'uppercase', flex: '0 0 auto',
               }}>{isDoc ? 'Document' : 'Link'}</span>
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
