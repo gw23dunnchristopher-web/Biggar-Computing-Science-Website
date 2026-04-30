@@ -4705,8 +4705,7 @@ function VideoQuestionPlayer({ config, compact }: { config: any; compact?: boole
       </div>
     );
   }
-  // Max width: compact (inside video_group) keeps things tighter.
-  const maxW = compact ? 400 : 800;
+  const maxW = 800;
   if (v.kind === 'youtube') {
     const id = youtubeIdFromUrl(String(v.url));
     if (!id) {
