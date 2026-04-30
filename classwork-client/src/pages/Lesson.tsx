@@ -2063,7 +2063,10 @@ function _gameRng(seed: string): () => number {
   let s = 0;
   for (const ch of String(seed)) s = (s * 31 + ch.charCodeAt(0)) | 0;
   return () => {
-    s = (s * 9301 + 49297) % 233280;
+    // Use positive-modulo trick: JS % can return negative values when s is
+    // negative (which happens after 32-bit overflow in the seed loop), which
+    // would make the Fisher-Yates swap index negative and corrupt the array.
+    s = ((s * 9301 + 49297) % 233280 + 233280) % 233280;
     return s / 233280;
   };
 }
