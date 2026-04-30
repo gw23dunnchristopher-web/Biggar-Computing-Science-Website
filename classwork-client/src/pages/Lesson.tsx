@@ -1011,15 +1011,6 @@ export default function Lesson() {
             const totalChildren = curItem.children.length;
             const rawStep = vgStep[curItem.passage.id] ?? 0;
             const curStep = Math.min(rawStep, Math.max(0, totalChildren - 1));
-            const vgNavBtn = (disabled: boolean): React.CSSProperties => ({
-              padding: '7px 18px', borderRadius: 8, fontSize: 14, fontWeight: 600,
-              border: '1px solid var(--cw-border)',
-              background: 'var(--cw-surface)',
-              color: disabled ? 'var(--cw-muted)' : 'var(--cw-ink)',
-              cursor: disabled ? 'default' : 'pointer',
-              opacity: disabled ? 0.4 : 1,
-              userSelect: 'none',
-            });
             curContent = (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div style={{ position: 'sticky', top: 0, zIndex: 10 }}>
@@ -1034,22 +1025,31 @@ export default function Lesson() {
                     {renderQuestionCard(curItem.children[curStep], `${String.fromCharCode(97 + curStep)})`, false)}
                     {totalChildren > 1 && (
                       <div style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        gap: 10, padding: '10px 0', borderTop: '1px solid var(--cw-border)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        gap: 6, padding: '10px 0', borderTop: '1px solid var(--cw-border)',
+                        flexWrap: 'wrap',
                       }}>
-                        <button
-                          disabled={curStep === 0}
-                          onClick={() => setVgStep((p) => ({ ...p, [curItem.passage.id]: curStep - 1 }))}
-                          style={vgNavBtn(curStep === 0)}
-                        >← Previous</button>
-                        <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
-                          Question {curStep + 1} of {totalChildren}
-                        </span>
-                        <button
-                          disabled={curStep === totalChildren - 1}
-                          onClick={() => setVgStep((p) => ({ ...p, [curItem.passage.id]: curStep + 1 }))}
-                          style={vgNavBtn(curStep === totalChildren - 1)}
-                        >Next →</button>
+                        <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginRight: 4, fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>Part:</span>
+                        {curItem.children.map((_, ci) => {
+                          const isCur = ci === curStep;
+                          return (
+                            <button
+                              key={ci}
+                              onClick={() => setVgStep((p) => ({ ...p, [curItem.passage.id]: ci }))}
+                              style={{
+                                minWidth: 34, height: 34, borderRadius: '50%', padding: '0 5px',
+                                border: isCur ? '2px solid var(--cw-accent)' : '2px solid var(--cw-border)',
+                                background: isCur ? 'var(--cw-accent)' : 'var(--cw-surface)',
+                                color: isCur ? '#fff' : 'var(--cw-muted)',
+                                fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                transition: 'all 150ms',
+                              }}
+                            >
+                              {String.fromCharCode(97 + ci)}
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </>
@@ -1063,14 +1063,15 @@ export default function Lesson() {
           }
         }
 
-        // Shared nav-button style helper.
+        // Shared nav-button style helper — solid accent fill so these are clearly
+        // the main question-level controls, distinct from the sub-question pill strip.
         const navBtnStyle = (disabled: boolean): React.CSSProperties => ({
-          padding: '7px 16px', borderRadius: 8, fontSize: 14, fontWeight: 600,
-          border: '1px solid var(--cw-border)',
-          background: disabled ? 'var(--cw-surface)' : 'var(--cw-surface)',
-          color: disabled ? 'var(--cw-muted)' : 'var(--cw-ink)',
+          padding: '8px 20px', borderRadius: 8, fontSize: 14, fontWeight: 600,
+          border: 'none',
+          background: disabled ? 'var(--cw-surface)' : 'var(--cw-accent)',
+          color: disabled ? 'var(--cw-muted)' : '#fff',
           cursor: disabled ? 'default' : 'pointer',
-          opacity: disabled ? 0.4 : 1,
+          opacity: disabled ? 0.45 : 1,
           transition: 'opacity 150ms',
           userSelect: 'none',
           flexShrink: 0,
