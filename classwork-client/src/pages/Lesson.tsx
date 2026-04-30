@@ -524,7 +524,7 @@ export default function Lesson() {
                       }}
                     >⠿</span>
                   )}
-                  <span>{label} · {TYPE_LABELS[q.question_type] || q.question_type}</span>
+                  <span>{label} · {isExt ? 'Extension Exercise' : (TYPE_LABELS[q.question_type] || q.question_type)}</span>
                   {isExt && (
                     <span style={{
                       fontSize: 11, fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase',
@@ -779,15 +779,15 @@ export default function Lesson() {
 
             let content: React.ReactNode;
             if (it.type === 'standalone') {
-              if (it.q.question_type === 'info_only') {
-                content = renderQuestionCard(it.q, 'Note', isExt);
-              } else if (it.q.question_type === 'text_only') {
-                content = renderQuestionCard(it.q, 'Task', isExt);
-              } else if (it.q.question_type === 'section_header') {
+              if (it.q.question_type === 'section_header') {
                 content = renderSectionHeader(it.q);
               } else if (isExt) {
                 exIdx++;
                 content = renderQuestionCard(it.q, `Ex${exIdx}`, isExt);
+              } else if (it.q.question_type === 'info_only') {
+                content = renderQuestionCard(it.q, 'Note', isExt);
+              } else if (it.q.question_type === 'text_only') {
+                content = renderQuestionCard(it.q, 'Task', isExt);
               } else {
                 qIdx++;
                 content = renderQuestionCard(it.q, `Q${qIdx}`, isExt);
@@ -960,14 +960,14 @@ export default function Lesson() {
           const itIsExt = it.type === 'standalone' ? !!it.q.is_extension : !!it.passage.is_extension;
           if (it.type === 'standalone') {
             const qt = it.q.question_type;
-            if (qt === 'info_only')           { tabLabels.push('Note');           tabAnswered.push(null); }
-            else if (qt === 'text_only')      { tCount++; tabLabels.push(`Task ${tCount}`); tabAnswered.push(null); }
-            else if (qt === 'section_header') { tabLabels.push('—');              tabAnswered.push(null); }
+            if (qt === 'section_header')      { tabLabels.push('—');              tabAnswered.push(null); }
             else if (itIsExt) {
               exCount++;
               tabLabels.push(`Ex${exCount}`);
               tabAnswered.push(submissions.some((s) => s.question_id === it.q.id));
-            } else {
+            } else if (qt === 'info_only')    { tabLabels.push('Note');           tabAnswered.push(null); }
+            else if (qt === 'text_only')      { tCount++; tabLabels.push(`Task ${tCount}`); tabAnswered.push(null); }
+            else {
               qCount++;
               tabLabels.push(`Q${qCount}`);
               tabAnswered.push(submissions.some((s) => s.question_id === it.q.id));
