@@ -137,6 +137,15 @@ export default function Lesson() {
   // Confetti fires once when the lesson is fully answered.
   const confettiFiredRef = useRef(false);
 
+  // Teacher-only: set of group passage IDs whose child questions are collapsed.
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  const toggleGroup = (id: string) =>
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
   // Edit-notes modal: opens directly from the in-lesson "My Jotter" button so
   // pupils don't have to leave the lesson to jot something into their unit
   // notes. Pupils edit their own per-unit notes; teachers (browsing or
@@ -763,15 +772,37 @@ export default function Lesson() {
               // Single stacked layout so the whole block is clearly one draggable unit.
               qIdx++;
               const groupLabel = `${prefix}${qIdx}`;
+              const gid = it.passage.id;
+              const collapsed = isTeacherDrag && collapsedGroups.has(gid);
+              const childCount = it.children.length;
               content = (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   {renderPassagePanel(it.passage, groupLabel)}
-                  {it.children.length === 0 ? (
-                    <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0 }}>
-                      No tasks are attached to this {it.passage.question_type === 'video_group' ? 'video' : 'passage'} yet.
-                    </p>
-                  ) : it.children.map((c, ci) =>
-                    renderQuestionCard(c, `${String.fromCharCode(97 + ci)})`, isExt)
+                  {/* Collapse toggle — teacher only */}
+                  {isTeacherDrag && childCount > 0 && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleGroup(gid); }}
+                      style={{
+                        alignSelf: 'flex-start',
+                        background: 'none', border: '1px solid var(--cw-border)',
+                        borderRadius: 6, padding: '3px 10px',
+                        fontSize: 12, color: 'var(--cw-muted)',
+                        cursor: 'pointer', userSelect: 'none',
+                      }}
+                    >
+                      {collapsed
+                        ? `▶ Show ${childCount} question${childCount !== 1 ? 's' : ''}`
+                        : `▲ Collapse questions`}
+                    </button>
+                  )}
+                  {!collapsed && (
+                    it.children.length === 0 ? (
+                      <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0 }}>
+                        No tasks are attached to this {it.passage.question_type === 'video_group' ? 'video' : 'passage'} yet.
+                      </p>
+                    ) : it.children.map((c, ci) =>
+                      renderQuestionCard(c, `${String.fromCharCode(97 + ci)})`, isExt)
+                    )
                   )}
                 </div>
               );
