@@ -524,13 +524,7 @@ export default function Lesson() {
                       }}
                     >⠿</span>
                   )}
-                  <span>{label} · {isExt ? 'Extension Exercise' : (TYPE_LABELS[q.question_type] || q.question_type)}</span>
-                  {isExt && (
-                    <span style={{
-                      fontSize: 11, fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase',
-                      padding: '2px 8px', borderRadius: 999, background: '#7c3aed', color: '#fff',
-                    }}>Extension</span>
-                  )}
+                  <span>{label}{!isInfo && !isTextOnly ? ` · ${TYPE_LABELS[q.question_type] || q.question_type}` : ''}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   {q.question_type !== 'passage' && !isInfo && (
