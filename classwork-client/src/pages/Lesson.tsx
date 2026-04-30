@@ -463,8 +463,8 @@ export default function Lesson() {
       )}
 
       {(() => {
-        const mainQs = questions.filter((q) => !q.is_extension);
-        const extQs  = questions.filter((q) => !!q.is_extension);
+        // All questions rendered in one unified list; is_extension drives
+        // label prefix (Ex1, Ex2…) and card tint but not section splits.
 
         // Build a render plan: each passage groups any later-or-earlier questions
         // whose passage_id matches it. Standalone (non-passage, non-attached)
@@ -763,38 +763,40 @@ export default function Lesson() {
           );
         };
 
-        // Run buildItems on main and extension lists separately so extensions stay
-        // in their own section. Numbering is shared so pupils see a single
-        // continuous Q-sequence: groups count as one Q, their children are a/b/c.
-        const renderItems = (items: Item[], isExt: boolean, prefix: 'Q' | 'E') => {
+        // Single unified render pass — Q counter for main questions,
+        // Ex counter for extension questions, both start from 1.
+        const renderItems = (items: Item[]) => {
           let qIdx = 0;
+          let exIdx = 0;
           const isTeacherDrag = role === 'teacher' && !previewAsStudent;
 
           return items.map((it) => {
             const itemId = it.type === 'standalone' ? it.q.id : it.passage.id;
             const isDragOver = dragOverId === itemId;
+            const isExt = it.type === 'standalone'
+              ? !!it.q.is_extension
+              : !!it.passage.is_extension;
 
             let content: React.ReactNode;
             if (it.type === 'standalone') {
               if (it.q.question_type === 'info_only') {
                 content = renderQuestionCard(it.q, 'Note', isExt);
               } else if (it.q.question_type === 'text_only') {
-                // Use a "Task" label (instead of "Q1, Q2…") so it's clearly
-                // an offline activity, not a markable question. Counter is
-                // not bumped — text_only is ignored in analytics.
                 content = renderQuestionCard(it.q, 'Task', isExt);
               } else if (it.q.question_type === 'section_header') {
                 content = renderSectionHeader(it.q);
+              } else if (isExt) {
+                exIdx++;
+                content = renderQuestionCard(it.q, `Ex${exIdx}`, isExt);
               } else {
                 qIdx++;
-                content = renderQuestionCard(it.q, `${prefix}${qIdx}`, isExt);
+                content = renderQuestionCard(it.q, `Q${qIdx}`, isExt);
               }
             } else {
-              // Group (passage / video_group): the group itself counts as one Q.
+              // Group (passage / video_group): counts as one Q or Ex.
               // Children are sub-labelled a), b), c) … within that Q.
-              // Single stacked layout so the whole block is clearly one draggable unit.
-              qIdx++;
-              const groupLabel = `${prefix}${qIdx}`;
+              if (isExt) { exIdx++; } else { qIdx++; }
+              const groupLabel = isExt ? `Ex${exIdx}` : `Q${qIdx}`;
               const gid = it.passage.id;
               const collapsed = isTeacherDrag && collapsedGroups.has(gid);
               const childCount = it.children.length;
@@ -880,8 +882,7 @@ export default function Lesson() {
           });
         };
 
-        const mainItems = buildItems(mainQs);
-        const extItems  = buildItems(extQs);
+        const allItems = buildItems(questions);
         const isTeacherDrag = role === 'teacher' && !previewAsStudent;
 
         // A drop zone rendered after the last card so teachers can drag
@@ -934,26 +935,9 @@ export default function Lesson() {
           return (
             <>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 }}>
-                {renderItems(mainItems, false, 'Q')}
+                {renderItems(allItems)}
               </div>
-              <DropTail items={mainItems} sentinel="__tail_main__" />
-              {extQs.length > 0 && (
-                <div style={{ marginTop: 28 }}>
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10,
-                    paddingBottom: 8, borderBottom: '2px solid #e9d5ff',
-                  }}>
-                    <h2 style={{ margin: 0, fontSize: 18, color: '#6b21a8' }}>Extension activities</h2>
-                    <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
-                      Optional — these are marked but don't count towards class analytics.
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {renderItems(extItems, true, 'E')}
-                  </div>
-                  <DropTail items={extItems} sentinel="__tail_ext__" />
-                </div>
-              )}
+              <DropTail items={allItems} sentinel="__tail__" />
             </>
           );
         }
@@ -963,29 +947,35 @@ export default function Lesson() {
         // ────────────────────────────────────────────────────────────────────
 
         // Clamp the current index to valid range (handles question removal).
-        const safeIdx = mainItems.length === 0 ? 0 : Math.max(0, Math.min(tabIdx, mainItems.length - 1));
+        const safeIdx = allItems.length === 0 ? 0 : Math.max(0, Math.min(tabIdx, allItems.length - 1));
 
         // Build tab labels and answered state in a single pass.
         let qCount = 0;
+        let exCount = 0;
         let tCount = 0;
         const tabLabels: string[]  = [];
         const tabAnswered: (boolean | null)[] = []; // null = non-answerable
 
-        for (const it of mainItems) {
+        for (const it of allItems) {
+          const itIsExt = it.type === 'standalone' ? !!it.q.is_extension : !!it.passage.is_extension;
           if (it.type === 'standalone') {
             const qt = it.q.question_type;
             if (qt === 'info_only')           { tabLabels.push('Note');           tabAnswered.push(null); }
             else if (qt === 'text_only')      { tCount++; tabLabels.push(`Task ${tCount}`); tabAnswered.push(null); }
             else if (qt === 'section_header') { tabLabels.push('—');              tabAnswered.push(null); }
-            else {
+            else if (itIsExt) {
+              exCount++;
+              tabLabels.push(`Ex${exCount}`);
+              tabAnswered.push(submissions.some((s) => s.question_id === it.q.id));
+            } else {
               qCount++;
               tabLabels.push(`Q${qCount}`);
               tabAnswered.push(submissions.some((s) => s.question_id === it.q.id));
             }
           } else {
-            // Group counts as ONE Q number; children get sub-labels a/b/c on the same tab.
-            qCount++;
-            tabLabels.push(`Q${qCount}`);
+            // Group counts as ONE Q or Ex; children get sub-labels a/b/c on the same tab.
+            if (itIsExt) { exCount++; tabLabels.push(`Ex${exCount}`); }
+            else { qCount++; tabLabels.push(`Q${qCount}`); }
             tabAnswered.push(
               it.children.length === 0
                 ? null
@@ -996,14 +986,17 @@ export default function Lesson() {
 
         // Render the card for the currently-active tab.
         let curContent: React.ReactNode = null;
-        if (mainItems.length > 0) {
-          const curItem = mainItems[safeIdx];
+        if (allItems.length > 0) {
+          const curItem = allItems[safeIdx];
           const curLabel = tabLabels[safeIdx];
+          const curIsExt = curItem.type === 'standalone'
+            ? !!curItem.q.is_extension
+            : !!curItem.passage.is_extension;
           if (curItem.type === 'standalone') {
             if (curItem.q.question_type === 'section_header') {
               curContent = renderSectionHeader(curItem.q);
             } else {
-              curContent = renderQuestionCard(curItem.q, curLabel, false);
+              curContent = renderQuestionCard(curItem.q, curLabel, curIsExt);
             }
           } else {
             // Group: video/passage pinned to the top, questions scroll below.
@@ -1079,22 +1072,6 @@ export default function Lesson() {
           flexShrink: 0,
         });
 
-        const extSection = extQs.length > 0 && (
-          <div style={{ marginTop: 36 }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10,
-              paddingBottom: 8, borderBottom: '2px solid #e9d5ff',
-            }}>
-              <h2 style={{ margin: 0, fontSize: 18, color: '#6b21a8' }}>Extension activities</h2>
-              <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
-                Optional — not counted in your progress.
-              </span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {renderItems(extItems, true, 'E')}
-            </div>
-          </div>
-        );
 
         return (
           <>
@@ -1134,7 +1111,7 @@ export default function Lesson() {
             )}
 
             {/* ── Tab navigation strip ── */}
-            {mainItems.length > 0 && (
+            {allItems.length > 0 && (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 8,
                 marginTop: mainCountableQs.length > 0 ? 14 : 16,
@@ -1152,7 +1129,7 @@ export default function Lesson() {
                   display: 'flex', gap: 5, flex: 1,
                   flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center',
                 }}>
-                  {mainItems.map((_, i) => {
+                  {allItems.map((_, i) => {
                     const isCurrent  = i === safeIdx;
                     const ans        = tabAnswered[i];
                     const lbl        = tabLabels[i];
@@ -1193,18 +1170,15 @@ export default function Lesson() {
 
                 {/* Next button */}
                 <button
-                  disabled={safeIdx === mainItems.length - 1}
-                  onClick={() => setTabIdx(Math.min(mainItems.length - 1, safeIdx + 1))}
-                  style={navBtnStyle(safeIdx === mainItems.length - 1)}
+                  disabled={safeIdx === allItems.length - 1}
+                  onClick={() => setTabIdx(Math.min(allItems.length - 1, safeIdx + 1))}
+                  style={navBtnStyle(safeIdx === allItems.length - 1)}
                 >Next →</button>
               </div>
             )}
 
             {/* ── Current question card ── */}
             <div style={{ marginTop: 16 }}>{curContent}</div>
-
-            {/* ── Extension activities (not tabbed) ── */}
-            {extSection}
           </>
         );
       })()}
