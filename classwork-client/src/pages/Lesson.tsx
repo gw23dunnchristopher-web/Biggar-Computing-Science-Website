@@ -4705,7 +4705,7 @@ function VideoQuestionPlayer({ config, compact }: { config: any; compact?: boole
     );
   }
   // Max width: compact (inside video_group) keeps things tighter.
-  const maxW = compact ? 400 : 640;
+  const maxW = compact ? 400 : 800;
   if (v.kind === 'youtube') {
     const id = youtubeIdFromUrl(String(v.url));
     if (!id) {
@@ -4722,9 +4722,9 @@ function VideoQuestionPlayer({ config, compact }: { config: any; compact?: boole
           title="Video task"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
-          style={{ display: 'block', width: '100%', maxWidth: maxW, aspectRatio: '16 / 9', border: 0, borderRadius: 8, background: '#000' }}
+          style={{ display: 'block', width: '100%', maxWidth: maxW, aspectRatio: '16 / 9', border: 0, borderRadius: 8, background: '#000', margin: '0 auto' }}
         />
-        <div style={{ marginTop: 6, fontSize: 12, color: 'var(--cw-muted)', maxWidth: maxW }}>
+        <div style={{ marginTop: 6, fontSize: 12, color: 'var(--cw-muted)', maxWidth: maxW, margin: '6px auto 0' }}>
           Can't see the video?{' '}
           <a href={v.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--cw-accent)' }}>
             Open it in YouTube ↗
@@ -4739,7 +4739,7 @@ function VideoQuestionPlayer({ config, compact }: { config: any; compact?: boole
       controls
       preload="metadata"
       src={v.url}
-      style={{ display: 'block', marginTop: 10, width: '100%', maxWidth: maxW, borderRadius: 8, background: '#000' }}
+      style={{ display: 'block', marginTop: 10, width: '100%', maxWidth: maxW, borderRadius: 8, background: '#000', marginLeft: 'auto', marginRight: 'auto' }}
     >
       Your browser can't play this video. <a href={v.url} target="_blank" rel="noopener noreferrer">Download it</a>.
     </video>
