@@ -139,6 +139,8 @@ export default function Lesson() {
 
   // Teacher-only: set of group passage IDs whose child questions are collapsed.
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+  // Per video_group: which child question is currently visible (0-based index).
+  const [vgStep, setVgStep] = useState<Record<string, number>>({});
   const toggleGroup = (id: string) =>
     setCollapsedGroups((prev) => {
       const next = new Set(prev);
@@ -717,7 +719,7 @@ export default function Lesson() {
                 )}
               </div>
               {isVG ? (
-                <VideoQuestionPlayer config={p.config} />
+                <VideoQuestionPlayer config={p.config} compact />
               ) : (
                 <>
                   <div style={{ marginTop: 8, lineHeight: 1.55 }}>
@@ -1003,16 +1005,59 @@ export default function Lesson() {
             }
           } else {
             // Group: video/passage pinned to the top, questions scroll below.
+            // For video_group: one child question at a time with prev/next nav.
+            // For passage: all children shown at once (unchanged behaviour).
+            const isVG = curItem.passage.question_type === 'video_group';
+            const totalChildren = curItem.children.length;
+            const rawStep = vgStep[curItem.passage.id] ?? 0;
+            const curStep = Math.min(rawStep, Math.max(0, totalChildren - 1));
+            const vgNavBtn = (disabled: boolean): React.CSSProperties => ({
+              padding: '7px 18px', borderRadius: 8, fontSize: 14, fontWeight: 600,
+              border: '1px solid var(--cw-border)',
+              background: 'var(--cw-surface)',
+              color: disabled ? 'var(--cw-muted)' : 'var(--cw-ink)',
+              cursor: disabled ? 'default' : 'pointer',
+              opacity: disabled ? 0.4 : 1,
+              userSelect: 'none',
+            });
             curContent = (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div style={{ position: 'sticky', top: 0, zIndex: 10 }}>
                   {renderPassagePanel(curItem.passage, curLabel)}
                 </div>
-                {curItem.children.length === 0 ? (
+                {totalChildren === 0 ? (
                   <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0, fontSize: 14 }}>
-                    No questions are attached to this {curItem.passage.question_type === 'video_group' ? 'video' : 'passage'} yet.
+                    No questions are attached to this {isVG ? 'video' : 'passage'} yet.
                   </p>
-                ) : curItem.children.map((c, ci) => renderQuestionCard(c, `${String.fromCharCode(97 + ci)})`, false))}
+                ) : isVG ? (
+                  <>
+                    {renderQuestionCard(curItem.children[curStep], `${String.fromCharCode(97 + curStep)})`, false)}
+                    {totalChildren > 1 && (
+                      <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        gap: 10, padding: '10px 0', borderTop: '1px solid var(--cw-border)',
+                      }}>
+                        <button
+                          disabled={curStep === 0}
+                          onClick={() => setVgStep((p) => ({ ...p, [curItem.passage.id]: curStep - 1 }))}
+                          style={vgNavBtn(curStep === 0)}
+                        >← Previous</button>
+                        <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
+                          Question {curStep + 1} of {totalChildren}
+                        </span>
+                        <button
+                          disabled={curStep === totalChildren - 1}
+                          onClick={() => setVgStep((p) => ({ ...p, [curItem.passage.id]: curStep + 1 }))}
+                          style={vgNavBtn(curStep === totalChildren - 1)}
+                        >Next →</button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  curItem.children.map((c, ci) =>
+                    renderQuestionCard(c, `${String.fromCharCode(97 + ci)})`, false)
+                  )
+                )}
               </div>
             );
           }
@@ -4650,7 +4695,7 @@ function youtubeIdFromUrl(url: string): string | null {
   return null;
 }
 
-function VideoQuestionPlayer({ config }: { config: any }) {
+function VideoQuestionPlayer({ config, compact }: { config: any; compact?: boolean }) {
   const v = config && typeof config === 'object' ? config.video : null;
   if (!v || typeof v !== 'object' || !v.url) {
     return (
@@ -4659,6 +4704,9 @@ function VideoQuestionPlayer({ config }: { config: any }) {
       </div>
     );
   }
+  // compact: cap height at 220px while preserving 16:9 on narrow screens
+  const paddingTop = compact ? 'min(56.25%, 220px)' : '56.25%';
+  const maxVideoHeight = compact ? 480 : 480;
   if (v.kind === 'youtube') {
     const id = youtubeIdFromUrl(String(v.url));
     if (!id) {
@@ -4670,7 +4718,7 @@ function VideoQuestionPlayer({ config }: { config: any }) {
     }
     return (
       <div style={{ marginTop: 10 }}>
-        <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
+        <div style={{ position: 'relative', paddingTop, borderRadius: 8, overflow: 'hidden', background: '#000' }}>
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${id}`}
             title="Video task"
@@ -4694,7 +4742,7 @@ function VideoQuestionPlayer({ config }: { config: any }) {
       controls
       preload="metadata"
       src={v.url}
-      style={{ marginTop: 10, width: '100%', maxHeight: 480, borderRadius: 8, background: '#000' }}
+      style={{ marginTop: 10, width: '100%', maxHeight: maxVideoHeight, borderRadius: 8, background: '#000' }}
     >
       Your browser can't play this video. <a href={v.url} target="_blank" rel="noopener noreferrer">Download it</a>.
     </video>
