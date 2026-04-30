@@ -30,6 +30,7 @@ interface Lesson {
   learning_intentions?: string | null;
   success_criteria?: string | null;
   is_published: boolean;
+  is_test?: boolean;
 }
 
 interface Resource {
@@ -535,6 +536,17 @@ export default function Course() {
     }
   }
 
+  async function toggleTest(lesson: Lesson) {
+    try {
+      await api(`/api/classwork/lessons/${lesson.id}`, {
+        method: 'PATCH', body: JSON.stringify({ isTest: !lesson.is_test }),
+      });
+      refresh();
+    } catch (e: any) {
+      setModal({ kind: 'info', title: 'Could not update lesson', message: e.message });
+    }
+  }
+
   async function confirmDeleteLesson(lesson: Lesson) {
     try {
       await api(`/api/classwork/lessons/${lesson.id}`, { method: 'DELETE' });
@@ -827,10 +839,10 @@ export default function Course() {
                         }}
                         style={{
                           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
-                          padding: 12, border: '1px solid var(--cw-border)', borderRadius: 8, background: 'var(--cw-surface-soft)',
+                          padding: 12, borderRadius: 8,
+                          border: l.is_test ? '1px solid var(--cw-tint-amber-border)' : '1px solid var(--cw-border)',
+                          background: l.is_test ? 'var(--cw-tint-amber-bg)' : 'var(--cw-surface-soft)',
                           opacity: isDragging ? 0.4 : 1,
-                          // Show a coloured indicator line on the side of the
-                          // row where the dragged lesson will land.
                           boxShadow: showTopLine
                             ? 'inset 0 3px 0 0 var(--cw-accent)'
                             : showBotLine
@@ -872,6 +884,13 @@ export default function Course() {
                               whiteSpace: 'nowrap', minWidth: 0,
                             }}
                           >{l.title}</Link>
+                          {l.is_test && (
+                            <span style={{
+                              fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999,
+                              background: 'var(--cw-tint-amber-border)', color: '#92400e',
+                              flexShrink: 0, letterSpacing: '0.04em', textTransform: 'uppercase',
+                            }}>Test</span>
+                          )}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           {role === 'teacher' && (
@@ -887,6 +906,13 @@ export default function Course() {
                                 title={l.is_published ? 'Lock this lesson so students can\'t see it while you edit' : 'Publish this lesson so students can see it'}
                               >
                                 {l.is_published ? 'Lock' : 'Publish'}
+                              </button>
+                              <button
+                                onClick={() => toggleTest(l)}
+                                style={secondaryBtn}
+                                title={l.is_test ? 'Remove test flag from this lesson' : 'Mark this lesson as a test'}
+                              >
+                                {l.is_test ? 'Unmark test' : 'Mark as test'}
                               </button>
                               <button onClick={() => openEditLesson(l)} style={secondaryBtn}
                                 title="Edit lesson title, learning intentions and success criteria">

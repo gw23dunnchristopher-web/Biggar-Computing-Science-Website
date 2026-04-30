@@ -202,6 +202,7 @@ export function ensureClassworkSchema(): Promise<void> {
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_uploaded_at TIMESTAMP;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS learning_intentions TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS success_criteria    TEXT;`),
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS is_test BOOLEAN NOT NULL DEFAULT FALSE;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_questions ADD COLUMN IF NOT EXISTS is_extension  BOOLEAN NOT NULL DEFAULT FALSE;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_questions ADD COLUMN IF NOT EXISTS passage_id    VARCHAR(64);`),
       // Additive columns on shared tables from other apps (IF EXISTS — silent no-op when absent)
@@ -570,7 +571,7 @@ export async function listLessons(unitId: string, opts: { onlyPublished?: boolea
   const r = await pool.query(
     `SELECT id, unit_id, course, title, description,
             learning_intentions, success_criteria,
-            order_index, is_published, created_at
+            order_index, is_published, is_test, created_at
        FROM bhs_classwork_lessons
        ${where}
       ORDER BY order_index ASC, created_at ASC`,
@@ -584,7 +585,7 @@ export async function getLesson(id: string) {
   const r = await pool.query(
     `SELECT id, unit_id, course, title, description,
             learning_intentions, success_criteria,
-            order_index, is_published, created_at
+            order_index, is_published, is_test, created_at
        FROM bhs_classwork_lessons WHERE id = $1`,
     [id]
   );
@@ -621,6 +622,7 @@ export async function updateLesson(id: string, fields: {
   if (fields.successCriteria    !== undefined) { sets.push(`success_criteria    = $${i++}`); vals.push(fields.successCriteria); }
   if (fields.orderIndex !== undefined) { sets.push(`order_index = $${i++}`); vals.push(fields.orderIndex); }
   if (fields.isPublished !== undefined) { sets.push(`is_published = $${i++}`); vals.push(fields.isPublished); }
+  if (fields.isTest      !== undefined) { sets.push(`is_test = $${i++}`);       vals.push(fields.isTest); }
   if (!sets.length) return null;
   vals.push(id);
   const r = await pool.query(
