@@ -77,36 +77,54 @@ interface Draft {
 }
 
 const TYPE_LABELS: Record<string, string> = {
+  // Written answers
   short: 'Short answer',
   long: 'Long answer',
   code: 'Code',
   multiple_choice: 'Multiple choice',
+  fill_in_blanks: 'Fill in the blanks',
+  table: 'Complete the table',
+  labeled_inputs: 'Labelled inputs (multi-field)',
+  // File & project uploads
   screenshot: 'Screenshot upload',
-  file_upload: 'File upload (text/code files)',
-  file_task: 'File task (upload + follow-up questions)',
+  file_upload: 'File upload (text / code)',
+  presentation: 'Presentation (.pptx)',
+  project: 'Long-form project (URL or file)',
   scratch_link: 'Scratch project link',
   makecode_link: 'MakeCode project link',
   google_sites_link: 'Google Sites link',
-  project: 'Long-form project',
-  presentation: 'Presentation (.pptx)',
-  video_question: 'Watch a video and answer',
+  // Embedded tools
   python_task: 'Python project (in-site editor)',
   html_task: 'HTML/CSS project (in-site editor)',
   sql_task: 'SQL task (Data Sculptor)',
   database_task: 'Database task (Data Sculptor sandbox)',
-  passage: 'Reading passage (with attached tasks)',
-  video_group: 'Video with attached tasks',
-  info_only: 'Information note (no answer needed)',
-  fill_in_blanks: 'Fill in the blanks',
-  table: 'Complete the table',
-  labeled_inputs: 'Labelled inputs (multi-field answer)',
-  section_header: 'Section divider (groups the tasks below)',
-  text_only: 'Jotter task (write the answer in your jotter)',
+  // Video, reading & file groups
+  video_group: 'Video (add questions underneath, or leave standalone)',
+  passage: 'Reading passage (add questions underneath)',
+  file_task: 'File task (students upload a file, then answer follow-ups)',
+  // Fun activities
   crossword: 'Crossword puzzle',
   word_search: 'Word search',
   matching: 'Matching pairs',
   anagrams: 'Anagrams',
+  // No answer needed
+  info_only: 'Information note (no answer needed)',
+  text_only: 'Jotter task (answer in jotter, no digital submission)',
+  section_header: 'Section divider',
+  // Legacy — still renders for existing questions, not offered for new ones
+  video_question: 'Watch a video and answer',
 };
+
+// Grouped structure for the type <select> — video_question excluded since
+// video_group covers the same need (attach 0 or more questions underneath).
+const TYPE_GROUPS: { label: string; types: string[] }[] = [
+  { label: 'Written answers', types: ['short', 'long', 'code', 'multiple_choice', 'fill_in_blanks', 'table', 'labeled_inputs'] },
+  { label: 'File & project uploads', types: ['screenshot', 'file_upload', 'presentation', 'project', 'scratch_link', 'makecode_link', 'google_sites_link'] },
+  { label: 'Embedded tools', types: ['python_task', 'html_task', 'sql_task', 'database_task'] },
+  { label: 'Video, reading & file groups', types: ['video_group', 'passage', 'file_task'] },
+  { label: 'Fun activities', types: ['crossword', 'word_search', 'matching', 'anagrams'] },
+  { label: 'No answer needed', types: ['info_only', 'text_only', 'section_header'] },
+];
 
 export default function Lesson() {
   const [, params] = useRoute('/lesson/:id');
@@ -4108,7 +4126,19 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
         <h2 style={{ marginTop: 0 }}>{isEdit ? 'Edit task' : 'New task'}</h2>
         <label style={fieldLabel}>Type
           <select value={type} onChange={(e) => onTypeChange(e.target.value)} style={input}>
-            {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            {/* If editing an existing question whose type is no longer offered
+                (e.g. legacy video_question), keep it selectable so the edit
+                doesn't force a type change. */}
+            {!TYPE_GROUPS.flatMap((g) => g.types).includes(type) && (
+              <option value={type}>{TYPE_LABELS[type] || type}</option>
+            )}
+            {TYPE_GROUPS.map((g) => (
+              <optgroup key={g.label} label={g.label}>
+                {g.types.map((k) => (
+                  <option key={k} value={k}>{TYPE_LABELS[k]}</option>
+                ))}
+              </optgroup>
+            ))}
           </select>
         </label>
         <label style={fieldLabel}>{
