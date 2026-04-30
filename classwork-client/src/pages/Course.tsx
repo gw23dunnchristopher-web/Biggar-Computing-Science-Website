@@ -81,6 +81,7 @@ export default function Course() {
   const [unitDescInput, setUnitDescInput] = useState('');
   const [unitImageUrl, setUnitImageUrl] = useState('');
   const [unitImageUploading, setUnitImageUploading] = useState(false);
+  const [editLessonTitle, setEditLessonTitle] = useState('');
   const [editLI, setEditLI] = useState('');
   const [editSC, setEditSC] = useState('');
   const [editResources, setEditResources] = useState<Resource[]>([]);
@@ -332,6 +333,7 @@ export default function Course() {
     setModal({ kind: 'addLesson', unitId });
   }
   function openEditLesson(l: Lesson) {
+    setEditLessonTitle(l.title || '');
     setEditLI(l.learning_intentions || '');
     setEditSC(l.success_criteria || '');
     setEditResources([]);
@@ -414,10 +416,12 @@ export default function Course() {
   }
 
   async function submitEditLesson(l: Lesson) {
+    if (!editLessonTitle.trim()) { setModalErr('Lesson name is required.'); return; }
     try {
       await api(`/api/classwork/lessons/${l.id}`, {
         method: 'PATCH',
         body: JSON.stringify({
+          title: editLessonTitle.trim(),
           // Empty textarea → clear the field on the server.
           learningIntentions: editLI.trim() ? editLI : null,
           successCriteria:    editSC.trim() ? editSC : null,
@@ -1048,6 +1052,21 @@ export default function Course() {
           <button onClick={() => modal.kind === 'editLesson' && submitEditLesson(modal.lesson)} style={modalPrimaryBtn}>Save lesson</button>
         </>}
       >
+        {modal.kind === 'editLesson' && (
+          <div style={{ marginBottom: 16 }}>
+            <label style={modalLabel}>Lesson name</label>
+            <input
+              type="text"
+              value={editLessonTitle}
+              onChange={(e) => setEditLessonTitle(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') submitEditLesson(modal.lesson); }}
+              placeholder="e.g. Variables and data types"
+              style={modalInput}
+              autoFocus
+            />
+          </div>
+        )}
+
         {modal.kind === 'editLesson' && !modal.lesson.is_test && (
           <>
             <div>
