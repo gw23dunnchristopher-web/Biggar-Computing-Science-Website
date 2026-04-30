@@ -193,18 +193,19 @@ body {
 
 }
 
-/* Subtle circuit-board background pattern on the root container.
-   Applied to #root (not body) because #root fills the viewport and
-   would otherwise cover a body-level background-image.
-   Swaps automatically for dark mode. */
+/* Circuit-board background — fills the root container, stays fixed while
+   content scrolls over it, swaps automatically for dark mode.
+   The custom-bg override below clears this when a user picks their own colour. */
 #root {
-  background-image: url('/public/images/cs-bg-light.svg');
-  background-repeat: repeat;
-  background-size: 200px 200px;
+  background-image: url('/public/images/cs-bg-light.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 html.dark #root {
-  background-image: url('/public/images/cs-bg-dark.svg');
+  background-image: url('/public/images/cs-bg-dark.png');
 }
 
 * { box-sizing: border-box; }
