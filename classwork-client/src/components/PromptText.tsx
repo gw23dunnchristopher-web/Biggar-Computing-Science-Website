@@ -418,11 +418,11 @@ export default function PromptText({ text }: { text: string }) {
             <ul key={idx} style={{
               margin: '6px 0 8px',
               paddingLeft: 22,
-              lineHeight: 1.45,
+              lineHeight: 1.55,
               listStyleType: 'disc',
             }}>
               {b.items.map((it, j) => (
-                <li key={j} style={{ marginBottom: 4, display: 'list-item' }}>
+                <li key={j} style={{ marginBottom: 8, display: 'list-item' }}>
                   {renderInline(it, ctx)}
                 </li>
               ))}
@@ -434,11 +434,11 @@ export default function PromptText({ text }: { text: string }) {
             <ol key={idx} style={{
               margin: '6px 0 8px',
               paddingLeft: 22,
-              lineHeight: 1.45,
+              lineHeight: 1.55,
               listStyleType: 'decimal',
             }}>
               {b.items.map((it, j) => (
-                <li key={j} style={{ marginBottom: 4, display: 'list-item' }}>
+                <li key={j} style={{ marginBottom: 8, display: 'list-item' }}>
                   {renderInline(it, ctx)}
                 </li>
               ))}
