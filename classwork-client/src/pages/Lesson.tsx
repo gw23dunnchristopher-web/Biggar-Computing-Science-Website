@@ -1258,6 +1258,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
   const [url, setUrl] = useState('');
   const [fileUrl, setFileUrl] = useState('');
   const [fileName, setFileName] = useState('');
+  const [fileDragOver, setFileDragOver] = useState(false);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -2021,61 +2022,97 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
         </div>
       )}
 
-      {t === 'file_upload' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <p style={{ margin: 0, fontSize: 13, color: 'var(--cw-muted)' }}>
-            Upload a file — accepted types: <strong>.txt .py .csv .html .js</strong> (max 200 KB)
-          </p>
-          <input
-            type="file"
-            accept=".txt,.py,.csv,.html,.htm,.js"
-            disabled={busy}
-            onChange={async (e) => {
-              const f = e.target.files?.[0];
-              if (!f) return;
-              if (f.size > 200 * 1024) {
-                setMsg('File too large — please keep it under 200 KB.');
-                return;
-              }
-              try {
-                const content = await f.text();
-                setText(content);
-                setFileName(f.name);
-                setMsg(null);
-              } catch {
-                setMsg('Could not read the file. Make sure it is a plain text or code file.');
-              }
-            }}
-          />
-          {fileName && (
-            <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
-              Attached: <strong>{fileName}</strong>{' '}
-              <button
-                type="button"
-                onClick={() => { setText(''); setFileName(''); setMsg(null); }}
-                style={{ marginLeft: 8, background: 'none', border: 'none', color: 'var(--cw-accent)', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
-              >
-                remove
-              </button>
-            </div>
-          )}
-          {text && fileName && (
-            <details style={{ marginTop: 4 }}>
-              <summary style={{ cursor: 'pointer', fontSize: 13, color: 'var(--cw-muted)' }}>
-                Preview contents ({text.length.toLocaleString()} characters)
-              </summary>
-              <pre style={{
-                marginTop: 6, padding: '10px 12px', borderRadius: 8,
-                background: 'var(--cw-surface)', border: '1px solid var(--cw-border)',
-                fontSize: 12, lineHeight: 1.5, overflow: 'auto', maxHeight: 200,
-                whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+      {t === 'file_upload' && (() => {
+        const ACCEPTED = '.txt,.py,.csv,.html,.htm,.js';
+        async function handleFile(f: File) {
+          if (f.size > 200 * 1024) {
+            setMsg('File too large — please keep it under 200 KB.');
+            return;
+          }
+          try {
+            const content = await f.text();
+            setText(content);
+            setFileName(f.name);
+            setMsg(null);
+          } catch {
+            setMsg('Could not read the file. Make sure it is a plain text or code file.');
+          }
+        }
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {/* Drop zone — click or drag a file onto it */}
+            <label
+              onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; setFileDragOver(true); }}
+              onDragLeave={(e) => { if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) setFileDragOver(false); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setFileDragOver(false);
+                const f = e.dataTransfer.files?.[0];
+                if (f) handleFile(f);
+              }}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                gap: 8, padding: '28px 20px', borderRadius: 10, cursor: busy ? 'not-allowed' : 'pointer',
+                border: `2px dashed ${fileDragOver ? 'var(--cw-accent)' : 'var(--cw-border)'}`,
+                background: fileDragOver ? 'var(--cw-tint-info-bg)' : 'var(--cw-surface-soft)',
+                transition: 'border-color 150ms, background 150ms',
+                textAlign: 'center',
+              }}
+            >
+              <span style={{ fontSize: 32, lineHeight: 1 }}>📂</span>
+              <span style={{ fontWeight: 600, color: 'var(--cw-ink)', fontSize: 14 }}>
+                {fileDragOver ? 'Drop to attach' : fileName ? 'Drop a new file to replace' : 'Drag & drop your file here'}
+              </span>
+              <span style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+                or click to browse — <strong>.txt .py .csv .html .js</strong> · max 200 KB
+              </span>
+              <input
+                type="file"
+                accept={ACCEPTED}
+                disabled={busy}
+                style={{ display: 'none' }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+              />
+            </label>
+
+            {fileName && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '8px 12px', borderRadius: 8,
+                background: 'var(--cw-tint-success-bg)', border: '1px solid var(--cw-tint-success-border)',
+                fontSize: 13,
               }}>
-                {text.length > 2000 ? text.slice(0, 2000) + '\n… (preview truncated)' : text}
-              </pre>
-            </details>
-          )}
-        </div>
-      )}
+                <span style={{ fontSize: 16 }}>✓</span>
+                <span style={{ fontWeight: 600, color: 'var(--cw-tint-success-ink)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fileName}</span>
+                <span style={{ color: 'var(--cw-muted)', flexShrink: 0 }}>{text.length.toLocaleString()} chars</span>
+                <button
+                  type="button"
+                  onClick={() => { setText(''); setFileName(''); setMsg(null); }}
+                  style={{ marginLeft: 4, background: 'none', border: 'none', color: 'var(--cw-accent)', cursor: 'pointer', textDecoration: 'underline', padding: 0, flexShrink: 0 }}
+                >
+                  remove
+                </button>
+              </div>
+            )}
+
+            {text && fileName && (
+              <details>
+                <summary style={{ cursor: 'pointer', fontSize: 13, color: 'var(--cw-muted)' }}>
+                  Preview contents
+                </summary>
+                <pre style={{
+                  marginTop: 6, padding: '10px 12px', borderRadius: 8,
+                  background: 'var(--cw-surface)', border: '1px solid var(--cw-border)',
+                  fontSize: 12, lineHeight: 1.5, overflow: 'auto', maxHeight: 200,
+                  whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+                }}>
+                  {text.length > 2000 ? text.slice(0, 2000) + '\n… (preview truncated)' : text}
+                </pre>
+              </details>
+            )}
+          </div>
+        );
+      })()}
 
       <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <button onClick={submit} disabled={busy || uploading || !canSubmit} style={{
