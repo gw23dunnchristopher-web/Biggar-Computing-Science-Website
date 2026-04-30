@@ -2401,23 +2401,31 @@ function AnagramsPupilUI({ config, cellAnswers, setCellAnswers }: {
     return <span style={_gameMutedStyle}>This anagrams task isn't set up yet — ask your teacher to add some words.</span>;
   }
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {items.map((it, i) => (
-        <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <span style={{
-              minWidth: 160, fontFamily: 'JetBrains Mono, monospace', letterSpacing: 4,
-              fontSize: 17, fontWeight: 700, color: 'var(--cw-ink)',
-            }}>{it?.scrambled}</span>
-            <input
-              type="text"
-              placeholder="unscrambled answer"
-              value={String(cellAnswers[String(i)] || '')}
-              onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value.toUpperCase() })}
-              style={{ flex: 1, padding: '6px 10px', border: '2px solid var(--cw-accent)', borderRadius: 6, textTransform: 'uppercase', fontSize: 14 }}
-            />
-          </div>
-          {it?.hint && <div style={{ fontSize: 12, color: 'var(--cw-muted)', paddingLeft: 4 }}>Hint: {it.hint}</div>}
+        <div key={i} style={{
+          display: 'flex', flexDirection: 'column', gap: 6,
+          padding: '10px 14px', borderRadius: 8,
+          border: '1px solid var(--cw-border)', background: 'var(--cw-surface)',
+        }}>
+          {/* Scrambled word — stacked above the input so any length fits */}
+          <div style={{
+            fontFamily: 'JetBrains Mono, monospace', letterSpacing: 3,
+            fontSize: 18, fontWeight: 700, color: 'var(--cw-ink)',
+            wordBreak: 'break-word', lineHeight: 1.4,
+          }}>{it?.scrambled}</div>
+          <input
+            type="text"
+            placeholder="Type the unscrambled answer…"
+            value={String(cellAnswers[String(i)] || '')}
+            onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value.toUpperCase() })}
+            style={{
+              width: '100%', boxSizing: 'border-box',
+              padding: '7px 10px', border: '2px solid var(--cw-accent)',
+              borderRadius: 6, textTransform: 'uppercase', fontSize: 14,
+            }}
+          />
+          {it?.hint && <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>Hint: {it.hint}</div>}
         </div>
       ))}
     </div>
