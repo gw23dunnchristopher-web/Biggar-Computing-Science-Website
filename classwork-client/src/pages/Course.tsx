@@ -887,7 +887,7 @@ export default function Course() {
                           {l.is_test && (
                             <span style={{
                               fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999,
-                              background: 'var(--cw-tint-amber-border)', color: '#92400e',
+                              background: 'var(--cw-tint-amber-border)', color: 'var(--cw-tint-amber-ink)',
                               flexShrink: 0, letterSpacing: '0.04em', textTransform: 'uppercase',
                             }}>Test</span>
                           )}
