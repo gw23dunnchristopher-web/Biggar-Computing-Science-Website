@@ -32,6 +32,7 @@ import {
   updateQuestion,
   deleteQuestion,
   reorderQuestions,
+  moveQuestionToLesson,
   createSubmission,
   listMySubmissionsForLesson,
   listSubmissionsForLesson,
@@ -859,6 +860,20 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] deleteQuestion error:', err);
       res.status(500).json({ error: 'Failed to delete question' });
+    }
+  });
+
+  // Move a question (or whole passage/video_group with children) to another
+  // lesson in the same unit. Body: { targetLessonId: string, moveGroup?: boolean }
+  app.patch('/api/classwork/questions/:id/move', requireTeacher, async (req, res) => {
+    try {
+      const { targetLessonId, moveGroup } = req.body as { targetLessonId?: string; moveGroup?: boolean };
+      if (!targetLessonId) return res.status(400).json({ error: 'targetLessonId required' });
+      await moveQuestionToLesson(req.params.id, targetLessonId, !!moveGroup);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('[classwork] moveQuestion error:', err);
+      res.status(500).json({ error: 'Failed to move question' });
     }
   });
 

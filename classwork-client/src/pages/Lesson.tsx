@@ -533,11 +533,21 @@ export default function Lesson() {
                     <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>{q.max_marks} mark{q.max_marks === 1 ? '' : 's'}</div>
                   )}
                   {role === 'teacher' && !previewAsStudent && (
-                    <EditQuestionButton
-                      question={q}
-                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group')}
-                      onChanged={refresh}
-                    />
+                    <>
+                      <EditQuestionButton
+                        question={q}
+                        passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group')}
+                        onChanged={refresh}
+                      />
+                      {lesson?.unit_id && (
+                        <MoveQuestionButton
+                          questionId={q.id}
+                          unitId={lesson.unit_id}
+                          currentLessonId={lessonId}
+                          onMoved={refresh}
+                        />
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -686,6 +696,15 @@ export default function Lesson() {
                       passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group').filter((x) => x.id !== p.id)}
                       onChanged={refresh}
                     />
+                    {lesson?.unit_id && (
+                      <MoveQuestionButton
+                        questionId={p.id}
+                        unitId={lesson.unit_id}
+                        currentLessonId={lessonId}
+                        isGroup
+                        onMoved={refresh}
+                      />
+                    )}
                     <NewQuestionButton
                       lessonId={lessonId}
                       passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group')}
@@ -3051,6 +3070,103 @@ function NewQuestionButton({ lessonId, passages, onCreated, initialPassageId, la
         onCreated={() => { setOpen(false); onCreated(); }}
       />}
     </>
+  );
+}
+
+/* Move-to-lesson button: lets teachers relocate a question (or whole group)
+   to another lesson in the same unit without deleting and recreating it. */
+function MoveQuestionButton({ questionId, unitId, currentLessonId, isGroup, onMoved }: {
+  questionId: string;
+  unitId: string;
+  currentLessonId: string;
+  isGroup?: boolean;
+  onMoved: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [lessons, setLessons] = useState<{ id: string; title: string }[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [moving, setMoving] = useState(false);
+
+  async function loadLessons() {
+    if (lessons.length) return;
+    setLoading(true);
+    try {
+      const all = await api<{ id: string; title: string }[]>(`/api/classwork/units/${unitId}/lessons`);
+      setLessons(all.filter((l) => l.id !== currentLessonId));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function moveTo(targetLessonId: string) {
+    setMoving(true);
+    try {
+      await api(`/api/classwork/questions/${questionId}/move`, {
+        method: 'PATCH',
+        body: JSON.stringify({ targetLessonId, moveGroup: isGroup }),
+      });
+      setOpen(false);
+      onMoved();
+    } finally {
+      setMoving(false);
+    }
+  }
+
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <button
+        title={isGroup ? 'Move this whole group to another lesson' : 'Move to another lesson'}
+        onClick={() => { setOpen((o) => !o); if (!open) loadLessons(); }}
+        style={{
+          background: 'var(--cw-surface)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
+          padding: '4px 10px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+        }}
+      >Move →</button>
+      {open && (
+        <>
+          {/* Invisible backdrop to close on outside click */}
+          <div
+            onClick={() => setOpen(false)}
+            style={{ position: 'fixed', inset: 0, zIndex: 998 }}
+          />
+          <div style={{
+            position: 'absolute', top: '100%', left: 0, zIndex: 999, marginTop: 4,
+            background: 'var(--cw-surface)', border: '1px solid var(--cw-border)',
+            borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.13)',
+            minWidth: 220, padding: 6,
+          }}>
+            {loading ? (
+              <div style={{ padding: '8px 12px', color: 'var(--cw-muted)', fontSize: 13 }}>Loading…</div>
+            ) : lessons.length === 0 ? (
+              <div style={{ padding: '8px 12px', color: 'var(--cw-muted)', fontSize: 13 }}>No other lessons in this unit</div>
+            ) : (
+              <>
+                <div style={{ padding: '4px 12px 6px', fontSize: 11, color: 'var(--cw-muted)', textTransform: 'uppercase', letterSpacing: 0.4, fontWeight: 700 }}>
+                  Move to lesson
+                </div>
+                {lessons.map((l) => (
+                  <button
+                    key={l.id}
+                    disabled={moving}
+                    onClick={() => moveTo(l.id)}
+                    style={{
+                      display: 'block', width: '100%', textAlign: 'left',
+                      padding: '7px 12px', borderRadius: 6, border: 'none',
+                      background: 'none', color: 'var(--cw-ink)', cursor: 'pointer',
+                      fontSize: 13, opacity: moving ? 0.6 : 1,
+                    }}
+                    onMouseEnter={(e) => { if (!moving) e.currentTarget.style.background = 'var(--cw-hover)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}
+                  >
+                    {l.title || '(Untitled lesson)'}
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 

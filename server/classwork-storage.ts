@@ -887,6 +887,53 @@ export async function deleteQuestion(id: string) {
   await pool.query(`DELETE FROM bhs_classwork_questions WHERE id = $1`, [id]);
 }
 
+/**
+ * Move a question (or an entire passage/video_group with its children) to a
+ * different lesson in the same unit. The question(s) are appended after whatever
+ * is already in the target lesson.
+ *
+ * moveGroup=true  → move the passage/video_group container AND all its children.
+ * moveGroup=false → move just this one question; if it was a child question its
+ *                   passage_id is cleared so it becomes standalone.
+ */
+export async function moveQuestionToLesson(
+  questionId: string,
+  targetLessonId: string,
+  moveGroup: boolean,
+): Promise<void> {
+  await ensureClassworkSchema();
+  const maxRes = await pool.query(
+    `SELECT COALESCE(MAX(order_index), -1) AS mx FROM bhs_classwork_questions WHERE lesson_id = $1`,
+    [targetLessonId],
+  );
+  let nextIdx: number = Number(maxRes.rows[0]?.mx ?? -1) + 1;
+
+  if (moveGroup) {
+    // Move the group container first.
+    await pool.query(
+      `UPDATE bhs_classwork_questions SET lesson_id = $1, order_index = $2 WHERE id = $3`,
+      [targetLessonId, nextIdx++, questionId],
+    );
+    // Move children in their current order.
+    const children = await pool.query(
+      `SELECT id FROM bhs_classwork_questions WHERE passage_id = $1 ORDER BY order_index`,
+      [questionId],
+    );
+    for (const child of children.rows) {
+      await pool.query(
+        `UPDATE bhs_classwork_questions SET lesson_id = $1, order_index = $2 WHERE id = $3`,
+        [targetLessonId, nextIdx++, child.id],
+      );
+    }
+  } else {
+    // Move just this question; detach from any group it belongs to.
+    await pool.query(
+      `UPDATE bhs_classwork_questions SET lesson_id = $1, order_index = $2, passage_id = NULL WHERE id = $3`,
+      [targetLessonId, nextIdx, questionId],
+    );
+  }
+}
+
 /* ---------- Submissions ---------- */
 
 export interface CreateSubmissionInput {
