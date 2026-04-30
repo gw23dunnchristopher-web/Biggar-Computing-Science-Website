@@ -72,6 +72,9 @@ export function ensureClassworkSchema(): Promise<void> {
   if (!hasDatabase) return Promise.resolve();
   if (initPromise) return initPromise;
   initPromise = (async () => {
+    // ── Phase 1: core FK chain (must be sequential) ──────────────────────────
+    // Each table references the one above it, so these three cannot be
+    // parallelised on a fresh install.
     const client = await pool.connect();
     try {
       await client.query(`
@@ -85,24 +88,6 @@ export function ensureClassworkSchema(): Promise<void> {
           created_at TIMESTAMP DEFAULT NOW()
         );
       `);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_units_course ON bhs_classwork_units(course);`);
-      // Back-compat for installs that pre-date the image_url field. Same
-      // additive pattern used elsewhere in this schema (see the
-      // n5_classes course column further down). Idempotent.
-      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS image_url TEXT;`);
-
-      // Per-unit PowerPoint presentation. Teachers upload a .pptx which we
-      // (a) store as-is in object storage so it can be re-downloaded, and
-      // (b) render to one PNG per slide via LibreOffice + a JSON manifest
-      // describing the slide URLs and any PowerPoint sections. Pupils only
-      // see a "View presentation" button when `presentation_url` is set.
-      // All four columns nullable + additive — same idempotent pattern as
-      // image_url above.
-      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_url        TEXT;`);
-      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_pages_url  TEXT;`);
-      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_filename   TEXT;`);
-      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_uploaded_at TIMESTAMP;`);
-
       await client.query(`
         CREATE TABLE IF NOT EXISTS bhs_classwork_lessons (
           id VARCHAR(64) PRIMARY KEY,
@@ -115,9 +100,6 @@ export function ensureClassworkSchema(): Promise<void> {
           created_at TIMESTAMP DEFAULT NOW()
         );
       `);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_lessons_unit ON bhs_classwork_lessons(unit_id);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_lessons_course ON bhs_classwork_lessons(course);`);
-
       await client.query(`
         CREATE TABLE IF NOT EXISTS bhs_classwork_questions (
           id VARCHAR(64) PRIMARY KEY,
@@ -134,9 +116,15 @@ export function ensureClassworkSchema(): Promise<void> {
           created_at TIMESTAMP DEFAULT NOW()
         );
       `);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_questions_lesson ON bhs_classwork_questions(lesson_id);`);
+    } finally {
+      client.release();
+    }
 
-      await client.query(`
+    // ── Phase 2: everything that only depends on the phase-1 tables ──────────
+    // All queries are independent of each other — fire them all at once.
+    await Promise.all([
+      // Dependent tables (FK → phase-1 tables which now exist)
+      pool.query(`
         CREATE TABLE IF NOT EXISTS bhs_classwork_submissions (
           id VARCHAR(64) PRIMARY KEY,
           question_id VARCHAR(64) NOT NULL REFERENCES bhs_classwork_questions(id) ON DELETE CASCADE,
@@ -154,9 +142,8 @@ export function ensureClassworkSchema(): Promise<void> {
           marked_at TIMESTAMP,
           submitted_at TIMESTAMP DEFAULT NOW()
         );
-      `);
-      // Per-pupil free-form notes jotter, one per (unit, student). Pupils only.
-      await client.query(`
+      `),
+      pool.query(`
         CREATE TABLE IF NOT EXISTS bhs_classwork_unit_notes (
           unit_id    VARCHAR(64) NOT NULL REFERENCES bhs_classwork_units(id) ON DELETE CASCADE,
           student_id VARCHAR(64) NOT NULL,
@@ -164,41 +151,8 @@ export function ensureClassworkSchema(): Promise<void> {
           updated_at TIMESTAMP DEFAULT NOW(),
           PRIMARY KEY (unit_id, student_id)
         );
-      `);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_unit_notes_student ON bhs_classwork_unit_notes(student_id);`);
-
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_subs_q ON bhs_classwork_submissions(question_id);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_subs_student ON bhs_classwork_submissions(student_id);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_subs_lesson ON bhs_classwork_submissions(lesson_id);`);
-
-      // Add a nullable `course` (year group) column to the shared classes table.
-      // Idempotent and safe to run on every boot. Existing rows get NULL until
-      // a teacher tags them with a year via the Classwork students page.
-      await client.query(`ALTER TABLE IF EXISTS n5_classes ADD COLUMN IF NOT EXISTS course VARCHAR(16);`);
-      // Archive flag: lets teachers hide last year's classes without deleting
-      // them (so all the pupils' work stays intact for reference). Idempotent.
-      await client.query(`ALTER TABLE IF EXISTS n5_classes  ADD COLUMN IF NOT EXISTS is_archived BOOLEAN NOT NULL DEFAULT FALSE;`);
-      await client.query(`ALTER TABLE IF EXISTS bhs_classes ADD COLUMN IF NOT EXISTS is_archived BOOLEAN NOT NULL DEFAULT FALSE;`);
-
-      // Extension-activity flag on questions. Extension questions are still
-      // submitted and AI-marked (so the pupil gets feedback), but they're
-      // excluded from every analytics aggregate so they don't drag the class
-      // average down or show up as "missing" work for pupils who skip them.
-      // Idempotent.
-      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_questions ADD COLUMN IF NOT EXISTS is_extension BOOLEAN NOT NULL DEFAULT FALSE;`);
-
-      // Learning intentions + success criteria for each lesson. Stored as
-      // free-form TEXT (one bullet per line — kept simple so teachers can paste
-      // straight from a planner). Idempotent.
-      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons ADD COLUMN IF NOT EXISTS learning_intentions TEXT;`);
-      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons ADD COLUMN IF NOT EXISTS success_criteria   TEXT;`);
-
-      // Per-lesson resources (image, document, youtube video, plain link).
-      // These are shown above the questions on the lesson page so pupils can
-      // read / watch / refer to them. `url` is either an external URL (for
-      // youtube/link) or `/classwork-uploads/<file>` for uploaded images and
-      // documents. `kind` is constrained at the application layer.
-      await client.query(`
+      `),
+      pool.query(`
         CREATE TABLE IF NOT EXISTS bhs_classwork_lesson_resources (
           id VARCHAR(64) PRIMARY KEY,
           lesson_id VARCHAR(64) NOT NULL REFERENCES bhs_classwork_lessons(id) ON DELETE CASCADE,
@@ -208,30 +162,8 @@ export function ensureClassworkSchema(): Promise<void> {
           order_index INTEGER DEFAULT 0,
           created_at TIMESTAMP DEFAULT NOW()
         );
-      `);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_resources_lesson ON bhs_classwork_lesson_resources(lesson_id);`);
-
-      // Stimulus groups: a question of type "passage" holds a paragraph of
-      // reading material; other questions can attach themselves to it via
-      // passage_id so they render in a sticky two-column layout. No FK on
-      // passage_id — children are detached at the application layer when a
-      // passage is deleted (see deleteQuestion). Idempotent.
-      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_questions ADD COLUMN IF NOT EXISTS passage_id VARCHAR(64);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_questions_passage ON bhs_classwork_questions(passage_id);`);
-
-      // Per-question resources: lets teachers attach images / docs / videos /
-      // links / embeds to an individual question rather than the whole lesson.
-      // question_id is NULL for legacy lesson-level resources. Idempotent.
-      await client.query(`ALTER TABLE IF EXISTS bhs_classwork_lesson_resources ADD COLUMN IF NOT EXISTS question_id VARCHAR(64) REFERENCES bhs_classwork_questions(id) ON DELETE CASCADE;`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_resources_question ON bhs_classwork_lesson_resources(question_id);`);
-
-      // Per-pupil "I opened this task" log. One row per (student, question)
-      // — `first_viewed_at` is the first time the student rendered the
-      // question on the lesson page, `last_viewed_at` is the most recent,
-      // and `view_count` is how many distinct lesson loads have included
-      // it. Lets a teacher distinguish "couldn't access the task" from
-      // "opened it but didn't finish". Idempotent.
-      await client.query(`
+      `),
+      pool.query(`
         CREATE TABLE IF NOT EXISTS bhs_classwork_question_views (
           student_id      VARCHAR(64) NOT NULL,
           question_id     VARCHAR(64) NOT NULL REFERENCES bhs_classwork_questions(id) ON DELETE CASCADE,
@@ -242,17 +174,8 @@ export function ensureClassworkSchema(): Promise<void> {
           view_count      INTEGER NOT NULL DEFAULT 1,
           PRIMARY KEY (student_id, question_id)
         );
-      `);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_views_lesson ON bhs_classwork_question_views(lesson_id);`);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_views_student ON bhs_classwork_question_views(student_id);`);
-
-      // Per-pupil draft answers. Saved automatically as the pupil types so
-      // that closing the tab, losing a connection, or wandering off mid-
-      // task doesn't lose their work. One row per (student, question);
-      // wiped automatically when a real submission for that pair lands
-      // (see createSubmission). text_answer also doubles as the JSON blob
-      // for fill_in_blanks / table / labeled_inputs draft state. Idempotent.
-      await client.query(`
+      `),
+      pool.query(`
         CREATE TABLE IF NOT EXISTS bhs_classwork_drafts (
           student_id            VARCHAR(64) NOT NULL,
           question_id           VARCHAR(64) NOT NULL REFERENCES bhs_classwork_questions(id) ON DELETE CASCADE,
@@ -265,11 +188,45 @@ export function ensureClassworkSchema(): Promise<void> {
           updated_at            TIMESTAMP DEFAULT NOW(),
           PRIMARY KEY (student_id, question_id)
         );
-      `);
-      await client.query(`CREATE INDEX IF NOT EXISTS idx_classwork_drafts_lesson_student ON bhs_classwork_drafts(lesson_id, student_id);`);
-    } finally {
-      client.release();
-    }
+      `),
+      // Indexes on phase-1 tables
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_units_course    ON bhs_classwork_units(course);`),
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_lessons_unit    ON bhs_classwork_lessons(unit_id);`),
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_lessons_course  ON bhs_classwork_lessons(course);`),
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_questions_lesson ON bhs_classwork_questions(lesson_id);`),
+      // Additive columns on phase-1 tables (all IF EXISTS / IF NOT EXISTS — safe no-ops on first boot)
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS image_url TEXT;`),
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_url         TEXT;`),
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_pages_url   TEXT;`),
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_filename    TEXT;`),
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_uploaded_at TIMESTAMP;`),
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS learning_intentions TEXT;`),
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS success_criteria    TEXT;`),
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_questions ADD COLUMN IF NOT EXISTS is_extension  BOOLEAN NOT NULL DEFAULT FALSE;`),
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_questions ADD COLUMN IF NOT EXISTS passage_id    VARCHAR(64);`),
+      // Additive columns on shared tables from other apps (IF EXISTS — silent no-op when absent)
+      pool.query(`ALTER TABLE IF EXISTS n5_classes  ADD COLUMN IF NOT EXISTS course      VARCHAR(16);`),
+      pool.query(`ALTER TABLE IF EXISTS n5_classes  ADD COLUMN IF NOT EXISTS is_archived BOOLEAN NOT NULL DEFAULT FALSE;`),
+      pool.query(`ALTER TABLE IF EXISTS bhs_classes ADD COLUMN IF NOT EXISTS is_archived BOOLEAN NOT NULL DEFAULT FALSE;`),
+    ]);
+
+    // ── Phase 3: indexes/columns that depend on phase-2 tables or columns ────
+    await Promise.all([
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_subs_q              ON bhs_classwork_submissions(question_id);`),
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_subs_student        ON bhs_classwork_submissions(student_id);`),
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_subs_lesson         ON bhs_classwork_submissions(lesson_id);`),
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_unit_notes_student  ON bhs_classwork_unit_notes(student_id);`),
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_resources_lesson    ON bhs_classwork_lesson_resources(lesson_id);`),
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_views_lesson        ON bhs_classwork_question_views(lesson_id);`),
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_views_student       ON bhs_classwork_question_views(student_id);`),
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_drafts_lesson_student ON bhs_classwork_drafts(lesson_id, student_id);`),
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_questions_passage   ON bhs_classwork_questions(passage_id);`),
+      // question_id column on lesson_resources — safe here because lesson_resources was created in phase 2
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lesson_resources ADD COLUMN IF NOT EXISTS question_id VARCHAR(64) REFERENCES bhs_classwork_questions(id) ON DELETE CASCADE;`),
+    ]);
+
+    // ── Phase 4: index on the question_id column added in phase 3 ────────────
+    await pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_resources_question ON bhs_classwork_lesson_resources(question_id);`);
   })();
   return initPromise;
 }
