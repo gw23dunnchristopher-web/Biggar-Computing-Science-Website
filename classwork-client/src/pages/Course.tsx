@@ -915,7 +915,7 @@ export default function Course() {
                                 {l.is_test ? 'Unmark test' : 'Mark as test'}
                               </button>
                               <button onClick={() => openEditLesson(l)} style={secondaryBtn}
-                                title="Edit lesson title, learning intentions and success criteria">
+                                title={l.is_test ? 'Edit lesson title and resources' : 'Edit lesson title, learning intentions and success criteria'}>
                                 Edit
                               </button>
                               <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteLesson', lesson: l }); }} style={dangerBtn}>Delete</button>
@@ -1048,32 +1048,36 @@ export default function Course() {
           <button onClick={() => modal.kind === 'editLesson' && submitEditLesson(modal.lesson)} style={modalPrimaryBtn}>Save lesson</button>
         </>}
       >
-        <div>
-          <label style={modalLabel}>Learning intentions</label>
-          <textarea
-            rows={4}
-            value={editLI}
-            onChange={(e) => setEditLI(e.target.value)}
-            placeholder={'One per line, e.g.\nUnderstand what a variable is\nIdentify suitable data types'}
-            style={{ ...modalInput, fontFamily: 'inherit', resize: 'vertical' }}
-          />
-          <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--cw-muted)' }}>
-            One bullet per line. Leave blank to hide.
-          </p>
-        </div>
-        <div style={{ marginTop: 12 }}>
-          <label style={modalLabel}>Success criteria</label>
-          <textarea
-            rows={4}
-            value={editSC}
-            onChange={(e) => setEditSC(e.target.value)}
-            placeholder={'One per line, e.g.\nI can declare a variable\nI can choose the right data type for a value'}
-            style={{ ...modalInput, fontFamily: 'inherit', resize: 'vertical' }}
-          />
-          <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--cw-muted)' }}>
-            One bullet per line. Leave blank to hide.
-          </p>
-        </div>
+        {modal.kind === 'editLesson' && !modal.lesson.is_test && (
+          <>
+            <div>
+              <label style={modalLabel}>Learning intentions</label>
+              <textarea
+                rows={4}
+                value={editLI}
+                onChange={(e) => setEditLI(e.target.value)}
+                placeholder={'One per line, e.g.\nUnderstand what a variable is\nIdentify suitable data types'}
+                style={{ ...modalInput, fontFamily: 'inherit', resize: 'vertical' }}
+              />
+              <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--cw-muted)' }}>
+                One bullet per line. Leave blank to hide.
+              </p>
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <label style={modalLabel}>Success criteria</label>
+              <textarea
+                rows={4}
+                value={editSC}
+                onChange={(e) => setEditSC(e.target.value)}
+                placeholder={'One per line, e.g.\nI can declare a variable\nI can choose the right data type for a value'}
+                style={{ ...modalInput, fontFamily: 'inherit', resize: 'vertical' }}
+              />
+              <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--cw-muted)' }}>
+                One bullet per line. Leave blank to hide.
+              </p>
+            </div>
+          </>
+        )}
 
         {modal.kind === 'editLesson' && (
           <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--cw-border)' }}>

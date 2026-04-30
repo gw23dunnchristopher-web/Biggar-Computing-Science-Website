@@ -13,6 +13,7 @@ interface LessonInfo {
   learning_intentions: string | null;
   success_criteria: string | null;
   is_published: boolean;
+  is_test?: boolean;
   // Returned by GET /api/classwork/lessons/:id (selected by getLesson()) but
   // previously not declared on the client. Used here to power the "My jotter"
   // link in the lesson header so teachers can demo it to a class.
@@ -5311,8 +5312,8 @@ function LessonHeader({ lesson }: { lesson: LessonInfo }) {
       .map((s) => s.replace(/^\s*(?:[-*•]|\d+[.)])\s+/, '').trim())
       .filter(Boolean);
   };
-  const li = toLines(lesson.learning_intentions);
-  const sc = toLines(lesson.success_criteria);
+  const li = lesson.is_test ? [] : toLines(lesson.learning_intentions);
+  const sc = lesson.is_test ? [] : toLines(lesson.success_criteria);
   return (
     <div style={{
       background: 'var(--cw-surface)', border: '1px solid var(--cw-border)', borderRadius: 12,
