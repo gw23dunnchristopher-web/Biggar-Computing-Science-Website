@@ -151,6 +151,7 @@ export default function Lesson() {
   const [err, setErr] = useState<string | null>(null);
   const [previewAsStudent, setPreviewAsStudent] = useState(false);
   const previewSessionRef = useRef(0);
+  const [previewAnsweredQIds, setPreviewAnsweredQIds] = useState<Set<string>>(new Set());
 
   // Drag-and-drop reordering state (teacher mode only).
   // We use a ref for the source so it doesn't trigger re-renders mid-drag,
@@ -242,7 +243,7 @@ export default function Lesson() {
     (q) => !q.is_extension && !['passage', 'video_group', 'file_task', 'mc_group', 'info_only', 'section_header', 'text_only'].includes(q.question_type)
   );
   const mainAnsweredCount = mainCountableQs.filter(
-    (q) => submissions.some((s) => s.question_id === q.id)
+    (q) => submissions.some((s) => s.question_id === q.id) || previewAnsweredQIds.has(q.id)
   ).length;
   const progressPct = mainCountableQs.length > 0
     ? Math.round(mainAnsweredCount / mainCountableQs.length * 100)
@@ -462,7 +463,7 @@ export default function Lesson() {
           <>
             <button
               type="button"
-              onClick={() => setPreviewAsStudent((v) => { if (!v) previewSessionRef.current += 1; return !v; })}
+              onClick={() => setPreviewAsStudent((v) => { if (!v) { previewSessionRef.current += 1; } else { setPreviewAnsweredQIds(new Set()); } return !v; })}
               style={{
                 background: previewAsStudent ? 'var(--cw-accent)' : 'var(--cw-surface-muted)',
                 color: previewAsStudent ? '#fff' : 'var(--cw-ink)',
@@ -1232,6 +1233,7 @@ export default function Lesson() {
                       submissions={submissions}
                       unlockedQIds={unlockedQIds}
                       preview={!!previewAsStudent}
+                      onPreviewAnswered={(ids) => setPreviewAnsweredQIds((prev) => { const next = new Set(prev); ids.forEach((id) => next.add(id)); return next; })}
                       onSubmitted={() => {
                         setUnlockedQIds((prev) => {
                           const next = new Set(prev);
@@ -5956,6 +5958,7 @@ function McGroupAnswer({
   submissions,
   unlockedQIds,
   preview,
+  onPreviewAnswered,
   onSubmitted,
 }: {
   group: Question;
@@ -5963,6 +5966,7 @@ function McGroupAnswer({
   submissions: Submission[];
   unlockedQIds: Set<string>;
   preview: boolean;
+  onPreviewAnswered: (ids: string[]) => void;
   onSubmitted: () => void;
 }) {
   // Most recent submission per child question.
@@ -6039,6 +6043,7 @@ function McGroupAnswer({
         }
         setPreviewResults(results);
         setMsg(null);
+        onPreviewAnswered(Object.keys(results));
       } else {
         for (const child of activeChildren) {
           const selected = answers[child.id] || '';
