@@ -5979,6 +5979,7 @@ function McGroupAnswer({
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [previewResults, setPreviewResults] = useState<Record<string, { marksAwarded: number | null; feedback: string | null; maxMarks: number }> | null>(null);
 
   // Pre-fill from last submissions on first render.
   const hydrated = useRef(false);
@@ -6016,23 +6017,40 @@ function McGroupAnswer({
   async function submitAll() {
     if (busy) return;
     setBusy(true);
-    setMsg(null);
+    setMsg(preview ? 'Running AI marker…' : null);
+    if (preview) setPreviewResults(null);
     const token = localStorage.getItem('studentToken') || '';
     try {
-      for (const child of activeChildren) {
-        const selected = answers[child.id] || '';
-        if (!selected) continue;
-        const res = await fetch(`/api/classwork/questions/${child.id}/submit`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ selectedOptionLabel: selected }),
-        });
-        if (!res.ok) {
-          const j = await res.json().catch(() => ({}));
-          throw new Error((j as any)?.error || `Submit failed (${res.status})`);
+      if (preview) {
+        // Dry-run: use the teacher-auth /try endpoint — no submissions stored.
+        const results: Record<string, { marksAwarded: number | null; feedback: string | null; maxMarks: number }> = {};
+        for (const child of activeChildren) {
+          const selected = answers[child.id] || '';
+          if (!selected) continue;
+          const r = await api<{ marksAwarded: number | null; feedback: string | null; maxMarks: number }>(
+            `/api/classwork/questions/${child.id}/try`,
+            { method: 'POST', body: JSON.stringify({ selectedOptionLabel: selected }) },
+          );
+          results[child.id] = r;
         }
+        setPreviewResults(results);
+        setMsg(null);
+      } else {
+        for (const child of activeChildren) {
+          const selected = answers[child.id] || '';
+          if (!selected) continue;
+          const res = await fetch(`/api/classwork/questions/${child.id}/submit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ selectedOptionLabel: selected }),
+          });
+          if (!res.ok) {
+            const j = await res.json().catch(() => ({}));
+            throw new Error((j as any)?.error || `Submit failed (${res.status})`);
+          }
+        }
+        onSubmitted();
       }
-      onSubmitted();
     } catch (e: any) {
       setMsg(e.message || 'Submission failed');
     } finally {
@@ -6148,6 +6166,24 @@ function McGroupAnswer({
               <div style={{ marginTop: 6, fontSize: 12, color: 'var(--cw-muted)', fontStyle: 'italic' }}>
                 Already submitted
                 {sub.marks_awarded != null && ` · ${sub.marks_awarded}/${c.max_marks} mark${c.max_marks === 1 ? '' : 's'}`}
+              </div>
+            )}
+            {preview && previewResults?.[c.id] && (
+              <div style={{
+                marginTop: 10, padding: '8px 12px', borderRadius: 8,
+                background: 'var(--cw-tint-info-bg)', border: '1px solid var(--cw-tint-info-border)',
+                fontSize: 13,
+              }}>
+                {previewResults[c.id].marksAwarded != null && (
+                  <div style={{ fontWeight: 700, marginBottom: 4, color: 'var(--cw-tint-info-ink)' }}>
+                    {previewResults[c.id].marksAwarded}/{previewResults[c.id].maxMarks} mark{previewResults[c.id].maxMarks === 1 ? '' : 's'}
+                  </div>
+                )}
+                {previewResults[c.id].feedback && (
+                  <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, color: 'var(--cw-ink)' }}>
+                    {previewResults[c.id].feedback}
+                  </div>
+                )}
               </div>
             )}
           </div>
