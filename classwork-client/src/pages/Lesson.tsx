@@ -2172,7 +2172,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
                     rows={3}
                     value={cellAnswers[String(i)] || ''}
                     onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}
-                    placeholder="List one or more programs, e.g. Zoom, Microsoft Teams"
+                    placeholder=""
                     style={{ padding: '8px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', resize: 'vertical', fontFamily: 'inherit', fontSize: 14 }}
                   />
                 ) : (
