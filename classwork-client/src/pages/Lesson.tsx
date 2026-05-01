@@ -6062,10 +6062,10 @@ function McGroupAnswer({
           const optText = opts.find((o: any) => o.label === sub?.selected_option_label)?.text;
           return (
             <div key={c.id} style={{
-              marginBottom: 10, paddingBottom: 10,
+              marginBottom: 20, paddingBottom: 20,
               borderBottom: ci < childQuestions.length - 1 ? '1px solid var(--cw-tint-success-border)' : 'none',
             }}>
-              <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 3 }}>
+              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>
                 {String.fromCharCode(97 + ci)}) {c.prompt}
               </div>
               {sub && (
@@ -6096,13 +6096,13 @@ function McGroupAnswer({
   // ── Active form ────────────────────────────────────────────────────────────
   return (
     <div style={{
-      marginTop: 4, padding: 14,
+      marginTop: 4, padding: 20,
       border: '1px dashed var(--cw-border)', borderRadius: 8,
       background: 'var(--cw-surface-soft)',
     }}>
       {anyUnlocked && allSubmitted && (
         <div style={{
-          marginBottom: 12, padding: '8px 12px',
+          marginBottom: 20, padding: '8px 12px',
           background: '#eff6ff', border: '1.5px solid #bfdbfe', borderRadius: 8,
           fontSize: 13, color: '#1e40af', display: 'flex', gap: 8, alignItems: 'flex-start',
         }}>
@@ -6116,13 +6116,13 @@ function McGroupAnswer({
         const opts: any[] = Array.isArray(c.options) ? c.options : [];
         return (
           <div key={c.id} style={{
-            marginBottom: 14, paddingBottom: 14,
+            marginBottom: 28, paddingBottom: 28,
             borderBottom: ci < childQuestions.length - 1 ? '1px solid var(--cw-border)' : 'none',
           }}>
-            <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 8 }}>
+            <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 12 }}>
               {String.fromCharCode(97 + ci)}) {c.prompt}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {opts.map((opt: any, oi: number) => {
                 const val: string = opt.label || String(oi);
                 return (
