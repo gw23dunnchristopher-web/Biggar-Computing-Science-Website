@@ -787,10 +787,10 @@ export default function Lesson() {
           return (
             <div style={{
               ...card,
-              background: '#f5f3ff',
-              borderColor: '#c4b5fd',
+              background: 'var(--cw-tint-extension-bg)',
+              borderColor: 'var(--cw-tint-extension-border)',
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#5b21b6', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: 'var(--cw-ink)', flexWrap: 'wrap' }}>
                 <span style={{
                   fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase',
                   padding: '2px 8px', borderRadius: 999,
