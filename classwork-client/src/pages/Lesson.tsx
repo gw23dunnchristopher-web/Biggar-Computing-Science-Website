@@ -6011,10 +6011,10 @@ function McGroupAnswer({
   // Children that still need a submission (or have been unlocked for re-submit).
   const activeChildren = childQuestions.filter((c) => !lastByQid[c.id] || unlockedQIds.has(c.id));
   const isLocked = allSubmitted && !anyUnlocked && !preview;
-  const canSubmit = !preview && activeChildren.length > 0 && activeChildren.every((c) => !!(answers[c.id] || '').trim());
+  const canSubmit = activeChildren.length > 0 && activeChildren.every((c) => !!(answers[c.id] || '').trim());
 
   async function submitAll() {
-    if (busy || preview) return;
+    if (busy) return;
     setBusy(true);
     setMsg(null);
     const token = localStorage.getItem('studentToken') || '';
@@ -6128,7 +6128,7 @@ function McGroupAnswer({
                 return (
                   <label key={oi} style={{
                     display: 'flex', gap: 8, alignItems: 'center',
-                    cursor: isActive && !preview ? 'pointer' : 'default',
+                    cursor: isActive ? 'pointer' : 'default',
                     opacity: !isActive ? 0.6 : 1,
                   }}>
                     <input
@@ -6137,7 +6137,7 @@ function McGroupAnswer({
                       value={val}
                       checked={answers[c.id] === val}
                       onChange={(e) => setAnswers((a) => ({ ...a, [c.id]: e.target.value }))}
-                      disabled={!isActive || preview}
+                      disabled={!isActive}
                     />
                     <span>{opt.text || opt.label || `Option ${oi + 1}`}</span>
                   </label>
@@ -6167,14 +6167,9 @@ function McGroupAnswer({
           {busy ? 'Submitting…' : 'Submit answers'}
         </button>
         {msg && <span style={{ color: 'var(--cw-danger)', fontSize: 13 }}>{msg}</span>}
-        {!preview && activeChildren.length > 0 && !canSubmit && (
+        {activeChildren.length > 0 && !canSubmit && (
           <span style={{ color: 'var(--cw-muted)', fontSize: 13 }}>
             Choose an answer for each question first.
-          </span>
-        )}
-        {preview && (
-          <span style={{ color: 'var(--cw-muted)', fontSize: 13, fontStyle: 'italic' }}>
-            (Student preview — submission disabled)
           </span>
         )}
       </div>
