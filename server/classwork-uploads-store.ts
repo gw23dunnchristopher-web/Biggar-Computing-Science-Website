@@ -60,28 +60,47 @@ export async function saveClassworkUpload(
   return { key, url: `/classwork-uploads/${key}` };
 }
 
+// MIME types inferred from extension — reliable because we control the
+// filenames on upload and always sanitise them via safeFilename().
+const MIME_BY_EXT: Record<string, string> = {
+  jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+  gif: 'image/gif', webp: 'image/webp', heic: 'image/heic', heif: 'image/heif',
+  pdf: 'application/pdf',
+  mp4: 'video/mp4', webm: 'video/webm', mov: 'video/quicktime', m4v: 'video/mp4',
+  txt: 'text/plain', csv: 'text/csv', py: 'text/x-python',
+  html: 'text/html', htm: 'text/html', css: 'text/css', js: 'text/javascript',
+  json: 'application/json', xml: 'application/xml', md: 'text/markdown',
+};
+
 // Stream a stored upload to the response, or return a 404. We pipe through
 // Express rather than redirecting to a signed GCS URL so the public URL stays
 // stable forever.
+//
+// Previously this made three GCS API round-trips per serve (exists, getMetadata,
+// createReadStream).  Now we skip straight to streaming: GCS will surface a
+// 404 error on the stream itself if the object doesn't exist, which the error
+// handler converts into a proper HTTP 404.  This roughly triples serve speed
+// for small files like unit thumbnails.
 export async function streamClassworkUpload(name: string, res: Response): Promise<void> {
   if (!isLegalLeafName(name)) {
     res.status(400).send('Bad request');
     return;
   }
+  const ext = (name.split('.').pop() ?? '').toLowerCase();
+  const contentType = MIME_BY_EXT[ext] ?? 'application/octet-stream';
   try {
     const file = getBucket().file(OBJECT_PREFIX + name);
-    const [exists] = await file.exists();
-    if (!exists) { res.status(404).send('Not found'); return; }
-    const [metadata] = await file.getMetadata();
     res.set({
-      'Content-Type': (metadata.contentType as string) || 'application/octet-stream',
+      'Content-Type': contentType,
       'Cache-Control': 'public, max-age=86400',
     });
-    if (metadata.size != null) res.set('Content-Length', String(metadata.size));
     file.createReadStream()
-      .on('error', (err) => {
+      .on('error', (err: any) => {
         console.error('[classwork-uploads] stream error:', err);
-        if (!res.headersSent) res.status(500).end();
+        if (!res.headersSent) {
+          // GCS surfaces missing-object as HTTP 404 on the stream error.
+          res.status(err?.code === 404 ? 404 : 500).end();
+        }
       })
       .pipe(res);
   } catch (err) {

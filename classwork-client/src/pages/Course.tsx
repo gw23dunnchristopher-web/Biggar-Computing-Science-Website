@@ -224,8 +224,30 @@ export default function Course() {
     setModal({ kind: 'editUnit', unit });
   }
 
-  // Reuses the same teacher resource upload endpoint used elsewhere on
-  // this page — returns a public /uploads URL we can persist as the
+  // Compress an image file client-side before uploading. Resizes to ≤ maxPx on
+  // the longest side and re-encodes as JPEG. Falls back to the original file
+  // if the Canvas API isn't available (e.g. in jsdom tests).
+  function compressImage(file: File, maxPx = 800, quality = 0.85): Promise<Blob> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const blobUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(blobUrl);
+        const scale = Math.min(1, maxPx / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
+        const w = Math.round((img.naturalWidth || 1) * scale);
+        const h = Math.round((img.naturalHeight || 1) * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(file); return; }
+        ctx.drawImage(img, 0, 0, w, h);
+        canvas.toBlob((blob) => resolve(blob ?? file), 'image/jpeg', quality);
+      };
+      img.onerror = () => { URL.revokeObjectURL(blobUrl); resolve(file); };
+      img.src = blobUrl;
+    });
+  }
+
   // unit's `image_url`. Surfaces failures via `modalErr` so the
   // currently-open New/Edit unit modal shows the message inline.
   async function uploadUnitImage(file: File) {
@@ -234,10 +256,18 @@ export default function Course() {
       setModalErr('Please choose an image file (PNG, JPG, GIF, …).');
       return;
     }
+    // Show a local blob preview instantly so the teacher sees the image
+    // straight away instead of staring at a spinner during the network round-trip.
+    const localPreview = URL.createObjectURL(file);
+    setUnitImageUrl(localPreview);
     setUnitImageUploading(true);
     try {
+      // Compress to ≤ 800 px on the longest side — more than enough for a
+      // course thumbnail and typically 10-20× smaller than a raw phone photo.
+      const blob = await compressImage(file, 800, 0.85);
+      const safeName = file.name.replace(/\.[^.]+$/, '') + '.jpg';
       const fd = new FormData();
-      fd.append('file', file);
+      fd.append('file', blob, safeName);
       const teacherToken = (() => {
         try { return localStorage.getItem('teacher_token') || localStorage.getItem('teacherToken') || ''; }
         catch { return ''; }
@@ -253,8 +283,11 @@ export default function Course() {
         throw new Error(msg);
       }
       const up = await res.json() as { url: string; filename: string };
+      URL.revokeObjectURL(localPreview);
       setUnitImageUrl(up.url);
     } catch (e: any) {
+      URL.revokeObjectURL(localPreview);
+      setUnitImageUrl('');
       setModalErr(e.message || 'Upload failed');
     } finally {
       setUnitImageUploading(false);
