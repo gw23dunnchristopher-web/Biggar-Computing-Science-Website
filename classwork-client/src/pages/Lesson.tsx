@@ -238,7 +238,7 @@ export default function Lesson() {
   // Progress tracking — counts answerable, non-extension questions only.
   // Excludes: passage, video_group (container cards), info_only, section_header, text_only.
   const mainCountableQs = questions.filter(
-    (q) => !q.is_extension && !['passage', 'video_group', 'file_task', 'info_only', 'section_header', 'text_only'].includes(q.question_type)
+    (q) => !q.is_extension && !['passage', 'video_group', 'file_task', 'mc_group', 'info_only', 'section_header', 'text_only'].includes(q.question_type)
   );
   const mainAnsweredCount = mainCountableQs.filter(
     (q) => submissions.some((s) => s.question_id === q.id)
@@ -5979,6 +5979,7 @@ function McGroupAnswer({
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [justSubmitted, setJustSubmitted] = useState(false);
   const [previewResults, setPreviewResults] = useState<Record<string, { marksAwarded: number | null; feedback: string | null; maxMarks: number }> | null>(null);
 
   // Pre-fill from last submissions on first render.
@@ -6000,6 +6001,7 @@ function McGroupAnswer({
   useEffect(() => {
     if (!anyUnlocked || unlockHydrated.current) return;
     unlockHydrated.current = true;
+    setJustSubmitted(false);
     const init: Record<string, string> = {};
     for (const c of childQuestions) {
       const sub = lastByQid[c.id];
@@ -6011,7 +6013,7 @@ function McGroupAnswer({
   const allSubmitted = childQuestions.every((c) => !!lastByQid[c.id]);
   // Children that still need a submission (or have been unlocked for re-submit).
   const activeChildren = childQuestions.filter((c) => !lastByQid[c.id] || unlockedQIds.has(c.id));
-  const isLocked = allSubmitted && !anyUnlocked && !preview;
+  const isLocked = (allSubmitted || justSubmitted) && !anyUnlocked && !preview;
   const canSubmit = activeChildren.length > 0 && activeChildren.every((c) => !!(answers[c.id] || '').trim());
 
   async function submitAll() {
@@ -6049,6 +6051,7 @@ function McGroupAnswer({
             throw new Error((j as any)?.error || `Submit failed (${res.status})`);
           }
         }
+        setJustSubmitted(true);
         onSubmitted();
       }
     } catch (e: any) {
