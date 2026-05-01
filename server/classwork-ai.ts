@@ -69,7 +69,7 @@ export async function markSubmission(
   try {
     switch (q.question_type) {
       case 'multiple_choice':
-        return markMultipleChoice(q, s);
+        return await markMultipleChoice(q, s);
       case 'short':
       case 'long':
       case 'code':
@@ -117,6 +117,7 @@ export async function markSubmission(
       case 'passage':
       case 'video_group':
       case 'file_task':
+      case 'mc_group':
       case 'text_only':
         return null;
       default:
@@ -128,27 +129,68 @@ export async function markSubmission(
   }
 }
 
-/* ---------- 1. Multiple choice (deterministic) ---------- */
+/* ---------- 1. Multiple choice ---------- */
+// Marks are always determined by the isCorrect flag (deterministic).
+// If the teacher has provided ai_grading_guidance or a marking_scheme, Gemini
+// generates a richer explanatory feedback message; otherwise a concise
+// fallback string is returned without calling the model.
 
-function markMultipleChoice(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+async function markMultipleChoice(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {
   const options = Array.isArray(q.options) ? q.options : null;
   if (!options || !s.selected_option_label) return null;
-  const picked = options.find((o: any) => String(o.label) === String(s.selected_option_label));
+
+  const picked  = options.find((o: any) => String(o.label) === String(s.selected_option_label));
+  const correct = options.find((o: any) => o.isCorrect);
+
+  // Deterministic marks — AI never overrides this.
+  const marksAwarded = picked?.isCorrect ? q.max_marks : 0;
+
+  // If teacher has given guidance, ask Gemini for an explanatory message.
+  const hasGuidance = !!(q.ai_grading_guidance?.trim() || q.marking_scheme?.trim());
+  if (hasGuidance && gemini) {
+    const optionsList = options
+      .map((o: any) => `${o.label}: ${o.text}${o.isCorrect ? ' ✓' : ''}`)
+      .join('\n');
+    const prompt = [
+      `A student answered a multiple choice question.`,
+      ``,
+      `Question: ${q.prompt}`,
+      ``,
+      `Options:\n${optionsList}`,
+      ``,
+      `Student selected: ${picked ? `${picked.label}: ${picked.text}` : s.selected_option_label}`,
+      `Result: ${picked?.isCorrect ? 'CORRECT' : 'INCORRECT'}`,
+      correct && !picked?.isCorrect ? `Correct answer: ${correct.label}: ${correct.text}` : '',
+      q.marking_scheme?.trim()      ? `Marking scheme: ${q.marking_scheme}`               : '',
+      q.ai_grading_guidance?.trim() ? `Additional guidance: ${q.ai_grading_guidance}`      : '',
+      ``,
+      `Write a brief, helpful feedback message (1–3 sentences) for the student.`,
+      `If correct, confirm and briefly explain why that answer is right.`,
+      `If incorrect, gently explain why the correct answer is right.`,
+      `Do not start with "Correct" or "Incorrect" — the student already sees a result indicator.`,
+      `Write in plain English, no markdown formatting.`,
+    ].filter(Boolean).join('\n');
+
+    try {
+      const resp = await gemini.models.generateContent({
+        model: MODEL,
+        contents: prompt,
+        config: { thinkingConfig: { thinkingBudget: 0 } },
+      });
+      const feedback = (resp.text || '').trim();
+      if (feedback) return { marksAwarded, feedback, markedBy: 'ai' };
+    } catch (err) {
+      console.error('[classwork-ai] MC AI feedback failed:', err);
+    }
+  }
+
+  // Fallback: concise deterministic feedback.
   if (!picked) {
-    return {
-      marksAwarded: 0,
-      feedback: 'No matching option selected.',
-      markedBy: 'ai',
-    };
+    return { marksAwarded: 0, feedback: 'No matching option selected.', markedBy: 'ai' };
   }
   if (picked.isCorrect) {
-    return {
-      marksAwarded: q.max_marks,
-      feedback: `Correct — ${picked.text || picked.label} is the right answer.`,
-      markedBy: 'ai',
-    };
+    return { marksAwarded, feedback: `Correct — ${picked.text || picked.label} is the right answer.`, markedBy: 'ai' };
   }
-  const correct = options.find((o: any) => o.isCorrect);
   return {
     marksAwarded: 0,
     feedback: correct

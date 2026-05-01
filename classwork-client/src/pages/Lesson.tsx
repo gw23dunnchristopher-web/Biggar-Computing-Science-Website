@@ -5221,13 +5221,21 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
             )}
           </div>
         )}
-        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'info_only' && type !== 'text_only' && type !== 'section_header' && (
+        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && type !== 'info_only' && type !== 'text_only' && type !== 'section_header' && (
           <>
             <label style={fieldLabel}>Marking scheme (teacher view only)
               <textarea rows={2} value={markingScheme} onChange={(e) => setMarkingScheme(e.target.value)} style={input} />
             </label>
-            <label style={fieldLabel}>AI grading guidance (used by AI marker — Phase 2)
+            <label style={fieldLabel}>
+              {type === 'multiple_choice'
+                ? 'AI feedback guidance (optional — if provided, the AI explains why the answer is right or wrong)'
+                : 'AI grading guidance (used by the AI marker)'}
               <textarea rows={2} value={aiGuidance} onChange={(e) => setAiGuidance(e.target.value)} style={input} />
+              {type === 'multiple_choice' && (
+                <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
+                  Leave blank for a simple correct/incorrect message. Add context (e.g. "Binary uses base 2 because…") for richer AI-generated explanations.
+                </span>
+              )}
             </label>
           </>
         )}
