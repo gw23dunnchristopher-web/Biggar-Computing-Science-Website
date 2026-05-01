@@ -220,6 +220,7 @@ export function ensureClassworkSchema(): Promise<void> {
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_pages_url   TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_filename    TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_uploaded_at TIMESTAMP;`),
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS onedrive_embed_url       TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS learning_intentions TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS success_criteria    TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS is_test BOOLEAN NOT NULL DEFAULT FALSE;`),
@@ -486,7 +487,7 @@ export async function listUnits(course: ClassworkCourse) {
   const r = await pool.query(
     `SELECT id, course, title, description, image_url, order_index, created_at,
             presentation_url, presentation_pages_url, presentation_filename,
-            presentation_uploaded_at
+            presentation_uploaded_at, onedrive_embed_url
        FROM bhs_classwork_units
       WHERE course = $1
       ORDER BY order_index ASC, created_at ASC`,
@@ -528,6 +529,32 @@ export async function clearUnitPresentation(unitId: string) {
             presentation_pages_url = NULL,
             presentation_filename = NULL,
             presentation_uploaded_at = NULL
+      WHERE id = $1
+      RETURNING *`,
+    [unitId]
+  );
+  return r.rows[0] || null;
+}
+
+// Save (or replace) the OneDrive embed URL for a unit.
+export async function setUnitOnedriveUrl(unitId: string, url: string) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `UPDATE bhs_classwork_units
+        SET onedrive_embed_url = $1
+      WHERE id = $2
+      RETURNING *`,
+    [url, unitId]
+  );
+  return r.rows[0] || null;
+}
+
+// Clear the OneDrive embed URL so the row no longer renders the iframe.
+export async function clearUnitOnedriveUrl(unitId: string) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `UPDATE bhs_classwork_units
+        SET onedrive_embed_url = NULL
       WHERE id = $1
       RETURNING *`,
     [unitId]

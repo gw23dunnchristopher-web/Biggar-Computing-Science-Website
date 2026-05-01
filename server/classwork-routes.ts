@@ -68,6 +68,8 @@ import {
   usernameTakenAnywhere,
   setUnitPresentation,
   clearUnitPresentation,
+  setUnitOnedriveUrl,
+  clearUnitOnedriveUrl,
   getStudentSubmissionForQuestion,
   unlockSubmission,
   lockSubmission,
@@ -497,6 +499,37 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] clear presentation error:', err);
       res.status(500).json({ error: 'Failed to remove presentation' });
+    }
+  });
+
+  /* ---------- Per-unit OneDrive embed link ---------- */
+
+  // Teachers can attach a OneDrive/SharePoint embed URL to a unit instead of
+  // (or alongside) a locally-uploaded PPTX. The client validates the URL format
+  // before calling this endpoint; we do a basic sanity-check server-side too.
+  app.put('/api/classwork/units/:unitId/onedrive-url', requireTeacher, async (req, res) => {
+    const { url } = req.body as { url?: string };
+    if (!url || typeof url !== 'string' || !url.trim().startsWith('http')) {
+      return res.status(400).json({ error: 'A valid URL is required.' });
+    }
+    try {
+      const updated = await setUnitOnedriveUrl(req.params.unitId, url.trim());
+      if (!updated) return res.status(404).json({ error: 'Unit not found' });
+      res.json({ ok: true, unit: updated });
+    } catch (err) {
+      console.error('[classwork] set onedrive url error:', err);
+      res.status(500).json({ error: 'Failed to save OneDrive URL' });
+    }
+  });
+
+  app.delete('/api/classwork/units/:unitId/onedrive-url', requireTeacher, async (req, res) => {
+    try {
+      const updated = await clearUnitOnedriveUrl(req.params.unitId);
+      if (!updated) return res.status(404).json({ error: 'Unit not found' });
+      res.json({ ok: true, unit: updated });
+    } catch (err) {
+      console.error('[classwork] clear onedrive url error:', err);
+      res.status(500).json({ error: 'Failed to remove OneDrive URL' });
     }
   });
 
