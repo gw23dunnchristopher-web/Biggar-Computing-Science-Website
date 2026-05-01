@@ -1681,7 +1681,8 @@ async function judgeCellsWithAI(
 // dispatches one Gemini call for the AI bucket, and assembles the final
 // scaled mark + per-cell feedback.
 async function gradeCellList(q: AIQuestion, cells: CellSpec[]): Promise<AIMarkResult | null> {
-  const aiCells = cells.filter((c) => c.aiGuidance && c.accept.length === 0 && c.pupilAnswer.trim());
+  const hasQGuidance = !!(q.marking_scheme || q.ai_grading_guidance);
+  const aiCells = cells.filter((c) => c.accept.length === 0 && c.pupilAnswer.trim() && (c.aiGuidance || hasQGuidance));
   const judgements = aiCells.length ? await judgeCellsWithAI(q, aiCells) : new Map();
   const lines: string[] = [];
   let correct = 0; let auto = 0;
@@ -1694,7 +1695,7 @@ async function gradeCellList(q: AIQuestion, cells: CellSpec[]): Promise<AIMarkRe
       } else {
         lines.push(`${c.label}: you wrote "${c.pupilAnswer}" — expected "${c.accept[0]}"`);
       }
-    } else if (c.aiGuidance) {
+    } else if (c.aiGuidance || hasQGuidance) {
       auto++;
       if (!c.pupilAnswer.trim()) {
         lines.push(`${c.label}: nothing written.`);
