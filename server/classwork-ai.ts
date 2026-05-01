@@ -1638,7 +1638,7 @@ async function judgeCellsWithAI(
     markIfTheyMeet: c.aiGuidance,
   }));
   const prompt = [
-    `You are a Scottish secondary school Computing Science teacher marking specific cells of a single classwork question.`,
+    `You are a Computing Science teacher marking specific cells of a classwork question.`,
     `Question prompt: ${q.prompt}`,
     q.marking_scheme ? `Overall marking scheme: ${q.marking_scheme}` : '',
     q.ai_grading_guidance ? `Overall guidance: ${q.ai_grading_guidance}` : '',
@@ -1647,7 +1647,8 @@ async function judgeCellsWithAI(
     `Cells:`,
     JSON.stringify(cellsForPrompt, null, 2),
     '',
-    `Return ONLY a JSON object keyed by the cell "key", where each value is { "correct": 0 or 1, "feedback": "<one short sentence aimed at the pupil>" }.`,
+    `Return ONLY a JSON object keyed by the cell "key", where each value is { "correct": 0 or 1, "feedback": "<one short sentence of plain English feedback for the pupil>" }.`,
+    `Write all feedback in plain, clear English — no regional dialect or informal expressions.`,
   ].filter(Boolean).join('\n');
   try {
     const resp = await gemini.models.generateContent({
@@ -1767,6 +1768,44 @@ async function markTable(q: AIQuestion, s: AISubmission): Promise<AIMarkResult |
   return gradeCellList(q, cells);
 }
 
+async function judgeLabeledInputsHolistically(
+  q: AIQuestion,
+  cells: CellSpec[],
+): Promise<AIMarkResult | null> {
+  if (!gemini) return null;
+  const fieldSummary = cells.map((c) => `${c.label}:\n${c.pupilAnswer || '(empty)'}`).join('\n\n');
+  const prompt = [
+    `You are a Computing Science teacher marking a classwork question.`,
+    `Question: ${q.prompt}`,
+    q.marking_scheme ? `Marking scheme / rubric:\n${q.marking_scheme}` : '',
+    q.ai_grading_guidance ? `Marking guidance:\n${q.ai_grading_guidance}` : '',
+    '',
+    `The student submitted the following:`,
+    fieldSummary,
+    '',
+    `Award a mark from 0 to ${q.max_marks} strictly following the rubric above.`,
+    `Write 2–3 sentences of plain English feedback for the student explaining what they did well and what to improve.`,
+    `Do not use regional dialect or informal expressions.`,
+    `Return ONLY valid JSON: { "marks": <integer 0–${q.max_marks}>, "feedback": "<feedback>" }`,
+  ].filter(Boolean).join('\n');
+  try {
+    const resp = await gemini.models.generateContent({
+      model: MODEL,
+      contents: prompt,
+      config: { responseMimeType: 'application/json', thinkingConfig: { thinkingBudget: 0 } },
+    });
+    const parsed = safeParseJson(resp.text || '');
+    if (parsed && typeof parsed === 'object') {
+      const marks = Math.max(0, Math.min(q.max_marks, Math.round(Number((parsed as any).marks) || 0)));
+      return { marksAwarded: marks, feedback: String((parsed as any).feedback || ''), markedBy: 'ai' };
+    }
+    return null;
+  } catch (err) {
+    console.error('[classwork-ai] judgeLabeledInputsHolistically failed:', err);
+    return null;
+  }
+}
+
 async function markLabeledInputs(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {
   const cfg = q.config;
   const fields = cfg && Array.isArray(cfg.fields) ? cfg.fields : null;
@@ -1783,6 +1822,13 @@ async function markLabeledInputs(q: AIQuestion, s: AISubmission): Promise<AIMark
       accept: Array.isArray(f?.accept) ? f.accept.map(String) : [],
       aiGuidance: String(f?.aiGuidance || '').trim(),
     });
+  }
+  // If the question has a rubric and no field has an exact-match accept list,
+  // use holistic rubric-based marking rather than per-cell binary correct/wrong.
+  const hasRubric = !!(q.marking_scheme || q.ai_grading_guidance);
+  const anyExactMatch = cells.some((c) => c.accept.length > 0);
+  if (hasRubric && !anyExactMatch) {
+    return judgeLabeledInputsHolistically(q, cells);
   }
   return gradeCellList(q, cells);
 }
