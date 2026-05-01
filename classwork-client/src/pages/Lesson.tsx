@@ -150,6 +150,7 @@ export default function Lesson() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [previewAsStudent, setPreviewAsStudent] = useState(false);
+  const previewSessionRef = useRef(0);
 
   // Drag-and-drop reordering state (teacher mode only).
   // We use a ref for the source so it doesn't trigger re-renders mid-drag,
@@ -461,7 +462,7 @@ export default function Lesson() {
           <>
             <button
               type="button"
-              onClick={() => setPreviewAsStudent((v) => !v)}
+              onClick={() => setPreviewAsStudent((v) => { if (!v) previewSessionRef.current += 1; return !v; })}
               style={{
                 background: previewAsStudent ? 'var(--cw-accent)' : 'var(--cw-surface-muted)',
                 color: previewAsStudent ? '#fff' : 'var(--cw-ink)',
@@ -1225,6 +1226,7 @@ export default function Lesson() {
                 ) : isMCG ? (
                   (role === 'student' || previewAsStudent) ? (
                     <McGroupAnswer
+                      key={`${curItem.passage.id}-${previewSessionRef.current}`}
                       group={curItem.passage}
                       childQuestions={curItem.children}
                       submissions={submissions}
