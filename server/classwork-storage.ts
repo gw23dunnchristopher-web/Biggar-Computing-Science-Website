@@ -64,6 +64,10 @@ export const CLASSWORK_QUESTION_TYPES = [
   // reference to whatever the pupil uploaded or linked. Excluded from
   // analytics alongside passage/video_group (it is a container, not a task).
   'file_task',
+  // Container that groups multiple_choice child questions together so pupils
+  // see them all at once and submit with a single button. Excluded from
+  // analytics (it is a container, not a scoreable task).
+  'mc_group',
 ] as const;
 export type ClassworkQuestionType = (typeof CLASSWORK_QUESTION_TYPES)[number];
 
