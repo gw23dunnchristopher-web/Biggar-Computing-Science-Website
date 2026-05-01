@@ -1516,33 +1516,46 @@ export default function Course() {
 
       {/* OneDrive / SharePoint iframe modal */}
       {odViewerUnit?.onedrive_embed_url && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 1200,
-          background: 'rgba(0,0,0,0.72)',
-          display: 'flex', flexDirection: 'column',
-        }}>
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 1200,
+            background: 'rgba(0,0,0,0.6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 24,
+          }}
+          onClick={(e) => { if (e.target === e.currentTarget) setOdViewerUnit(null); }}
+        >
           <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '10px 16px', background: '#1e293b', color: '#f1f5f9',
-            flexShrink: 0,
+            display: 'flex', flexDirection: 'column',
+            width: '100%', maxWidth: 1100, height: '90vh',
+            borderRadius: 12, overflow: 'hidden',
+            boxShadow: '0 24px 64px rgba(0,0,0,0.45)',
           }}>
-            <span style={{ fontWeight: 700, fontSize: 15 }}>
-              ☁️ {odViewerUnit.title}
-            </span>
-            <button
-              onClick={() => setOdViewerUnit(null)}
-              style={{
-                background: 'transparent', color: '#94a3b8', border: '1px solid #334155',
-                borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontWeight: 600, fontSize: 13,
-              }}
-            >Close</button>
+            {/* Modal header */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '10px 16px', background: '#1e293b', color: '#f1f5f9',
+              flexShrink: 0,
+            }}>
+              <span style={{ fontWeight: 700, fontSize: 15 }}>
+                ☁️ {odViewerUnit.title}
+              </span>
+              <button
+                onClick={() => setOdViewerUnit(null)}
+                style={{
+                  background: 'transparent', color: '#94a3b8', border: '1px solid #334155',
+                  borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontWeight: 600, fontSize: 13,
+                }}
+              >✕ Close</button>
+            </div>
+            {/* Embedded presentation */}
+            <iframe
+              src={toOnedriveEmbedUrl(odViewerUnit.onedrive_embed_url)}
+              style={{ flex: 1, border: 'none', width: '100%' }}
+              allowFullScreen
+              title={`${odViewerUnit.title} — OneDrive slides`}
+            />
           </div>
-          <iframe
-            src={toOnedriveEmbedUrl(odViewerUnit.onedrive_embed_url)}
-            style={{ flex: 1, border: 'none', width: '100%' }}
-            allowFullScreen
-            title={`${odViewerUnit.title} — OneDrive slides`}
-          />
         </div>
       )}
     </Shell>
