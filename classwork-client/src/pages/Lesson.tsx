@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
@@ -102,6 +102,7 @@ const TYPE_LABELS: Record<string, string> = {
   video_group: 'Video (add questions underneath, or leave standalone)',
   passage: 'Reading passage (add questions underneath)',
   file_task: 'File task (students upload a file, then answer follow-ups)',
+  mc_group: 'Multiple choice group (a, b, c… all answered & submitted together)',
   // Fun activities
   crossword: 'Crossword puzzle',
   word_search: 'Word search',
@@ -118,7 +119,7 @@ const TYPE_LABELS: Record<string, string> = {
 // Grouped structure for the type <select> — video_question excluded since
 // video_group covers the same need (attach 0 or more questions underneath).
 const TYPE_GROUPS: { label: string; types: string[] }[] = [
-  { label: 'Written answers', types: ['short', 'long', 'code', 'multiple_choice', 'fill_in_blanks', 'table', 'labeled_inputs'] },
+  { label: 'Written answers', types: ['short', 'long', 'code', 'multiple_choice', 'fill_in_blanks', 'table', 'labeled_inputs', 'mc_group'] },
   { label: 'File & project uploads', types: ['screenshot', 'file_upload', 'presentation', 'project', 'scratch_link', 'makecode_link', 'google_sites_link'] },
   { label: 'Embedded tools', types: ['python_task', 'html_task', 'sql_task', 'database_task'] },
   { label: 'Video, reading & file groups', types: ['video_group', 'passage', 'file_task'] },
@@ -473,7 +474,7 @@ export default function Lesson() {
             </button>
             {!previewAsStudent && <NewQuestionButton
               lessonId={lessonId}
-              passages={questions.filter((q) => q.question_type === 'passage' || q.question_type === 'video_group' || q.question_type === 'file_task')}
+              passages={questions.filter((q) => q.question_type === 'passage' || q.question_type === 'video_group' || q.question_type === 'file_task' || q.question_type === 'mc_group')}
               onCreated={refresh}
             />}
           </>
@@ -514,9 +515,9 @@ export default function Lesson() {
           const items: Item[] = [];
           for (const q of qs) {
             if (consumed.has(q.id)) continue;
-            if (q.question_type === 'passage' || q.question_type === 'video_group' || q.question_type === 'file_task') {
+            if (q.question_type === 'passage' || q.question_type === 'video_group' || q.question_type === 'file_task' || q.question_type === 'mc_group') {
               const children = qs.filter((c) =>
-                c.id !== q.id && c.question_type !== 'passage' && c.question_type !== 'video_group' && c.question_type !== 'file_task' && c.passage_id === q.id && !consumed.has(c.id)
+                c.id !== q.id && c.question_type !== 'passage' && c.question_type !== 'video_group' && c.question_type !== 'file_task' && c.question_type !== 'mc_group' && c.passage_id === q.id && !consumed.has(c.id)
               );
               children.forEach((c) => consumed.add(c.id));
               consumed.add(q.id);
@@ -752,7 +753,7 @@ export default function Lesson() {
                     )}
                     <NewQuestionButton
                       lessonId={lessonId}
-                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task')}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'mc_group')}
                       initialPassageId={p.id}
                       label={isVG ? '+ Add question to this video' : '+ Add question to this passage'}
                       compact
@@ -775,6 +776,64 @@ export default function Lesson() {
                   />
                 </>
               )}
+            </div>
+          );
+        };
+
+        // The mc_group panel: a card with a question stem / instructions.
+        // Children are multiple_choice questions answered and submitted together
+        // as a group — the student sees them all at once with a single submit.
+        const renderMcGroupPanel = (p: Question, label: string) => {
+          return (
+            <div style={{
+              ...card,
+              background: '#f5f3ff',
+              borderColor: '#c4b5fd',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#5b21b6', flexWrap: 'wrap' }}>
+                <span style={{
+                  fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase',
+                  padding: '2px 8px', borderRadius: 999,
+                  background: '#7c3aed', color: '#fff',
+                }}>Multi-part MC</span>
+                <span>{label}</span>
+                {role === 'teacher' && !previewAsStudent && (
+                  <>
+                    <EditQuestionButton
+                      question={p}
+                      passages={[]}
+                      onChanged={refresh}
+                    />
+                    {lesson?.unit_id && (
+                      <MoveQuestionButton
+                        questionId={p.id}
+                        unitId={lesson.unit_id}
+                        currentLessonId={lessonId}
+                        isGroup
+                        onMoved={refresh}
+                      />
+                    )}
+                    <NewQuestionButton
+                      lessonId={lessonId}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'mc_group')}
+                      initialPassageId={p.id}
+                      label="+ Add MC question to this group"
+                      compact
+                      onCreated={refresh}
+                    />
+                  </>
+                )}
+              </div>
+              {p.prompt && (
+                <div style={{ marginTop: 8, lineHeight: 1.55 }}>
+                  <PromptText text={p.prompt} />
+                </div>
+              )}
+              <QuestionResources
+                questionId={p.id}
+                isTeacher={role === 'teacher' && !previewAsStudent}
+                initialResources={resourcesByQuestion[p.id] || []}
+              />
             </div>
           );
         };
@@ -939,7 +998,9 @@ export default function Lesson() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   {it.passage.question_type === 'file_task'
                     ? renderFileTaskPanel(it.passage, groupLabel)
-                    : renderPassagePanel(it.passage, groupLabel)}
+                    : it.passage.question_type === 'mc_group'
+                      ? renderMcGroupPanel(it.passage, groupLabel)
+                      : renderPassagePanel(it.passage, groupLabel)}
                   {/* Collapse toggle — teacher only */}
                   {isTeacherDrag && childCount > 0 && (
                     <button
@@ -960,7 +1021,7 @@ export default function Lesson() {
                   {!collapsed && (
                     it.children.length === 0 ? (
                       <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0 }}>
-                        No tasks are attached to this {it.passage.question_type === 'video_group' ? 'video' : it.passage.question_type === 'file_task' ? 'file task' : 'passage'} yet.
+                        No tasks are attached to this {it.passage.question_type === 'video_group' ? 'video' : it.passage.question_type === 'file_task' ? 'file task' : it.passage.question_type === 'mc_group' ? 'group' : 'passage'} yet.
                       </p>
                     ) : it.children.map((c, ci) =>
                       renderQuestionCard(c, `${String.fromCharCode(97 + ci)})`, isExt)
@@ -1139,9 +1200,11 @@ export default function Lesson() {
             // Group: video/passage pinned to the top, questions scroll below.
             // Both video_group and passage show one child question at a time
             // with the lettered pill-button nav (a / b / c …).
+            // mc_group shows all children at once with a single submit.
             const isVG = curItem.passage.question_type === 'video_group';
             const isPassage = curItem.passage.question_type === 'passage';
             const isFT = curItem.passage.question_type === 'file_task';
+            const isMCG = curItem.passage.question_type === 'mc_group';
             const useStepped = isVG || isPassage;
             const totalChildren = curItem.children.length;
             const rawStep = vgStep[curItem.passage.id] ?? 0;
@@ -1151,12 +1214,36 @@ export default function Lesson() {
                 <div style={{ position: 'sticky', top: 0, zIndex: 10 }}>
                   {isFT
                     ? renderFileTaskPanel(curItem.passage, curIsExt ? 'Extension' : curLabel)
-                    : renderPassagePanel(curItem.passage, curIsExt ? 'Extension' : curLabel)}
+                    : isMCG
+                      ? renderMcGroupPanel(curItem.passage, curIsExt ? 'Extension' : curLabel)
+                      : renderPassagePanel(curItem.passage, curIsExt ? 'Extension' : curLabel)}
                 </div>
                 {totalChildren === 0 ? (
                   <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0, fontSize: 14 }}>
-                    No questions are attached to this {isVG ? 'video' : isFT ? 'file task' : 'passage'} yet.
+                    No questions are attached to this {isVG ? 'video' : isFT ? 'file task' : isMCG ? 'group' : 'passage'} yet.
                   </p>
+                ) : isMCG ? (
+                  (role === 'student' || previewAsStudent) ? (
+                    <McGroupAnswer
+                      group={curItem.passage}
+                      childQuestions={curItem.children}
+                      submissions={submissions}
+                      unlockedQIds={unlockedQIds}
+                      preview={!!previewAsStudent}
+                      onSubmitted={() => {
+                        setUnlockedQIds((prev) => {
+                          const next = new Set(prev);
+                          curItem.children.forEach((c) => next.delete(c.id));
+                          return next;
+                        });
+                        refresh();
+                      }}
+                    />
+                  ) : (
+                    curItem.children.map((c, ci) =>
+                      renderQuestionCard(c, `${String.fromCharCode(97 + ci)})`, false)
+                    )
+                  )
                 ) : useStepped ? (
                   <>
                     {renderQuestionCard(curItem.children[curStep], `${String.fromCharCode(97 + curStep)})`, false)}
@@ -4052,7 +4139,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
     setBusy(true);
     setErr(null);
     try {
-      const noAnswerType = type === 'passage' || type === 'video_group' || type === 'file_task' || type === 'info_only' || type === 'section_header' || type === 'text_only';
+      const noAnswerType = type === 'passage' || type === 'video_group' || type === 'file_task' || type === 'mc_group' || type === 'info_only' || type === 'section_header' || type === 'text_only';
       const body: any = {
         questionType: type, prompt,
         // Passages and info-only notes have no marks / marking scheme / AI
@@ -4064,9 +4151,8 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
         aiGradingGuidance: noAnswerType ? '' : aiGuidance,
         isExtension,
       };
-      // Only non-passage types can be attached to a passage (a passage
-      // attaching to itself doesn't make sense).
-      if (type !== 'passage' && type !== 'video_group' && type !== 'file_task' && passageId) body.passageId = passageId;
+      // Only non-container types can be attached to a container group.
+      if (type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && passageId) body.passageId = passageId;
       if (type === 'multiple_choice') body.options = options;
       if (type === 'presentation') {
         const cfg: any = {};
@@ -4285,30 +4371,45 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
 
   const rubricTotal = rubric.reduce((a, r) => a + (Number(r.marks) || 0), 0);
 
+  // When this question is attached to an mc_group container, it must be a
+  // multiple_choice question — lock the type selector automatically.
+  const selectedPassage = passages.find((p) => p.id === passageId);
+  const isAttachedToMCG = selectedPassage?.question_type === 'mc_group';
+  useEffect(() => {
+    if (isAttachedToMCG && type !== 'multiple_choice') setType('multiple_choice');
+  }, [isAttachedToMCG]);
+
   return (
     <div style={modalOverlay}>
       <div style={modal}>
         <h2 style={{ marginTop: 0 }}>{isEdit ? 'Edit task' : 'New task'}</h2>
         <label style={fieldLabel}>Type
-          <select value={type} onChange={(e) => onTypeChange(e.target.value)} style={input}>
-            {/* If editing an existing question whose type is no longer offered
-                (e.g. legacy video_question), keep it selectable so the edit
-                doesn't force a type change. */}
-            {!TYPE_GROUPS.flatMap((g) => g.types).includes(type) && (
-              <option value={type}>{TYPE_LABELS[type] || type}</option>
-            )}
-            {TYPE_GROUPS.map((g) => (
-              <optgroup key={g.label} label={g.label}>
-                {g.types.map((k) => (
-                  <option key={k} value={k}>{TYPE_LABELS[k]}</option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
+          {isAttachedToMCG ? (
+            <div style={{ padding: '6px 10px', background: '#f5f3ff', border: '1px solid #c4b5fd', borderRadius: 8, fontSize: 13, color: '#5b21b6', fontWeight: 400 }}>
+              Multiple choice <span style={{ color: 'var(--cw-muted)' }}>(fixed — children of a MC group must be multiple choice questions)</span>
+            </div>
+          ) : (
+            <select value={type} onChange={(e) => onTypeChange(e.target.value)} style={input}>
+              {/* If editing an existing question whose type is no longer offered
+                  (e.g. legacy video_question), keep it selectable so the edit
+                  doesn't force a type change. */}
+              {!TYPE_GROUPS.flatMap((g) => g.types).includes(type) && (
+                <option value={type}>{TYPE_LABELS[type] || type}</option>
+              )}
+              {TYPE_GROUPS.map((g) => (
+                <optgroup key={g.label} label={g.label}>
+                  {g.types.map((k) => (
+                    <option key={k} value={k}>{TYPE_LABELS[k]}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+          )}
         </label>
         <label style={fieldLabel}>{
             type === 'passage' ? 'Passage text (what pupils read)'
             : type === 'video_group' ? 'Description (optional — shown above the video)'
+            : type === 'mc_group' ? 'Question stem / instructions (optional — shown above all sub-questions)'
             : type === 'info_only' ? 'Note text (shown to pupils, no answer required)'
             : type === 'text_only' ? 'Task description (what pupils should do in their jotter)'
             : type === 'section_header' ? 'Section title (shown as a divider, e.g. "Section A: Comprehension")'
@@ -4562,16 +4663,17 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
                   : <>Tip: paste a URL (e.g. https://bbc.co.uk/bitesize) and it will appear as a clickable link that opens in a new window. For a friendlier label, write <code>[Bitesize lesson](https://bbc.co.uk/bitesize)</code>.</>}
           </span>
         </label>
-        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && passages.length > 0 && (
-          <label style={fieldLabel}>Attach to passage, video, or file task (optional)
+        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && passages.length > 0 && (
+          <label style={fieldLabel}>Attach to passage, video, file task, or MC group (optional)
             <select value={passageId} onChange={(e) => setPassageId(e.target.value)} style={input}>
               <option value="">— None (standalone task) —</option>
               {passages.map((p) => {
                 const isVid = p.question_type === 'video_group';
                 const isFT = p.question_type === 'file_task';
+                const isMCG = p.question_type === 'mc_group';
                 const preview = (p.prompt || '').slice(0, 60);
-                const prefix = isVid ? '▶ Video: ' : isFT ? '📎 File task: ' : 'Passage: ';
-                const fallback = isVid ? '(no description)' : isFT ? '(no description)' : '(no preview)';
+                const prefix = isVid ? '▶ Video: ' : isFT ? '📎 File task: ' : isMCG ? '☰ MC group: ' : 'Passage: ';
+                const fallback = '(no description)';
                 return (
                   <option key={p.id} value={p.id}>
                     {prefix}{preview || fallback}{(p.prompt || '').length > 60 ? '…' : ''}
@@ -4580,11 +4682,11 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
               })}
             </select>
             <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
-              Group this task with a reading passage, video, or file task so pupils see the stimulus alongside their answer area.
+              Group this task with a reading passage, video, file task, or MC group so pupils see the stimulus alongside their answer area.
             </span>
           </label>
         )}
-        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'info_only' && type !== 'text_only' && (
+        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && type !== 'info_only' && type !== 'text_only' && (
           <label style={fieldLabel}>Max marks
             <input type="number" min={1} value={maxMarks} onChange={(e) => setMaxMarks(parseInt(e.target.value) || 1)} style={input} />
             {(type === 'fill_in_blanks' || type === 'table' || type === 'labeled_inputs') && (
@@ -5831,6 +5933,243 @@ function LessonHeader({ lesson }: { lesson: LessonInfo }) {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// ── McGroupAnswer ─────────────────────────────────────────────────────────────
+// Student-facing component for mc_group questions.  All child multiple_choice
+// questions are displayed together with a single "Submit answers" button.
+function McGroupAnswer({
+  group,
+  childQuestions,
+  submissions,
+  unlockedQIds,
+  preview,
+  onSubmitted,
+}: {
+  group: Question;
+  childQuestions: Question[];
+  submissions: Submission[];
+  unlockedQIds: Set<string>;
+  preview: boolean;
+  onSubmitted: () => void;
+}) {
+  // Most recent submission per child question.
+  const lastByQid = useMemo(() => {
+    const map: Record<string, Submission> = {};
+    const ids = new Set(childQuestions.map((c) => c.id));
+    for (const s of submissions) {
+      if (!ids.has(s.question_id)) continue;
+      if (!map[s.question_id] || new Date(s.submitted_at) > new Date(map[s.question_id].submitted_at)) {
+        map[s.question_id] = s;
+      }
+    }
+    return map;
+  }, [submissions, childQuestions]);
+
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  // Pre-fill from last submissions on first render.
+  const hydrated = useRef(false);
+  useEffect(() => {
+    if (hydrated.current) return;
+    hydrated.current = true;
+    const init: Record<string, string> = {};
+    for (const c of childQuestions) {
+      const sub = lastByQid[c.id];
+      if (sub?.selected_option_label) init[c.id] = sub.selected_option_label;
+    }
+    if (Object.keys(init).length) setAnswers((a) => ({ ...init, ...a }));
+  }, [lastByQid, childQuestions]);
+
+  // Re-fill when teacher grants an unlock.
+  const unlockHydrated = useRef(false);
+  const anyUnlocked = childQuestions.some((c) => unlockedQIds.has(c.id));
+  useEffect(() => {
+    if (!anyUnlocked || unlockHydrated.current) return;
+    unlockHydrated.current = true;
+    const init: Record<string, string> = {};
+    for (const c of childQuestions) {
+      const sub = lastByQid[c.id];
+      if (sub?.selected_option_label) init[c.id] = sub.selected_option_label;
+    }
+    if (Object.keys(init).length) setAnswers((a) => ({ ...init, ...a }));
+  }, [anyUnlocked, lastByQid, childQuestions]);
+
+  const allSubmitted = childQuestions.every((c) => !!lastByQid[c.id]);
+  // Children that still need a submission (or have been unlocked for re-submit).
+  const activeChildren = childQuestions.filter((c) => !lastByQid[c.id] || unlockedQIds.has(c.id));
+  const isLocked = allSubmitted && !anyUnlocked && !preview;
+  const canSubmit = !preview && activeChildren.length > 0 && activeChildren.every((c) => !!(answers[c.id] || '').trim());
+
+  async function submitAll() {
+    if (busy || preview) return;
+    setBusy(true);
+    setMsg(null);
+    const token = localStorage.getItem('studentToken') || '';
+    try {
+      for (const child of activeChildren) {
+        const selected = answers[child.id] || '';
+        if (!selected) continue;
+        const res = await fetch(`/api/classwork/questions/${child.id}/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ selectedOptionLabel: selected }),
+        });
+        if (!res.ok) {
+          const j = await res.json().catch(() => ({}));
+          throw new Error((j as any)?.error || `Submit failed (${res.status})`);
+        }
+      }
+      onSubmitted();
+    } catch (e: any) {
+      setMsg(e.message || 'Submission failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // ── Locked (all submitted, none unlocked) ──────────────────────────────────
+  if (isLocked) {
+    const totalMarks = childQuestions.reduce((s, c) => s + (c.max_marks || 0), 0);
+    const awarded = childQuestions.reduce((s, c) => s + (lastByQid[c.id]?.marks_awarded ?? 0), 0);
+    return (
+      <div style={{
+        marginTop: 4, padding: '14px 16px',
+        border: '1.5px solid var(--cw-tint-success-border)', borderRadius: 8,
+        background: 'var(--cw-tint-success-bg)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <span style={{ fontSize: 18 }}>✅</span>
+          <span style={{ fontWeight: 700, color: 'var(--cw-tint-success-ink)', fontSize: 14 }}>
+            Submitted · {awarded}/{totalMarks} mark{totalMarks === 1 ? '' : 's'}
+          </span>
+        </div>
+        {childQuestions.map((c, ci) => {
+          const sub = lastByQid[c.id];
+          const opts: any[] = Array.isArray(c.options) ? c.options : [];
+          const optText = opts.find((o: any) => o.label === sub?.selected_option_label)?.text;
+          return (
+            <div key={c.id} style={{
+              marginBottom: 10, paddingBottom: 10,
+              borderBottom: ci < childQuestions.length - 1 ? '1px solid var(--cw-tint-success-border)' : 'none',
+            }}>
+              <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 3 }}>
+                {String.fromCharCode(97 + ci)}) {c.prompt}
+              </div>
+              {sub && (
+                <div style={{ fontSize: 13, color: 'var(--cw-ink)' }}>
+                  <strong>Your answer:</strong> {optText || sub.selected_option_label}
+                  {sub.marks_awarded != null && (
+                    <span style={{ marginLeft: 8, color: 'var(--cw-muted)' }}>
+                      ({sub.marks_awarded}/{c.max_marks} mark{c.max_marks === 1 ? '' : 's'})
+                    </span>
+                  )}
+                </div>
+              )}
+              {sub?.ai_feedback && (
+                <div style={{ marginTop: 4, fontSize: 13, color: 'var(--cw-ink)', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+                  {sub.ai_feedback}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        <p style={{ margin: 0, fontSize: 12, color: 'var(--cw-muted)' }}>
+          Your answers are locked. Ask your teacher if you need to revise.
+        </p>
+      </div>
+    );
+  }
+
+  // ── Active form ────────────────────────────────────────────────────────────
+  return (
+    <div style={{
+      marginTop: 4, padding: 14,
+      border: '1px dashed var(--cw-border)', borderRadius: 8,
+      background: 'var(--cw-surface-soft)',
+    }}>
+      {anyUnlocked && allSubmitted && (
+        <div style={{
+          marginBottom: 12, padding: '8px 12px',
+          background: '#eff6ff', border: '1.5px solid #bfdbfe', borderRadius: 8,
+          fontSize: 13, color: '#1e40af', display: 'flex', gap: 8, alignItems: 'flex-start',
+        }}>
+          <span style={{ flexShrink: 0 }}>🔓</span>
+          <span>Your teacher has unlocked this question — revise your answers below and resubmit.</span>
+        </div>
+      )}
+      {childQuestions.map((c, ci) => {
+        const sub = lastByQid[c.id];
+        const isActive = !sub || unlockedQIds.has(c.id);
+        const opts: any[] = Array.isArray(c.options) ? c.options : [];
+        return (
+          <div key={c.id} style={{
+            marginBottom: 14, paddingBottom: 14,
+            borderBottom: ci < childQuestions.length - 1 ? '1px solid var(--cw-border)' : 'none',
+          }}>
+            <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 8 }}>
+              {String.fromCharCode(97 + ci)}) {c.prompt}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+              {opts.map((opt: any, oi: number) => {
+                const val: string = opt.label || String(oi);
+                return (
+                  <label key={oi} style={{
+                    display: 'flex', gap: 8, alignItems: 'center',
+                    cursor: isActive && !preview ? 'pointer' : 'default',
+                    opacity: !isActive ? 0.6 : 1,
+                  }}>
+                    <input
+                      type="radio"
+                      name={`mcg-${group.id}-${c.id}`}
+                      value={val}
+                      checked={answers[c.id] === val}
+                      onChange={(e) => setAnswers((a) => ({ ...a, [c.id]: e.target.value }))}
+                      disabled={!isActive || preview}
+                    />
+                    <span>{opt.text || opt.label || `Option ${oi + 1}`}</span>
+                  </label>
+                );
+              })}
+            </div>
+            {!isActive && sub && (
+              <div style={{ marginTop: 6, fontSize: 12, color: 'var(--cw-muted)', fontStyle: 'italic' }}>
+                Already submitted
+                {sub.marks_awarded != null && ` · ${sub.marks_awarded}/${c.max_marks} mark${c.max_marks === 1 ? '' : 's'}`}
+              </div>
+            )}
+          </div>
+        );
+      })}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4, flexWrap: 'wrap' }}>
+        <button
+          onClick={submitAll}
+          disabled={busy || !canSubmit}
+          style={{
+            background: canSubmit && !busy ? 'var(--cw-accent)' : 'var(--cw-surface-muted)',
+            color: canSubmit && !busy ? '#fff' : 'var(--cw-muted)',
+            border: 'none', padding: '9px 18px', borderRadius: 8,
+            fontWeight: 700, cursor: canSubmit && !busy ? 'pointer' : 'not-allowed', fontSize: 14,
+          }}
+        >
+          {busy ? 'Submitting…' : 'Submit answers'}
+        </button>
+        {msg && <span style={{ color: 'var(--cw-danger)', fontSize: 13 }}>{msg}</span>}
+        {!preview && activeChildren.length > 0 && !canSubmit && (
+          <span style={{ color: 'var(--cw-muted)', fontSize: 13 }}>
+            Choose an answer for each question first.
+          </span>
+        )}
+        {preview && (
+          <span style={{ color: 'var(--cw-muted)', fontSize: 13, fontStyle: 'italic' }}>
+            (Student preview — submission disabled)
+          </span>
+        )}
+      </div>
     </div>
   );
 }
