@@ -118,6 +118,10 @@ export default function Course() {
   const [odBusy, setOdBusy] = useState<Record<string, boolean>>({});
   const [odErr, setOdErr] = useState<Record<string, string>>({});
   const [odViewerUnit, setOdViewerUnit] = useState<Unit | null>(null); // open iframe modal
+  // Section nav for the OneDrive modal — populated from the PPTX manifest
+  // if one exists on the same unit.
+  const [odSections, setOdSections] = useState<{ name: string; startSlide: number }[]>([]);
+  const [odStartSlide, setOdStartSlide] = useState(1);
 
   // Per-unit collapse state. Stored client-side only and persisted in
   // localStorage scoped per course so each user's chosen layout (e.g.
@@ -371,6 +375,21 @@ export default function Course() {
     }
   }
 
+  // When the OneDrive modal opens, try to load section data from the PPTX
+  // manifest (if the same unit also has a PPTX upload). Sections let the
+  // viewer jump straight to a PowerPoint section via wdStartOn.
+  useEffect(() => {
+    setOdSections([]);
+    setOdStartSlide(1);
+    if (!odViewerUnit?.presentation_pages_url) return;
+    let cancelled = false;
+    fetch(odViewerUnit.presentation_pages_url)
+      .then((r) => r.json())
+      .then((m) => { if (!cancelled) setOdSections(m?.sections || []); })
+      .catch(() => { /* manifest unavailable — no section nav */ });
+    return () => { cancelled = true; };
+  }, [odViewerUnit]);
+
   // Best-effort conversion of a OneDrive/SharePoint share URL to an embed URL.
   // If the URL is already an embed URL (contains "action=embedview" or is the
   // onedrive.live.com/embed path) it is returned unchanged.
@@ -396,6 +415,24 @@ export default function Course() {
       return raw.trim();
     } catch {
       return raw.trim();
+    }
+  }
+
+  // Build the final iframe src, optionally appending wdStartOn so OneDrive
+  // opens at a specific slide number (1-based). A change in startSlide also
+  // acts as the iframe key, forcing a remount and a fresh load.
+  function buildOdSrc(raw: string, startSlide: number): string {
+    const base = toOnedriveEmbedUrl(raw);
+    try {
+      const u = new URL(base);
+      if (startSlide > 1) {
+        u.searchParams.set('wdStartOn', String(startSlide));
+      } else {
+        u.searchParams.delete('wdStartOn');
+      }
+      return u.toString();
+    } catch {
+      return base;
     }
   }
 
@@ -1533,13 +1570,39 @@ export default function Course() {
           }}>
             {/* Modal header */}
             <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
               padding: '10px 16px', background: '#1e293b', color: '#f1f5f9',
               flexShrink: 0,
             }}>
-              <span style={{ fontWeight: 700, fontSize: 15 }}>
+              <span style={{ fontWeight: 700, fontSize: 15, marginRight: 4 }}>
                 ☁️ {odViewerUnit.title}
               </span>
+              {/* Section jump dropdown — only shown when the unit also has a
+                  PPTX manifest that contains section metadata. */}
+              {odSections.length > 0 && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <label htmlFor="od-section-jump" style={{ fontSize: 13, color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                    Jump to section
+                  </label>
+                  <select
+                    id="od-section-jump"
+                    value={odSections.findIndex((s) => s.startSlide === odStartSlide)}
+                    onChange={(e) => {
+                      const i = parseInt(e.target.value, 10);
+                      if (Number.isFinite(i) && odSections[i]) setOdStartSlide(odSections[i].startSlide);
+                    }}
+                    style={{
+                      padding: '4px 8px', borderRadius: 6, fontSize: 13,
+                      border: '1px solid #334155', background: '#0f172a', color: '#f1f5f9',
+                    }}
+                  >
+                    {odSections.map((s, i) => (
+                      <option key={i} value={i}>{s.name} (slide {s.startSlide})</option>
+                    ))}
+                  </select>
+                </span>
+              )}
+              <span style={{ flex: 1 }} />
               <button
                 onClick={() => setOdViewerUnit(null)}
                 style={{
@@ -1548,9 +1611,11 @@ export default function Course() {
                 }}
               >✕ Close</button>
             </div>
-            {/* Embedded presentation */}
+            {/* Embedded presentation — key changes on section jump so the
+                iframe remounts and loads from the correct slide. */}
             <iframe
-              src={toOnedriveEmbedUrl(odViewerUnit.onedrive_embed_url)}
+              key={odStartSlide}
+              src={buildOdSrc(odViewerUnit.onedrive_embed_url, odStartSlide)}
               style={{ flex: 1, border: 'none', width: '100%' }}
               allowFullScreen
               title={`${odViewerUnit.title} — OneDrive slides`}
