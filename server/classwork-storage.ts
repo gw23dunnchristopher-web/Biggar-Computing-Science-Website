@@ -198,6 +198,17 @@ export function ensureClassworkSchema(): Promise<void> {
           PRIMARY KEY (student_id, question_id)
         );
       `),
+      // Teacher-granted permission for a student to revise and resubmit a
+      // question they have already answered. Consumed (deleted) the moment
+      // the student submits again so each unlock covers exactly one resubmit.
+      pool.query(`
+        CREATE TABLE IF NOT EXISTS bhs_classwork_submission_unlocks (
+          student_id  VARCHAR(64) NOT NULL,
+          question_id VARCHAR(64) NOT NULL REFERENCES bhs_classwork_questions(id) ON DELETE CASCADE,
+          created_at  TIMESTAMP DEFAULT NOW(),
+          PRIMARY KEY (student_id, question_id)
+        );
+      `),
       // Indexes on phase-1 tables
       pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_units_course    ON bhs_classwork_units(course);`),
       pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_lessons_unit    ON bhs_classwork_lessons(unit_id);`),
@@ -231,6 +242,7 @@ export function ensureClassworkSchema(): Promise<void> {
       pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_views_student       ON bhs_classwork_question_views(student_id);`),
       pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_drafts_lesson_student ON bhs_classwork_drafts(lesson_id, student_id);`),
       pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_questions_passage   ON bhs_classwork_questions(passage_id);`),
+      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_unlocks_question    ON bhs_classwork_submission_unlocks(question_id);`),
       // question_id column on lesson_resources — safe here because lesson_resources was created in phase 2
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lesson_resources ADD COLUMN IF NOT EXISTS question_id VARCHAR(64) REFERENCES bhs_classwork_questions(id) ON DELETE CASCADE;`),
     ]);
@@ -952,6 +964,15 @@ export async function createSubmission(input: CreateSubmissionInput) {
     // cleanup hiccup.
     console.error('[classwork] draft cleanup error:', err);
   }
+  // Consume any teacher-granted resubmit unlock — one unlock = one resubmit.
+  try {
+    await pool.query(
+      `DELETE FROM bhs_classwork_submission_unlocks WHERE student_id = $1 AND question_id = $2`,
+      [input.studentId, input.questionId],
+    );
+  } catch (err) {
+    console.error('[classwork] unlock cleanup error:', err);
+  }
   return r.rows[0];
 }
 
@@ -1098,6 +1119,59 @@ export async function listSubmissionsForLesson(lessonId: string) {
       WHERE lesson_id = $1
       ORDER BY submitted_at DESC`,
     [lessonId]
+  );
+  return r.rows;
+}
+
+/* ---------- Submission unlocks ---------- */
+
+// Grant a specific student permission to revise and resubmit one question.
+// Idempotent — calling it twice for the same pair is harmless.
+export async function unlockSubmission(studentId: string, questionId: string): Promise<void> {
+  await ensureClassworkSchema();
+  await pool.query(
+    `INSERT INTO bhs_classwork_submission_unlocks (student_id, question_id, created_at)
+     VALUES ($1, $2, NOW())
+     ON CONFLICT (student_id, question_id) DO NOTHING`,
+    [studentId, questionId],
+  );
+}
+
+// Revoke a previously granted unlock (teacher locks again without a resubmit).
+export async function lockSubmission(studentId: string, questionId: string): Promise<void> {
+  await ensureClassworkSchema();
+  await pool.query(
+    `DELETE FROM bhs_classwork_submission_unlocks WHERE student_id = $1 AND question_id = $2`,
+    [studentId, questionId],
+  );
+}
+
+// Return the question IDs that are currently unlocked for a specific student
+// within a lesson (used by the student-facing endpoint).
+export async function listMyUnlocksForLesson(lessonId: string, studentId: string): Promise<string[]> {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `SELECT u.question_id
+     FROM bhs_classwork_submission_unlocks u
+     JOIN bhs_classwork_questions q ON q.id = u.question_id
+     WHERE q.lesson_id = $1 AND u.student_id = $2`,
+    [lessonId, studentId],
+  );
+  return r.rows.map((row: any) => row.question_id as string);
+}
+
+// Return all (student_id, question_id) unlock pairs for a lesson
+// (used by the teacher-facing endpoint to show unlock indicators).
+export async function listUnlocksForLesson(
+  lessonId: string,
+): Promise<{ student_id: string; question_id: string }[]> {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `SELECT u.student_id, u.question_id
+     FROM bhs_classwork_submission_unlocks u
+     JOIN bhs_classwork_questions q ON q.id = u.question_id
+     WHERE q.lesson_id = $1`,
+    [lessonId],
   );
   return r.rows;
 }

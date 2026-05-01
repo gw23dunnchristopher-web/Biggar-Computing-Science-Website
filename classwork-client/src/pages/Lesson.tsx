@@ -134,6 +134,10 @@ export default function Lesson() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [allSubs, setAllSubs] = useState<Submission[]>([]);
+  // Question IDs the teacher has unlocked for this student to resubmit.
+  const [unlockedQIds, setUnlockedQIds] = useState<Set<string>>(new Set());
+  // Teacher view: all active unlock records for the lesson.
+  const [teacherUnlocks, setTeacherUnlocks] = useState<{ student_id: string; question_id: string }[]>([]);
   // Pupil-only auto-saved drafts, keyed by question_id for O(1) lookup.
   // Loaded once at lesson open; from then on each StudentAnswer manages
   // its own write-back so we don't need to refetch on every save.
@@ -261,12 +265,20 @@ export default function Lesson() {
       const draftsP: Promise<Draft[]> = role === 'student'
         ? api<Draft[]>(`/api/classwork/lessons/${lessonId}/my-drafts`).catch(() => [])
         : Promise.resolve([]);
-      const [info, qs, resMap, subs, drafts] = await Promise.all([
+      // Student: fetch their unlock set; teacher: fetch all lesson unlocks.
+      const unlocksP =
+        role === 'student'
+          ? api<string[]>(`/api/classwork/lessons/${lessonId}/my-unlocks`).catch(() => [] as string[])
+          : role === 'teacher'
+            ? api<{ student_id: string; question_id: string }[]>(`/api/classwork/lessons/${lessonId}/unlocks`).catch(() => [] as { student_id: string; question_id: string }[])
+            : Promise.resolve([] as string[]);
+      const [info, qs, resMap, subs, drafts, unlocks] = await Promise.all([
         api<LessonInfo>(`/api/classwork/lessons/${lessonId}`).catch(() => null),
         api<Question[]>(`/api/classwork/lessons/${lessonId}/questions`),
         api<Record<string, LessonResource[]>>(`/api/classwork/lessons/${lessonId}/all-question-resources`).catch(() => ({})),
         submissionsP,
         draftsP,
+        unlocksP,
       ]);
       setLesson(info);
       setQuestions(qs);
@@ -277,6 +289,9 @@ export default function Lesson() {
         const map: Record<string, Draft> = {};
         for (const d of drafts) map[d.question_id] = d;
         setDraftsByQuestion(map);
+        setUnlockedQIds(new Set(unlocks as string[]));
+      } else if (role === 'teacher') {
+        setTeacherUnlocks(unlocks as { student_id: string; question_id: string }[]);
       }
     } catch (e: any) {
       setErr(e.message || 'Failed to load');
@@ -288,8 +303,12 @@ export default function Lesson() {
   async function refreshSubmissions() {
     if (role !== 'teacher') return;
     try {
-      const subs = await api<Submission[]>(`/api/classwork/lessons/${lessonId}/submissions`);
+      const [subs, unlocks] = await Promise.all([
+        api<Submission[]>(`/api/classwork/lessons/${lessonId}/submissions`),
+        api<{ student_id: string; question_id: string }[]>(`/api/classwork/lessons/${lessonId}/unlocks`).catch(() => []),
+      ]);
       setAllSubs(subs);
+      setTeacherUnlocks(unlocks);
     } catch { /* ignore */ }
   }
 
@@ -658,6 +677,7 @@ export default function Lesson() {
                 <StudentAnswer
                   question={q}
                   previousSubmissions={mySubs}
+                  isUnlocked={unlockedQIds.has(q.id)}
                   draft={role === 'student' ? (draftsByQuestion[q.id] || null) : null}
                   onSubmitted={() => {
                     // The server clears the draft as part of createSubmission,
@@ -668,6 +688,13 @@ export default function Lesson() {
                       const { [q.id]: _, ...rest } = m;
                       return rest;
                     });
+                    // Consume the unlock locally so the UI snaps to locked
+                    // immediately — the server already deleted the row.
+                    setUnlockedQIds((prev) => {
+                      const next = new Set(prev);
+                      next.delete(q.id);
+                      return next;
+                    });
                     refresh();
                   }}
                   preview={role === 'teacher' && previewAsStudent}
@@ -677,6 +704,7 @@ export default function Lesson() {
                 <TeacherSubmissions
                   question={q}
                   submissions={allSubs.filter((s) => s.question_id === q.id)}
+                  unlockedStudentIds={new Set(teacherUnlocks.filter((u) => u.question_id === q.id).map((u) => u.student_id))}
                   onChanged={refreshSubmissions}
                 />
               )}
@@ -815,8 +843,16 @@ export default function Lesson() {
                   <StudentAnswer
                     question={p}
                     previousSubmissions={mySubs}
+                    isUnlocked={unlockedQIds.has(p.id)}
                     draft={myDraft}
-                    onSubmitted={refresh}
+                    onSubmitted={() => {
+                      setUnlockedQIds((prev) => {
+                        const next = new Set(prev);
+                        next.delete(p.id);
+                        return next;
+                      });
+                      refresh();
+                    }}
                     preview={previewAsStudent}
                   />
                 </div>
@@ -825,7 +861,12 @@ export default function Lesson() {
               {role === 'teacher' && !previewAsStudent && mySubs.length > 0 && (
                 <div style={{ marginTop: 12, borderTop: '1px solid var(--cw-border)', paddingTop: 12 }}>
                   <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 600, color: 'var(--cw-muted)', textTransform: 'uppercase', letterSpacing: 0.4 }}>Uploaded file</p>
-                  <TeacherSubmissions question={p} submissions={mySubs} onChanged={refresh} />
+                  <TeacherSubmissions
+                    question={p}
+                    submissions={mySubs}
+                    unlockedStudentIds={new Set(teacherUnlocks.filter((u) => u.question_id === p.id).map((u) => u.student_id))}
+                    onChanged={refreshSubmissions}
+                  />
                 </div>
               )}
             </div>
@@ -1342,9 +1383,11 @@ export default function Lesson() {
   );
 }
 
-function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, preview = false }: {
+function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draft, onSubmitted, preview = false }: {
   question: Question;
   previousSubmissions: Submission[];
+  // true when the teacher has granted this student a one-shot resubmit.
+  isUnlocked?: boolean;
   // The pupil's auto-saved in-progress answer for this question, if any.
   // Loaded once at lesson open by the parent; mutations from this
   // component don't need to update it because we own the latest state
@@ -1615,6 +1658,43 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
     draftHydrated.current = true;
   }, [draft, draftEnabled, t]);
 
+  // When the teacher unlocks this question while the student already has the
+  // page open, pre-fill the inputs from their last submission so they can see
+  // what they wrote and revise it. Only fires once per unlock event; a draft
+  // that already exists (from an earlier auto-save) takes priority over the
+  // stale submission data.
+  const unlockHydrated = useRef(false);
+  useEffect(() => {
+    if (!isUnlocked || !last || unlockHydrated.current) return;
+    if (draft) { unlockHydrated.current = true; return; } // draft wins
+    if (!draftEnabled) { unlockHydrated.current = true; return; } // non-text type
+    // Hydrate inputs from the previous submission.
+    if (last.text_answer != null) {
+      if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
+          || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams') {
+        try {
+          const parsed = JSON.parse(last.text_answer);
+          if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
+        } catch { /* malformed */ }
+      } else if (t === 'file_upload') {
+        try {
+          const parsed = JSON.parse(last.text_answer);
+          if (parsed?.filename) setFileName(parsed.filename);
+          if (parsed?.content) setText(parsed.content);
+        } catch { /* malformed */ }
+      } else {
+        setText(last.text_answer);
+      }
+    }
+    if (last.selected_option_label != null) setOption(last.selected_option_label);
+    if (last.link_url != null) setUrl(last.link_url);
+    if (last.file_url != null) {
+      setFileUrl(last.file_url);
+      setFileName(last.file_url.split('/').pop() || 'attachment');
+    }
+    unlockHydrated.current = true;
+  }, [isUnlocked, last, draft, draftEnabled, t]);
+
   // Centralised draft writer used by both the debounced save and the
   // visibility/unload flush. `keepalive` lets the request finish even
   // when the page is being torn down.
@@ -1815,8 +1895,50 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
           return !!String(v || '').trim();
         }) :
     !!text.trim();
+  // ── Locked state ─────────────────────────────────────────────────────────
+  // Once a student has submitted, hide the answer form entirely. Only show it
+  // again if the teacher has explicitly unlocked this question for them.
+  if (last && !isUnlocked && !preview) {
+    return (
+      <div style={{
+        marginTop: 12, padding: '14px 16px',
+        border: '1.5px solid var(--cw-tint-success-border)', borderRadius: 8,
+        background: 'var(--cw-tint-success-bg)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 18, lineHeight: 1 }}>✅</span>
+          <span style={{ fontWeight: 700, color: 'var(--cw-tint-success-ink)', fontSize: 14 }}>
+            Submitted {new Date(last.submitted_at).toLocaleString()}
+            {last.marks_awarded != null && (
+              <> &middot; {last.marks_awarded}/{question.max_marks} mark{question.max_marks === 1 ? '' : 's'}</>
+            )}
+          </span>
+        </div>
+        {last.ai_feedback && (
+          <div style={{ marginTop: 8, fontSize: 14, color: 'var(--cw-ink)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+            {last.ai_feedback}
+          </div>
+        )}
+        <p style={{ marginTop: 10, marginBottom: 0, fontSize: 12, color: 'var(--cw-muted)' }}>
+          Your answer is locked. Ask your teacher if you need to revise it.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div style={{ marginTop: 12, padding: 12, border: '1px dashed var(--cw-border)', borderRadius: 8, background: 'var(--cw-surface-soft)' }}>
+      {/* ── Unlocked banner ── shown when teacher has allowed a resubmit */}
+      {isUnlocked && last && (
+        <div style={{
+          marginBottom: 12, padding: '8px 12px',
+          background: '#eff6ff', border: '1.5px solid #bfdbfe', borderRadius: 8,
+          fontSize: 13, color: '#1e40af', display: 'flex', gap: 8, alignItems: 'flex-start',
+        }}>
+          <span style={{ fontSize: 16, lineHeight: 1.2, flexShrink: 0 }}>🔓</span>
+          <span>Your teacher has unlocked this question. Revise your answer below and resubmit when you&rsquo;re ready.</span>
+        </div>
+      )}
       {t === 'multiple_choice' && Array.isArray(question.options) && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {question.options.map((opt: any, i: number) => (
@@ -3021,9 +3143,11 @@ function AnagramsEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void })
   );
 }
 
-function TeacherSubmissions({ question, submissions, onChanged }: {
+function TeacherSubmissions({ question, submissions, unlockedStudentIds = new Set(), onChanged }: {
   question: Question;
   submissions: Submission[];
+  // Student IDs that currently have an active unlock for this question.
+  unlockedStudentIds?: Set<string>;
   onChanged: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -3046,16 +3170,24 @@ function TeacherSubmissions({ question, submissions, onChanged }: {
       </summary>
       <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
         {sorted.map((s) => (
-          <SubmissionRow key={s.id} question={question} submission={s} onChanged={onChanged} />
+          <SubmissionRow
+            key={s.id}
+            question={question}
+            submission={s}
+            isUnlocked={unlockedStudentIds.has(s.student_id)}
+            onChanged={onChanged}
+          />
         ))}
       </div>
     </details>
   );
 }
 
-function SubmissionRow({ question, submission, onChanged }: {
+function SubmissionRow({ question, submission, isUnlocked: initUnlocked = false, onChanged }: {
   question: Question;
   submission: Submission;
+  // Whether the teacher has currently granted this student a resubmit unlock.
+  isUnlocked?: boolean;
   onChanged: () => void;
 }) {
   const s = submission;
@@ -3063,6 +3195,10 @@ function SubmissionRow({ question, submission, onChanged }: {
   const [feedback, setFeedback] = useState<string>(s.ai_feedback || '');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  // Local unlock state — synced from parent on mount, then managed locally
+  // so toggling feels instant without waiting for a full refresh.
+  const [unlocked, setUnlocked] = useState(initUnlocked);
+  useEffect(() => { setUnlocked(initUnlocked); }, [initUnlocked]);
 
   async function save() {
     const n = parseInt(marks, 10);
@@ -3096,11 +3232,32 @@ function SubmissionRow({ question, submission, onChanged }: {
     } finally { setBusy(false); }
   }
 
+  async function toggleUnlock() {
+    setBusy(true); setMsg(null);
+    try {
+      const next = !unlocked;
+      await api(
+        `/api/classwork/questions/${s.question_id}/unlock/${s.student_id}`,
+        { method: next ? 'POST' : 'DELETE' },
+      );
+      setUnlocked(next);
+      setMsg(next ? 'Unlocked — student can now revise and resubmit.' : 'Locked again.');
+      onChanged();
+    } catch (e: any) {
+      setMsg(e.message || 'Failed to update lock');
+    } finally { setBusy(false); }
+  }
+
   return (
-    <div style={{ border: '1px solid var(--cw-border)', borderRadius: 8, padding: 12, background: 'var(--cw-surface)' }}>
+    <div style={{ border: `1px solid ${unlocked ? '#bfdbfe' : 'var(--cw-border)'}`, borderRadius: 8, padding: 12, background: unlocked ? '#f0f9ff' : 'var(--cw-surface)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, fontSize: 13 }}>
-        <div style={{ fontWeight: 700 }}>
+        <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
           {s.student_username || s.student_id || 'Unknown student'}
+          {unlocked && (
+            <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 999, background: '#bfdbfe', color: '#1e40af' }}>
+              Unlocked
+            </span>
+          )}
         </div>
         <div style={{ color: 'var(--cw-muted)' }}>
           Submitted {new Date(s.submitted_at).toLocaleString()}
@@ -3136,6 +3293,12 @@ function SubmissionRow({ question, submission, onChanged }: {
           background: 'var(--cw-surface-muted)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
           padding: '6px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 13,
         }}>Re-mark with AI</button>
+        <button onClick={toggleUnlock} disabled={busy} style={{
+          background: unlocked ? '#fef3c7' : 'var(--cw-surface-muted)',
+          color: unlocked ? '#92400e' : 'var(--cw-ink)',
+          border: `1px solid ${unlocked ? '#fde68a' : 'var(--cw-border)'}`,
+          padding: '6px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 13,
+        }}>{unlocked ? '🔒 Lock again' : '🔓 Allow resubmit'}</button>
         {msg && <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>{msg}</span>}
       </div>
     </div>

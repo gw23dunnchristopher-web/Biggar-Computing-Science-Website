@@ -69,6 +69,10 @@ import {
   setUnitPresentation,
   clearUnitPresentation,
   getStudentSubmissionForQuestion,
+  unlockSubmission,
+  lockSubmission,
+  listMyUnlocksForLesson,
+  listUnlocksForLesson,
 } from './classwork-storage';
 import { markSubmission, suggestCrosswordClues, renderPptxToImages, extractPptxSections, convertPptxToPdf, fetchGoogleDocText } from './classwork-ai';
 import { storage as n5Storage } from './n5-storage';
@@ -1215,6 +1219,17 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     }
   });
 
+  // Student: which question IDs in this lesson are currently unlocked for them?
+  app.get('/api/classwork/lessons/:lessonId/my-unlocks', requireStudent, async (req, res) => {
+    try {
+      const ids = await listMyUnlocksForLesson(req.params.lessonId, (req as any).studentId);
+      res.json(ids);
+    } catch (err) {
+      console.error('[classwork] my-unlocks error:', err);
+      res.status(500).json({ error: 'Failed to list unlocks' });
+    }
+  });
+
   // Teacher: list every submission for a lesson.
   app.get('/api/classwork/lessons/:lessonId/submissions', requireTeacher, async (req, res) => {
     try {
@@ -1223,6 +1238,40 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] submissions error:', err);
       res.status(500).json({ error: 'Failed to list submissions' });
+    }
+  });
+
+  // Teacher: all current unlock records for a lesson (so the UI can show
+  // which students are unlocked without a per-row round-trip).
+  app.get('/api/classwork/lessons/:lessonId/unlocks', requireTeacher, async (req, res) => {
+    try {
+      const unlocks = await listUnlocksForLesson(req.params.lessonId);
+      res.json(unlocks);
+    } catch (err) {
+      console.error('[classwork] unlocks error:', err);
+      res.status(500).json({ error: 'Failed to list unlocks' });
+    }
+  });
+
+  // Teacher: grant a student permission to revise and resubmit one question.
+  app.post('/api/classwork/questions/:questionId/unlock/:studentId', requireTeacher, async (req, res) => {
+    try {
+      await unlockSubmission(req.params.studentId, req.params.questionId);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('[classwork] unlock error:', err);
+      res.status(500).json({ error: 'Failed to unlock' });
+    }
+  });
+
+  // Teacher: revoke a previously granted unlock.
+  app.delete('/api/classwork/questions/:questionId/unlock/:studentId', requireTeacher, async (req, res) => {
+    try {
+      await lockSubmission(req.params.studentId, req.params.questionId);
+      res.json({ ok: true });
+    } catch (err) {
+      console.error('[classwork] lock error:', err);
+      res.status(500).json({ error: 'Failed to lock' });
     }
   });
 
