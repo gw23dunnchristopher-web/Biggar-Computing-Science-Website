@@ -1521,13 +1521,13 @@ export default function Course() {
             position: 'fixed', inset: 0, zIndex: 1200,
             background: 'rgba(0,0,0,0.6)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: 24,
+            padding: 16,
           }}
           onClick={(e) => { if (e.target === e.currentTarget) setOdViewerUnit(null); }}
         >
           <div style={{
             display: 'flex', flexDirection: 'column',
-            width: '100%', maxWidth: 1100, height: '90vh',
+            width: '100%', maxWidth: 1600, height: '92vh',
             borderRadius: 12, overflow: 'hidden',
             boxShadow: '0 24px 64px rgba(0,0,0,0.45)',
           }}>
