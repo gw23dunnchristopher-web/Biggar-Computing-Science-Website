@@ -1096,10 +1096,12 @@ export default function Lesson() {
             }
           } else {
             // Group: video/passage pinned to the top, questions scroll below.
-            // For video_group: one child question at a time with prev/next nav.
-            // For passage: all children shown at once (unchanged behaviour).
+            // Both video_group and passage show one child question at a time
+            // with the lettered pill-button nav (a / b / c …).
             const isVG = curItem.passage.question_type === 'video_group';
+            const isPassage = curItem.passage.question_type === 'passage';
             const isFT = curItem.passage.question_type === 'file_task';
+            const useStepped = isVG || isPassage;
             const totalChildren = curItem.children.length;
             const rawStep = vgStep[curItem.passage.id] ?? 0;
             const curStep = Math.min(rawStep, Math.max(0, totalChildren - 1));
@@ -1114,7 +1116,7 @@ export default function Lesson() {
                   <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0, fontSize: 14 }}>
                     No questions are attached to this {isVG ? 'video' : isFT ? 'file task' : 'passage'} yet.
                   </p>
-                ) : isVG ? (
+                ) : useStepped ? (
                   <>
                     {renderQuestionCard(curItem.children[curStep], `${String.fromCharCode(97 + curStep)})`, false)}
                     {totalChildren > 1 && (
