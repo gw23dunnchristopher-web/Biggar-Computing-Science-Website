@@ -145,9 +145,8 @@ async function markMultipleChoice(q: AIQuestion, s: AISubmission): Promise<AIMar
   // Deterministic marks — AI never overrides this.
   const marksAwarded = picked?.isCorrect ? q.max_marks : 0;
 
-  // If teacher has given guidance, ask Gemini for an explanatory message.
-  const hasGuidance = !!(q.ai_grading_guidance?.trim() || q.marking_scheme?.trim());
-  if (hasGuidance && gemini) {
+  // Always ask Gemini for an explanatory feedback message when available.
+  if (gemini) {
     const optionsList = options
       .map((o: any) => `${o.label}: ${o.text}${o.isCorrect ? ' ✓' : ''}`)
       .join('\n');

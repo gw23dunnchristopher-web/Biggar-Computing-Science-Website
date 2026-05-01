@@ -5228,12 +5228,12 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
             </label>
             <label style={fieldLabel}>
               {type === 'multiple_choice'
-                ? 'AI feedback guidance (optional — if provided, the AI explains why the answer is right or wrong)'
+                ? 'AI feedback guidance (optional — extra context for the AI explanation)'
                 : 'AI grading guidance (used by the AI marker)'}
               <textarea rows={2} value={aiGuidance} onChange={(e) => setAiGuidance(e.target.value)} style={input} />
               {type === 'multiple_choice' && (
                 <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
-                  Leave blank for a simple correct/incorrect message. Add context (e.g. "Binary uses base 2 because…") for richer AI-generated explanations.
+                  The AI always explains why the answer is right or wrong. Add extra context here (e.g. "Binary uses base 2 because…") to make the explanation richer.
                 </span>
               )}
             </label>
