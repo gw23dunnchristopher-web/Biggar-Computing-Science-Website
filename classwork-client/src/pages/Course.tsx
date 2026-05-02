@@ -1707,32 +1707,6 @@ export default function Course() {
                 }}
               >✕ Close</button>
             </div>
-            {/* Section reference list — shown when the unit has manually-defined
-                sections. SharePoint's embedded viewer can't be navigated via URL
-                params from a third-party iframe (its CSP blocks the slide-nav
-                initialiser), so we display section names + slide numbers as a
-                hint and pupils navigate using the viewer's own controls. */}
-            {(odViewerUnit.od_sections?.length ?? 0) > 0 && (
-              <div style={{
-                padding: '10px 16px',
-                background: '#f1f5f9', color: '#1e293b',
-                borderBottom: '1px solid #cbd5e1',
-                fontSize: 13,
-                flexShrink: 0,
-              }}>
-                <div style={{ fontWeight: 700, marginBottom: 6 }}>
-                  Sections — use the slide controls below to jump to:
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px' }}>
-                  {odViewerUnit.od_sections!.map((s, i) => (
-                    <span key={i}>
-                      <strong>{s.name}</strong>
-                      <span style={{ color: '#475569' }}> — slide {s.startSlide}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
             {/* Embedded presentation. SharePoint always opens at slide 1; pupils
                 navigate manually using the viewer's own slide controls. */}
             <iframe
