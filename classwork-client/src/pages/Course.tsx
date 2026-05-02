@@ -443,17 +443,25 @@ export default function Course() {
   // (the teacher-pasted sharing link) with action=embedview when no resolved
   // URL is available — slide navigation won't work in that case but the viewer
   // itself still loads fine.
-  function buildOdSrc(raw: string, startSlide: number, _resolvedUrl?: string | null): string {
-    // Use the Office Online embed viewer rather than SharePoint's own embed
-    // renderer. SharePoint's ClientRender=1 viewer ignores wdStartOn when it's
-    // loaded in a third-party iframe (its inline initialiser is blocked by
-    // SharePoint's own page CSP), so URL-based slide navigation never fires.
-    // view.officeapps.live.com/op/embed.aspx is purpose-built for third-party
-    // embedding and reliably honours wdSlideIndex for slide navigation.
-    const src = encodeURIComponent(raw);
-    const parts = [`src=${src}`];
-    if (startSlide > 1) parts.push(`wdSlideIndex=${startSlide}`);
-    return `https://view.officeapps.live.com/op/embed.aspx?${parts.join('&')}`;
+  function buildOdSrc(raw: string, startSlide: number, resolvedUrl?: string | null): string {
+    // Note: SharePoint's embed renderer (doc2.aspx?ClientRender=1) ignores
+    // wdStartOn when loaded inside a third-party iframe — its inline
+    // initialiser is blocked by SharePoint's own page CSP. The viewer still
+    // displays the deck correctly, but URL-based slide navigation has no
+    // effect; we keep wdStartOn in case Microsoft ever fixes it.
+    const base = resolvedUrl ? resolvedUrl : toOnedriveEmbedUrl(raw);
+    try {
+      const u = new URL(base);
+      if (startSlide > 1) {
+        u.searchParams.set('wdStartOn', String(startSlide));
+      } else {
+        u.searchParams.delete('wdStartOn');
+      }
+      u.searchParams.delete('nav');
+      return u.toString();
+    } catch {
+      return base;
+    }
   }
 
   async function saveOnedriveUrl(unitId: string) {
@@ -573,10 +581,6 @@ export default function Course() {
     const raw = odPageInputRef.current?.value ?? '';
     const n = parseInt(raw, 10);
     if (!Number.isFinite(n) || n < 1) return;
-    if (odViewerUnit) {
-      const url = buildOdSrc(odViewerUnit.onedrive_embed_url!, n, odViewerUnit.od_resolved_url);
-      console.log('[jumpToPage] resolved?', !!odViewerUnit.od_resolved_url, 'URL:', url);
-    }
     setOdStartSlide(n);
     setOdJumpKey((k) => k + 1);
   }
