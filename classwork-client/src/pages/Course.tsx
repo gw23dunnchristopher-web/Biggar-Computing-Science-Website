@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
 import RichTextEditor from '@/components/RichTextEditor';
@@ -129,13 +129,6 @@ export default function Course() {
   const [odBusy, setOdBusy] = useState<Record<string, boolean>>({});
   const [odErr, setOdErr] = useState<Record<string, string>>({});
   const [odViewerUnit, setOdViewerUnit] = useState<Unit | null>(null); // open iframe modal
-  // Section nav — driven by the manually-defined od_sections on the unit row.
-  const [odStartSlide, setOdStartSlide] = useState(1);
-  // Bumped every time the user clicks Go so the iframe key always changes,
-  // even when jumping to the same slide number twice in a row.
-  const [odJumpKey, setOdJumpKey] = useState(0);
-  // Uncontrolled ref for the slide-number input — avoids stale-closure bugs.
-  const odPageInputRef = useRef<HTMLInputElement>(null);
   // Section editor state (teacher only, per-unit).
   const [odSecOpen, setOdSecOpen] = useState<Record<string, boolean>>({});
   const [odSecDraft, setOdSecDraft] = useState<Record<string, { name: string; startSlide: string }[]>>({});
@@ -393,20 +386,6 @@ export default function Course() {
     }
   }
 
-  // Reset slide position whenever a different unit's OneDrive modal opens,
-  // and seed the page-jump input with "1" so the field is never empty.
-  useEffect(() => {
-    setOdStartSlide(1);
-    setOdJumpKey(0);
-    if (odPageInputRef.current) odPageInputRef.current.value = '1';
-  }, [odViewerUnit]);
-
-  // Keep the page-jump input in sync with odStartSlide so that after a
-  // section-dropdown jump the number field shows the new slide number.
-  useEffect(() => {
-    if (odPageInputRef.current) odPageInputRef.current.value = String(odStartSlide);
-  }, [odStartSlide]);
-
   // Best-effort conversion of a OneDrive/SharePoint share URL to an embed URL.
   // If the URL is already an embed URL (contains "action=embedview" or is the
   // onedrive.live.com/embed path) it is returned unchanged.
@@ -443,25 +422,13 @@ export default function Course() {
   // (the teacher-pasted sharing link) with action=embedview when no resolved
   // URL is available — slide navigation won't work in that case but the viewer
   // itself still loads fine.
-  function buildOdSrc(raw: string, startSlide: number, resolvedUrl?: string | null): string {
-    // Note: SharePoint's embed renderer (doc2.aspx?ClientRender=1) ignores
-    // wdStartOn when loaded inside a third-party iframe — its inline
-    // initialiser is blocked by SharePoint's own page CSP. The viewer still
-    // displays the deck correctly, but URL-based slide navigation has no
-    // effect; we keep wdStartOn in case Microsoft ever fixes it.
-    const base = resolvedUrl ? resolvedUrl : toOnedriveEmbedUrl(raw);
-    try {
-      const u = new URL(base);
-      if (startSlide > 1) {
-        u.searchParams.set('wdStartOn', String(startSlide));
-      } else {
-        u.searchParams.delete('wdStartOn');
-      }
-      u.searchParams.delete('nav');
-      return u.toString();
-    } catch {
-      return base;
-    }
+  function buildOdSrc(raw: string, resolvedUrl?: string | null): string {
+    // SharePoint's embed renderer ignores wdStartOn / wdSlideIndex when loaded
+    // inside a third-party iframe (its inline initialiser is blocked by
+    // SharePoint's own page CSP). We can't auto-jump to a slide; the viewer
+    // always opens at slide 1 and pupils navigate manually using the section
+    // reference list shown above the iframe.
+    return resolvedUrl ? resolvedUrl : toOnedriveEmbedUrl(raw);
   }
 
   async function saveOnedriveUrl(unitId: string) {
@@ -575,14 +542,6 @@ export default function Course() {
     } finally {
       setOdSecBusy((b) => { const n = { ...b }; delete n[unitId]; return n; });
     }
-  }
-
-  function jumpToPage() {
-    const raw = odPageInputRef.current?.value ?? '';
-    const n = parseInt(raw, 10);
-    if (!Number.isFinite(n) || n < 1) return;
-    setOdStartSlide(n);
-    setOdJumpKey((k) => k + 1);
   }
 
   function openAddLesson(unitId: string) {
@@ -1739,56 +1698,6 @@ export default function Course() {
               <span style={{ fontWeight: 700, fontSize: 15, marginRight: 4 }}>
                 ☁️ {odViewerUnit.title}
               </span>
-              {/* Section jump dropdown — shown when the unit has manually-defined sections. */}
-              {(odViewerUnit.od_sections?.length ?? 0) > 0 && (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                  <label htmlFor="od-section-jump" style={{ fontSize: 13, color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                    Section
-                  </label>
-                  <select
-                    id="od-section-jump"
-                    value={odViewerUnit.od_sections!.findIndex((s) => s.startSlide === odStartSlide)}
-                    onChange={(e) => {
-                      const i = parseInt(e.target.value, 10);
-                      const sec = odViewerUnit.od_sections?.[i];
-                      if (sec) setOdStartSlide(sec.startSlide);
-                    }}
-                    style={{
-                      padding: '4px 8px', borderRadius: 6, fontSize: 13,
-                      border: '1px solid #334155', background: '#0f172a', color: '#f1f5f9',
-                    }}
-                  >
-                    {odViewerUnit.od_sections!.map((s, i) => (
-                      <option key={i} value={i}>{s.name} (slide {s.startSlide})</option>
-                    ))}
-                  </select>
-                </span>
-              )}
-              {/* Jump-to-page input */}
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <label htmlFor="od-page-jump" style={{ fontSize: 13, color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                  Slide
-                </label>
-                <input
-                  ref={odPageInputRef}
-                  id="od-page-jump"
-                  type="number"
-                  min={1}
-                  defaultValue={1}
-                  onKeyDown={(e) => { if (e.key === 'Enter') jumpToPage(); }}
-                  style={{
-                    width: 56, padding: '4px 6px', borderRadius: 6, fontSize: 13,
-                    border: '1px solid #334155', background: '#0f172a', color: '#f1f5f9',
-                  }}
-                />
-                <button
-                  onClick={jumpToPage}
-                  style={{
-                    background: '#334155', color: '#f1f5f9', border: 'none',
-                    borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 13,
-                  }}
-                >Go</button>
-              </span>
               <span style={{ flex: 1 }} />
               <button
                 onClick={() => setOdViewerUnit(null)}
@@ -1798,12 +1707,36 @@ export default function Course() {
                 }}
               >✕ Close</button>
             </div>
-            {/* Embedded presentation — key changes on slide jump so the
-                iframe remounts and loads from the correct slide. odJumpKey
-                ensures a remount even when the slide number is unchanged. */}
+            {/* Section reference list — shown when the unit has manually-defined
+                sections. SharePoint's embedded viewer can't be navigated via URL
+                params from a third-party iframe (its CSP blocks the slide-nav
+                initialiser), so we display section names + slide numbers as a
+                hint and pupils navigate using the viewer's own controls. */}
+            {(odViewerUnit.od_sections?.length ?? 0) > 0 && (
+              <div style={{
+                padding: '10px 16px',
+                background: '#f1f5f9', color: '#1e293b',
+                borderBottom: '1px solid #cbd5e1',
+                fontSize: 13,
+                flexShrink: 0,
+              }}>
+                <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                  Sections — use the slide controls below to jump to:
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px' }}>
+                  {odViewerUnit.od_sections!.map((s, i) => (
+                    <span key={i}>
+                      <strong>{s.name}</strong>
+                      <span style={{ color: '#475569' }}> — slide {s.startSlide}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* Embedded presentation. SharePoint always opens at slide 1; pupils
+                navigate manually using the viewer's own slide controls. */}
             <iframe
-              key={`${odStartSlide}-${odJumpKey}`}
-              src={buildOdSrc(odViewerUnit.onedrive_embed_url, odStartSlide, odViewerUnit.od_resolved_url)}
+              src={buildOdSrc(odViewerUnit.onedrive_embed_url, odViewerUnit.od_resolved_url)}
               style={{ flex: 1, border: 'none', width: '100%' }}
               allowFullScreen
               title={`${odViewerUnit.title} — OneDrive slides`}
