@@ -29,6 +29,12 @@ interface Unit {
   // rather than the local PDF viewer. Updates in OneDrive are reflected
   // automatically since the iframe always loads the live embed.
   onedrive_embed_url?: string | null;
+  // Server-resolved form of onedrive_embed_url. The raw URL is often a
+  // /:p:/g/personal/… sharing link whose query params (wdStartOn etc.) are
+  // discarded in a server-side redirect. The server follows that redirect once
+  // at save-time and stores the final /_layouts/15/doc2.aspx?sourcedoc=…
+  // URL here. buildOdSrc uses this for slide navigation when it's present.
+  od_resolved_url?: string | null;
   // Manually-defined section markers for the OneDrive viewer. Each entry has
   // a display name and the 1-based slide number where the section starts.
   // Stored as JSONB on the unit row so they are always independent of any
@@ -431,28 +437,22 @@ export default function Course() {
 
   // Build the final iframe src for a given 1-based slide number.
   //
-  // Two URL formats exist:
-  //   A) Proper embed URL  — /_layouts/15/Doc.aspx?sourcedoc=...&action=embedview
-  //      Supports the `wdStartOn=N` query parameter directly.
-  //   B) Sharing link      — /:p:/g/personal/... or /:p:/r/...?e=TOKEN&action=embedview
-  //      `wdStartOn` is lost in the server-side redirect. These URLs use a
-  //      `nav` query parameter that holds a base64-encoded JSON payload,
-  //      e.g. nav=btoa('{"slideId":5}'), which the Office Online viewer reads
-  //      client-side before it has resolved the sharing token.
-  //
-  // We set both so that whichever format the teacher pasted is handled.
-  function buildOdSrc(raw: string, startSlide: number): string {
-    const base = toOnedriveEmbedUrl(raw);
+  // Prefers `resolvedUrl` (the server-resolved /_layouts/15/doc2.aspx?sourcedoc=…
+  // URL) because that form passes wdStartOn directly to the Office Online viewer
+  // without any redirect that would strip query params.  Falls back to `raw`
+  // (the teacher-pasted sharing link) with action=embedview when no resolved
+  // URL is available — slide navigation won't work in that case but the viewer
+  // itself still loads fine.
+  function buildOdSrc(raw: string, startSlide: number, resolvedUrl?: string | null): string {
+    const base = resolvedUrl ? resolvedUrl : toOnedriveEmbedUrl(raw);
     try {
       const u = new URL(base);
       if (startSlide > 1) {
         u.searchParams.set('wdStartOn', String(startSlide));
-        // nav param for sharing-link format: base64(JSON({slideId:N}))
-        u.searchParams.set('nav', btoa(JSON.stringify({ slideId: startSlide })));
       } else {
         u.searchParams.delete('wdStartOn');
-        u.searchParams.delete('nav');
       }
+      u.searchParams.delete('nav'); // remove any stale nav= from earlier attempts
       return u.toString();
     } catch {
       return base;
@@ -1798,7 +1798,7 @@ export default function Course() {
                 ensures a remount even when the slide number is unchanged. */}
             <iframe
               key={`${odStartSlide}-${odJumpKey}`}
-              src={buildOdSrc(odViewerUnit.onedrive_embed_url, odStartSlide)}
+              src={buildOdSrc(odViewerUnit.onedrive_embed_url, odStartSlide, odViewerUnit.od_resolved_url)}
               style={{ flex: 1, border: 'none', width: '100%' }}
               allowFullScreen
               title={`${odViewerUnit.title} — OneDrive slides`}

@@ -7,6 +7,8 @@ import { saveClassworkUpload, streamClassworkUpload, downloadClassworkUploadToTe
 import { pool, hasDatabase } from './db';
 import {
   setUnitOdSections,
+  setUnitOdResolvedUrl,
+  resolveOdSharingUrl,
   ensureClassworkSchema,
   isClassworkCourse,
   isClassworkQuestionType,
@@ -331,6 +333,15 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     try {
       const units = await listUnits(course);
       res.json(units);
+      // Background: resolve any sharing URLs that haven't been resolved yet.
+      // Runs fire-and-forget so the response is never delayed.
+      for (const u of units) {
+        if (u.onedrive_embed_url && !u.od_resolved_url) {
+          resolveOdSharingUrl(u.onedrive_embed_url).then((resolved) => {
+            if (resolved) setUnitOdResolvedUrl(u.id, resolved).catch(() => {});
+          }).catch(() => {});
+        }
+      }
     } catch (err) {
       console.error('[classwork] listUnits error:', err);
       res.status(500).json({ error: 'Failed to list units' });
@@ -516,6 +527,14 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     try {
       const updated = await setUnitOnedriveUrl(req.params.unitId, url.trim());
       if (!updated) return res.status(404).json({ error: 'Unit not found' });
+      // Attempt to resolve the sharing URL to the proper /_layouts/15/doc2.aspx
+      // embed URL in the background. This resolved URL supports wdStartOn for
+      // slide navigation, unlike the raw sharing link which loses query params
+      // during its server-side redirect. We don't await the result before
+      // responding to the teacher — resolution typically takes ~1 s.
+      resolveOdSharingUrl(url.trim()).then((resolved) => {
+        setUnitOdResolvedUrl(req.params.unitId, resolved).catch(() => {});
+      }).catch(() => {});
       res.json({ ok: true, unit: updated });
     } catch (err) {
       console.error('[classwork] set onedrive url error:', err);
@@ -548,6 +567,8 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     try {
       const updated = await clearUnitOnedriveUrl(req.params.unitId);
       if (!updated) return res.status(404).json({ error: 'Unit not found' });
+      // Also clear the resolved URL so stale data doesn't linger.
+      setUnitOdResolvedUrl(req.params.unitId, null).catch(() => {});
       res.json({ ok: true, unit: updated });
     } catch (err) {
       console.error('[classwork] clear onedrive url error:', err);

@@ -226,6 +226,7 @@ export function ensureClassworkSchema(): Promise<void> {
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_uploaded_at TIMESTAMP;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS onedrive_embed_url       TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS od_sections             JSONB;`),
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS od_resolved_url         TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS learning_intentions TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS success_criteria    TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS is_test BOOLEAN NOT NULL DEFAULT FALSE;`),
@@ -492,7 +493,7 @@ export async function listUnits(course: ClassworkCourse) {
   const r = await pool.query(
     `SELECT id, course, title, description, image_url, order_index, created_at,
             presentation_url, presentation_pages_url, presentation_filename,
-            presentation_uploaded_at, onedrive_embed_url, od_sections
+            presentation_uploaded_at, onedrive_embed_url, od_sections, od_resolved_url
        FROM bhs_classwork_units
       WHERE course = $1
       ORDER BY order_index ASC, created_at ASC`,
@@ -552,6 +553,49 @@ export async function setUnitOnedriveUrl(unitId: string, url: string) {
     [url, unitId]
   );
   return r.rows[0] || null;
+}
+
+// Store the server-resolved form of a sharing URL (the proper /_layouts/15/doc2.aspx?sourcedoc=...
+// embed URL that supports wdStartOn for slide navigation). Null clears the column.
+export async function setUnitOdResolvedUrl(unitId: string, resolvedUrl: string | null) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `UPDATE bhs_classwork_units SET od_resolved_url = $1 WHERE id = $2 RETURNING *`,
+    [resolvedUrl, unitId],
+  );
+  return r.rows[0] || null;
+}
+
+// Follow HTTP redirects for a OneDrive/SharePoint sharing URL and return the
+// stable /_layouts/15/doc2.aspx?sourcedoc=... embed URL (minus the
+// session-specific slrid param). Returns null if the URL cannot be resolved or
+// does not redirect to a recognisable SharePoint document viewer.
+export async function resolveOdSharingUrl(sharingUrl: string): Promise<string | null> {
+  try {
+    const response = await fetch(sharingUrl, {
+      method: 'GET',
+      redirect: 'follow',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      },
+      signal: AbortSignal.timeout(10_000),
+    });
+    const finalUrl = response.url;
+    if (
+      finalUrl !== sharingUrl &&
+      (finalUrl.includes('/_layouts/15/Doc.aspx') || finalUrl.includes('/_layouts/15/doc2.aspx')) &&
+      finalUrl.includes('sourcedoc=')
+    ) {
+      // Strip session-scoped parameters that change per-request.
+      const u = new URL(finalUrl);
+      u.searchParams.delete('slrid');
+      return u.toString();
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 // Save manually-defined section markers for the OneDrive viewer.
