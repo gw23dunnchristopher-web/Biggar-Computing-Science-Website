@@ -572,7 +572,16 @@ export async function setUnitOdResolvedUrl(unitId: string, resolvedUrl: string |
 // does not redirect to a recognisable SharePoint document viewer.
 export async function resolveOdSharingUrl(sharingUrl: string): Promise<string | null> {
   try {
-    const response = await fetch(sharingUrl, {
+    // Without action=embedview the sharing link redirects to a login page.
+    // Always add it so SharePoint follows the embed-viewer redirect path.
+    let fetchUrl = sharingUrl;
+    try {
+      const u = new URL(sharingUrl);
+      u.searchParams.set('action', 'embedview');
+      fetchUrl = u.toString();
+    } catch { /* use sharingUrl as-is */ }
+
+    const response = await fetch(fetchUrl, {
       method: 'GET',
       redirect: 'follow',
       headers: {
