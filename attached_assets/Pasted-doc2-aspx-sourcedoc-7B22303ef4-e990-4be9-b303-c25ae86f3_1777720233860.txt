@@ -1,0 +1,61 @@
+doc2.aspx?sourcedoc=%7B22303ef4-e990-4be9-b303-c25ae86f30cf%7D&action=embedview&originalPath=aHR0cH…:120 Uncaught ReferenceError: wacUiHostSession is not defined
+    at doc2.aspx?sourcedoc=%7B22303ef4-e990-4be9-b303-c25ae86f30cf%7D&action=embedview&originalPath=aHR0cH…:120:3
+(anonymous) @ doc2.aspx?sourcedoc=%7B22303ef4-e990-4be9-b303-c25ae86f30cf%7D&action=embedview&originalPath=aHR0cH…:120
+
+loginapp.js:78 Session ID: 769fcf4a-8a87-420b-abc7-164f10f1f1b3
+loginapp.js:78 Time in UTC:  Sat, 02 May 2026 11:09:40 GMT
+wacowlhostwebpack.js:113 Session ID: E1A80FA2-5090-0001-D822-E93D024F5935
+wacowlhostwebpack.js:113 Time in UTC:  Sat, 02 May 2026 11:09:41 GMT
+viewer:716 Executing inline event handler violates the following Content Security Policy directive 'script-src 'nonce-bj9rY283WxfOeL3ja/HwVrA0K6xZbU8gj67/AbDLWbopm2oPAgKe/3O8aI9xLg2xm85RPtWhXw26vfWkhvWGatCQFRVxjFmBXbRoIuzc/1dku9/YaumkfImdHoD8D85fTa2P71jXPkNYp9byXqL7+E8iFZSo9zna0eSgD+DZxw4=' 'unsafe-inline' 'unsafe-eval' 'strict-dynamic' https:'. Note that 'unsafe-inline' is ignored if either a hash or nonce value is present in the source list. The action has been blocked.
+ViewingApp.js:2 Using the default ShapeBuilderCanvasContext
+ViewingApp.js:2 creating WebGLRendererEnvironment
+ViewingApp.js:2 BJS - [12:09:42]: Babylon.js v7.51.0 - WebGL2 - Parallel shader compilation
+ViewingApp.js:2 BJS - [12:09:43]: Babylon.js v7.51.0 - WebGL2 - Parallel shader compilation
+viewer:1 Access to XMLHttpRequest at 'https://weu-region.pods.officeapps.live.com/RemoteTelemetry.ashx' from origin 'https://euc.present.officeapps.live.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+HLS.bundle.js:1  POST https://weu-region.pods.officeapps.live.com/RemoteTelemetry.ashx net::ERR_FAILED 200 (OK)
+_tryUpload @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ssapp/HLS.bundle.js:1
+_loggerFlush @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ssapp/HLS.bundle.js:1
+_loggerSendEventsAndRequeue @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ssapp/HLS.bundle.js:1
+addOrUpdatePartCDimension @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ssapp/HLS.bundle.js:1
+(anonymous) @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+addOrUpdatePartCDimensions @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+load @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+await in load
+getShapeViewData @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+(anonymous) @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+getShapeViewDataInSlideAsync @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+isCameoPresentInSlideAsync @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+isCameoDetectedAtSlideIndexAsync @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+emitIfCameoDetected @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+prefetchSlide @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+await in prefetchSlide
+prefetchSlides @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+await in prefetchSlides
+onSlideLocationChanged @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+(anonymous) @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+s.emit @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+gotoSlideImpl @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+await in gotoSlideImpl
+gotoSlide @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+nextSlide @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+await in nextSlide
+nextStep @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+nextStep @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+(anonymous) @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+s.emit @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/ViewingApp.js:2
+(anonymous) @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+onExecute @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+n.Et @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+De @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+Re @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+(anonymous) @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+Nr @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+Hr @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+(anonymous) @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+sc @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+ze @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+$r @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+Ko @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+Go @ res-1.cdn.office.net/pptlive/1602002745607/pptscripts/SlideShowModernUI.min.js:1
+viewer:1 Access to XMLHttpRequest at 'https://weu-region.pods.officeapps.live.com/RemoteTelemetry.ashx' from origin 'https://euc.present.officeapps.live.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+HLS.bundle.js:1  POST https://weu-region.pods.officeapps.live.com/RemoteTelemetry.ashx net::ERR_FAILED 200 (OK)
