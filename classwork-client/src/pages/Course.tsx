@@ -429,17 +429,29 @@ export default function Course() {
     }
   }
 
-  // Build the final iframe src, optionally appending wdStartOn so OneDrive
-  // opens at a specific slide number (1-based). A change in startSlide also
-  // acts as the iframe key, forcing a remount and a fresh load.
+  // Build the final iframe src for a given 1-based slide number.
+  //
+  // Two URL formats exist:
+  //   A) Proper embed URL  — /_layouts/15/Doc.aspx?sourcedoc=...&action=embedview
+  //      Supports the `wdStartOn=N` query parameter directly.
+  //   B) Sharing link      — /:p:/g/personal/... or /:p:/r/...?e=TOKEN&action=embedview
+  //      `wdStartOn` is lost in the server-side redirect. These URLs use a
+  //      `nav` query parameter that holds a base64-encoded JSON payload,
+  //      e.g. nav=btoa('{"slideId":5}'), which the Office Online viewer reads
+  //      client-side before it has resolved the sharing token.
+  //
+  // We set both so that whichever format the teacher pasted is handled.
   function buildOdSrc(raw: string, startSlide: number): string {
     const base = toOnedriveEmbedUrl(raw);
     try {
       const u = new URL(base);
       if (startSlide > 1) {
         u.searchParams.set('wdStartOn', String(startSlide));
+        // nav param for sharing-link format: base64(JSON({slideId:N}))
+        u.searchParams.set('nav', btoa(JSON.stringify({ slideId: startSlide })));
       } else {
         u.searchParams.delete('wdStartOn');
+        u.searchParams.delete('nav');
       }
       return u.toString();
     } catch {
@@ -563,10 +575,7 @@ export default function Course() {
   function jumpToPage() {
     const raw = odPageInputRef.current?.value ?? '';
     const n = parseInt(raw, 10);
-    console.log('[jumpToPage] raw:', raw, 'parsed:', n, 'ref:', odPageInputRef.current);
     if (!Number.isFinite(n) || n < 1) return;
-    const url = odViewerUnit ? buildOdSrc(odViewerUnit.onedrive_embed_url!, n) : '(no unit)';
-    console.log('[jumpToPage] will load URL:', url);
     setOdStartSlide(n);
     setOdJumpKey((k) => k + 1);
   }
