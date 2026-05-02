@@ -395,6 +395,12 @@ export default function Course() {
     if (odPageInputRef.current) odPageInputRef.current.value = '1';
   }, [odViewerUnit]);
 
+  // Keep the page-jump input in sync with odStartSlide so that after a
+  // section-dropdown jump the number field shows the new slide number.
+  useEffect(() => {
+    if (odPageInputRef.current) odPageInputRef.current.value = String(odStartSlide);
+  }, [odStartSlide]);
+
   // Best-effort conversion of a OneDrive/SharePoint share URL to an embed URL.
   // If the URL is already an embed URL (contains "action=embedview" or is the
   // onedrive.live.com/embed path) it is returned unchanged.
@@ -557,9 +563,10 @@ export default function Course() {
   function jumpToPage() {
     const raw = odPageInputRef.current?.value ?? '';
     const n = parseInt(raw, 10);
+    console.log('[jumpToPage] raw:', raw, 'parsed:', n, 'ref:', odPageInputRef.current);
     if (!Number.isFinite(n) || n < 1) return;
-    // Always bump the key so the iframe remounts even if the slide number
-    // hasn't changed (user jumps to the same page twice).
+    const url = odViewerUnit ? buildOdSrc(odViewerUnit.onedrive_embed_url!, n) : '(no unit)';
+    console.log('[jumpToPage] will load URL:', url);
     setOdStartSlide(n);
     setOdJumpKey((k) => k + 1);
   }
