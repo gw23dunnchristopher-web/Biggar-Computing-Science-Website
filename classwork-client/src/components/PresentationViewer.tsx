@@ -237,19 +237,6 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
     return () => { try { renderTask?.cancel(); } catch { /* noop */ } };
   }, [pdfDoc, slideIdx, stageSize.w, stageSize.h]);
 
-  // Derive the current section index for the dropdown highlight. Uses a
-  // sequential scan rather than binary search because section lists are
-  // tiny in practice (rarely >10 entries).
-  const currentSectionIdx = (() => {
-    if (!manifest || manifest.sections.length === 0) return -1;
-    const slideNum = slideIdx + 1;
-    let idx = -1;
-    for (let i = 0; i < manifest.sections.length; i++) {
-      if (manifest.sections[i].startSlide <= slideNum) idx = i;
-      else break;
-    }
-    return idx;
-  })();
 
   // Keyboard nav while the modal is open. We bail out when the user is
   // typing in the page-jump input so number keys don't get hijacked.
@@ -445,31 +432,6 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
               />
               <span style={{ color: 'var(--cw-muted)', fontSize: 14 }}>of {slideCount}</span>
             </span>
-
-            {manifest.sections.length > 0 && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
-                <label htmlFor="cw-pres-section" style={{ color: 'var(--cw-muted)', fontSize: 14 }}>Section</label>
-                <select
-                  id="cw-pres-section"
-                  value={currentSectionIdx >= 0 ? currentSectionIdx : ''}
-                  onChange={(e) => {
-                    const i = parseInt(e.target.value, 10);
-                    if (Number.isFinite(i) && manifest.sections[i]) go(manifest.sections[i].startSlide - 1);
-                  }}
-                  style={{
-                    padding: '6px 8px', borderRadius: 6,
-                    border: '1px solid var(--cw-border)', fontSize: 14, maxWidth: 240,
-                  }}
-                >
-                  {currentSectionIdx === -1 && (
-                    <option value="">— before first section —</option>
-                  )}
-                  {manifest.sections.map((s, i) => (
-                    <option key={i} value={i}>{s.name} (slide {s.startSlide})</option>
-                  ))}
-                </select>
-              </span>
-            )}
 
             {/* Spacer pushes the view-mode controls to the right side. */}
             <span style={{ flex: 1 }} />
