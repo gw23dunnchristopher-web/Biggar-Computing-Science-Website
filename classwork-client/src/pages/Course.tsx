@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
 import RichTextEditor from '@/components/RichTextEditor';
@@ -125,8 +125,11 @@ export default function Course() {
   const [odViewerUnit, setOdViewerUnit] = useState<Unit | null>(null); // open iframe modal
   // Section nav — driven by the manually-defined od_sections on the unit row.
   const [odStartSlide, setOdStartSlide] = useState(1);
-  // Jump-to-page input value (string so the input stays controlled).
-  const [odPageInput, setOdPageInput] = useState('');
+  // Bumped every time the user clicks Go so the iframe key always changes,
+  // even when jumping to the same slide number twice in a row.
+  const [odJumpKey, setOdJumpKey] = useState(0);
+  // Uncontrolled ref for the slide-number input — avoids stale-closure bugs.
+  const odPageInputRef = useRef<HTMLInputElement>(null);
   // Section editor state (teacher only, per-unit).
   const [odSecOpen, setOdSecOpen] = useState<Record<string, boolean>>({});
   const [odSecDraft, setOdSecDraft] = useState<Record<string, { name: string; startSlide: string }[]>>({});
@@ -384,10 +387,12 @@ export default function Course() {
     }
   }
 
-  // Reset slide position whenever a different unit's OneDrive modal opens.
+  // Reset slide position whenever a different unit's OneDrive modal opens,
+  // and seed the page-jump input with "1" so the field is never empty.
   useEffect(() => {
     setOdStartSlide(1);
-    setOdPageInput('');
+    setOdJumpKey(0);
+    if (odPageInputRef.current) odPageInputRef.current.value = '1';
   }, [odViewerUnit]);
 
   // Best-effort conversion of a OneDrive/SharePoint share URL to an embed URL.
@@ -550,8 +555,13 @@ export default function Course() {
   }
 
   function jumpToPage() {
-    const n = parseInt(odPageInput, 10);
-    if (Number.isFinite(n) && n >= 1) setOdStartSlide(n);
+    const raw = odPageInputRef.current?.value ?? '';
+    const n = parseInt(raw, 10);
+    if (!Number.isFinite(n) || n < 1) return;
+    // Always bump the key so the iframe remounts even if the slide number
+    // hasn't changed (user jumps to the same page twice).
+    setOdStartSlide(n);
+    setOdJumpKey((k) => k + 1);
   }
 
   function openAddLesson(unitId: string) {
@@ -1739,13 +1749,12 @@ export default function Course() {
                   Slide
                 </label>
                 <input
+                  ref={odPageInputRef}
                   id="od-page-jump"
                   type="number"
                   min={1}
-                  value={odPageInput}
-                  onChange={(e) => setOdPageInput(e.target.value)}
+                  defaultValue={1}
                   onKeyDown={(e) => { if (e.key === 'Enter') jumpToPage(); }}
-                  placeholder="1"
                   style={{
                     width: 56, padding: '4px 6px', borderRadius: 6, fontSize: 13,
                     border: '1px solid #334155', background: '#0f172a', color: '#f1f5f9',
@@ -1768,10 +1777,11 @@ export default function Course() {
                 }}
               >✕ Close</button>
             </div>
-            {/* Embedded presentation — key changes on section jump so the
-                iframe remounts and loads from the correct slide. */}
+            {/* Embedded presentation — key changes on slide jump so the
+                iframe remounts and loads from the correct slide. odJumpKey
+                ensures a remount even when the slide number is unchanged. */}
             <iframe
-              key={odStartSlide}
+              key={`${odStartSlide}-${odJumpKey}`}
               src={buildOdSrc(odViewerUnit.onedrive_embed_url, odStartSlide)}
               style={{ flex: 1, border: 'none', width: '100%' }}
               allowFullScreen
