@@ -225,6 +225,7 @@ export function ensureClassworkSchema(): Promise<void> {
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_filename    TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_uploaded_at TIMESTAMP;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS onedrive_embed_url       TEXT;`),
+      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS od_sections             JSONB;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS learning_intentions TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS success_criteria    TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS is_test BOOLEAN NOT NULL DEFAULT FALSE;`),
@@ -491,7 +492,7 @@ export async function listUnits(course: ClassworkCourse) {
   const r = await pool.query(
     `SELECT id, course, title, description, image_url, order_index, created_at,
             presentation_url, presentation_pages_url, presentation_filename,
-            presentation_uploaded_at, onedrive_embed_url
+            presentation_uploaded_at, onedrive_embed_url, od_sections
        FROM bhs_classwork_units
       WHERE course = $1
       ORDER BY order_index ASC, created_at ASC`,
@@ -549,6 +550,19 @@ export async function setUnitOnedriveUrl(unitId: string, url: string) {
       WHERE id = $2
       RETURNING *`,
     [url, unitId]
+  );
+  return r.rows[0] || null;
+}
+
+// Save manually-defined section markers for the OneDrive viewer.
+export async function setUnitOdSections(
+  unitId: string,
+  sections: { name: string; startSlide: number }[],
+) {
+  await ensureClassworkSchema();
+  const r = await pool.query(
+    `UPDATE bhs_classwork_units SET od_sections = $1 WHERE id = $2 RETURNING *`,
+    [JSON.stringify(sections), unitId],
   );
   return r.rows[0] || null;
 }

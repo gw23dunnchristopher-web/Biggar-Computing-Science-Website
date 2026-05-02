@@ -6,6 +6,7 @@ import multer from 'multer';
 import { saveClassworkUpload, streamClassworkUpload, downloadClassworkUploadToTemp } from './classwork-uploads-store';
 import { pool, hasDatabase } from './db';
 import {
+  setUnitOdSections,
   ensureClassworkSchema,
   isClassworkCourse,
   isClassworkQuestionType,
@@ -519,6 +520,27 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] set onedrive url error:', err);
       res.status(500).json({ error: 'Failed to save OneDrive URL' });
+    }
+  });
+
+  // Teachers save manually-defined section markers for the OneDrive viewer.
+  // Sections are stored as JSONB on the unit row so they are always in sync
+  // with whatever the teacher types — no PPTX upload required.
+  app.put('/api/classwork/units/:unitId/od-sections', requireTeacher, async (req, res) => {
+    const { sections } = req.body as { sections?: unknown };
+    if (!Array.isArray(sections)) {
+      return res.status(400).json({ error: 'sections must be an array' });
+    }
+    const validated = (sections as any[]).filter(
+      (s) => s && typeof s.name === 'string' && Number.isFinite(Number(s.startSlide)),
+    ).map((s) => ({ name: String(s.name).trim(), startSlide: Number(s.startSlide) }));
+    try {
+      const updated = await setUnitOdSections(req.params.unitId, validated);
+      if (!updated) return res.status(404).json({ error: 'Unit not found' });
+      res.json({ ok: true, unit: updated });
+    } catch (err) {
+      console.error('[classwork] od-sections update failed:', err);
+      res.status(500).json({ error: 'Failed to update sections' });
     }
   });
 

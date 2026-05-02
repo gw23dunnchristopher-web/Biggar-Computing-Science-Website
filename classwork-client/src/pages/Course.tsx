@@ -29,6 +29,11 @@ interface Unit {
   // rather than the local PDF viewer. Updates in OneDrive are reflected
   // automatically since the iframe always loads the live embed.
   onedrive_embed_url?: string | null;
+  // Manually-defined section markers for the OneDrive viewer. Each entry has
+  // a display name and the 1-based slide number where the section starts.
+  // Stored as JSONB on the unit row so they are always independent of any
+  // uploaded PPTX file and stay accurate even when the OneDrive copy changes.
+  od_sections?: { name: string; startSlide: number }[] | null;
 }
 interface Lesson {
   id: string; unit_id: string; title: string; description: string | null;
@@ -118,10 +123,14 @@ export default function Course() {
   const [odBusy, setOdBusy] = useState<Record<string, boolean>>({});
   const [odErr, setOdErr] = useState<Record<string, string>>({});
   const [odViewerUnit, setOdViewerUnit] = useState<Unit | null>(null); // open iframe modal
-  // Section nav for the OneDrive modal — populated from the PPTX manifest
-  // if one exists on the same unit.
-  const [odSections, setOdSections] = useState<{ name: string; startSlide: number }[]>([]);
+  // Section nav — driven by the manually-defined od_sections on the unit row.
   const [odStartSlide, setOdStartSlide] = useState(1);
+  // Jump-to-page input value (string so the input stays controlled).
+  const [odPageInput, setOdPageInput] = useState('');
+  // Section editor state (teacher only, per-unit).
+  const [odSecOpen, setOdSecOpen] = useState<Record<string, boolean>>({});
+  const [odSecDraft, setOdSecDraft] = useState<Record<string, { name: string; startSlide: string }[]>>({});
+  const [odSecBusy, setOdSecBusy] = useState<Record<string, boolean>>({});
 
   // Per-unit collapse state. Stored client-side only and persisted in
   // localStorage scoped per course so each user's chosen layout (e.g.
@@ -375,19 +384,10 @@ export default function Course() {
     }
   }
 
-  // When the OneDrive modal opens, try to load section data from the PPTX
-  // manifest (if the same unit also has a PPTX upload). Sections let the
-  // viewer jump straight to a PowerPoint section via wdStartOn.
+  // Reset slide position whenever a different unit's OneDrive modal opens.
   useEffect(() => {
-    setOdSections([]);
     setOdStartSlide(1);
-    if (!odViewerUnit?.presentation_pages_url) return;
-    let cancelled = false;
-    fetch(odViewerUnit.presentation_pages_url)
-      .then((r) => r.json())
-      .then((m) => { if (!cancelled) setOdSections(m?.sections || []); })
-      .catch(() => { /* manifest unavailable — no section nav */ });
-    return () => { cancelled = true; };
+    setOdPageInput('');
   }, [odViewerUnit]);
 
   // Best-effort conversion of a OneDrive/SharePoint share URL to an embed URL.
@@ -486,6 +486,72 @@ export default function Course() {
     } finally {
       setOdBusy((b) => { const n = { ...b }; delete n[unitId]; return n; });
     }
+  }
+
+  // ── Section editor helpers (teacher only) ─────────────────────────────────
+
+  function openSectionEditor(u: Unit) {
+    const existing = (u.od_sections || []).map((s) => ({
+      name: s.name,
+      startSlide: String(s.startSlide),
+    }));
+    setOdSecDraft((d) => ({ ...d, [u.id]: existing }));
+    setOdSecOpen((o) => ({ ...o, [u.id]: true }));
+  }
+
+  function closeSectionEditor(unitId: string) {
+    setOdSecOpen((o) => ({ ...o, [unitId]: false }));
+  }
+
+  function addSectionRow(unitId: string) {
+    setOdSecDraft((d) => ({ ...d, [unitId]: [...(d[unitId] || []), { name: '', startSlide: '' }] }));
+  }
+
+  function updateSectionRow(unitId: string, idx: number, field: 'name' | 'startSlide', value: string) {
+    setOdSecDraft((d) => {
+      const rows = [...(d[unitId] || [])];
+      rows[idx] = { ...rows[idx], [field]: value };
+      return { ...d, [unitId]: rows };
+    });
+  }
+
+  function removeSectionRow(unitId: string, idx: number) {
+    setOdSecDraft((d) => {
+      const rows = [...(d[unitId] || [])];
+      rows.splice(idx, 1);
+      return { ...d, [unitId]: rows };
+    });
+  }
+
+  async function saveSections(unitId: string) {
+    const rows = odSecDraft[unitId] || [];
+    const sections = rows
+      .filter((r) => r.name.trim() && Number.isFinite(parseInt(r.startSlide, 10)))
+      .map((r) => ({ name: r.name.trim(), startSlide: parseInt(r.startSlide, 10) }));
+    setOdSecBusy((b) => ({ ...b, [unitId]: true }));
+    try {
+      const res = await fetch(`/api/classwork/units/${unitId}/od-sections`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...teacherTokenHeader() },
+        body: JSON.stringify({ sections }),
+      });
+      if (!res.ok) throw new Error(`Save failed (${res.status})`);
+      const data = await res.json() as { unit: Unit };
+      setUnits((us) => us.map((u) => (u.id === unitId ? { ...u, ...data.unit } : u)));
+      // Also update the viewer unit so the dropdown reflects immediately if
+      // the teacher saves while the modal is open on this unit.
+      setOdViewerUnit((prev) => prev?.id === unitId ? { ...prev, ...data.unit } : prev);
+      closeSectionEditor(unitId);
+    } catch (e: any) {
+      alert(e?.message || 'Could not save sections');
+    } finally {
+      setOdSecBusy((b) => { const n = { ...b }; delete n[unitId]; return n; });
+    }
+  }
+
+  function jumpToPage() {
+    const n = parseInt(odPageInput, 10);
+    if (Number.isFinite(n) && n >= 1) setOdStartSlide(n);
   }
 
   function openAddLesson(unitId: string) {
@@ -1017,6 +1083,71 @@ export default function Course() {
                         <span style={{ color: 'var(--cw-danger)', fontSize: 13, width: '100%' }}>
                           {odErr[u.id]}
                         </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ── Section editor (teacher only, when OneDrive link is set) ── */}
+                  {u.onedrive_embed_url && role === 'teacher' && (
+                    <div style={{ marginTop: 6 }}>
+                      {!odSecOpen[u.id] ? (
+                        <button
+                          type="button"
+                          onClick={() => openSectionEditor(u)}
+                          style={{ fontSize: 12, background: 'none', border: '1px solid var(--cw-border)', borderRadius: 6, padding: '3px 10px', cursor: 'pointer', color: 'var(--cw-muted)' }}
+                        >
+                          ☰ {(u.od_sections?.length ?? 0) > 0 ? `Sections (${u.od_sections!.length})` : 'Add sections'}
+                        </button>
+                      ) : (
+                        <div style={{ border: '1px solid var(--cw-border)', borderRadius: 8, padding: 12, background: 'var(--cw-bg)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          <span style={{ fontSize: 13, fontWeight: 600 }}>Sections</span>
+                          <span style={{ fontSize: 11, color: 'var(--cw-muted)' }}>
+                            Each section needs a name and the slide number it starts on. Slide numbers must match the live OneDrive presentation.
+                          </span>
+                          {(odSecDraft[u.id] || []).map((row, idx) => (
+                            <div key={idx} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                              <input
+                                type="text"
+                                placeholder="Section name"
+                                value={row.name}
+                                onChange={(e) => updateSectionRow(u.id, idx, 'name', e.target.value)}
+                                style={{ flex: 3, padding: '4px 8px', border: '1px solid var(--cw-border)', borderRadius: 6, fontSize: 13 }}
+                              />
+                              <input
+                                type="number"
+                                placeholder="Slide"
+                                value={row.startSlide}
+                                min={1}
+                                onChange={(e) => updateSectionRow(u.id, idx, 'startSlide', e.target.value)}
+                                style={{ flex: 1, minWidth: 60, padding: '4px 8px', border: '1px solid var(--cw-border)', borderRadius: 6, fontSize: 13 }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeSectionRow(u.id, idx)}
+                                style={{ background: 'none', border: 'none', color: 'var(--cw-danger)', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '2px 4px' }}
+                                title="Remove section"
+                              >✕</button>
+                            </div>
+                          ))}
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              onClick={() => addSectionRow(u.id)}
+                              style={{ fontSize: 12, background: 'none', border: '1px solid var(--cw-border)', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', color: 'var(--cw-text)' }}
+                            >+ Add section</button>
+                            <button
+                              type="button"
+                              onClick={() => saveSections(u.id)}
+                              disabled={!!odSecBusy[u.id]}
+                              style={{ ...secondaryBtn, fontSize: 12, padding: '4px 14px' }}
+                            >{odSecBusy[u.id] ? 'Saving…' : 'Save'}</button>
+                            <button
+                              type="button"
+                              onClick={() => closeSectionEditor(u.id)}
+                              style={{ fontSize: 12, background: 'none', border: 'none', color: 'var(--cw-muted)', cursor: 'pointer', padding: '4px 6px' }}
+                            >Cancel</button>
+                          </div>
+                        </div>
                       )}
                     </div>
                   )}
@@ -1577,31 +1708,57 @@ export default function Course() {
               <span style={{ fontWeight: 700, fontSize: 15, marginRight: 4 }}>
                 ☁️ {odViewerUnit.title}
               </span>
-              {/* Section jump dropdown — only shown when the unit also has a
-                  PPTX manifest that contains section metadata. */}
-              {odSections.length > 0 && (
+              {/* Section jump dropdown — shown when the unit has manually-defined sections. */}
+              {(odViewerUnit.od_sections?.length ?? 0) > 0 && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                   <label htmlFor="od-section-jump" style={{ fontSize: 13, color: '#94a3b8', whiteSpace: 'nowrap' }}>
-                    Jump to section
+                    Section
                   </label>
                   <select
                     id="od-section-jump"
-                    value={odSections.findIndex((s) => s.startSlide === odStartSlide)}
+                    value={odViewerUnit.od_sections!.findIndex((s) => s.startSlide === odStartSlide)}
                     onChange={(e) => {
                       const i = parseInt(e.target.value, 10);
-                      if (Number.isFinite(i) && odSections[i]) setOdStartSlide(odSections[i].startSlide);
+                      const sec = odViewerUnit.od_sections?.[i];
+                      if (sec) setOdStartSlide(sec.startSlide);
                     }}
                     style={{
                       padding: '4px 8px', borderRadius: 6, fontSize: 13,
                       border: '1px solid #334155', background: '#0f172a', color: '#f1f5f9',
                     }}
                   >
-                    {odSections.map((s, i) => (
+                    {odViewerUnit.od_sections!.map((s, i) => (
                       <option key={i} value={i}>{s.name} (slide {s.startSlide})</option>
                     ))}
                   </select>
                 </span>
               )}
+              {/* Jump-to-page input */}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <label htmlFor="od-page-jump" style={{ fontSize: 13, color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                  Slide
+                </label>
+                <input
+                  id="od-page-jump"
+                  type="number"
+                  min={1}
+                  value={odPageInput}
+                  onChange={(e) => setOdPageInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') jumpToPage(); }}
+                  placeholder="1"
+                  style={{
+                    width: 56, padding: '4px 6px', borderRadius: 6, fontSize: 13,
+                    border: '1px solid #334155', background: '#0f172a', color: '#f1f5f9',
+                  }}
+                />
+                <button
+                  onClick={jumpToPage}
+                  style={{
+                    background: '#334155', color: '#f1f5f9', border: 'none',
+                    borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontSize: 13,
+                  }}
+                >Go</button>
+              </span>
               <span style={{ flex: 1 }} />
               <button
                 onClick={() => setOdViewerUnit(null)}
