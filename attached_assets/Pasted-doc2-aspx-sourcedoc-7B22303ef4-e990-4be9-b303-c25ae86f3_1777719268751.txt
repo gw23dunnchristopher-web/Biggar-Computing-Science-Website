@@ -1,0 +1,26 @@
+doc2.aspx?sourcedoc=%7B22303ef4-e990-4be9-b303-c25ae86f30cf%7D&action=embedview&originalPath=aHR0cH…:120 Uncaught ReferenceError: wacUiHostSession is not defined
+    at doc2.aspx?sourcedoc=%7B22303ef4-e990-4be9-b303-c25ae86f30cf%7D&action=embedview&originalPath=aHR0cH…:120:3
+(anonymous) @ doc2.aspx?sourcedoc=%7B22303ef4-e990-4be9-b303-c25ae86f30cf%7D&action=embedview&originalPath=aHR0cH…:120
+
+loginapp.js:78 Session ID: a73c89d2-2c53-4be8-8641-93b508c4a49e
+loginapp.js:78 Time in UTC:  Sat, 02 May 2026 10:53:53 GMT
+wacowlhostwebpack.js:113 Session ID: FAA70FA2-E03B-0001-D822-E0CD010EE84A
+wacowlhostwebpack.js:113 Time in UTC:  Sat, 02 May 2026 10:53:53 GMT
+viewer:716 Executing inline event handler violates the following Content Security Policy directive 'script-src 'nonce-DO3C2x8u+ScQ8PS4SCsAimXe1N96ROVAOzsfNWK+LhgS6drZ09SiO5wrlec2NAh2q0Fk8MGWHGk5xc1tpdreTskitWXdSmWWL7QGSIPO0pV60MR58x45x3qxmbPu3nucyw+VB9b3zIOpCi2++B1+93O1z1azLCod/ynaAtU8Zjg=' 'unsafe-inline' 'unsafe-eval' 'strict-dynamic' https:'. Note that 'unsafe-inline' is ignored if either a hash or nonce value is present in the source list. The action has been blocked.
+ViewingApp.js:2 Using the default ShapeBuilderCanvasContext
+ViewingApp.js:2 creating WebGLRendererEnvironment
+ViewingApp.js:2 BJS - [11:53:54]: Babylon.js v7.51.0 - WebGL2 - Parallel shader compilation
+ViewingApp.js:2 BJS - [11:53:55]: Babylon.js v7.51.0 - WebGL2 - Parallel shader compilation
+Course-CbxXEmDd.js:55 [jumpToPage] resolved? true URL: https://glowscotland-my.sharepoint.com/personal/gw23dunnchristopher_glow_sch_uk/_layouts/15/doc2.aspx?sourcedoc=%7B22303ef4-e990-4be9-b303-c25ae86f30cf%7D&action=embedview&originalPath=aHR0cHM6Ly9nbG93c2NvdGxhbmQtbXkuc2hhcmVwb2ludC5jb20vOnA6L2cvcGVyc29uYWwvZ3cyM2R1bm5jaHJpc3RvcGhlcl9nbG93X3NjaF91ay9JUUQwUGpBaWtPbnBTN01Ed2xyb2J6RFBBVmxGUUxvbmZjUkl1ZDctVHFmbUdBWT9ydGltZT1YZlVYWnppbzNrZw&CID=d4db231b-d5e8-4d84-ad53-997fcb0680f2&_SRM=0%3AG%3A151&file=Internet+Safety+%28New%29.pptx&ClientRender=1&wdStartOn=6
+doc2.aspx?sourcedoc=%7B22303ef4-e990-4be9-b303-c25ae86f30cf%7D&action=embedview&originalPath=aHR0cHM6Ly9nbG93c2NvdGxhbmQtbXkuc2hhcmVwb2ludC5jb20vOnA6L2cvcGVyc29uYWwvZ3cyM2R1bm5jaHJpc3RvcGhlcl9nbG93X3NjaF91ay9JUUQwUGpBaWtPbnBTN01Ed2xyb2J6RFBBVmxGUUxvbmZjUkl1ZDctVHFmbUdBWT9ydGltZT1YZlVYWnppbzNrZw&CID=d4db231b-d5e8-4d84-ad53-997fcb0680f2&_SRM=0%3AG%3A151&file=Internet+Safety+%28New%29.pptx&ClientRender=1&wdStartOn=6:120 Uncaught ReferenceError: wacUiHostSession is not defined
+    at doc2.aspx?sourcedoc=%7B22303ef4-e990-4be9-b303-c25ae86f30cf%7D&action=embedview&originalPath=aHR0cHM6Ly9nbG93c2NvdGxhbmQtbXkuc2hhcmVwb2ludC5jb20vOnA6L2cvcGVyc29uYWwvZ3cyM2R1bm5jaHJpc3RvcGhlcl9nbG93X3NjaF91ay9JUUQwUGpBaWtPbnBTN01Ed2xyb2J6RFBBVmxGUUxvbmZjUkl1ZDctVHFmbUdBWT9ydGltZT1YZlVYWnppbzNrZw&CID=d4db231b-d5e8-4d84-ad53-997fcb0680f2&_SRM=0%3AG%3A151&file=Internet+Safety+%28New%29.pptx&ClientRender=1&wdStartOn=6:120:3
+(anonymous) @ glowscotland-my.sharepoint.com/personal/gw23dunnchristopher_glow_sch_uk/_layouts/15/doc2.aspx?sourcedoc=%7B22303ef4-e990-4be9-b303-c25ae86f30cf%7D&action=embedview&originalPath=aHR0cHM6Ly9nbG93c2NvdGxhbmQtbXkuc2hhcmVwb2ludC5jb20vOnA6L2cvcGVyc29uYWwvZ3cyM2R1bm5jaHJpc3RvcGhlcl9nbG93X3NjaF91ay9JUUQwUGpBaWtPbnBTN01Ed2xyb2J6RFBBVmxGUUxvbmZjUkl1ZDctVHFmbUdBWT9ydGltZT1YZlVYWnppbzNrZw&CID=d4db231b-d5e8-4d84-ad53-997fcb0680f2&_SRM=0%3AG%3A151&file=Internet+Safety+%28New%29.pptx&ClientRender=1&wdStartOn=6:120
+loginapp.js:78 Session ID: 0543d5ce-62c6-4d33-9064-cb3ca3a51eb5
+loginapp.js:78 Time in UTC:  Sat, 02 May 2026 10:54:00 GMT
+wacowlhostwebpack.js:113 Session ID: FCA70FA2-4007-0001-D822-EEF1D2596715
+wacowlhostwebpack.js:113 Time in UTC:  Sat, 02 May 2026 10:54:01 GMT
+viewer:716 Executing inline event handler violates the following Content Security Policy directive 'script-src 'nonce-1Prhkehxcz1Fsu0UNzcUseFWYX+RIJMEykgNoiptbLCiFs/BDvIyh4QgfVUKSyW2s4Q1a4veh57yWItzBGk+hA/QsSVQ9+mq4H0R2Ty/YpLJwriZPCJPCm9aKkIHZccyS2OLuxJ/FrVzUNiOHQMI+LZg91Dq61SPPUwq/sq35gc=' 'unsafe-inline' 'unsafe-eval' 'strict-dynamic' https:'. Note that 'unsafe-inline' is ignored if either a hash or nonce value is present in the source list. The action has been blocked.
+ViewingApp.js:2 Using the default ShapeBuilderCanvasContext
+ViewingApp.js:2 creating WebGLRendererEnvironment
+ViewingApp.js:2 BJS - [11:54:01]: Babylon.js v7.51.0 - WebGL2 - Parallel shader compilation
+ViewingApp.js:2 BJS - [11:54:02]: Babylon.js v7.51.0 - WebGL2 - Parallel shader compilation

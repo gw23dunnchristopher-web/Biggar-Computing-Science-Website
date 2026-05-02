@@ -443,20 +443,17 @@ export default function Course() {
   // (the teacher-pasted sharing link) with action=embedview when no resolved
   // URL is available — slide navigation won't work in that case but the viewer
   // itself still loads fine.
-  function buildOdSrc(raw: string, startSlide: number, resolvedUrl?: string | null): string {
-    const base = resolvedUrl ? resolvedUrl : toOnedriveEmbedUrl(raw);
-    try {
-      const u = new URL(base);
-      if (startSlide > 1) {
-        u.searchParams.set('wdStartOn', String(startSlide));
-      } else {
-        u.searchParams.delete('wdStartOn');
-      }
-      u.searchParams.delete('nav'); // remove any stale nav= from earlier attempts
-      return u.toString();
-    } catch {
-      return base;
-    }
+  function buildOdSrc(raw: string, startSlide: number, _resolvedUrl?: string | null): string {
+    // Use the Office Online embed viewer rather than SharePoint's own embed
+    // renderer. SharePoint's ClientRender=1 viewer ignores wdStartOn when it's
+    // loaded in a third-party iframe (its inline initialiser is blocked by
+    // SharePoint's own page CSP), so URL-based slide navigation never fires.
+    // view.officeapps.live.com/op/embed.aspx is purpose-built for third-party
+    // embedding and reliably honours wdSlideIndex for slide navigation.
+    const src = encodeURIComponent(raw);
+    const parts = [`src=${src}`];
+    if (startSlide > 1) parts.push(`wdSlideIndex=${startSlide}`);
+    return `https://view.officeapps.live.com/op/embed.aspx?${parts.join('&')}`;
   }
 
   async function saveOnedriveUrl(unitId: string) {
