@@ -576,6 +576,10 @@ export default function Course() {
     const raw = odPageInputRef.current?.value ?? '';
     const n = parseInt(raw, 10);
     if (!Number.isFinite(n) || n < 1) return;
+    if (odViewerUnit) {
+      const url = buildOdSrc(odViewerUnit.onedrive_embed_url!, n, odViewerUnit.od_resolved_url);
+      console.log('[jumpToPage] resolved?', !!odViewerUnit.od_resolved_url, 'URL:', url);
+    }
     setOdStartSlide(n);
     setOdJumpKey((k) => k + 1);
   }
