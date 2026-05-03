@@ -1732,7 +1732,7 @@ export default function TimedExam() {
                                             {block.type === "pseudocode" && block.pseudocodeLines && (
                                               <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-50 dark:bg-neutral-900">
                                                 <pre className="font-mono text-sm whitespace-pre-wrap break-words">{block.pseudocodeLines.map(line => 
-                                                  `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent)}${line.content}`
+                                                  `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent || 0)}${line.content}`
                                                 ).join('\n')}</pre>
                                               </div>
                                             )}
@@ -1790,7 +1790,7 @@ export default function TimedExam() {
                                                     {childBlock.type === "pseudocode" && childBlock.pseudocodeLines && (
                                                       <div className="p-3 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-50 dark:bg-neutral-900">
                                                         <pre className="font-mono text-sm whitespace-pre-wrap break-words">{childBlock.pseudocodeLines.map(line => 
-                                                          `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent)}${line.content}`
+                                                          `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent || 0)}${line.content}`
                                                         ).join('\n')}</pre>
                                                       </div>
                                                     )}
@@ -1944,7 +1944,7 @@ export default function TimedExam() {
                                             {block.type === "pseudocode" && block.pseudocodeLines && (
                                               <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-50 dark:bg-neutral-900">
                                                 <pre className="font-mono text-sm whitespace-pre-wrap break-words">{block.pseudocodeLines.map(line => 
-                                                  `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent)}${line.content}`
+                                                  `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent || 0)}${line.content}`
                                                 ).join('\n')}</pre>
                                               </div>
                                             )}
@@ -1972,7 +1972,7 @@ export default function TimedExam() {
                                                     {childBlock.type === "pseudocode" && childBlock.pseudocodeLines && (
                                                       <div className="p-3 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-50 dark:bg-neutral-900">
                                                         <pre className="font-mono text-sm whitespace-pre-wrap break-words">{childBlock.pseudocodeLines.map(line => 
-                                                          `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent)}${line.content}`
+                                                          `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent || 0)}${line.content}`
                                                         ).join('\n')}</pre>
                                                       </div>
                                                     )}
@@ -2131,7 +2131,7 @@ export default function TimedExam() {
                                                 {block.type === "pseudocode" && block.pseudocodeLines && (
                                                   <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-50 dark:bg-neutral-900">
                                                     <pre className="font-mono text-sm whitespace-pre-wrap break-words">{block.pseudocodeLines.map(line => 
-                                                      `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent)}${line.content}`
+                                                      `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent || 0)}${line.content}`
                                                     ).join('\n')}</pre>
                                                   </div>
                                                 )}

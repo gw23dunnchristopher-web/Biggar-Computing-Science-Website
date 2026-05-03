@@ -1884,7 +1884,7 @@ function MarkingGuidanceModal({
 
   const totalMarks = rows.reduce((sum, r) => sum + (r.marks || 0), 0);
 
-  const getAuthHeaders = () => {
+  const getAuthHeaders = (): Record<string, string> => {
     const token = localStorage.getItem("teacher_token");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };

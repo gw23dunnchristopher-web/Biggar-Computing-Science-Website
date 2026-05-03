@@ -11,7 +11,7 @@ export interface ErdAttribute {
 
 export interface DiagramItem {
   id: string;
-  type: "box" | "text" | "ellipse" | "diamond" | "parallelogram" | "cylinder" | "document" | "hexagon" | "trapezoid" | "circle" | "line" | "crowfoot" | "ui-window" | "ui-button" | "ui-input" | "ui-output" | "ui-image" | "ui-dropdown" | "bullet-text" | "numbered-text" | "link-text" | "erd-entity" | "dataflow-arrow" | "ui-textarea" | "ui-radio" | "ui-checkbox" | "ui-submit" | "ui-label" | "nav-highlight" | "nav-page" | "struct-process" | "struct-decision" | "struct-loop" | "entity-oval" | "entity-occurrence";
+  type: "box" | "text" | "ellipse" | "diamond" | "parallelogram" | "cylinder" | "document" | "hexagon" | "trapezoid" | "circle" | "line" | "crowfoot" | "ui-window" | "ui-button" | "ui-input" | "ui-output" | "ui-image" | "ui-dropdown" | "bullet-text" | "numbered-text" | "link-text" | "erd-entity" | "dataflow-arrow" | "dataflow-up" | "dataflow-down" | "ui-textarea" | "ui-radio" | "ui-checkbox" | "ui-submit" | "ui-label" | "nav-highlight" | "nav-page" | "struct-process" | "struct-decision" | "struct-loop" | "entity-oval" | "entity-occurrence";
   x: number;
   y: number;
   content?: string;

@@ -133,6 +133,11 @@ interface AssignmentResponseInfo {
   marksAwarded: number | null;
   aiFeedback: string | null;
   submittedAt: string | null;
+  sectionTitle?: string | null;
+  partLabel?: string | null;
+  partTitle?: string | null;
+  inputStyle?: string | null;
+  codeAnswer?: string | null;
 }
 
 interface ClassInfo {
@@ -1244,7 +1249,7 @@ function StudentDetail({ studentId, studentUsername, onBack, onViewAttempt }: { 
                                 <div className="text-sm mb-2">
                                   <p className="text-xs text-neutral-500 mb-1">Answer:</p>
                                   <div className="whitespace-pre-wrap bg-white dark:bg-neutral-950 p-2 rounded border text-neutral-800 dark:text-neutral-200">
-                                    <FormattedAnswer answer={resp.textAnswer} inputStyle={resp.inputStyle} />
+                                    <FormattedAnswer answer={resp.textAnswer} inputStyle={resp.inputStyle ?? undefined} />
                                   </div>
                                 </div>
                               )}

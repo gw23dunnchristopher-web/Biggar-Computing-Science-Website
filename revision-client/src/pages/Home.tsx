@@ -39,7 +39,7 @@ export default function Home() {
   const { student, logout } = useStudentAuth();
   
   const [randomQuizOpen, setRandomQuizOpen] = useState(false);
-  const [selectedTopics, setSelectedTopics] = useState<Set<Topic>>(new Set(["sdcs", "dd", "wd"]));
+  const [selectedTopics, setSelectedTopics] = useState<Set<Topic>>(new Set<Topic>(["sdcs", "dd", "wd"]));
   const [questionCount, setQuestionCount] = useState(10);
 
   const questionsByTopic = useMemo(() => {
