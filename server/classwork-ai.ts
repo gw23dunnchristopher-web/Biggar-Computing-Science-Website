@@ -130,6 +130,70 @@ export async function markSubmission(
         return markFlowchartSeq(q, s);
       case 'sorting_race':
         return markSortingRace(q, s);
+      case 'convert_relay':
+        return markConvertRelay(q, s);
+      case 'url_anatomy':
+        return markUrlAnatomy(q, s);
+      case 'truth_table':
+        return markTruthTable(q, s);
+      case 'field_type_sort':
+        return markFieldTypeSort(q, s);
+      case 'io_sort':
+        return markIoSort(q, s);
+      case 'html_match':
+        return markHtmlMatch(q, s);
+      case 'password_forge':
+        return markPasswordForge(q, s);
+      case 'privacy_radar':
+        return markPrivacyRadar(q, s);
+      case 'validation_rules':
+        return markValidationRules(q, s);
+      case 'find_duplicate':
+        return markFindDuplicate(q, s);
+      case 'bin_search':
+        return markBinSearch(q, s);
+      case 'box_model':
+        return markBoxModel(q, s);
+      case 'friend_or_fake':
+        return markPickListGeneric(q, s, 'friendOrFake', 'verdict', 'profiles classified', ['real', 'fake']);
+      case 'dm_danger':
+        return markPickListGeneric(q, s, 'dmDanger', 'risk', 'DMs rated', ['safe', 'risky', 'dangerous']);
+      case 'malware_triage':
+        return markPickListGeneric(q, s, 'malwareTriage', 'kind', 'malware types matched', ['virus', 'worm', 'trojan', 'ransomware', 'spyware', 'adware']);
+      case '2fa_escape':
+        return markPickListGeneric(q, s, 'twoFactorEscape', 'method', '2FA methods chosen', ['password_only', 'sms', 'email', 'authenticator', 'hardware']);
+      case 'a11y_audit':
+        return markPickListGeneric(q, s, 'a11yAudit', 'issue', 'accessibility issues identified', ['contrast', 'alt_text', 'labels', 'keyboard', 'heading_order', 'focus_indicator']);
+      case 'fetch_execute':
+        return markPickListGeneric(q, s, 'fetchExecute', 'step', 'FDE stages classified', ['fetch', 'decode', 'execute']);
+      case 'screen_time':
+        return markPickListGeneric(q, s, 'screenTime', 'rating', 'screen-time habits rated', ['healthy', 'balanced', 'unhealthy']);
+      case 'footprint_trail':
+        return markPickListGeneric(q, s, 'footprintTrail', 'visibility', 'footprint items classified', ['private', 'personal', 'public']);
+      case 'social_engineer':
+        return markPickListGeneric(q, s, 'socialEngineer', 'kind', 'social-engineering scams matched', ['phishing', 'pretexting', 'baiting', 'quid_pro_quo', 'tailgating', 'shoulder_surfing']);
+      case 'cipher_quest':
+        return markPickListGeneric(q, s, 'cipherQuest', 'cipher', 'ciphers identified', ['caesar', 'substitution', 'vigenere', 'transposition', 'aes']);
+      case 'normalise_it':
+        return markPickListGeneric(q, s, 'normaliseIt', 'violation', 'normal-form violations spotted', ['breaks_1nf', 'breaks_2nf', 'breaks_3nf', 'normalised']);
+      case 'subnet_calc':
+        return markPickListGeneric(q, s, 'subnetCalc', 'kind', 'IPs classified', ['class_a', 'class_b', 'class_c', 'class_d', 'class_e', 'private', 'loopback']);
+      case 'phish_inbox':
+        return markPickListGeneric(q, s, 'phishInbox', 'verdict', 'inbox items triaged', ['legitimate', 'phishing', 'spam', 'scam']);
+      case 'build_pc':
+        return markPickListGeneric(q, s, 'buildPc', 'part', 'PC parts identified', ['cpu', 'gpu', 'ram', 'storage', 'psu', 'motherboard', 'cooling', 'case']);
+      case 'os_sched':
+        return markPickListGeneric(q, s, 'osSched', 'algo', 'scheduling algorithms picked', ['fcfs', 'sjf', 'round_robin', 'priority']);
+      case 'query_visual':
+        return markPickListGeneric(q, s, 'queryVisual', 'op', 'SQL operations identified', ['select', 'project', 'join', 'filter', 'sort', 'group_by']);
+      case 'schema_arch':
+        return markPickListGeneric(q, s, 'schemaArch', 'rel', 'relationships classified', ['one_to_one', 'one_to_many', 'many_to_many']);
+      case 'tag_soup_repair':
+        return markPickListGeneric(q, s, 'tagSoupRepair', 'bug', 'HTML bugs spotted', ['unclosed', 'wrong_nesting', 'missing_attribute', 'self_close_misuse', 'wrong_tag']);
+      case 'selector_golf':
+        return markPickListGeneric(q, s, 'selectorGolf', 'kind', 'CSS selectors identified', ['id', 'class', 'element', 'descendant', 'child', 'attribute']);
+      case 'css_sliders':
+        return markPickListGeneric(q, s, 'cssSliders', 'prop', 'CSS properties matched', ['width', 'height', 'padding', 'margin', 'border', 'color', 'background', 'font_size']);
       case 'file_upload':
         return await markFileUpload(q, s);
       case 'info_only':
@@ -2297,4 +2361,387 @@ function markSortingRace(q: AIQuestion, s: AISubmission): AIMarkResult | null {
   if (!sortOk) wrong.push('sorted list');
   const breakdown = wrong.length === 0 ? 'all three values correct' : `still to fix: ${wrong.join(', ')}`;
   return buildGameResult(correct, 3, q.max_marks, breakdown);
+}
+
+/* ============================================================================
+   GAMES — BATCH 2 (convert_relay, url_anatomy, truth_table, field_type_sort,
+   io_sort, html_match). Helpers mirror the client at lesson-games.tsx so
+   procedural problems regenerate identically per-question.
+   ============================================================================ */
+
+const _gConvertModeLabel: Record<string, string> = {
+  dec_to_bin: 'Decimal → Binary', bin_to_dec: 'Binary → Decimal',
+  dec_to_hex: 'Decimal → Hex', hex_to_dec: 'Hex → Decimal',
+  bits_to_bytes: 'Bits → Bytes', bytes_to_bits: 'Bytes → Bits',
+  b_to_kb: 'Bytes → Kilobytes', kb_to_b: 'Kilobytes → Bytes',
+  kb_to_mb: 'Kilobytes → Megabytes', mb_to_kb: 'Megabytes → Kilobytes',
+  mb_to_gb: 'Megabytes → Gigabytes', gb_to_mb: 'Gigabytes → Megabytes',
+};
+const _gConvertAllModes = Object.keys(_gConvertModeLabel);
+function _gConvertProblems(cfg: any, seed: string): { mode: string; prompt: string; expected: string }[] {
+  const rounds = Math.max(1, Math.min(40, Number(cfg?.rounds) || 10));
+  const maxValue = Math.max(10, Math.min(9999, Number(cfg?.maxValue) || 200));
+  const modes: string[] = (Array.isArray(cfg?.modes) && cfg.modes.length)
+    ? cfg.modes.filter((m: any) => _gConvertAllModes.includes(m))
+    : _gConvertAllModes.slice(0, 6);
+  if (modes.length === 0) modes.push('dec_to_bin');
+  const rng = _gMulberry32(_gStringHash(seed));
+  const out: { mode: string; prompt: string; expected: string }[] = [];
+  for (let i = 0; i < rounds; i++) {
+    const mode = modes[Math.floor(rng() * modes.length)];
+    const m = Math.max(1, Math.floor(rng() * maxValue) + 1);
+    let prompt = '', expected = '';
+    if (mode === 'dec_to_bin') { prompt = `${m}`; expected = m.toString(2); }
+    else if (mode === 'bin_to_dec') { prompt = m.toString(2); expected = String(m); }
+    else if (mode === 'dec_to_hex') { prompt = `${m}`; expected = m.toString(16).toUpperCase(); }
+    else if (mode === 'hex_to_dec') { prompt = m.toString(16).toUpperCase(); expected = String(m); }
+    else if (mode === 'bits_to_bytes') { prompt = `${m * 8} bits`; expected = String(m); }
+    else if (mode === 'bytes_to_bits') { prompt = `${m} bytes`; expected = String(m * 8); }
+    else if (mode === 'b_to_kb') { prompt = `${m * 1000} bytes`; expected = String(m); }
+    else if (mode === 'kb_to_b') { prompt = `${m} KB`; expected = String(m * 1000); }
+    else if (mode === 'kb_to_mb') { prompt = `${m * 1000} KB`; expected = String(m); }
+    else if (mode === 'mb_to_kb') { prompt = `${m} MB`; expected = String(m * 1000); }
+    else if (mode === 'mb_to_gb') { prompt = `${m * 1000} MB`; expected = String(m); }
+    else if (mode === 'gb_to_mb') { prompt = `${m} GB`; expected = String(m * 1000); }
+    out.push({ mode, prompt, expected });
+  }
+  return out;
+}
+
+function markConvertRelay(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const probs = _gConvertProblems(q.config?.convertRelay || {}, `cr-${q.id}`);
+  if (probs.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  const wrong: string[] = [];
+  for (let i = 0; i < probs.length; i++) {
+    const got = _gNorm((parsed as any)[String(i)] || '');
+    const exp = _gNorm(probs[i].expected);
+    if (got === exp) correct++;
+    else wrong.push(`${probs[i].prompt}→${probs[i].expected}`);
+  }
+  const breakdown = `${correct}/${probs.length} conversions${wrong.length ? `; missed: ${wrong.slice(0, 5).join(', ')}${wrong.length > 5 ? '…' : ''}` : ''}`;
+  return buildGameResult(correct, probs.length, q.max_marks, breakdown);
+}
+
+type _GUrlSeg = { text: string; label: string | null };
+function _gParseUrlSegments(url: string): _GUrlSeg[] | null {
+  const m = String(url || '').trim().match(/^([a-zA-Z][a-zA-Z0-9+\-.]*):\/\/([^\/:?#]+)(?::(\d+))?([^?#]*)?(?:\?([^#]*))?(?:#(.*))?$/);
+  if (!m) return null;
+  const protocol = m[1], host = m[2], port = m[3], path = m[4], query = m[5], fragment = m[6];
+  const hostParts = host.split('.');
+  let subdomain = '', domain = host;
+  if (hostParts.length >= 3) {
+    subdomain = hostParts.slice(0, -2).join('.');
+    domain = hostParts.slice(-2).join('.');
+  }
+  const segs: _GUrlSeg[] = [];
+  segs.push({ text: protocol, label: 'protocol' });
+  segs.push({ text: '://', label: null });
+  if (subdomain) { segs.push({ text: subdomain, label: 'subdomain' }); segs.push({ text: '.', label: null }); }
+  segs.push({ text: domain, label: 'domain' });
+  if (port) { segs.push({ text: ':', label: null }); segs.push({ text: port, label: 'port' }); }
+  if (path) segs.push({ text: path, label: 'path' });
+  if (query !== undefined) { segs.push({ text: '?', label: null }); segs.push({ text: query, label: 'query' }); }
+  if (fragment !== undefined) { segs.push({ text: '#', label: null }); segs.push({ text: fragment, label: 'fragment' }); }
+  return segs;
+}
+
+function markUrlAnatomy(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.urlAnatomy?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0, total = 0;
+  for (let i = 0; i < items.length; i++) {
+    const segs = _gParseUrlSegments(String(items[i]?.url || '')) || [];
+    const ans = (parsed as any)[String(i)] || {};
+    for (let j = 0; j < segs.length; j++) {
+      if (segs[j].label === null) continue;
+      total++;
+      const got = String((typeof ans === 'object' && ans) ? ans[String(j)] : '').toLowerCase().trim();
+      if (got === segs[j].label) correct++;
+    }
+  }
+  if (total === 0) return null;
+  return buildGameResult(correct, total, q.max_marks, `${correct}/${total} URL segments correctly labelled`);
+}
+
+type _GTtNode =
+  | { kind: 'var'; name: string }
+  | { kind: 'not'; inner: _GTtNode }
+  | { kind: 'and'; left: _GTtNode; right: _GTtNode }
+  | { kind: 'or'; left: _GTtNode; right: _GTtNode };
+function _gParseTruthExpr(input: string): { ast: _GTtNode; vars: string[] } | null {
+  const tokens: string[] = [];
+  const src = String(input || '').replace(/\s+/g, ' ').trim();
+  let i = 0;
+  while (i < src.length) {
+    const ch = src[i];
+    if (ch === ' ') { i++; continue; }
+    if (ch === '(' || ch === ')') { tokens.push(ch); i++; continue; }
+    if (/[A-Za-z]/.test(ch)) {
+      let j = i;
+      while (j < src.length && /[A-Za-z0-9_]/.test(src[j])) j++;
+      tokens.push(src.slice(i, j).toUpperCase());
+      i = j;
+      continue;
+    }
+    return null;
+  }
+  let p = 0;
+  const peek = () => tokens[p];
+  const eat = (t: string) => { if (tokens[p] !== t) throw new Error('parse'); p++; };
+  const vars = new Set<string>();
+  function parseOr(): _GTtNode {
+    let left = parseAnd();
+    while (peek() === 'OR') { p++; left = { kind: 'or', left, right: parseAnd() }; }
+    return left;
+  }
+  function parseAnd(): _GTtNode {
+    let left = parseNot();
+    while (peek() === 'AND') { p++; left = { kind: 'and', left, right: parseNot() }; }
+    return left;
+  }
+  function parseNot(): _GTtNode {
+    if (peek() === 'NOT') { p++; return { kind: 'not', inner: parseNot() }; }
+    return parseAtom();
+  }
+  function parseAtom(): _GTtNode {
+    const t = peek();
+    if (t === '(') { p++; const inner = parseOr(); eat(')'); return inner; }
+    if (t && /^[A-Z][A-Z0-9_]*$/.test(t) && t !== 'AND' && t !== 'OR' && t !== 'NOT') {
+      p++; vars.add(t); return { kind: 'var', name: t };
+    }
+    throw new Error('parse');
+  }
+  try {
+    const ast = parseOr();
+    if (p !== tokens.length) return null;
+    return { ast, vars: Array.from(vars).sort() };
+  } catch { return null; }
+}
+function _gEvalTruth(ast: _GTtNode, env: Record<string, boolean>): boolean {
+  if (ast.kind === 'var') return !!env[ast.name];
+  if (ast.kind === 'not') return !_gEvalTruth(ast.inner, env);
+  if (ast.kind === 'and') return _gEvalTruth(ast.left, env) && _gEvalTruth(ast.right, env);
+  return _gEvalTruth(ast.left, env) || _gEvalTruth(ast.right, env);
+}
+
+function markTruthTable(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const expr = String(q.config?.truthTable?.expression || '');
+  const built = _gParseTruthExpr(expr);
+  if (!built) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  const N = built.vars.length;
+  const total = N === 0 ? 1 : (1 << N);
+  let correct = 0;
+  for (let r = 0; r < total; r++) {
+    const env: Record<string, boolean> = {};
+    built.vars.forEach((v, k) => { env[v] = !!((r >> (N - 1 - k)) & 1); });
+    const expected = _gEvalTruth(built.ast, env) ? '1' : '0';
+    const got = String((parsed as any)[String(r)] || '').trim();
+    if (got === expected) correct++;
+  }
+  return buildGameResult(correct, total, q.max_marks, `${correct}/${total} truth-table rows correct`);
+}
+
+function markFieldTypeSort(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.fieldTypeSort?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  for (let i = 0; i < items.length; i++) {
+    const expected = String(items[i]?.type || '').toLowerCase();
+    const got = String((parsed as any)[String(i)] || '').toLowerCase().trim();
+    if (got === expected && expected) correct++;
+  }
+  return buildGameResult(correct, items.length, q.max_marks, `${correct}/${items.length} field types correct`);
+}
+
+function markIoSort(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.ioSort?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  for (let i = 0; i < items.length; i++) {
+    const expected = String(items[i]?.category || '').toLowerCase();
+    const got = String((parsed as any)[String(i)] || '').toLowerCase().trim();
+    if (got === expected && expected) correct++;
+  }
+  return buildGameResult(correct, items.length, q.max_marks, `${correct}/${items.length} devices categorised correctly`);
+}
+
+function markHtmlMatch(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.htmlMatch?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  for (let i = 0; i < items.length; i++) {
+    const expected = String(items[i]?.tag || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const got = String((parsed as any)[String(i)] || '').toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+    if (got === expected && expected) correct++;
+  }
+  return buildGameResult(correct, items.length, q.max_marks, `${correct}/${items.length} HTML tags matched`);
+}
+
+/* ============================================================================
+   GAMES — BATCH 3 (password_forge, privacy_radar, validation_rules,
+   find_duplicate, bin_search, box_model). Helpers mirror the client.
+   ============================================================================ */
+
+const _gPasswordRules: { id: string; label: string; check: (pw: string) => boolean }[] = [
+  { id: 'min_length_8', label: '≥ 8 characters', check: (pw) => pw.length >= 8 },
+  { id: 'min_length_12', label: '≥ 12 characters', check: (pw) => pw.length >= 12 },
+  { id: 'min_length_16', label: '≥ 16 characters', check: (pw) => pw.length >= 16 },
+  { id: 'has_upper', label: 'has uppercase', check: (pw) => /[A-Z]/.test(pw) },
+  { id: 'has_lower', label: 'has lowercase', check: (pw) => /[a-z]/.test(pw) },
+  { id: 'has_digit', label: 'has digit', check: (pw) => /\d/.test(pw) },
+  { id: 'has_symbol', label: 'has symbol', check: (pw) => /[^A-Za-z0-9]/.test(pw) },
+  { id: 'no_spaces', label: 'no spaces', check: (pw) => pw.length > 0 && !/\s/.test(pw) },
+  { id: 'no_common_word', label: 'not common', check: (pw) => {
+    const lower = pw.toLowerCase();
+    const bad = ['password','passw0rd','qwerty','12345','11111','letmein','admin','welcome','iloveyou','dragon','monkey','football','abc123','000000','starwars'];
+    return !bad.some((b) => lower.includes(b));
+  } },
+];
+const _gPasswordRuleIds = _gPasswordRules.map((r) => r.id);
+
+function markPasswordForge(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const ruleIds: string[] = (q.config?.passwordForge?.rules || []).filter((r: any) => _gPasswordRuleIds.includes(r));
+  if (ruleIds.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  const pw = String((parsed as any).password || '');
+  const checks = _gPasswordRules.filter((r) => ruleIds.includes(r.id)).map((r) => ({ id: r.id, label: r.label, ok: r.check(pw) }));
+  const correct = checks.filter((c) => c.ok).length;
+  const failed = checks.filter((c) => !c.ok).map((c) => c.label);
+  const breakdown = `${correct}/${checks.length} password rules satisfied${failed.length ? `; missing: ${failed.join(', ')}` : ''}`;
+  return buildGameResult(correct, checks.length, q.max_marks, breakdown);
+}
+
+function _gMarkPickList(items: any[], parsed: any, expectedKey: string, max_marks: number, label: string): AIMarkResult {
+  let correct = 0;
+  for (let i = 0; i < items.length; i++) {
+    const expected = String((items[i] as any)?.[expectedKey] || '').toLowerCase();
+    const got = String((parsed as any)[String(i)] || '').toLowerCase().trim();
+    if (got === expected && expected) correct++;
+  }
+  return buildGameResult(correct, items.length, max_marks, `${correct}/${items.length} ${label}`);
+}
+
+function markPrivacyRadar(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.privacyRadar?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  return _gMarkPickList(items, parsed, 'risk', q.max_marks, 'risk levels correct');
+}
+
+function markValidationRules(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.validationRules?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  return _gMarkPickList(items, parsed, 'rule', q.max_marks, 'validation rules matched');
+}
+
+function _gFindDuplicateRows(rows: string[][]): Set<number> {
+  const seen = new Map<string, number[]>();
+  rows.forEach((row, i) => {
+    const key = row.map((c) => String(c).trim().toLowerCase()).join('||');
+    if (!seen.has(key)) seen.set(key, []);
+    seen.get(key)!.push(i);
+  });
+  const out = new Set<number>();
+  seen.forEach((idxs) => { if (idxs.length > 1) idxs.forEach((i) => out.add(i)); });
+  return out;
+}
+
+function markFindDuplicate(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.findDuplicate?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  for (let i = 0; i < items.length; i++) {
+    const rows: string[][] = Array.isArray(items[i]?.rows) ? items[i].rows : [];
+    const dups = _gFindDuplicateRows(rows);
+    const got = parseInt(String((parsed as any)[String(i)] || ''), 10);
+    if (!isNaN(got) && dups.has(got)) correct++;
+  }
+  return buildGameResult(correct, items.length, q.max_marks, `${correct}/${items.length} duplicate rows found`);
+}
+
+function _gSimulateBinSearch(list: number[], target: number): number[] {
+  let lo = 0, hi = list.length - 1;
+  const mids: number[] = [];
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    mids.push(mid);
+    if (list[mid] === target) return mids;
+    if (list[mid] < target) lo = mid + 1;
+    else hi = mid - 1;
+  }
+  return mids;
+}
+
+function markBinSearch(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.binSearch?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  for (let i = 0; i < items.length; i++) {
+    const list: number[] = (Array.isArray(items[i]?.list) ? items[i].list : []).map((n: any) => Number(n)).filter((n: number) => Number.isFinite(n));
+    const target = Number(items[i]?.target);
+    if (list.length === 0 || !Number.isFinite(target)) continue;
+    const expected = _gSimulateBinSearch(list, target).join(',');
+    const got = String((parsed as any)[String(i)] || '').split(/[,\s]+/).map((x) => x.trim()).filter(Boolean).join(',');
+    if (got === expected) correct++;
+  }
+  return buildGameResult(correct, items.length, q.max_marks, `${correct}/${items.length} binary-search traces correct`);
+}
+
+function markBoxModel(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.boxModel?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  for (let i = 0; i < items.length; i++) {
+    const c = Number(items[i]?.content) || 0;
+    const p = Number(items[i]?.padding) || 0;
+    const b = Number(items[i]?.border) || 0;
+    const mg = Number(items[i]?.margin) || 0;
+    const expected = c + 2 * (p + b + mg);
+    const got = Number(String((parsed as any)[String(i)] || '').trim());
+    if (Number.isFinite(got) && got === expected) correct++;
+  }
+  return buildGameResult(correct, items.length, q.max_marks, `${correct}/${items.length} box widths correct`);
+}
+
+/* ============================================================================
+   GAMES — BATCH 4 (pick-list pattern wrapper).
+   friend_or_fake, dm_danger, malware_triage, 2fa_escape, a11y_audit, fetch_execute
+   ============================================================================ */
+
+function markPickListGeneric(q: AIQuestion, s: AISubmission, configKey: string, expectedKey: string, label: string, allowed: string[]): AIMarkResult | null {
+  const items = (q.config as any)?.[configKey]?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  for (let i = 0; i < items.length; i++) {
+    const expected = String((items[i] as any)?.[expectedKey] || '').toLowerCase();
+    if (!allowed.includes(expected)) continue;
+    const got = String((parsed as any)[String(i)] || '').toLowerCase().trim();
+    if (got === expected) correct++;
+  }
+  return buildGameResult(correct, items.length, q.max_marks, `${correct}/${items.length} ${label}`);
 }

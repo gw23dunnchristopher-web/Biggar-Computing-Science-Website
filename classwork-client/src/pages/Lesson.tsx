@@ -17,6 +17,38 @@ import {
   CodeTracerPupilUI, CodeTracerEditor,
   FlowchartPupilUI, FlowchartEditor,
   SortingRacePupilUI, SortingRaceEditor,
+  ConvertRelayPupilUI, ConvertRelayEditor,
+  UrlAnatomyPupilUI, UrlAnatomyEditor,
+  TruthTablePupilUI, TruthTableEditor,
+  FieldTypeSortPupilUI, FieldTypeSortEditor,
+  IoSortPupilUI, IoSortEditor,
+  HtmlMatchPupilUI, HtmlMatchEditor,
+  PasswordForgePupilUI, PasswordForgeEditor,
+  PrivacyRadarPupilUI, PrivacyRadarEditor,
+  ValidationRulesPupilUI, ValidationRulesEditor,
+  FindDuplicatePupilUI, FindDuplicateEditor,
+  BinSearchPupilUI, BinSearchEditor,
+  BoxModelPupilUI, BoxModelEditor,
+  FriendOrFakePupilUI, FriendOrFakeEditor,
+  DmDangerPupilUI, DmDangerEditor,
+  MalwareTriagePupilUI, MalwareTriageEditor,
+  TwoFactorEscapePupilUI, TwoFactorEscapeEditor,
+  A11yAuditPupilUI, A11yAuditEditor,
+  FetchExecutePupilUI, FetchExecuteEditor,
+  ScreenTimePupilUI, ScreenTimeEditor,
+  FootprintTrailPupilUI, FootprintTrailEditor,
+  SocialEngineerPupilUI, SocialEngineerEditor,
+  CipherQuestPupilUI, CipherQuestEditor,
+  NormaliseItPupilUI, NormaliseItEditor,
+  SubnetCalcPupilUI, SubnetCalcEditor,
+  PhishInboxPupilUI, PhishInboxEditor,
+  BuildPcPupilUI, BuildPcEditor,
+  OsSchedPupilUI, OsSchedEditor,
+  QueryVisualPupilUI, QueryVisualEditor,
+  SchemaArchPupilUI, SchemaArchEditor,
+  TagSoupRepairPupilUI, TagSoupRepairEditor,
+  SelectorGolfPupilUI, SelectorGolfEditor,
+  CssSlidersPupilUI, CssSlidersEditor,
   GameReview,
 } from './lesson-games';
 
@@ -133,6 +165,38 @@ const TYPE_LABELS: Record<string, string> = {
   code_tracer: 'Code tracer',
   flowchart_seq: 'Flowchart sequencer',
   sorting_race: 'Sorting race',
+  convert_relay: 'Convert-it relay (units & bases)',
+  url_anatomy: 'URL anatomy',
+  truth_table: 'Truth table builder',
+  field_type_sort: 'Field-type sorter',
+  io_sort: 'Input / output sorter',
+  html_match: 'HTML element matcher',
+  password_forge: 'Password forge',
+  privacy_radar: 'Privacy radar (risk levels)',
+  validation_rules: 'Validation-rule matcher',
+  find_duplicate: 'Find the duplicate row',
+  bin_search: 'Binary-search trace',
+  box_model: 'CSS box model',
+  friend_or_fake: 'Friend or fake (profile spotter)',
+  dm_danger: 'DM danger (message rating)',
+  malware_triage: 'Malware triage',
+  '2fa_escape': '2FA escape (auth method picker)',
+  a11y_audit: 'Accessibility audit',
+  fetch_execute: 'Fetch–decode–execute sorter',
+  screen_time: 'Screen-time check',
+  footprint_trail: 'Digital footprint trail',
+  social_engineer: 'Social-engineering scams',
+  cipher_quest: 'Cipher quest',
+  normalise_it: 'Normalise it (1NF/2NF/3NF)',
+  subnet_calc: 'IP-address classifier',
+  phish_inbox: 'Phish-inbox triage',
+  build_pc: 'Build-a-PC parts',
+  os_sched: 'OS scheduling algorithms',
+  query_visual: 'SQL operation identifier',
+  schema_arch: 'Schema relationships',
+  tag_soup_repair: 'Tag-soup HTML repair',
+  selector_golf: 'CSS-selector golf',
+  css_sliders: 'CSS-property sliders',
   // No answer needed
   info_only: 'Information note (no answer needed)',
   text_only: 'Jotter task (answer in jotter, no digital submission)',
@@ -149,7 +213,7 @@ const TYPE_GROUPS: { label: string; types: string[] }[] = [
   { label: 'Embedded tools', types: ['python_task', 'html_task', 'sql_task', 'database_task'] },
   { label: 'Groups (show questions together)', types: ['group', 'video_group', 'passage', 'file_task', 'mc_group'] },
   { label: 'Fun activities', types: ['crossword', 'word_search', 'matching', 'anagrams'] },
-  { label: 'Games', types: ['hangman', 'speed_round', 'ordering', 'caesar_cipher', 'spot_phish', 'binary_hex', 'bit_ops', 'code_tracer', 'flowchart_seq', 'sorting_race'] },
+  { label: 'Games', types: ['hangman', 'speed_round', 'ordering', 'caesar_cipher', 'spot_phish', 'binary_hex', 'bit_ops', 'code_tracer', 'flowchart_seq', 'sorting_race', 'convert_relay', 'url_anatomy', 'truth_table', 'field_type_sort', 'io_sort', 'html_match', 'password_forge', 'privacy_radar', 'validation_rules', 'find_duplicate', 'bin_search', 'box_model', 'friend_or_fake', 'dm_danger', 'malware_triage', '2fa_escape', 'a11y_audit', 'fetch_execute', 'screen_time', 'footprint_trail', 'social_engineer', 'cipher_quest', 'normalise_it', 'subnet_calc', 'phish_inbox', 'build_pc', 'os_sched', 'query_visual', 'schema_arch', 'tag_soup_repair', 'selector_golf', 'css_sliders'] },
   { label: 'No answer needed', types: ['info_only', 'text_only', 'section_header'] },
 ];
 
@@ -1835,6 +1899,11 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     // Games — same JSON-into-text_answer storage as fun activities.
     'hangman', 'speed_round', 'ordering', 'caesar_cipher', 'spot_phish',
     'binary_hex', 'bit_ops', 'code_tracer', 'flowchart_seq', 'sorting_race',
+    'convert_relay', 'url_anatomy', 'truth_table', 'field_type_sort', 'io_sort', 'html_match',
+    'password_forge', 'privacy_radar', 'validation_rules', 'find_duplicate', 'bin_search', 'box_model',
+    'friend_or_fake', 'dm_danger', 'malware_triage', '2fa_escape', 'a11y_audit', 'fetch_execute',
+    'screen_time', 'footprint_trail', 'social_engineer', 'cipher_quest', 'normalise_it', 'subnet_calc',
+    'phish_inbox', 'build_pc', 'os_sched', 'query_visual', 'schema_arch', 'tag_soup_repair', 'selector_golf', 'css_sliders',
     // File upload — file content stored as JSON in text_answer.
     'file_upload',
   ];
@@ -1861,7 +1930,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
       return { ...empty, fileUrl: fileUrl || null, linkUrl: url || null };
     }
     if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-        || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race') {
+        || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders') {
       const filled = Object.values(cellAnswers).some((v) => {
         if (Array.isArray(v)) return v.length > 0;
         return String(v || '').trim();
@@ -1901,7 +1970,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     if (draft) {
       if (draft.text_answer != null) {
         if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-            || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race') {
+            || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders') {
           try {
             const parsed = JSON.parse(draft.text_answer);
             if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
@@ -1946,7 +2015,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     // Hydrate inputs from the previous submission.
     if (last.text_answer != null) {
       if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-          || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race') {
+          || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders') {
         try {
           const parsed = JSON.parse(last.text_answer);
           if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
@@ -2083,7 +2152,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
           body.linkUrl = `${selectedProjectId}|${data?.name || ''}`;
         }
       } else if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-                 || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race') {
+                 || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders') {
         // Send the cell answers as JSON so the deterministic marker can
         // compare each one against the expected answers in the question config.
         // Same path serves the four fun-activity types — each renderer above
@@ -2164,7 +2233,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     codeProjectKind ? !!selectedProjectId :
     t === 'database_task' ? !!dbEmbedToken :
     (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-      || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race')
+      || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders')
       ? Object.values(cellAnswers).some((v) => {
           if (Array.isArray(v)) return v.length > 0;
           return !!String(v || '').trim();
@@ -2431,6 +2500,102 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
       )}
       {t === 'sorting_race' && (
         <SortingRacePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'convert_relay' && (
+        <ConvertRelayPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />
+      )}
+      {t === 'url_anatomy' && (
+        <UrlAnatomyPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'truth_table' && (
+        <TruthTablePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'field_type_sort' && (
+        <FieldTypeSortPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'io_sort' && (
+        <IoSortPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'html_match' && (
+        <HtmlMatchPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'password_forge' && (
+        <PasswordForgePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'privacy_radar' && (
+        <PrivacyRadarPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'validation_rules' && (
+        <ValidationRulesPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'find_duplicate' && (
+        <FindDuplicatePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'bin_search' && (
+        <BinSearchPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'box_model' && (
+        <BoxModelPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'friend_or_fake' && (
+        <FriendOrFakePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'dm_danger' && (
+        <DmDangerPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'malware_triage' && (
+        <MalwareTriagePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === '2fa_escape' && (
+        <TwoFactorEscapePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'a11y_audit' && (
+        <A11yAuditPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'fetch_execute' && (
+        <FetchExecutePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'screen_time' && (
+        <ScreenTimePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'footprint_trail' && (
+        <FootprintTrailPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'social_engineer' && (
+        <SocialEngineerPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'cipher_quest' && (
+        <CipherQuestPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'normalise_it' && (
+        <NormaliseItPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'subnet_calc' && (
+        <SubnetCalcPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'phish_inbox' && (
+        <PhishInboxPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'build_pc' && (
+        <BuildPcPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'os_sched' && (
+        <OsSchedPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'query_visual' && (
+        <QueryVisualPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'schema_arch' && (
+        <SchemaArchPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'tag_soup_repair' && (
+        <TagSoupRepairPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'selector_golf' && (
+        <SelectorGolfPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'css_sliders' && (
+        <CssSlidersPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
       )}
 
       {(t === 'short' || t === 'long' || t === 'code' || t === 'video_question') && (
@@ -3834,7 +3999,7 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
     );
   }
 
-  if (t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race') {
+  if (t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders') {
     let parsed: any = {};
     try { parsed = JSON.parse(s.text_answer || '{}') || {}; } catch {}
     return <GameReview type={t} cfg={(question as any).config} parsed={parsed} questionId={String(question.id)} />;
@@ -4195,6 +4360,304 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
     const list = (cfg.sortingRace && Array.isArray(cfg.sortingRace.list)) ? cfg.sortingRace.list.map((n: any) => Number(n)).filter((n: number) => Number.isFinite(n)) : [5, 3, 8, 1, 4, 2];
     return { algorithm: ['bubble','selection','insertion'].includes(cfg.sortingRace?.algorithm) ? cfg.sortingRace.algorithm : 'bubble', list, _listText: list.join(', ') };
   });
+  const [convertRelayCfg, setConvertRelayCfg] = useState<any>(() =>
+    cfg.convertRelay && typeof cfg.convertRelay === 'object'
+      ? { rounds: Number(cfg.convertRelay.rounds) || 10, maxValue: Number(cfg.convertRelay.maxValue) || 200, modes: Array.isArray(cfg.convertRelay.modes) ? cfg.convertRelay.modes : ['dec_to_bin','bin_to_dec','b_to_kb','kb_to_b','kb_to_mb','mb_to_kb'] }
+      : { rounds: 10, maxValue: 200, modes: ['dec_to_bin','bin_to_dec','b_to_kb','kb_to_b','kb_to_mb','mb_to_kb'] }
+  );
+  const [urlAnatomyCfg, setUrlAnatomyCfg] = useState<any>(() =>
+    (cfg.urlAnatomy && Array.isArray(cfg.urlAnatomy.items))
+      ? { items: cfg.urlAnatomy.items.map((it: any) => ({ url: String(it?.url || '') })) }
+      : { items: [{ url: 'https://www.bbc.co.uk/news/technology?topic=ai#section1' }] }
+  );
+  const [truthTableCfg, setTruthTableCfg] = useState<any>(() =>
+    (cfg.truthTable && typeof cfg.truthTable === 'object')
+      ? { expression: String(cfg.truthTable.expression || '') }
+      : { expression: 'A AND (B OR NOT C)' }
+  );
+  const [fieldTypeSortCfg, setFieldTypeSortCfg] = useState<any>(() =>
+    (cfg.fieldTypeSort && Array.isArray(cfg.fieldTypeSort.items))
+      ? { items: cfg.fieldTypeSort.items.map((it: any) => ({ value: String(it?.value ?? ''), type: String(it?.type || 'text') })) }
+      : { items: [{ value: '42', type: 'integer' }, { value: '"hello"', type: 'text' }, { value: 'True', type: 'boolean' }, { value: '3.14', type: 'real' }, { value: '07/05/2024', type: 'date' }] }
+  );
+  const [ioSortCfg, setIoSortCfg] = useState<any>(() =>
+    (cfg.ioSort && Array.isArray(cfg.ioSort.items))
+      ? { items: cfg.ioSort.items.map((it: any) => ({ name: String(it?.name || ''), category: String(it?.category || 'input') })) }
+      : { items: [{ name: 'Keyboard', category: 'input' }, { name: 'Monitor', category: 'output' }, { name: 'SSD', category: 'storage' }, { name: 'Touchscreen', category: 'both' }] }
+  );
+  const [htmlMatchCfg, setHtmlMatchCfg] = useState<any>(() =>
+    (cfg.htmlMatch && Array.isArray(cfg.htmlMatch.items))
+      ? { items: cfg.htmlMatch.items.map((it: any) => ({ description: String(it?.description || ''), tag: String(it?.tag || '') })) }
+      : { items: [{ description: 'Top-level page heading', tag: 'h1' }, { description: 'A clickable hyperlink', tag: 'a' }, { description: 'An unordered (bulleted) list', tag: 'ul' }, { description: 'A paragraph of text', tag: 'p' }] }
+  );
+  const [passwordForgeCfg, setPasswordForgeCfg] = useState<any>(() =>
+    (cfg.passwordForge && Array.isArray(cfg.passwordForge.rules))
+      ? { rules: cfg.passwordForge.rules }
+      : { rules: ['min_length_12', 'has_upper', 'has_lower', 'has_digit', 'has_symbol', 'no_common_word'] }
+  );
+  const [privacyRadarCfg, setPrivacyRadarCfg] = useState<any>(() =>
+    (cfg.privacyRadar && Array.isArray(cfg.privacyRadar.items))
+      ? { items: cfg.privacyRadar.items.map((it: any) => ({ text: String(it?.text || ''), risk: String(it?.risk || 'low') })) }
+      : { items: [
+          { text: 'Posting your full home address publicly', risk: 'high' },
+          { text: 'Sharing your favourite colour with friends', risk: 'low' },
+          { text: 'Posting a photo of your school ID badge', risk: 'high' },
+          { text: 'Adding your birthday year to a profile', risk: 'medium' },
+        ] }
+  );
+  const [validationRulesCfg, setValidationRulesCfg] = useState<any>(() =>
+    (cfg.validationRules && Array.isArray(cfg.validationRules.items))
+      ? { items: cfg.validationRules.items.map((it: any) => ({ scenario: String(it?.scenario || ''), rule: String(it?.rule || 'presence') })) }
+      : { items: [
+          { scenario: "Pupil's age must be between 5 and 18", rule: 'range' },
+          { scenario: 'Surname must not be left blank', rule: 'presence' },
+          { scenario: 'Postcode must look like AB12 3CD', rule: 'format' },
+          { scenario: 'Year group must be S1, S2, S3, S4, S5 or S6', rule: 'lookup' },
+          { scenario: 'Password must be 8 to 32 characters', rule: 'length' },
+        ] }
+  );
+  const [findDuplicateCfg, setFindDuplicateCfg] = useState<any>(() =>
+    (cfg.findDuplicate && Array.isArray(cfg.findDuplicate.items))
+      ? { items: cfg.findDuplicate.items.map((it: any) => ({ headers: Array.isArray(it?.headers) ? it.headers : [], rows: Array.isArray(it?.rows) ? it.rows : [] })) }
+      : { items: [{ headers: ['Name', 'Age', 'Subject'], rows: [['Alice','10','Maths'], ['Bob','11','English'], ['Alice','10','Maths'], ['Carol','9','Art']] }] }
+  );
+  const [binSearchCfg, setBinSearchCfg] = useState<any>(() =>
+    (cfg.binSearch && Array.isArray(cfg.binSearch.items))
+      ? { items: cfg.binSearch.items.map((it: any) => ({ list: Array.isArray(it?.list) ? it.list : [], target: Number(it?.target) })) }
+      : { items: [{ list: [1, 3, 5, 7, 9, 11, 13, 15], target: 11 }, { list: [2, 4, 6, 8, 10, 12, 14, 16], target: 4 }] }
+  );
+  const [boxModelCfg, setBoxModelCfg] = useState<any>(() =>
+    (cfg.boxModel && Array.isArray(cfg.boxModel.items))
+      ? { items: cfg.boxModel.items.map((it: any) => ({ content: Number(it?.content) || 0, padding: Number(it?.padding) || 0, border: Number(it?.border) || 0, margin: Number(it?.margin) || 0 })) }
+      : { items: [{ content: 200, padding: 10, border: 2, margin: 8 }, { content: 100, padding: 20, border: 4, margin: 0 }] }
+  );
+  const [friendOrFakeCfg, setFriendOrFakeCfg] = useState<any>(() =>
+    (cfg.friendOrFake && Array.isArray(cfg.friendOrFake.items))
+      ? { items: cfg.friendOrFake.items.map((it: any) => ({ text: String(it?.text || ''), verdict: String(it?.verdict || 'real') })) }
+      : { items: [
+          { text: 'Profile is 7 years old, posts about hobbies, has many real friends as connections', verdict: 'real' },
+          { text: 'Account created 2 days ago, no profile picture, sends friend requests to many strangers', verdict: 'fake' },
+          { text: 'Photos look like a celebrity, asks for your phone number in DMs', verdict: 'fake' },
+          { text: 'School friend tagged in classmates\' posts going back years', verdict: 'real' },
+        ] }
+  );
+  const [dmDangerCfg, setDmDangerCfg] = useState<any>(() =>
+    (cfg.dmDanger && Array.isArray(cfg.dmDanger.items))
+      ? { items: cfg.dmDanger.items.map((it: any) => ({ text: String(it?.text || ''), risk: String(it?.risk || 'safe') })) }
+      : { items: [
+          { text: 'A school friend asks what time PE finishes today', risk: 'safe' },
+          { text: 'A stranger says "you\'ve won £1000! Click this link to claim"', risk: 'dangerous' },
+          { text: 'Someone you met in a game asks for your home address', risk: 'dangerous' },
+          { text: 'A new follower asks where you live (just the town)', risk: 'risky' },
+        ] }
+  );
+  const [malwareTriageCfg, setMalwareTriageCfg] = useState<any>(() =>
+    (cfg.malwareTriage && Array.isArray(cfg.malwareTriage.items))
+      ? { items: cfg.malwareTriage.items.map((it: any) => ({ text: String(it?.text || ''), kind: String(it?.kind || 'virus') })) }
+      : { items: [
+          { text: 'Encrypts your files and demands payment to unlock them', kind: 'ransomware' },
+          { text: 'Spreads itself across a network without user action', kind: 'worm' },
+          { text: 'Pretends to be a useful program but hides a payload', kind: 'trojan' },
+          { text: 'Records what you type and sends it to attackers', kind: 'spyware' },
+          { text: 'Shows pop-up adverts and slows down your browser', kind: 'adware' },
+          { text: 'Attaches itself to other programs and runs when they do', kind: 'virus' },
+        ] }
+  );
+  const [twoFactorEscapeCfg, setTwoFactorEscapeCfg] = useState<any>(() =>
+    (cfg.twoFactorEscape && Array.isArray(cfg.twoFactorEscape.items))
+      ? { items: cfg.twoFactorEscape.items.map((it: any) => ({ text: String(it?.text || ''), method: String(it?.method || 'password_only') })) }
+      : { items: [
+          { text: 'A bank protecting customers\' money online', method: 'hardware' },
+          { text: 'A pupil signing into a low-risk school quiz site', method: 'password_only' },
+          { text: 'A teacher\'s email account containing pupil data', method: 'authenticator' },
+          { text: 'Confirming a phone bill payment using a one-time code on the phone', method: 'sms' },
+        ] }
+  );
+  const [a11yAuditCfg, setA11yAuditCfg] = useState<any>(() =>
+    (cfg.a11yAudit && Array.isArray(cfg.a11yAudit.items))
+      ? { items: cfg.a11yAudit.items.map((it: any) => ({ text: String(it?.text || ''), issue: String(it?.issue || 'contrast') })) }
+      : { items: [
+          { text: 'Light grey text (#bbb) on a white background', issue: 'contrast' },
+          { text: '<img src="logo.png"> with no alt attribute', issue: 'alt_text' },
+          { text: 'A search box with no <label> and no placeholder', issue: 'labels' },
+          { text: 'Page jumps from <h1> straight to <h4>', issue: 'heading_order' },
+          { text: 'Custom button styled to remove the dotted outline on focus', issue: 'focus_indicator' },
+          { text: 'A modal dialog you can\'t close using only the keyboard', issue: 'keyboard' },
+        ] }
+  );
+  const [fetchExecuteCfg, setFetchExecuteCfg] = useState<any>(() =>
+    (cfg.fetchExecute && Array.isArray(cfg.fetchExecute.items))
+      ? { items: cfg.fetchExecute.items.map((it: any) => ({ text: String(it?.text || ''), step: String(it?.step || 'fetch') })) }
+      : { items: [
+          { text: 'The address in the program counter is sent to memory', step: 'fetch' },
+          { text: 'The instruction is copied from memory into the CIR', step: 'fetch' },
+          { text: 'The control unit interprets the opcode', step: 'decode' },
+          { text: 'Operands are read from registers', step: 'decode' },
+          { text: 'The ALU adds two numbers', step: 'execute' },
+          { text: 'The result is written back to a register', step: 'execute' },
+        ] }
+  );
+  const [screenTimeCfg, setScreenTimeCfg] = useState<any>(() =>
+    (cfg.screenTime && Array.isArray(cfg.screenTime.items))
+      ? { items: cfg.screenTime.items.map((it: any) => ({ text: String(it?.text || ''), rating: String(it?.rating || 'healthy') })) }
+      : { items: [
+          { text: '20 minutes of online homework after school', rating: 'healthy' },
+          { text: '6 hours of TikTok every night until midnight', rating: 'unhealthy' },
+          { text: '1 hour of gaming with friends after exercise outside', rating: 'balanced' },
+          { text: 'Phone in bedroom checking notifications all night', rating: 'unhealthy' },
+        ] }
+  );
+  const [footprintTrailCfg, setFootprintTrailCfg] = useState<any>(() =>
+    (cfg.footprintTrail && Array.isArray(cfg.footprintTrail.items))
+      ? { items: cfg.footprintTrail.items.map((it: any) => ({ text: String(it?.text || ''), visibility: String(it?.visibility || 'private') })) }
+      : { items: [
+          { text: 'Your bank card PIN', visibility: 'private' },
+          { text: 'Your home address', visibility: 'private' },
+          { text: 'A photo of your art project at school', visibility: 'public' },
+          { text: 'Your favourite hobbies', visibility: 'public' },
+          { text: 'Your phone number', visibility: 'personal' },
+          { text: 'Your school class timetable', visibility: 'personal' },
+        ] }
+  );
+  const [socialEngineerCfg, setSocialEngineerCfg] = useState<any>(() =>
+    (cfg.socialEngineer && Array.isArray(cfg.socialEngineer.items))
+      ? { items: cfg.socialEngineer.items.map((it: any) => ({ text: String(it?.text || ''), kind: String(it?.kind || 'phishing') })) }
+      : { items: [
+          { text: 'An email pretending to be from your bank, asking to "verify" details via a link', kind: 'phishing' },
+          { text: 'A USB stick labelled "Salaries 2026" left in the staffroom', kind: 'baiting' },
+          { text: 'Caller pretends to be IT support and asks for your password', kind: 'pretexting' },
+          { text: '"Free 1-month subscription if you give us your school email"', kind: 'quid_pro_quo' },
+          { text: 'Someone follows a teacher through a card-locked door', kind: 'tailgating' },
+          { text: 'Someone watches you type your code at the till', kind: 'shoulder_surfing' },
+        ] }
+  );
+  const [cipherQuestCfg, setCipherQuestCfg] = useState<any>(() =>
+    (cfg.cipherQuest && Array.isArray(cfg.cipherQuest.items))
+      ? { items: cfg.cipherQuest.items.map((it: any) => ({ text: String(it?.text || ''), cipher: String(it?.cipher || 'caesar') })) }
+      : { items: [
+          { text: 'Each letter is shifted by a fixed amount (e.g. +3)', cipher: 'caesar' },
+          { text: 'Each letter is replaced using a secret one-to-one alphabet', cipher: 'substitution' },
+          { text: 'A keyword decides a different shift for each letter', cipher: 'vigenere' },
+          { text: 'Letters of the message are rearranged into a grid', cipher: 'transposition' },
+          { text: 'Modern symmetric block cipher used to secure web traffic', cipher: 'aes' },
+        ] }
+  );
+  const [normaliseItCfg, setNormaliseItCfg] = useState<any>(() =>
+    (cfg.normaliseIt && Array.isArray(cfg.normaliseIt.items))
+      ? { items: cfg.normaliseIt.items.map((it: any) => ({ text: String(it?.text || ''), violation: String(it?.violation || 'normalised') })) }
+      : { items: [
+          { text: 'Pupil(id, name, subject1, subject2, subject3) — three subject columns per row', violation: 'breaks_1nf' },
+          { text: 'BookLoan(bookId, pupilId, bookTitle) where bookTitle depends only on bookId, not the whole key', violation: 'breaks_2nf' },
+          { text: 'Pupil(id, name, formClass, formTeacher) where formTeacher depends on formClass, not on id', violation: 'breaks_3nf' },
+          { text: 'Pupil(id, name, dob) with no repeating groups or partial/transitive dependencies', violation: 'normalised' },
+        ] }
+  );
+  const [subnetCalcCfg, setSubnetCalcCfg] = useState<any>(() =>
+    (cfg.subnetCalc && Array.isArray(cfg.subnetCalc.items))
+      ? { items: cfg.subnetCalc.items.map((it: any) => ({ text: String(it?.text || ''), kind: String(it?.kind || 'class_c') })) }
+      : { items: [
+          { text: '10.0.0.5', kind: 'private' },
+          { text: '127.0.0.1', kind: 'loopback' },
+          { text: '192.168.1.10', kind: 'private' },
+          { text: '8.8.8.8', kind: 'class_a' },
+          { text: '172.217.16.142', kind: 'class_b' },
+          { text: '224.0.0.1', kind: 'class_d' },
+        ] }
+  );
+  const [phishInboxCfg, setPhishInboxCfg] = useState<any>(() =>
+    (cfg.phishInbox && Array.isArray(cfg.phishInbox.items))
+      ? { items: cfg.phishInbox.items.map((it: any) => ({ text: String(it?.text || ''), verdict: String(it?.verdict || 'legitimate') })) }
+      : { items: [
+          { text: 'Order confirmation from a shop you really used yesterday', verdict: 'legitimate' },
+          { text: '"Your parcel is held — pay £1.99 to release"', verdict: 'phishing' },
+          { text: '"Hi friend, urgent help needed, can you send £200?"', verdict: 'scam' },
+          { text: 'Daily newsletter you signed up for and rarely read', verdict: 'spam' },
+          { text: '"Your Apple ID has been suspended. Click here to verify"', verdict: 'phishing' },
+        ] }
+  );
+  const [buildPcCfg, setBuildPcCfg] = useState<any>(() =>
+    (cfg.buildPc && Array.isArray(cfg.buildPc.items))
+      ? { items: cfg.buildPc.items.map((it: any) => ({ text: String(it?.text || ''), part: String(it?.part || 'cpu') })) }
+      : { items: [
+          { text: 'Carries out arithmetic and logic on every instruction', part: 'cpu' },
+          { text: 'Volatile fast memory used while a program is running', part: 'ram' },
+          { text: 'Renders 3-D graphics for games and video', part: 'gpu' },
+          { text: 'Long-term non-volatile place to keep your files', part: 'storage' },
+          { text: 'Converts mains electricity to DC for the components', part: 'psu' },
+          { text: 'Main board everything plugs into', part: 'motherboard' },
+          { text: 'Keeps the CPU temperature down', part: 'cooling' },
+          { text: 'Metal/plastic shell that holds everything', part: 'case' },
+        ] }
+  );
+  const [osSchedCfg, setOsSchedCfg] = useState<any>(() =>
+    (cfg.osSched && Array.isArray(cfg.osSched.items))
+      ? { items: cfg.osSched.items.map((it: any) => ({ text: String(it?.text || ''), algo: String(it?.algo || 'fcfs') })) }
+      : { items: [
+          { text: 'Each process gets a fixed time-slice in turn', algo: 'round_robin' },
+          { text: 'Whichever process arrived first runs to completion', algo: 'fcfs' },
+          { text: 'Always pick the process with the smallest expected runtime', algo: 'sjf' },
+          { text: 'A nurse-call system: more important alarms run first', algo: 'priority' },
+        ] }
+  );
+  const [queryVisualCfg, setQueryVisualCfg] = useState<any>(() =>
+    (cfg.queryVisual && Array.isArray(cfg.queryVisual.items))
+      ? { items: cfg.queryVisual.items.map((it: any) => ({ text: String(it?.text || ''), op: String(it?.op || 'select') })) }
+      : { items: [
+          { text: 'Show only the rows where mark > 50', op: 'filter' },
+          { text: 'Show only the columns name and mark', op: 'project' },
+          { text: 'Combine Pupils and Marks on pupilId', op: 'join' },
+          { text: 'Sort the result by mark, highest first', op: 'sort' },
+          { text: 'Average mark per class', op: 'group_by' },
+          { text: 'Choose all the rows from the Pupils table', op: 'select' },
+        ] }
+  );
+  const [schemaArchCfg, setSchemaArchCfg] = useState<any>(() =>
+    (cfg.schemaArch && Array.isArray(cfg.schemaArch.items))
+      ? { items: cfg.schemaArch.items.map((it: any) => ({ text: String(it?.text || ''), rel: String(it?.rel || 'one_to_many') })) }
+      : { items: [
+          { text: 'Pupil and Locker (each pupil has exactly one locker; each locker has one pupil)', rel: 'one_to_one' },
+          { text: 'Class and Pupil (a class has many pupils; a pupil is in one class)', rel: 'one_to_many' },
+          { text: 'Pupil and Club (pupils join many clubs; clubs have many pupils)', rel: 'many_to_many' },
+          { text: 'Author and Book (one author writes many books; a book has one author)', rel: 'one_to_many' },
+        ] }
+  );
+  const [tagSoupRepairCfg, setTagSoupRepairCfg] = useState<any>(() =>
+    (cfg.tagSoupRepair && Array.isArray(cfg.tagSoupRepair.items))
+      ? { items: cfg.tagSoupRepair.items.map((it: any) => ({ text: String(it?.text || ''), bug: String(it?.bug || 'unclosed') })) }
+      : { items: [
+          { text: '<p>Hello world', bug: 'unclosed' },
+          { text: '<p>Hello <b>world</p></b>', bug: 'wrong_nesting' },
+          { text: '<img src="cat.jpg">', bug: 'missing_attribute' },
+          { text: '<br></br>', bug: 'self_close_misuse' },
+          { text: '<b>My page title</b> at the top of the page', bug: 'wrong_tag' },
+        ] }
+  );
+  const [selectorGolfCfg, setSelectorGolfCfg] = useState<any>(() =>
+    (cfg.selectorGolf && Array.isArray(cfg.selectorGolf.items))
+      ? { items: cfg.selectorGolf.items.map((it: any) => ({ text: String(it?.text || ''), kind: String(it?.kind || 'class') })) }
+      : { items: [
+          { text: '#header', kind: 'id' },
+          { text: '.btn-primary', kind: 'class' },
+          { text: 'h1', kind: 'element' },
+          { text: 'nav a', kind: 'descendant' },
+          { text: 'ul > li', kind: 'child' },
+          { text: 'input[type="email"]', kind: 'attribute' },
+        ] }
+  );
+  const [cssSlidersCfg, setCssSlidersCfg] = useState<any>(() =>
+    (cfg.cssSliders && Array.isArray(cfg.cssSliders.items))
+      ? { items: cfg.cssSliders.items.map((it: any) => ({ text: String(it?.text || ''), prop: String(it?.prop || 'width') })) }
+      : { items: [
+          { text: 'Make the box twice as wide', prop: 'width' },
+          { text: 'Add space between this element and its neighbour', prop: 'margin' },
+          { text: 'Add space inside the box, around the text', prop: 'padding' },
+          { text: 'Make the headline text bigger', prop: 'font_size' },
+          { text: 'Change the text colour to red', prop: 'color' },
+          { text: 'Give the card a yellow background', prop: 'background' },
+          { text: 'Add a thin black outline around the card', prop: 'border' },
+          { text: 'Make the box taller', prop: 'height' },
+        ] }
+  );
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   // Inline image upload state for the prompt textarea: lets a teacher paste
@@ -4703,6 +5166,145 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
         if (list.length < 2) throw new Error('Enter a list of at least 2 numbers to sort.');
         const algorithm = ['bubble','selection','insertion'].includes(sortingRaceCfg.algorithm) ? sortingRaceCfg.algorithm : 'bubble';
         body.config = { sortingRace: { list, algorithm } };
+      }
+      if (type === 'convert_relay') {
+        const allModes = ['dec_to_bin','bin_to_dec','dec_to_hex','hex_to_dec','bits_to_bytes','bytes_to_bits','b_to_kb','kb_to_b','kb_to_mb','mb_to_kb','mb_to_gb','gb_to_mb'];
+        const modes = (Array.isArray(convertRelayCfg.modes) ? convertRelayCfg.modes : []).filter((m: any) => allModes.includes(m));
+        if (modes.length === 0) throw new Error('Pick at least one conversion mode.');
+        body.config = { convertRelay: {
+          rounds: Math.max(1, Math.min(40, Number(convertRelayCfg.rounds) || 10)),
+          maxValue: Math.max(10, Math.min(9999, Number(convertRelayCfg.maxValue) || 200)),
+          modes,
+        } };
+      }
+      if (type === 'url_anatomy') {
+        const items = (Array.isArray(urlAnatomyCfg.items) ? urlAnatomyCfg.items : [])
+          .map((it: any) => ({ url: String(it?.url || '').trim() }))
+          .filter((it: any) => it.url);
+        if (items.length === 0) throw new Error('Add at least one URL.');
+        body.config = { urlAnatomy: { items } };
+      }
+      if (type === 'truth_table') {
+        const expression = String(truthTableCfg.expression || '').trim();
+        if (!expression) throw new Error('Enter a Boolean expression (e.g. A AND (B OR NOT C)).');
+        body.config = { truthTable: { expression } };
+      }
+      if (type === 'field_type_sort') {
+        const items = (Array.isArray(fieldTypeSortCfg.items) ? fieldTypeSortCfg.items : [])
+          .map((it: any) => ({ value: String(it?.value ?? ''), type: ['integer','real','text','boolean','date'].includes(it?.type) ? it.type : 'text' }))
+          .filter((it: any) => it.value !== '');
+        if (items.length === 0) throw new Error('Add at least one value to classify.');
+        body.config = { fieldTypeSort: { items } };
+      }
+      if (type === 'io_sort') {
+        const items = (Array.isArray(ioSortCfg.items) ? ioSortCfg.items : [])
+          .map((it: any) => ({ name: String(it?.name || '').trim(), category: ['input','output','storage','both'].includes(it?.category) ? it.category : 'input' }))
+          .filter((it: any) => it.name);
+        if (items.length === 0) throw new Error('Add at least one device.');
+        body.config = { ioSort: { items } };
+      }
+      if (type === 'html_match') {
+        const items = (Array.isArray(htmlMatchCfg.items) ? htmlMatchCfg.items : [])
+          .map((it: any) => ({ description: String(it?.description || '').trim(), tag: String(it?.tag || '').toLowerCase().replace(/[^a-z0-9]/g, '') }))
+          .filter((it: any) => it.description && it.tag);
+        if (items.length === 0) throw new Error('Add at least one description with a matching tag.');
+        body.config = { htmlMatch: { items } };
+      }
+      if (type === 'password_forge') {
+        const allRuleIds = ['min_length_8','min_length_12','min_length_16','has_upper','has_lower','has_digit','has_symbol','no_spaces','no_common_word'];
+        const rules = (Array.isArray(passwordForgeCfg.rules) ? passwordForgeCfg.rules : []).filter((r: any) => allRuleIds.includes(r));
+        if (rules.length === 0) throw new Error('Pick at least one password rule.');
+        body.config = { passwordForge: { rules } };
+      }
+      if (type === 'privacy_radar') {
+        const items = (Array.isArray(privacyRadarCfg.items) ? privacyRadarCfg.items : [])
+          .map((it: any) => ({ text: String(it?.text || '').trim(), risk: ['low','medium','high'].includes(it?.risk) ? it.risk : 'low' }))
+          .filter((it: any) => it.text);
+        if (items.length === 0) throw new Error('Add at least one privacy scenario.');
+        body.config = { privacyRadar: { items } };
+      }
+      if (type === 'validation_rules') {
+        const items = (Array.isArray(validationRulesCfg.items) ? validationRulesCfg.items : [])
+          .map((it: any) => ({ scenario: String(it?.scenario || '').trim(), rule: ['presence','range','length','format','lookup'].includes(it?.rule) ? it.rule : 'presence' }))
+          .filter((it: any) => it.scenario);
+        if (items.length === 0) throw new Error('Add at least one validation scenario.');
+        body.config = { validationRules: { items } };
+      }
+      if (type === 'find_duplicate') {
+        const items = (Array.isArray(findDuplicateCfg.items) ? findDuplicateCfg.items : [])
+          .map((it: any) => ({
+            headers: (Array.isArray(it?.headers) ? it.headers : []).map((h: any) => String(h)),
+            rows: (Array.isArray(it?.rows) ? it.rows : []).map((row: any) => (Array.isArray(row) ? row.map((c: any) => String(c)) : [])),
+          }))
+          .filter((it: any) => it.rows.length >= 2);
+        if (items.length === 0) throw new Error('Add at least one table with rows.');
+        for (const it of items) {
+          const seen = new Map<string, number>();
+          let hasDup = false;
+          for (const row of it.rows) {
+            const k = row.map((c: string) => c.trim().toLowerCase()).join('||');
+            if (seen.has(k)) { hasDup = true; break; }
+            seen.set(k, 1);
+          }
+          if (!hasDup) throw new Error('Each table needs exactly one duplicate row.');
+        }
+        body.config = { findDuplicate: { items } };
+      }
+      if (type === 'bin_search') {
+        const items = (Array.isArray(binSearchCfg.items) ? binSearchCfg.items : [])
+          .map((it: any) => ({
+            list: (Array.isArray(it?.list) ? it.list : []).map((n: any) => Number(n)).filter((n: number) => Number.isFinite(n)),
+            target: Number(it?.target),
+          }))
+          .filter((it: any) => it.list.length >= 2 && Number.isFinite(it.target));
+        for (const it of items) {
+          const sorted = [...it.list].sort((a, b) => a - b);
+          if (sorted.some((v, i) => v !== it.list[i])) throw new Error('Each binary-search list must already be sorted in ascending order.');
+        }
+        if (items.length === 0) throw new Error('Add at least one sorted list with a target.');
+        body.config = { binSearch: { items } };
+      }
+      if (type === 'box_model') {
+        const items = (Array.isArray(boxModelCfg.items) ? boxModelCfg.items : [])
+          .map((it: any) => ({
+            content: Math.max(0, Math.round(Number(it?.content) || 0)),
+            padding: Math.max(0, Math.round(Number(it?.padding) || 0)),
+            border: Math.max(0, Math.round(Number(it?.border) || 0)),
+            margin: Math.max(0, Math.round(Number(it?.margin) || 0)),
+          }))
+          .filter((it: any) => it.content > 0);
+        if (items.length === 0) throw new Error('Add at least one CSS box (content width must be > 0).');
+        body.config = { boxModel: { items } };
+      }
+      const PICKLIST_SAVE: Record<string, { src: any; configKey: string; valueKey: string; allowed: string[] }> = {
+        friend_or_fake: { src: friendOrFakeCfg, configKey: 'friendOrFake', valueKey: 'verdict', allowed: ['real','fake'] },
+        dm_danger: { src: dmDangerCfg, configKey: 'dmDanger', valueKey: 'risk', allowed: ['safe','risky','dangerous'] },
+        malware_triage: { src: malwareTriageCfg, configKey: 'malwareTriage', valueKey: 'kind', allowed: ['virus','worm','trojan','ransomware','spyware','adware'] },
+        '2fa_escape': { src: twoFactorEscapeCfg, configKey: 'twoFactorEscape', valueKey: 'method', allowed: ['password_only','sms','email','authenticator','hardware'] },
+        a11y_audit: { src: a11yAuditCfg, configKey: 'a11yAudit', valueKey: 'issue', allowed: ['contrast','alt_text','labels','keyboard','heading_order','focus_indicator'] },
+        fetch_execute: { src: fetchExecuteCfg, configKey: 'fetchExecute', valueKey: 'step', allowed: ['fetch','decode','execute'] },
+        screen_time: { src: screenTimeCfg, configKey: 'screenTime', valueKey: 'rating', allowed: ['healthy','balanced','unhealthy'] },
+        footprint_trail: { src: footprintTrailCfg, configKey: 'footprintTrail', valueKey: 'visibility', allowed: ['private','personal','public'] },
+        social_engineer: { src: socialEngineerCfg, configKey: 'socialEngineer', valueKey: 'kind', allowed: ['phishing','pretexting','baiting','quid_pro_quo','tailgating','shoulder_surfing'] },
+        cipher_quest: { src: cipherQuestCfg, configKey: 'cipherQuest', valueKey: 'cipher', allowed: ['caesar','substitution','vigenere','transposition','aes'] },
+        normalise_it: { src: normaliseItCfg, configKey: 'normaliseIt', valueKey: 'violation', allowed: ['breaks_1nf','breaks_2nf','breaks_3nf','normalised'] },
+        subnet_calc: { src: subnetCalcCfg, configKey: 'subnetCalc', valueKey: 'kind', allowed: ['class_a','class_b','class_c','class_d','class_e','private','loopback'] },
+        phish_inbox: { src: phishInboxCfg, configKey: 'phishInbox', valueKey: 'verdict', allowed: ['legitimate','phishing','spam','scam'] },
+        build_pc: { src: buildPcCfg, configKey: 'buildPc', valueKey: 'part', allowed: ['cpu','gpu','ram','storage','psu','motherboard','cooling','case'] },
+        os_sched: { src: osSchedCfg, configKey: 'osSched', valueKey: 'algo', allowed: ['fcfs','sjf','round_robin','priority'] },
+        query_visual: { src: queryVisualCfg, configKey: 'queryVisual', valueKey: 'op', allowed: ['select','project','join','filter','sort','group_by'] },
+        schema_arch: { src: schemaArchCfg, configKey: 'schemaArch', valueKey: 'rel', allowed: ['one_to_one','one_to_many','many_to_many'] },
+        tag_soup_repair: { src: tagSoupRepairCfg, configKey: 'tagSoupRepair', valueKey: 'bug', allowed: ['unclosed','wrong_nesting','missing_attribute','self_close_misuse','wrong_tag'] },
+        selector_golf: { src: selectorGolfCfg, configKey: 'selectorGolf', valueKey: 'kind', allowed: ['id','class','element','descendant','child','attribute'] },
+        css_sliders: { src: cssSlidersCfg, configKey: 'cssSliders', valueKey: 'prop', allowed: ['width','height','padding','margin','border','color','background','font_size'] },
+      };
+      if (PICKLIST_SAVE[type]) {
+        const meta = PICKLIST_SAVE[type];
+        const items = (Array.isArray(meta.src.items) ? meta.src.items : [])
+          .map((it: any) => ({ text: String(it?.text || '').trim(), [meta.valueKey]: meta.allowed.includes(it?.[meta.valueKey]) ? it[meta.valueKey] : meta.allowed[0] }))
+          .filter((it: any) => it.text);
+        if (items.length === 0) throw new Error('Add at least one item.');
+        body.config = { [meta.configKey]: { items } };
       }
       if (isEdit) {
         await api(`/api/classwork/questions/${existing!.id}`, {
@@ -5666,6 +6268,198 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
           <div style={fieldLabel as any}>
             <div style={{ fontWeight: 600 }}>Sorting race</div>
             <SortingRaceEditor cfg={sortingRaceCfg} setCfg={setSortingRaceCfg} />
+          </div>
+        )}
+        {type === 'convert_relay' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Convert-it relay</div>
+            <ConvertRelayEditor cfg={convertRelayCfg} setCfg={setConvertRelayCfg} />
+          </div>
+        )}
+        {type === 'url_anatomy' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>URL anatomy</div>
+            <UrlAnatomyEditor cfg={urlAnatomyCfg} setCfg={setUrlAnatomyCfg} />
+          </div>
+        )}
+        {type === 'truth_table' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Truth table builder</div>
+            <TruthTableEditor cfg={truthTableCfg} setCfg={setTruthTableCfg} />
+          </div>
+        )}
+        {type === 'field_type_sort' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Field-type sorter</div>
+            <FieldTypeSortEditor cfg={fieldTypeSortCfg} setCfg={setFieldTypeSortCfg} />
+          </div>
+        )}
+        {type === 'io_sort' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Input / output sorter</div>
+            <IoSortEditor cfg={ioSortCfg} setCfg={setIoSortCfg} />
+          </div>
+        )}
+        {type === 'html_match' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>HTML element matcher</div>
+            <HtmlMatchEditor cfg={htmlMatchCfg} setCfg={setHtmlMatchCfg} />
+          </div>
+        )}
+        {type === 'password_forge' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Password forge</div>
+            <PasswordForgeEditor cfg={passwordForgeCfg} setCfg={setPasswordForgeCfg} />
+          </div>
+        )}
+        {type === 'privacy_radar' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Privacy radar</div>
+            <PrivacyRadarEditor cfg={privacyRadarCfg} setCfg={setPrivacyRadarCfg} />
+          </div>
+        )}
+        {type === 'validation_rules' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Validation-rule matcher</div>
+            <ValidationRulesEditor cfg={validationRulesCfg} setCfg={setValidationRulesCfg} />
+          </div>
+        )}
+        {type === 'find_duplicate' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Find the duplicate row</div>
+            <FindDuplicateEditor cfg={findDuplicateCfg} setCfg={setFindDuplicateCfg} />
+          </div>
+        )}
+        {type === 'bin_search' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Binary-search trace</div>
+            <BinSearchEditor cfg={binSearchCfg} setCfg={setBinSearchCfg} />
+          </div>
+        )}
+        {type === 'box_model' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>CSS box model</div>
+            <BoxModelEditor cfg={boxModelCfg} setCfg={setBoxModelCfg} />
+          </div>
+        )}
+        {type === 'friend_or_fake' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Friend or fake</div>
+            <FriendOrFakeEditor cfg={friendOrFakeCfg} setCfg={setFriendOrFakeCfg} />
+          </div>
+        )}
+        {type === 'dm_danger' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>DM danger</div>
+            <DmDangerEditor cfg={dmDangerCfg} setCfg={setDmDangerCfg} />
+          </div>
+        )}
+        {type === 'malware_triage' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Malware triage</div>
+            <MalwareTriageEditor cfg={malwareTriageCfg} setCfg={setMalwareTriageCfg} />
+          </div>
+        )}
+        {type === '2fa_escape' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>2FA escape</div>
+            <TwoFactorEscapeEditor cfg={twoFactorEscapeCfg} setCfg={setTwoFactorEscapeCfg} />
+          </div>
+        )}
+        {type === 'a11y_audit' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Accessibility audit</div>
+            <A11yAuditEditor cfg={a11yAuditCfg} setCfg={setA11yAuditCfg} />
+          </div>
+        )}
+        {type === 'fetch_execute' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Fetch–decode–execute</div>
+            <FetchExecuteEditor cfg={fetchExecuteCfg} setCfg={setFetchExecuteCfg} />
+          </div>
+        )}
+        {type === 'screen_time' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Screen-time check</div>
+            <ScreenTimeEditor cfg={screenTimeCfg} setCfg={setScreenTimeCfg} />
+          </div>
+        )}
+        {type === 'footprint_trail' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Digital footprint trail</div>
+            <FootprintTrailEditor cfg={footprintTrailCfg} setCfg={setFootprintTrailCfg} />
+          </div>
+        )}
+        {type === 'social_engineer' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Social-engineering scams</div>
+            <SocialEngineerEditor cfg={socialEngineerCfg} setCfg={setSocialEngineerCfg} />
+          </div>
+        )}
+        {type === 'cipher_quest' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Cipher quest</div>
+            <CipherQuestEditor cfg={cipherQuestCfg} setCfg={setCipherQuestCfg} />
+          </div>
+        )}
+        {type === 'normalise_it' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Normalise it</div>
+            <NormaliseItEditor cfg={normaliseItCfg} setCfg={setNormaliseItCfg} />
+          </div>
+        )}
+        {type === 'subnet_calc' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>IP-address classifier</div>
+            <SubnetCalcEditor cfg={subnetCalcCfg} setCfg={setSubnetCalcCfg} />
+          </div>
+        )}
+        {type === 'phish_inbox' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Phish-inbox triage</div>
+            <PhishInboxEditor cfg={phishInboxCfg} setCfg={setPhishInboxCfg} />
+          </div>
+        )}
+        {type === 'build_pc' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Build-a-PC parts</div>
+            <BuildPcEditor cfg={buildPcCfg} setCfg={setBuildPcCfg} />
+          </div>
+        )}
+        {type === 'os_sched' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>OS scheduling algorithms</div>
+            <OsSchedEditor cfg={osSchedCfg} setCfg={setOsSchedCfg} />
+          </div>
+        )}
+        {type === 'query_visual' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>SQL operation identifier</div>
+            <QueryVisualEditor cfg={queryVisualCfg} setCfg={setQueryVisualCfg} />
+          </div>
+        )}
+        {type === 'schema_arch' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Schema relationships</div>
+            <SchemaArchEditor cfg={schemaArchCfg} setCfg={setSchemaArchCfg} />
+          </div>
+        )}
+        {type === 'tag_soup_repair' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Tag-soup HTML repair</div>
+            <TagSoupRepairEditor cfg={tagSoupRepairCfg} setCfg={setTagSoupRepairCfg} />
+          </div>
+        )}
+        {type === 'selector_golf' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>CSS-selector golf</div>
+            <SelectorGolfEditor cfg={selectorGolfCfg} setCfg={setSelectorGolfCfg} />
+          </div>
+        )}
+        {type === 'css_sliders' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>CSS-property sliders</div>
+            <CssSlidersEditor cfg={cssSlidersCfg} setCfg={setCssSlidersCfg} />
           </div>
         )}
         {type !== 'section_header' && (

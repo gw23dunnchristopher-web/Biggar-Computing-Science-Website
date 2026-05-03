@@ -1064,6 +1064,1048 @@ function _normCmp(a: any, b: any): boolean {
        === String(b == null ? '' : b).trim().toUpperCase().replace(/\s+/g, ' ');
 }
 
+/* ============================================================================
+   BATCH 2 — convert_relay, url_anatomy, truth_table, field_type_sort,
+   io_sort, html_match. Same pattern as the original 10 games.
+   ============================================================================ */
+
+const CONVERT_MODE_LABEL: Record<string, string> = {
+  dec_to_bin: 'Decimal → Binary',
+  bin_to_dec: 'Binary → Decimal',
+  dec_to_hex: 'Decimal → Hex',
+  hex_to_dec: 'Hex → Decimal',
+  bits_to_bytes: 'Bits → Bytes',
+  bytes_to_bits: 'Bytes → Bits',
+  b_to_kb: 'Bytes → Kilobytes',
+  kb_to_b: 'Kilobytes → Bytes',
+  kb_to_mb: 'Kilobytes → Megabytes',
+  mb_to_kb: 'Megabytes → Kilobytes',
+  mb_to_gb: 'Megabytes → Gigabytes',
+  gb_to_mb: 'Gigabytes → Megabytes',
+};
+export const CONVERT_ALL_MODES = Object.keys(CONVERT_MODE_LABEL);
+
+export type ConvertProblem = { mode: string; prompt: string; expected: string; hint: string };
+export function generateConvertRelayProblems(cfg: any, seed: string): ConvertProblem[] {
+  const rounds = Math.max(1, Math.min(40, Number(cfg?.rounds) || 10));
+  const maxValue = Math.max(10, Math.min(9999, Number(cfg?.maxValue) || 200));
+  const modes: string[] = (Array.isArray(cfg?.modes) && cfg.modes.length)
+    ? cfg.modes.filter((m: any) => CONVERT_ALL_MODES.includes(m))
+    : CONVERT_ALL_MODES.slice(0, 6);
+  if (modes.length === 0) modes.push('dec_to_bin');
+  const rng = _mulberry32(_stringHash(seed));
+  const out: ConvertProblem[] = [];
+  for (let i = 0; i < rounds; i++) {
+    const mode = modes[Math.floor(rng() * modes.length)];
+    const m = Math.max(1, Math.floor(rng() * maxValue) + 1);
+    let prompt = '', expected = '';
+    if (mode === 'dec_to_bin') { prompt = `${m}`; expected = m.toString(2); }
+    else if (mode === 'bin_to_dec') { prompt = m.toString(2); expected = String(m); }
+    else if (mode === 'dec_to_hex') { prompt = `${m}`; expected = m.toString(16).toUpperCase(); }
+    else if (mode === 'hex_to_dec') { prompt = m.toString(16).toUpperCase(); expected = String(m); }
+    else if (mode === 'bits_to_bytes') { prompt = `${m * 8} bits`; expected = String(m); }
+    else if (mode === 'bytes_to_bits') { prompt = `${m} bytes`; expected = String(m * 8); }
+    else if (mode === 'b_to_kb') { prompt = `${m * 1000} bytes`; expected = String(m); }
+    else if (mode === 'kb_to_b') { prompt = `${m} KB`; expected = String(m * 1000); }
+    else if (mode === 'kb_to_mb') { prompt = `${m * 1000} KB`; expected = String(m); }
+    else if (mode === 'mb_to_kb') { prompt = `${m} MB`; expected = String(m * 1000); }
+    else if (mode === 'mb_to_gb') { prompt = `${m * 1000} MB`; expected = String(m); }
+    else if (mode === 'gb_to_mb') { prompt = `${m} GB`; expected = String(m * 1000); }
+    out.push({ mode, prompt, expected, hint: CONVERT_MODE_LABEL[mode] });
+  }
+  return out;
+}
+
+export type UrlSeg = { text: string; label: string | null };
+export const URL_LABELS = ['protocol', 'subdomain', 'domain', 'port', 'path', 'query', 'fragment'];
+export function parseUrlSegments(url: string): UrlSeg[] | null {
+  const m = String(url || '').trim().match(/^([a-zA-Z][a-zA-Z0-9+\-.]*):\/\/([^\/:?#]+)(?::(\d+))?([^?#]*)?(?:\?([^#]*))?(?:#(.*))?$/);
+  if (!m) return null;
+  const protocol = m[1], host = m[2], port = m[3], path = m[4], query = m[5], fragment = m[6];
+  const hostParts = host.split('.');
+  let subdomain = '', domain = host;
+  if (hostParts.length >= 3) {
+    subdomain = hostParts.slice(0, -2).join('.');
+    domain = hostParts.slice(-2).join('.');
+  }
+  const segs: UrlSeg[] = [];
+  segs.push({ text: protocol, label: 'protocol' });
+  segs.push({ text: '://', label: null });
+  if (subdomain) {
+    segs.push({ text: subdomain, label: 'subdomain' });
+    segs.push({ text: '.', label: null });
+  }
+  segs.push({ text: domain, label: 'domain' });
+  if (port) {
+    segs.push({ text: ':', label: null });
+    segs.push({ text: port, label: 'port' });
+  }
+  if (path) segs.push({ text: path, label: 'path' });
+  if (query !== undefined) {
+    segs.push({ text: '?', label: null });
+    segs.push({ text: query, label: 'query' });
+  }
+  if (fragment !== undefined) {
+    segs.push({ text: '#', label: null });
+    segs.push({ text: fragment, label: 'fragment' });
+  }
+  return segs;
+}
+
+export type TtNode =
+  | { kind: 'var'; name: string }
+  | { kind: 'not'; inner: TtNode }
+  | { kind: 'and'; left: TtNode; right: TtNode }
+  | { kind: 'or'; left: TtNode; right: TtNode };
+export function parseTruthExpr(input: string): { ast: TtNode; vars: string[] } | { error: string } {
+  const tokens: string[] = [];
+  const src = String(input || '').replace(/\s+/g, ' ').trim();
+  let i = 0;
+  while (i < src.length) {
+    const ch = src[i];
+    if (ch === ' ') { i++; continue; }
+    if (ch === '(' || ch === ')') { tokens.push(ch); i++; continue; }
+    if (/[A-Za-z]/.test(ch)) {
+      let j = i;
+      while (j < src.length && /[A-Za-z0-9_]/.test(src[j])) j++;
+      tokens.push(src.slice(i, j).toUpperCase());
+      i = j;
+      continue;
+    }
+    return { error: `Unexpected '${ch}' at position ${i}` };
+  }
+  let p = 0;
+  const peek = () => tokens[p];
+  const eat = (t: string) => { if (tokens[p] !== t) throw new Error(`Expected '${t}' but got '${tokens[p] || 'end'}'`); p++; };
+  const vars = new Set<string>();
+  function parseOr(): TtNode {
+    let left = parseAnd();
+    while (peek() === 'OR') { p++; left = { kind: 'or', left, right: parseAnd() }; }
+    return left;
+  }
+  function parseAnd(): TtNode {
+    let left = parseNot();
+    while (peek() === 'AND') { p++; left = { kind: 'and', left, right: parseNot() }; }
+    return left;
+  }
+  function parseNot(): TtNode {
+    if (peek() === 'NOT') { p++; return { kind: 'not', inner: parseNot() }; }
+    return parseAtom();
+  }
+  function parseAtom(): TtNode {
+    const t = peek();
+    if (t === '(') { p++; const inner = parseOr(); eat(')'); return inner; }
+    if (t && /^[A-Z][A-Z0-9_]*$/.test(t) && t !== 'AND' && t !== 'OR' && t !== 'NOT') {
+      p++; vars.add(t); return { kind: 'var', name: t };
+    }
+    throw new Error(`Unexpected token '${t || 'end'}'`);
+  }
+  try {
+    const ast = parseOr();
+    if (p !== tokens.length) return { error: `Trailing token '${tokens[p]}'` };
+    return { ast, vars: Array.from(vars).sort() };
+  } catch (err: any) {
+    return { error: String(err?.message || err) };
+  }
+}
+export function evalTruthExpr(ast: TtNode, env: Record<string, boolean>): boolean {
+  if (ast.kind === 'var') return !!env[ast.name];
+  if (ast.kind === 'not') return !evalTruthExpr(ast.inner, env);
+  if (ast.kind === 'and') return evalTruthExpr(ast.left, env) && evalTruthExpr(ast.right, env);
+  return evalTruthExpr(ast.left, env) || evalTruthExpr(ast.right, env);
+}
+export function buildTruthRows(input: string): { vars: string[]; rows: { env: Record<string, boolean>; expected: boolean }[] } | null {
+  const parsed = parseTruthExpr(input);
+  if ('error' in parsed) return null;
+  const { ast, vars } = parsed;
+  const rows: { env: Record<string, boolean>; expected: boolean }[] = [];
+  const N = vars.length;
+  const total = N === 0 ? 1 : (1 << N);
+  for (let r = 0; r < total; r++) {
+    const env: Record<string, boolean> = {};
+    vars.forEach((v, k) => { env[v] = !!((r >> (N - 1 - k)) & 1); });
+    rows.push({ env, expected: evalTruthExpr(ast, env) });
+  }
+  return { vars, rows };
+}
+
+/* ---------- ConvertRelay ---------- */
+export function ConvertRelayPupilUI({ config, cellAnswers, setCellAnswers, questionId }: {
+  config: any; cellAnswers: any; setCellAnswers: (v: any) => void; questionId?: string;
+}) {
+  const probs = useMemo(() => generateConvertRelayProblems(config?.convertRelay || {}, `cr-${questionId || ''}`), [config?.convertRelay, questionId]);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>{probs.length} round{probs.length === 1 ? '' : 's'} — convert each one in your head, no calculator. Use 1 KB = 1000 B, 1 MB = 1000 KB, 1 GB = 1000 MB and 1 byte = 8 bits.</div>
+      {probs.map((p, i) => (
+        <label key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px', background: 'var(--cw-surface-soft)', borderRadius: 6 }}>
+          <span style={{ width: 26, textAlign: 'right', color: 'var(--cw-muted)', fontSize: 12 }}>{i + 1}.</span>
+          <span style={{ flex: 1, fontFamily: 'JetBrains Mono, monospace', fontSize: 13 }}>
+            <strong>{p.prompt}</strong> <span style={{ color: 'var(--cw-muted)' }}>· {p.hint}</span>
+          </span>
+          <input
+            value={String(cellAnswers[String(i)] || '')}
+            onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}
+            style={{ width: 140, padding: '4px 8px', fontFamily: 'JetBrains Mono, monospace' }}
+            placeholder="answer"
+          />
+        </label>
+      ))}
+    </div>
+  );
+}
+export function ConvertRelayEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const modes: string[] = Array.isArray(cfg.modes) ? cfg.modes : [];
+  const toggle = (m: string) => {
+    const next = modes.includes(m) ? modes.filter((x) => x !== m) : [...modes, m];
+    setCfg({ ...cfg, modes: next });
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <label style={{ fontSize: 13 }}>
+        Rounds <input type="number" min={1} max={40} value={Number(cfg.rounds) || 10} onChange={(e) => setCfg({ ...cfg, rounds: Number(e.target.value) })} style={{ width: 80, marginLeft: 6 }} />
+      </label>
+      <label style={{ fontSize: 13 }}>
+        Max value <input type="number" min={10} max={9999} value={Number(cfg.maxValue) || 200} onChange={(e) => setCfg({ ...cfg, maxValue: Number(e.target.value) })} style={{ width: 100, marginLeft: 6 }} />
+        <span style={{ color: 'var(--cw-muted)', fontSize: 12, marginLeft: 6 }}>(used as the "from" side of each conversion)</span>
+      </label>
+      <div style={{ fontSize: 13, fontWeight: 600 }}>Modes</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 6 }}>
+        {CONVERT_ALL_MODES.map((m) => (
+          <label key={m} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+            <input type="checkbox" checked={modes.includes(m)} onChange={() => toggle(m)} />
+            {CONVERT_MODE_LABEL[m]}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- UrlAnatomy ---------- */
+export function UrlAnatomyPupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: any; setCellAnswers: (v: any) => void;
+}) {
+  const items: any[] = config?.urlAnatomy?.items || [];
+  const setSeg = (i: number, segIdx: number, label: string) => {
+    const cur = (cellAnswers[String(i)] && typeof cellAnswers[String(i)] === 'object') ? cellAnswers[String(i)] : {};
+    setCellAnswers({ ...cellAnswers, [String(i)]: { ...cur, [String(segIdx)]: label } });
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {items.map((it, i) => {
+        const segs = parseUrlSegments(String(it?.url || '')) || [];
+        const ans = (cellAnswers[String(i)] && typeof cellAnswers[String(i)] === 'object') ? cellAnswers[String(i)] : {};
+        return (
+          <div key={i} style={{ background: 'var(--cw-surface-soft)', padding: 10, borderRadius: 6 }}>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', wordBreak: 'break-all', marginBottom: 8, fontSize: 14 }}>
+              {segs.map((s, j) => s.label === null
+                ? <span key={j} style={{ color: 'var(--cw-muted)' }}>{s.text}</span>
+                : <span key={j} style={{ background: '#fff', padding: '2px 4px', borderRadius: 3, border: '1px solid var(--cw-border)', margin: '0 1px' }}>{s.text}</span>
+              )}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {segs.map((s, j) => s.label === null ? null : (
+                <label key={j} style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13 }}>
+                  <code style={{ minWidth: 140 }}>{s.text}</code>
+                  <select value={String(ans[String(j)] || '')} onChange={(e) => setSeg(i, j, e.target.value)}>
+                    <option value="">— pick label —</option>
+                    {URL_LABELS.map((L) => <option key={L} value={L}>{L}</option>)}
+                  </select>
+                </label>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+export function UrlAnatomyEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const items: any[] = Array.isArray(cfg.items) ? cfg.items : [];
+  const upd = (i: number, url: string) => {
+    const next = items.slice();
+    next[i] = { url };
+    setCfg({ ...cfg, items: next });
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>One URL per row. Each is auto-split into segments and pupils pick the correct label for every meaningful part. Mix in subdomains, ports, paths, queries and fragments so all labels appear.</div>
+      {items.map((it, i) => {
+        const segs = parseUrlSegments(String(it?.url || ''));
+        return (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, background: 'var(--cw-surface-soft)', borderRadius: 6 }}>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+              <input value={String(it?.url || '')} onChange={(e) => upd(i, e.target.value)} placeholder="https://www.bbc.co.uk/news/technology?topic=ai#section1" style={{ flex: 1, padding: '4px 8px', fontFamily: 'JetBrains Mono, monospace' }} />
+              <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })} style={{ padding: '4px 8px' }}>×</button>
+            </div>
+            <div style={{ fontSize: 12, color: segs ? 'var(--cw-muted)' : '#b91c1c' }}>
+              {segs ? segs.filter((s) => s.label).map((s) => `${s.label}=${s.text}`).join(' · ') : 'Could not parse — must start with protocol://'}
+            </div>
+          </div>
+        );
+      })}
+      <button type="button" onClick={() => setCfg({ ...cfg, items: [...items, { url: '' }] })} style={{ alignSelf: 'flex-start', padding: '6px 10px' }}>+ Add URL</button>
+    </div>
+  );
+}
+
+/* ---------- TruthTable ---------- */
+export function TruthTablePupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: any; setCellAnswers: (v: any) => void;
+}) {
+  const expr = String(config?.truthTable?.expression || '');
+  const built = useMemo(() => buildTruthRows(expr), [expr]);
+  if (!built) return <div style={{ color: '#b91c1c' }}>Invalid Boolean expression — ask your teacher to fix it.</div>;
+  const { vars, rows } = built;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14 }}>{expr}</div>
+      <table style={{ borderCollapse: 'collapse', fontFamily: 'JetBrains Mono, monospace', fontSize: 13 }}>
+        <thead>
+          <tr>
+            {vars.map((v) => <th key={v} style={{ border: '1px solid var(--cw-border)', padding: '4px 10px' }}>{v}</th>)}
+            <th style={{ border: '1px solid var(--cw-border)', padding: '4px 10px', background: 'var(--cw-surface-soft)' }}>Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, ri) => (
+            <tr key={ri}>
+              {vars.map((v) => <td key={v} style={{ border: '1px solid var(--cw-border)', padding: '4px 10px', textAlign: 'center' }}>{row.env[v] ? 1 : 0}</td>)}
+              <td style={{ border: '1px solid var(--cw-border)', padding: '2px 4px', textAlign: 'center' }}>
+                <input
+                  value={String(cellAnswers[String(ri)] || '')}
+                  onChange={(e) => setCellAnswers({ ...cellAnswers, [String(ri)]: e.target.value.replace(/[^01]/g, '').slice(0, 1) })}
+                  style={{ width: 36, textAlign: 'center', fontFamily: 'JetBrains Mono, monospace' }}
+                  placeholder="?"
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+export function TruthTableEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const expr = String(cfg.expression || '');
+  const parsed = useMemo(() => parseTruthExpr(expr), [expr]);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <label style={{ fontSize: 13 }}>
+        Expression <input value={expr} onChange={(e) => setCfg({ ...cfg, expression: e.target.value })} placeholder="A AND (B OR NOT C)" style={{ width: '100%', padding: '4px 8px', fontFamily: 'JetBrains Mono, monospace' }} />
+      </label>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>Use uppercase letters as variables and the operators AND, OR, NOT. Parentheses are allowed.</div>
+      {'error' in parsed
+        ? <div style={{ color: '#b91c1c', fontSize: 13 }}>Parse error: {parsed.error}</div>
+        : <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>Variables: {parsed.vars.join(', ') || '(none)'} — pupils will fill {parsed.vars.length === 0 ? 1 : (1 << parsed.vars.length)} row{parsed.vars.length === 0 ? '' : 's'}.</div>
+      }
+    </div>
+  );
+}
+
+/* ---------- FieldTypeSort ---------- */
+const FIELD_TYPES = ['integer', 'real', 'text', 'boolean', 'date'];
+export function FieldTypeSortPupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: any; setCellAnswers: (v: any) => void;
+}) {
+  const items: any[] = config?.fieldTypeSort?.items || [];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>For each value, pick the field type that best stores it.</div>
+      {items.map((it, i) => (
+        <label key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 6, background: 'var(--cw-surface-soft)', borderRadius: 6 }}>
+          <code style={{ flex: 1, fontFamily: 'JetBrains Mono, monospace' }}>{String(it?.value ?? '')}</code>
+          <select value={String(cellAnswers[String(i)] || '')} onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}>
+            <option value="">— pick type —</option>
+            {FIELD_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </label>
+      ))}
+    </div>
+  );
+}
+export function FieldTypeSortEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const items: any[] = Array.isArray(cfg.items) ? cfg.items : [];
+  const upd = (i: number, patch: any) => {
+    const next = items.slice();
+    next[i] = { ...next[i], ...patch };
+    setCfg({ ...cfg, items: next });
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>Add a value (as pupils will see it) plus its correct field type.</div>
+      {items.map((it, i) => (
+        <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <input value={String(it?.value ?? '')} onChange={(e) => upd(i, { value: e.target.value })} placeholder='e.g. 07/05/2024 or 42' style={{ flex: 1, padding: '4px 8px', fontFamily: 'JetBrains Mono, monospace' }} />
+          <select value={String(it?.type || 'text')} onChange={(e) => upd(i, { type: e.target.value })}>
+            {FIELD_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+          <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })} style={{ padding: '4px 8px' }}>×</button>
+        </div>
+      ))}
+      <button type="button" onClick={() => setCfg({ ...cfg, items: [...items, { value: '', type: 'text' }] })} style={{ alignSelf: 'flex-start', padding: '6px 10px' }}>+ Add value</button>
+    </div>
+  );
+}
+
+/* ---------- IoSort ---------- */
+const IO_CATEGORIES = ['input', 'output', 'storage', 'both'];
+export function IoSortPupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: any; setCellAnswers: (v: any) => void;
+}) {
+  const items: any[] = config?.ioSort?.items || [];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>Categorise each device. "Both" = it does input <em>and</em> output (e.g. touchscreen).</div>
+      {items.map((it, i) => (
+        <label key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 6, background: 'var(--cw-surface-soft)', borderRadius: 6 }}>
+          <span style={{ flex: 1 }}>{String(it?.name || '')}</span>
+          <select value={String(cellAnswers[String(i)] || '')} onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}>
+            <option value="">— pick —</option>
+            {IO_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </label>
+      ))}
+    </div>
+  );
+}
+export function IoSortEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const items: any[] = Array.isArray(cfg.items) ? cfg.items : [];
+  const upd = (i: number, patch: any) => {
+    const next = items.slice();
+    next[i] = { ...next[i], ...patch };
+    setCfg({ ...cfg, items: next });
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {items.map((it, i) => (
+        <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <input value={String(it?.name || '')} onChange={(e) => upd(i, { name: e.target.value })} placeholder="e.g. Touchscreen" style={{ flex: 1, padding: '4px 8px' }} />
+          <select value={String(it?.category || 'input')} onChange={(e) => upd(i, { category: e.target.value })}>
+            {IO_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })} style={{ padding: '4px 8px' }}>×</button>
+        </div>
+      ))}
+      <button type="button" onClick={() => setCfg({ ...cfg, items: [...items, { name: '', category: 'input' }] })} style={{ alignSelf: 'flex-start', padding: '6px 10px' }}>+ Add device</button>
+    </div>
+  );
+}
+
+/* ---------- HtmlMatch ---------- */
+const COMMON_HTML_TAGS = ['h1','h2','h3','p','a','img','ul','ol','li','div','span','button','input','form','table','tr','td','th','nav','header','footer','section','article','main','video','audio','br'];
+export function HtmlMatchPupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: any; setCellAnswers: (v: any) => void;
+}) {
+  const items: any[] = config?.htmlMatch?.items || [];
+  const tags = Array.from(new Set([...items.map((it: any) => String(it?.tag || '').toLowerCase()).filter(Boolean), ...COMMON_HTML_TAGS])).sort();
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>Pick the HTML tag that matches each description.</div>
+      {items.map((it, i) => (
+        <label key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', padding: 6, background: 'var(--cw-surface-soft)', borderRadius: 6 }}>
+          <span style={{ flex: 1 }}>{String(it?.description || '')}</span>
+          <select value={String(cellAnswers[String(i)] || '')} onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}>
+            <option value="">— pick tag —</option>
+            {tags.map((t) => <option key={t} value={t}>&lt;{t}&gt;</option>)}
+          </select>
+        </label>
+      ))}
+    </div>
+  );
+}
+export function HtmlMatchEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const items: any[] = Array.isArray(cfg.items) ? cfg.items : [];
+  const upd = (i: number, patch: any) => {
+    const next = items.slice();
+    next[i] = { ...next[i], ...patch };
+    setCfg({ ...cfg, items: next });
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>Description (what the element does) plus the correct tag (no angle brackets).</div>
+      {items.map((it, i) => (
+        <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <input value={String(it?.description || '')} onChange={(e) => upd(i, { description: e.target.value })} placeholder="A clickable hyperlink" style={{ flex: 2, padding: '4px 8px' }} />
+          <input value={String(it?.tag || '')} onChange={(e) => upd(i, { tag: e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '') })} placeholder="a" style={{ width: 80, padding: '4px 8px', fontFamily: 'JetBrains Mono, monospace' }} />
+          <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })} style={{ padding: '4px 8px' }}>×</button>
+        </div>
+      ))}
+      <button type="button" onClick={() => setCfg({ ...cfg, items: [...items, { description: '', tag: '' }] })} style={{ alignSelf: 'flex-start', padding: '6px 10px' }}>+ Add element</button>
+    </div>
+  );
+}
+
+/* ============================================================================
+   BATCH 3 — password_forge, privacy_radar, validation_rules, find_duplicate,
+   bin_search, box_model.
+   ============================================================================ */
+
+const PASSWORD_RULES: { id: string; label: string; check: (pw: string) => boolean }[] = [
+  { id: 'min_length_8', label: '≥ 8 characters', check: (pw) => pw.length >= 8 },
+  { id: 'min_length_12', label: '≥ 12 characters', check: (pw) => pw.length >= 12 },
+  { id: 'min_length_16', label: '≥ 16 characters', check: (pw) => pw.length >= 16 },
+  { id: 'has_upper', label: 'Has UPPERCASE letter', check: (pw) => /[A-Z]/.test(pw) },
+  { id: 'has_lower', label: 'Has lowercase letter', check: (pw) => /[a-z]/.test(pw) },
+  { id: 'has_digit', label: 'Has digit (0–9)', check: (pw) => /\d/.test(pw) },
+  { id: 'has_symbol', label: 'Has symbol (!@#…)', check: (pw) => /[^A-Za-z0-9]/.test(pw) },
+  { id: 'no_spaces', label: 'No spaces', check: (pw) => pw.length > 0 && !/\s/.test(pw) },
+  { id: 'no_common_word', label: 'Not a common password', check: (pw) => {
+    const lower = pw.toLowerCase();
+    const bad = ['password','passw0rd','qwerty','12345','11111','letmein','admin','welcome','iloveyou','dragon','monkey','football','abc123','000000','starwars'];
+    return !bad.some((b) => lower.includes(b));
+  } },
+];
+export const PASSWORD_RULE_IDS = PASSWORD_RULES.map((r) => r.id);
+
+export function checkPassword(pw: string, ruleIds: string[]): { id: string; label: string; ok: boolean }[] {
+  return PASSWORD_RULES.filter((r) => ruleIds.includes(r.id)).map((r) => ({ id: r.id, label: r.label, ok: r.check(pw) }));
+}
+
+export function PasswordForgePupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: any; setCellAnswers: (v: any) => void;
+}) {
+  const ruleIds: string[] = (config?.passwordForge?.rules || []).filter((r: any) => PASSWORD_RULE_IDS.includes(r));
+  const pw = String(cellAnswers.password || '');
+  const checks = checkPassword(pw, ruleIds);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <input
+        value={pw}
+        onChange={(e) => setCellAnswers({ ...cellAnswers, password: e.target.value })}
+        style={{ padding: '8px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 14, border: '1px solid var(--cw-border)', borderRadius: 6 }}
+        placeholder="Type your strong password…"
+        autoComplete="off"
+        spellCheck={false}
+      />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {checks.map((c) => (
+          <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+            <span style={{ width: 18, color: c.ok ? '#16a34a' : '#94a3b8' }}>{c.ok ? '✓' : '○'}</span>
+            <span style={{ color: c.ok ? '#166534' : 'var(--cw-muted)' }}>{c.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+export function PasswordForgeEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const rules: string[] = Array.isArray(cfg.rules) ? cfg.rules : [];
+  const toggle = (id: string) => {
+    const next = rules.includes(id) ? rules.filter((r) => r !== id) : [...rules, id];
+    setCfg({ ...cfg, rules: next });
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>Pick the rules pupils' password must satisfy. Each tick is worth one mark.</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 4 }}>
+        {PASSWORD_RULES.map((r) => (
+          <label key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+            <input type="checkbox" checked={rules.includes(r.id)} onChange={() => toggle(r.id)} />
+            {r.label}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- PrivacyRadar ---------- */
+const PRIVACY_LEVELS = ['low', 'medium', 'high'];
+export function PrivacyRadarPupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: any; setCellAnswers: (v: any) => void;
+}) {
+  const items: any[] = config?.privacyRadar?.items || [];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>How risky is each thing to share online? Pick low / medium / high.</div>
+      {items.map((it, i) => (
+        <label key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 6, background: 'var(--cw-surface-soft)', borderRadius: 6 }}>
+          <span style={{ flex: 1 }}>{String(it?.text || '')}</span>
+          <select value={String(cellAnswers[String(i)] || '')} onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}>
+            <option value="">— pick —</option>
+            {PRIVACY_LEVELS.map((L) => <option key={L} value={L}>{L}</option>)}
+          </select>
+        </label>
+      ))}
+    </div>
+  );
+}
+export function PrivacyRadarEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const items: any[] = Array.isArray(cfg.items) ? cfg.items : [];
+  const upd = (i: number, patch: any) => { const next = items.slice(); next[i] = { ...next[i], ...patch }; setCfg({ ...cfg, items: next }); };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {items.map((it, i) => (
+        <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <input value={String(it?.text || '')} onChange={(e) => upd(i, { text: e.target.value })} placeholder="e.g. Posting your home address publicly" style={{ flex: 1, padding: '4px 8px' }} />
+          <select value={String(it?.risk || 'low')} onChange={(e) => upd(i, { risk: e.target.value })}>
+            {PRIVACY_LEVELS.map((L) => <option key={L} value={L}>{L}</option>)}
+          </select>
+          <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })} style={{ padding: '4px 8px' }}>×</button>
+        </div>
+      ))}
+      <button type="button" onClick={() => setCfg({ ...cfg, items: [...items, { text: '', risk: 'low' }] })} style={{ alignSelf: 'flex-start', padding: '6px 10px' }}>+ Add scenario</button>
+    </div>
+  );
+}
+
+/* ---------- ValidationRules ---------- */
+const VALIDATION_RULE_TYPES = ['presence', 'range', 'length', 'format', 'lookup'];
+const VALIDATION_RULE_LABEL: Record<string, string> = {
+  presence: 'Presence (must not be blank)',
+  range: 'Range (between two numbers/dates)',
+  length: 'Length (min/max characters)',
+  format: 'Format / pattern (e.g. postcode, email)',
+  lookup: 'Lookup / restricted choice (from a list)',
+};
+export function ValidationRulesPupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: any; setCellAnswers: (v: any) => void;
+}) {
+  const items: any[] = config?.validationRules?.items || [];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>Match each rule to the validation type it best illustrates.</div>
+      {items.map((it, i) => (
+        <label key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', padding: 6, background: 'var(--cw-surface-soft)', borderRadius: 6 }}>
+          <span style={{ flex: 1 }}>{String(it?.scenario || '')}</span>
+          <select value={String(cellAnswers[String(i)] || '')} onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}>
+            <option value="">— pick rule —</option>
+            {VALIDATION_RULE_TYPES.map((R) => <option key={R} value={R}>{R}</option>)}
+          </select>
+        </label>
+      ))}
+    </div>
+  );
+}
+export function ValidationRulesEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const items: any[] = Array.isArray(cfg.items) ? cfg.items : [];
+  const upd = (i: number, patch: any) => { const next = items.slice(); next[i] = { ...next[i], ...patch }; setCfg({ ...cfg, items: next }); };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>{Object.entries(VALIDATION_RULE_LABEL).map(([k,v]) => `${k}: ${v}`).join(' · ')}</div>
+      {items.map((it, i) => (
+        <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <input value={String(it?.scenario || '')} onChange={(e) => upd(i, { scenario: e.target.value })} placeholder="e.g. Pupil's age must be between 5 and 18" style={{ flex: 1, padding: '4px 8px' }} />
+          <select value={String(it?.rule || 'presence')} onChange={(e) => upd(i, { rule: e.target.value })}>
+            {VALIDATION_RULE_TYPES.map((R) => <option key={R} value={R}>{R}</option>)}
+          </select>
+          <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })} style={{ padding: '4px 8px' }}>×</button>
+        </div>
+      ))}
+      <button type="button" onClick={() => setCfg({ ...cfg, items: [...items, { scenario: '', rule: 'presence' }] })} style={{ alignSelf: 'flex-start', padding: '6px 10px' }}>+ Add scenario</button>
+    </div>
+  );
+}
+
+/* ---------- FindDuplicate ---------- */
+export function findDuplicateRows(rows: string[][]): Set<number> {
+  const seen = new Map<string, number[]>();
+  rows.forEach((row, i) => {
+    const key = row.map((c) => String(c).trim().toLowerCase()).join('||');
+    if (!seen.has(key)) seen.set(key, []);
+    seen.get(key)!.push(i);
+  });
+  const out = new Set<number>();
+  seen.forEach((idxs) => { if (idxs.length > 1) idxs.forEach((i) => out.add(i)); });
+  return out;
+}
+export function FindDuplicatePupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: any; setCellAnswers: (v: any) => void;
+}) {
+  const items: any[] = config?.findDuplicate?.items || [];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>One row in each table is a duplicate. Click the duplicate row.</div>
+      {items.map((it, i) => {
+        const headers: string[] = Array.isArray(it?.headers) ? it.headers : [];
+        const rows: string[][] = Array.isArray(it?.rows) ? it.rows : [];
+        const sel = String(cellAnswers[String(i)] || '');
+        return (
+          <div key={i} style={{ background: 'var(--cw-surface-soft)', padding: 8, borderRadius: 6 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr>
+                  <th style={{ padding: 4, border: '1px solid var(--cw-border)', width: 40 }}>#</th>
+                  {headers.map((h, k) => <th key={k} style={{ padding: 4, border: '1px solid var(--cw-border)', textAlign: 'left' }}>{h}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row, ri) => (
+                  <tr key={ri} onClick={() => setCellAnswers({ ...cellAnswers, [String(i)]: String(ri) })} style={{ cursor: 'pointer', background: sel === String(ri) ? '#fde68a' : undefined }}>
+                    <td style={{ padding: 4, border: '1px solid var(--cw-border)', textAlign: 'center' }}>
+                      <input type="radio" checked={sel === String(ri)} onChange={() => setCellAnswers({ ...cellAnswers, [String(i)]: String(ri) })} />
+                    </td>
+                    {row.map((c, k) => <td key={k} style={{ padding: 4, border: '1px solid var(--cw-border)' }}>{c}</td>)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+export function FindDuplicateEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const items: any[] = Array.isArray(cfg.items) ? cfg.items : [];
+  const updItem = (i: number, patch: any) => { const next = items.slice(); next[i] = { ...next[i], ...patch }; setCfg({ ...cfg, items: next }); };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>For each table, list headers (comma-separated) and rows (one row per line, cells comma-separated). Make sure exactly one row is duplicated.</div>
+      {items.map((it, i) => {
+        const headers: string[] = Array.isArray(it?.headers) ? it.headers : [];
+        const rows: string[][] = Array.isArray(it?.rows) ? it.rows : [];
+        const dups = findDuplicateRows(rows);
+        return (
+          <div key={i} style={{ background: 'var(--cw-surface-soft)', padding: 8, borderRadius: 6, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <input value={headers.join(', ')} onChange={(e) => updItem(i, { headers: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })} placeholder="Name, Age, Subject" style={{ padding: '4px 8px' }} />
+            <textarea
+              value={rows.map((r) => r.join(', ')).join('\n')}
+              onChange={(e) => updItem(i, { rows: e.target.value.split('\n').map((line) => line.split(',').map((c) => c.trim())).filter((row) => row.some((c) => c)) })}
+              rows={5}
+              placeholder={'Alice, 10, Maths\nBob, 11, English\nAlice, 10, Maths\nCarol, 9, Art'}
+              style={{ padding: '4px 8px', fontFamily: 'JetBrains Mono, monospace', fontSize: 13 }}
+            />
+            <div style={{ fontSize: 12, color: dups.size === 0 ? '#b91c1c' : 'var(--cw-muted)' }}>
+              {dups.size === 0 ? 'No duplicate detected — add a repeated row.' : `Duplicate row indices: ${[...dups].sort((a, b) => a - b).join(', ')}`}
+            </div>
+            <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })} style={{ alignSelf: 'flex-start', padding: '4px 8px' }}>Remove table</button>
+          </div>
+        );
+      })}
+      <button type="button" onClick={() => setCfg({ ...cfg, items: [...items, { headers: ['Name', 'Age', 'Subject'], rows: [['Alice','10','Maths'], ['Bob','11','English'], ['Alice','10','Maths'], ['Carol','9','Art']] }] })} style={{ alignSelf: 'flex-start', padding: '6px 10px' }}>+ Add table</button>
+    </div>
+  );
+}
+
+/* ---------- BinSearch ---------- */
+export function simulateBinSearch(list: number[], target: number): { mids: number[]; found: boolean; foundIndex: number } {
+  let lo = 0, hi = list.length - 1;
+  const mids: number[] = [];
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    mids.push(mid);
+    if (list[mid] === target) return { mids, found: true, foundIndex: mid };
+    if (list[mid] < target) lo = mid + 1;
+    else hi = mid - 1;
+  }
+  return { mids, found: false, foundIndex: -1 };
+}
+export function BinSearchPupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: any; setCellAnswers: (v: any) => void;
+}) {
+  const items: any[] = config?.binSearch?.items || [];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>For each sorted list and target, type the indices the binary-search algorithm checks (in order, comma-separated). Indices start at 0.</div>
+      {items.map((it, i) => {
+        const list: number[] = Array.isArray(it?.list) ? it.list.map((n: any) => Number(n)).filter((n: number) => Number.isFinite(n)) : [];
+        return (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, background: 'var(--cw-surface-soft)', borderRadius: 6 }}>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13 }}>List: [{list.join(', ')}] — indices 0 to {list.length - 1}</div>
+            <div style={{ fontSize: 13 }}>Target: <code>{Number(it?.target)}</code></div>
+            <input
+              value={String(cellAnswers[String(i)] || '')}
+              onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}
+              placeholder="e.g. 3, 1, 2"
+              style={{ padding: '4px 8px', fontFamily: 'JetBrains Mono, monospace' }}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+export function BinSearchEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const items: any[] = Array.isArray(cfg.items) ? cfg.items : [];
+  const upd = (i: number, patch: any) => { const next = items.slice(); next[i] = { ...next[i], ...patch }; setCfg({ ...cfg, items: next }); };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>Each item is a sorted list (comma-separated) plus a target. The expected sequence of mid indices is computed automatically.</div>
+      {items.map((it, i) => {
+        const list: number[] = Array.isArray(it?.list) ? it.list.map((n: any) => Number(n)).filter((n: number) => Number.isFinite(n)) : [];
+        const target = Number(it?.target);
+        const sim = list.length > 0 && Number.isFinite(target) ? simulateBinSearch(list, target) : null;
+        return (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, background: 'var(--cw-surface-soft)', borderRadius: 6 }}>
+            <input
+              value={Array.isArray(it?.list) ? it.list.join(', ') : ''}
+              onChange={(e) => upd(i, { list: e.target.value.split(/[,\s]+/).map((x) => Number(x)).filter((n) => Number.isFinite(n)) })}
+              placeholder="1, 3, 5, 7, 9, 11, 13, 15"
+              style={{ padding: '4px 8px', fontFamily: 'JetBrains Mono, monospace' }}
+            />
+            <input
+              type="number"
+              value={Number.isFinite(target) ? target : ''}
+              onChange={(e) => upd(i, { target: Number(e.target.value) })}
+              placeholder="target"
+              style={{ width: 120, padding: '4px 8px' }}
+            />
+            <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+              {sim ? `Expected mids: ${sim.mids.join(', ')}${sim.found ? ` (found at ${sim.foundIndex})` : ' (not found)'}` : 'Add list and target'}
+            </div>
+            <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })} style={{ alignSelf: 'flex-start', padding: '4px 8px' }}>Remove</button>
+          </div>
+        );
+      })}
+      <button type="button" onClick={() => setCfg({ ...cfg, items: [...items, { list: [1, 3, 5, 7, 9, 11, 13, 15], target: 11 }] })} style={{ alignSelf: 'flex-start', padding: '6px 10px' }}>+ Add list</button>
+    </div>
+  );
+}
+
+/* ---------- BoxModel ---------- */
+export function BoxModelPupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: any; setCellAnswers: (v: any) => void;
+}) {
+  const items: any[] = config?.boxModel?.items || [];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>For each CSS box, work out the total <em>outer</em> width in pixels: <code>content + 2×(padding + border + margin)</code>.</div>
+      {items.map((it, i) => {
+        const c = Number(it?.content) || 0, p = Number(it?.padding) || 0, b = Number(it?.border) || 0, mg = Number(it?.margin) || 0;
+        return (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 10, background: 'var(--cw-surface-soft)', borderRadius: 6 }}>
+            <div style={{ display: 'inline-block', position: 'relative', padding: mg, background: '#fef3c7', flexShrink: 0 }}>
+              <div style={{ padding: b, background: '#0f172a' }}>
+                <div style={{ padding: p, background: '#bbf7d0' }}>
+                  <div style={{ width: c, height: 24, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontFamily: 'JetBrains Mono, monospace' }}>{c}px</div>
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, fontSize: 13 }}>
+              <div>content: <code>{c}px</code> · padding: <code>{p}px</code> · border: <code>{b}px</code> · margin: <code>{mg}px</code></div>
+              <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                Outer width:
+                <input
+                  type="number"
+                  value={String(cellAnswers[String(i)] || '')}
+                  onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}
+                  style={{ width: 100, padding: '4px 8px' }}
+                />
+                px
+              </label>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+export function BoxModelEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const items: any[] = Array.isArray(cfg.items) ? cfg.items : [];
+  const upd = (i: number, patch: any) => { const next = items.slice(); next[i] = { ...next[i], ...patch }; setCfg({ ...cfg, items: next }); };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {items.map((it, i) => {
+        const c = Number(it?.content) || 0, p = Number(it?.padding) || 0, b = Number(it?.border) || 0, mg = Number(it?.margin) || 0;
+        const total = c + 2 * (p + b + mg);
+        return (
+          <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <label style={{ fontSize: 12 }}>content<input type="number" value={c} onChange={(e) => upd(i, { content: Number(e.target.value) })} style={{ width: 70, marginLeft: 4 }} /></label>
+            <label style={{ fontSize: 12 }}>padding<input type="number" value={p} onChange={(e) => upd(i, { padding: Number(e.target.value) })} style={{ width: 60, marginLeft: 4 }} /></label>
+            <label style={{ fontSize: 12 }}>border<input type="number" value={b} onChange={(e) => upd(i, { border: Number(e.target.value) })} style={{ width: 60, marginLeft: 4 }} /></label>
+            <label style={{ fontSize: 12 }}>margin<input type="number" value={mg} onChange={(e) => upd(i, { margin: Number(e.target.value) })} style={{ width: 60, marginLeft: 4 }} /></label>
+            <span style={{ fontSize: 12, color: 'var(--cw-muted)' }}>= {total}px</span>
+            <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })} style={{ padding: '4px 8px' }}>×</button>
+          </div>
+        );
+      })}
+      <button type="button" onClick={() => setCfg({ ...cfg, items: [...items, { content: 200, padding: 10, border: 2, margin: 8 }] })} style={{ alignSelf: 'flex-start', padding: '6px 10px' }}>+ Add box</button>
+    </div>
+  );
+}
+
+/* ============================================================================
+   BATCH 4 — pick-list pattern games (shared helper).
+   friend_or_fake, dm_danger, malware_triage, 2fa_escape, a11y_audit, fetch_execute
+   ============================================================================ */
+
+export function PickListPupilUI({ items, options, hint, textKey, cellAnswers, setCellAnswers, labelMap }: {
+  items: any[]; options: string[]; hint: string; textKey: string;
+  cellAnswers: any; setCellAnswers: (v: any) => void;
+  labelMap?: Record<string, string>;
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontSize: 12, color: 'var(--cw-muted)' }}>{hint}</div>
+      {items.map((it, i) => (
+        <label key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', padding: 6, background: 'var(--cw-surface-soft)', borderRadius: 6 }}>
+          <span style={{ flex: 1 }}>{String(it?.[textKey] || '')}</span>
+          <select value={String(cellAnswers[String(i)] || '')} onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}>
+            <option value="">— pick —</option>
+            {options.map((o) => <option key={o} value={o}>{labelMap?.[o] || o}</option>)}
+          </select>
+        </label>
+      ))}
+    </div>
+  );
+}
+
+export function PickListEditor({ cfg, setCfg, options, textKey, valueKey, textPlaceholder, labelMap }: {
+  cfg: any; setCfg: (v: any) => void;
+  options: string[]; textKey: string; valueKey: string; textPlaceholder: string;
+  labelMap?: Record<string, string>;
+}) {
+  const items: any[] = Array.isArray(cfg.items) ? cfg.items : [];
+  const upd = (i: number, patch: any) => { const next = items.slice(); next[i] = { ...next[i], ...patch }; setCfg({ ...cfg, items: next }); };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {items.map((it, i) => (
+        <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <input value={String(it?.[textKey] || '')} onChange={(e) => upd(i, { [textKey]: e.target.value })} placeholder={textPlaceholder} style={{ flex: 1, padding: '4px 8px' }} />
+          <select value={String(it?.[valueKey] || options[0])} onChange={(e) => upd(i, { [valueKey]: e.target.value })}>
+            {options.map((o) => <option key={o} value={o}>{labelMap?.[o] || o}</option>)}
+          </select>
+          <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })} style={{ padding: '4px 8px' }}>×</button>
+        </div>
+      ))}
+      <button type="button" onClick={() => setCfg({ ...cfg, items: [...items, { [textKey]: '', [valueKey]: options[0] }] })} style={{ alignSelf: 'flex-start', padding: '6px 10px' }}>+ Add item</button>
+    </div>
+  );
+}
+
+const FRIEND_OR_FAKE_OPTS = ['real', 'fake'];
+const DM_DANGER_OPTS = ['safe', 'risky', 'dangerous'];
+const MALWARE_OPTS = ['virus', 'worm', 'trojan', 'ransomware', 'spyware', 'adware'];
+const TFA_OPTS = ['password_only', 'sms', 'email', 'authenticator', 'hardware'];
+const TFA_LABELS: Record<string, string> = { password_only: 'Password only', sms: 'SMS code', email: 'Email link', authenticator: 'Authenticator app', hardware: 'Hardware key' };
+const A11Y_OPTS = ['contrast', 'alt_text', 'labels', 'keyboard', 'heading_order', 'focus_indicator'];
+const A11Y_LABELS: Record<string, string> = { contrast: 'Poor colour contrast', alt_text: 'Missing alt text', labels: 'Missing form labels', keyboard: 'Keyboard trap / not reachable', heading_order: 'Heading order skips levels', focus_indicator: 'No focus indicator' };
+const FETCH_EXECUTE_OPTS = ['fetch', 'decode', 'execute'];
+
+export const FriendOrFakePupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.friendOrFake?.items || []} options={FRIEND_OR_FAKE_OPTS} hint="Decide if each social-media profile is genuine or fake." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />;
+export const FriendOrFakeEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={FRIEND_OR_FAKE_OPTS} textKey="text" valueKey="verdict" textPlaceholder="e.g. New profile, no posts, asks personal questions" />;
+
+export const DmDangerPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.dmDanger?.items || []} options={DM_DANGER_OPTS} hint="Rate each direct message: safe, risky, or dangerous." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />;
+export const DmDangerEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={DM_DANGER_OPTS} textKey="text" valueKey="risk" textPlaceholder="e.g. Stranger asks for your home address" />;
+
+export const MalwareTriagePupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.malwareTriage?.items || []} options={MALWARE_OPTS} hint="Match each description to the type of malware." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />;
+export const MalwareTriageEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={MALWARE_OPTS} textKey="text" valueKey="kind" textPlaceholder="e.g. Encrypts your files and demands payment" />;
+
+export const TwoFactorEscapePupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.twoFactorEscape?.items || []} options={TFA_OPTS} hint="Pick the most appropriate authentication method for each scenario." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={TFA_LABELS} />;
+export const TwoFactorEscapeEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={TFA_OPTS} textKey="text" valueKey="method" textPlaceholder="e.g. Online banking on a personal phone" labelMap={TFA_LABELS} />;
+
+export const A11yAuditPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.a11yAudit?.items || []} options={A11Y_OPTS} hint="Identify the accessibility issue in each web-page snippet." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={A11Y_LABELS} />;
+export const A11yAuditEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={A11Y_OPTS} textKey="text" valueKey="issue" textPlaceholder='e.g. <img src="logo.png"> with no alt' labelMap={A11Y_LABELS} />;
+
+export const FetchExecutePupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.fetchExecute?.items || []} options={FETCH_EXECUTE_OPTS} hint="Which stage of the fetch–decode–execute cycle does each action belong to?" textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />;
+export const FetchExecuteEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={FETCH_EXECUTE_OPTS} textKey="text" valueKey="step" textPlaceholder="e.g. The PC's address is sent to memory" />;
+
+/* ---------- BATCH 5 — more pick-list games ---------- */
+const SCREEN_TIME_OPTS = ['healthy', 'balanced', 'unhealthy'];
+const FOOTPRINT_OPTS = ['private', 'personal', 'public'];
+const FOOTPRINT_LABELS: Record<string, string> = { private: 'Keep private', personal: 'Personal (close friends)', public: 'OK to be public' };
+const SOCIAL_ENG_OPTS = ['phishing', 'pretexting', 'baiting', 'quid_pro_quo', 'tailgating', 'shoulder_surfing'];
+const SOCIAL_ENG_LABELS: Record<string, string> = { phishing: 'Phishing', pretexting: 'Pretexting', baiting: 'Baiting', quid_pro_quo: 'Quid pro quo', tailgating: 'Tailgating', shoulder_surfing: 'Shoulder surfing' };
+const CIPHER_OPTS = ['caesar', 'substitution', 'vigenere', 'transposition', 'aes'];
+const CIPHER_LABELS: Record<string, string> = { caesar: 'Caesar shift', substitution: 'Substitution cipher', vigenere: 'Vigenère cipher', transposition: 'Transposition cipher', aes: 'AES (modern symmetric)' };
+const NORMALISE_OPTS = ['breaks_1nf', 'breaks_2nf', 'breaks_3nf', 'normalised'];
+const NORMALISE_LABELS: Record<string, string> = { breaks_1nf: 'Breaks 1NF (repeating groups)', breaks_2nf: 'Breaks 2NF (partial dependency)', breaks_3nf: 'Breaks 3NF (transitive dependency)', normalised: 'Already in 3NF' };
+const SUBNET_OPTS = ['class_a', 'class_b', 'class_c', 'class_d', 'class_e', 'private', 'loopback'];
+const SUBNET_LABELS: Record<string, string> = { class_a: 'Class A (public)', class_b: 'Class B (public)', class_c: 'Class C (public)', class_d: 'Class D (multicast)', class_e: 'Class E (reserved)', private: 'Private range', loopback: 'Loopback (127.x.x.x)' };
+
+export const ScreenTimePupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.screenTime?.items || []} options={SCREEN_TIME_OPTS} hint="Rate each daily habit: healthy, balanced, or unhealthy." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />;
+export const ScreenTimeEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={SCREEN_TIME_OPTS} textKey="text" valueKey="rating" textPlaceholder="e.g. 6 hours of TikTok before bed every night" />;
+
+export const FootprintTrailPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.footprintTrail?.items || []} options={FOOTPRINT_OPTS} hint="Decide what should stay private, personal, or be OK to make public." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={FOOTPRINT_LABELS} />;
+export const FootprintTrailEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={FOOTPRINT_OPTS} textKey="text" valueKey="visibility" textPlaceholder="e.g. Your bank card PIN" labelMap={FOOTPRINT_LABELS} />;
+
+export const SocialEngineerPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.socialEngineer?.items || []} options={SOCIAL_ENG_OPTS} hint="Match each scam scenario to the social-engineering technique it uses." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={SOCIAL_ENG_LABELS} />;
+export const SocialEngineerEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={SOCIAL_ENG_OPTS} textKey="text" valueKey="kind" textPlaceholder="e.g. Email pretending to be from your bank" labelMap={SOCIAL_ENG_LABELS} />;
+
+export const CipherQuestPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.cipherQuest?.items || []} options={CIPHER_OPTS} hint="Identify which cipher each description matches." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={CIPHER_LABELS} />;
+export const CipherQuestEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={CIPHER_OPTS} textKey="text" valueKey="cipher" textPlaceholder="e.g. Each letter is shifted by a fixed amount" labelMap={CIPHER_LABELS} />;
+
+export const NormaliseItPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.normaliseIt?.items || []} options={NORMALISE_OPTS} hint="Look at each table description and decide what (if anything) it breaks." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={NORMALISE_LABELS} />;
+export const NormaliseItEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={NORMALISE_OPTS} textKey="text" valueKey="violation" textPlaceholder="e.g. Pupil(id, name, subject1, subject2, subject3)" labelMap={NORMALISE_LABELS} />;
+
+export const SubnetCalcPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.subnetCalc?.items || []} options={SUBNET_OPTS} hint="Classify each IP address by its network class or special use." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={SUBNET_LABELS} />;
+export const SubnetCalcEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={SUBNET_OPTS} textKey="text" valueKey="kind" textPlaceholder="e.g. 192.168.1.10" labelMap={SUBNET_LABELS} />;
+
+/* ---------- BATCH 6 (final) — pick-list games ---------- */
+const PHISH_INBOX_OPTS = ['legitimate', 'phishing', 'spam', 'scam'];
+const PHISH_INBOX_LABELS: Record<string, string> = { legitimate: 'Legitimate', phishing: 'Phishing', spam: 'Spam', scam: 'Scam / fraud' };
+const BUILD_PC_OPTS = ['cpu', 'gpu', 'ram', 'storage', 'psu', 'motherboard', 'cooling', 'case'];
+const BUILD_PC_LABELS: Record<string, string> = { cpu: 'CPU (processor)', gpu: 'GPU (graphics card)', ram: 'RAM', storage: 'SSD / HDD', psu: 'PSU (power supply)', motherboard: 'Motherboard', cooling: 'Cooling fan / heatsink', case: 'Case / chassis' };
+const OS_SCHED_OPTS = ['fcfs', 'sjf', 'round_robin', 'priority'];
+const OS_SCHED_LABELS: Record<string, string> = { fcfs: 'First-come-first-served', sjf: 'Shortest-job-first', round_robin: 'Round-robin', priority: 'Priority scheduling' };
+const QUERY_VISUAL_OPTS = ['select', 'project', 'join', 'filter', 'sort', 'group_by'];
+const QUERY_VISUAL_LABELS: Record<string, string> = { select: 'SELECT (rows)', project: 'PROJECT (columns)', join: 'JOIN (combine tables)', filter: 'WHERE (filter rows)', sort: 'ORDER BY (sort)', group_by: 'GROUP BY (aggregate)' };
+const SCHEMA_ARCH_OPTS = ['one_to_one', 'one_to_many', 'many_to_many'];
+const SCHEMA_ARCH_LABELS: Record<string, string> = { one_to_one: 'One-to-one', one_to_many: 'One-to-many', many_to_many: 'Many-to-many' };
+const TAG_SOUP_OPTS = ['unclosed', 'wrong_nesting', 'missing_attribute', 'self_close_misuse', 'wrong_tag'];
+const TAG_SOUP_LABELS: Record<string, string> = { unclosed: 'Tag not closed', wrong_nesting: 'Tags wrongly nested', missing_attribute: 'Missing required attribute', self_close_misuse: 'Self-closing tag misused', wrong_tag: 'Wrong tag for the job' };
+const SELECTOR_GOLF_OPTS = ['id', 'class', 'element', 'descendant', 'child', 'attribute'];
+const SELECTOR_GOLF_LABELS: Record<string, string> = { id: 'ID selector (#id)', class: 'Class selector (.class)', element: 'Element selector (p, h1)', descendant: 'Descendant (a b)', child: 'Direct child (a > b)', attribute: 'Attribute ([type="x"])' };
+const CSS_SLIDERS_OPTS = ['width', 'height', 'padding', 'margin', 'border', 'color', 'background', 'font_size'];
+const CSS_SLIDERS_LABELS: Record<string, string> = { width: 'width', height: 'height', padding: 'padding', margin: 'margin', border: 'border', color: 'color (text)', background: 'background-color', font_size: 'font-size' };
+
+export const PhishInboxPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.phishInbox?.items || []} options={PHISH_INBOX_OPTS} hint="Triage your inbox: is each email legitimate, phishing, spam, or a scam?" textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={PHISH_INBOX_LABELS} />;
+export const PhishInboxEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={PHISH_INBOX_OPTS} textKey="text" valueKey="verdict" textPlaceholder='e.g. "Your parcel needs £1.99 — click here"' labelMap={PHISH_INBOX_LABELS} />;
+
+export const BuildPcPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.buildPc?.items || []} options={BUILD_PC_OPTS} hint="Match each description to the PC component it describes." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={BUILD_PC_LABELS} />;
+export const BuildPcEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={BUILD_PC_OPTS} textKey="text" valueKey="part" textPlaceholder="e.g. Volatile fast memory used while a program runs" labelMap={BUILD_PC_LABELS} />;
+
+export const OsSchedPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.osSched?.items || []} options={OS_SCHED_OPTS} hint="Pick the scheduling algorithm that best fits each scenario." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={OS_SCHED_LABELS} />;
+export const OsSchedEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={OS_SCHED_OPTS} textKey="text" valueKey="algo" textPlaceholder="e.g. Each process gets a fixed time-slice in turn" labelMap={OS_SCHED_LABELS} />;
+
+export const QueryVisualPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.queryVisual?.items || []} options={QUERY_VISUAL_OPTS} hint="Identify the SQL operation each step performs." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={QUERY_VISUAL_LABELS} />;
+export const QueryVisualEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={QUERY_VISUAL_OPTS} textKey="text" valueKey="op" textPlaceholder='e.g. Combine Pupils and Marks on pupilId' labelMap={QUERY_VISUAL_LABELS} />;
+
+export const SchemaArchPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.schemaArch?.items || []} options={SCHEMA_ARCH_OPTS} hint="Decide the relationship type between each pair of entities." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={SCHEMA_ARCH_LABELS} />;
+export const SchemaArchEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={SCHEMA_ARCH_OPTS} textKey="text" valueKey="rel" textPlaceholder="e.g. Pupils and Classes (a pupil is in many classes, a class has many pupils)" labelMap={SCHEMA_ARCH_LABELS} />;
+
+export const TagSoupRepairPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.tagSoupRepair?.items || []} options={TAG_SOUP_OPTS} hint="Spot the HTML mistake in each snippet." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={TAG_SOUP_LABELS} />;
+export const TagSoupRepairEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={TAG_SOUP_OPTS} textKey="text" valueKey="bug" textPlaceholder='e.g. <p>Hello <b>world</p></b>' labelMap={TAG_SOUP_LABELS} />;
+
+export const SelectorGolfPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.selectorGolf?.items || []} options={SELECTOR_GOLF_OPTS} hint="Identify which kind of CSS selector is being used." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={SELECTOR_GOLF_LABELS} />;
+export const SelectorGolfEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={SELECTOR_GOLF_OPTS} textKey="text" valueKey="kind" textPlaceholder='e.g. nav > li' labelMap={SELECTOR_GOLF_LABELS} />;
+
+export const CssSlidersPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.cssSliders?.items || []} options={CSS_SLIDERS_OPTS} hint="Pick which CSS property would change to match each effect." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={CSS_SLIDERS_LABELS} />;
+export const CssSlidersEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={CSS_SLIDERS_OPTS} textKey="text" valueKey="prop" textPlaceholder="e.g. Make the box twice as wide" labelMap={CSS_SLIDERS_LABELS} />;
+
 export function GameReview({ type, cfg, parsed, questionId }: {
   type: string; cfg: any; parsed: any; questionId?: string;
 }) {
@@ -1266,6 +2308,203 @@ export function GameReview({ type, cfg, parsed, questionId }: {
           <span>Sorted list</span>
           <span style={reviewMuted}>got <code>{gotSortedRaw || '(blank)'}</code> · expected <code>{trace.sorted.join(', ')}</code></span>
         </div>
+      </div>
+    );
+  }
+
+  if (type === 'convert_relay') {
+    const probs = generateConvertRelayProblems(cfg.convertRelay || {}, `cr-${questionId || ''}`);
+    return (
+      <div style={wrap}>
+        {probs.map((p, i) => {
+          const got = String(parsed[String(i)] || '').trim();
+          const ok = _normCmp(got, p.expected);
+          return (
+            <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
+              <span style={tickCell(ok)}>{ok ? '✓' : '✗'}</span>
+              <span><code>{p.prompt}</code> <span style={reviewMuted}>· {p.hint}</span></span>
+              <span style={reviewMuted}>got <code>{got || '(blank)'}</code> · expected <code>{p.expected}</code></span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (type === 'url_anatomy') {
+    const items: any[] = cfg.urlAnatomy?.items || [];
+    return (
+      <div style={wrap}>
+        {items.map((it, i) => {
+          const segs = parseUrlSegments(String(it?.url || '')) || [];
+          const ans = (parsed[String(i)] && typeof parsed[String(i)] === 'object') ? parsed[String(i)] : {};
+          return (
+            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <code style={{ fontSize: 12 }}>{String(it?.url || '')}</code>
+              {segs.map((s, j) => s.label === null ? null : (
+                <div key={j} style={{ display: 'flex', gap: 6, alignItems: 'baseline', marginLeft: 12 }}>
+                  <span style={tickCell(String(ans[String(j)] || '') === s.label)}>{String(ans[String(j)] || '') === s.label ? '✓' : '✗'}</span>
+                  <code>{s.text}</code>
+                  <span style={reviewMuted}>got <code>{String(ans[String(j)] || '(blank)')}</code> · expected <code>{s.label}</code></span>
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (type === 'truth_table') {
+    const built = buildTruthRows(String(cfg.truthTable?.expression || ''));
+    if (!built) return <span style={reviewMuted}>(invalid expression)</span>;
+    return (
+      <div style={wrap}>
+        {built.rows.map((row, ri) => {
+          const got = String(parsed[String(ri)] || '');
+          const expectedStr = row.expected ? '1' : '0';
+          const ok = got === expectedStr;
+          return (
+            <div key={ri} style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
+              <span style={tickCell(ok)}>{ok ? '✓' : '✗'}</span>
+              <code>{built.vars.map((v) => row.env[v] ? 1 : 0).join(' ')}</code>
+              <span style={reviewMuted}>got <code>{got || '(blank)'}</code> · expected <code>{expectedStr}</code></span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  const PICK_LIST_META: Record<string, { itemsPath: string; expectedKey: string; labelKey: string }> = {
+    field_type_sort: { itemsPath: 'fieldTypeSort', expectedKey: 'type', labelKey: 'value' },
+    io_sort: { itemsPath: 'ioSort', expectedKey: 'category', labelKey: 'name' },
+    html_match: { itemsPath: 'htmlMatch', expectedKey: 'tag', labelKey: 'description' },
+    privacy_radar: { itemsPath: 'privacyRadar', expectedKey: 'risk', labelKey: 'text' },
+    validation_rules: { itemsPath: 'validationRules', expectedKey: 'rule', labelKey: 'scenario' },
+    friend_or_fake: { itemsPath: 'friendOrFake', expectedKey: 'verdict', labelKey: 'text' },
+    dm_danger: { itemsPath: 'dmDanger', expectedKey: 'risk', labelKey: 'text' },
+    malware_triage: { itemsPath: 'malwareTriage', expectedKey: 'kind', labelKey: 'text' },
+    '2fa_escape': { itemsPath: 'twoFactorEscape', expectedKey: 'method', labelKey: 'text' },
+    a11y_audit: { itemsPath: 'a11yAudit', expectedKey: 'issue', labelKey: 'text' },
+    fetch_execute: { itemsPath: 'fetchExecute', expectedKey: 'step', labelKey: 'text' },
+    screen_time: { itemsPath: 'screenTime', expectedKey: 'rating', labelKey: 'text' },
+    footprint_trail: { itemsPath: 'footprintTrail', expectedKey: 'visibility', labelKey: 'text' },
+    social_engineer: { itemsPath: 'socialEngineer', expectedKey: 'kind', labelKey: 'text' },
+    cipher_quest: { itemsPath: 'cipherQuest', expectedKey: 'cipher', labelKey: 'text' },
+    normalise_it: { itemsPath: 'normaliseIt', expectedKey: 'violation', labelKey: 'text' },
+    subnet_calc: { itemsPath: 'subnetCalc', expectedKey: 'kind', labelKey: 'text' },
+    phish_inbox: { itemsPath: 'phishInbox', expectedKey: 'verdict', labelKey: 'text' },
+    build_pc: { itemsPath: 'buildPc', expectedKey: 'part', labelKey: 'text' },
+    os_sched: { itemsPath: 'osSched', expectedKey: 'algo', labelKey: 'text' },
+    query_visual: { itemsPath: 'queryVisual', expectedKey: 'op', labelKey: 'text' },
+    schema_arch: { itemsPath: 'schemaArch', expectedKey: 'rel', labelKey: 'text' },
+    tag_soup_repair: { itemsPath: 'tagSoupRepair', expectedKey: 'bug', labelKey: 'text' },
+    selector_golf: { itemsPath: 'selectorGolf', expectedKey: 'kind', labelKey: 'text' },
+    css_sliders: { itemsPath: 'cssSliders', expectedKey: 'prop', labelKey: 'text' },
+  };
+  if (PICK_LIST_META[type]) {
+    const meta = PICK_LIST_META[type];
+    const items: any[] = cfg[meta.itemsPath]?.items || [];
+    const expectedKey = meta.expectedKey;
+    const labelOf = (it: any) => String(it?.[meta.labelKey] ?? it?.value ?? it?.name ?? '');
+    return (
+      <div style={wrap}>
+        {items.map((it, i) => {
+          const expected = String((it as any)?.[expectedKey] || '').toLowerCase();
+          const got = String(parsed[String(i)] || '').toLowerCase();
+          const ok = got === expected && !!expected;
+          return (
+            <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
+              <span style={tickCell(ok)}>{ok ? '✓' : '✗'}</span>
+              <span style={{ flex: 1 }}>{labelOf(it)}</span>
+              <span style={reviewMuted}>got <code>{got || '(blank)'}</code> · expected <code>{expected}</code></span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (type === 'password_forge') {
+    const ruleIds: string[] = (cfg.passwordForge?.rules || []).filter((r: any) => PASSWORD_RULE_IDS.includes(r));
+    const pw = String(parsed.password || '');
+    const checks = checkPassword(pw, ruleIds);
+    return (
+      <div style={wrap}>
+        <div style={{ fontSize: 13 }}>Password: <code>{pw || '(blank)'}</code></div>
+        {checks.map((c) => (
+          <div key={c.id} style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
+            <span style={tickCell(c.ok)}>{c.ok ? '✓' : '✗'}</span>
+            <span>{c.label}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (type === 'find_duplicate') {
+    const items: any[] = cfg.findDuplicate?.items || [];
+    return (
+      <div style={wrap}>
+        {items.map((it, i) => {
+          const rows: string[][] = Array.isArray(it?.rows) ? it.rows : [];
+          const dups = findDuplicateRows(rows);
+          const got = String(parsed[String(i)] || '');
+          const gotIdx = parseInt(got, 10);
+          const ok = !isNaN(gotIdx) && dups.has(gotIdx);
+          return (
+            <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
+              <span style={tickCell(ok)}>{ok ? '✓' : '✗'}</span>
+              <span>Table {i + 1}</span>
+              <span style={reviewMuted}>got row <code>{got || '(blank)'}</code> · duplicates at <code>{[...dups].sort((a, b) => a - b).join(', ')}</code></span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (type === 'bin_search') {
+    const items: any[] = cfg.binSearch?.items || [];
+    return (
+      <div style={wrap}>
+        {items.map((it, i) => {
+          const list: number[] = Array.isArray(it?.list) ? it.list.map((n: any) => Number(n)).filter((n: number) => Number.isFinite(n)) : [];
+          const target = Number(it?.target);
+          const sim = list.length > 0 && Number.isFinite(target) ? simulateBinSearch(list, target) : null;
+          const expected = sim ? sim.mids.join(',') : '';
+          const got = String(parsed[String(i)] || '').split(/[,\s]+/).map((x) => x.trim()).filter(Boolean).join(',');
+          const ok = got === expected;
+          return (
+            <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
+              <span style={tickCell(ok)}>{ok ? '✓' : '✗'}</span>
+              <span>Target {target}</span>
+              <span style={reviewMuted}>got <code>{got || '(blank)'}</code> · expected <code>{expected}</code></span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (type === 'box_model') {
+    const items: any[] = cfg.boxModel?.items || [];
+    return (
+      <div style={wrap}>
+        {items.map((it, i) => {
+          const c = Number(it?.content) || 0, p = Number(it?.padding) || 0, b = Number(it?.border) || 0, mg = Number(it?.margin) || 0;
+          const expected = c + 2 * (p + b + mg);
+          const got = Number(parsed[String(i)]);
+          const ok = Number.isFinite(got) && got === expected;
+          return (
+            <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
+              <span style={tickCell(ok)}>{ok ? '✓' : '✗'}</span>
+              <span>c{c} p{p} b{b} m{mg}</span>
+              <span style={reviewMuted}>got <code>{Number.isFinite(got) ? got : '(blank)'}</code> · expected <code>{expected}</code></span>
+            </div>
+          );
+        })}
       </div>
     );
   }

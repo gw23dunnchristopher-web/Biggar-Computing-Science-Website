@@ -21,7 +21,7 @@ A Node.js/Express server, built with TypeScript, serves static content and provi
 - **Data Sculptor:** Sandboxed database tool with personal multi-database dashboards and advanced database design capabilities for teachers, including AI marking for SQL tasks.
 - **Code Editor Project Dashboards:** Personal project management for Python and HTML/CSS editors with cloud synchronization.
 - **Classwork Features:** View-tracking, auto-saved drafts, and fun activities (crossword, word search, matching, anagrams) with teacher editing and AI assistance.
-- **BHS Classwork App:** React SPA for AI-marked classwork with comprehensive teacher tools for class/student management, lesson editing, diverse question types, AI-judged marking, and Excel export.
+- **BHS Classwork App:** React SPA for AI-marked classwork with comprehensive teacher tools for class/student management, lesson editing, diverse question types, AI-judged marking, and Excel export. Includes 42 game-style activity types (10 original + 32 new across Internet Safety, Cyber Security, Databases, Web Development, and Computer Systems strands), most built on a shared pick-list pattern (`PickListPupilUI`/`PickListEditor` in `lesson-games.tsx`, `markPickListGeneric` in `classwork-ai.ts`).
 - **Per-student activity calendar:** Visualizes student engagement on the Analytics page.
 - **BHS Progress Tracker:** Unified SPA for teachers to view student progress across all courses.
 - **Site-Wide Student Login:** Vanilla-JS component for consistent student authentication.
