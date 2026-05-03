@@ -6,6 +6,19 @@ import Modal, { modalPrimaryBtn, modalSecondaryBtn } from '@/components/Modal';
 import RichTextEditor from '@/components/RichTextEditor';
 import PromptText, { parsePromptImageAlt, type PromptImageAlign } from '@/components/PromptText';
 import { api, getCurrentRole } from '@/lib/api';
+import {
+  HangmanPupilUI, HangmanEditor,
+  SpeedRoundPupilUI, SpeedRoundEditor,
+  OrderingPupilUI, OrderingEditor,
+  CaesarPupilUI, CaesarEditor,
+  SpotPhishPupilUI, SpotPhishEditor,
+  BinaryHexPupilUI, BinaryHexEditor,
+  BitOpsPupilUI, BitOpsEditor,
+  CodeTracerPupilUI, CodeTracerEditor,
+  FlowchartPupilUI, FlowchartEditor,
+  SortingRacePupilUI, SortingRaceEditor,
+  GameReview,
+} from './lesson-games';
 
 interface LessonInfo {
   id: string;
@@ -109,6 +122,17 @@ const TYPE_LABELS: Record<string, string> = {
   word_search: 'Word search',
   matching: 'Matching pairs',
   anagrams: 'Anagrams',
+  // Games
+  hangman: 'Hangman',
+  speed_round: 'Speed round (timed Q&A)',
+  ordering: 'Ordering / sequencing',
+  caesar_cipher: 'Caesar cipher challenge',
+  spot_phish: 'Spot the phish',
+  binary_hex: 'Binary / hex blitz',
+  bit_ops: 'Bit manipulation puzzle',
+  code_tracer: 'Code tracer',
+  flowchart_seq: 'Flowchart sequencer',
+  sorting_race: 'Sorting race',
   // No answer needed
   info_only: 'Information note (no answer needed)',
   text_only: 'Jotter task (answer in jotter, no digital submission)',
@@ -125,6 +149,7 @@ const TYPE_GROUPS: { label: string; types: string[] }[] = [
   { label: 'Embedded tools', types: ['python_task', 'html_task', 'sql_task', 'database_task'] },
   { label: 'Groups (show questions together)', types: ['group', 'video_group', 'passage', 'file_task', 'mc_group'] },
   { label: 'Fun activities', types: ['crossword', 'word_search', 'matching', 'anagrams'] },
+  { label: 'Games', types: ['hangman', 'speed_round', 'ordering', 'caesar_cipher', 'spot_phish', 'binary_hex', 'bit_ops', 'code_tracer', 'flowchart_seq', 'sorting_race'] },
   { label: 'No answer needed', types: ['info_only', 'text_only', 'section_header'] },
 ];
 
@@ -1807,6 +1832,9 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     // Fun-activity types — same JSON-into-text_answer storage as fill-in-blanks
     // so the cell-grid draft path picks them up for free.
     'crossword', 'word_search', 'matching', 'anagrams',
+    // Games — same JSON-into-text_answer storage as fun activities.
+    'hangman', 'speed_round', 'ordering', 'caesar_cipher', 'spot_phish',
+    'binary_hex', 'bit_ops', 'code_tracer', 'flowchart_seq', 'sorting_race',
     // File upload — file content stored as JSON in text_answer.
     'file_upload',
   ];
@@ -1833,7 +1861,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
       return { ...empty, fileUrl: fileUrl || null, linkUrl: url || null };
     }
     if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-        || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams') {
+        || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race') {
       const filled = Object.values(cellAnswers).some((v) => {
         if (Array.isArray(v)) return v.length > 0;
         return String(v || '').trim();
@@ -1873,7 +1901,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     if (draft) {
       if (draft.text_answer != null) {
         if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-            || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams') {
+            || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race') {
           try {
             const parsed = JSON.parse(draft.text_answer);
             if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
@@ -1918,7 +1946,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     // Hydrate inputs from the previous submission.
     if (last.text_answer != null) {
       if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-          || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams') {
+          || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race') {
         try {
           const parsed = JSON.parse(last.text_answer);
           if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
@@ -2055,7 +2083,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
           body.linkUrl = `${selectedProjectId}|${data?.name || ''}`;
         }
       } else if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-                 || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams') {
+                 || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race') {
         // Send the cell answers as JSON so the deterministic marker can
         // compare each one against the expected answers in the question config.
         // Same path serves the four fun-activity types — each renderer above
@@ -2136,7 +2164,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     codeProjectKind ? !!selectedProjectId :
     t === 'database_task' ? !!dbEmbedToken :
     (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-      || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams')
+      || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race')
       ? Object.values(cellAnswers).some((v) => {
           if (Array.isArray(v)) return v.length > 0;
           return !!String(v || '').trim();
@@ -2373,6 +2401,36 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
           cellAnswers={cellAnswers}
           setCellAnswers={setCellAnswers}
         />
+      )}
+      {t === 'hangman' && (
+        <HangmanPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'speed_round' && (
+        <SpeedRoundPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'ordering' && (
+        <OrderingPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />
+      )}
+      {t === 'caesar_cipher' && (
+        <CaesarPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'spot_phish' && (
+        <SpotPhishPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'binary_hex' && (
+        <BinaryHexPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />
+      )}
+      {t === 'bit_ops' && (
+        <BitOpsPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />
+      )}
+      {t === 'code_tracer' && (
+        <CodeTracerPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'flowchart_seq' && (
+        <FlowchartPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />
+      )}
+      {t === 'sorting_race' && (
+        <SortingRacePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
       )}
 
       {(t === 'short' || t === 'long' || t === 'code' || t === 'video_question') && (
@@ -3776,6 +3834,12 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
     );
   }
 
+  if (t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race') {
+    let parsed: any = {};
+    try { parsed = JSON.parse(s.text_answer || '{}') || {}; } catch {}
+    return <GameReview type={t} cfg={(question as any).config} parsed={parsed} questionId={String(question.id)} />;
+  }
+
   // short / long / code
   const text = s.text_answer || '';
   if (!text) return <span style={muted}>Empty answer.</span>;
@@ -4081,6 +4145,56 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
         })) }
       : { items: [{ answer: '', scrambled: '', hint: '' }] }
   );
+  // ─── Game config slots ───────────────────────────────────────────────
+  const [hangmanCfg, setHangmanCfg] = useState<any>(() =>
+    (cfg.hangman && Array.isArray(cfg.hangman.items))
+      ? { items: cfg.hangman.items.map((it: any) => ({ word: String(it?.word || '').toUpperCase(), hint: String(it?.hint || '') })) }
+      : { items: [{ word: '', hint: '' }] }
+  );
+  const [speedRoundCfg, setSpeedRoundCfg] = useState<any>(() =>
+    (cfg.speedRound && Array.isArray(cfg.speedRound.items))
+      ? { items: cfg.speedRound.items.map((it: any) => ({ q: String(it?.q || ''), a: String(it?.a || '') })), seconds: Number(cfg.speedRound.seconds) || 60 }
+      : { items: [{ q: '', a: '' }], seconds: 60 }
+  );
+  const [orderingCfg, setOrderingCfg] = useState<any>(() =>
+    (cfg.ordering && Array.isArray(cfg.ordering.items))
+      ? { prompt: String(cfg.ordering.prompt || ''), items: cfg.ordering.items.map((it: any) => ({ label: String(it?.label || '') })) }
+      : { prompt: '', items: [{ label: '' }, { label: '' }, { label: '' }] }
+  );
+  const [caesarCfg, setCaesarCfg] = useState<any>(() =>
+    (cfg.caesar && Array.isArray(cfg.caesar.items))
+      ? { items: cfg.caesar.items.map((it: any) => ({ text: String(it?.text || '').toUpperCase(), shift: Number(it?.shift) || 0, mode: it?.mode === 'decode' ? 'decode' : 'encode' })) }
+      : { items: [{ text: '', shift: 3, mode: 'encode' }] }
+  );
+  const [spotPhishCfg, setSpotPhishCfg] = useState<any>(() =>
+    (cfg.spotPhish && Array.isArray(cfg.spotPhish.items))
+      ? { items: cfg.spotPhish.items.map((it: any) => ({ text: String(it?.text || ''), isPhish: !!it?.isPhish, why: String(it?.why || '') })) }
+      : { items: [{ text: '', isPhish: false, why: '' }] }
+  );
+  const [binaryHexCfg, setBinaryHexCfg] = useState<any>(() =>
+    cfg.binaryHex && typeof cfg.binaryHex === 'object'
+      ? { rounds: Number(cfg.binaryHex.rounds) || 10, maxValue: Number(cfg.binaryHex.maxValue) || 255, modes: Array.isArray(cfg.binaryHex.modes) ? cfg.binaryHex.modes : ['dec_to_bin','bin_to_dec','dec_to_hex','hex_to_dec'] }
+      : { rounds: 10, maxValue: 255, modes: ['dec_to_bin','bin_to_dec','dec_to_hex','hex_to_dec'] }
+  );
+  const [bitOpsCfg, setBitOpsCfg] = useState<any>(() =>
+    cfg.bitOps && typeof cfg.bitOps === 'object'
+      ? { rounds: Number(cfg.bitOps.rounds) || 6, bitWidth: Number(cfg.bitOps.bitWidth) || 8, ops: Array.isArray(cfg.bitOps.ops) ? cfg.bitOps.ops : ['AND','OR','XOR','NOT','SHL','SHR'] }
+      : { rounds: 6, bitWidth: 8, ops: ['AND','OR','XOR','NOT','SHL','SHR'] }
+  );
+  const [codeTracerCfg, setCodeTracerCfg] = useState<any>(() =>
+    cfg.codeTracer && typeof cfg.codeTracer === 'object'
+      ? { language: cfg.codeTracer.language === 'pseudocode' ? 'pseudocode' : 'python', code: String(cfg.codeTracer.code || ''), steps: Array.isArray(cfg.codeTracer.steps) ? cfg.codeTracer.steps.map((s: any) => ({ note: String(s?.note || ''), vars: Array.isArray(s?.vars) ? s.vars.map((v: any) => ({ name: String(v?.name || ''), value: String(v?.value || '') })) : [] })) : [] }
+      : { language: 'python', code: '', steps: [{ note: '', vars: [{ name: '', value: '' }] }] }
+  );
+  const [flowchartCfg, setFlowchartCfg] = useState<any>(() =>
+    (cfg.flowchartSeq && Array.isArray(cfg.flowchartSeq.blocks))
+      ? { prompt: String(cfg.flowchartSeq.prompt || ''), blocks: cfg.flowchartSeq.blocks.map((b: any) => ({ shape: ['process','decision','io','terminator'].includes(b?.shape) ? b.shape : 'process', label: String(b?.label || '') })) }
+      : { prompt: '', blocks: [{ shape: 'terminator', label: 'Start' }, { shape: 'process', label: '' }, { shape: 'terminator', label: 'End' }] }
+  );
+  const [sortingRaceCfg, setSortingRaceCfg] = useState<any>(() => {
+    const list = (cfg.sortingRace && Array.isArray(cfg.sortingRace.list)) ? cfg.sortingRace.list.map((n: any) => Number(n)).filter((n: number) => Number.isFinite(n)) : [5, 3, 8, 1, 4, 2];
+    return { algorithm: ['bubble','selection','insertion'].includes(cfg.sortingRace?.algorithm) ? cfg.sortingRace.algorithm : 'bubble', list, _listText: list.join(', ') };
+  });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   // Inline image upload state for the prompt textarea: lets a teacher paste
@@ -4506,6 +4620,89 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
           .filter((it: any) => it.answer.replace(/\s/g, '').length >= 2);
         if (cleaned.length === 0) throw new Error('Add at least one anagram with an answer of 2 or more letters.');
         body.config = { anagrams: { items: cleaned } };
+      }
+      if (type === 'hangman') {
+        const items = (Array.isArray(hangmanCfg.items) ? hangmanCfg.items : [])
+          .map((it: any) => ({ word: String(it?.word || '').toUpperCase().replace(/[^A-Z ]/g, '').trim(), hint: String(it?.hint || '').trim() }))
+          .filter((it: any) => it.word.replace(/\s/g, '').length >= 2);
+        if (items.length === 0) throw new Error('Add at least one hangman word of 2 or more letters.');
+        body.config = { hangman: { items } };
+      }
+      if (type === 'speed_round') {
+        const items = (Array.isArray(speedRoundCfg.items) ? speedRoundCfg.items : [])
+          .map((it: any) => ({ q: String(it?.q || '').trim(), a: String(it?.a || '').trim() }))
+          .filter((it: any) => it.q && it.a);
+        if (items.length === 0) throw new Error('Add at least one speed-round question with an answer.');
+        body.config = { speedRound: { items, seconds: Math.max(5, Math.min(600, Number(speedRoundCfg.seconds) || 60)) } };
+      }
+      if (type === 'ordering') {
+        const items = (Array.isArray(orderingCfg.items) ? orderingCfg.items : [])
+          .map((it: any) => ({ label: String(it?.label || '').trim() }))
+          .filter((it: any) => it.label);
+        if (items.length < 2) throw new Error('Add at least two steps in their correct order.');
+        body.config = { ordering: { prompt: String(orderingCfg.prompt || '').trim(), items } };
+      }
+      if (type === 'caesar_cipher') {
+        const items = (Array.isArray(caesarCfg.items) ? caesarCfg.items : [])
+          .map((it: any) => ({ text: String(it?.text || '').toUpperCase().replace(/[^A-Z ]/g, ''), shift: Number(it?.shift) || 0, mode: it?.mode === 'decode' ? 'decode' : 'encode' }))
+          .filter((it: any) => it.text.length >= 2);
+        if (items.length === 0) throw new Error('Add at least one Caesar cipher message of 2 or more letters.');
+        body.config = { caesar: { items } };
+      }
+      if (type === 'spot_phish') {
+        const items = (Array.isArray(spotPhishCfg.items) ? spotPhishCfg.items : [])
+          .map((it: any) => ({ text: String(it?.text || '').trim(), isPhish: !!it?.isPhish, why: String(it?.why || '').trim() }))
+          .filter((it: any) => it.text);
+        if (items.length === 0) throw new Error('Add at least one phishing example.');
+        body.config = { spotPhish: { items } };
+      }
+      if (type === 'binary_hex') {
+        const allModes = ['dec_to_bin', 'bin_to_dec', 'dec_to_hex', 'hex_to_dec'];
+        const modes = (Array.isArray(binaryHexCfg.modes) ? binaryHexCfg.modes : []).filter((m: any) => allModes.includes(m));
+        if (modes.length === 0) throw new Error('Pick at least one conversion mode.');
+        body.config = { binaryHex: {
+          rounds: Math.max(1, Math.min(50, Number(binaryHexCfg.rounds) || 10)),
+          maxValue: Math.max(15, Math.min(65535, Number(binaryHexCfg.maxValue) || 255)),
+          modes,
+        } };
+      }
+      if (type === 'bit_ops') {
+        const allOps = ['AND', 'OR', 'XOR', 'NOT', 'SHL', 'SHR'];
+        const ops = (Array.isArray(bitOpsCfg.ops) ? bitOpsCfg.ops : []).filter((o: any) => allOps.includes(o));
+        if (ops.length === 0) throw new Error('Pick at least one bitwise operation.');
+        body.config = { bitOps: {
+          rounds: Math.max(1, Math.min(30, Number(bitOpsCfg.rounds) || 6)),
+          bitWidth: Math.max(4, Math.min(16, Number(bitOpsCfg.bitWidth) || 8)),
+          ops,
+        } };
+      }
+      if (type === 'code_tracer') {
+        const code = String(codeTracerCfg.code || '').trim();
+        if (!code) throw new Error('Paste the code snippet pupils should trace.');
+        const steps = (Array.isArray(codeTracerCfg.steps) ? codeTracerCfg.steps : [])
+          .map((s: any) => ({
+            note: String(s?.note || '').trim(),
+            vars: (Array.isArray(s?.vars) ? s.vars : [])
+              .map((v: any) => ({ name: String(v?.name || '').trim(), value: String(v?.value || '').trim() }))
+              .filter((v: any) => v.name),
+          }))
+          .filter((s: any) => s.vars.length > 0);
+        if (steps.length === 0) throw new Error('Add at least one trace step with a variable.');
+        body.config = { codeTracer: { language: codeTracerCfg.language === 'pseudocode' ? 'pseudocode' : 'python', code, steps } };
+      }
+      if (type === 'flowchart_seq') {
+        const blocks = (Array.isArray(flowchartCfg.blocks) ? flowchartCfg.blocks : [])
+          .map((b: any) => ({ shape: ['process','decision','io','terminator'].includes(b?.shape) ? b.shape : 'process', label: String(b?.label || '').trim() }))
+          .filter((b: any) => b.label);
+        if (blocks.length < 2) throw new Error('Add at least two flowchart blocks in correct order.');
+        body.config = { flowchartSeq: { prompt: String(flowchartCfg.prompt || '').trim(), blocks } };
+      }
+      if (type === 'sorting_race') {
+        const list = (typeof sortingRaceCfg._listText === 'string' ? sortingRaceCfg._listText : (Array.isArray(sortingRaceCfg.list) ? sortingRaceCfg.list.join(',') : ''))
+          .split(/[,\s]+/).map((x: string) => Number(x)).filter((n: number) => Number.isFinite(n));
+        if (list.length < 2) throw new Error('Enter a list of at least 2 numbers to sort.');
+        const algorithm = ['bubble','selection','insertion'].includes(sortingRaceCfg.algorithm) ? sortingRaceCfg.algorithm : 'bubble';
+        body.config = { sortingRace: { list, algorithm } };
       }
       if (isEdit) {
         await api(`/api/classwork/questions/${existing!.id}`, {
@@ -5409,6 +5606,66 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
           <div style={fieldLabel as any}>
             <div style={{ fontWeight: 600 }}>Anagrams</div>
             <AnagramsEditor cfg={anagramsCfg} setCfg={setAnagramsCfg} />
+          </div>
+        )}
+        {type === 'hangman' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Hangman</div>
+            <HangmanEditor cfg={hangmanCfg} setCfg={setHangmanCfg} />
+          </div>
+        )}
+        {type === 'speed_round' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Speed round</div>
+            <SpeedRoundEditor cfg={speedRoundCfg} setCfg={setSpeedRoundCfg} />
+          </div>
+        )}
+        {type === 'ordering' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Ordering / sequencing</div>
+            <OrderingEditor cfg={orderingCfg} setCfg={setOrderingCfg} />
+          </div>
+        )}
+        {type === 'caesar_cipher' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Caesar cipher</div>
+            <CaesarEditor cfg={caesarCfg} setCfg={setCaesarCfg} />
+          </div>
+        )}
+        {type === 'spot_phish' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Spot the phish</div>
+            <SpotPhishEditor cfg={spotPhishCfg} setCfg={setSpotPhishCfg} />
+          </div>
+        )}
+        {type === 'binary_hex' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Binary / hex blitz</div>
+            <BinaryHexEditor cfg={binaryHexCfg} setCfg={setBinaryHexCfg} />
+          </div>
+        )}
+        {type === 'bit_ops' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Bit-manipulation puzzle</div>
+            <BitOpsEditor cfg={bitOpsCfg} setCfg={setBitOpsCfg} />
+          </div>
+        )}
+        {type === 'code_tracer' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Code tracer</div>
+            <CodeTracerEditor cfg={codeTracerCfg} setCfg={setCodeTracerCfg} />
+          </div>
+        )}
+        {type === 'flowchart_seq' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Flowchart sequencer</div>
+            <FlowchartEditor cfg={flowchartCfg} setCfg={setFlowchartCfg} />
+          </div>
+        )}
+        {type === 'sorting_race' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Sorting race</div>
+            <SortingRaceEditor cfg={sortingRaceCfg} setCfg={setSortingRaceCfg} />
           </div>
         )}
         {type !== 'section_header' && (

@@ -110,6 +110,26 @@ export async function markSubmission(
         return markMatching(q, s);
       case 'anagrams':
         return markAnagrams(q, s);
+      case 'hangman':
+        return markHangman(q, s);
+      case 'speed_round':
+        return markSpeedRound(q, s);
+      case 'ordering':
+        return markOrdering(q, s);
+      case 'caesar_cipher':
+        return markCaesarCipher(q, s);
+      case 'spot_phish':
+        return markSpotPhish(q, s);
+      case 'binary_hex':
+        return markBinaryHex(q, s);
+      case 'bit_ops':
+        return markBitOps(q, s);
+      case 'code_tracer':
+        return markCodeTracer(q, s);
+      case 'flowchart_seq':
+        return markFlowchartSeq(q, s);
+      case 'sorting_race':
+        return markSortingRace(q, s);
       case 'file_upload':
         return await markFileUpload(q, s);
       case 'info_only':
@@ -1987,4 +2007,294 @@ export async function suggestCrosswordClues(words: string[], topic: string): Pro
     console.error('[classwork-ai] suggestCrosswordClues failed:', err);
     return cleaned.map(() => null);
   }
+}
+
+/* ============================================================================
+   GAMES (10 new types) — deterministic auto-marking. Shape mirrors the
+   client-side helpers in classwork-client/src/pages/lesson-games.tsx so
+   server and client agree on expected answers (especially for the
+   procedurally generated Binary/Hex Blitz and Bit-Ops Puzzle).
+   ============================================================================ */
+
+function _gStringHash(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 16777619) >>> 0; }
+  return h >>> 0;
+}
+function _gMulberry32(seedNum: number) {
+  let s = seedNum >>> 0;
+  return function () {
+    s = (s + 0x6D2B79F5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function _gCaesar(text: string, shift: number): string {
+  const sh = ((Math.round(shift) % 26) + 26) % 26;
+  return String(text || '').toUpperCase().replace(/[A-Z]/g, (c) =>
+    String.fromCharCode(((c.charCodeAt(0) - 65 + sh) % 26) + 65)
+  );
+}
+function _gPadBin(n: number, width: number): string {
+  let s = (n >>> 0).toString(2);
+  if (s.length > width) s = s.slice(-width);
+  while (s.length < width) s = '0' + s;
+  return s;
+}
+function _gNorm(v: any): string {
+  return String(v == null ? '' : v).trim().toUpperCase().replace(/\s+/g, ' ');
+}
+
+/* ---------- Hangman ---------- */
+function markHangman(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.hangman?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  let parsed: any = null;
+  try { parsed = JSON.parse(s.text_answer || '{}'); } catch { parsed = null; }
+  if (!parsed || typeof parsed !== 'object') return null;
+  let correct = 0;
+  const wrongWords: string[] = [];
+  for (let i = 0; i < items.length; i++) {
+    const word = String(items[i]?.word || '').toUpperCase();
+    const state = parsed[String(i)] || {};
+    const guessed: string[] = Array.isArray(state.guessed) ? state.guessed.map((g: any) => String(g).toUpperCase()) : [];
+    const guessedSet = new Set(guessed);
+    const letters = new Set(word.split('').filter((ch) => /[A-Z]/.test(ch)));
+    const wrong = guessed.filter((g) => !letters.has(g));
+    const won = [...letters].every((l) => guessedSet.has(l));
+    if (won && wrong.length < 6) correct++;
+    else wrongWords.push(word);
+  }
+  const breakdown = wrongWords.length === 0 ? 'every word solved' : `still to solve: ${wrongWords.slice(0, 5).join(', ')}${wrongWords.length > 5 ? '…' : ''}`;
+  return buildGameResult(correct, items.length, q.max_marks, breakdown);
+}
+
+/* ---------- Speed round ---------- */
+function markSpeedRound(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.speedRound?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  const wrong: string[] = [];
+  for (let i = 0; i < items.length; i++) {
+    const expected = String(items[i]?.a || '');
+    const accepts = expected.split(',').map((x) => _gNorm(x)).filter(Boolean);
+    const got = _gNorm(parsed[String(i)]);
+    if (accepts.length > 0 && accepts.includes(got)) correct++;
+    else wrong.push(`Q${i + 1}`);
+  }
+  const breakdown = wrong.length === 0 ? 'every answer correct' : `missed: ${wrong.slice(0, 5).join(', ')}${wrong.length > 5 ? '…' : ''}`;
+  return buildGameResult(correct, items.length, q.max_marks, breakdown);
+}
+
+/* ---------- Ordering / sequencing ---------- */
+function markOrdering(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.ordering?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  let parsed: any = null;
+  try { parsed = JSON.parse(s.text_answer || '{}'); } catch { parsed = null; }
+  if (!parsed) return null;
+  const order: number[] = Array.isArray(parsed.order) ? parsed.order : [];
+  let correct = 0;
+  for (let i = 0; i < items.length; i++) {
+    if (order[i] === i) correct++;
+  }
+  const breakdown = correct === items.length ? 'sequence is perfect' : `${items.length - correct} step${items.length - correct === 1 ? '' : 's'} out of place`;
+  return buildGameResult(correct, items.length, q.max_marks, breakdown);
+}
+
+/* ---------- Caesar cipher ---------- */
+function markCaesarCipher(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.caesar?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  const wrong: string[] = [];
+  for (let i = 0; i < items.length; i++) {
+    const it = items[i];
+    const mode = it?.mode === 'decode' ? 'decode' : 'encode';
+    const plain = String(it?.text || '').toUpperCase();
+    const cipher = _gCaesar(plain, Number(it?.shift) || 0);
+    const expected = mode === 'encode' ? cipher : plain;
+    const got = _gNorm(parsed[String(i)]);
+    if (got === _gNorm(expected)) correct++;
+    else wrong.push(`Msg ${i + 1}`);
+  }
+  const breakdown = wrong.length === 0 ? 'all messages correct' : `still to fix: ${wrong.slice(0, 5).join(', ')}${wrong.length > 5 ? '…' : ''}`;
+  return buildGameResult(correct, items.length, q.max_marks, breakdown);
+}
+
+/* ---------- Spot the phish ---------- */
+function markSpotPhish(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const items = q.config?.spotPhish?.items;
+  if (!Array.isArray(items) || items.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  for (let i = 0; i < items.length; i++) {
+    const expected = items[i]?.isPhish ? 'phish' : 'safe';
+    if (String(parsed[String(i)] || '') === expected) correct++;
+  }
+  const breakdown = correct === items.length ? 'perfectly classified' : `${items.length - correct} misclassified`;
+  return buildGameResult(correct, items.length, q.max_marks, breakdown);
+}
+
+/* ---------- Binary / Hex Blitz ---------- */
+function markBinaryHex(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const cfg = q.config?.binaryHex;
+  if (!cfg) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  const rounds = Math.max(1, Math.min(50, Number(cfg.rounds) || 10));
+  const maxValue = Math.max(15, Math.min(65535, Number(cfg.maxValue) || 255));
+  const allModes = ['dec_to_bin', 'bin_to_dec', 'dec_to_hex', 'hex_to_dec'];
+  const modes: string[] = (Array.isArray(cfg.modes) && cfg.modes.length)
+    ? cfg.modes.filter((m: any) => allModes.includes(m))
+    : allModes;
+  if (modes.length === 0) modes.push('dec_to_bin');
+  const rng = _gMulberry32(_gStringHash(`bh-${q.id}`));
+  let correct = 0;
+  for (let i = 0; i < rounds; i++) {
+    const mode = modes[Math.floor(rng() * modes.length)];
+    const n = 1 + Math.floor(rng() * (maxValue - 1));
+    let expected: string;
+    if (mode === 'dec_to_bin') expected = n.toString(2);
+    else if (mode === 'bin_to_dec') expected = String(n);
+    else if (mode === 'dec_to_hex') expected = n.toString(16).toUpperCase();
+    else expected = String(n);
+    const got = String(parsed[String(i)] || '').trim().toUpperCase();
+    if (got === expected.toUpperCase()) correct++;
+  }
+  const breakdown = correct === rounds ? 'every conversion correct' : `${rounds - correct} to fix`;
+  return buildGameResult(correct, rounds, q.max_marks, breakdown);
+}
+
+/* ---------- Bit Manipulation Puzzle ---------- */
+function markBitOps(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const cfg = q.config?.bitOps;
+  if (!cfg) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  const rounds = Math.max(1, Math.min(30, Number(cfg.rounds) || 6));
+  const bitWidth = Math.max(4, Math.min(16, Number(cfg.bitWidth) || 8));
+  const allOps = ['AND', 'OR', 'XOR', 'NOT', 'SHL', 'SHR'];
+  const ops: string[] = (Array.isArray(cfg.ops) && cfg.ops.length)
+    ? cfg.ops.filter((o: any) => allOps.includes(o))
+    : allOps;
+  if (ops.length === 0) ops.push('AND');
+  const mask = (1 << bitWidth) - 1;
+  const rng = _gMulberry32(_gStringHash(`bo-${q.id}`));
+  let correct = 0;
+  for (let i = 0; i < rounds; i++) {
+    const op = ops[Math.floor(rng() * ops.length)];
+    const a = Math.floor(rng() * (mask + 1));
+    const b = Math.floor(rng() * (mask + 1));
+    const shift = 1 + Math.floor(rng() * Math.min(4, bitWidth - 1));
+    let expected: string;
+    if (op === 'AND') expected = _gPadBin(a & b, bitWidth);
+    else if (op === 'OR') expected = _gPadBin(a | b, bitWidth);
+    else if (op === 'XOR') expected = _gPadBin(a ^ b, bitWidth);
+    else if (op === 'NOT') expected = _gPadBin((~a) & mask, bitWidth);
+    else if (op === 'SHL') expected = _gPadBin((a << shift) & mask, bitWidth);
+    else expected = _gPadBin(a >> shift, bitWidth);
+    const got = String(parsed[String(i)] || '').replace(/[^01]/g, '');
+    if (got === expected) correct++;
+  }
+  const breakdown = correct === rounds ? 'every operation correct' : `${rounds - correct} to fix`;
+  return buildGameResult(correct, rounds, q.max_marks, breakdown);
+}
+
+/* ---------- Code Tracer ---------- */
+function markCodeTracer(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const steps = q.config?.codeTracer?.steps;
+  if (!Array.isArray(steps) || steps.length === 0) return null;
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  let correct = 0;
+  let total = 0;
+  for (let si = 0; si < steps.length; si++) {
+    const vars = Array.isArray(steps[si]?.vars) ? steps[si].vars : [];
+    for (const v of vars) {
+      const name = String(v?.name || '');
+      if (!name) continue;
+      total++;
+      const expected = _gNorm(v?.value);
+      const got = _gNorm(parsed[`${si}.${name}`]);
+      if (got === expected) correct++;
+    }
+  }
+  if (total === 0) return null;
+  const breakdown = correct === total ? 'trace is spot on' : `${total - correct} value${total - correct === 1 ? '' : 's'} to fix`;
+  return buildGameResult(correct, total, q.max_marks, breakdown);
+}
+
+/* ---------- Flowchart Sequencer ---------- */
+function markFlowchartSeq(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const blocks = q.config?.flowchartSeq?.blocks;
+  if (!Array.isArray(blocks) || blocks.length === 0) return null;
+  let parsed: any = null;
+  try { parsed = JSON.parse(s.text_answer || '{}'); } catch { parsed = null; }
+  if (!parsed) return null;
+  const order: number[] = Array.isArray(parsed.order) ? parsed.order : [];
+  let correct = 0;
+  for (let i = 0; i < blocks.length; i++) {
+    if (order[i] === i) correct++;
+  }
+  const breakdown = correct === blocks.length ? 'flowchart is perfect' : `${blocks.length - correct} block${blocks.length - correct === 1 ? '' : 's'} out of place`;
+  return buildGameResult(correct, blocks.length, q.max_marks, breakdown);
+}
+
+/* ---------- Sorting Race ---------- */
+function markSortingRace(q: AIQuestion, s: AISubmission): AIMarkResult | null {
+  const cfg = q.config?.sortingRace;
+  if (!cfg) return null;
+  const list: number[] = Array.isArray(cfg.list) ? cfg.list.map((n: any) => Number(n)).filter((n: number) => Number.isFinite(n)) : [];
+  if (list.length === 0) return null;
+  const algorithm = ['bubble', 'selection', 'insertion'].includes(cfg.algorithm) ? cfg.algorithm : 'bubble';
+  const parsed = parseAnswerJson(s);
+  if (!parsed) return null;
+  // Re-simulate to get expected stats.
+  const a = list.slice();
+  let comparisons = 0, swaps = 0;
+  if (algorithm === 'selection') {
+    for (let i = 0; i < a.length - 1; i++) {
+      let minIdx = i;
+      for (let j = i + 1; j < a.length; j++) {
+        comparisons++;
+        if (a[j] < a[minIdx]) minIdx = j;
+      }
+      if (minIdx !== i) { [a[i], a[minIdx]] = [a[minIdx], a[i]]; swaps++; }
+    }
+  } else if (algorithm === 'insertion') {
+    for (let i = 1; i < a.length; i++) {
+      let j = i;
+      while (j > 0) {
+        comparisons++;
+        if (a[j - 1] > a[j]) { [a[j - 1], a[j]] = [a[j], a[j - 1]]; swaps++; j--; } else break;
+      }
+    }
+  } else {
+    for (let i = 0; i < a.length - 1; i++) {
+      for (let j = 0; j < a.length - 1 - i; j++) {
+        comparisons++;
+        if (a[j] > a[j + 1]) { [a[j], a[j + 1]] = [a[j + 1], a[j]]; swaps++; }
+      }
+    }
+  }
+  const expectedSorted = a.join(',');
+  const gotSorted = String(parsed.sorted || '').split(/[,\s]+/).map((x) => x.trim()).filter(Boolean).join(',');
+  const cmpOk = String(parsed.comparisons || '').trim() === String(comparisons);
+  const swapOk = String(parsed.swaps || '').trim() === String(swaps);
+  const sortOk = gotSorted === expectedSorted;
+  const correct = (cmpOk ? 1 : 0) + (swapOk ? 1 : 0) + (sortOk ? 1 : 0);
+  const wrong: string[] = [];
+  if (!cmpOk) wrong.push('comparisons');
+  if (!swapOk) wrong.push('swaps');
+  if (!sortOk) wrong.push('sorted list');
+  const breakdown = wrong.length === 0 ? 'all three values correct' : `still to fix: ${wrong.join(', ')}`;
+  return buildGameResult(correct, 3, q.max_marks, breakdown);
 }

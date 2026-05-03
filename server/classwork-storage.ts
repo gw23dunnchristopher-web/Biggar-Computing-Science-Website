@@ -55,6 +55,18 @@ export const CLASSWORK_QUESTION_TYPES = [
   'word_search',
   'matching',
   'anagrams',
+  // Game types — same JSON-into-text_answer shape as fun activities.
+  // Each game's config sits under a different key on q.config.
+  'hangman',
+  'speed_round',
+  'ordering',
+  'caesar_cipher',
+  'spot_phish',
+  'binary_hex',
+  'bit_ops',
+  'code_tracer',
+  'flowchart_seq',
+  'sorting_race',
   // Pupil uploads a plain-text or code file (.txt/.py/.csv/.html/.js).
   // The file is read as text in the browser and stored as JSON in text_answer
   // so the AI can read the content directly without object storage.
