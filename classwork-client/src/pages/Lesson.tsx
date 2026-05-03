@@ -103,6 +103,7 @@ const TYPE_LABELS: Record<string, string> = {
   passage: 'Reading passage (add questions underneath)',
   file_task: 'File task (students upload a file, then answer follow-ups)',
   mc_group: 'Multiple choice group (a, b, c… all answered & submitted together)',
+  group: 'Question group (any types shown together — replaces passage & video)',
   // Fun activities
   crossword: 'Crossword puzzle',
   word_search: 'Word search',
@@ -122,7 +123,7 @@ const TYPE_GROUPS: { label: string; types: string[] }[] = [
   { label: 'Written answers', types: ['short', 'long', 'code', 'multiple_choice', 'fill_in_blanks', 'table', 'labeled_inputs', 'mc_group'] },
   { label: 'File & project uploads', types: ['screenshot', 'file_upload', 'presentation', 'project', 'scratch_link', 'makecode_link', 'google_sites_link'] },
   { label: 'Embedded tools', types: ['python_task', 'html_task', 'sql_task', 'database_task'] },
-  { label: 'Video, reading & file groups', types: ['video_group', 'passage', 'file_task'] },
+  { label: 'Groups (show questions together)', types: ['group', 'video_group', 'passage', 'file_task', 'mc_group'] },
   { label: 'Fun activities', types: ['crossword', 'word_search', 'matching', 'anagrams'] },
   { label: 'No answer needed', types: ['info_only', 'text_only', 'section_header'] },
 ];
@@ -240,7 +241,7 @@ export default function Lesson() {
   // Progress tracking — counts answerable, non-extension questions only.
   // Excludes: passage, video_group (container cards), info_only, section_header, text_only.
   const mainCountableQs = questions.filter(
-    (q) => !q.is_extension && !['passage', 'video_group', 'file_task', 'mc_group', 'info_only', 'section_header', 'text_only'].includes(q.question_type)
+    (q) => !q.is_extension && !['passage', 'video_group', 'file_task', 'mc_group', 'group', 'info_only', 'section_header', 'text_only'].includes(q.question_type)
   );
   const mainAnsweredCount = mainCountableQs.filter(
     (q) => submissions.some((s) => s.question_id === q.id) || previewAnsweredQIds.has(q.id)
@@ -476,7 +477,7 @@ export default function Lesson() {
             </button>
             {!previewAsStudent && <NewQuestionButton
               lessonId={lessonId}
-              passages={questions.filter((q) => q.question_type === 'passage' || q.question_type === 'video_group' || q.question_type === 'file_task' || q.question_type === 'mc_group')}
+              passages={questions.filter((q) => q.question_type === 'passage' || q.question_type === 'video_group' || q.question_type === 'file_task' || q.question_type === 'mc_group' || q.question_type === 'group')}
               onCreated={refresh}
             />}
           </>
@@ -517,9 +518,9 @@ export default function Lesson() {
           const items: Item[] = [];
           for (const q of qs) {
             if (consumed.has(q.id)) continue;
-            if (q.question_type === 'passage' || q.question_type === 'video_group' || q.question_type === 'file_task' || q.question_type === 'mc_group') {
+            if (q.question_type === 'passage' || q.question_type === 'video_group' || q.question_type === 'file_task' || q.question_type === 'mc_group' || q.question_type === 'group') {
               const children = qs.filter((c) =>
-                c.id !== q.id && c.question_type !== 'passage' && c.question_type !== 'video_group' && c.question_type !== 'file_task' && c.question_type !== 'mc_group' && c.passage_id === q.id && !consumed.has(c.id)
+                c.id !== q.id && c.question_type !== 'passage' && c.question_type !== 'video_group' && c.question_type !== 'file_task' && c.question_type !== 'mc_group' && c.question_type !== 'group' && c.passage_id === q.id && !consumed.has(c.id)
               );
               children.forEach((c) => consumed.add(c.id));
               consumed.add(q.id);
@@ -575,7 +576,7 @@ export default function Lesson() {
                     <>
                       <EditQuestionButton
                         question={q}
-                        passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task')}
+                        passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'group')}
                         onChanged={refresh}
                       />
                       {lesson?.unit_id && (
@@ -722,26 +723,35 @@ export default function Lesson() {
 
         // The passage panel: a card with the passage prompt + its own resources.
         // No marks, no marking scheme, no answer area — it's reading material only.
+        // Also handles the generic `group` type (any contextMode).
         const renderPassagePanel = (p: Question, label: string) => {
           const isVG = p.question_type === 'video_group';
+          const isGroup = p.question_type === 'group';
+          const groupCfg = isGroup ? ((p.config && typeof p.config === 'object') ? p.config as any : {}) : null;
+          const contextMode: string = groupCfg ? (groupCfg.contextMode || 'none') : '';
+          const groupBadgeColor = '#0ea5e9';
+          const bgColor = isVG ? 'var(--cw-surface)' : isGroup ? 'rgba(14,165,233,0.06)' : 'var(--cw-tint-amber-bg)';
+          const borderColor = isVG ? 'var(--cw-border)' : isGroup ? '#0ea5e9' : 'var(--cw-tint-amber-border)';
+          const fgColor = isVG ? 'var(--cw-ink)' : isGroup ? 'var(--cw-ink)' : 'var(--cw-tint-amber-ink)';
+          const badgeBg = isVG ? '#6366f1' : isGroup ? groupBadgeColor : '#f59e0b';
+          const badgeLabel = isVG ? '▶ Video' : isGroup ? '⊞ Group' : 'Passage';
+          const addLabel = isVG ? '+ Add question to this video'
+            : isGroup ? '+ Add question to this group'
+            : '+ Add question to this passage';
           return (
-            <div style={{
-              ...card,
-              background: isVG ? 'var(--cw-surface)' : 'var(--cw-tint-amber-bg)',
-              borderColor: isVG ? 'var(--cw-border)' : 'var(--cw-tint-amber-border)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: isVG ? 'var(--cw-ink)' : 'var(--cw-tint-amber-ink)', flexWrap: 'wrap' }}>
+            <div style={{ ...card, background: bgColor, borderColor }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: fgColor, flexWrap: 'wrap' }}>
                 <span style={{
                   fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase',
                   padding: '2px 8px', borderRadius: 999,
-                  background: isVG ? '#6366f1' : '#f59e0b', color: '#fff',
-                }}>{isVG ? '▶ Video' : 'Passage'}</span>
+                  background: badgeBg, color: '#fff',
+                }}>{badgeLabel}</span>
                 <span>{label}</span>
                 {role === 'teacher' && !previewAsStudent && (
                   <>
                     <EditQuestionButton
                       question={p}
-                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group').filter((x) => x.id !== p.id)}
+                      passages={questions.filter((x) => (x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'group') && x.id !== p.id)}
                       onChanged={refresh}
                     />
                     {lesson?.unit_id && (
@@ -755,9 +765,9 @@ export default function Lesson() {
                     )}
                     <NewQuestionButton
                       lessonId={lessonId}
-                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'mc_group')}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'mc_group' || x.question_type === 'group')}
                       initialPassageId={p.id}
-                      label={isVG ? '+ Add question to this video' : '+ Add question to this passage'}
+                      label={addLabel}
                       compact
                       onCreated={refresh}
                     />
@@ -766,6 +776,35 @@ export default function Lesson() {
               </div>
               {isVG ? (
                 <VideoQuestionPlayer config={p.config} compact />
+              ) : isGroup ? (
+                <>
+                  {contextMode === 'video' && groupCfg.video ? (
+                    <VideoQuestionPlayer config={{ video: groupCfg.video }} compact />
+                  ) : contextMode === 'image' && groupCfg.imageUrl ? (
+                    <div style={{ marginTop: 8 }}>
+                      <img
+                        src={groupCfg.imageUrl}
+                        alt="Group context"
+                        style={{ maxWidth: '100%', borderRadius: 6, border: '1px solid var(--cw-border)' }}
+                      />
+                    </div>
+                  ) : contextMode === 'text' && p.prompt ? (
+                    <>
+                      <div style={{ marginTop: 8, lineHeight: 1.55 }}>
+                        <PromptText text={p.prompt} />
+                      </div>
+                      <QuestionResources
+                        questionId={p.id}
+                        isTeacher={role === 'teacher' && !previewAsStudent}
+                        initialResources={resourcesByQuestion[p.id] || []}
+                      />
+                    </>
+                  ) : p.prompt ? (
+                    <div style={{ marginTop: 8, lineHeight: 1.55 }}>
+                      <PromptText text={p.prompt} />
+                    </div>
+                  ) : null}
+                </>
               ) : (
                 <>
                   <div style={{ marginTop: 8, lineHeight: 1.55 }}>
@@ -817,7 +856,7 @@ export default function Lesson() {
                     )}
                     <NewQuestionButton
                       lessonId={lessonId}
-                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'mc_group')}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'mc_group' || x.question_type === 'group')}
                       initialPassageId={p.id}
                       label="+ Add MC question to this group"
                       compact
@@ -862,7 +901,7 @@ export default function Lesson() {
                   <>
                     <EditQuestionButton
                       question={p}
-                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task').filter((x) => x.id !== p.id)}
+                      passages={questions.filter((x) => (x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'group') && x.id !== p.id)}
                       onChanged={refresh}
                     />
                     {lesson?.unit_id && (
@@ -876,7 +915,7 @@ export default function Lesson() {
                     )}
                     <NewQuestionButton
                       lessonId={lessonId}
-                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task')}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'group')}
                       initialPassageId={p.id}
                       label="+ Add question to this file task"
                       compact
@@ -951,7 +990,7 @@ export default function Lesson() {
               {role === 'teacher' && !previewAsStudent && (
                 <EditQuestionButton
                   question={s}
-                  passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task')}
+                  passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'group')}
                   onChanged={refresh}
                 />
               )}
@@ -1023,7 +1062,7 @@ export default function Lesson() {
                   {!collapsed && (
                     it.children.length === 0 ? (
                       <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0 }}>
-                        No tasks are attached to this {it.passage.question_type === 'video_group' ? 'video' : it.passage.question_type === 'file_task' ? 'file task' : it.passage.question_type === 'mc_group' ? 'group' : 'passage'} yet.
+                        No tasks are attached to this {it.passage.question_type === 'video_group' ? 'video' : it.passage.question_type === 'file_task' ? 'file task' : (it.passage.question_type === 'mc_group' || it.passage.question_type === 'group') ? 'group' : 'passage'} yet.
                       </p>
                     ) : it.children.map((c, ci) =>
                       renderQuestionCard(c, `${String.fromCharCode(97 + ci)})`, isExt)
@@ -1207,7 +1246,8 @@ export default function Lesson() {
             const isPassage = curItem.passage.question_type === 'passage';
             const isFT = curItem.passage.question_type === 'file_task';
             const isMCG = curItem.passage.question_type === 'mc_group';
-            const useStepped = isVG || isPassage;
+            const isGroup = curItem.passage.question_type === 'group';
+            const useStepped = isVG || isPassage || isGroup;
             const totalChildren = curItem.children.length;
             const rawStep = vgStep[curItem.passage.id] ?? 0;
             const curStep = Math.min(rawStep, Math.max(0, totalChildren - 1));
@@ -1222,7 +1262,7 @@ export default function Lesson() {
                 </div>
                 {totalChildren === 0 ? (
                   <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0, fontSize: 14 }}>
-                    No questions are attached to this {isVG ? 'video' : isFT ? 'file task' : isMCG ? 'group' : 'passage'} yet.
+                    No questions are attached to this {isVG ? 'video' : isFT ? 'file task' : (isMCG || isGroup) ? 'group' : 'passage'} yet.
                   </p>
                 ) : isMCG ? (
                   (role === 'student' || previewAsStudent) ? (
@@ -3820,6 +3860,11 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
   const [videoUrl, setVideoUrl] = useState(cfg.video && typeof cfg.video.url === 'string' ? cfg.video.url : '');
   const [videoFileName, setVideoFileName] = useState('');
   const [videoUploading, setVideoUploading] = useState(false);
+  // group type: contextMode and optional image URL (video uses the shared videoUrl/videoKind state)
+  const [groupContextMode, setGroupContextMode] = useState<'none' | 'text' | 'video' | 'image'>(
+    typeof cfg.contextMode === 'string' ? (cfg.contextMode as any) : 'none'
+  );
+  const [groupImageUrl, setGroupImageUrl] = useState(typeof cfg.imageUrl === 'string' ? cfg.imageUrl : '');
   // Resources staged inside the New-question modal. Each entry is the same
   // shape as a saved resource minus the id; once the question is created we
   // POST each one to /api/classwork/questions/:newId/resources. In edit mode
@@ -4143,7 +4188,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
     setBusy(true);
     setErr(null);
     try {
-      const noAnswerType = type === 'passage' || type === 'video_group' || type === 'file_task' || type === 'mc_group' || type === 'info_only' || type === 'section_header' || type === 'text_only';
+      const noAnswerType = type === 'passage' || type === 'video_group' || type === 'file_task' || type === 'mc_group' || type === 'group' || type === 'info_only' || type === 'section_header' || type === 'text_only';
       const body: any = {
         questionType: type, prompt,
         // Passages and info-only notes have no marks / marking scheme / AI
@@ -4156,7 +4201,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
         isExtension,
       };
       // Only non-container types can be attached to a container group.
-      if (type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && passageId) body.passageId = passageId;
+      if (type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && type !== 'group' && passageId) body.passageId = passageId;
       if (type === 'multiple_choice') body.options = options;
       if (type === 'presentation') {
         const cfg: any = {};
@@ -4249,6 +4294,17 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
           throw new Error('That doesn\u2019t look like a YouTube URL.');
         }
         body.config = { video: { kind: videoKind, url: videoUrl.trim() } };
+      }
+      if (type === 'group') {
+        const gcfg: any = { contextMode: groupContextMode };
+        if (groupContextMode === 'video') {
+          if (!videoUrl.trim()) throw new Error('Please paste a YouTube URL or upload a video for this group.');
+          if (videoKind === 'youtube' && !youtubeIdFromUrl(videoUrl)) throw new Error('That doesn\u2019t look like a YouTube URL.');
+          gcfg.video = { kind: videoKind, url: videoUrl.trim() };
+        } else if (groupContextMode === 'image') {
+          if (groupImageUrl.trim()) gcfg.imageUrl = groupImageUrl.trim();
+        }
+        body.config = gcfg;
       }
       if (type === 'crossword') {
         const entries = (Array.isArray(crosswordCfg.entries) ? crosswordCfg.entries : [])
@@ -4660,6 +4716,12 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
               ? 'Type or paste the paragraph pupils have to read. It will sit in a sticky panel beside its attached tasks, so pupils can refer back to it as they answer.'
               : type === 'video_group'
                 ? <>This card is just the video — there\u2019s no answer area on it. <strong>After saving</strong>, click <strong>+ Add question to this video</strong> on the video panel (or use <em>+ New task</em> and pick this video in <em>Attach to passage or video</em>) to add the questions pupils answer underneath it.</>
+              : type === 'group'
+                ? groupContextMode === 'text'
+                  ? 'Type the reading material or stimulus text that pupils will see pinned at the top of this group.'
+                  : groupContextMode === 'video' || groupContextMode === 'image'
+                    ? 'Optional: add an extra text description or caption above the video/image (leave blank if not needed).'
+                    : 'Optional title or description for the group (leave blank for no heading).'
               : type === 'info_only'
                 ? 'A non-interactive note. Use it for instructions, a reminder or a sub-heading between tasks. Pupils don\u2019t answer it and it doesn\u2019t count for marks.'
                 : type === 'fill_in_blanks'
@@ -4667,16 +4729,55 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
                   : <>Tip: paste a URL (e.g. https://bbc.co.uk/bitesize) and it will appear as a clickable link that opens in a new window. For a friendlier label, write <code>[Bitesize lesson](https://bbc.co.uk/bitesize)</code>.</>}
           </span>
         </label>
-        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && passages.length > 0 && (
-          <label style={fieldLabel}>Attach to passage, video, file task, or MC group (optional)
+        {type === 'group' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <label style={fieldLabel}>Context shown at top of group
+              <select value={groupContextMode} onChange={(e) => setGroupContextMode(e.target.value as any)} style={input}>
+                <option value="none">None — just the question title/description above</option>
+                <option value="text">Reading passage — text pupils refer to while answering</option>
+                <option value="video">Video — pupils watch it, then answer questions below</option>
+                <option value="image">Image — a diagram or photo shown above the questions</option>
+              </select>
+            </label>
+            {groupContextMode === 'video' && (
+              <label style={fieldLabel}>Video URL (YouTube)
+                <input
+                  placeholder="https://www.youtube.com/watch?v=…"
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  style={input}
+                />
+                <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
+                  Paste a YouTube URL. The video will be embedded at the top of the group panel.
+                </span>
+              </label>
+            )}
+            {groupContextMode === 'image' && (
+              <label style={fieldLabel}>Image URL
+                <input
+                  placeholder="https://example.com/image.png"
+                  value={groupImageUrl}
+                  onChange={(e) => setGroupImageUrl(e.target.value)}
+                  style={input}
+                />
+                <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
+                  Paste a public image URL. You can also upload an image via the prompt box above and copy the resulting URL from there.
+                </span>
+              </label>
+            )}
+          </div>
+        )}
+        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && type !== 'group' && passages.length > 0 && (
+          <label style={fieldLabel}>Attach to passage, video, file task, MC group, or group (optional)
             <select value={passageId} onChange={(e) => setPassageId(e.target.value)} style={input}>
               <option value="">— None (standalone task) —</option>
               {passages.map((p) => {
                 const isVid = p.question_type === 'video_group';
                 const isFT = p.question_type === 'file_task';
                 const isMCG = p.question_type === 'mc_group';
+                const isGrp = p.question_type === 'group';
                 const preview = (p.prompt || '').slice(0, 60);
-                const prefix = isVid ? '▶ Video: ' : isFT ? '📎 File task: ' : isMCG ? '☰ MC group: ' : 'Passage: ';
+                const prefix = isVid ? '▶ Video: ' : isFT ? '📎 File task: ' : isMCG ? '☰ MC group: ' : isGrp ? '⊞ Group: ' : 'Passage: ';
                 const fallback = '(no description)';
                 return (
                   <option key={p.id} value={p.id}>
@@ -4686,11 +4787,11 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
               })}
             </select>
             <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
-              Group this task with a reading passage, video, file task, or MC group so pupils see the stimulus alongside their answer area.
+              Group this task with a reading passage, video, file task, MC group, or generic group so pupils see the stimulus alongside their answer area.
             </span>
           </label>
         )}
-        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && type !== 'info_only' && type !== 'text_only' && (
+        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && type !== 'group' && type !== 'info_only' && type !== 'text_only' && (
           <label style={fieldLabel}>Max marks
             <input type="number" min={1} value={maxMarks} onChange={(e) => setMaxMarks(parseInt(e.target.value) || 1)} style={input} />
             {(type === 'fill_in_blanks' || type === 'table' || type === 'labeled_inputs') && (
@@ -5225,7 +5326,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
             )}
           </div>
         )}
-        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && type !== 'info_only' && type !== 'text_only' && type !== 'section_header' && (
+        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && type !== 'group' && type !== 'info_only' && type !== 'text_only' && type !== 'section_header' && (
           <>
             <label style={fieldLabel}>Marking scheme (teacher view only)
               <textarea rows={2} value={markingScheme} onChange={(e) => setMarkingScheme(e.target.value)} style={input} />
