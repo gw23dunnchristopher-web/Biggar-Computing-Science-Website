@@ -71,15 +71,16 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
   const renderTokenRef = useRef(0);
   const [stageSize, setStageSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
 
-  // Load manifest (and PDF for v2) on open or when the URL changes.
+  // Eagerly load the manifest and PDF as soon as pagesUrl is known — don't
+  // wait for the modal to open. This way the first slide is ready to paint the
+  // instant the user clicks "View slides" rather than after a visible fetch
+  // round-trip. We still gate on pagesUrl so nothing loads when no deck is set.
   useEffect(() => {
-    if (!open || !pagesUrl) return;
+    if (!pagesUrl) return;
     let cancelled = false;
     setManifest(null);
     setPdfDoc((prev) => { if (prev) prev.destroy(); return null; });
     setSlideCount(0);
-    setSlideIdx(0);
-    setJumpInput('1');
     setLoadErr(null);
     setLoading(true);
     (async () => {
@@ -112,14 +113,21 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
       }
     })();
     return () => { cancelled = true; };
-  }, [open, pagesUrl]);
+  }, [pagesUrl]);
 
-  // Tear the PDF doc down when the modal closes for good. We keep it
-  // alive while open so paging between slides is instant.
+  // Reset to slide 1 each time the modal opens so re-opening always starts
+  // from the beginning (the PDF doc itself stays loaded in memory).
   useEffect(() => {
-    if (open) return;
-    setPdfDoc((prev) => { if (prev) prev.destroy(); return null; });
+    if (!open) return;
+    setSlideIdx(0);
+    setJumpInput('1');
   }, [open]);
+
+  // Tear the PDF doc down when the pagesUrl is cleared (unit removed/changed).
+  useEffect(() => {
+    if (pagesUrl) return;
+    setPdfDoc((prev) => { if (prev) prev.destroy(); return null; });
+  }, [pagesUrl]);
 
   // Sync the page-jump input when the user navigates by other means.
   useEffect(() => { setJumpInput(String(slideIdx + 1)); }, [slideIdx]);

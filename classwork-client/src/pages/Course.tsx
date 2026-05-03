@@ -236,6 +236,23 @@ export default function Course() {
 
   useEffect(() => { refresh(); }, [course]);
 
+  // Background-preload presentation PDFs into the browser cache as soon as
+  // units arrive. PresentationViewer then gets the file from cache when it
+  // calls pdfjsLib.getDocument(), making the first "View slides" click instant.
+  useEffect(() => {
+    units.forEach((u) => {
+      if (!u.presentation_pages_url) return;
+      fetch(u.presentation_pages_url, { credentials: 'same-origin' })
+        .then((r) => r.ok ? r.json() : null)
+        .then((m: any) => {
+          if (m?.version >= 2 && m?.pdfUrl) {
+            fetch(m.pdfUrl, { credentials: 'same-origin' }).catch(() => {});
+          }
+        })
+        .catch(() => {});
+    });
+  }, [units]);
+
   function openAddUnit() {
     setTitleInput(''); setUnitDescInput(''); setUnitImageUrl('');
     setModalErr(null);
