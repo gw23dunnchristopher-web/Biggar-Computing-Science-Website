@@ -33,7 +33,7 @@
                     cellAnswers = { comparisons, swaps, sorted }
    ============================================================================ */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 
 const muted: React.CSSProperties = { color: 'var(--cw-muted)', fontStyle: 'italic', fontSize: 13 };
 const card: React.CSSProperties = {
@@ -2509,5 +2509,190 @@ export function GameReview({ type, cfg, parsed, questionId }: {
     );
   }
 
+  if (type === 'mindmap') {
+    const central = cfg.mindmap?.central || 'Topic';
+    let branches: MindmapBranch[] = [];
+    try { branches = JSON.parse(parsed['mindmap_tree'] || '[]'); } catch {}
+    if (!Array.isArray(branches)) branches = [];
+    return (
+      <div style={wrap}>
+        <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 14 }}>📍 {central}</div>
+        {branches.length === 0
+          ? <span style={reviewMuted}>(no branches added)</span>
+          : branches.map((b, bi) => (
+            <div key={bi} style={{ marginBottom: 6 }}>
+              <div style={{ fontWeight: 600, fontSize: 13 }}>↳ {b.label || <em style={reviewMuted}>(blank)</em>}</div>
+              {(b.children || []).map((c, ci) => (
+                <div key={ci} style={{ marginLeft: 20, fontSize: 12, color: 'var(--cw-muted)' }}>· {c.label || <em>(blank)</em>}</div>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+    );
+  }
+
   return <span style={reviewMuted}>(no review for this game type)</span>;
+}
+
+// ─── Mindmap types ────────────────────────────────────────────────────────────
+
+interface MindmapBranch {
+  id: string;
+  label: string;
+  children: { id: string; label: string }[];
+}
+
+// ─── MindmapPupilUI ───────────────────────────────────────────────────────────
+
+export function MindmapPupilUI({ config, cellAnswers, setCellAnswers }: {
+  config: any; cellAnswers: Record<string, any>; setCellAnswers: (v: Record<string, any>) => void;
+}) {
+  const central = (config as any)?.mindmap?.central || 'Central Topic';
+
+  function getTree(): MindmapBranch[] {
+    try {
+      const t = JSON.parse(cellAnswers['mindmap_tree'] || '[]');
+      return Array.isArray(t) ? t : [];
+    } catch { return []; }
+  }
+
+  function setTree(next: MindmapBranch[]) {
+    setCellAnswers({ ...cellAnswers, mindmap_tree: JSON.stringify(next) });
+  }
+
+  const tree = getTree();
+
+  function addBranch() {
+    const id = `b${Date.now()}`;
+    setTree([...tree, { id, label: '', children: [] }]);
+  }
+
+  function removeBranch(bi: number) {
+    setTree(tree.filter((_, i) => i !== bi));
+  }
+
+  function updateBranch(bi: number, label: string) {
+    setTree(tree.map((b, i) => i === bi ? { ...b, label } : b));
+  }
+
+  function addChild(bi: number) {
+    const id = `b${bi}c${Date.now()}`;
+    setTree(tree.map((b, i) => i === bi ? { ...b, children: [...b.children, { id, label: '' }] } : b));
+  }
+
+  function removeChild(bi: number, ci: number) {
+    setTree(tree.map((b, i) => i === bi ? { ...b, children: b.children.filter((_, j) => j !== ci) } : b));
+  }
+
+  function updateChild(bi: number, ci: number, label: string) {
+    setTree(tree.map((b, i) => i === bi ? {
+      ...b,
+      children: b.children.map((c, j) => j === ci ? { ...c, label } : c),
+    } : b));
+  }
+
+  const nodeBox: React.CSSProperties = {
+    display: 'inline-block', padding: '6px 14px',
+    borderRadius: 20, fontWeight: 700, fontSize: 14,
+    background: 'var(--cw-accent, #4f46e5)', color: '#fff',
+    marginBottom: 16, textAlign: 'center',
+  };
+  const branchCard: React.CSSProperties = {
+    border: '1.5px solid var(--cw-border, #e2e8f0)', borderRadius: 8,
+    padding: '10px 12px', marginBottom: 10,
+    background: 'var(--cw-surface, #fff)',
+  };
+  const inputSm: React.CSSProperties = {
+    flex: 1, padding: '4px 8px', fontSize: 13,
+    border: '1px solid var(--cw-border, #e2e8f0)', borderRadius: 6,
+    background: 'var(--cw-bg, #fff)', color: 'var(--cw-text, #111)',
+  };
+  const btn: React.CSSProperties = {
+    padding: '3px 10px', fontSize: 12, borderRadius: 5, cursor: 'pointer',
+    border: '1px solid var(--cw-border, #e2e8f0)',
+    background: 'var(--cw-surface, #f8fafc)', color: 'var(--cw-text, #111)',
+  };
+  const rmBtn: React.CSSProperties = { ...btn, color: '#b91c1c', borderColor: '#fca5a5' };
+
+  return (
+    <div style={{ marginTop: 8 }}>
+      <div style={{ textAlign: 'center', marginBottom: 12 }}>
+        <span style={nodeBox}>📍 {central}</span>
+      </div>
+      {tree.map((branch, bi) => (
+        <div key={branch.id} style={branchCard}>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
+            <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>Branch</span>
+            <input
+              style={inputSm}
+              value={branch.label}
+              onChange={(e) => updateBranch(bi, e.target.value)}
+              placeholder="Branch label…"
+            />
+            <button style={rmBtn} onClick={() => removeBranch(bi)}>✕</button>
+          </div>
+          {branch.children.map((child, ci) => (
+            <div key={child.id} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4, marginLeft: 20 }}>
+              <span style={{ fontSize: 12, color: 'var(--cw-muted)' }}>└</span>
+              <input
+                style={{ ...inputSm, fontSize: 12 }}
+                value={child.label}
+                onChange={(e) => updateChild(bi, ci, e.target.value)}
+                placeholder="Sub-branch…"
+              />
+              <button style={rmBtn} onClick={() => removeChild(bi, ci)}>✕</button>
+            </div>
+          ))}
+          <button style={{ ...btn, marginLeft: 20, marginTop: 4 }} onClick={() => addChild(bi)}>+ Sub-branch</button>
+        </div>
+      ))}
+      <button style={{ ...btn, padding: '6px 14px', marginTop: 4 }} onClick={addBranch}>+ Add branch</button>
+    </div>
+  );
+}
+
+// ─── MindmapEditor ────────────────────────────────────────────────────────────
+
+export function MindmapEditor({ cfg, setCfg }: { cfg: any; setCfg: (c: any) => void }) {
+  const label: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 10 };
+  const lbl: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: 'var(--cw-muted)' };
+  const inp: React.CSSProperties = {
+    padding: '5px 8px', fontSize: 13, borderRadius: 6,
+    border: '1px solid var(--cw-border, #e2e8f0)',
+    background: 'var(--cw-bg, #fff)', color: 'var(--cw-text, #111)',
+  };
+
+  return (
+    <div style={{ marginTop: 10 }}>
+      <div style={label}>
+        <span style={lbl}>Central topic <span style={{ color: '#b91c1c' }}>*</span></span>
+        <input
+          style={inp}
+          value={cfg.central || ''}
+          onChange={(e) => setCfg({ ...cfg, central: e.target.value })}
+          placeholder="e.g. Computer Systems"
+        />
+      </div>
+      <div style={label}>
+        <span style={lbl}>Expected branches (guidance for AI marking)</span>
+        <input
+          style={inp}
+          value={cfg.expectedBranches || ''}
+          onChange={(e) => setCfg({ ...cfg, expectedBranches: e.target.value })}
+          placeholder="e.g. CPU, Memory, Storage, Input/Output"
+        />
+        <span style={{ fontSize: 11, color: 'var(--cw-muted)' }}>Comma-separated list of branches you expect pupils to include.</span>
+      </div>
+      <div style={label}>
+        <span style={lbl}>Marking guidance (optional)</span>
+        <textarea
+          style={{ ...inp, resize: 'vertical', minHeight: 60 }}
+          value={cfg.guidance || ''}
+          onChange={(e) => setCfg({ ...cfg, guidance: e.target.value })}
+          placeholder="e.g. Award marks for each correct branch and for relevant sub-branches. Do not penalise unusual but valid answers."
+        />
+      </div>
+    </div>
+  );
 }

@@ -194,6 +194,8 @@ export async function markSubmission(
         return markPickListGeneric(q, s, 'selectorGolf', 'kind', 'CSS selectors identified', ['id', 'class', 'element', 'descendant', 'child', 'attribute']);
       case 'css_sliders':
         return markPickListGeneric(q, s, 'cssSliders', 'prop', 'CSS properties matched', ['width', 'height', 'padding', 'margin', 'border', 'color', 'background', 'font_size']);
+      case 'mindmap':
+        return await markMindmap(q, s);
       case 'file_upload':
         return await markFileUpload(q, s);
       case 'info_only':
@@ -2730,6 +2732,55 @@ function markBoxModel(q: AIQuestion, s: AISubmission): AIMarkResult | null {
    GAMES — BATCH 4 (pick-list pattern wrapper).
    friend_or_fake, dm_danger, malware_triage, 2fa_escape, a11y_audit, fetch_execute
    ============================================================================ */
+
+async function markMindmap(q: AIQuestion, s: AISubmission): Promise<AIMarkResult | null> {
+  if (!gemini) return null;
+  const cfg = (q.config as any)?.mindmap;
+  if (!cfg?.central) return null;
+
+  let cellAnswers: Record<string, string> = {};
+  try { cellAnswers = JSON.parse(s.text_answer || '{}') || {}; } catch {}
+
+  let branches: { label: string; children: { label: string }[] }[] = [];
+  try {
+    const parsed = JSON.parse(cellAnswers['mindmap_tree'] || '[]');
+    if (Array.isArray(parsed)) branches = parsed;
+  } catch {}
+
+  const lines: string[] = [`Central topic: ${cfg.central}`];
+  for (const b of branches) {
+    lines.push(`  Branch: ${String(b?.label || '').trim() || '(blank)'}`);
+    for (const c of (b?.children || [])) {
+      lines.push(`    Sub-branch: ${String(c?.label || '').trim() || '(blank)'}`);
+    }
+  }
+  const treeText = lines.join('\n');
+
+  const expectedBranches = String(cfg.expectedBranches || '').trim();
+  const guidance = String(cfg.guidance || '').trim();
+
+  const prompt = `You are marking a student's mindmap activity.
+
+Central topic set by the teacher: "${cfg.central}"
+${expectedBranches ? `Expected branches (teacher's guidance): ${expectedBranches}` : ''}
+${guidance ? `Marking guidance: ${guidance}` : ''}
+
+Maximum marks available: ${q.max_marks}
+
+The student's mindmap (indented tree format):
+${treeText}
+
+Mark the student's mindmap. Consider:
+- Whether the student identified relevant branches for the central topic
+- Whether the sub-branches are accurate and relevant to their parent branch
+- The overall completeness and accuracy of the mindmap
+- Award partial marks fairly for partial understanding
+
+Respond with a JSON object only:
+{ "marks": <integer 0–${q.max_marks}>, "feedback": "<concise feedback in 1–3 sentences>" }`;
+
+  return await callGeminiForMark(prompt, q.max_marks);
+}
 
 function markPickListGeneric(q: AIQuestion, s: AISubmission, configKey: string, expectedKey: string, label: string, allowed: string[]): AIMarkResult | null {
   const items = (q.config as any)?.[configKey]?.items;

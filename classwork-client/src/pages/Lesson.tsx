@@ -49,6 +49,7 @@ import {
   TagSoupRepairPupilUI, TagSoupRepairEditor,
   SelectorGolfPupilUI, SelectorGolfEditor,
   CssSlidersPupilUI, CssSlidersEditor,
+  MindmapPupilUI, MindmapEditor,
   GameReview,
 } from './lesson-games';
 
@@ -198,6 +199,7 @@ const TYPE_LABELS: Record<string, string> = {
   tag_soup_repair: 'Tag-soup HTML repair',
   selector_golf: 'CSS-selector golf',
   css_sliders: 'CSS-property sliders',
+  mindmap: 'Mindmap activity',
   // No answer needed
   info_only: 'Information note (no answer needed)',
   text_only: 'Jotter task (answer in jotter, no digital submission)',
@@ -213,7 +215,7 @@ const TYPE_GROUPS: { label: string; types: string[] }[] = [
   { label: 'File & project uploads', types: ['screenshot', 'file_upload', 'presentation', 'project', 'scratch_link', 'makecode_link', 'google_sites_link'] },
   { label: 'Embedded tools', types: ['python_task', 'html_task', 'sql_task', 'database_task'] },
   { label: 'Groups (show questions together)', types: ['group', 'video_group', 'passage', 'file_task', 'mc_group'] },
-  { label: 'Fun activities', types: ['crossword', 'word_search', 'matching', 'anagrams'] },
+  { label: 'Fun activities', types: ['crossword', 'word_search', 'matching', 'anagrams', 'mindmap'] },
   { label: 'Games · Word & puzzle', types: ['hangman', 'speed_round', 'ordering'] },
   { label: 'Games · Internet Safety', types: ['spot_phish', 'phish_inbox', 'friend_or_fake', 'dm_danger', 'screen_time', 'footprint_trail', 'social_engineer'] },
   { label: 'Games · Cyber Security', types: ['caesar_cipher', 'cipher_quest', 'password_forge', '2fa_escape', 'privacy_radar', 'malware_triage'] },
@@ -1910,6 +1912,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     'friend_or_fake', 'dm_danger', 'malware_triage', '2fa_escape', 'a11y_audit', 'fetch_execute',
     'screen_time', 'footprint_trail', 'social_engineer', 'cipher_quest', 'normalise_it', 'subnet_calc',
     'phish_inbox', 'build_pc', 'os_sched', 'query_visual', 'schema_arch', 'tag_soup_repair', 'selector_golf', 'css_sliders',
+    'mindmap',
     // File upload — file content stored as JSON in text_answer.
     'file_upload',
   ];
@@ -1936,7 +1939,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
       return { ...empty, fileUrl: fileUrl || null, linkUrl: url || null };
     }
     if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-        || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders') {
+        || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap') {
       const filled = Object.values(cellAnswers).some((v) => {
         if (Array.isArray(v)) return v.length > 0;
         return String(v || '').trim();
@@ -1976,7 +1979,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     if (draft) {
       if (draft.text_answer != null) {
         if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-            || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders') {
+            || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap') {
           try {
             const parsed = JSON.parse(draft.text_answer);
             if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
@@ -2021,7 +2024,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     // Hydrate inputs from the previous submission.
     if (last.text_answer != null) {
       if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-          || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders') {
+          || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap') {
         try {
           const parsed = JSON.parse(last.text_answer);
           if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
@@ -2158,7 +2161,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
           body.linkUrl = `${selectedProjectId}|${data?.name || ''}`;
         }
       } else if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-                 || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders') {
+                 || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap') {
         // Send the cell answers as JSON so the deterministic marker can
         // compare each one against the expected answers in the question config.
         // Same path serves the four fun-activity types — each renderer above
@@ -2239,7 +2242,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     codeProjectKind ? !!selectedProjectId :
     t === 'database_task' ? !!dbEmbedToken :
     (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-      || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders')
+      || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap')
       ? Object.values(cellAnswers).some((v) => {
           if (Array.isArray(v)) return v.length > 0;
           return !!String(v || '').trim();
@@ -2602,6 +2605,9 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
       )}
       {t === 'css_sliders' && (
         <CssSlidersPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'mindmap' && (
+        <MindmapPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
       )}
 
       {(t === 'short' || t === 'long' || t === 'code' || t === 'video_question') && (
@@ -4005,7 +4011,7 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
     );
   }
 
-  if (t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders') {
+  if (t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap') {
     let parsed: any = {};
     try { parsed = JSON.parse(s.text_answer || '{}') || {}; } catch {}
     return <GameReview type={t} cfg={(question as any).config} parsed={parsed} questionId={String(question.id)} />;
@@ -4664,6 +4670,11 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
           { text: 'Make the box taller', prop: 'height' },
         ] }
   );
+  const [mindmapCfg, setMindmapCfg] = useState<any>(() =>
+    cfg.mindmap && typeof cfg.mindmap === 'object'
+      ? { central: String(cfg.mindmap.central || ''), expectedBranches: String(cfg.mindmap.expectedBranches || ''), guidance: String(cfg.mindmap.guidance || '') }
+      : { central: '', expectedBranches: '', guidance: '' }
+  );
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   // Inline image upload state for the prompt textarea: lets a teacher paste
@@ -5304,6 +5315,15 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
         selector_golf: { src: selectorGolfCfg, configKey: 'selectorGolf', valueKey: 'kind', allowed: ['id','class','element','descendant','child','attribute'] },
         css_sliders: { src: cssSlidersCfg, configKey: 'cssSliders', valueKey: 'prop', allowed: ['width','height','padding','margin','border','color','background','font_size'] },
       };
+      if (type === 'mindmap') {
+        const central = mindmapCfg.central?.trim() || '';
+        if (!central) throw new Error('Enter a central topic for the mindmap.');
+        body.config = { mindmap: {
+          central,
+          expectedBranches: String(mindmapCfg.expectedBranches || '').trim(),
+          guidance: String(mindmapCfg.guidance || '').trim(),
+        } };
+      }
       if (PICKLIST_SAVE[type]) {
         const meta = PICKLIST_SAVE[type];
         const items = (Array.isArray(meta.src.items) ? meta.src.items : [])
@@ -6466,6 +6486,12 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
           <div style={fieldLabel as any}>
             <div style={{ fontWeight: 600 }}>CSS-property sliders</div>
             <CssSlidersEditor cfg={cssSlidersCfg} setCfg={setCssSlidersCfg} />
+          </div>
+        )}
+        {type === 'mindmap' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Mindmap activity</div>
+            <MindmapEditor cfg={mindmapCfg} setCfg={setMindmapCfg} />
           </div>
         )}
         {type !== 'section_header' && (
