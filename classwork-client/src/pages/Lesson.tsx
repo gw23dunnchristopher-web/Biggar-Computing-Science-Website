@@ -117,7 +117,7 @@ const TYPE_LABELS: Record<string, string> = {
   video_question: 'Watch a video and answer',
 };
 
-// Grouped structure for the type <select> — video_question excluded since
+// Grouped structure for the type picker — video_question excluded since
 // video_group covers the same need (attach 0 or more questions underneath).
 const TYPE_GROUPS: { label: string; types: string[] }[] = [
   { label: 'Written answers', types: ['short', 'long', 'code', 'multiple_choice', 'fill_in_blanks', 'table', 'labeled_inputs', 'mc_group'] },
@@ -127,6 +127,122 @@ const TYPE_GROUPS: { label: string; types: string[] }[] = [
   { label: 'Fun activities', types: ['crossword', 'word_search', 'matching', 'anagrams'] },
   { label: 'No answer needed', types: ['info_only', 'text_only', 'section_header'] },
 ];
+
+// Two-level type picker: group headings on the left, types for the active
+// group on the right. Rendered inline (no absolute positioning) so it is
+// never clipped by the modal's overflow:auto.
+function TypePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const defaultGroup = Math.max(0, TYPE_GROUPS.findIndex((g) => g.types.includes(value)));
+  const [open, setOpen]           = useState(false);
+  const [activeGroup, setActiveGroup] = useState(defaultGroup);
+
+  // Re-sync the active group whenever the value changes from outside.
+  useEffect(() => {
+    const idx = TYPE_GROUPS.findIndex((g) => g.types.includes(value));
+    if (idx >= 0) setActiveGroup(idx);
+  }, [value]);
+
+  const groupLabel = TYPE_GROUPS[activeGroup]?.label || '';
+  const typeLabel  = TYPE_LABELS[value] || value;
+  const valueGroup = TYPE_GROUPS.findIndex((g) => g.types.includes(value));
+
+  return (
+    <div>
+      {/* Trigger button — shows current selection, toggles the panel */}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          padding: '8px 10px', fontSize: 14, fontWeight: 400,
+          border: '1px solid var(--cw-border)', borderRadius: 8, fontFamily: 'inherit',
+          width: '100%', display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', cursor: 'pointer',
+          background: 'var(--cw-surface)', textAlign: 'left', gap: 8,
+        }}
+      >
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {valueGroup >= 0 && (
+            <span style={{ color: 'var(--cw-muted)', fontWeight: 400 }}>
+              {TYPE_GROUPS[valueGroup].label}{' › '}
+            </span>
+          )}
+          {typeLabel}
+        </span>
+        <span style={{ flexShrink: 0, color: 'var(--cw-muted)', fontSize: 12 }}>
+          {open ? '▴' : '▾'}
+        </span>
+      </button>
+
+      {/* Inline split panel — no absolute positioning, never clipped by modal */}
+      {open && (
+        <div style={{
+          display: 'flex', marginTop: 4,
+          border: '1px solid var(--cw-border)', borderRadius: 10,
+          overflow: 'hidden', fontSize: 13,
+          boxShadow: '0 4px 14px rgba(15,23,42,0.10)',
+        }}>
+          {/* Left column: group headings */}
+          <div style={{
+            flexShrink: 0, width: 195,
+            borderRight: '1px solid var(--cw-border)',
+            background: 'var(--cw-surface-soft, var(--cw-surface-muted))',
+          }}>
+            {TYPE_GROUPS.map((g, i) => (
+              <div
+                key={g.label}
+                onMouseEnter={() => setActiveGroup(i)}
+                onClick={() => setActiveGroup(i)}
+                style={{
+                  display: 'flex', alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 12px', cursor: 'default',
+                  fontWeight: activeGroup === i ? 700 : 600,
+                  background: activeGroup === i ? 'var(--cw-accent)' : 'transparent',
+                  color: activeGroup === i ? '#fff'
+                    : valueGroup === i ? 'var(--cw-accent)' : 'var(--cw-ink)',
+                  borderLeft: valueGroup === i && activeGroup !== i
+                    ? '3px solid var(--cw-accent)' : '3px solid transparent',
+                }}
+              >
+                <span>{g.label}</span>
+                <span style={{ opacity: 0.55, fontSize: 11 }}>›</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Right column: types within the active group */}
+          <div style={{ flex: 1, minWidth: 0, background: 'var(--cw-surface)' }}>
+            {(TYPE_GROUPS[activeGroup]?.types ?? []).map((k) => {
+              const isCurrent = value === k;
+              return (
+                <div
+                  key={k}
+                  onClick={() => { onChange(k); setOpen(false); }}
+                  style={{
+                    padding: '9px 14px', cursor: 'pointer',
+                    fontWeight: isCurrent ? 600 : 400,
+                    background: isCurrent ? '#eff6ff' : 'transparent',
+                    color: isCurrent ? '#1d4ed8' : 'var(--cw-ink)',
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isCurrent) e.currentTarget.style.background = 'var(--cw-surface-muted)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = isCurrent ? '#eff6ff' : 'transparent';
+                  }}
+                >
+                  {isCurrent && <span style={{ fontSize: 10 }}>✓</span>}
+                  {TYPE_LABELS[k]}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Lesson() {
   const [, params] = useRoute('/lesson/:id');
@@ -4449,21 +4565,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
               Multiple choice <span style={{ color: 'var(--cw-muted)' }}>(fixed — children of a MC group must be multiple choice questions)</span>
             </div>
           ) : (
-            <select value={type} onChange={(e) => onTypeChange(e.target.value)} style={input}>
-              {/* If editing an existing question whose type is no longer offered
-                  (e.g. legacy video_question), keep it selectable so the edit
-                  doesn't force a type change. */}
-              {!TYPE_GROUPS.flatMap((g) => g.types).includes(type) && (
-                <option value={type}>{TYPE_LABELS[type] || type}</option>
-              )}
-              {TYPE_GROUPS.map((g) => (
-                <optgroup key={g.label} label={g.label}>
-                  {g.types.map((k) => (
-                    <option key={k} value={k}>{TYPE_LABELS[k]}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
+            <TypePicker value={type} onChange={onTypeChange} />
           )}
         </label>
         <label style={fieldLabel}>{
