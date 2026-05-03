@@ -160,7 +160,7 @@ export default function Course() {
       const next = new Set(prev);
       if (next.has(unitId)) next.delete(unitId); else next.add(unitId);
       try {
-        if (collapseStorageKey) localStorage.setItem(collapseStorageKey, JSON.stringify([...next]));
+        if (collapseStorageKey) localStorage.setItem(collapseStorageKey, JSON.stringify(Array.from(next)));
       } catch { /* localStorage may be full or disabled */ }
       return next;
     });
@@ -169,7 +169,7 @@ export default function Course() {
     const next: Set<string> = collapsed ? new Set(units.map((u) => u.id)) : new Set();
     setCollapsedUnits(next);
     try {
-      if (collapseStorageKey) localStorage.setItem(collapseStorageKey, JSON.stringify([...next]));
+      if (collapseStorageKey) localStorage.setItem(collapseStorageKey, JSON.stringify(Array.from(next)));
     } catch { /* ignore */ }
   }
 

@@ -89,6 +89,7 @@ interface Question {
   config: any;
   is_extension?: boolean;
   passage_id?: string | null;
+  created_at?: string;
 }
 
 interface Submission {
@@ -582,7 +583,7 @@ export default function Lesson() {
     setQuestions((prev) =>
       [...prev]
         .map((q) => idToOrder.has(q.id) ? { ...q, order_index: idToOrder.get(q.id)! } : q)
-        .sort((a, b) => a.order_index - b.order_index || a.created_at.localeCompare(b.created_at))
+        .sort((a, b) => a.order_index - b.order_index || (a.created_at || '').localeCompare(b.created_at || ''))
     );
 
     try {
@@ -3644,7 +3645,7 @@ function TeacherSubmissions({ question, submissions, unlockedStudentIds = new Se
             key={s.id}
             question={question}
             submission={s}
-            isUnlocked={unlockedStudentIds.has(s.student_id)}
+            isUnlocked={unlockedStudentIds.has(s.student_id || '')}
             onChanged={onChanged}
           />
         ))}
@@ -5036,7 +5037,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
         // no grid yet — saves the teacher one click.
         const placedSet = new Set(placedWords.map((w) => String(w).toUpperCase()));
         const desiredSet = new Set(wordsFromText.map((w) => w.toUpperCase().replace(/[^A-Z]/g, '')));
-        const drift = grid.length === 0 || placedSet.size !== desiredSet.size || [...desiredSet].some((w) => !placedSet.has(w));
+        const drift = grid.length === 0 || placedSet.size !== desiredSet.size || Array.from(desiredSet).some((w) => !placedSet.has(w));
         if (drift) {
           const out = _generateWordSearchGrid(
             Math.max(5, Number(wordSearchCfg.rows) || 12),
@@ -6102,7 +6103,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
                         title="Add column"
                         onClick={() => {
                           setTblHeaders([...tblHeaders, `Column ${tblHeaders.length + 1}`]);
-                          setTblRows(tblRows.map((row) => [...row, { value: '', blank: false, accept: '' }]));
+                          setTblRows(tblRows.map((row) => [...row, { value: '', blank: false, accept: '', aiGuidance: '' }]));
                         }}
                         style={{ ...input, cursor: 'pointer', width: '100%' }}
                       >+</button>
@@ -6169,7 +6170,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
                 onClick={() =>
                   setTblRows([
                     ...tblRows,
-                    tblHeaders.map(() => ({ value: '', blank: false, accept: '' })),
+                    tblHeaders.map(() => ({ value: '', blank: false, accept: '', aiGuidance: '' })),
                   ])
                 }
                 style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}

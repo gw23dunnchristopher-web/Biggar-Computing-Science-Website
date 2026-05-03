@@ -1769,7 +1769,7 @@ export function FindDuplicateEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any
               style={{ padding: '4px 8px', fontFamily: 'JetBrains Mono, monospace', fontSize: 13 }}
             />
             <div style={{ fontSize: 12, color: dups.size === 0 ? '#b91c1c' : 'var(--cw-muted)' }}>
-              {dups.size === 0 ? 'No duplicate detected — add a repeated row.' : `Duplicate row indices: ${[...dups].sort((a, b) => a - b).join(', ')}`}
+              {dups.size === 0 ? 'No duplicate detected — add a repeated row.' : `Duplicate row indices: ${Array.from(dups).sort((a, b) => a - b).join(', ')}`}
             </div>
             <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })} style={{ alignSelf: 'flex-start', padding: '4px 8px' }}>Remove table</button>
           </div>
@@ -2457,7 +2457,7 @@ export function GameReview({ type, cfg, parsed, questionId }: {
             <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'baseline' }}>
               <span style={tickCell(ok)}>{ok ? '✓' : '✗'}</span>
               <span>Table {i + 1}</span>
-              <span style={reviewMuted}>got row <code>{got || '(blank)'}</code> · duplicates at <code>{[...dups].sort((a, b) => a - b).join(', ')}</code></span>
+              <span style={reviewMuted}>got row <code>{got || '(blank)'}</code> · duplicates at <code>{Array.from(dups).sort((a, b) => a - b).join(', ')}</code></span>
             </div>
           );
         })}
