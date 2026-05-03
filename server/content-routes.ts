@@ -87,7 +87,7 @@ export function registerContentRoutes(
       console.log(`[content] GET questions course=${course} → ${rows.length} rows`);
       if (req.query.summary === '1') {
         // Lightweight summary — omit heavy JSON blobs, add subQuestionCount
-        const summary = rows.map(r => ({
+        const summary = rows.map((r: any) => ({
           id: r.id,
           course: r.course,
           year: r.year,

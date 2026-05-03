@@ -736,6 +736,7 @@ export async function updateLesson(id: string, fields: {
   successCriteria?: string | null;
   orderIndex?: number;
   isPublished?: boolean;
+  isTest?: boolean;
 }) {
   await ensureClassworkSchema();
   const sets: string[] = [];

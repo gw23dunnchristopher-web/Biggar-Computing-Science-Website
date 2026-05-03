@@ -1335,7 +1335,7 @@ try {
   console.warn('[startup] font setup failed:', err);
 }
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
   // Pre-warm the LibreOffice user profile in the background so the first
   // .pptx upload after a cold start doesn't pay the bootstrap cost.

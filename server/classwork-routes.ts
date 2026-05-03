@@ -617,7 +617,7 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
       const cc = await getStudentClassCourse(studentId);
       if (!cc?.course) return res.status(409).json({ error: 'You haven\u2019t been put in a year group yet.' });
       const jotter = await getJotterForStudent(studentId, cc.course);
-      res.json({ ...jotter, courseLabel: CLASSWORK_COURSE_LABELS[cc.course] || cc.course });
+      res.json({ ...jotter, courseLabel: (CLASSWORK_COURSE_LABELS as Record<string, string>)[cc.course] || cc.course });
     } catch (err) {
       console.error('[classwork] getMyJotter error:', err);
       res.status(500).json({ error: 'Failed to load jotter' });
@@ -631,7 +631,7 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
       const cc = await getStudentClassCourse(studentId);
       if (!cc?.course) return res.status(409).json({ error: 'This pupil hasn\u2019t been put in a year group yet.' });
       const jotter = await getJotterForStudent(studentId, cc.course);
-      res.json({ ...jotter, courseLabel: CLASSWORK_COURSE_LABELS[cc.course] || cc.course });
+      res.json({ ...jotter, courseLabel: (CLASSWORK_COURSE_LABELS as Record<string, string>)[cc.course] || cc.course });
     } catch (err) {
       console.error('[classwork] getStudentJotter error:', err);
       res.status(500).json({ error: 'Failed to load jotter' });

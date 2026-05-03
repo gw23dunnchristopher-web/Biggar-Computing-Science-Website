@@ -500,6 +500,7 @@ class MemoryStorage implements IStorage {
       id: `attempt-${Date.now()}`, 
       assignmentId: attempt.assignmentId,
       localStudentId: attempt.localStudentId,
+      studentId: attempt.studentId ?? null,
       chosenOptionalSection: attempt.chosenOptionalSection,
       status: attempt.status ?? "in_progress",
       timeRemainingSeconds: attempt.timeRemainingSeconds,
@@ -507,8 +508,8 @@ class MemoryStorage implements IStorage {
       currentPartId: attempt.currentPartId ?? null,
       completedPartIds: attempt.completedPartIds ?? [],
       startedAt: new Date(),
-      pausedAt: attempt.pausedAt ?? null,
-      completedAt: attempt.completedAt ?? null
+      pausedAt: (attempt as any).pausedAt ?? null,
+      completedAt: (attempt as any).completedAt ?? null
     };
     this.attemptList.push(newA);
     return newA;

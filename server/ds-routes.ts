@@ -125,15 +125,15 @@ export async function gradeDatabaseStructure(args: {
     : '';
 
   const tables = await db.select().from(dsTables).where(eq(dsTables.databaseId, dbId)).orderBy(dsTables.createdAt);
-  const tableDetails = await Promise.all(tables.map(async (t) => {
+  const tableDetails = await Promise.all(tables.map(async (t: any) => {
     const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, t.id)).orderBy(dsFields.sortOrder);
     const records = await db!.select().from(dsRecords).where(and(eq(dsRecords.tableId, t.id), eq(dsRecords.databaseId, dbId)));
-    const sampleRows = records.slice(0, 5).map(r => r.data);
-    return { name: t.name, fields: fields.map(f => ({ name: f.name, type: f.fieldType, isPrimaryKey: f.isPrimaryKey, isRequired: f.isRequired, fieldSize: f.fieldSize ?? null, defaultValue: f.defaultValue ?? null, description: f.description ?? null })), rowCount: records.length, sampleRows };
+    const sampleRows = records.slice(0, 5).map((r: any) => r.data);
+    return { name: t.name, fields: fields.map((f: any) => ({ name: f.name, type: f.fieldType, isPrimaryKey: f.isPrimaryKey, isRequired: f.isRequired, fieldSize: f.fieldSize ?? null, defaultValue: f.defaultValue ?? null, description: f.description ?? null })), rowCount: records.length, sampleRows };
   }));
 
   const dbSummary = tableDetails.map(t =>
-    `Table: ${t.name} (${t.rowCount} row${t.rowCount !== 1 ? 's' : ''})\n  Fields: ${t.fields.map(f => {
+    `Table: ${t.name} (${t.rowCount} row${t.rowCount !== 1 ? 's' : ''})\n  Fields: ${t.fields.map((f: any) => {
       const parts: string[] = [f.type];
       if (f.isPrimaryKey) parts.push('PK');
       if (f.isRequired) parts.push('required');
@@ -141,7 +141,7 @@ export async function gradeDatabaseStructure(args: {
       if (f.defaultValue != null && f.defaultValue !== '') parts.push(`default "${f.defaultValue}"`);
       if (f.description) parts.push(`description "${f.description}"`);
       return `${f.name} (${parts.join(', ')})`;
-    }).join(', ')}\n  Sample data: ${t.sampleRows.length > 0 ? t.sampleRows.map(r => JSON.stringify(r)).join('; ') : 'none'}`
+    }).join(', ')}\n  Sample data: ${t.sampleRows.length > 0 ? t.sampleRows.map((r: any) => JSON.stringify(r)).join('; ') : 'none'}`
   ).join('\n\n');
 
   // Deterministic data-dictionary audit (server-side, not by the AI).
@@ -186,7 +186,7 @@ export async function gradeDatabaseStructure(args: {
   const expectedTables = dataDictionary ? parseDataDictionary(dataDictionary) : [];
   const studentFieldsByTable = new Map<string, Set<string>>();
   for (const t of tableDetails) {
-    studentFieldsByTable.set(t.name.toLowerCase().trim(), new Set(t.fields.map(f => f.name.toLowerCase().trim())));
+    studentFieldsByTable.set(t.name.toLowerCase().trim(), new Set(t.fields.map((f: any) => f.name.toLowerCase().trim())));
   }
   type AuditRow = { table: string; field: string; tablePresent: boolean; fieldPresent: boolean };
   const auditRows: AuditRow[] = [];
@@ -360,7 +360,7 @@ async function deepCopyDatabase(sourceDatabaseId: number, newUserId: string): Pr
   if (!sourceDb) throw new Error("Source database not found");
 
   // ── Step 2: Fetch all fields for all source tables in one query ──
-  const sourceTableIds = sourceTables.map(t => t.id);
+  const sourceTableIds = sourceTables.map((t: any) => t.id);
   const sourceFieldsAll = sourceTableIds.length > 0
     ? await db.select().from(dsFields).where(inArray(dsFields.tableId, sourceTableIds))
     : [];
@@ -390,7 +390,7 @@ async function deepCopyDatabase(sourceDatabaseId: number, newUserId: string): Pr
   const tableIdMap: Record<number, number> = {};
   const fieldIdMap: Record<number, number> = {};
 
-  await Promise.all(sourceTables.map(async (t) => {
+  await Promise.all(sourceTables.map(async (t: any) => {
     const [newTable] = await db!.insert(dsTables).values({ name: t.name, databaseId: newDb.id }).returning();
     tableIdMap[t.id] = newTable.id;
 
@@ -402,39 +402,39 @@ async function deepCopyDatabase(sourceDatabaseId: number, newUserId: string): Pr
       (async () => {
         if (fields.length > 0) {
           const newFields = await db!.insert(dsFields).values(
-            fields.map(f => ({
+            fields.map((f: any) => ({
               name: f.name, fieldType: f.fieldType, isRequired: f.isRequired,
               isPrimaryKey: f.isPrimaryKey, sortOrder: f.sortOrder, tableId: newTable.id,
               caption: f.caption, defaultValue: f.defaultValue, fieldSize: f.fieldSize, description: f.description,
             }))
           ).returning();
           // Map old→new field IDs (returning() preserves insert order)
-          fields.forEach((oldF, i) => { fieldIdMap[oldF.id] = newFields[i].id; });
+          fields.forEach((oldF: any, i: number) => { fieldIdMap[oldF.id] = newFields[i].id; });
         }
       })(),
       // Batch-insert all records for this table at once
       records.length > 0
-        ? db!.insert(dsRecords).values(records.map(r => ({ tableId: newTable.id, databaseId: newDb.id, data: r.data })))
+        ? db!.insert(dsRecords).values(records.map((r: any) => ({ tableId: newTable.id, databaseId: newDb.id, data: r.data })))
         : Promise.resolve(),
     ]);
   }));
 
   // ── Step 5: Batch-insert relationships, queries, forms, reports in parallel ──
-  const validRels = sourceRels.filter(rel =>
+  const validRels = sourceRels.filter((rel: any) =>
     tableIdMap[rel.fromTableId] && tableIdMap[rel.toTableId] &&
     fieldIdMap[rel.fromFieldId] && fieldIdMap[rel.toFieldId]
   );
 
   await Promise.all([
-    validRels.length > 0 ? db!.insert(dsRelationships).values(validRels.map(rel => ({
+    validRels.length > 0 ? db!.insert(dsRelationships).values(validRels.map((rel: any) => ({
       databaseId: newDb.id,
       fromTableId: tableIdMap[rel.fromTableId], fromFieldId: fieldIdMap[rel.fromFieldId],
       toTableId: tableIdMap[rel.toTableId],     toFieldId: fieldIdMap[rel.toFieldId],
       relationshipType: rel.relationshipType,
     }))) : Promise.resolve(),
-    sourceQueries.length > 0 ? db!.insert(dsQueries).values(sourceQueries.map(q => ({ name: q.name, databaseId: newDb.id, definition: q.definition }))) : Promise.resolve(),
-    sourceForms.length > 0   ? db!.insert(dsForms).values(sourceForms.map(f => ({ name: f.name, databaseId: newDb.id, definition: f.definition })))     : Promise.resolve(),
-    sourceReports.length > 0 ? db!.insert(dsReports).values(sourceReports.map(r => ({ name: r.name, databaseId: newDb.id, definition: r.definition })))  : Promise.resolve(),
+    sourceQueries.length > 0 ? db!.insert(dsQueries).values(sourceQueries.map((q: any) => ({ name: q.name, databaseId: newDb.id, definition: q.definition }))) : Promise.resolve(),
+    sourceForms.length > 0   ? db!.insert(dsForms).values(sourceForms.map((f: any) => ({ name: f.name, databaseId: newDb.id, definition: f.definition })))     : Promise.resolve(),
+    sourceReports.length > 0 ? db!.insert(dsReports).values(sourceReports.map((r: any) => ({ name: r.name, databaseId: newDb.id, definition: r.definition })))  : Promise.resolve(),
   ]);
 
   return newDb.id;
@@ -585,7 +585,7 @@ export function registerDsRoutes(app: Express) {
     const { userId } = req.query;
     if (!userId || typeof userId !== "string") return res.status(400).json({ error: "userId is required" });
     const rows = await db!.select().from(dsDatabases).where(eq(dsDatabases.userId, userId)).orderBy(dsDatabases.createdAt);
-    res.json(rows.map(d => tsFmt(d, "createdAt", "updatedAt")));
+    res.json(rows.map((d: any) => tsFmt(d, "createdAt", "updatedAt")));
   });
 
   app.post("/api/ds/databases", async (req, res) => {
@@ -648,7 +648,7 @@ export function registerDsRoutes(app: Express) {
   app.get("/api/ds/databases/:dbId/tables", async (req, res) => {
     const databaseId = parseInt(req.params.dbId);
     const tables = await db!.select().from(dsTables).where(eq(dsTables.databaseId, databaseId)).orderBy(dsTables.createdAt);
-    res.json(tables.map(t => tsFmt(t, "createdAt", "updatedAt")));
+    res.json(tables.map((t: any) => tsFmt(t, "createdAt", "updatedAt")));
   });
 
   app.post("/api/ds/databases/:dbId/tables", async (req, res) => {
@@ -672,7 +672,7 @@ export function registerDsRoutes(app: Express) {
       });
     }
     const tableFields = await db!.select().from(dsFields).where(eq(dsFields.tableId, table.id)).orderBy(dsFields.sortOrder);
-    res.status(201).json({ ...tsFmt(table, "createdAt", "updatedAt"), fields: tableFields.map(f => tsFmt(f, "createdAt", "updatedAt")) });
+    res.status(201).json({ ...tsFmt(table, "createdAt", "updatedAt"), fields: tableFields.map((f: any) => tsFmt(f, "createdAt", "updatedAt")) });
   });
 
   app.get("/api/ds/databases/:dbId/tables/:tableId", async (req, res) => {
@@ -681,7 +681,7 @@ export function registerDsRoutes(app: Express) {
     const [table] = await db!.select().from(dsTables).where(and(eq(dsTables.id, tableId), eq(dsTables.databaseId, databaseId)));
     if (!table) return res.status(404).json({ error: "Table not found" });
     const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, tableId)).orderBy(dsFields.sortOrder);
-    res.json({ ...tsFmt(table, "createdAt", "updatedAt"), fields: fields.map(f => tsFmt(f, "createdAt", "updatedAt")) });
+    res.json({ ...tsFmt(table, "createdAt", "updatedAt"), fields: fields.map((f: any) => tsFmt(f, "createdAt", "updatedAt")) });
   });
 
   app.put("/api/ds/databases/:dbId/tables/:tableId", async (req, res) => {
@@ -700,7 +700,7 @@ export function registerDsRoutes(app: Express) {
       })));
     }
     const updatedFields = await db!.select().from(dsFields).where(eq(dsFields.tableId, tableId)).orderBy(dsFields.sortOrder);
-    res.json({ ...tsFmt(table, "createdAt", "updatedAt"), fields: updatedFields.map(f => tsFmt(f, "createdAt", "updatedAt")) });
+    res.json({ ...tsFmt(table, "createdAt", "updatedAt"), fields: updatedFields.map((f: any) => tsFmt(f, "createdAt", "updatedAt")) });
   });
 
   // Lightweight rename / metadata update — does NOT touch fields.
@@ -717,7 +717,7 @@ export function registerDsRoutes(app: Express) {
       .returning();
     if (!table) return res.status(404).json({ error: "Table not found" });
     const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, tableId)).orderBy(dsFields.sortOrder);
-    res.json({ ...tsFmt(table, "createdAt", "updatedAt"), fields: fields.map(f => tsFmt(f, "createdAt", "updatedAt")) });
+    res.json({ ...tsFmt(table, "createdAt", "updatedAt"), fields: fields.map((f: any) => tsFmt(f, "createdAt", "updatedAt")) });
   });
 
   app.delete("/api/ds/databases/:dbId/tables/:tableId", async (req, res) => {
@@ -744,18 +744,18 @@ export function registerDsRoutes(app: Express) {
     let records = await db!.select().from(dsRecords).where(and(eq(dsRecords.tableId, tableId), eq(dsRecords.databaseId, databaseId)));
     if (search?.trim()) {
       const s = search.toLowerCase();
-      records = records.filter(r => Object.values(r.data as any).some((v: any) => v !== null && String(v).toLowerCase().includes(s)));
+      records = records.filter((r: any) => Object.values(r.data as any).some((v: any) => v !== null && String(v).toLowerCase().includes(s)));
     }
     if (sortField) {
       const dir = sortDirection === "desc" ? -1 : 1;
-      records = records.sort((a, b) => {
+      records = records.sort((a: any, b: any) => {
         const av = (a.data as any)[sortField] ?? ""; const bv = (b.data as any)[sortField] ?? "";
         return av < bv ? -dir : av > bv ? dir : 0;
       });
     } else {
-      records = records.sort((a, b) => a.id - b.id);
+      records = records.sort((a: any, b: any) => a.id - b.id);
     }
-    res.json(records.map(r => tsFmt(r, "createdAt", "updatedAt")));
+    res.json(records.map((r: any) => tsFmt(r, "createdAt", "updatedAt")));
   });
 
   app.post("/api/ds/databases/:dbId/tables/:tableId/records", async (req, res) => {
@@ -764,7 +764,7 @@ export function registerDsRoutes(app: Express) {
     const { data } = req.body;
     if (!data || typeof data !== "object") return res.status(400).json({ error: "data is required" });
     const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, tableId));
-    const autoFields = fields.filter(f => f.fieldType === "autonumber");
+    const autoFields = fields.filter((f: any) => f.fieldType === "autonumber");
     const processedData = { ...data };
     for (const af of autoFields) {
       const existing = await db!.select().from(dsRecords).where(eq(dsRecords.tableId, tableId));
@@ -803,11 +803,11 @@ export function registerDsRoutes(app: Express) {
     const previewHost = getPreviewHost(req);
     const databases = await db!.select().from(dsDatabases).where(eq(dsDatabases.userId, userId)).orderBy(dsDatabases.createdAt);
     const embeds = await db!.select().from(dsEmbeds).where(eq(dsEmbeds.userId, userId));
-    const embedByDbId = new Map(embeds.map(e => [e.databaseId, e]));
+    const embedByDbId = new Map(embeds.map((e: any) => [e.databaseId, e]));
     const sandboxes = databases
-      .filter(d => embedByDbId.has(d.id))
-      .map(d => {
-        const embed = embedByDbId.get(d.id)!;
+      .filter((d: any) => embedByDbId.has(d.id))
+      .map((d: any) => {
+        const embed = embedByDbId.get(d.id) as any;
         const embedUrl = `${host}/data-sculptor/?embed=${embed.token}`;
         const previewUrl = `${previewHost}/data-sculptor/?embed=${embed.token}`;
         const iframeCode = buildIframeCode(embedUrl, previewUrl, embed.token);
@@ -887,16 +887,16 @@ export function registerDsRoutes(app: Express) {
     ]);
     if (!database) return res.status(404).json({ error: "Sandbox database not found" });
     const allFields = tables.length > 0
-      ? await db!.select().from(dsFields).where(inArray(dsFields.tableId, tables.map(t => t.id))).orderBy(dsFields.sortOrder)
+      ? await db!.select().from(dsFields).where(inArray(dsFields.tableId, tables.map((t: any) => t.id))).orderBy(dsFields.sortOrder)
       : [];
     const fieldsByTable = new Map<number, typeof allFields>();
     for (const f of allFields) {
       if (!fieldsByTable.has(f.tableId)) fieldsByTable.set(f.tableId, []);
       fieldsByTable.get(f.tableId)!.push(f);
     }
-    const tablesWithFields = tables.map(table => ({
+    const tablesWithFields = tables.map((table: any) => ({
       ...tsFmt(table, "createdAt", "updatedAt"),
-      fields: (fieldsByTable.get(table.id) ?? []).map(f => tsFmt(f, "createdAt", "updatedAt")),
+      fields: (fieldsByTable.get(table.id) ?? []).map((f: any) => tsFmt(f, "createdAt", "updatedAt")),
     }));
     res.json({
       database: { ...tsFmt(database, "createdAt", "updatedAt"), taskDescription: originalDb?.taskDescription ?? null },
@@ -915,7 +915,7 @@ export function registerDsRoutes(app: Express) {
     await Promise.all([
       db!.delete(dsStudentSessions).where(and(eq(dsStudentSessions.sessionKey, sessionKey), eq(dsStudentSessions.token, token))),
       db!.delete(dsRecords).where(eq(dsRecords.databaseId, dbId)),
-      tableIds.length > 0 ? db!.delete(dsFields).where(inArray(dsFields.tableId, tableIds.map(t => t.id))) : Promise.resolve(),
+      tableIds.length > 0 ? db!.delete(dsFields).where(inArray(dsFields.tableId, tableIds.map((t: any) => t.id))) : Promise.resolve(),
       db!.delete(dsQueries).where(eq(dsQueries.databaseId, dbId)),
       db!.delete(dsForms).where(eq(dsForms.databaseId, dbId)),
       db!.delete(dsReports).where(eq(dsReports.databaseId, dbId)),
@@ -968,7 +968,7 @@ export function registerDsRoutes(app: Express) {
     const tableData: Record<number, any[]> = {};
     for (const t of tables) {
       const records = await db!.select().from(dsRecords).where(and(eq(dsRecords.tableId, t.tableId), eq(dsRecords.databaseId, databaseId)));
-      tableData[t.tableId] = records.map(r => r.data);
+      tableData[t.tableId] = records.map((r: any) => r.data);
     }
     let resultRows: Record<string, any>[] = [];
     if (tables.length === 1) {
@@ -1067,7 +1067,7 @@ export function registerDsRoutes(app: Express) {
   app.get("/api/ds/databases/:dbId/relationships", async (req, res) => {
     const databaseId = parseInt(req.params.dbId);
     const rows = await db!.select().from(dsRelationships).where(eq(dsRelationships.databaseId, databaseId));
-    res.json(rows.map(r => tsFmt(r, "createdAt")));
+    res.json(rows.map((r: any) => tsFmt(r, "createdAt")));
   });
 
   app.post("/api/ds/databases/:dbId/relationships", async (req, res) => {
@@ -1150,7 +1150,7 @@ export function registerDsRoutes(app: Express) {
           tableFieldMap.set(table.id, fields);
           const records = await db!.select().from(dsRecords).where(and(eq(dsRecords.tableId, table.id), eq(dsRecords.databaseId, databaseId)));
           if (fields.length === 0) { alasql(`CREATE TABLE ${safeName} (id INT)`); continue; }
-          const colDefs = fields.map(f => {
+          const colDefs = fields.map((f: any) => {
             const safeFld = safeIdent(f.name);
             let typ = "STRING";
             if (f.fieldType === "number" || f.fieldType === "autonumber" || f.fieldType === "currency") typ = "NUMBER";
@@ -1160,7 +1160,7 @@ export function registerDsRoutes(app: Express) {
           });
           alasql(`CREATE TABLE ${safeName} (${colDefs.join(", ")})`);
           if (records.length > 0) {
-            const dataRows = records.map(r => {
+            const dataRows = records.map((r: any) => {
               const out: Record<string,any> = {};
               for (const f of fields) out[safeIdent(f.name)] = (r.data as any)[f.name] ?? null;
               return out;
@@ -1196,7 +1196,7 @@ export function registerDsRoutes(app: Express) {
         try { alasql(`DROP DATABASE ${instanceDb}`); } catch {}
       }
     } catch (e: any) {
-      const tableNames = (await db!.select({ name: dsTables.name }).from(dsTables).where(eq(dsTables.databaseId, databaseId))).map(t => t.name);
+      const tableNames = (await db!.select({ name: dsTables.name }).from(dsTables).where(eq(dsTables.databaseId, databaseId))).map((t: any) => t.name);
       let msg = e?.message || "Query execution failed";
       if (/table.*not.*(exist|found)|no such table/i.test(msg)) msg = `Table not found. Available: ${tableNames.join(", ")}. Check spelling.`;
       else if (/column.*not.*(found|exist)/i.test(msg)) msg = "Column not found. Check the field name spelling.";
@@ -1208,9 +1208,9 @@ export function registerDsRoutes(app: Express) {
   app.get("/api/ds/databases/:dbId/sql/schema", async (req, res) => {
     const databaseId = parseInt(req.params.dbId);
     const tables = await db!.select().from(dsTables).where(eq(dsTables.databaseId, databaseId));
-    const schema = await Promise.all(tables.map(async (table) => {
+    const schema = await Promise.all(tables.map(async (table: any) => {
       const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, table.id));
-      return { id: table.id, name: table.name, fields: fields.sort((a,b) => a.sortOrder - b.sortOrder).map(f => ({ name: f.name, fieldType: f.fieldType, isPrimaryKey: f.isPrimaryKey })) };
+      return { id: table.id, name: table.name, fields: fields.sort((a: any, b: any) => a.sortOrder - b.sortOrder).map((f: any) => ({ name: f.name, fieldType: f.fieldType, isPrimaryKey: f.isPrimaryKey })) };
     }));
     res.json(schema);
   });
@@ -1219,12 +1219,12 @@ export function registerDsRoutes(app: Express) {
   app.get("/api/ds/databases/:dbId/analyse", async (req, res) => {
     const databaseId = parseInt(req.params.dbId);
     const tables = await db!.select().from(dsTables).where(eq(dsTables.databaseId, databaseId));
-    const tableStats = await Promise.all(tables.map(async table => {
+    const tableStats = await Promise.all(tables.map(async (table: any) => {
       const fields = await db!.select().from(dsFields).where(eq(dsFields.tableId, table.id));
       const records = await db!.select().from(dsRecords).where(and(eq(dsRecords.tableId, table.id), eq(dsRecords.databaseId, databaseId)));
       const rowCount = records.length;
-      const fieldStats = fields.sort((a,b) => a.sortOrder - b.sortOrder).map(f => {
-        const emptyCount = records.filter(r => { const v = (r.data as any)[f.name]; return v === null || v === undefined || v === ""; }).length;
+      const fieldStats = fields.sort((a: any, b: any) => a.sortOrder - b.sortOrder).map((f: any) => {
+        const emptyCount = records.filter((r: any) => { const v = (r.data as any)[f.name]; return v === null || v === undefined || v === ""; }).length;
         return { id: f.id, name: f.name, fieldType: f.fieldType, isPrimaryKey: f.isPrimaryKey, emptyCount, fillRate: rowCount > 0 ? Math.round(((rowCount - emptyCount)/rowCount)*100) : 100 };
       });
       return { id: table.id, name: table.name, rowCount, fieldCount: fields.length, fieldStats, createdAt: table.createdAt.toISOString() };
@@ -1235,9 +1235,9 @@ export function registerDsRoutes(app: Express) {
   app.post("/api/ds/databases/:dbId/compact", async (req, res) => {
     const databaseId = parseInt(req.params.dbId);
     const tables = await db!.select({ id: dsTables.id }).from(dsTables).where(eq(dsTables.databaseId, databaseId));
-    const validIds = new Set(tables.map(t => t.id));
+    const validIds = new Set(tables.map((t: any) => t.id));
     const allRecords = await db!.select({ id: dsRecords.id, tableId: dsRecords.tableId }).from(dsRecords).where(eq(dsRecords.databaseId, databaseId));
-    const orphans = allRecords.filter(r => !validIds.has(r.tableId));
+    const orphans = allRecords.filter((r: any) => !validIds.has(r.tableId));
     for (const r of orphans) await db!.delete(dsRecords).where(eq(dsRecords.id, r.id));
     res.json({ message: "Compact & Repair complete", tablesChecked: tables.length, orphanedRecordsRemoved: orphans.length, status: "healthy" });
   });
