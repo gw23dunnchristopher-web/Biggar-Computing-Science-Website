@@ -1508,6 +1508,24 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     }
   });
 
+  app.get('/api/classwork/teacher/classes/:id/students/export.xlsx', requireTeacher, async (req, res) => {
+    try {
+      const { buildCredentialsWorkbook } = await import('./classwork-export.js');
+      const result = await buildCredentialsWorkbook(req.params.id);
+      if (!result) return res.status(404).json({ error: 'Class not found or has no students' });
+      const { wb, className } = result;
+      const slug = className.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
+      const filename = `logins-${slug}-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      await wb.xlsx.write(res);
+      res.end();
+    } catch (err) {
+      console.error('[classwork] credentials export error:', err);
+      if (!res.headersSent) res.status(500).json({ error: 'Failed to build credentials workbook' });
+    }
+  });
+
   app.post('/api/classwork/teacher/classes/:id/students/bulk', requireTeacher, async (req, res) => {
     try {
       const src = await getClassSource(req.params.id);

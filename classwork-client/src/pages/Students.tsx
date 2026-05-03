@@ -498,13 +498,23 @@ export default function Students() {
                   <h3 style={{ margin: 0 }}>{selectedClass.name}</h3>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                     {students.length > 0 && (
-                      <button
-                        onClick={printCredentials}
-                        title="Open a print-ready credentials sheet for this class"
-                        style={secondaryBtn}
-                      >
-                        Print logins
-                      </button>
+                      <>
+                        <button
+                          onClick={printCredentials}
+                          title="Open a print-ready credentials sheet for this class"
+                          style={secondaryBtn}
+                        >
+                          Print logins
+                        </button>
+                        <a
+                          href={`/api/classwork/teacher/classes/${selectedId}/students/export.xlsx`}
+                          download
+                          title="Download an Excel file with usernames and initial passwords"
+                          style={{ ...secondaryBtn, textDecoration: 'none', display: 'inline-block' }}
+                        >
+                          Save as Excel
+                        </a>
+                      </>
                     )}
                     <label style={{ fontSize: 13 }}>Add</label>
                     <input
