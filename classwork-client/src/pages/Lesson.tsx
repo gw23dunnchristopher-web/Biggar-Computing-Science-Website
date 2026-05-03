@@ -214,7 +214,12 @@ const TYPE_GROUPS: { label: string; types: string[] }[] = [
   { label: 'Embedded tools', types: ['python_task', 'html_task', 'sql_task', 'database_task'] },
   { label: 'Groups (show questions together)', types: ['group', 'video_group', 'passage', 'file_task', 'mc_group'] },
   { label: 'Fun activities', types: ['crossword', 'word_search', 'matching', 'anagrams'] },
-  { label: 'Games', types: ['hangman', 'speed_round', 'ordering', 'caesar_cipher', 'spot_phish', 'binary_hex', 'bit_ops', 'code_tracer', 'flowchart_seq', 'sorting_race', 'convert_relay', 'url_anatomy', 'truth_table', 'field_type_sort', 'io_sort', 'html_match', 'password_forge', 'privacy_radar', 'validation_rules', 'find_duplicate', 'bin_search', 'box_model', 'friend_or_fake', 'dm_danger', 'malware_triage', '2fa_escape', 'a11y_audit', 'fetch_execute', 'screen_time', 'footprint_trail', 'social_engineer', 'cipher_quest', 'normalise_it', 'subnet_calc', 'phish_inbox', 'build_pc', 'os_sched', 'query_visual', 'schema_arch', 'tag_soup_repair', 'selector_golf', 'css_sliders'] },
+  { label: 'Games · Word & puzzle', types: ['hangman', 'speed_round', 'ordering'] },
+  { label: 'Games · Internet Safety', types: ['spot_phish', 'phish_inbox', 'friend_or_fake', 'dm_danger', 'screen_time', 'footprint_trail', 'social_engineer'] },
+  { label: 'Games · Cyber Security', types: ['caesar_cipher', 'cipher_quest', 'password_forge', '2fa_escape', 'privacy_radar', 'malware_triage'] },
+  { label: 'Games · Databases', types: ['field_type_sort', 'validation_rules', 'find_duplicate', 'normalise_it', 'query_visual', 'schema_arch'] },
+  { label: 'Games · Web Development', types: ['url_anatomy', 'html_match', 'tag_soup_repair', 'selector_golf', 'box_model', 'css_sliders', 'a11y_audit'] },
+  { label: 'Games · Computer Systems', types: ['binary_hex', 'convert_relay', 'bit_ops', 'truth_table', 'io_sort', 'build_pc', 'fetch_execute', 'os_sched', 'code_tracer', 'flowchart_seq', 'sorting_race', 'bin_search', 'subnet_calc'] },
   { label: 'No answer needed', types: ['info_only', 'text_only', 'section_header'] },
 ];
 
