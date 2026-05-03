@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import Shell from '@/components/Shell';
 
+function useSearchParam(key: string) {
+  return new URLSearchParams(window.location.search).get(key);
+}
+
 /**
  * Unified Classwork sign-in. One form, one Sign in button.
  * - If the entered identifier looks like an email, we try the teacher login
@@ -15,6 +19,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const sessionExpired = useSearchParam('expired') === '1';
 
   async function tryTeacher(): Promise<boolean> {
     try {
@@ -86,6 +91,16 @@ export default function Login() {
         border: '1px solid var(--cw-border)', borderRadius: 12, padding: 28,
         boxShadow: '0 4px 14px rgba(15,23,42,0.05)',
       }}>
+        {sessionExpired && (
+          <div style={{
+            marginBottom: 16, padding: '12px 14px',
+            background: 'var(--cw-warning-bg, #fef9c3)', color: 'var(--cw-warning-ink, #854d0e)',
+            border: '1px solid var(--cw-warning-border, #fde047)',
+            borderRadius: 8, fontSize: 14, lineHeight: 1.5,
+          }}>
+            <strong>Your session has expired.</strong> Please sign in again to continue.
+          </div>
+        )}
         <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <p style={{ margin: 0, color: 'var(--cw-muted)', fontSize: 14 }}>
             Students: use your Revision-app username and password.<br />
