@@ -2198,21 +2198,21 @@ export function UpstanderPupilUI({ config, cellAnswers, setCellAnswers }: any) {
       </div>
 
       <div style={{ position: 'relative', height: 340, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{
+        {!consequence && (<div style={{
           position: 'absolute', left: 4, top: '50%', transform: 'translateY(-50%)',
           opacity: hintLeft, transition: isDragging ? 'none' : 'opacity 0.2s',
           background: '#ef444418', border: '2px solid #ef4444', borderRadius: 12,
           padding: '8px 14px', color: '#ef4444', fontWeight: 700, fontSize: 12,
           maxWidth: 110, textAlign: 'center', pointerEvents: 'none', zIndex: 2,
-        }}>← {item?.left?.label || 'Left'}</div>
+        }}>← {item?.left?.label || 'Left'}</div>)}
 
-        <div style={{
+        {!consequence && (<div style={{
           position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)',
           opacity: hintRight, transition: isDragging ? 'none' : 'opacity 0.2s',
           background: '#10b98118', border: '2px solid #10b981', borderRadius: 12,
           padding: '8px 14px', color: '#10b981', fontWeight: 700, fontSize: 12,
           maxWidth: 110, textAlign: 'center', pointerEvents: 'none', zIndex: 2,
-        }}>{item?.right?.label || 'Right'} →</div>
+        }}>{item?.right?.label || 'Right'} →</div>)}
 
         {consequence ? (
           <div style={{
