@@ -4565,6 +4565,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
     (cfg.upstander && Array.isArray(cfg.upstander.items) && cfg.upstander.items.length > 0)
       ? { items: cfg.upstander.items.map((it: any) => ({
           scenario: String(it?.scenario || ''),
+          image: it?.image ? String(it.image) : undefined,
           left:  it?.left  || { label: '', consequence: '', effects: { kindness: 0, courage: 0, safety: 0 } },
           right: it?.right || { label: '', consequence: '', effects: { kindness: 0, courage: 0, safety: 0 } },
         })) }
@@ -5437,6 +5438,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
         const items = (Array.isArray(upstanderCfg.items) ? upstanderCfg.items : [])
           .map((it: any) => ({
             scenario: String(it?.scenario || '').trim(),
+            ...(it?.image ? { image: String(it.image).trim() } : {}),
             left: {
               label: String(it?.left?.label || '').trim(),
               consequence: String(it?.left?.consequence || '').trim(),

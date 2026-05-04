@@ -1987,6 +1987,7 @@ export const DmDangerEditor = ({ cfg, setCfg }: any) =>
 
 export interface UpstanderItem {
   scenario: string;
+  image?: string;
   left: { label: string; consequence: string; effects: { kindness: number; courage: number; safety: number } };
   right: { label: string; consequence: string; effects: { kindness: number; courage: number; safety: number } };
 }
@@ -1994,51 +1995,61 @@ export interface UpstanderItem {
 export const DEFAULT_UPSTANDER_ITEMS: UpstanderItem[] = [
   {
     scenario: 'Your group chat starts filling up with mean comments about a classmate\'s appearance.',
+    image: '/classwork/assets/upstander/card1.png',
     left: { label: 'Leave quietly', consequence: 'You step away from the chat. The comments carry on without you, and nobody challenges them.', effects: { kindness: -1, courage: 0, safety: 1 } },
     right: { label: 'Tell them to stop', consequence: 'The chat goes silent. A few people message you privately to say they\'re glad someone spoke up.', effects: { kindness: 2, courage: 3, safety: 1 } },
   },
   {
     scenario: 'A classmate shows you distressing anonymous messages they\'ve been receiving for weeks.',
+    image: '/classwork/assets/upstander/card2.png',
     left: { label: 'Help them report it', consequence: 'They feel stronger knowing you\'ve got their back. Together you flag the account and it\'s investigated.', effects: { kindness: 3, courage: 2, safety: 2 } },
     right: { label: 'Tell them to ignore it', consequence: 'Your classmate forces a smile, but the messages get worse over the next week.', effects: { kindness: -2, courage: -1, safety: -2 } },
   },
   {
     scenario: 'A stranger keeps messaging you repeatedly after you asked them to stop.',
+    image: '/classwork/assets/upstander/card3.png',
     left: { label: 'Block & report them', consequence: 'The messages stop instantly. You feel relieved and safe, and the account is flagged.', effects: { kindness: 0, courage: 1, safety: 3 } },
     right: { label: 'Message them again', consequence: 'They see it as an invitation to keep trying. More messages arrive that evening.', effects: { kindness: 0, courage: -1, safety: -2 } },
   },
   {
     scenario: 'Someone has created a fake account using a classmate\'s name and photo to spread rumours.',
+    image: '/classwork/assets/upstander/card4.png',
     left: { label: 'Report it quietly', consequence: 'The account is removed, but your classmate later finds out from someone else and feels hurt nobody told them.', effects: { kindness: 1, courage: 1, safety: 2 } },
     right: { label: 'Tell them first, then report together', consequence: 'They\'re shaken but feel empowered taking action together with you. The account is removed quickly.', effects: { kindness: 2, courage: 2, safety: 2 } },
   },
   {
     scenario: 'A classmate\'s ex-partner is sharing private photos of her on social media without her permission.',
+    image: '/classwork/assets/upstander/card5.png',
     left: { label: 'Tell her and report together', consequence: 'She\'s upset but grateful you told her. The images are removed quickly and she knows someone had her back.', effects: { kindness: 3, courage: 3, safety: 2 } },
     right: { label: 'Report it yourself silently', consequence: 'The images come down, but she\'s upset that people knew about it before she did.', effects: { kindness: 1, courage: 2, safety: 2 } },
   },
   {
     scenario: 'A group of students creates a mean hashtag using a classmate\'s real name.',
+    image: '/classwork/assets/upstander/card6.png',
     left: { label: 'Report every post', consequence: 'Many posts are removed. The hashtag slowly dies out without an audience to fuel it.', effects: { kindness: 2, courage: 1, safety: 2 } },
     right: { label: 'Post kind things about them', consequence: 'Positive messages flood in and bury the negativity. Your classmate is touched by the support.', effects: { kindness: 3, courage: 2, safety: 1 } },
   },
   {
     scenario: 'Someone dares you in a group chat to post something mean about a classmate.',
+    image: '/classwork/assets/upstander/card7.png',
     left: { label: 'Refuse and call it out', consequence: 'You face a bit of mockery, but others in the chat quietly respect you for standing up.', effects: { kindness: 1, courage: 3, safety: 1 } },
     right: { label: 'Leave the chat silently', consequence: 'Nobody speaks up. The dare moves on to the next person in the chat.', effects: { kindness: 0, courage: -1, safety: 1 } },
   },
   {
     scenario: 'A classmate is using a gaming platform\'s chat to threaten someone they\'ll "sort them out" after school.',
+    image: '/classwork/assets/upstander/card8.png',
     left: { label: 'Screenshot & tell an adult', consequence: 'Staff treat it as a safeguarding matter. It\'s investigated properly. You feel you did the right thing.', effects: { kindness: 2, courage: 3, safety: 3 } },
     right: { label: 'Tell your friends & leave it', consequence: 'Word spreads but nobody actually reports it. Nothing changes, and the threats continue.', effects: { kindness: -1, courage: -1, safety: -1 } },
   },
   {
     scenario: 'Your friend is too scared to open their phone because of constant hurtful messages every night.',
+    image: '/classwork/assets/upstander/card9.png',
     left: { label: 'Help them document & report', consequence: 'You help build a detailed record of the bullying. It\'s officially reported and a proper investigation begins.', effects: { kindness: 3, courage: 2, safety: 2 } },
     right: { label: 'Suggest a social media break', consequence: 'They feel slightly dismissed. The bullying is still there when they return online.', effects: { kindness: -1, courage: -1, safety: 0 } },
   },
   {
     scenario: 'Someone is live-streaming themselves reading out a classmate\'s private messages for their followers to mock.',
+    image: '/classwork/assets/upstander/card10.png',
     left: { label: 'Report the stream now', consequence: 'The stream is cut within minutes. The target is mortified but deeply grateful someone acted fast.', effects: { kindness: 2, courage: 2, safety: 2 } },
     right: { label: 'Message the streamer to stop', consequence: 'They read your message aloud as a joke to their audience. The bullying escalates further.', effects: { kindness: -1, courage: -1, safety: -1 } },
   },
@@ -2223,29 +2234,37 @@ export function UpstanderPupilUI({ config, cellAnswers, setCellAnswers }: any) {
             style={{
               width: '80%', cursor: busy ? 'default' : isDragging ? 'grabbing' : 'grab',
               background: 'var(--cw-surface)',
-              border: '2px solid var(--cw-border)', borderRadius: 20, padding: '26px 22px',
+              border: '2px solid var(--cw-border)', borderRadius: 20, overflow: 'hidden',
               boxShadow: '0 8px 28px rgba(0,0,0,0.10)',
               transform: `translateX(${dragX}px) rotate(${rot}deg)`,
               transition: isDragging ? 'none' : 'transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94)',
               opacity: Math.abs(dragX) > 200 ? Math.max(0.15, 1 - (Math.abs(dragX) - 200) / 220) : 1,
-              display: 'flex', flexDirection: 'column', gap: 18, touchAction: 'none',
+              display: 'flex', flexDirection: 'column', gap: 0, touchAction: 'none',
             }}
           >
-            <div style={{
-              fontSize: 15, lineHeight: 1.65, color: 'var(--cw-ink)',
-              textAlign: 'center', fontWeight: 500,
-            }}>{String(item?.scenario || '')}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <button type="button" onClick={() => choose('left')} style={{
-                padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
-                background: '#fff1f2', color: '#ef4444', border: '2px solid #fca5a5',
-                fontWeight: 600, fontSize: 12,
-              }}>← {item?.left?.label || 'Left'}</button>
-              <button type="button" onClick={() => choose('right')} style={{
-                padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
-                background: '#f0fdf4', color: '#10b981', border: '2px solid #86efac',
-                fontWeight: 600, fontSize: 12,
-              }}>{item?.right?.label || 'Right'} →</button>
+            {item?.image && (
+              <div style={{ width: '100%', height: 148, overflow: 'hidden', flexShrink: 0 }}>
+                <img src={item.image} alt="" draggable={false}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', pointerEvents: 'none' }} />
+              </div>
+            )}
+            <div style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <div style={{
+                fontSize: 15, lineHeight: 1.65, color: 'var(--cw-ink)',
+                textAlign: 'center', fontWeight: 500,
+              }}>{String(item?.scenario || '')}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <button type="button" onClick={() => choose('left')} style={{
+                  padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
+                  background: '#fff1f2', color: '#ef4444', border: '2px solid #fca5a5',
+                  fontWeight: 600, fontSize: 12,
+                }}>← {item?.left?.label || 'Left'}</button>
+                <button type="button" onClick={() => choose('right')} style={{
+                  padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
+                  background: '#f0fdf4', color: '#10b981', border: '2px solid #86efac',
+                  fontWeight: 600, fontSize: 12,
+                }}>{item?.right?.label || 'Right'} →</button>
+              </div>
             </div>
           </div>
         )}
@@ -2281,6 +2300,11 @@ export function UpstanderEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) =>
             <textarea value={String(it?.scenario || '')} onChange={(e) => upd(i, { scenario: e.target.value })}
               placeholder="What situation is the student facing?"
               style={{ width: '100%', padding: '4px 8px', fontSize: 13, minHeight: 55, boxSizing: 'border-box' }} />
+            <label style={{ fontSize: 12, fontWeight: 600 }}>Card image URL <span style={{ fontWeight: 400, color: 'var(--cw-muted)' }}>(optional)</span></label>
+            {it?.image && <img src={String(it.image)} alt="preview" style={{ height: 80, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--cw-border)' }} />}
+            <input value={String(it?.image || '')} onChange={(e) => upd(i, { image: e.target.value })}
+              placeholder="https://… or /classwork/assets/upstander/card1.png"
+              style={{ padding: '4px 8px', fontSize: 12 }} />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {(['left', 'right'] as const).map((side) => (
                 <div key={side} style={{ border: `2px solid ${side === 'left' ? '#fca5a5' : '#86efac'}`, borderRadius: 8, padding: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
