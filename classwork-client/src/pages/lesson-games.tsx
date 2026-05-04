@@ -1992,10 +1992,105 @@ const UPSTANDER_LABELS: Record<string, string> = {
   block: '🚫 Block & ignore',
   ignore: '😶 Do nothing',
 };
-export const UpstanderPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
-  <PickListPupilUI items={config?.upstander?.items || []} options={UPSTANDER_OPTS} hint="For each scenario, choose the best action to take as an upstander." textKey="scenario" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={UPSTANDER_LABELS} />;
-export const UpstanderEditor = ({ cfg, setCfg }: any) =>
-  <PickListEditor cfg={cfg} setCfg={setCfg} options={UPSTANDER_OPTS} textKey="scenario" valueKey="action" textPlaceholder='e.g. A classmate is posting mean comments on someone&apos;s photo' labelMap={UPSTANDER_LABELS} />;
+const UPSTANDER_BTN_STYLES: Record<string, { color: string; bg: string; border: string }> = {
+  report:  { color: '#dc2626', bg: '#fef2f2', border: '#fca5a5' },
+  support: { color: '#0d9488', bg: '#f0fdfa', border: '#5eead4' },
+  block:   { color: '#7c3aed', bg: '#faf5ff', border: '#c4b5fd' },
+  ignore:  { color: '#6b7280', bg: '#f9fafb', border: '#d1d5db' },
+};
+export function UpstanderPupilUI({ config, cellAnswers, setCellAnswers }: any) {
+  const items: any[] = config?.upstander?.items || [];
+  const opts = UPSTANDER_OPTS;
+  const allAnswered = items.length > 0 && items.every((_: any, i: number) => !!cellAnswers[String(i)]);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{
+        background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+        borderRadius: 14, padding: '14px 20px',
+        display: 'flex', alignItems: 'center', gap: 14, color: '#fff',
+      }}>
+        <span style={{ fontSize: 36 }}>🦸</span>
+        <div>
+          <div style={{ fontWeight: 800, fontSize: 18, letterSpacing: -0.3 }}>Be an Upstander!</div>
+          <div style={{ fontSize: 13, opacity: 0.88, marginTop: 2 }}>Read each scenario and pick the best action to take.</div>
+        </div>
+        {allAnswered && (
+          <div style={{ marginLeft: 'auto', background: '#fff2', borderRadius: 999, padding: '4px 14px', fontSize: 13, fontWeight: 700 }}>
+            ✅ All done!
+          </div>
+        )}
+      </div>
+      {items.map((it: any, i: number) => {
+        const chosen = String(cellAnswers[String(i)] || '');
+        return (
+          <div key={i} style={{
+            background: 'var(--cw-surface)', borderRadius: 14,
+            border: `2px solid ${chosen ? UPSTANDER_BTN_STYLES[chosen]?.border || 'var(--cw-border)' : 'var(--cw-border)'}`,
+            overflow: 'hidden', transition: 'border-color 0.2s',
+          }}>
+            <div style={{
+              background: 'linear-gradient(90deg,#6366f108,#a855f708)',
+              borderBottom: '1px solid var(--cw-border)',
+              padding: '10px 16px', display: 'flex', gap: 10, alignItems: 'flex-start',
+            }}>
+              <span style={{
+                flexShrink: 0, width: 26, height: 26,
+                background: 'linear-gradient(135deg,#6366f1,#a855f7)',
+                color: '#fff', borderRadius: 999, fontSize: 12, fontWeight: 800,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>{i + 1}</span>
+              <span style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--cw-ink)' }}>{String(it?.scenario || '')}</span>
+            </div>
+            <div style={{ padding: '12px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {opts.map((o) => {
+                const sel = chosen === o;
+                const s = UPSTANDER_BTN_STYLES[o];
+                return (
+                  <button key={o} type="button"
+                    onClick={() => setCellAnswers({ ...cellAnswers, [String(i)]: o })}
+                    style={{
+                      padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
+                      background: sel ? s.color : s.bg,
+                      color: sel ? '#fff' : s.color,
+                      border: `2px solid ${sel ? s.color : s.border}`,
+                      fontWeight: sel ? 700 : 500, fontSize: 13,
+                      transition: 'all 0.15s',
+                      boxShadow: sel ? `0 2px 10px ${s.color}44` : 'none',
+                      transform: sel ? 'scale(1.03)' : 'none',
+                    }}
+                  >{UPSTANDER_LABELS[o]}</button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+export function UpstanderEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
+  const items: any[] = Array.isArray(cfg.items) ? cfg.items : [];
+  const upd = (i: number, scenario: string) => {
+    const next = items.slice(); next[i] = { scenario }; setCfg({ ...cfg, items: next });
+  };
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {items.map((it, i) => (
+        <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <span style={{ fontSize: 12, color: 'var(--cw-muted)', minWidth: 20, textAlign: 'right' }}>{i + 1}.</span>
+          <input
+            value={String(it?.scenario || '')}
+            onChange={(e) => upd(i, e.target.value)}
+            placeholder="e.g. A classmate is posting mean comments on someone's photo"
+            style={{ flex: 1, padding: '4px 8px' }}
+          />
+          <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })} style={{ padding: '4px 8px' }}>×</button>
+        </div>
+      ))}
+      <button type="button" onClick={() => setCfg({ ...cfg, items: [...items, { scenario: '' }] })} style={{ alignSelf: 'flex-start', padding: '6px 10px' }}>+ Add scenario</button>
+    </div>
+  );
+}
 
 export const MalwareTriagePupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
   <PickListPupilUI items={config?.malwareTriage?.items || []} options={MALWARE_OPTS} hint="Match each description to the type of malware." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />;
@@ -2388,6 +2483,30 @@ export function GameReview({ type, cfg, parsed, questionId }: {
     );
   }
 
+  if (type === 'upstander') {
+    const items: any[] = cfg.upstander?.items || [];
+    const UPSTANDER_REVIEW_LABELS: Record<string, string> = {
+      report: '🚨 Report it', support: '💬 Support them', block: '🚫 Block & ignore', ignore: '😶 Do nothing',
+    };
+    return (
+      <div style={wrap}>
+        {items.map((it: any, i: number) => {
+          const got = String(parsed[String(i)] || '');
+          return (
+            <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span style={{ fontSize: 13, flex: 1 }}>{String(it?.scenario || '')}</span>
+              <span style={{
+                padding: '2px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600,
+                background: got ? 'var(--cw-surface-soft)' : 'transparent',
+                color: 'var(--cw-ink)',
+              }}>{got ? UPSTANDER_REVIEW_LABELS[got] || got : <span style={reviewMuted}>(not answered)</span>}</span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   const PICK_LIST_META: Record<string, { itemsPath: string; expectedKey: string; labelKey: string }> = {
     field_type_sort: { itemsPath: 'fieldTypeSort', expectedKey: 'type', labelKey: 'value' },
     io_sort: { itemsPath: 'ioSort', expectedKey: 'category', labelKey: 'name' },
@@ -2409,7 +2528,7 @@ export function GameReview({ type, cfg, parsed, questionId }: {
     phish_inbox: { itemsPath: 'phishInbox', expectedKey: 'verdict', labelKey: 'text' },
     build_pc: { itemsPath: 'buildPc', expectedKey: 'part', labelKey: 'text' },
     os_sched: { itemsPath: 'osSched', expectedKey: 'algo', labelKey: 'text' },
-    upstander: { itemsPath: 'upstander', expectedKey: 'action', labelKey: 'scenario' },
+    upstander_noop: { itemsPath: 'upstander', expectedKey: '_none_', labelKey: 'scenario' },
     query_visual: { itemsPath: 'queryVisual', expectedKey: 'op', labelKey: 'text' },
     schema_arch: { itemsPath: 'schemaArch', expectedKey: 'rel', labelKey: 'text' },
     tag_soup_repair: { itemsPath: 'tagSoupRepair', expectedKey: 'bug', labelKey: 'text' },

@@ -197,7 +197,7 @@ export async function markSubmission(
       case 'mindmap':
         return await markMindmap(q, s);
       case 'upstander':
-        return markPickListGeneric(q, s, 'upstander', 'action', 'best responses chosen', ['report', 'support', 'block', 'ignore']);
+        return { score: null, feedback: 'Extension activity — no marking required.', breakdown: [] };
       case 'file_upload':
         return await markFileUpload(q, s);
       case 'info_only':
