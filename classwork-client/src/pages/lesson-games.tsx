@@ -2590,11 +2590,14 @@ function pillSize(lines: string[], fontSize: number, padX: number, padY: number,
 }
 
 // Multi-line centred SVG text block.
+// SVG text y = baseline, so we add ~0.36 × fontSize to reach the optical centre
+// of capital letters (cap-height ≈ 72% of fontSize → centre ≈ 0.36 × fontSize above baseline).
 function MindmapText({ nx, ny, lines, fontSize, fill, fontWeight, lineH }: {
   nx: number; ny: number; lines: string[]; fontSize: number;
   fill: string; fontWeight: string; lineH: number;
 }) {
-  const topY = ny - ((lines.length - 1) * lineH) / 2;
+  const capCorrection = fontSize * 0.36;
+  const topY = ny + capCorrection - ((lines.length - 1) * lineH) / 2;
   return (
     <text textAnchor="middle" fontFamily="system-ui,sans-serif"
       fontWeight={fontWeight} fontSize={fontSize} fill={fill}>
