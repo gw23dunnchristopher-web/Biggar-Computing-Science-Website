@@ -2556,6 +2556,127 @@ interface MindmapBranch {
   children: { id: string; label: string }[];
 }
 
+// ─── Mindmap live SVG visual ──────────────────────────────────────────────────
+
+const BRANCH_COLORS = [
+  '#4f46e5', '#0ea5e9', '#10b981', '#f59e0b',
+  '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6',
+];
+
+function trunc(s: string, n: number) {
+  const t = (s || '').trim();
+  return t.length > n ? t.slice(0, n - 1) + '…' : (t || '—');
+}
+
+function MindmapSvg({ central, branches }: { central: string; branches: MindmapBranch[] }) {
+  const W = 800, H = 640;
+  const cx = W / 2, cy = H / 2;
+
+  const n = branches.length;
+  // Keep branch nodes far enough apart: arc ≥ 130 px → R1 ≥ 130*n/(2π)
+  const R1 = n <= 1 ? 160 : Math.max(150, Math.ceil(21 * n));
+  const R2 = 120; // extra radius for sub-branch nodes
+  const FAN = (22 * Math.PI) / 180; // 22° gap between sub-branches
+
+  // Branch node geometry
+  const BW = 118, BH = 36;
+  // Sub-branch node geometry
+  const SW = 108, SH = 28;
+  // Central node geometry
+  const CW = 154, CH = 44;
+
+  interface BPos { x: number; y: number; angle: number; color: string; branch: MindmapBranch }
+  const bpos: BPos[] = branches.map((b, i) => {
+    const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+    return {
+      x: cx + R1 * Math.cos(angle),
+      y: cy + R1 * Math.sin(angle),
+      angle,
+      color: BRANCH_COLORS[i % BRANCH_COLORS.length],
+      branch: b,
+    };
+  });
+
+  return (
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      style={{ width: '100%', maxHeight: 420, borderRadius: 10, background: 'var(--cw-surface-soft, #f8fafc)', border: '1.5px solid var(--cw-border, #e2e8f0)' }}
+    >
+      {/* Lines: center → branch */}
+      {bpos.map((bp, bi) => (
+        <line key={`cl-${bi}`}
+          x1={cx} y1={cy} x2={bp.x} y2={bp.y}
+          stroke={bp.color} strokeWidth={2.5} strokeLinecap="round" opacity={0.6}
+        />
+      ))}
+
+      {/* Lines: branch → sub-branch */}
+      {bpos.map((bp, bi) => {
+        const m = bp.branch.children.length;
+        return bp.branch.children.map((_, ci) => {
+          const subAngle = bp.angle + (ci - (m - 1) / 2) * FAN;
+          const sx = cx + (R1 + R2) * Math.cos(subAngle);
+          const sy = cy + (R1 + R2) * Math.sin(subAngle);
+          return (
+            <line key={`sl-${bi}-${ci}`}
+              x1={bp.x} y1={bp.y} x2={sx} y2={sy}
+              stroke={bp.color} strokeWidth={1.5} strokeLinecap="round" opacity={0.4}
+            />
+          );
+        });
+      })}
+
+      {/* Sub-branch nodes */}
+      {bpos.map((bp, bi) => {
+        const m = bp.branch.children.length;
+        return bp.branch.children.map((child, ci) => {
+          const subAngle = bp.angle + (ci - (m - 1) / 2) * FAN;
+          const sx = cx + (R1 + R2) * Math.cos(subAngle);
+          const sy = cy + (R1 + R2) * Math.sin(subAngle);
+          return (
+            <g key={`sn-${bi}-${ci}`}>
+              <rect x={sx - SW / 2} y={sy - SH / 2} width={SW} height={SH} rx={14}
+                fill={bp.color} opacity={0.15} stroke={bp.color} strokeWidth={1.5} strokeOpacity={0.5}
+              />
+              <text x={sx} y={sy + 4.5} textAnchor="middle" fontSize={11}
+                fill={bp.color} fontFamily="system-ui,sans-serif" fontWeight="600">
+                {trunc(child.label, 15)}
+              </text>
+            </g>
+          );
+        });
+      })}
+
+      {/* Branch nodes */}
+      {bpos.map((bp, bi) => (
+        <g key={`bn-${bi}`}>
+          <rect x={bp.x - BW / 2} y={bp.y - BH / 2} width={BW} height={BH} rx={18}
+            fill={bp.color} />
+          <text x={bp.x} y={bp.y + 5} textAnchor="middle" fontSize={12.5}
+            fill="#fff" fontFamily="system-ui,sans-serif" fontWeight="700">
+            {trunc(bp.branch.label, 16)}
+          </text>
+        </g>
+      ))}
+
+      {/* Central node */}
+      <rect x={cx - CW / 2} y={cy - CH / 2} width={CW} height={CH} rx={22} fill="#1e293b" />
+      <text x={cx} y={cy + 5.5} textAnchor="middle" fontSize={14}
+        fill="#fff" fontFamily="system-ui,sans-serif" fontWeight="700">
+        {trunc(central || 'Central Topic', 20)}
+      </text>
+
+      {/* Empty-state hint */}
+      {n === 0 && (
+        <text x={cx} y={cy + 52} textAnchor="middle" fontSize={12}
+          fill="#94a3b8" fontFamily="system-ui,sans-serif">
+          Use the editor below to add branches
+        </text>
+      )}
+    </svg>
+  );
+}
+
 // ─── MindmapPupilUI ───────────────────────────────────────────────────────────
 
 export function MindmapPupilUI({ config, cellAnswers, setCellAnswers }: {
@@ -2577,46 +2698,25 @@ export function MindmapPupilUI({ config, cellAnswers, setCellAnswers }: {
   const tree = getTree();
 
   function addBranch() {
-    const id = `b${Date.now()}`;
-    setTree([...tree, { id, label: '', children: [] }]);
+    setTree([...tree, { id: `b${Date.now()}`, label: '', children: [] }]);
   }
-
   function removeBranch(bi: number) {
     setTree(tree.filter((_, i) => i !== bi));
   }
-
   function updateBranch(bi: number, label: string) {
     setTree(tree.map((b, i) => i === bi ? { ...b, label } : b));
   }
-
   function addChild(bi: number) {
-    const id = `b${bi}c${Date.now()}`;
-    setTree(tree.map((b, i) => i === bi ? { ...b, children: [...b.children, { id, label: '' }] } : b));
+    setTree(tree.map((b, i) => i === bi ? { ...b, children: [...b.children, { id: `b${bi}c${Date.now()}`, label: '' }] } : b));
   }
-
   function removeChild(bi: number, ci: number) {
     setTree(tree.map((b, i) => i === bi ? { ...b, children: b.children.filter((_, j) => j !== ci) } : b));
   }
-
   function updateChild(bi: number, ci: number, label: string) {
-    setTree(tree.map((b, i) => i === bi ? {
-      ...b,
-      children: b.children.map((c, j) => j === ci ? { ...c, label } : c),
-    } : b));
+    setTree(tree.map((b, i) => i === bi ? { ...b, children: b.children.map((c, j) => j === ci ? { ...c, label } : c) } : b));
   }
 
-  const nodeBox: React.CSSProperties = {
-    display: 'inline-block', padding: '6px 14px',
-    borderRadius: 20, fontWeight: 700, fontSize: 14,
-    background: 'var(--cw-accent, #4f46e5)', color: '#fff',
-    marginBottom: 16, textAlign: 'center',
-  };
-  const branchCard: React.CSSProperties = {
-    border: '1.5px solid var(--cw-border, #e2e8f0)', borderRadius: 8,
-    padding: '10px 12px', marginBottom: 10,
-    background: 'var(--cw-surface, #fff)',
-  };
-  const inputSm: React.CSSProperties = {
+  const inp: React.CSSProperties = {
     flex: 1, padding: '4px 8px', fontSize: 13,
     border: '1px solid var(--cw-border, #e2e8f0)', borderRadius: 6,
     background: 'var(--cw-bg, #fff)', color: 'var(--cw-text, #111)',
@@ -2630,37 +2730,58 @@ export function MindmapPupilUI({ config, cellAnswers, setCellAnswers }: {
 
   return (
     <div style={{ marginTop: 8 }}>
-      <div style={{ textAlign: 'center', marginBottom: 12 }}>
-        <span style={nodeBox}>📍 {central}</span>
-      </div>
-      {tree.map((branch, bi) => (
-        <div key={branch.id} style={branchCard}>
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 8 }}>
-            <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>Branch</span>
-            <input
-              style={inputSm}
-              value={branch.label}
-              onChange={(e) => updateBranch(bi, e.target.value)}
-              placeholder="Branch label…"
-            />
-            <button style={rmBtn} onClick={() => removeBranch(bi)}>✕</button>
-          </div>
-          {branch.children.map((child, ci) => (
-            <div key={child.id} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4, marginLeft: 20 }}>
-              <span style={{ fontSize: 12, color: 'var(--cw-muted)' }}>└</span>
+      {/* ── Live visual mindmap ── */}
+      <MindmapSvg central={central} branches={tree} />
+
+      {/* ── Edit panel ── */}
+      <div style={{ marginTop: 12 }}>
+        {tree.map((branch, bi) => (
+          <div key={branch.id} style={{
+            borderLeft: `4px solid ${BRANCH_COLORS[bi % BRANCH_COLORS.length]}`,
+            paddingLeft: 10, marginBottom: 10,
+            background: 'var(--cw-surface, #fff)',
+            borderRadius: '0 6px 6px 0',
+            padding: '8px 10px 8px 10px',
+            border: '1px solid var(--cw-border, #e2e8f0)',
+            borderLeftWidth: 4,
+            borderLeftColor: BRANCH_COLORS[bi % BRANCH_COLORS.length],
+          }}>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 6 }}>
+              <span style={{
+                width: 12, height: 12, borderRadius: '50%', flexShrink: 0,
+                background: BRANCH_COLORS[bi % BRANCH_COLORS.length],
+                display: 'inline-block',
+              }} />
               <input
-                style={{ ...inputSm, fontSize: 12 }}
-                value={child.label}
-                onChange={(e) => updateChild(bi, ci, e.target.value)}
-                placeholder="Sub-branch…"
+                style={inp}
+                value={branch.label}
+                onChange={(e) => updateBranch(bi, e.target.value)}
+                placeholder="Branch label…"
+                autoFocus={branch.label === ''}
               />
-              <button style={rmBtn} onClick={() => removeChild(bi, ci)}>✕</button>
+              <button style={rmBtn} onClick={() => removeBranch(bi)}>✕</button>
             </div>
-          ))}
-          <button style={{ ...btn, marginLeft: 20, marginTop: 4 }} onClick={() => addChild(bi)}>+ Sub-branch</button>
-        </div>
-      ))}
-      <button style={{ ...btn, padding: '6px 14px', marginTop: 4 }} onClick={addBranch}>+ Add branch</button>
+            {branch.children.map((child, ci) => (
+              <div key={child.id} style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4, marginLeft: 18 }}>
+                <span style={{ fontSize: 11, color: 'var(--cw-muted)', flexShrink: 0 }}>└</span>
+                <input
+                  style={{ ...inp, fontSize: 12 }}
+                  value={child.label}
+                  onChange={(e) => updateChild(bi, ci, e.target.value)}
+                  placeholder="Sub-branch…"
+                />
+                <button style={rmBtn} onClick={() => removeChild(bi, ci)}>✕</button>
+              </div>
+            ))}
+            <button style={{ ...btn, marginLeft: 18, marginTop: 4, fontSize: 11 }} onClick={() => addChild(bi)}>
+              + Sub-branch
+            </button>
+          </div>
+        ))}
+        <button style={{ ...btn, padding: '6px 14px', marginTop: 4 }} onClick={addBranch}>
+          + Add branch
+        </button>
+      </div>
     </div>
   );
 }
