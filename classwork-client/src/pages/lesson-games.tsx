@@ -2710,7 +2710,7 @@ function MindmapSvg({ central, branches }: { central: string; branches: MindmapB
         bp.subs.map((s, ci) => (
           <g key={`sn-${bi}-${ci}`}>
             <rect x={s.sx - s.w / 2} y={s.sy - s.h / 2} width={s.w} height={s.h} rx={s.h / 2}
-              fill={bp.color} fillOpacity={0.12} stroke={bp.color} strokeWidth={1.5} strokeOpacity={0.5} />
+              fill={bp.color} fillOpacity={0.25} stroke={bp.color} strokeWidth={1.5} strokeOpacity={0.7} />
             <MindmapText nx={s.sx} ny={s.sy} lines={s.lines} fontSize={FS}
               fill={bp.color} fontWeight="600" lineH={s.lineH} />
           </g>
