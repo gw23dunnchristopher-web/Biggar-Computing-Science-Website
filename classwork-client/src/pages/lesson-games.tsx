@@ -1985,109 +1985,336 @@ export const DmDangerPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
 export const DmDangerEditor = ({ cfg, setCfg }: any) =>
   <PickListEditor cfg={cfg} setCfg={setCfg} options={DM_DANGER_OPTS} textKey="text" valueKey="risk" textPlaceholder="e.g. Stranger asks for your home address" />;
 
-const UPSTANDER_OPTS = ['report', 'support', 'block', 'ignore'];
-const UPSTANDER_LABELS: Record<string, string> = {
-  report: '🚨 Report it',
-  support: '💬 Support the target',
-  block: '🚫 Block & ignore',
-  ignore: '😶 Do nothing',
-};
-const UPSTANDER_BTN_STYLES: Record<string, { color: string; bg: string; border: string }> = {
-  report:  { color: '#dc2626', bg: '#fef2f2', border: '#fca5a5' },
-  support: { color: '#0d9488', bg: '#f0fdfa', border: '#5eead4' },
-  block:   { color: '#7c3aed', bg: '#faf5ff', border: '#c4b5fd' },
-  ignore:  { color: '#6b7280', bg: '#f9fafb', border: '#d1d5db' },
-};
+export interface UpstanderItem {
+  scenario: string;
+  left: { label: string; consequence: string; effects: { kindness: number; courage: number; safety: number } };
+  right: { label: string; consequence: string; effects: { kindness: number; courage: number; safety: number } };
+}
+
+export const DEFAULT_UPSTANDER_ITEMS: UpstanderItem[] = [
+  {
+    scenario: 'Your group chat starts filling up with mean comments about a classmate\'s appearance.',
+    left: { label: 'Leave quietly', consequence: 'You step away from the chat. The comments carry on without you, and nobody challenges them.', effects: { kindness: -1, courage: 0, safety: 1 } },
+    right: { label: 'Tell them to stop', consequence: 'The chat goes silent. A few people message you privately to say they\'re glad someone spoke up.', effects: { kindness: 2, courage: 3, safety: 1 } },
+  },
+  {
+    scenario: 'A classmate shows you distressing anonymous messages they\'ve been receiving for weeks.',
+    left: { label: 'Help them report it', consequence: 'They feel stronger knowing you\'ve got their back. Together you flag the account and it\'s investigated.', effects: { kindness: 3, courage: 2, safety: 2 } },
+    right: { label: 'Tell them to ignore it', consequence: 'Your classmate forces a smile, but the messages get worse over the next week.', effects: { kindness: -2, courage: -1, safety: -2 } },
+  },
+  {
+    scenario: 'A stranger keeps messaging you repeatedly after you asked them to stop.',
+    left: { label: 'Block & report them', consequence: 'The messages stop instantly. You feel relieved and safe, and the account is flagged.', effects: { kindness: 0, courage: 1, safety: 3 } },
+    right: { label: 'Message them again', consequence: 'They see it as an invitation to keep trying. More messages arrive that evening.', effects: { kindness: 0, courage: -1, safety: -2 } },
+  },
+  {
+    scenario: 'Someone has created a fake account using a classmate\'s name and photo to spread rumours.',
+    left: { label: 'Report it quietly', consequence: 'The account is removed, but your classmate later finds out from someone else and feels hurt nobody told them.', effects: { kindness: 1, courage: 1, safety: 2 } },
+    right: { label: 'Tell them first, then report together', consequence: 'They\'re shaken but feel empowered taking action together with you. The account is removed quickly.', effects: { kindness: 2, courage: 2, safety: 2 } },
+  },
+  {
+    scenario: 'A classmate\'s ex-partner is sharing private photos of her on social media without her permission.',
+    left: { label: 'Tell her and report together', consequence: 'She\'s upset but grateful you told her. The images are removed quickly and she knows someone had her back.', effects: { kindness: 3, courage: 3, safety: 2 } },
+    right: { label: 'Report it yourself silently', consequence: 'The images come down, but she\'s upset that people knew about it before she did.', effects: { kindness: 1, courage: 2, safety: 2 } },
+  },
+  {
+    scenario: 'A group of students creates a mean hashtag using a classmate\'s real name.',
+    left: { label: 'Report every post', consequence: 'Many posts are removed. The hashtag slowly dies out without an audience to fuel it.', effects: { kindness: 2, courage: 1, safety: 2 } },
+    right: { label: 'Post kind things about them', consequence: 'Positive messages flood in and bury the negativity. Your classmate is touched by the support.', effects: { kindness: 3, courage: 2, safety: 1 } },
+  },
+  {
+    scenario: 'Someone dares you in a group chat to post something mean about a classmate.',
+    left: { label: 'Refuse and call it out', consequence: 'You face a bit of mockery, but others in the chat quietly respect you for standing up.', effects: { kindness: 1, courage: 3, safety: 1 } },
+    right: { label: 'Leave the chat silently', consequence: 'Nobody speaks up. The dare moves on to the next person in the chat.', effects: { kindness: 0, courage: -1, safety: 1 } },
+  },
+  {
+    scenario: 'A classmate is using a gaming platform\'s chat to threaten someone they\'ll "sort them out" after school.',
+    left: { label: 'Screenshot & tell an adult', consequence: 'Staff treat it as a safeguarding matter. It\'s investigated properly. You feel you did the right thing.', effects: { kindness: 2, courage: 3, safety: 3 } },
+    right: { label: 'Tell your friends & leave it', consequence: 'Word spreads but nobody actually reports it. Nothing changes, and the threats continue.', effects: { kindness: -1, courage: -1, safety: -1 } },
+  },
+  {
+    scenario: 'Your friend is too scared to open their phone because of constant hurtful messages every night.',
+    left: { label: 'Help them document & report', consequence: 'You help build a detailed record of the bullying. It\'s officially reported and a proper investigation begins.', effects: { kindness: 3, courage: 2, safety: 2 } },
+    right: { label: 'Suggest a social media break', consequence: 'They feel slightly dismissed. The bullying is still there when they return online.', effects: { kindness: -1, courage: -1, safety: 0 } },
+  },
+  {
+    scenario: 'Someone is live-streaming themselves reading out a classmate\'s private messages for their followers to mock.',
+    left: { label: 'Report the stream now', consequence: 'The stream is cut within minutes. The target is mortified but deeply grateful someone acted fast.', effects: { kindness: 2, courage: 2, safety: 2 } },
+    right: { label: 'Message the streamer to stop', consequence: 'They read your message aloud as a joke to their audience. The bullying escalates further.', effects: { kindness: -1, courage: -1, safety: -1 } },
+  },
+];
+
+const UPSTANDER_STAT_BARS = [
+  { key: 'kindness', label: 'Kindness', emoji: '💚', color: '#10b981' },
+  { key: 'courage',  label: 'Courage',  emoji: '🦁', color: '#f59e0b' },
+  { key: 'safety',   label: 'Safety',   emoji: '🛡️', color: '#3b82f6' },
+];
+
+function upstanderComputeStats(items: UpstanderItem[], answers: Record<string, string>) {
+  let kindness = 50, courage = 50, safety = 50;
+  items.forEach((item, i) => {
+    const dir = answers[String(i)];
+    if (!dir) return;
+    const eff = (dir === 'left' ? item.left : item.right)?.effects || {};
+    kindness = Math.max(0, Math.min(100, kindness + (eff.kindness || 0) * 10));
+    courage  = Math.max(0, Math.min(100, courage  + (eff.courage  || 0) * 10));
+    safety   = Math.max(0, Math.min(100, safety   + (eff.safety   || 0) * 10));
+  });
+  return { kindness, courage, safety };
+}
+
 export function UpstanderPupilUI({ config, cellAnswers, setCellAnswers }: any) {
-  const items: any[] = config?.upstander?.items || [];
-  const opts = UPSTANDER_OPTS;
-  const allAnswered = items.length > 0 && items.every((_: any, i: number) => !!cellAnswers[String(i)]);
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{
-        background: 'linear-gradient(135deg, #6366f1, #a855f7)',
-        borderRadius: 14, padding: '14px 20px',
-        display: 'flex', alignItems: 'center', gap: 14, color: '#fff',
-      }}>
-        <span style={{ fontSize: 36 }}>🦸</span>
-        <div>
-          <div style={{ fontWeight: 800, fontSize: 18, letterSpacing: -0.3 }}>Be an Upstander!</div>
-          <div style={{ fontSize: 13, opacity: 0.88, marginTop: 2 }}>Read each scenario and pick the best action to take.</div>
+  const items: UpstanderItem[] = config?.upstander?.items || [];
+
+  const firstUnanswered = items.findIndex((_: any, i: number) => !cellAnswers[String(i)]);
+  const startIndex = firstUnanswered === -1 ? items.length : firstUnanswered;
+
+  const [cardIndex, setCardIndex] = useState(startIndex);
+  const [stats, setStats] = useState(() => upstanderComputeStats(items, cellAnswers));
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [consequence, setConsequence] = useState<{ text: string; dir: 'left' | 'right' } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const dragStartX = useRef(0);
+
+  const finished = cardIndex >= items.length;
+  const item = items[cardIndex];
+
+  const hintLeft  = Math.min(1, Math.max(0, (-dragX - 40) / 80));
+  const hintRight = Math.min(1, Math.max(0, (dragX  - 40) / 80));
+  const rot = Math.min(15, Math.abs(dragX) * 0.05) * Math.sign(dragX);
+
+  function onPointerDown(e: React.PointerEvent) {
+    if (busy || consequence) return;
+    dragStartX.current = e.clientX;
+    setIsDragging(true);
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }
+  function onPointerMove(e: React.PointerEvent) {
+    if (!isDragging) return;
+    setDragX(e.clientX - dragStartX.current);
+  }
+  function onPointerUp(e: React.PointerEvent) {
+    if (!isDragging) return;
+    setIsDragging(false);
+    const dx = e.clientX - dragStartX.current;
+    if (dx > 120) choose('right');
+    else if (dx < -120) choose('left');
+    else setDragX(0);
+  }
+
+  function choose(dir: 'left' | 'right') {
+    if (!item || busy) return;
+    const choice = dir === 'left' ? item.left : item.right;
+    const eff = choice?.effects || { kindness: 0, courage: 0, safety: 0 };
+    setCellAnswers({ ...cellAnswers, [String(cardIndex)]: dir });
+    setStats(prev => ({
+      kindness: Math.max(0, Math.min(100, prev.kindness + (eff.kindness || 0) * 10)),
+      courage:  Math.max(0, Math.min(100, prev.courage  + (eff.courage  || 0) * 10)),
+      safety:   Math.max(0, Math.min(100, prev.safety   + (eff.safety   || 0) * 10)),
+    }));
+    setConsequence({ text: choice?.consequence || '', dir });
+    setDragX(dir === 'left' ? -420 : 420);
+    setBusy(true);
+    setTimeout(() => {
+      setDragX(0);
+      setConsequence(null);
+      setBusy(false);
+      setCardIndex(prev => prev + 1);
+    }, 2600);
+  }
+
+  const total = stats.kindness + stats.courage + stats.safety;
+  const ending =
+    total >= 240 ? { title: 'Digital Hero',           emoji: '🏆', color: '#f59e0b', desc: 'You stood up for others in almost every situation. The online world needs more people like you!' }
+    : total >= 180 ? { title: 'Upstander in Training', emoji: '🌱', color: '#10b981', desc: 'You made mostly good choices. Keep practising speaking up — it gets easier every time!' }
+    : total >= 120 ? { title: 'Cautious Bystander',    emoji: '👀', color: '#6366f1', desc: 'You often held back when others needed help. Next time, trust your instincts and take action.' }
+    :               { title: 'Silent Witness',          emoji: '😔', color: '#6b7280', desc: 'Doing nothing allows bullying to go unchallenged. Every situation is a chance to make a difference.' };
+
+  if (finished) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 460, margin: '0 auto' }}>
+        <div style={{
+          background: `linear-gradient(135deg,${ending.color}22,${ending.color}44)`,
+          border: `2px solid ${ending.color}88`, borderRadius: 20, padding: 32, textAlign: 'center',
+        }}>
+          <div style={{ fontSize: 64 }}>{ending.emoji}</div>
+          <div style={{ fontWeight: 800, fontSize: 24, color: ending.color, marginTop: 10 }}>{ending.title}</div>
+          <div style={{ fontSize: 14, color: 'var(--cw-ink)', marginTop: 10, lineHeight: 1.65 }}>{ending.desc}</div>
         </div>
-        {allAnswered && (
-          <div style={{ marginLeft: 'auto', background: '#fff2', borderRadius: 999, padding: '4px 14px', fontSize: 13, fontWeight: 700 }}>
-            ✅ All done!
+        <div style={{ background: 'var(--cw-surface)', border: '1px solid var(--cw-border)', borderRadius: 14, padding: '16px 20px' }}>
+          <div style={{ fontWeight: 700, marginBottom: 14, fontSize: 15 }}>Your final stats</div>
+          {UPSTANDER_STAT_BARS.map(({ key, label, emoji, color }) => (
+            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <span style={{ fontSize: 20, width: 26 }}>{emoji}</span>
+              <span style={{ fontSize: 13, width: 70 }}>{label}</span>
+              <div style={{ flex: 1, background: 'var(--cw-surface-soft)', borderRadius: 999, height: 14, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${(stats as any)[key]}%`, background: color, borderRadius: 999, transition: 'width 0.8s ease' }} />
+              </div>
+              <span style={{ fontSize: 12, color: 'var(--cw-muted)', width: 36, textAlign: 'right' }}>{(stats as any)[key]}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 460, margin: '0 auto', userSelect: 'none' }}>
+      <div style={{
+        background: 'linear-gradient(135deg,#6366f1,#a855f7)',
+        borderRadius: 14, padding: '12px 18px',
+        display: 'flex', alignItems: 'center', gap: 12, color: '#fff',
+      }}>
+        <span style={{ fontSize: 28 }}>🦸</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 800, fontSize: 16 }}>Be an Upstander!</div>
+          <div style={{ fontSize: 12, opacity: 0.85 }}>Card {cardIndex + 1} of {items.length} — swipe or tap to choose</div>
+        </div>
+      </div>
+
+      <div style={{ background: 'var(--cw-surface)', border: '1px solid var(--cw-border)', borderRadius: 12, padding: '10px 16px', display: 'flex', flexDirection: 'column', gap: 7 }}>
+        {UPSTANDER_STAT_BARS.map(({ key, label, emoji, color }) => (
+          <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 14, width: 20 }}>{emoji}</span>
+            <span style={{ fontSize: 11, width: 60, color: 'var(--cw-muted)' }}>{label}</span>
+            <div style={{ flex: 1, background: 'var(--cw-surface-soft)', borderRadius: 999, height: 8, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${(stats as any)[key]}%`, background: color, borderRadius: 999, transition: 'width 0.5s ease' }} />
+            </div>
+            <span style={{ fontSize: 11, color: 'var(--cw-muted)', width: 28, textAlign: 'right' }}>{(stats as any)[key]}</span>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ position: 'relative', height: 340, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{
+          position: 'absolute', left: 4, top: '50%', transform: 'translateY(-50%)',
+          opacity: hintLeft, transition: isDragging ? 'none' : 'opacity 0.2s',
+          background: '#ef444418', border: '2px solid #ef4444', borderRadius: 12,
+          padding: '8px 14px', color: '#ef4444', fontWeight: 700, fontSize: 12,
+          maxWidth: 110, textAlign: 'center', pointerEvents: 'none', zIndex: 2,
+        }}>← {item?.left?.label || 'Left'}</div>
+
+        <div style={{
+          position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)',
+          opacity: hintRight, transition: isDragging ? 'none' : 'opacity 0.2s',
+          background: '#10b98118', border: '2px solid #10b981', borderRadius: 12,
+          padding: '8px 14px', color: '#10b981', fontWeight: 700, fontSize: 12,
+          maxWidth: 110, textAlign: 'center', pointerEvents: 'none', zIndex: 2,
+        }}>{item?.right?.label || 'Right'} →</div>
+
+        {consequence ? (
+          <div style={{
+            width: '78%', borderRadius: 20, padding: '28px 24px',
+            background: consequence.dir === 'left' ? '#fff1f2' : '#f0fdf4',
+            border: `2px solid ${consequence.dir === 'left' ? '#fca5a5' : '#86efac'}`,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.13)', textAlign: 'center',
+            animation: 'fadeIn 0.2s ease',
+          }}>
+            <div style={{ fontSize: 40, marginBottom: 12 }}>{consequence.dir === 'left' ? '↩️' : '✅'}</div>
+            <div style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--cw-ink)' }}>{consequence.text}</div>
+          </div>
+        ) : (
+          <div
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={() => { setIsDragging(false); setDragX(0); }}
+            style={{
+              width: '80%', cursor: busy ? 'default' : isDragging ? 'grabbing' : 'grab',
+              background: 'var(--cw-surface)',
+              border: '2px solid var(--cw-border)', borderRadius: 20, padding: '26px 22px',
+              boxShadow: '0 8px 28px rgba(0,0,0,0.10)',
+              transform: `translateX(${dragX}px) rotate(${rot}deg)`,
+              transition: isDragging ? 'none' : 'transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94)',
+              opacity: Math.abs(dragX) > 200 ? Math.max(0.15, 1 - (Math.abs(dragX) - 200) / 220) : 1,
+              display: 'flex', flexDirection: 'column', gap: 18, touchAction: 'none',
+            }}
+          >
+            <div style={{
+              fontSize: 15, lineHeight: 1.65, color: 'var(--cw-ink)',
+              textAlign: 'center', fontWeight: 500,
+            }}>{String(item?.scenario || '')}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <button type="button" onClick={() => choose('left')} style={{
+                padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
+                background: '#fff1f2', color: '#ef4444', border: '2px solid #fca5a5',
+                fontWeight: 600, fontSize: 12,
+              }}>← {item?.left?.label || 'Left'}</button>
+              <button type="button" onClick={() => choose('right')} style={{
+                padding: '10px 8px', borderRadius: 10, cursor: 'pointer',
+                background: '#f0fdf4', color: '#10b981', border: '2px solid #86efac',
+                fontWeight: 600, fontSize: 12,
+              }}>{item?.right?.label || 'Right'} →</button>
+            </div>
           </div>
         )}
       </div>
-      {items.map((it: any, i: number) => {
-        const chosen = String(cellAnswers[String(i)] || '');
-        return (
-          <div key={i} style={{
-            background: 'var(--cw-surface)', borderRadius: 14,
-            border: `2px solid ${chosen ? UPSTANDER_BTN_STYLES[chosen]?.border || 'var(--cw-border)' : 'var(--cw-border)'}`,
-            overflow: 'hidden', transition: 'border-color 0.2s',
-          }}>
-            <div style={{
-              background: 'linear-gradient(90deg,#6366f108,#a855f708)',
-              borderBottom: '1px solid var(--cw-border)',
-              padding: '10px 16px', display: 'flex', gap: 10, alignItems: 'flex-start',
-            }}>
-              <span style={{
-                flexShrink: 0, width: 26, height: 26,
-                background: 'linear-gradient(135deg,#6366f1,#a855f7)',
-                color: '#fff', borderRadius: 999, fontSize: 12, fontWeight: 800,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>{i + 1}</span>
-              <span style={{ fontSize: 14, lineHeight: 1.55, color: 'var(--cw-ink)' }}>{String(it?.scenario || '')}</span>
-            </div>
-            <div style={{ padding: '12px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              {opts.map((o) => {
-                const sel = chosen === o;
-                const s = UPSTANDER_BTN_STYLES[o];
-                return (
-                  <button key={o} type="button"
-                    onClick={() => setCellAnswers({ ...cellAnswers, [String(i)]: o })}
-                    style={{
-                      padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
-                      background: sel ? s.color : s.bg,
-                      color: sel ? '#fff' : s.color,
-                      border: `2px solid ${sel ? s.color : s.border}`,
-                      fontWeight: sel ? 700 : 500, fontSize: 13,
-                      transition: 'all 0.15s',
-                      boxShadow: sel ? `0 2px 10px ${s.color}44` : 'none',
-                      transform: sel ? 'scale(1.03)' : 'none',
-                    }}
-                  >{UPSTANDER_LABELS[o]}</button>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
     </div>
   );
 }
+
 export function UpstanderEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void }) {
-  const items: any[] = Array.isArray(cfg.items) ? cfg.items : [];
-  const upd = (i: number, scenario: string) => {
-    const next = items.slice(); next[i] = { scenario }; setCfg({ ...cfg, items: next });
+  const items: UpstanderItem[] = Array.isArray(cfg.items) ? cfg.items : [];
+  const upd = (i: number, patch: Partial<UpstanderItem>) => {
+    const next = items.slice(); next[i] = { ...next[i], ...patch }; setCfg({ ...cfg, items: next });
+  };
+  const updSide = (i: number, side: 'left' | 'right', patch: any) => {
+    const next = items.slice();
+    next[i] = { ...next[i], [side]: { ...next[i]?.[side], ...patch } };
+    setCfg({ ...cfg, items: next });
+  };
+  const updEff = (i: number, side: 'left' | 'right', key: string, val: number) => {
+    const next = items.slice();
+    next[i] = { ...next[i], [side]: { ...next[i]?.[side], effects: { ...next[i]?.[side]?.effects, [key]: val } } };
+    setCfg({ ...cfg, items: next });
   };
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {items.map((it, i) => (
-        <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <span style={{ fontSize: 12, color: 'var(--cw-muted)', minWidth: 20, textAlign: 'right' }}>{i + 1}.</span>
-          <input
-            value={String(it?.scenario || '')}
-            onChange={(e) => upd(i, e.target.value)}
-            placeholder="e.g. A classmate is posting mean comments on someone's photo"
-            style={{ flex: 1, padding: '4px 8px' }}
-          />
-          <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })} style={{ padding: '4px 8px' }}>×</button>
-        </div>
+        <details key={i} style={{ border: '1px solid var(--cw-border)', borderRadius: 8, padding: '8px 12px' }}>
+          <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: 13 }}>
+            Card {i + 1}: {String(it?.scenario || '').slice(0, 55) || '(untitled)'}…
+          </summary>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+            <label style={{ fontSize: 12, fontWeight: 600 }}>Scenario</label>
+            <textarea value={String(it?.scenario || '')} onChange={(e) => upd(i, { scenario: e.target.value })}
+              placeholder="What situation is the student facing?"
+              style={{ width: '100%', padding: '4px 8px', fontSize: 13, minHeight: 55, boxSizing: 'border-box' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {(['left', 'right'] as const).map((side) => (
+                <div key={side} style={{ border: `2px solid ${side === 'left' ? '#fca5a5' : '#86efac'}`, borderRadius: 8, padding: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ fontWeight: 700, fontSize: 12, color: side === 'left' ? '#ef4444' : '#10b981' }}>
+                    {side === 'left' ? '← Left choice' : 'Right choice →'}
+                  </div>
+                  <input value={String(it?.[side]?.label || '')} onChange={(e) => updSide(i, side, { label: e.target.value })}
+                    placeholder="Button label" style={{ padding: '4px 6px', fontSize: 12 }} />
+                  <textarea value={String(it?.[side]?.consequence || '')} onChange={(e) => updSide(i, side, { consequence: e.target.value })}
+                    placeholder="What happens after choosing this?"
+                    style={{ padding: '4px 6px', fontSize: 12, minHeight: 48 }} />
+                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--cw-muted)' }}>Stat effects (−3 to +3)</div>
+                  {[['kindness','💚'],['courage','🦁'],['safety','🛡️']].map(([k, em]) => (
+                    <label key={k} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+                      <span>{em} {k.charAt(0).toUpperCase() + k.slice(1)}</span>
+                      <input type="number" min={-3} max={3} step={1}
+                        value={it?.[side]?.effects?.[k as keyof typeof it.left.effects] ?? 0}
+                        onChange={(e) => updEff(i, side, k, Number(e.target.value))}
+                        style={{ width: 56, padding: '2px 4px' }} />
+                    </label>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <button type="button" onClick={() => setCfg({ ...cfg, items: items.filter((_, k) => k !== i) })}
+              style={{ color: '#ef4444', background: 'none', border: '1px solid #ef4444', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer', alignSelf: 'flex-start' }}>Remove this card</button>
+          </div>
+        </details>
       ))}
-      <button type="button" onClick={() => setCfg({ ...cfg, items: [...items, { scenario: '' }] })} style={{ alignSelf: 'flex-start', padding: '6px 10px' }}>+ Add scenario</button>
+      <button type="button" onClick={() => setCfg({ ...cfg, items: [...items, {
+        scenario: '',
+        left:  { label: '', consequence: '', effects: { kindness: 0, courage: 0, safety: 0 } },
+        right: { label: '', consequence: '', effects: { kindness: 0, courage: 0, safety: 0 } },
+      }] })} style={{ alignSelf: 'flex-start', padding: '6px 10px' }}>+ Add card</button>
     </div>
   );
 }
@@ -2485,21 +2712,20 @@ export function GameReview({ type, cfg, parsed, questionId }: {
 
   if (type === 'upstander') {
     const items: any[] = cfg.upstander?.items || [];
-    const UPSTANDER_REVIEW_LABELS: Record<string, string> = {
-      report: '🚨 Report it', support: '💬 Support them', block: '🚫 Block & ignore', ignore: '😶 Do nothing',
-    };
     return (
       <div style={wrap}>
         {items.map((it: any, i: number) => {
-          const got = String(parsed[String(i)] || '');
+          const dir = String(parsed[String(i)] || '');
+          const chosen = dir === 'left' ? it?.left : dir === 'right' ? it?.right : null;
           return (
-            <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <span style={{ fontSize: 13, flex: 1 }}>{String(it?.scenario || '')}</span>
+            <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', borderBottom: '1px solid var(--cw-border)', paddingBottom: 8, marginBottom: 8 }}>
+              <span style={{ fontSize: 13, flex: 1, lineHeight: 1.5 }}>{String(it?.scenario || '')}</span>
               <span style={{
-                padding: '2px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600,
-                background: got ? 'var(--cw-surface-soft)' : 'transparent',
-                color: 'var(--cw-ink)',
-              }}>{got ? UPSTANDER_REVIEW_LABELS[got] || got : <span style={reviewMuted}>(not answered)</span>}</span>
+                flexShrink: 0, padding: '2px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600,
+                background: dir === 'left' ? '#fff1f2' : dir === 'right' ? '#f0fdf4' : 'transparent',
+                color: dir === 'left' ? '#ef4444' : dir === 'right' ? '#10b981' : 'var(--cw-muted)',
+                border: dir === 'left' ? '1px solid #fca5a5' : dir === 'right' ? '1px solid #86efac' : '1px solid var(--cw-border)',
+              }}>{chosen ? `${dir === 'left' ? '←' : '→'} ${chosen.label || dir}` : '(not answered)'}</span>
             </div>
           );
         })}

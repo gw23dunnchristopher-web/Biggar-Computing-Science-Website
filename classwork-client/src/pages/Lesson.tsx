@@ -51,6 +51,7 @@ import {
   SelectorGolfPupilUI, SelectorGolfEditor,
   CssSlidersPupilUI, CssSlidersEditor,
   MindmapPupilUI, MindmapEditor,
+  DEFAULT_UPSTANDER_ITEMS,
   GameReview,
 } from './lesson-games';
 
@@ -4561,30 +4562,13 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
         ] }
   );
   const [upstanderCfg, setUpstanderCfg] = useState<any>(() =>
-    (cfg.upstander && Array.isArray(cfg.upstander.items))
-      ? { items: cfg.upstander.items.map((it: any) => ({ scenario: String(it?.scenario || '') })) }
-      : { items: [
-          { scenario: 'A classmate is being sent cruel messages by a group of people who are also threatening to share embarrassing photos of them.' },
-          { scenario: 'Your friend messages you saying they feel awful because people at school have been posting horrible things about them online.' },
-          { scenario: 'A stranger you have never met keeps sending you unwanted messages even after you have told them to stop.' },
-          { scenario: 'A group chat you are in starts sharing edited photos of a classmate to make them look ridiculous.' },
-          { scenario: 'A classmate tells you they have been deliberately left out of every group chat in your year and feel completely isolated.' },
-          { scenario: 'Someone posts a cruel online poll asking who is the "most annoying" person in your year, with real names listed.' },
-          { scenario: 'An unknown account starts leaving rude, one-word replies on everything you post, but stops as soon as you do not respond.' },
-          { scenario: 'A classmate\'s ex-boyfriend is sharing private photos of her on social media without her permission.' },
-          { scenario: 'A stranger sends you a single offensive comment on a public post, clearly just trying to get a reaction from you.' },
-          { scenario: 'A friend tells you they are scared to open their phone because of the constant hurtful comments they keep receiving.' },
-          { scenario: 'Someone has created a fake account pretending to be a classmate and is using it to spread false rumours about them.' },
-          { scenario: 'Someone you had an argument with at school keeps tagging you in embarrassing posts and refuses to stop.' },
-          { scenario: 'A group of students creates a mean hashtag using a classmate\'s name and encourages others to post hurtful comments under it.' },
-          { scenario: 'Your friend breaks down at lunch and shows you dozens of hurtful anonymous messages they have been receiving every night.' },
-          { scenario: 'Someone is using a gaming platform\'s chat to threaten a classmate, saying they will "sort them out" after school.' },
-          { scenario: 'A user you do not recognise starts sending you unsolicited voice notes calling you names and making fun of how you look.' },
-          { scenario: 'A school group chat is being used to mock a classmate\'s reading difficulties by sharing screenshots of their messages as jokes.' },
-          { scenario: 'A classmate pulls you aside and says they are being threatened online by someone in your year but are too frightened to tell a teacher.' },
-          { scenario: 'Someone is live-streaming themselves reading out a classmate\'s private messages for their followers to laugh at.' },
-          { scenario: 'Someone dares you in a group chat to write something mean on a classmate\'s social media profile.' },
-        ] }
+    (cfg.upstander && Array.isArray(cfg.upstander.items) && cfg.upstander.items.length > 0)
+      ? { items: cfg.upstander.items.map((it: any) => ({
+          scenario: String(it?.scenario || ''),
+          left:  it?.left  || { label: '', consequence: '', effects: { kindness: 0, courage: 0, safety: 0 } },
+          right: it?.right || { label: '', consequence: '', effects: { kindness: 0, courage: 0, safety: 0 } },
+        })) }
+      : { items: DEFAULT_UPSTANDER_ITEMS }
   );
   const [dmDangerCfg, setDmDangerCfg] = useState<any>(() =>
     (cfg.dmDanger && Array.isArray(cfg.dmDanger.items))
@@ -5451,7 +5435,27 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
       };
       if (type === 'upstander') {
         const items = (Array.isArray(upstanderCfg.items) ? upstanderCfg.items : [])
-          .map((it: any) => ({ scenario: String(it?.scenario || '').trim() }))
+          .map((it: any) => ({
+            scenario: String(it?.scenario || '').trim(),
+            left: {
+              label: String(it?.left?.label || '').trim(),
+              consequence: String(it?.left?.consequence || '').trim(),
+              effects: {
+                kindness: Math.max(-3, Math.min(3, Number(it?.left?.effects?.kindness) || 0)),
+                courage:  Math.max(-3, Math.min(3, Number(it?.left?.effects?.courage)  || 0)),
+                safety:   Math.max(-3, Math.min(3, Number(it?.left?.effects?.safety)   || 0)),
+              },
+            },
+            right: {
+              label: String(it?.right?.label || '').trim(),
+              consequence: String(it?.right?.consequence || '').trim(),
+              effects: {
+                kindness: Math.max(-3, Math.min(3, Number(it?.right?.effects?.kindness) || 0)),
+                courage:  Math.max(-3, Math.min(3, Number(it?.right?.effects?.courage)  || 0)),
+                safety:   Math.max(-3, Math.min(3, Number(it?.right?.effects?.safety)   || 0)),
+              },
+            },
+          }))
           .filter((it: any) => it.scenario);
         if (items.length === 0) throw new Error('Add at least one scenario.');
         body.config = { upstander: { items } };
