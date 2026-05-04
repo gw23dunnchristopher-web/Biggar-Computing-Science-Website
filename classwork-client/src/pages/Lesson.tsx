@@ -855,6 +855,7 @@ export default function Lesson() {
                           onMoved={refresh}
                         />
                       )}
+                      <DeleteQuestionButton questionId={q.id} onDeleted={refresh} />
                     </>
                   )}
                 </div>
@@ -1031,6 +1032,7 @@ export default function Lesson() {
                         onMoved={refresh}
                       />
                     )}
+                    <DeleteQuestionButton questionId={p.id} onDeleted={refresh} />
                     <NewQuestionButton
                       lessonId={lessonId}
                       passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'mc_group' || x.question_type === 'group')}
@@ -1122,6 +1124,7 @@ export default function Lesson() {
                         onMoved={refresh}
                       />
                     )}
+                    <DeleteQuestionButton questionId={p.id} onDeleted={refresh} />
                     <NewQuestionButton
                       lessonId={lessonId}
                       passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'mc_group' || x.question_type === 'group')}
@@ -1181,6 +1184,7 @@ export default function Lesson() {
                         onMoved={refresh}
                       />
                     )}
+                    <DeleteQuestionButton questionId={p.id} onDeleted={refresh} />
                     <NewQuestionButton
                       lessonId={lessonId}
                       passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'group')}
@@ -1256,11 +1260,14 @@ export default function Lesson() {
             }}>
               <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--cw-ink)' }}>{title}</div>
               {role === 'teacher' && !previewAsStudent && (
-                <EditQuestionButton
-                  question={s}
-                  passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'group')}
-                  onChanged={refresh}
-                />
+                <>
+                  <EditQuestionButton
+                    question={s}
+                    passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'group')}
+                    onChanged={refresh}
+                  />
+                  <DeleteQuestionButton questionId={s.id} onDeleted={refresh} />
+                </>
               )}
             </div>
           );
@@ -4209,6 +4216,48 @@ function MoveQuestionButton({ questionId, unitId, currentLessonId, isGroup, onMo
 /* Edit-question entry point: same modal, just pre-populated with the existing
    values and saving via PATCH instead of POST. Lives next to each question
    card for teachers (not in pupil-preview mode). */
+function DeleteQuestionButton({ questionId, onDeleted }: { questionId: string; onDeleted: () => void }) {
+  const [confirm, setConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function doDelete() {
+    setDeleting(true);
+    try {
+      await api(`/api/classwork/questions/${questionId}`, { method: 'DELETE' });
+      onDeleted();
+    } catch {
+      setDeleting(false);
+      setConfirm(false);
+    }
+  }
+
+  if (confirm) {
+    return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ fontSize: 12, color: 'var(--cw-danger, #b91c1c)', fontWeight: 600 }}>Delete?</span>
+        <button onClick={doDelete} disabled={deleting} style={{
+          background: '#b91c1c', color: '#fff', border: 'none',
+          borderRadius: 4, padding: '3px 10px', fontSize: 12,
+          cursor: deleting ? 'not-allowed' : 'pointer', fontWeight: 600,
+        }}>{deleting ? '…' : 'Yes, delete'}</button>
+        <button onClick={() => setConfirm(false)} disabled={deleting} style={{
+          background: 'var(--cw-surface)', color: 'var(--cw-ink)',
+          border: '1px solid var(--cw-border)', borderRadius: 4,
+          padding: '3px 8px', fontSize: 12, cursor: 'pointer',
+        }}>Cancel</button>
+      </span>
+    );
+  }
+
+  return (
+    <button onClick={() => setConfirm(true)} title="Delete this question" style={{
+      background: 'var(--cw-surface)', color: '#b91c1c',
+      border: '1px solid var(--cw-border)',
+      padding: '4px 10px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+    }}>Delete</button>
+  );
+}
+
 function EditQuestionButton({ question, passages, onChanged }: { question: Question; passages: Question[]; onChanged: () => void }) {
   const [open, setOpen] = useState(false);
   return (
