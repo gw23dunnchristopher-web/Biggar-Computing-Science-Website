@@ -53,6 +53,7 @@ import {
   MindmapPupilUI, MindmapEditor,
   DEFAULT_UPSTANDER_ITEMS,
   GameReview,
+  GameShell,
 } from './lesson-games';
 
 interface LessonInfo {
@@ -227,6 +228,71 @@ const TYPE_GROUPS: { label: string; types: string[] }[] = [
   { label: 'Games · Computer Systems', types: ['binary_hex', 'convert_relay', 'bit_ops', 'truth_table', 'io_sort', 'build_pc', 'fetch_execute', 'os_sched', 'code_tracer', 'flowchart_seq', 'sorting_race', 'bin_search', 'subnet_calc'] },
   { label: 'No answer needed', types: ['info_only', 'text_only', 'section_header'] },
 ];
+
+const GAME_ICONS: Record<string, string> = {
+  hangman: '🎯', speed_round: '⚡', ordering: '📋', caesar_cipher: '🔐',
+  spot_phish: '🎣', binary_hex: '💻', bit_ops: '⚙️', code_tracer: '🔬',
+  flowchart_seq: '📊', sorting_race: '🏁', convert_relay: '🔄', url_anatomy: '🌐',
+  truth_table: '✅', field_type_sort: '🗃️', io_sort: '📥', html_match: '🏷️',
+  password_forge: '🔒', privacy_radar: '🕵️', validation_rules: '✔️',
+  find_duplicate: '🔎', bin_search: '🔍', box_model: '📦', friend_or_fake: '👥',
+  dm_danger: '💬', upstander: '🦸', malware_triage: '🛡️', '2fa_escape': '🔑',
+  a11y_audit: '♿', fetch_execute: '⚡', screen_time: '📱', footprint_trail: '👣',
+  social_engineer: '🎭', cipher_quest: '🗝️', normalise_it: '🗄️', subnet_calc: '🌐',
+  phish_inbox: '📧', build_pc: '🖥️', os_sched: '⏱️', query_visual: '📊',
+  schema_arch: '🏗️', tag_soup_repair: '🔧', selector_golf: '⛳', css_sliders: '🎨',
+  mindmap: '🧠', crossword: '🔤', word_search: '🔍', matching: '🔗', anagrams: '🔀',
+};
+const GAME_HINTS: Record<string, string> = {
+  hangman: 'Guess the hidden word one letter at a time — but watch your lives!',
+  speed_round: 'Answer as many questions as you can before the timer runs out.',
+  ordering: 'Drag the items into the correct order.',
+  caesar_cipher: 'Encode or decode messages using the Caesar cipher shift.',
+  spot_phish: 'Read each message carefully and spot the phishing attempts.',
+  binary_hex: 'Convert numbers between binary, decimal and hexadecimal.',
+  bit_ops: 'Apply bitwise operations and get the right binary result.',
+  code_tracer: 'Step through the code and trace the values of each variable.',
+  flowchart_seq: 'Arrange the flowchart blocks into the correct sequence.',
+  sorting_race: 'Step through a sorting algorithm and watch it in action.',
+  convert_relay: 'Convert values between different units and number bases.',
+  url_anatomy: 'Label the different parts of a URL.',
+  truth_table: 'Complete the truth table for each Boolean expression.',
+  field_type_sort: 'Match each field to its correct data type.',
+  io_sort: 'Sort each item as an input or an output device.',
+  html_match: 'Match each HTML element to its correct description.',
+  password_forge: 'Build a strong password that meets all the security rules.',
+  privacy_radar: 'Classify each piece of information by how private it is.',
+  validation_rules: 'Pick the right validation rule for each form field.',
+  find_duplicate: 'Spot the duplicate records in the dataset.',
+  bin_search: 'Step through a binary search and find the target value.',
+  box_model: 'Label the parts of the CSS box model correctly.',
+  friend_or_fake: 'Decide whether each social media profile is real or fake.',
+  dm_danger: 'Rate each direct message as safe, risky, or dangerous.',
+  upstander: 'Swipe left or right to choose how you respond to each cyberbullying situation.',
+  malware_triage: 'Match each description to the correct type of malware.',
+  '2fa_escape': 'Choose the strongest two-factor authentication method for each scenario.',
+  a11y_audit: 'Spot the accessibility issues on each web page.',
+  fetch_execute: 'Sort each action into the correct stage of the Fetch-Execute cycle.',
+  screen_time: 'Rate each screen-time habit as healthy, balanced, or unhealthy.',
+  footprint_trail: 'Classify each piece of digital footprint as private, personal, or public.',
+  social_engineer: 'Identify which social engineering technique is being used.',
+  cipher_quest: 'Work out which cipher was used to encrypt each message.',
+  normalise_it: 'Spot which normal form each table violates.',
+  subnet_calc: 'Classify each IP address correctly.',
+  phish_inbox: 'Triage your inbox — spot the phishing emails before you click!',
+  build_pc: 'Identify each PC component and what it does.',
+  os_sched: 'Choose the right scheduling algorithm for each scenario.',
+  query_visual: 'Identify which SQL operation each query is performing.',
+  schema_arch: 'Classify the relationship type between each pair of tables.',
+  tag_soup_repair: 'Find and fix the HTML bugs in each snippet.',
+  selector_golf: 'Identify the type of CSS selector used in each example.',
+  css_sliders: 'Match each CSS property to its visual effect.',
+  mindmap: 'Build a mind map to organise your ideas on the topic.',
+  crossword: 'Use the clues to fill in the crossword grid.',
+  word_search: 'Find all the hidden words in the grid.',
+  matching: 'Drag each item to its matching pair.',
+  anagrams: 'Unscramble the letters to spell the correct word.',
+};
 
 // Two-level type picker: group headings on the left, types for the active
 // group on the right. Rendered inline (no absolute positioning) so it is
@@ -2514,166 +2580,63 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
         );
       })()}
 
-      {/* ---- Fun activities (auto-marked) ---------------------------- */}
-      {t === 'crossword' && (
-        <CrosswordPupilGrid
-          config={(question as any).config}
-          cellAnswers={cellAnswers}
-          setCellAnswers={setCellAnswers}
-        />
-      )}
-      {t === 'word_search' && (
-        <WordSearchPupilGrid
-          config={(question as any).config}
-          cellAnswers={cellAnswers}
-          setCellAnswers={setCellAnswers}
-        />
-      )}
-      {t === 'matching' && (
-        <MatchingPupilUI
-          config={(question as any).config}
-          cellAnswers={cellAnswers}
-          setCellAnswers={setCellAnswers}
-        />
-      )}
-      {t === 'anagrams' && (
-        <AnagramsPupilUI
-          config={(question as any).config}
-          cellAnswers={cellAnswers}
-          setCellAnswers={setCellAnswers}
-        />
-      )}
-      {t === 'hangman' && (
-        <HangmanPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'speed_round' && (
-        <SpeedRoundPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'ordering' && (
-        <OrderingPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />
-      )}
-      {t === 'caesar_cipher' && (
-        <CaesarPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'spot_phish' && (
-        <SpotPhishPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'binary_hex' && (
-        <BinaryHexPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />
-      )}
-      {t === 'bit_ops' && (
-        <BitOpsPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />
-      )}
-      {t === 'code_tracer' && (
-        <CodeTracerPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'flowchart_seq' && (
-        <FlowchartPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />
-      )}
-      {t === 'sorting_race' && (
-        <SortingRacePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'convert_relay' && (
-        <ConvertRelayPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />
-      )}
-      {t === 'url_anatomy' && (
-        <UrlAnatomyPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'truth_table' && (
-        <TruthTablePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'field_type_sort' && (
-        <FieldTypeSortPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'io_sort' && (
-        <IoSortPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'html_match' && (
-        <HtmlMatchPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'password_forge' && (
-        <PasswordForgePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'privacy_radar' && (
-        <PrivacyRadarPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'validation_rules' && (
-        <ValidationRulesPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'find_duplicate' && (
-        <FindDuplicatePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'bin_search' && (
-        <BinSearchPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'box_model' && (
-        <BoxModelPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'friend_or_fake' && (
-        <FriendOrFakePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'dm_danger' && (
-        <DmDangerPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'upstander' && (
-        <UpstanderPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'malware_triage' && (
-        <MalwareTriagePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === '2fa_escape' && (
-        <TwoFactorEscapePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'a11y_audit' && (
-        <A11yAuditPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'fetch_execute' && (
-        <FetchExecutePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'screen_time' && (
-        <ScreenTimePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'footprint_trail' && (
-        <FootprintTrailPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'social_engineer' && (
-        <SocialEngineerPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'cipher_quest' && (
-        <CipherQuestPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'normalise_it' && (
-        <NormaliseItPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'subnet_calc' && (
-        <SubnetCalcPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'phish_inbox' && (
-        <PhishInboxPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'build_pc' && (
-        <BuildPcPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'os_sched' && (
-        <OsSchedPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'query_visual' && (
-        <QueryVisualPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'schema_arch' && (
-        <SchemaArchPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'tag_soup_repair' && (
-        <TagSoupRepairPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'selector_golf' && (
-        <SelectorGolfPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'css_sliders' && (
-        <CssSlidersPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
-      )}
-      {t === 'mindmap' && (
-        <MindmapPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      {/* ---- Fun activities & games — all wrapped in a shared start/restart shell */}
+      {(t in GAME_ICONS) && (
+        <GameShell
+          title={TYPE_LABELS[t] || t}
+          icon={GAME_ICONS[t] || '🎮'}
+          hint={GAME_HINTS[t]}
+          onReset={() => setCellAnswers({})}
+        >
+          {t === 'crossword' && (<CrosswordPupilGrid config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'word_search' && (<WordSearchPupilGrid config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'matching' && (<MatchingPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'anagrams' && (<AnagramsPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'hangman' && (<HangmanPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'speed_round' && (<SpeedRoundPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'ordering' && (<OrderingPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />)}
+          {t === 'caesar_cipher' && (<CaesarPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'spot_phish' && (<SpotPhishPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'binary_hex' && (<BinaryHexPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />)}
+          {t === 'bit_ops' && (<BitOpsPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />)}
+          {t === 'code_tracer' && (<CodeTracerPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'flowchart_seq' && (<FlowchartPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />)}
+          {t === 'sorting_race' && (<SortingRacePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'convert_relay' && (<ConvertRelayPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />)}
+          {t === 'url_anatomy' && (<UrlAnatomyPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'truth_table' && (<TruthTablePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'field_type_sort' && (<FieldTypeSortPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'io_sort' && (<IoSortPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'html_match' && (<HtmlMatchPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'password_forge' && (<PasswordForgePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'privacy_radar' && (<PrivacyRadarPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'validation_rules' && (<ValidationRulesPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'find_duplicate' && (<FindDuplicatePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'bin_search' && (<BinSearchPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'box_model' && (<BoxModelPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'friend_or_fake' && (<FriendOrFakePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'dm_danger' && (<DmDangerPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'upstander' && (<UpstanderPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'malware_triage' && (<MalwareTriagePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === '2fa_escape' && (<TwoFactorEscapePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'a11y_audit' && (<A11yAuditPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'fetch_execute' && (<FetchExecutePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'screen_time' && (<ScreenTimePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'footprint_trail' && (<FootprintTrailPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'social_engineer' && (<SocialEngineerPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'cipher_quest' && (<CipherQuestPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'normalise_it' && (<NormaliseItPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'subnet_calc' && (<SubnetCalcPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'phish_inbox' && (<PhishInboxPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'build_pc' && (<BuildPcPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'os_sched' && (<OsSchedPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'query_visual' && (<QueryVisualPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'schema_arch' && (<SchemaArchPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'tag_soup_repair' && (<TagSoupRepairPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'selector_golf' && (<SelectorGolfPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'css_sliders' && (<CssSlidersPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'mindmap' && (<MindmapPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+        </GameShell>
       )}
 
       {(t === 'short' || t === 'long' || t === 'code' || t === 'video_question') && (

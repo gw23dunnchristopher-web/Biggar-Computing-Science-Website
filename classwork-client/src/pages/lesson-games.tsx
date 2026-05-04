@@ -58,6 +58,48 @@ const accentBtn: React.CSSProperties = {
   background: 'var(--cw-accent)', color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600,
 };
 
+/* ── Shared game shell ── wraps every game PupilUI in Lesson.tsx ─────────── */
+export function GameShell({
+  title, icon, hint, children, onReset,
+}: {
+  title: string; icon: string; hint?: string;
+  children: React.ReactNode; onReset: () => void;
+}) {
+  const [started, setStarted] = useState(false);
+  const handleReset = () => { onReset(); setStarted(false); };
+  if (!started) {
+    return (
+      <div style={{
+        textAlign: 'center', padding: '44px 24px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
+      }}>
+        <div style={{ fontSize: 64, lineHeight: 1 }}>{icon}</div>
+        <div style={{ fontSize: 21, fontWeight: 800, color: 'var(--cw-ink)' }}>{title}</div>
+        {hint && (
+          <div style={{ fontSize: 14, color: 'var(--cw-muted)', maxWidth: 340, lineHeight: 1.65 }}>
+            {hint}
+          </div>
+        )}
+        <button style={{ ...accentBtn, padding: '11px 32px', fontSize: 15, marginTop: 4 }}
+          onClick={() => setStarted(true)}>
+          ▶ Start
+        </button>
+      </div>
+    );
+  }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button style={{ ...ghostBtn, fontSize: 12, padding: '3px 10px', color: 'var(--cw-muted)' }}
+          onClick={handleReset}>
+          ↺ Restart
+        </button>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 /* ── Deterministic PRNG so every pupil sees the same scrambled order /
    the same generated number-base problems for a given question. ─── */
 export function _stringHash(s: string): number {
