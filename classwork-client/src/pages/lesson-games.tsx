@@ -2036,64 +2036,74 @@ export interface UpstanderItem {
 
 export const DEFAULT_UPSTANDER_ITEMS: UpstanderItem[] = [
   {
+    // Card 1 — clear good/bad choice; bad choice now more punishing
     scenario: 'Your group chat starts filling up with mean comments about a classmate\'s appearance.',
     image: '/classwork/assets/upstander/card1.png',
-    left: { label: 'Leave quietly', consequence: 'You step away from the chat. The comments carry on without you, and nobody challenges them.', effects: { kindness: -1, courage: 0, safety: 1 } },
+    left: { label: 'Leave quietly', consequence: 'You step away from the chat. The comments carry on without you. Your classmate later finds out you were there and did nothing — they feel betrayed.', effects: { kindness: -2, courage: -3, safety: 1 } },
     right: { label: 'Tell them to stop', consequence: 'The chat goes silent. A few people message you privately to say they\'re glad someone spoke up.', effects: { kindness: 2, courage: 3, safety: 1 } },
   },
   {
+    // Card 2 — clear good/bad choice; bad choice now much more punishing
     scenario: 'A classmate shows you distressing anonymous messages they\'ve been receiving for weeks.',
     image: '/classwork/assets/upstander/card2.png',
     left: { label: 'Help them report it', consequence: 'They feel stronger knowing you\'ve got their back. Together you flag the account and it\'s investigated.', effects: { kindness: 3, courage: 2, safety: 2 } },
-    right: { label: 'Tell them to ignore it', consequence: 'Your classmate forces a smile, but the messages get worse over the next week.', effects: { kindness: -2, courage: -1, safety: -2 } },
+    right: { label: 'Tell them to ignore it', consequence: 'Your classmate forces a smile, but the messages get worse and more personal over the next week. They start avoiding school.', effects: { kindness: -3, courage: -2, safety: -3 } },
   },
   {
+    // Card 3 — clear good/bad choice; bad choice now much more punishing
     scenario: 'A stranger keeps messaging you repeatedly after you asked them to stop.',
     image: '/classwork/assets/upstander/card3.png',
-    left: { label: 'Block & report them', consequence: 'The messages stop instantly. You feel relieved and safe, and the account is flagged.', effects: { kindness: 0, courage: 1, safety: 3 } },
-    right: { label: 'Message them again', consequence: 'They see it as an invitation to keep trying. More messages arrive that evening.', effects: { kindness: 0, courage: -1, safety: -2 } },
+    left: { label: 'Block & report them', consequence: 'The messages stop instantly. You feel relieved and safe, and the account is flagged for investigation.', effects: { kindness: 0, courage: 2, safety: 3 } },
+    right: { label: 'Message them again', consequence: 'They see it as an invitation. Messages arrive all night, they find your other accounts, and the harassment escalates badly.', effects: { kindness: 0, courage: -3, safety: -4 } },
   },
   {
-    scenario: 'Someone has created a fake account using a classmate\'s name and photo to spread rumours.',
+    // Card 4 — TRADE-OFF: both choices have upsides and downsides
+    scenario: 'Someone has created a fake account using a classmate\'s name and photo to spread rumours. They don\'t know about it yet.',
     image: '/classwork/assets/upstander/card4.png',
-    left: { label: 'Report it quietly', consequence: 'The account is removed, but your classmate later finds out from someone else and feels hurt nobody told them.', effects: { kindness: 1, courage: 1, safety: 2 } },
-    right: { label: 'Tell them first, then report together', consequence: 'They\'re shaken but feel empowered taking action together with you. The account is removed quickly.', effects: { kindness: 2, courage: 2, safety: 2 } },
+    left: { label: 'Report it quietly without telling them', consequence: 'The account is removed quickly. But your classmate later finds out — they\'re hurt and upset that something was happening to them without their knowledge.', effects: { kindness: -2, courage: 2, safety: 3 } },
+    right: { label: 'Tell them first, then report together', consequence: 'They feel empowered taking action with you. But it takes longer to report — more people see the account before it comes down.', effects: { kindness: 3, courage: 1, safety: -1 } },
   },
   {
+    // Card 5 — TRADE-OFF: both choices have upsides and downsides
     scenario: 'A classmate\'s ex-partner is sharing private photos of her on social media without her permission.',
     image: '/classwork/assets/upstander/card5.png',
-    left: { label: 'Tell her and report together', consequence: 'She\'s upset but grateful you told her. The images are removed quickly and she knows someone had her back.', effects: { kindness: 3, courage: 3, safety: 2 } },
-    right: { label: 'Report it yourself silently', consequence: 'The images come down, but she\'s upset that people knew about it before she did.', effects: { kindness: 1, courage: 2, safety: 2 } },
+    left: { label: 'Call it out publicly in the group', consequence: 'The sharing stops immediately. But by speaking up you\'ve made yourself a target — the bullies turn on you and your inbox fills with threats.', effects: { kindness: 2, courage: 3, safety: -2 } },
+    right: { label: 'Tell a trusted adult discreetly', consequence: 'The images are removed efficiently. But your classmate is hurt that you went to an adult before coming to her — she finds out from the teacher rather than from you.', effects: { kindness: -1, courage: 2, safety: 3 } },
   },
   {
-    scenario: 'A group of students creates a mean hashtag using a classmate\'s real name.',
+    // Card 6 — TRADE-OFF: both choices have upsides and downsides
+    scenario: 'A group of students creates a mean hashtag using a classmate\'s real name and it starts trending in school.',
     image: '/classwork/assets/upstander/card6.png',
-    left: { label: 'Report every post', consequence: 'Many posts are removed. The hashtag slowly dies out without an audience to fuel it.', effects: { kindness: 2, courage: 1, safety: 2 } },
-    right: { label: 'Post kind things about them', consequence: 'Positive messages flood in and bury the negativity. Your classmate is touched by the support.', effects: { kindness: 3, courage: 2, safety: 1 } },
+    left: { label: 'Report every post quietly', consequence: 'Posts gradually come down and the hashtag dies out. But progress is slow and your classmate feels unsupported — they needed someone to stand with them publicly.', effects: { kindness: -1, courage: -1, safety: 2 } },
+    right: { label: 'Publicly flood it with kind messages', consequence: 'Positive messages bury the cruelty and your classmate is deeply touched. But the bullies turn their attention to you — you start receiving nasty comments yourself.', effects: { kindness: 3, courage: 2, safety: -3 } },
   },
   {
+    // Card 7 — clear good/bad choice; bad choice now much more punishing
     scenario: 'Someone dares you in a group chat to post something mean about a classmate.',
     image: '/classwork/assets/upstander/card7.png',
-    left: { label: 'Refuse and call it out', consequence: 'You face a bit of mockery, but others in the chat quietly respect you for standing up.', effects: { kindness: 1, courage: 3, safety: 1 } },
-    right: { label: 'Leave the chat silently', consequence: 'Nobody speaks up. The dare moves on to the next person in the chat.', effects: { kindness: 0, courage: -1, safety: 1 } },
+    left: { label: 'Refuse and call it out', consequence: 'You face a bit of mockery, but others in the chat quietly message you to say they respected you for it.', effects: { kindness: 1, courage: 3, safety: 0 } },
+    right: { label: 'Leave the chat silently', consequence: 'Nobody speaks up. The dare moves to the next person, then the next. You feel awful watching it happen and saying nothing.', effects: { kindness: -2, courage: -3, safety: 0 } },
   },
   {
+    // Card 8 — clear good/bad choice; bad choice now much more punishing
     scenario: 'A classmate is using a gaming platform\'s chat to threaten someone they\'ll "sort them out" after school.',
     image: '/classwork/assets/upstander/card8.png',
-    left: { label: 'Screenshot & tell an adult', consequence: 'Staff treat it as a safeguarding matter. It\'s investigated properly. You feel you did the right thing.', effects: { kindness: 2, courage: 3, safety: 3 } },
-    right: { label: 'Tell your friends & leave it', consequence: 'Word spreads but nobody actually reports it. Nothing changes, and the threats continue.', effects: { kindness: -1, courage: -1, safety: -1 } },
+    left: { label: 'Screenshot & tell an adult', consequence: 'Staff treat it as a safeguarding matter. It\'s investigated properly and the threats stop. You feel you did the right thing.', effects: { kindness: 2, courage: 3, safety: 3 } },
+    right: { label: 'Tell your friends & leave it', consequence: 'Word spreads but nobody actually reports it. Nothing changes, and the threatened classmate is assaulted after school.', effects: { kindness: -2, courage: -3, safety: -3 } },
   },
   {
+    // Card 9 — clear good/bad choice; bad choice now much more punishing
     scenario: 'Your friend is too scared to open their phone because of constant hurtful messages every night.',
     image: '/classwork/assets/upstander/card9.png',
     left: { label: 'Help them document & report', consequence: 'You help build a detailed record of the bullying. It\'s officially reported and a proper investigation begins.', effects: { kindness: 3, courage: 2, safety: 2 } },
-    right: { label: 'Suggest a social media break', consequence: 'They feel slightly dismissed. The bullying is still there when they return online.', effects: { kindness: -1, courage: -1, safety: 0 } },
+    right: { label: 'Suggest a social media break', consequence: 'They feel dismissed and alone. Taking a break doesn\'t stop the bullying — it just means they stop seeing it while it gets worse and more personal.', effects: { kindness: -2, courage: -3, safety: -2 } },
   },
   {
+    // Card 10 — clear good/bad choice; bad choice now much more punishing
     scenario: 'Someone is live-streaming themselves reading out a classmate\'s private messages for their followers to mock.',
     image: '/classwork/assets/upstander/card10.png',
     left: { label: 'Report the stream now', consequence: 'The stream is cut within minutes. The target is mortified but deeply grateful someone acted fast.', effects: { kindness: 2, courage: 2, safety: 2 } },
-    right: { label: 'Message the streamer to stop', consequence: 'They read your message aloud as a joke to their audience. The bullying escalates further.', effects: { kindness: -1, courage: -1, safety: -1 } },
+    right: { label: 'Message the streamer to stop', consequence: 'They read your message aloud as a joke to their thousands of followers. The audience piles on, and the harassment spreads way beyond the original stream.', effects: { kindness: -1, courage: -2, safety: -4 } },
   },
 ];
 
