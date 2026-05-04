@@ -2677,8 +2677,13 @@ function MindmapSvg({ central, branches }: { central: string; branches: MindmapB
       maxY = Math.max(maxY, s.sy + s.h / 2);
     }
   }
-  const vx = minX - PAD, vy = minY - PAD;
-  const vw = maxX - minX + PAD * 2, vh = maxY - minY + PAD * 2;
+  // Enforce a minimum canvas size so the diagram never blows up when nearly empty.
+  const MIN_VW = 700, MIN_VH = 460;
+  const rawVw = maxX - minX + PAD * 2, rawVh = maxY - minY + PAD * 2;
+  const vw = Math.max(MIN_VW, rawVw), vh = Math.max(MIN_VH, rawVh);
+  // Re-centre if the content is smaller than the minimum canvas.
+  const extraX = (vw - rawVw) / 2, extraY = (vh - rawVh) / 2;
+  const vx = minX - PAD - extraX, vy = minY - PAD - extraY;
 
   return (
     <svg
