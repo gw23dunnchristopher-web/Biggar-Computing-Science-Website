@@ -31,6 +31,7 @@ import {
   BoxModelPupilUI, BoxModelEditor,
   FriendOrFakePupilUI, FriendOrFakeEditor,
   DmDangerPupilUI, DmDangerEditor,
+  UpstanderPupilUI, UpstanderEditor,
   MalwareTriagePupilUI, MalwareTriageEditor,
   TwoFactorEscapePupilUI, TwoFactorEscapeEditor,
   A11yAuditPupilUI, A11yAuditEditor,
@@ -181,6 +182,7 @@ const TYPE_LABELS: Record<string, string> = {
   box_model: 'CSS box model',
   friend_or_fake: 'Friend or fake (profile spotter)',
   dm_danger: 'DM danger (message rating)',
+  upstander: 'Be an Upstander (cyberbullying)',
   malware_triage: 'Malware triage',
   '2fa_escape': '2FA escape (auth method picker)',
   a11y_audit: 'Accessibility audit',
@@ -217,7 +219,7 @@ const TYPE_GROUPS: { label: string; types: string[] }[] = [
   { label: 'Groups (show questions together)', types: ['group', 'video_group', 'passage', 'file_task', 'mc_group'] },
   { label: 'Fun activities', types: ['crossword', 'word_search', 'matching', 'anagrams', 'mindmap'] },
   { label: 'Games · Word & puzzle', types: ['hangman', 'speed_round', 'ordering'] },
-  { label: 'Games · Internet Safety', types: ['spot_phish', 'phish_inbox', 'friend_or_fake', 'dm_danger', 'screen_time', 'footprint_trail', 'social_engineer'] },
+  { label: 'Games · Internet Safety', types: ['spot_phish', 'phish_inbox', 'friend_or_fake', 'dm_danger', 'upstander', 'screen_time', 'footprint_trail', 'social_engineer'] },
   { label: 'Games · Cyber Security', types: ['caesar_cipher', 'cipher_quest', 'password_forge', '2fa_escape', 'privacy_radar', 'malware_triage'] },
   { label: 'Games · Databases', types: ['field_type_sort', 'validation_rules', 'find_duplicate', 'normalise_it', 'query_visual', 'schema_arch'] },
   { label: 'Games · Web Development', types: ['url_anatomy', 'html_match', 'tag_soup_repair', 'selector_golf', 'box_model', 'css_sliders', 'a11y_audit'] },
@@ -1909,7 +1911,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     'binary_hex', 'bit_ops', 'code_tracer', 'flowchart_seq', 'sorting_race',
     'convert_relay', 'url_anatomy', 'truth_table', 'field_type_sort', 'io_sort', 'html_match',
     'password_forge', 'privacy_radar', 'validation_rules', 'find_duplicate', 'bin_search', 'box_model',
-    'friend_or_fake', 'dm_danger', 'malware_triage', '2fa_escape', 'a11y_audit', 'fetch_execute',
+    'friend_or_fake', 'dm_danger', 'upstander', 'malware_triage', '2fa_escape', 'a11y_audit', 'fetch_execute',
     'screen_time', 'footprint_trail', 'social_engineer', 'cipher_quest', 'normalise_it', 'subnet_calc',
     'phish_inbox', 'build_pc', 'os_sched', 'query_visual', 'schema_arch', 'tag_soup_repair', 'selector_golf', 'css_sliders',
     'mindmap',
@@ -1939,7 +1941,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
       return { ...empty, fileUrl: fileUrl || null, linkUrl: url || null };
     }
     if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-        || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap') {
+        || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'upstander' || t === 'mindmap') {
       const filled = Object.values(cellAnswers).some((v) => {
         if (Array.isArray(v)) return v.length > 0;
         return String(v || '').trim();
@@ -1979,7 +1981,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     if (draft) {
       if (draft.text_answer != null) {
         if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-            || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap') {
+            || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'upstander' || t === 'mindmap') {
           try {
             const parsed = JSON.parse(draft.text_answer);
             if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
@@ -2024,7 +2026,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     // Hydrate inputs from the previous submission.
     if (last.text_answer != null) {
       if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-          || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap') {
+          || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'upstander' || t === 'mindmap') {
         try {
           const parsed = JSON.parse(last.text_answer);
           if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
@@ -2161,7 +2163,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
           body.linkUrl = `${selectedProjectId}|${data?.name || ''}`;
         }
       } else if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-                 || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap') {
+                 || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'upstander' || t === 'mindmap') {
         // Send the cell answers as JSON so the deterministic marker can
         // compare each one against the expected answers in the question config.
         // Same path serves the four fun-activity types — each renderer above
@@ -2242,7 +2244,7 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
     codeProjectKind ? !!selectedProjectId :
     t === 'database_task' ? !!dbEmbedToken :
     (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-      || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap')
+      || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'upstander' || t === 'mindmap')
       ? Object.values(cellAnswers).some((v) => {
           if (Array.isArray(v)) return v.length > 0;
           return !!String(v || '').trim();
@@ -2551,6 +2553,9 @@ function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draf
       )}
       {t === 'dm_danger' && (
         <DmDangerPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
+      )}
+      {t === 'upstander' && (
+        <UpstanderPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
       )}
       {t === 'malware_triage' && (
         <MalwareTriagePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />
@@ -4011,7 +4016,7 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
     );
   }
 
-  if (t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap') {
+  if (t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap' || t === 'upstander') {
     let parsed: any = {};
     try { parsed = JSON.parse(s.text_answer || '{}') || {}; } catch {}
     return <GameReview type={t} cfg={(question as any).config} parsed={parsed} questionId={String(question.id)} />;
@@ -4451,6 +4456,16 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
           { text: 'Account created 2 days ago, no profile picture, sends friend requests to many strangers', verdict: 'fake' },
           { text: 'Photos look like a celebrity, asks for your phone number in DMs', verdict: 'fake' },
           { text: 'School friend tagged in classmates\' posts going back years', verdict: 'real' },
+        ] }
+  );
+  const [upstanderCfg, setUpstanderCfg] = useState<any>(() =>
+    (cfg.upstander && Array.isArray(cfg.upstander.items))
+      ? { items: cfg.upstander.items.map((it: any) => ({ scenario: String(it?.scenario || ''), action: String(it?.action || 'report') })) }
+      : { items: [
+          { scenario: 'A classmate keeps posting mean comments under someone\'s photos every day.', action: 'report' },
+          { scenario: 'Someone sends you a link saying "look what this person said about you".', action: 'block' },
+          { scenario: 'A friend tells you they\'re being sent nasty messages by someone at school.', action: 'support' },
+          { scenario: 'A group chat is mocking a classmate\'s appearance with edited photos.', action: 'report' },
         ] }
   );
   const [dmDangerCfg, setDmDangerCfg] = useState<any>(() =>
@@ -5296,6 +5311,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
       const PICKLIST_SAVE: Record<string, { src: any; configKey: string; valueKey: string; allowed: string[] }> = {
         friend_or_fake: { src: friendOrFakeCfg, configKey: 'friendOrFake', valueKey: 'verdict', allowed: ['real','fake'] },
         dm_danger: { src: dmDangerCfg, configKey: 'dmDanger', valueKey: 'risk', allowed: ['safe','risky','dangerous'] },
+        upstander: { src: upstanderCfg, configKey: 'upstander', valueKey: 'action', allowed: ['report','support','block','ignore'] },
         malware_triage: { src: malwareTriageCfg, configKey: 'malwareTriage', valueKey: 'kind', allowed: ['virus','worm','trojan','ransomware','spyware','adware'] },
         '2fa_escape': { src: twoFactorEscapeCfg, configKey: 'twoFactorEscape', valueKey: 'method', allowed: ['password_only','sms','email','authenticator','hardware'] },
         a11y_audit: { src: a11yAuditCfg, configKey: 'a11yAudit', valueKey: 'issue', allowed: ['contrast','alt_text','labels','keyboard','heading_order','focus_indicator'] },
@@ -6378,6 +6394,12 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
           <div style={fieldLabel as any}>
             <div style={{ fontWeight: 600 }}>DM danger</div>
             <DmDangerEditor cfg={dmDangerCfg} setCfg={setDmDangerCfg} />
+          </div>
+        )}
+        {type === 'upstander' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Be an Upstander</div>
+            <UpstanderEditor cfg={upstanderCfg} setCfg={setUpstanderCfg} />
           </div>
         )}
         {type === 'malware_triage' && (

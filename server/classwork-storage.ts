@@ -100,6 +100,7 @@ export const CLASSWORK_QUESTION_TYPES = [
   'selector_golf',
   'css_sliders',
   'mindmap',
+  'upstander',
   // Pupil uploads a plain-text or code file (.txt/.py/.csv/.html/.js).
   // The file is read as text in the browser and stored as JSON in text_answer
   // so the AI can read the content directly without object storage.

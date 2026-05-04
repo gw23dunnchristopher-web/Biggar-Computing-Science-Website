@@ -1985,6 +1985,18 @@ export const DmDangerPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
 export const DmDangerEditor = ({ cfg, setCfg }: any) =>
   <PickListEditor cfg={cfg} setCfg={setCfg} options={DM_DANGER_OPTS} textKey="text" valueKey="risk" textPlaceholder="e.g. Stranger asks for your home address" />;
 
+const UPSTANDER_OPTS = ['report', 'support', 'block', 'ignore'];
+const UPSTANDER_LABELS: Record<string, string> = {
+  report: '🚨 Report it',
+  support: '💬 Support the target',
+  block: '🚫 Block & ignore',
+  ignore: '😶 Do nothing',
+};
+export const UpstanderPupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
+  <PickListPupilUI items={config?.upstander?.items || []} options={UPSTANDER_OPTS} hint="For each scenario, choose the best action to take as an upstander." textKey="scenario" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} labelMap={UPSTANDER_LABELS} />;
+export const UpstanderEditor = ({ cfg, setCfg }: any) =>
+  <PickListEditor cfg={cfg} setCfg={setCfg} options={UPSTANDER_OPTS} textKey="scenario" valueKey="action" textPlaceholder='e.g. A classmate is posting mean comments on someone&apos;s photo' labelMap={UPSTANDER_LABELS} />;
+
 export const MalwareTriagePupilUI = ({ config, cellAnswers, setCellAnswers }: any) =>
   <PickListPupilUI items={config?.malwareTriage?.items || []} options={MALWARE_OPTS} hint="Match each description to the type of malware." textKey="text" cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />;
 export const MalwareTriageEditor = ({ cfg, setCfg }: any) =>
@@ -2397,6 +2409,7 @@ export function GameReview({ type, cfg, parsed, questionId }: {
     phish_inbox: { itemsPath: 'phishInbox', expectedKey: 'verdict', labelKey: 'text' },
     build_pc: { itemsPath: 'buildPc', expectedKey: 'part', labelKey: 'text' },
     os_sched: { itemsPath: 'osSched', expectedKey: 'algo', labelKey: 'text' },
+    upstander: { itemsPath: 'upstander', expectedKey: 'action', labelKey: 'scenario' },
     query_visual: { itemsPath: 'queryVisual', expectedKey: 'op', labelKey: 'text' },
     schema_arch: { itemsPath: 'schemaArch', expectedKey: 'rel', labelKey: 'text' },
     tag_soup_repair: { itemsPath: 'tagSoupRepair', expectedKey: 'bug', labelKey: 'text' },

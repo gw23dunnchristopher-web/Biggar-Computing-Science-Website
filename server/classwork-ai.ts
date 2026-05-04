@@ -196,6 +196,8 @@ export async function markSubmission(
         return markPickListGeneric(q, s, 'cssSliders', 'prop', 'CSS properties matched', ['width', 'height', 'padding', 'margin', 'border', 'color', 'background', 'font_size']);
       case 'mindmap':
         return await markMindmap(q, s);
+      case 'upstander':
+        return markPickListGeneric(q, s, 'upstander', 'action', 'best responses chosen', ['report', 'support', 'block', 'ignore']);
       case 'file_upload':
         return await markFileUpload(q, s);
       case 'info_only':
