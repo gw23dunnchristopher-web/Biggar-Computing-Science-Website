@@ -1,5 +1,64 @@
 uploads = []
-generated = []
+
+[[generated]]
+id = "CyUOuXWbFcfkG8He4po-l"
+uri = "file://public/classwork/assets/upstander/card1.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "D1LR6u-roMNPnfpCLXyPr"
+uri = "file://public/classwork/assets/upstander/card2.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "wUUUf5BY9ew29UzNWwlRc"
+uri = "file://public/classwork/assets/upstander/card3.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "LNKmFEE_vM4Ps0cd07PbI"
+uri = "file://public/classwork/assets/upstander/card4.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "sPbjxvfSWXO58r0zilvCS"
+uri = "file://public/classwork/assets/upstander/card5.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "ebNAfggGyANXOXDl2o8qa"
+uri = "file://public/classwork/assets/upstander/card6.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "OYW7CwAMfxjuJs6_pRZiP"
+uri = "file://public/classwork/assets/upstander/card7.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "xCtal406GqGklA_epRaLx"
+uri = "file://public/classwork/assets/upstander/card8.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "qiqdioQ7SAZCgB7EebE3U"
+uri = "file://public/classwork/assets/upstander/card9.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "KFqj1tAD-ygbUHCK30pS0"
+uri = "file://public/classwork/assets/upstander/card10.png"
+type = "image"
+title = "generated_image"
 
 [[outputs]]
 id = "akR-isxMabDxYPEFDtzME"

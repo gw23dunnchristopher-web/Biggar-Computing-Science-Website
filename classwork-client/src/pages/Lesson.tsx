@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
 import { Link, useRoute } from 'wouter';
 import Shell from '@/components/Shell';
@@ -6,6 +6,55 @@ import Modal, { modalPrimaryBtn, modalSecondaryBtn } from '@/components/Modal';
 import RichTextEditor from '@/components/RichTextEditor';
 import PromptText, { parsePromptImageAlt, type PromptImageAlign } from '@/components/PromptText';
 import { api, getCurrentRole } from '@/lib/api';
+import {
+  HangmanPupilUI, HangmanEditor,
+  SpeedRoundPupilUI, SpeedRoundEditor,
+  OrderingPupilUI, OrderingEditor,
+  CaesarPupilUI, CaesarEditor,
+  SpotPhishPupilUI, SpotPhishEditor,
+  BinaryHexPupilUI, BinaryHexEditor,
+  BitOpsPupilUI, BitOpsEditor,
+  CodeTracerPupilUI, CodeTracerEditor,
+  FlowchartPupilUI, FlowchartEditor,
+  SortingRacePupilUI, SortingRaceEditor,
+  ConvertRelayPupilUI, ConvertRelayEditor,
+  UrlAnatomyPupilUI, UrlAnatomyEditor,
+  TruthTablePupilUI, TruthTableEditor,
+  FieldTypeSortPupilUI, FieldTypeSortEditor,
+  IoSortPupilUI, IoSortEditor,
+  HtmlMatchPupilUI, HtmlMatchEditor,
+  PasswordForgePupilUI, PasswordForgeEditor,
+  PrivacyRadarPupilUI, PrivacyRadarEditor,
+  ValidationRulesPupilUI, ValidationRulesEditor,
+  FindDuplicatePupilUI, FindDuplicateEditor,
+  BinSearchPupilUI, BinSearchEditor,
+  BoxModelPupilUI, BoxModelEditor,
+  FriendOrFakePupilUI, FriendOrFakeEditor,
+  DmDangerPupilUI, DmDangerEditor,
+  UpstanderPupilUI, UpstanderEditor,
+  MalwareTriagePupilUI, MalwareTriageEditor,
+  TwoFactorEscapePupilUI, TwoFactorEscapeEditor,
+  A11yAuditPupilUI, A11yAuditEditor,
+  FetchExecutePupilUI, FetchExecuteEditor,
+  ScreenTimePupilUI, ScreenTimeEditor,
+  FootprintTrailPupilUI, FootprintTrailEditor,
+  SocialEngineerPupilUI, SocialEngineerEditor,
+  CipherQuestPupilUI, CipherQuestEditor,
+  NormaliseItPupilUI, NormaliseItEditor,
+  SubnetCalcPupilUI, SubnetCalcEditor,
+  PhishInboxPupilUI, PhishInboxEditor,
+  BuildPcPupilUI, BuildPcEditor,
+  OsSchedPupilUI, OsSchedEditor,
+  QueryVisualPupilUI, QueryVisualEditor,
+  SchemaArchPupilUI, SchemaArchEditor,
+  TagSoupRepairPupilUI, TagSoupRepairEditor,
+  SelectorGolfPupilUI, SelectorGolfEditor,
+  CssSlidersPupilUI, CssSlidersEditor,
+  MindmapPupilUI, MindmapEditor,
+  DEFAULT_UPSTANDER_ITEMS,
+  GameReview,
+  GameShell,
+} from './lesson-games';
 
 interface LessonInfo {
   id: string;
@@ -13,6 +62,7 @@ interface LessonInfo {
   learning_intentions: string | null;
   success_criteria: string | null;
   is_published: boolean;
+  is_test?: boolean;
   // Returned by GET /api/classwork/lessons/:id (selected by getLesson()) but
   // previously not declared on the client. Used here to power the "My jotter"
   // link in the lesson header so teachers can demo it to a class.
@@ -43,6 +93,7 @@ interface Question {
   config: any;
   is_extension?: boolean;
   passage_id?: string | null;
+  created_at?: string;
 }
 
 interface Submission {
@@ -76,34 +127,288 @@ interface Draft {
 }
 
 const TYPE_LABELS: Record<string, string> = {
+  // Written answers
   short: 'Short answer',
   long: 'Long answer',
   code: 'Code',
   multiple_choice: 'Multiple choice',
+  fill_in_blanks: 'Fill in the blanks',
+  table: 'Complete the table',
+  labeled_inputs: 'Labelled inputs (multi-field)',
+  // File & project uploads
   screenshot: 'Screenshot upload',
+  file_upload: 'File upload (text / code)',
+  presentation: 'Presentation (.pptx)',
+  project: 'Long-form project (URL or file)',
   scratch_link: 'Scratch project link',
   makecode_link: 'MakeCode project link',
   google_sites_link: 'Google Sites link',
-  project: 'Long-form project',
-  presentation: 'Presentation (.pptx)',
-  video_question: 'Watch a video and answer',
+  // Embedded tools
   python_task: 'Python project (in-site editor)',
   html_task: 'HTML/CSS project (in-site editor)',
   sql_task: 'SQL task (Data Sculptor)',
   database_task: 'Database task (Data Sculptor sandbox)',
-  passage: 'Reading passage (with attached tasks)',
-  video_group: 'Video with attached tasks',
-  info_only: 'Information note (no answer needed)',
-  fill_in_blanks: 'Fill in the blanks',
-  table: 'Complete the table',
-  labeled_inputs: 'Labelled inputs (multi-field answer)',
-  section_header: 'Section divider (groups the tasks below)',
-  text_only: 'Jotter task (write the answer in your jotter)',
+  // Video, reading & file groups
+  video_group: 'Video (add questions underneath, or leave standalone)',
+  passage: 'Reading passage (add questions underneath)',
+  file_task: 'File task (students upload a file, then answer follow-ups)',
+  mc_group: 'Multiple choice group (a, b, c… all answered & submitted together)',
+  group: 'Question group (any types shown together — replaces passage & video)',
+  // Fun activities
   crossword: 'Crossword puzzle',
   word_search: 'Word search',
   matching: 'Matching pairs',
   anagrams: 'Anagrams',
+  // Games
+  hangman: 'Hangman',
+  speed_round: 'Speed round (timed Q&A)',
+  ordering: 'Ordering / sequencing',
+  caesar_cipher: 'Caesar cipher challenge',
+  spot_phish: 'Spot the phish',
+  binary_hex: 'Binary / hex blitz',
+  bit_ops: 'Bit manipulation puzzle',
+  code_tracer: 'Code tracer',
+  flowchart_seq: 'Flowchart sequencer',
+  sorting_race: 'Sorting race',
+  convert_relay: 'Convert-it relay (units & bases)',
+  url_anatomy: 'URL anatomy',
+  truth_table: 'Truth table builder',
+  field_type_sort: 'Field-type sorter',
+  io_sort: 'Input / output sorter',
+  html_match: 'HTML element matcher',
+  password_forge: 'Password forge',
+  privacy_radar: 'Privacy radar (risk levels)',
+  validation_rules: 'Validation-rule matcher',
+  find_duplicate: 'Find the duplicate row',
+  bin_search: 'Binary-search trace',
+  box_model: 'CSS box model',
+  friend_or_fake: 'Friend or fake (profile spotter)',
+  dm_danger: 'DM danger (message rating)',
+  upstander: 'Be an Upstander (cyberbullying)',
+  malware_triage: 'Malware triage',
+  '2fa_escape': '2FA escape (auth method picker)',
+  a11y_audit: 'Accessibility audit',
+  fetch_execute: 'Fetch–decode–execute sorter',
+  screen_time: 'Screen-time check',
+  footprint_trail: 'Digital footprint trail',
+  social_engineer: 'Social-engineering scams',
+  cipher_quest: 'Cipher quest',
+  normalise_it: 'Normalise it (1NF/2NF/3NF)',
+  subnet_calc: 'IP-address classifier',
+  phish_inbox: 'Phish-inbox triage',
+  build_pc: 'Build-a-PC parts',
+  os_sched: 'OS scheduling algorithms',
+  query_visual: 'SQL operation identifier',
+  schema_arch: 'Schema relationships',
+  tag_soup_repair: 'Tag-soup HTML repair',
+  selector_golf: 'CSS-selector golf',
+  css_sliders: 'CSS-property sliders',
+  mindmap: 'Mindmap activity',
+  // No answer needed
+  info_only: 'Information note (no answer needed)',
+  text_only: 'Jotter task (answer in jotter, no digital submission)',
+  section_header: 'Section divider',
+  // Legacy — still renders for existing questions, not offered for new ones
+  video_question: 'Watch a video and answer',
 };
+
+// Grouped structure for the type picker — video_question excluded since
+// video_group covers the same need (attach 0 or more questions underneath).
+const TYPE_GROUPS: { label: string; types: string[] }[] = [
+  { label: 'Written answers', types: ['short', 'long', 'code', 'multiple_choice', 'fill_in_blanks', 'table', 'labeled_inputs', 'mc_group'] },
+  { label: 'File & project uploads', types: ['screenshot', 'file_upload', 'presentation', 'project', 'scratch_link', 'makecode_link', 'google_sites_link'] },
+  { label: 'Embedded tools', types: ['python_task', 'html_task', 'sql_task', 'database_task'] },
+  { label: 'Groups (show questions together)', types: ['group', 'video_group', 'passage', 'file_task', 'mc_group'] },
+  { label: 'Fun activities', types: ['crossword', 'word_search', 'matching', 'anagrams', 'mindmap'] },
+  { label: 'Games · Word & puzzle', types: ['hangman', 'speed_round', 'ordering'] },
+  { label: 'Games · Internet Safety', types: ['spot_phish', 'phish_inbox', 'friend_or_fake', 'dm_danger', 'upstander', 'screen_time', 'footprint_trail', 'social_engineer'] },
+  { label: 'Games · Cyber Security', types: ['caesar_cipher', 'cipher_quest', 'password_forge', '2fa_escape', 'privacy_radar', 'malware_triage'] },
+  { label: 'Games · Databases', types: ['field_type_sort', 'validation_rules', 'find_duplicate', 'normalise_it', 'query_visual', 'schema_arch'] },
+  { label: 'Games · Web Development', types: ['url_anatomy', 'html_match', 'tag_soup_repair', 'selector_golf', 'box_model', 'css_sliders', 'a11y_audit'] },
+  { label: 'Games · Computer Systems', types: ['binary_hex', 'convert_relay', 'bit_ops', 'truth_table', 'io_sort', 'build_pc', 'fetch_execute', 'os_sched', 'code_tracer', 'flowchart_seq', 'sorting_race', 'bin_search', 'subnet_calc'] },
+  { label: 'No answer needed', types: ['info_only', 'text_only', 'section_header'] },
+];
+
+const GAME_ICONS: Record<string, string> = {
+  hangman: '🎯', speed_round: '⚡', ordering: '📋', caesar_cipher: '🔐',
+  spot_phish: '🎣', binary_hex: '💻', bit_ops: '⚙️', code_tracer: '🔬',
+  flowchart_seq: '📊', sorting_race: '🏁', convert_relay: '🔄', url_anatomy: '🌐',
+  truth_table: '✅', field_type_sort: '🗃️', io_sort: '📥', html_match: '🏷️',
+  password_forge: '🔒', privacy_radar: '🕵️', validation_rules: '✔️',
+  find_duplicate: '🔎', bin_search: '🔍', box_model: '📦', friend_or_fake: '👥',
+  dm_danger: '💬', upstander: '🦸', malware_triage: '🛡️', '2fa_escape': '🔑',
+  a11y_audit: '♿', fetch_execute: '⚡', screen_time: '📱', footprint_trail: '👣',
+  social_engineer: '🎭', cipher_quest: '🗝️', normalise_it: '🗄️', subnet_calc: '🌐',
+  phish_inbox: '📧', build_pc: '🖥️', os_sched: '⏱️', query_visual: '📊',
+  schema_arch: '🏗️', tag_soup_repair: '🔧', selector_golf: '⛳', css_sliders: '🎨',
+  mindmap: '🧠', crossword: '🔤', word_search: '🔍', matching: '🔗', anagrams: '🔀',
+};
+const GAME_HINTS: Record<string, string> = {
+  hangman: 'Guess the hidden word one letter at a time — but watch your lives!',
+  speed_round: 'Answer as many questions as you can before the timer runs out.',
+  ordering: 'Drag the items into the correct order.',
+  caesar_cipher: 'Encode or decode messages using the Caesar cipher shift.',
+  spot_phish: 'Read each message carefully and spot the phishing attempts.',
+  binary_hex: 'Convert numbers between binary, decimal and hexadecimal.',
+  bit_ops: 'Apply bitwise operations and get the right binary result.',
+  code_tracer: 'Step through the code and trace the values of each variable.',
+  flowchart_seq: 'Arrange the flowchart blocks into the correct sequence.',
+  sorting_race: 'Step through a sorting algorithm and watch it in action.',
+  convert_relay: 'Convert values between different units and number bases.',
+  url_anatomy: 'Label the different parts of a URL.',
+  truth_table: 'Complete the truth table for each Boolean expression.',
+  field_type_sort: 'Match each field to its correct data type.',
+  io_sort: 'Sort each item as an input or an output device.',
+  html_match: 'Match each HTML element to its correct description.',
+  password_forge: 'Build a strong password that meets all the security rules.',
+  privacy_radar: 'Classify each piece of information by how private it is.',
+  validation_rules: 'Pick the right validation rule for each form field.',
+  find_duplicate: 'Spot the duplicate records in the dataset.',
+  bin_search: 'Step through a binary search and find the target value.',
+  box_model: 'Label the parts of the CSS box model correctly.',
+  friend_or_fake: 'Decide whether each social media profile is real or fake.',
+  dm_danger: 'Rate each direct message as safe, risky, or dangerous.',
+  upstander: 'Swipe left or right to choose how you respond to each cyberbullying situation.',
+  malware_triage: 'Match each description to the correct type of malware.',
+  '2fa_escape': 'Choose the strongest two-factor authentication method for each scenario.',
+  a11y_audit: 'Spot the accessibility issues on each web page.',
+  fetch_execute: 'Sort each action into the correct stage of the Fetch-Execute cycle.',
+  screen_time: 'Rate each screen-time habit as healthy, balanced, or unhealthy.',
+  footprint_trail: 'Classify each piece of digital footprint as private, personal, or public.',
+  social_engineer: 'Identify which social engineering technique is being used.',
+  cipher_quest: 'Work out which cipher was used to encrypt each message.',
+  normalise_it: 'Spot which normal form each table violates.',
+  subnet_calc: 'Classify each IP address correctly.',
+  phish_inbox: 'Triage your inbox — spot the phishing emails before you click!',
+  build_pc: 'Identify each PC component and what it does.',
+  os_sched: 'Choose the right scheduling algorithm for each scenario.',
+  query_visual: 'Identify which SQL operation each query is performing.',
+  schema_arch: 'Classify the relationship type between each pair of tables.',
+  tag_soup_repair: 'Find and fix the HTML bugs in each snippet.',
+  selector_golf: 'Identify the type of CSS selector used in each example.',
+  css_sliders: 'Match each CSS property to its visual effect.',
+  mindmap: 'Build a mind map to organise your ideas on the topic.',
+  crossword: 'Use the clues to fill in the crossword grid.',
+  word_search: 'Find all the hidden words in the grid.',
+  matching: 'Drag each item to its matching pair.',
+  anagrams: 'Unscramble the letters to spell the correct word.',
+};
+
+// Two-level type picker: group headings on the left, types for the active
+// group on the right. Rendered inline (no absolute positioning) so it is
+// never clipped by the modal's overflow:auto.
+function TypePicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const defaultGroup = Math.max(0, TYPE_GROUPS.findIndex((g) => g.types.includes(value)));
+  const [open, setOpen]           = useState(false);
+  const [activeGroup, setActiveGroup] = useState(defaultGroup);
+
+  // Re-sync the active group whenever the value changes from outside.
+  useEffect(() => {
+    const idx = TYPE_GROUPS.findIndex((g) => g.types.includes(value));
+    if (idx >= 0) setActiveGroup(idx);
+  }, [value]);
+
+  const groupLabel = TYPE_GROUPS[activeGroup]?.label || '';
+  const typeLabel  = TYPE_LABELS[value] || value;
+  const valueGroup = TYPE_GROUPS.findIndex((g) => g.types.includes(value));
+
+  return (
+    <div>
+      {/* Trigger button — shows current selection, toggles the panel */}
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        style={{
+          padding: '8px 10px', fontSize: 14, fontWeight: 400,
+          border: '1px solid var(--cw-border)', borderRadius: 8, fontFamily: 'inherit',
+          width: '100%', display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', cursor: 'pointer',
+          background: 'var(--cw-surface)', textAlign: 'left', gap: 8,
+        }}
+      >
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {valueGroup >= 0 && (
+            <span style={{ color: 'var(--cw-muted)', fontWeight: 400 }}>
+              {TYPE_GROUPS[valueGroup].label}{' › '}
+            </span>
+          )}
+          {typeLabel}
+        </span>
+        <span style={{ flexShrink: 0, color: 'var(--cw-muted)', fontSize: 12 }}>
+          {open ? '▴' : '▾'}
+        </span>
+      </button>
+
+      {/* Inline split panel — no absolute positioning, never clipped by modal */}
+      {open && (
+        <div style={{
+          display: 'flex', marginTop: 4,
+          border: '1px solid var(--cw-border)', borderRadius: 10,
+          overflow: 'hidden', fontSize: 13,
+          boxShadow: '0 4px 14px rgba(15,23,42,0.10)',
+        }}>
+          {/* Left column: group headings */}
+          <div style={{
+            flexShrink: 0, width: 195,
+            borderRight: '1px solid var(--cw-border)',
+            background: 'var(--cw-surface-soft, var(--cw-surface-muted))',
+          }}>
+            {TYPE_GROUPS.map((g, i) => (
+              <div
+                key={g.label}
+                onMouseEnter={() => setActiveGroup(i)}
+                onClick={() => setActiveGroup(i)}
+                style={{
+                  display: 'flex', alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 12px', cursor: 'default',
+                  fontWeight: activeGroup === i ? 700 : 600,
+                  background: activeGroup === i ? 'var(--cw-accent)' : 'transparent',
+                  color: activeGroup === i ? '#fff'
+                    : valueGroup === i ? 'var(--cw-accent)' : 'var(--cw-ink)',
+                  borderLeft: valueGroup === i && activeGroup !== i
+                    ? '3px solid var(--cw-accent)' : '3px solid transparent',
+                }}
+              >
+                <span>{g.label}</span>
+                <span style={{ opacity: 0.55, fontSize: 11 }}>›</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Right column: types within the active group */}
+          <div style={{ flex: 1, minWidth: 0, background: 'var(--cw-surface)' }}>
+            {(TYPE_GROUPS[activeGroup]?.types ?? []).map((k) => {
+              const isCurrent = value === k;
+              return (
+                <div
+                  key={k}
+                  onClick={() => { onChange(k); setOpen(false); }}
+                  style={{
+                    padding: '9px 14px', cursor: 'pointer',
+                    fontWeight: isCurrent ? 600 : 400,
+                    background: isCurrent ? '#eff6ff' : 'transparent',
+                    color: isCurrent ? '#1d4ed8' : 'var(--cw-ink)',
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isCurrent) e.currentTarget.style.background = 'var(--cw-surface-muted)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = isCurrent ? '#eff6ff' : 'transparent';
+                  }}
+                >
+                  {isCurrent && <span style={{ fontSize: 10 }}>✓</span>}
+                  {TYPE_LABELS[k]}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Lesson() {
   const [, params] = useRoute('/lesson/:id');
@@ -113,6 +418,10 @@ export default function Lesson() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [allSubs, setAllSubs] = useState<Submission[]>([]);
+  // Question IDs the teacher has unlocked for this student to resubmit.
+  const [unlockedQIds, setUnlockedQIds] = useState<Set<string>>(new Set());
+  // Teacher view: all active unlock records for the lesson.
+  const [teacherUnlocks, setTeacherUnlocks] = useState<{ student_id: string; question_id: string }[]>([]);
   // Pupil-only auto-saved drafts, keyed by question_id for O(1) lookup.
   // Loaded once at lesson open; from then on each StudentAnswer manages
   // its own write-back so we don't need to refetch on every save.
@@ -124,6 +433,8 @@ export default function Lesson() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [previewAsStudent, setPreviewAsStudent] = useState(false);
+  const previewSessionRef = useRef(0);
+  const [previewAnsweredQIds, setPreviewAnsweredQIds] = useState<Set<string>>(new Set());
 
   // Drag-and-drop reordering state (teacher mode only).
   // We use a ref for the source so it doesn't trigger re-renders mid-drag,
@@ -152,11 +463,13 @@ export default function Lesson() {
   // pupils don't have to leave the lesson to jot something into their unit
   // notes. Pupils edit their own per-unit notes; teachers (browsing or
   // previewing the lesson) edit the shared demo notes for the unit.
-  const [editing, setEditing] = useState<{ unitId: string; title: string } | null>(null);
+  const [editing, setEditing] = useState<{ unitId: string; title: string; lessonTitle?: string } | null>(null);
   const [editContent, setEditContent] = useState('');
   const [editSavedAt, setEditSavedAt] = useState<number | null>(null);
   const [editStatus, setEditStatus] = useState<'idle' | 'loading' | 'saving' | 'saved' | 'error'>('idle');
   const [editErr, setEditErr] = useState<string | null>(null);
+  // Set when the jotter is opened from a specific lesson question; cleared after scroll.
+  const [editScrollTarget, setEditScrollTarget] = useState<string | null>(null);
 
   function notesEndpoint(unitId: string): string {
     return role === 'teacher'
@@ -164,12 +477,27 @@ export default function Lesson() {
       : `/api/classwork/units/${encodeURIComponent(unitId)}/notes`;
   }
 
-  function openEditNotes(unitId: string, unitTitle: string) {
+  function openEditNotes(unitId: string, unitTitle: string, lessonTitle?: string) {
     setEditContent(''); setEditSavedAt(null); setEditErr(null);
     setEditStatus('loading');
-    setEditing({ unitId, title: unitTitle });
+    setEditing({ unitId, title: unitTitle, lessonTitle });
+    if (lessonTitle) setEditScrollTarget(lessonTitle);
     api<{ content: string; updatedAt: number | null }>(notesEndpoint(unitId))
-      .then((r) => { setEditContent(r.content || ''); setEditSavedAt(r.updatedAt); setEditStatus('idle'); })
+      .then((r) => {
+        let content = r.content || '';
+        if (lessonTitle) {
+          // Ensure a heading for this lesson exists; if not, append it so the
+          // student's notes are automatically organised under the lesson topic.
+          const esc = lessonTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          const heading = `<h2>${esc}</h2>`;
+          if (!content.includes(heading)) {
+            content = content ? `${content}\n${heading}\n<p><br></p>` : `${heading}\n<p><br></p>`;
+          }
+        }
+        setEditContent(content);
+        setEditSavedAt(r.updatedAt);
+        setEditStatus('idle');
+      })
       .catch((e: any) => { setEditStatus('error'); setEditErr(e.message || 'Failed to load notes'); });
   }
 
@@ -197,6 +525,24 @@ export default function Lesson() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editContent, editing?.unitId]);
 
+  // After loading finishes, scroll to the lesson heading in the editor (once).
+  useEffect(() => {
+    if (editStatus !== 'idle' || !editScrollTarget) return;
+    const target = editScrollTarget;
+    setEditScrollTarget(null); // clear immediately so this only fires once
+    window.setTimeout(() => {
+      const editor = document.querySelector('[aria-label="Unit notes"]') as HTMLElement | null;
+      if (!editor) return;
+      for (const h of Array.from(editor.querySelectorAll('h2'))) {
+        if ((h as HTMLElement).textContent?.trim() === target.trim()) {
+          (h as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        }
+      }
+    }, 150);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editStatus, editScrollTarget]);
+
   function closeEditNotes() {
     const wasEditing = editing;
     const lastContent = editContent;
@@ -212,10 +558,10 @@ export default function Lesson() {
   // Progress tracking — counts answerable, non-extension questions only.
   // Excludes: passage, video_group (container cards), info_only, section_header, text_only.
   const mainCountableQs = questions.filter(
-    (q) => !q.is_extension && !['passage', 'video_group', 'info_only', 'section_header', 'text_only'].includes(q.question_type)
+    (q) => !q.is_extension && !['passage', 'video_group', 'file_task', 'mc_group', 'group', 'info_only', 'section_header', 'text_only'].includes(q.question_type)
   );
   const mainAnsweredCount = mainCountableQs.filter(
-    (q) => submissions.some((s) => s.question_id === q.id)
+    (q) => submissions.some((s) => s.question_id === q.id) || previewAnsweredQIds.has(q.id)
   ).length;
   const progressPct = mainCountableQs.length > 0
     ? Math.round(mainAnsweredCount / mainCountableQs.length * 100)
@@ -240,12 +586,20 @@ export default function Lesson() {
       const draftsP: Promise<Draft[]> = role === 'student'
         ? api<Draft[]>(`/api/classwork/lessons/${lessonId}/my-drafts`).catch(() => [])
         : Promise.resolve([]);
-      const [info, qs, resMap, subs, drafts] = await Promise.all([
+      // Student: fetch their unlock set; teacher: fetch all lesson unlocks.
+      const unlocksP =
+        role === 'student'
+          ? api<string[]>(`/api/classwork/lessons/${lessonId}/my-unlocks`).catch(() => [] as string[])
+          : role === 'teacher'
+            ? api<{ student_id: string; question_id: string }[]>(`/api/classwork/lessons/${lessonId}/unlocks`).catch(() => [] as { student_id: string; question_id: string }[])
+            : Promise.resolve([] as string[]);
+      const [info, qs, resMap, subs, drafts, unlocks] = await Promise.all([
         api<LessonInfo>(`/api/classwork/lessons/${lessonId}`).catch(() => null),
         api<Question[]>(`/api/classwork/lessons/${lessonId}/questions`),
         api<Record<string, LessonResource[]>>(`/api/classwork/lessons/${lessonId}/all-question-resources`).catch(() => ({})),
         submissionsP,
         draftsP,
+        unlocksP,
       ]);
       setLesson(info);
       setQuestions(qs);
@@ -256,6 +610,9 @@ export default function Lesson() {
         const map: Record<string, Draft> = {};
         for (const d of drafts) map[d.question_id] = d;
         setDraftsByQuestion(map);
+        setUnlockedQIds(new Set(unlocks as string[]));
+      } else if (role === 'teacher') {
+        setTeacherUnlocks(unlocks as { student_id: string; question_id: string }[]);
       }
     } catch (e: any) {
       setErr(e.message || 'Failed to load');
@@ -267,8 +624,12 @@ export default function Lesson() {
   async function refreshSubmissions() {
     if (role !== 'teacher') return;
     try {
-      const subs = await api<Submission[]>(`/api/classwork/lessons/${lessonId}/submissions`);
+      const [subs, unlocks] = await Promise.all([
+        api<Submission[]>(`/api/classwork/lessons/${lessonId}/submissions`),
+        api<{ student_id: string; question_id: string }[]>(`/api/classwork/lessons/${lessonId}/unlocks`).catch(() => []),
+      ]);
       setAllSubs(subs);
+      setTeacherUnlocks(unlocks);
     } catch { /* ignore */ }
   }
 
@@ -333,7 +694,7 @@ export default function Lesson() {
     setQuestions((prev) =>
       [...prev]
         .map((q) => idToOrder.has(q.id) ? { ...q, order_index: idToOrder.get(q.id)! } : q)
-        .sort((a, b) => a.order_index - b.order_index || a.created_at.localeCompare(b.created_at))
+        .sort((a, b) => a.order_index - b.order_index || (a.created_at || '').localeCompare(b.created_at || ''))
     );
 
     try {
@@ -420,7 +781,7 @@ export default function Lesson() {
           <>
             <button
               type="button"
-              onClick={() => setPreviewAsStudent((v) => !v)}
+              onClick={() => setPreviewAsStudent((v) => { if (!v) { previewSessionRef.current += 1; } else { setPreviewAnsweredQIds(new Set()); } return !v; })}
               style={{
                 background: previewAsStudent ? 'var(--cw-accent)' : 'var(--cw-surface-muted)',
                 color: previewAsStudent ? '#fff' : 'var(--cw-ink)',
@@ -433,7 +794,7 @@ export default function Lesson() {
             </button>
             {!previewAsStudent && <NewQuestionButton
               lessonId={lessonId}
-              passages={questions.filter((q) => q.question_type === 'passage' || q.question_type === 'video_group')}
+              passages={questions.filter((q) => q.question_type === 'passage' || q.question_type === 'video_group' || q.question_type === 'file_task' || q.question_type === 'mc_group' || q.question_type === 'group')}
               onCreated={refresh}
             />}
           </>
@@ -461,8 +822,8 @@ export default function Lesson() {
       )}
 
       {(() => {
-        const mainQs = questions.filter((q) => !q.is_extension);
-        const extQs  = questions.filter((q) => !!q.is_extension);
+        // All questions rendered in one unified list; is_extension drives
+        // label prefix (Ex1, Ex2…) and card tint but not section splits.
 
         // Build a render plan: each passage groups any later-or-earlier questions
         // whose passage_id matches it. Standalone (non-passage, non-attached)
@@ -474,9 +835,9 @@ export default function Lesson() {
           const items: Item[] = [];
           for (const q of qs) {
             if (consumed.has(q.id)) continue;
-            if (q.question_type === 'passage' || q.question_type === 'video_group') {
+            if (q.question_type === 'passage' || q.question_type === 'video_group' || q.question_type === 'file_task' || q.question_type === 'mc_group' || q.question_type === 'group') {
               const children = qs.filter((c) =>
-                c.id !== q.id && c.question_type !== 'passage' && c.question_type !== 'video_group' && c.passage_id === q.id && !consumed.has(c.id)
+                c.id !== q.id && c.question_type !== 'passage' && c.question_type !== 'video_group' && c.question_type !== 'file_task' && c.question_type !== 'mc_group' && c.question_type !== 'group' && c.passage_id === q.id && !consumed.has(c.id)
               );
               children.forEach((c) => consumed.add(c.id));
               consumed.add(q.id);
@@ -522,23 +883,35 @@ export default function Lesson() {
                       }}
                     >⠿</span>
                   )}
-                  <span>{label} · {TYPE_LABELS[q.question_type] || q.question_type}</span>
-                  {isExt && (
-                    <span style={{
-                      fontSize: 11, fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase',
-                      padding: '2px 8px', borderRadius: 999, background: '#7c3aed', color: '#fff',
-                    }}>Extension</span>
-                  )}
+                  <span>{label}{!isInfo && !isTextOnly ? ` · ${TYPE_LABELS[q.question_type] || q.question_type}` : ''}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   {q.question_type !== 'passage' && !isInfo && (
                     <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>{q.max_marks} mark{q.max_marks === 1 ? '' : 's'}</div>
                   )}
+                  {/* Jotter shortcut on every question — students open their unit
+                      notes without leaving the lesson; the heading for this lesson
+                      is auto-inserted if it doesn't already exist. */}
+                  {lesson?.unit_id && !isTextOnly && (role === 'student' || previewAsStudent) && (
+                    <button
+                      type="button"
+                      onClick={() => openEditNotes(lesson.unit_id!, lesson.title || 'this unit', lesson.title || undefined)}
+                      title={role === 'teacher' ? 'Open demo jotter for this unit' : 'Add notes to your jotter for this lesson'}
+                      style={{
+                        background: 'none', border: '1px solid var(--cw-border, #e2e8f0)',
+                        borderRadius: 5, padding: '2px 8px', fontSize: 12,
+                        cursor: 'pointer', color: 'var(--cw-muted)', display: 'flex',
+                        alignItems: 'center', gap: 3, whiteSpace: 'nowrap',
+                      }}
+                    >
+                      📓 Jotter
+                    </button>
+                  )}
                   {role === 'teacher' && !previewAsStudent && (
                     <>
                       <EditQuestionButton
                         question={q}
-                        passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group')}
+                        passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'group')}
                         onChanged={refresh}
                       />
                       {lesson?.unit_id && (
@@ -549,6 +922,7 @@ export default function Lesson() {
                           onMoved={refresh}
                         />
                       )}
+                      <DeleteQuestionButton questionId={q.id} onDeleted={refresh} />
                     </>
                   )}
                 </div>
@@ -620,7 +994,7 @@ export default function Lesson() {
                       // so pupils can jot something straight away without
                       // navigating away from the lesson.
                       if (!lesson?.unit_id) return;
-                      openEditNotes(lesson.unit_id, lesson.title || 'this unit');
+                      openEditNotes(lesson.unit_id, lesson.title || 'this unit', lesson.title || undefined);
                     }}
                     disabled={!lesson?.unit_id}
                     title={role === 'teacher'
@@ -643,6 +1017,7 @@ export default function Lesson() {
                 <StudentAnswer
                   question={q}
                   previousSubmissions={mySubs}
+                  isUnlocked={unlockedQIds.has(q.id)}
                   draft={role === 'student' ? (draftsByQuestion[q.id] || null) : null}
                   onSubmitted={() => {
                     // The server clears the draft as part of createSubmission,
@@ -653,6 +1028,13 @@ export default function Lesson() {
                       const { [q.id]: _, ...rest } = m;
                       return rest;
                     });
+                    // Consume the unlock locally so the UI snaps to locked
+                    // immediately — the server already deleted the row.
+                    setUnlockedQIds((prev) => {
+                      const next = new Set(prev);
+                      next.delete(q.id);
+                      return next;
+                    });
                     refresh();
                   }}
                   preview={role === 'teacher' && previewAsStudent}
@@ -662,6 +1044,7 @@ export default function Lesson() {
                 <TeacherSubmissions
                   question={q}
                   submissions={allSubs.filter((s) => s.question_id === q.id)}
+                  unlockedStudentIds={new Set(teacherUnlocks.filter((u) => u.question_id === q.id).map((u) => u.student_id))}
                   onChanged={refreshSubmissions}
                 />
               )}
@@ -676,26 +1059,35 @@ export default function Lesson() {
 
         // The passage panel: a card with the passage prompt + its own resources.
         // No marks, no marking scheme, no answer area — it's reading material only.
+        // Also handles the generic `group` type (any contextMode).
         const renderPassagePanel = (p: Question, label: string) => {
           const isVG = p.question_type === 'video_group';
+          const isGroup = p.question_type === 'group';
+          const groupCfg = isGroup ? ((p.config && typeof p.config === 'object') ? p.config as any : {}) : null;
+          const contextMode: string = groupCfg ? (groupCfg.contextMode || 'none') : '';
+          const groupBadgeColor = '#0ea5e9';
+          const bgColor = isVG ? 'var(--cw-surface)' : isGroup ? 'rgba(14,165,233,0.06)' : 'var(--cw-tint-amber-bg)';
+          const borderColor = isVG ? 'var(--cw-border)' : isGroup ? '#0ea5e9' : 'var(--cw-tint-amber-border)';
+          const fgColor = isVG ? 'var(--cw-ink)' : isGroup ? 'var(--cw-ink)' : 'var(--cw-tint-amber-ink)';
+          const badgeBg = isVG ? '#6366f1' : isGroup ? groupBadgeColor : '#f59e0b';
+          const badgeLabel = isVG ? '▶ Video' : isGroup ? '⊞ Group' : 'Passage';
+          const addLabel = isVG ? '+ Add question to this video'
+            : isGroup ? '+ Add question to this group'
+            : '+ Add question to this passage';
           return (
-            <div style={{
-              ...card,
-              background: isVG ? 'var(--cw-surface)' : 'var(--cw-tint-amber-bg)',
-              borderColor: isVG ? 'var(--cw-border)' : 'var(--cw-tint-amber-border)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: isVG ? 'var(--cw-ink)' : 'var(--cw-tint-amber-ink)', flexWrap: 'wrap' }}>
+            <div style={{ ...card, background: bgColor, borderColor }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: fgColor, flexWrap: 'wrap' }}>
                 <span style={{
                   fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase',
                   padding: '2px 8px', borderRadius: 999,
-                  background: isVG ? '#6366f1' : '#f59e0b', color: '#fff',
-                }}>{isVG ? '▶ Video' : 'Passage'}</span>
+                  background: badgeBg, color: '#fff',
+                }}>{badgeLabel}</span>
                 <span>{label}</span>
                 {role === 'teacher' && !previewAsStudent && (
                   <>
                     <EditQuestionButton
                       question={p}
-                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group').filter((x) => x.id !== p.id)}
+                      passages={questions.filter((x) => (x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'group') && x.id !== p.id)}
                       onChanged={refresh}
                     />
                     {lesson?.unit_id && (
@@ -707,11 +1099,12 @@ export default function Lesson() {
                         onMoved={refresh}
                       />
                     )}
+                    <DeleteQuestionButton questionId={p.id} onDeleted={refresh} />
                     <NewQuestionButton
                       lessonId={lessonId}
-                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group')}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'mc_group' || x.question_type === 'group')}
                       initialPassageId={p.id}
-                      label={isVG ? '+ Add question to this video' : '+ Add question to this passage'}
+                      label={addLabel}
                       compact
                       onCreated={refresh}
                     />
@@ -720,6 +1113,35 @@ export default function Lesson() {
               </div>
               {isVG ? (
                 <VideoQuestionPlayer config={p.config} compact />
+              ) : isGroup ? (
+                <>
+                  {contextMode === 'video' && groupCfg.video ? (
+                    <VideoQuestionPlayer config={{ video: groupCfg.video }} compact />
+                  ) : contextMode === 'image' && groupCfg.imageUrl ? (
+                    <div style={{ marginTop: 8 }}>
+                      <img
+                        src={groupCfg.imageUrl}
+                        alt="Group context"
+                        style={{ maxWidth: '100%', borderRadius: 6, border: '1px solid var(--cw-border)' }}
+                      />
+                    </div>
+                  ) : contextMode === 'text' && p.prompt ? (
+                    <>
+                      <div style={{ marginTop: 8, lineHeight: 1.55 }}>
+                        <PromptText text={p.prompt} />
+                      </div>
+                      <QuestionResources
+                        questionId={p.id}
+                        isTeacher={role === 'teacher' && !previewAsStudent}
+                        initialResources={resourcesByQuestion[p.id] || []}
+                      />
+                    </>
+                  ) : p.prompt ? (
+                    <div style={{ marginTop: 8, lineHeight: 1.55 }}>
+                      <PromptText text={p.prompt} />
+                    </div>
+                  ) : null}
+                </>
               ) : (
                 <>
                   <div style={{ marginTop: 8, lineHeight: 1.55 }}>
@@ -731,6 +1153,160 @@ export default function Lesson() {
                     initialResources={resourcesByQuestion[p.id] || []}
                   />
                 </>
+              )}
+            </div>
+          );
+        };
+
+        // The mc_group panel: a card with a question stem / instructions.
+        // Children are multiple_choice questions answered and submitted together
+        // as a group — the student sees them all at once with a single submit.
+        const renderMcGroupPanel = (p: Question, label: string) => {
+          return (
+            <div style={{
+              ...card,
+              background: 'var(--cw-tint-extension-bg)',
+              borderColor: 'var(--cw-tint-extension-border)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: 'var(--cw-ink)', flexWrap: 'wrap' }}>
+                <span style={{
+                  fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase',
+                  padding: '2px 8px', borderRadius: 999,
+                  background: '#7c3aed', color: '#fff',
+                }}>Multi-part MC</span>
+                <span>{label}</span>
+                {role === 'teacher' && !previewAsStudent && (
+                  <>
+                    <EditQuestionButton
+                      question={p}
+                      passages={[]}
+                      onChanged={refresh}
+                    />
+                    {lesson?.unit_id && (
+                      <MoveQuestionButton
+                        questionId={p.id}
+                        unitId={lesson.unit_id}
+                        currentLessonId={lessonId}
+                        isGroup
+                        onMoved={refresh}
+                      />
+                    )}
+                    <DeleteQuestionButton questionId={p.id} onDeleted={refresh} />
+                    <NewQuestionButton
+                      lessonId={lessonId}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'mc_group' || x.question_type === 'group')}
+                      initialPassageId={p.id}
+                      label="+ Add MC question to this group"
+                      compact
+                      onCreated={refresh}
+                    />
+                  </>
+                )}
+              </div>
+              {p.prompt && (
+                <div style={{ marginTop: 8, lineHeight: 1.55 }}>
+                  <PromptText text={p.prompt} />
+                </div>
+              )}
+              <QuestionResources
+                questionId={p.id}
+                isTeacher={role === 'teacher' && !previewAsStudent}
+                initialResources={resourcesByQuestion[p.id] || []}
+              />
+            </div>
+          );
+        };
+
+        // The file task panel: like a passage card but with a file upload student
+        // answer area instead of reading text.  Child questions appear below it.
+        const renderFileTaskPanel = (p: Question, label: string) => {
+          const mySubs = submissions.filter((s) => s.question_id === p.id);
+          const myDraft = draftsByQuestion[p.id] ?? null;
+          return (
+            <div style={{
+              ...card,
+              background: 'var(--cw-tint-success-bg)',
+              borderColor: 'var(--cw-tint-success-border)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, flexWrap: 'wrap' }}>
+                <span style={{
+                  fontSize: 11, letterSpacing: 0.4, textTransform: 'uppercase',
+                  padding: '2px 8px', borderRadius: 999,
+                  background: '#16a34a', color: '#fff',
+                }}>📎 File task</span>
+                <span style={{ color: 'var(--cw-tint-success-ink)' }}>{label}</span>
+                {role === 'teacher' && !previewAsStudent && (
+                  <>
+                    <EditQuestionButton
+                      question={p}
+                      passages={questions.filter((x) => (x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'group') && x.id !== p.id)}
+                      onChanged={refresh}
+                    />
+                    {lesson?.unit_id && (
+                      <MoveQuestionButton
+                        questionId={p.id}
+                        unitId={lesson.unit_id}
+                        currentLessonId={lessonId}
+                        isGroup
+                        onMoved={refresh}
+                      />
+                    )}
+                    <DeleteQuestionButton questionId={p.id} onDeleted={refresh} />
+                    <NewQuestionButton
+                      lessonId={lessonId}
+                      passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'group')}
+                      initialPassageId={p.id}
+                      label="+ Add question to this file task"
+                      compact
+                      onCreated={refresh}
+                    />
+                  </>
+                )}
+              </div>
+              {p.prompt && (
+                <div style={{ marginTop: 8, lineHeight: 1.55 }}>
+                  <PromptText text={p.prompt} />
+                </div>
+              )}
+              <QuestionResources
+                questionId={p.id}
+                isTeacher={role === 'teacher' && !previewAsStudent}
+                initialResources={resourcesByQuestion[p.id] || []}
+              />
+              {/* Student and preview-as-student: show the file upload answer area */}
+              {(role === 'student' || previewAsStudent) && (
+                <div style={{ marginTop: 12 }}>
+                  <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: 'var(--cw-tint-success-ink)' }}>
+                    Step 1 — upload your file or paste a share link below before answering the questions.
+                  </p>
+                  <StudentAnswer
+                    question={p}
+                    previousSubmissions={mySubs}
+                    isUnlocked={unlockedQIds.has(p.id)}
+                    draft={myDraft}
+                    onSubmitted={() => {
+                      setUnlockedQIds((prev) => {
+                        const next = new Set(prev);
+                        next.delete(p.id);
+                        return next;
+                      });
+                      refresh();
+                    }}
+                    preview={previewAsStudent}
+                  />
+                </div>
+              )}
+              {/* Teacher viewing a student's work: show the submitted file */}
+              {role === 'teacher' && !previewAsStudent && mySubs.length > 0 && (
+                <div style={{ marginTop: 12, borderTop: '1px solid var(--cw-border)', paddingTop: 12 }}>
+                  <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 600, color: 'var(--cw-muted)', textTransform: 'uppercase', letterSpacing: 0.4 }}>Uploaded file</p>
+                  <TeacherSubmissions
+                    question={p}
+                    submissions={mySubs}
+                    unlockedStudentIds={new Set(teacherUnlocks.filter((u) => u.question_id === p.id).map((u) => u.student_id))}
+                    onChanged={refreshSubmissions}
+                  />
+                </div>
               )}
             </div>
           );
@@ -751,54 +1327,63 @@ export default function Lesson() {
             }}>
               <div style={{ fontWeight: 700, fontSize: 16, color: 'var(--cw-ink)' }}>{title}</div>
               {role === 'teacher' && !previewAsStudent && (
-                <EditQuestionButton
-                  question={s}
-                  passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group')}
-                  onChanged={refresh}
-                />
+                <>
+                  <EditQuestionButton
+                    question={s}
+                    passages={questions.filter((x) => x.question_type === 'passage' || x.question_type === 'video_group' || x.question_type === 'file_task' || x.question_type === 'group')}
+                    onChanged={refresh}
+                  />
+                  <DeleteQuestionButton questionId={s.id} onDeleted={refresh} />
+                </>
               )}
             </div>
           );
         };
 
-        // Run buildItems on main and extension lists separately so extensions stay
-        // in their own section. Numbering is shared so pupils see a single
-        // continuous Q-sequence: groups count as one Q, their children are a/b/c.
-        const renderItems = (items: Item[], isExt: boolean, prefix: 'Q' | 'E') => {
+        // Single unified render pass — Q counter for main questions,
+        // Ex counter for extension questions, both start from 1.
+        const renderItems = (items: Item[]) => {
           let qIdx = 0;
+          let exIdx = 0;
           const isTeacherDrag = role === 'teacher' && !previewAsStudent;
 
           return items.map((it) => {
             const itemId = it.type === 'standalone' ? it.q.id : it.passage.id;
             const isDragOver = dragOverId === itemId;
+            const isExt = it.type === 'standalone'
+              ? !!it.q.is_extension
+              : !!it.passage.is_extension;
 
             let content: React.ReactNode;
             if (it.type === 'standalone') {
-              if (it.q.question_type === 'info_only') {
+              if (it.q.question_type === 'section_header') {
+                content = renderSectionHeader(it.q);
+              } else if (isExt) {
+                exIdx++;
+                content = renderQuestionCard(it.q, 'Extension', isExt);
+              } else if (it.q.question_type === 'info_only') {
                 content = renderQuestionCard(it.q, 'Note', isExt);
               } else if (it.q.question_type === 'text_only') {
-                // Use a "Task" label (instead of "Q1, Q2…") so it's clearly
-                // an offline activity, not a markable question. Counter is
-                // not bumped — text_only is ignored in analytics.
                 content = renderQuestionCard(it.q, 'Task', isExt);
-              } else if (it.q.question_type === 'section_header') {
-                content = renderSectionHeader(it.q);
               } else {
                 qIdx++;
-                content = renderQuestionCard(it.q, `${prefix}${qIdx}`, isExt);
+                content = renderQuestionCard(it.q, `Q${qIdx}`, isExt);
               }
             } else {
-              // Group (passage / video_group): the group itself counts as one Q.
+              // Group (passage / video_group): counts as one Q or Ex.
               // Children are sub-labelled a), b), c) … within that Q.
-              // Single stacked layout so the whole block is clearly one draggable unit.
-              qIdx++;
-              const groupLabel = `${prefix}${qIdx}`;
+              if (isExt) { exIdx++; } else { qIdx++; }
+              const groupLabel = isExt ? 'Extension' : `Q${qIdx}`;
               const gid = it.passage.id;
               const collapsed = isTeacherDrag && collapsedGroups.has(gid);
               const childCount = it.children.length;
               content = (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {renderPassagePanel(it.passage, groupLabel)}
+                  {it.passage.question_type === 'file_task'
+                    ? renderFileTaskPanel(it.passage, groupLabel)
+                    : it.passage.question_type === 'mc_group'
+                      ? renderMcGroupPanel(it.passage, groupLabel)
+                      : renderPassagePanel(it.passage, groupLabel)}
                   {/* Collapse toggle — teacher only */}
                   {isTeacherDrag && childCount > 0 && (
                     <button
@@ -819,7 +1404,7 @@ export default function Lesson() {
                   {!collapsed && (
                     it.children.length === 0 ? (
                       <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0 }}>
-                        No tasks are attached to this {it.passage.question_type === 'video_group' ? 'video' : 'passage'} yet.
+                        No tasks are attached to this {it.passage.question_type === 'video_group' ? 'video' : it.passage.question_type === 'file_task' ? 'file task' : (it.passage.question_type === 'mc_group' || it.passage.question_type === 'group') ? 'group' : 'passage'} yet.
                       </p>
                     ) : it.children.map((c, ci) =>
                       renderQuestionCard(c, `${String.fromCharCode(97 + ci)})`, isExt)
@@ -878,8 +1463,7 @@ export default function Lesson() {
           });
         };
 
-        const mainItems = buildItems(mainQs);
-        const extItems  = buildItems(extQs);
+        const allItems = buildItems(questions);
         const isTeacherDrag = role === 'teacher' && !previewAsStudent;
 
         // A drop zone rendered after the last card so teachers can drag
@@ -932,26 +1516,9 @@ export default function Lesson() {
           return (
             <>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 16 }}>
-                {renderItems(mainItems, false, 'Q')}
+                {renderItems(allItems)}
               </div>
-              <DropTail items={mainItems} sentinel="__tail_main__" />
-              {extQs.length > 0 && (
-                <div style={{ marginTop: 28 }}>
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10,
-                    paddingBottom: 8, borderBottom: '2px solid #e9d5ff',
-                  }}>
-                    <h2 style={{ margin: 0, fontSize: 18, color: '#6b21a8' }}>Extension activities</h2>
-                    <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
-                      Optional — these are marked but don't count towards class analytics.
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {renderItems(extItems, true, 'E')}
-                  </div>
-                  <DropTail items={extItems} sentinel="__tail_ext__" />
-                </div>
-              )}
+              <DropTail items={allItems} sentinel="__tail__" />
             </>
           );
         }
@@ -961,29 +1528,35 @@ export default function Lesson() {
         // ────────────────────────────────────────────────────────────────────
 
         // Clamp the current index to valid range (handles question removal).
-        const safeIdx = mainItems.length === 0 ? 0 : Math.max(0, Math.min(tabIdx, mainItems.length - 1));
+        const safeIdx = allItems.length === 0 ? 0 : Math.max(0, Math.min(tabIdx, allItems.length - 1));
 
         // Build tab labels and answered state in a single pass.
         let qCount = 0;
+        let exCount = 0;
         let tCount = 0;
         const tabLabels: string[]  = [];
         const tabAnswered: (boolean | null)[] = []; // null = non-answerable
 
-        for (const it of mainItems) {
+        for (const it of allItems) {
+          const itIsExt = it.type === 'standalone' ? !!it.q.is_extension : !!it.passage.is_extension;
           if (it.type === 'standalone') {
             const qt = it.q.question_type;
-            if (qt === 'info_only')           { tabLabels.push('Note');           tabAnswered.push(null); }
+            if (qt === 'section_header')      { tabLabels.push('—');              tabAnswered.push(null); }
+            else if (itIsExt) {
+              exCount++;
+              tabLabels.push(`Ex${exCount}`);
+              tabAnswered.push(submissions.some((s) => s.question_id === it.q.id));
+            } else if (qt === 'info_only')    { tabLabels.push('Note');           tabAnswered.push(null); }
             else if (qt === 'text_only')      { tCount++; tabLabels.push(`Task ${tCount}`); tabAnswered.push(null); }
-            else if (qt === 'section_header') { tabLabels.push('—');              tabAnswered.push(null); }
             else {
               qCount++;
               tabLabels.push(`Q${qCount}`);
               tabAnswered.push(submissions.some((s) => s.question_id === it.q.id));
             }
           } else {
-            // Group counts as ONE Q number; children get sub-labels a/b/c on the same tab.
-            qCount++;
-            tabLabels.push(`Q${qCount}`);
+            // Group counts as ONE Q or Ex; children get sub-labels a/b/c on the same tab.
+            if (itIsExt) { exCount++; tabLabels.push(`Ex${exCount}`); }
+            else { qCount++; tabLabels.push(`Q${qCount}`); }
             tabAnswered.push(
               it.children.length === 0
                 ? null
@@ -994,33 +1567,70 @@ export default function Lesson() {
 
         // Render the card for the currently-active tab.
         let curContent: React.ReactNode = null;
-        if (mainItems.length > 0) {
-          const curItem = mainItems[safeIdx];
+        if (allItems.length > 0) {
+          const curItem = allItems[safeIdx];
           const curLabel = tabLabels[safeIdx];
+          const curIsExt = curItem.type === 'standalone'
+            ? !!curItem.q.is_extension
+            : !!curItem.passage.is_extension;
           if (curItem.type === 'standalone') {
             if (curItem.q.question_type === 'section_header') {
               curContent = renderSectionHeader(curItem.q);
             } else {
-              curContent = renderQuestionCard(curItem.q, curLabel, false);
+              curContent = renderQuestionCard(curItem.q, curIsExt ? 'Extension' : curLabel, curIsExt);
             }
           } else {
             // Group: video/passage pinned to the top, questions scroll below.
-            // For video_group: one child question at a time with prev/next nav.
-            // For passage: all children shown at once (unchanged behaviour).
+            // Both video_group and passage show one child question at a time
+            // with the lettered pill-button nav (a / b / c …).
+            // mc_group shows all children at once with a single submit.
             const isVG = curItem.passage.question_type === 'video_group';
+            const isPassage = curItem.passage.question_type === 'passage';
+            const isFT = curItem.passage.question_type === 'file_task';
+            const isMCG = curItem.passage.question_type === 'mc_group';
+            const isGroup = curItem.passage.question_type === 'group';
+            const useStepped = isVG || isPassage || isGroup;
             const totalChildren = curItem.children.length;
             const rawStep = vgStep[curItem.passage.id] ?? 0;
             const curStep = Math.min(rawStep, Math.max(0, totalChildren - 1));
             curContent = (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div style={{ position: 'sticky', top: 0, zIndex: 10 }}>
-                  {renderPassagePanel(curItem.passage, curLabel)}
+                  {isFT
+                    ? renderFileTaskPanel(curItem.passage, curIsExt ? 'Extension' : curLabel)
+                    : isMCG
+                      ? renderMcGroupPanel(curItem.passage, curIsExt ? 'Extension' : curLabel)
+                      : renderPassagePanel(curItem.passage, curIsExt ? 'Extension' : curLabel)}
                 </div>
                 {totalChildren === 0 ? (
                   <p style={{ color: 'var(--cw-muted)', fontStyle: 'italic', margin: 0, fontSize: 14 }}>
-                    No questions are attached to this {isVG ? 'video' : 'passage'} yet.
+                    No questions are attached to this {isVG ? 'video' : isFT ? 'file task' : (isMCG || isGroup) ? 'group' : 'passage'} yet.
                   </p>
-                ) : isVG ? (
+                ) : isMCG ? (
+                  (role === 'student' || previewAsStudent) ? (
+                    <McGroupAnswer
+                      key={`${curItem.passage.id}-${previewSessionRef.current}`}
+                      group={curItem.passage}
+                      childQuestions={curItem.children}
+                      submissions={submissions}
+                      unlockedQIds={unlockedQIds}
+                      preview={!!previewAsStudent}
+                      onPreviewAnswered={(ids) => setPreviewAnsweredQIds((prev) => { const next = new Set(prev); ids.forEach((id) => next.add(id)); return next; })}
+                      onSubmitted={() => {
+                        setUnlockedQIds((prev) => {
+                          const next = new Set(prev);
+                          curItem.children.forEach((c) => next.delete(c.id));
+                          return next;
+                        });
+                        refresh();
+                      }}
+                    />
+                  ) : (
+                    curItem.children.map((c, ci) =>
+                      renderQuestionCard(c, `${String.fromCharCode(97 + ci)})`, false)
+                    )
+                  )
+                ) : useStepped ? (
                   <>
                     {renderQuestionCard(curItem.children[curStep], `${String.fromCharCode(97 + curStep)})`, false)}
                     {totalChildren > 1 && (
@@ -1077,22 +1687,6 @@ export default function Lesson() {
           flexShrink: 0,
         });
 
-        const extSection = extQs.length > 0 && (
-          <div style={{ marginTop: 36 }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10,
-              paddingBottom: 8, borderBottom: '2px solid #e9d5ff',
-            }}>
-              <h2 style={{ margin: 0, fontSize: 18, color: '#6b21a8' }}>Extension activities</h2>
-              <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>
-                Optional — not counted in your progress.
-              </span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {renderItems(extItems, true, 'E')}
-            </div>
-          </div>
-        );
 
         return (
           <>
@@ -1132,7 +1726,7 @@ export default function Lesson() {
             )}
 
             {/* ── Tab navigation strip ── */}
-            {mainItems.length > 0 && (
+            {allItems.length > 0 && (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 8,
                 marginTop: mainCountableQs.length > 0 ? 14 : 16,
@@ -1150,7 +1744,7 @@ export default function Lesson() {
                   display: 'flex', gap: 5, flex: 1,
                   flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center',
                 }}>
-                  {mainItems.map((_, i) => {
+                  {allItems.map((_, i) => {
                     const isCurrent  = i === safeIdx;
                     const ans        = tabAnswered[i];
                     const lbl        = tabLabels[i];
@@ -1191,18 +1785,15 @@ export default function Lesson() {
 
                 {/* Next button */}
                 <button
-                  disabled={safeIdx === mainItems.length - 1}
-                  onClick={() => setTabIdx(Math.min(mainItems.length - 1, safeIdx + 1))}
-                  style={navBtnStyle(safeIdx === mainItems.length - 1)}
+                  disabled={safeIdx === allItems.length - 1}
+                  onClick={() => setTabIdx(Math.min(allItems.length - 1, safeIdx + 1))}
+                  style={navBtnStyle(safeIdx === allItems.length - 1)}
                 >Next →</button>
               </div>
             )}
 
             {/* ── Current question card ── */}
             <div style={{ marginTop: 16 }}>{curContent}</div>
-
-            {/* ── Extension activities (not tabbed) ── */}
-            {extSection}
           </>
         );
       })()}
@@ -1265,9 +1856,11 @@ export default function Lesson() {
   );
 }
 
-function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, preview = false }: {
+function StudentAnswer({ question, previousSubmissions, isUnlocked = false, draft, onSubmitted, preview = false }: {
   question: Question;
   previousSubmissions: Submission[];
+  // true when the teacher has granted this student a one-shot resubmit.
+  isUnlocked?: boolean;
   // The pupil's auto-saved in-progress answer for this question, if any.
   // Loaded once at lesson open by the parent; mutations from this
   // component don't need to update it because we own the latest state
@@ -1282,6 +1875,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
   const [url, setUrl] = useState('');
   const [fileUrl, setFileUrl] = useState('');
   const [fileName, setFileName] = useState('');
+  const [fileDragOver, setFileDragOver] = useState(false);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -1439,6 +2033,17 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
     // Fun-activity types — same JSON-into-text_answer storage as fill-in-blanks
     // so the cell-grid draft path picks them up for free.
     'crossword', 'word_search', 'matching', 'anagrams',
+    // Games — same JSON-into-text_answer storage as fun activities.
+    'hangman', 'speed_round', 'ordering', 'caesar_cipher', 'spot_phish',
+    'binary_hex', 'bit_ops', 'code_tracer', 'flowchart_seq', 'sorting_race',
+    'convert_relay', 'url_anatomy', 'truth_table', 'field_type_sort', 'io_sort', 'html_match',
+    'password_forge', 'privacy_radar', 'validation_rules', 'find_duplicate', 'bin_search', 'box_model',
+    'friend_or_fake', 'dm_danger', 'upstander', 'malware_triage', '2fa_escape', 'a11y_audit', 'fetch_execute',
+    'screen_time', 'footprint_trail', 'social_engineer', 'cipher_quest', 'normalise_it', 'subnet_calc',
+    'phish_inbox', 'build_pc', 'os_sched', 'query_visual', 'schema_arch', 'tag_soup_repair', 'selector_golf', 'css_sliders',
+    'mindmap',
+    // File upload — file content stored as JSON in text_answer.
+    'file_upload',
   ];
   const draftEnabled = !preview && draftableTypes.includes(t);
 
@@ -1463,12 +2068,19 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
       return { ...empty, fileUrl: fileUrl || null, linkUrl: url || null };
     }
     if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-        || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams') {
+        || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'upstander' || t === 'mindmap') {
       const filled = Object.values(cellAnswers).some((v) => {
         if (Array.isArray(v)) return v.length > 0;
         return String(v || '').trim();
       });
       return { ...empty, textAnswer: filled ? JSON.stringify(cellAnswers) : null };
+    }
+    if (t === 'file_upload' || t === 'file_task') {
+      return {
+        ...empty,
+        textAnswer: (fileName && text) ? JSON.stringify({ filename: fileName, content: text }) : null,
+        linkUrl: url.trim() || null,
+      };
     }
     // short / long / code / video_question / sql_task — plain textarea.
     return { ...empty, textAnswer: text || null };
@@ -1496,10 +2108,16 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
     if (draft) {
       if (draft.text_answer != null) {
         if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-            || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams') {
+            || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'upstander' || t === 'mindmap') {
           try {
             const parsed = JSON.parse(draft.text_answer);
             if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
+          } catch { /* malformed — discard silently */ }
+        } else if (t === 'file_upload') {
+          try {
+            const parsed = JSON.parse(draft.text_answer);
+            if (parsed?.filename) setFileName(parsed.filename);
+            if (parsed?.content) setText(parsed.content);
           } catch { /* malformed — discard silently */ }
         } else {
           setText(draft.text_answer);
@@ -1521,6 +2139,43 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
     }
     draftHydrated.current = true;
   }, [draft, draftEnabled, t]);
+
+  // When the teacher unlocks this question while the student already has the
+  // page open, pre-fill the inputs from their last submission so they can see
+  // what they wrote and revise it. Only fires once per unlock event; a draft
+  // that already exists (from an earlier auto-save) takes priority over the
+  // stale submission data.
+  const unlockHydrated = useRef(false);
+  useEffect(() => {
+    if (!isUnlocked || !last || unlockHydrated.current) return;
+    if (draft) { unlockHydrated.current = true; return; } // draft wins
+    if (!draftEnabled) { unlockHydrated.current = true; return; } // non-text type
+    // Hydrate inputs from the previous submission.
+    if (last.text_answer != null) {
+      if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
+          || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'upstander' || t === 'mindmap') {
+        try {
+          const parsed = JSON.parse(last.text_answer);
+          if (parsed && typeof parsed === 'object') setCellAnswers(parsed);
+        } catch { /* malformed */ }
+      } else if (t === 'file_upload') {
+        try {
+          const parsed = JSON.parse(last.text_answer);
+          if (parsed?.filename) setFileName(parsed.filename);
+          if (parsed?.content) setText(parsed.content);
+        } catch { /* malformed */ }
+      } else {
+        setText(last.text_answer);
+      }
+    }
+    if (last.selected_option_label != null) setOption(last.selected_option_label);
+    if (last.link_url != null) setUrl(last.link_url);
+    if (last.file_url != null) {
+      setFileUrl(last.file_url);
+      setFileName(last.file_url.split('/').pop() || 'attachment');
+    }
+    unlockHydrated.current = true;
+  }, [isUnlocked, last, draft, draftEnabled, t]);
 
   // Centralised draft writer used by both the debounced save and the
   // visibility/unload flush. `keepalive` lets the request finish even
@@ -1635,7 +2290,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
           body.linkUrl = `${selectedProjectId}|${data?.name || ''}`;
         }
       } else if (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-                 || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams') {
+                 || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'upstander' || t === 'mindmap') {
         // Send the cell answers as JSON so the deterministic marker can
         // compare each one against the expected answers in the question config.
         // Same path serves the four fun-activity types — each renderer above
@@ -1658,6 +2313,10 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
         const sessionKey = localStorage.getItem('student_session_key');
         if (!sessionKey) throw new Error('Please open the database first, do your work, then come back and submit.');
         body.linkUrl = `${dbEmbedToken}|${sessionKey}`;
+      } else if (t === 'file_upload' || t === 'file_task') {
+        if (!fileName && !url.trim()) throw new Error('Please upload a file or paste a share link.');
+        if (fileName && text) body.textAnswer = JSON.stringify({ filename: fileName, content: text });
+        if (url.trim()) body.linkUrl = url.trim();
       } else body.textAnswer = text; // short / long / code / video_question / sql_task
 
       if (preview) {
@@ -1707,18 +2366,61 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
     t === 'screenshot' ? !!fileUrl :
     t === 'presentation' ? !!fileUrl :
     t === 'project' ? !!(fileUrl || url) :
+    t === 'file_upload' || t === 'file_task' ? !!(fileName && text) || !!url.trim() :
     ['scratch_link', 'makecode_link', 'google_sites_link'].includes(t) ? !!url :
     codeProjectKind ? !!selectedProjectId :
     t === 'database_task' ? !!dbEmbedToken :
     (t === 'fill_in_blanks' || t === 'table' || t === 'labeled_inputs'
-      || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams')
+      || t === 'crossword' || t === 'word_search' || t === 'matching' || t === 'anagrams' || t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'upstander' || t === 'mindmap')
       ? Object.values(cellAnswers).some((v) => {
           if (Array.isArray(v)) return v.length > 0;
           return !!String(v || '').trim();
         }) :
     !!text.trim();
+  // ── Locked state ─────────────────────────────────────────────────────────
+  // Once a student has submitted, hide the answer form entirely. Only show it
+  // again if the teacher has explicitly unlocked this question for them.
+  if (last && !isUnlocked && !preview) {
+    return (
+      <div style={{
+        marginTop: 12, padding: '14px 16px',
+        border: '1.5px solid var(--cw-tint-success-border)', borderRadius: 8,
+        background: 'var(--cw-tint-success-bg)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 18, lineHeight: 1 }}>✅</span>
+          <span style={{ fontWeight: 700, color: 'var(--cw-tint-success-ink)', fontSize: 14 }}>
+            Submitted {new Date(last.submitted_at).toLocaleString()}
+            {last.marks_awarded != null && (
+              <> &middot; {last.marks_awarded}/{question.max_marks} mark{question.max_marks === 1 ? '' : 's'}</>
+            )}
+          </span>
+        </div>
+        {last.ai_feedback && (
+          <div style={{ marginTop: 8, fontSize: 14, color: 'var(--cw-ink)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+            {last.ai_feedback}
+          </div>
+        )}
+        <p style={{ marginTop: 10, marginBottom: 0, fontSize: 12, color: 'var(--cw-muted)' }}>
+          Your answer is locked. Ask your teacher if you need to revise it.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div style={{ marginTop: 12, padding: 12, border: '1px dashed var(--cw-border)', borderRadius: 8, background: 'var(--cw-surface-soft)' }}>
+      {/* ── Unlocked banner ── shown when teacher has allowed a resubmit */}
+      {isUnlocked && last && (
+        <div style={{
+          marginBottom: 12, padding: '8px 12px',
+          background: '#eff6ff', border: '1.5px solid #bfdbfe', borderRadius: 8,
+          fontSize: 13, color: '#1e40af', display: 'flex', gap: 8, alignItems: 'flex-start',
+        }}>
+          <span style={{ fontSize: 16, lineHeight: 1.2, flexShrink: 0 }}>🔓</span>
+          <span>Your teacher has unlocked this question. Revise your answer below and resubmit when you&rsquo;re ready.</span>
+        </div>
+      )}
       {t === 'multiple_choice' && Array.isArray(question.options) && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {question.options.map((opt: any, i: number) => (
@@ -1861,7 +2563,7 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
                     rows={3}
                     value={cellAnswers[String(i)] || ''}
                     onChange={(e) => setCellAnswers({ ...cellAnswers, [String(i)]: e.target.value })}
-                    placeholder="List one or more programs, e.g. Zoom, Microsoft Teams"
+                    placeholder=""
                     style={{ padding: '8px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', resize: 'vertical', fontFamily: 'inherit', fontSize: 14 }}
                   />
                 ) : (
@@ -1878,34 +2580,63 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
         );
       })()}
 
-      {/* ---- Fun activities (auto-marked) ---------------------------- */}
-      {t === 'crossword' && (
-        <CrosswordPupilGrid
-          config={(question as any).config}
-          cellAnswers={cellAnswers}
-          setCellAnswers={setCellAnswers}
-        />
-      )}
-      {t === 'word_search' && (
-        <WordSearchPupilGrid
-          config={(question as any).config}
-          cellAnswers={cellAnswers}
-          setCellAnswers={setCellAnswers}
-        />
-      )}
-      {t === 'matching' && (
-        <MatchingPupilUI
-          config={(question as any).config}
-          cellAnswers={cellAnswers}
-          setCellAnswers={setCellAnswers}
-        />
-      )}
-      {t === 'anagrams' && (
-        <AnagramsPupilUI
-          config={(question as any).config}
-          cellAnswers={cellAnswers}
-          setCellAnswers={setCellAnswers}
-        />
+      {/* ---- Fun activities & games — all wrapped in a shared start/restart shell */}
+      {(t in GAME_ICONS) && (
+        <GameShell
+          title={TYPE_LABELS[t] || t}
+          icon={GAME_ICONS[t] || '🎮'}
+          hint={GAME_HINTS[t]}
+          onReset={() => setCellAnswers({})}
+        >
+          {t === 'crossword' && (<CrosswordPupilGrid config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'word_search' && (<WordSearchPupilGrid config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'matching' && (<MatchingPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'anagrams' && (<AnagramsPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'hangman' && (<HangmanPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'speed_round' && (<SpeedRoundPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'ordering' && (<OrderingPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />)}
+          {t === 'caesar_cipher' && (<CaesarPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'spot_phish' && (<SpotPhishPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'binary_hex' && (<BinaryHexPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />)}
+          {t === 'bit_ops' && (<BitOpsPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />)}
+          {t === 'code_tracer' && (<CodeTracerPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'flowchart_seq' && (<FlowchartPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />)}
+          {t === 'sorting_race' && (<SortingRacePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'convert_relay' && (<ConvertRelayPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} questionId={question.id} />)}
+          {t === 'url_anatomy' && (<UrlAnatomyPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'truth_table' && (<TruthTablePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'field_type_sort' && (<FieldTypeSortPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'io_sort' && (<IoSortPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'html_match' && (<HtmlMatchPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'password_forge' && (<PasswordForgePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'privacy_radar' && (<PrivacyRadarPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'validation_rules' && (<ValidationRulesPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'find_duplicate' && (<FindDuplicatePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'bin_search' && (<BinSearchPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'box_model' && (<BoxModelPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'friend_or_fake' && (<FriendOrFakePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'dm_danger' && (<DmDangerPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'upstander' && (<UpstanderPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'malware_triage' && (<MalwareTriagePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === '2fa_escape' && (<TwoFactorEscapePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'a11y_audit' && (<A11yAuditPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'fetch_execute' && (<FetchExecutePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'screen_time' && (<ScreenTimePupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'footprint_trail' && (<FootprintTrailPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'social_engineer' && (<SocialEngineerPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'cipher_quest' && (<CipherQuestPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'normalise_it' && (<NormaliseItPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'subnet_calc' && (<SubnetCalcPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'phish_inbox' && (<PhishInboxPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'build_pc' && (<BuildPcPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'os_sched' && (<OsSchedPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'query_visual' && (<QueryVisualPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'schema_arch' && (<SchemaArchPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'tag_soup_repair' && (<TagSoupRepairPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'selector_golf' && (<SelectorGolfPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'css_sliders' && (<CssSlidersPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+          {t === 'mindmap' && (<MindmapPupilUI config={(question as any).config} cellAnswers={cellAnswers} setCellAnswers={setCellAnswers} />)}
+        </GameShell>
       )}
 
       {(t === 'short' || t === 'long' || t === 'code' || t === 'video_question') && (
@@ -2026,6 +2757,124 @@ function StudentAnswer({ question, previousSubmissions, draft, onSubmitted, prev
           )}
         </div>
       )}
+
+      {(t === 'file_upload' || t === 'file_task') && (() => {
+        const ACCEPTED = '.txt,.py,.csv,.html,.htm,.js';
+        async function handleFile(f: File) {
+          if (f.size > 200 * 1024) {
+            setMsg('File too large — please keep it under 200 KB.');
+            return;
+          }
+          try {
+            const content = await f.text();
+            setText(content);
+            setFileName(f.name);
+            setMsg(null);
+          } catch {
+            setMsg('Could not read the file. Make sure it is a plain text or code file.');
+          }
+        }
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {/* Drop zone — click or drag a file onto it */}
+            <label
+              onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; setFileDragOver(true); }}
+              onDragLeave={(e) => { if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) setFileDragOver(false); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                setFileDragOver(false);
+                const f = e.dataTransfer.files?.[0];
+                if (f) handleFile(f);
+              }}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                gap: 8, padding: '28px 20px', borderRadius: 10, cursor: busy ? 'not-allowed' : 'pointer',
+                border: `2px dashed ${fileDragOver ? 'var(--cw-accent)' : 'var(--cw-border)'}`,
+                background: fileDragOver ? 'var(--cw-tint-info-bg)' : 'var(--cw-surface-soft)',
+                transition: 'border-color 150ms, background 150ms',
+                textAlign: 'center',
+              }}
+            >
+              <span style={{ fontSize: 32, lineHeight: 1 }}>📂</span>
+              <span style={{ fontWeight: 600, color: 'var(--cw-ink)', fontSize: 14 }}>
+                {fileDragOver ? 'Drop to attach' : fileName ? 'Drop a new file to replace' : 'Drag & drop your file here'}
+              </span>
+              <span style={{ fontSize: 12, color: 'var(--cw-muted)' }}>
+                or click to browse — <strong>.txt .py .csv .html .js</strong> · max 200 KB
+              </span>
+              <input
+                type="file"
+                accept={ACCEPTED}
+                disabled={busy}
+                style={{ display: 'none' }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+              />
+            </label>
+
+            {fileName && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '8px 12px', borderRadius: 8,
+                background: 'var(--cw-tint-success-bg)', border: '1px solid var(--cw-tint-success-border)',
+                fontSize: 13,
+              }}>
+                <span style={{ fontSize: 16 }}>✓</span>
+                <span style={{ fontWeight: 600, color: 'var(--cw-tint-success-ink)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{fileName}</span>
+                <span style={{ color: 'var(--cw-muted)', flexShrink: 0 }}>{text.length.toLocaleString()} chars</span>
+                <button
+                  type="button"
+                  onClick={() => { setText(''); setFileName(''); setMsg(null); }}
+                  style={{ marginLeft: 4, background: 'none', border: 'none', color: 'var(--cw-accent)', cursor: 'pointer', textDecoration: 'underline', padding: 0, flexShrink: 0 }}
+                >
+                  remove
+                </button>
+              </div>
+            )}
+
+            {text && fileName && (
+              <details>
+                <summary style={{ cursor: 'pointer', fontSize: 13, color: 'var(--cw-muted)' }}>
+                  Preview contents
+                </summary>
+                <pre style={{
+                  marginTop: 6, padding: '10px 12px', borderRadius: 8,
+                  background: 'var(--cw-surface)', border: '1px solid var(--cw-border)',
+                  fontSize: 12, lineHeight: 1.5, overflow: 'auto', maxHeight: 200,
+                  whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+                }}>
+                  {text.length > 2000 ? text.slice(0, 2000) + '\n… (preview truncated)' : text}
+                </pre>
+              </details>
+            )}
+
+            {/* Google Docs / Sheets / Drive share link alternative */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '4px 0' }}>
+              <div style={{ flex: 1, height: 1, background: 'var(--cw-border)' }} />
+              <span style={{ fontSize: 12, color: 'var(--cw-muted)', whiteSpace: 'nowrap' }}>OR paste a share link</span>
+              <div style={{ flex: 1, height: 1, background: 'var(--cw-border)' }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <input
+                type="url"
+                placeholder="Paste a Google Docs, Sheets or Drive share link…"
+                value={url}
+                disabled={busy}
+                onChange={(e) => setUrl(e.target.value)}
+                style={{
+                  width: '100%', padding: '9px 12px', borderRadius: 8, fontSize: 14,
+                  border: `1.5px solid ${url.trim() ? 'var(--cw-accent)' : 'var(--cw-border)'}`,
+                  background: 'var(--cw-surface)', color: 'var(--cw-ink)',
+                  outline: 'none', boxSizing: 'border-box',
+                  transition: 'border-color 150ms',
+                }}
+              />
+              <p style={{ margin: 0, fontSize: 12, color: 'var(--cw-muted)' }}>
+                Make sure sharing is set to <strong>"Anyone with the link can view"</strong> before submitting.
+              </p>
+            </div>
+          </div>
+        );
+      })()}
 
       <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <button onClick={submit} disabled={busy || uploading || !canSubmit} style={{
@@ -2805,9 +3654,11 @@ function AnagramsEditor({ cfg, setCfg }: { cfg: any; setCfg: (v: any) => void })
   );
 }
 
-function TeacherSubmissions({ question, submissions, onChanged }: {
+function TeacherSubmissions({ question, submissions, unlockedStudentIds = new Set(), onChanged }: {
   question: Question;
   submissions: Submission[];
+  // Student IDs that currently have an active unlock for this question.
+  unlockedStudentIds?: Set<string>;
   onChanged: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -2830,16 +3681,24 @@ function TeacherSubmissions({ question, submissions, onChanged }: {
       </summary>
       <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 10 }}>
         {sorted.map((s) => (
-          <SubmissionRow key={s.id} question={question} submission={s} onChanged={onChanged} />
+          <SubmissionRow
+            key={s.id}
+            question={question}
+            submission={s}
+            isUnlocked={unlockedStudentIds.has(s.student_id || '')}
+            onChanged={onChanged}
+          />
         ))}
       </div>
     </details>
   );
 }
 
-function SubmissionRow({ question, submission, onChanged }: {
+function SubmissionRow({ question, submission, isUnlocked: initUnlocked = false, onChanged }: {
   question: Question;
   submission: Submission;
+  // Whether the teacher has currently granted this student a resubmit unlock.
+  isUnlocked?: boolean;
   onChanged: () => void;
 }) {
   const s = submission;
@@ -2847,6 +3706,10 @@ function SubmissionRow({ question, submission, onChanged }: {
   const [feedback, setFeedback] = useState<string>(s.ai_feedback || '');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  // Local unlock state — synced from parent on mount, then managed locally
+  // so toggling feels instant without waiting for a full refresh.
+  const [unlocked, setUnlocked] = useState(initUnlocked);
+  useEffect(() => { setUnlocked(initUnlocked); }, [initUnlocked]);
 
   async function save() {
     const n = parseInt(marks, 10);
@@ -2880,11 +3743,32 @@ function SubmissionRow({ question, submission, onChanged }: {
     } finally { setBusy(false); }
   }
 
+  async function toggleUnlock() {
+    setBusy(true); setMsg(null);
+    try {
+      const next = !unlocked;
+      await api(
+        `/api/classwork/questions/${s.question_id}/unlock/${s.student_id}`,
+        { method: next ? 'POST' : 'DELETE' },
+      );
+      setUnlocked(next);
+      setMsg(next ? 'Unlocked — student can now revise and resubmit.' : 'Locked again.');
+      onChanged();
+    } catch (e: any) {
+      setMsg(e.message || 'Failed to update lock');
+    } finally { setBusy(false); }
+  }
+
   return (
-    <div style={{ border: '1px solid var(--cw-border)', borderRadius: 8, padding: 12, background: 'var(--cw-surface)' }}>
+    <div style={{ border: `1px solid ${unlocked ? '#bfdbfe' : 'var(--cw-border)'}`, borderRadius: 8, padding: 12, background: unlocked ? '#f0f9ff' : 'var(--cw-surface)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, fontSize: 13 }}>
-        <div style={{ fontWeight: 700 }}>
+        <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
           {s.student_username || s.student_id || 'Unknown student'}
+          {unlocked && (
+            <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 7px', borderRadius: 999, background: '#bfdbfe', color: '#1e40af' }}>
+              Unlocked
+            </span>
+          )}
         </div>
         <div style={{ color: 'var(--cw-muted)' }}>
           Submitted {new Date(s.submitted_at).toLocaleString()}
@@ -2920,6 +3804,12 @@ function SubmissionRow({ question, submission, onChanged }: {
           background: 'var(--cw-surface-muted)', color: 'var(--cw-ink)', border: '1px solid var(--cw-border)',
           padding: '6px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 13,
         }}>Re-mark with AI</button>
+        <button onClick={toggleUnlock} disabled={busy} style={{
+          background: unlocked ? '#fef3c7' : 'var(--cw-surface-muted)',
+          color: unlocked ? '#92400e' : 'var(--cw-ink)',
+          border: `1px solid ${unlocked ? '#fde68a' : 'var(--cw-border)'}`,
+          padding: '6px 12px', borderRadius: 6, fontWeight: 600, cursor: 'pointer', fontSize: 13,
+        }}>{unlocked ? '🔒 Lock again' : '🔓 Allow resubmit'}</button>
         {msg && <span style={{ fontSize: 13, color: 'var(--cw-muted)' }}>{msg}</span>}
       </div>
     </div>
@@ -2961,6 +3851,50 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
           <img src={s.file_url} alt="Screenshot" style={{ maxWidth: '100%', maxHeight: 280, borderRadius: 6, border: '1px solid var(--cw-border)' }} />
         </a>
       : <span style={muted}>No screenshot uploaded.</span>;
+  }
+
+  if (t === 'file_upload') {
+    if (!s.text_answer && !s.link_url) return <span style={muted}>No file or link submitted.</span>;
+    let filename = '';
+    let content = '';
+    if (s.text_answer) {
+      try {
+        const parsed = JSON.parse(s.text_answer);
+        filename = String(parsed.filename || 'file');
+        content = String(parsed.content || '');
+      } catch {
+        content = s.text_answer;
+      }
+    }
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {filename && (
+          <div style={{ fontSize: 13 }}>
+            <strong>File:</strong> {filename}
+            {content && <span style={{ marginLeft: 8, color: 'var(--cw-muted)' }}>({content.length.toLocaleString()} characters)</span>}
+          </div>
+        )}
+        {content && (
+          <pre style={{
+            padding: '10px 12px', borderRadius: 8, margin: 0,
+            background: 'var(--cw-surface)', border: '1px solid var(--cw-border)',
+            fontSize: 12, lineHeight: 1.5, overflow: 'auto', maxHeight: 320,
+            whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+          }}>
+            {content.length > 4000 ? content.slice(0, 4000) + '\n… (truncated for display)' : content}
+          </pre>
+        )}
+        {s.link_url && (
+          <div style={{ fontSize: 13 }}>
+            <strong>Shared link:</strong>{' '}
+            <a href={s.link_url} target="_blank" rel="noopener noreferrer"
+              style={{ color: 'var(--cw-accent)', wordBreak: 'break-all' }}>
+              {s.link_url}
+            </a>
+          </div>
+        )}
+      </div>
+    );
   }
 
   if (t === 'project') {
@@ -3106,6 +4040,12 @@ function SubmissionAnswer({ question, submission }: { question: Question; submis
     );
   }
 
+  if (t === 'hangman' || t === 'speed_round' || t === 'ordering' || t === 'caesar_cipher' || t === 'spot_phish' || t === 'binary_hex' || t === 'bit_ops' || t === 'code_tracer' || t === 'flowchart_seq' || t === 'sorting_race' || t === 'convert_relay' || t === 'url_anatomy' || t === 'truth_table' || t === 'field_type_sort' || t === 'io_sort' || t === 'html_match' || t === 'password_forge' || t === 'privacy_radar' || t === 'validation_rules' || t === 'find_duplicate' || t === 'bin_search' || t === 'box_model' || t === 'friend_or_fake' || t === 'dm_danger' || t === 'malware_triage' || t === '2fa_escape' || t === 'a11y_audit' || t === 'fetch_execute' || t === 'screen_time' || t === 'footprint_trail' || t === 'social_engineer' || t === 'cipher_quest' || t === 'normalise_it' || t === 'subnet_calc' || t === 'phish_inbox' || t === 'build_pc' || t === 'os_sched' || t === 'query_visual' || t === 'schema_arch' || t === 'tag_soup_repair' || t === 'selector_golf' || t === 'css_sliders' || t === 'mindmap' || t === 'upstander') {
+    let parsed: any = {};
+    try { parsed = JSON.parse(s.text_answer || '{}') || {}; } catch {}
+    return <GameReview type={t} cfg={(question as any).config} parsed={parsed} questionId={String(question.id)} />;
+  }
+
   // short / long / code
   const text = s.text_answer || '';
   if (!text) return <span style={muted}>Empty answer.</span>;
@@ -3240,6 +4180,48 @@ function MoveQuestionButton({ questionId, unitId, currentLessonId, isGroup, onMo
 /* Edit-question entry point: same modal, just pre-populated with the existing
    values and saving via PATCH instead of POST. Lives next to each question
    card for teachers (not in pupil-preview mode). */
+function DeleteQuestionButton({ questionId, onDeleted }: { questionId: string; onDeleted: () => void }) {
+  const [confirm, setConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function doDelete() {
+    setDeleting(true);
+    try {
+      await api(`/api/classwork/questions/${questionId}`, { method: 'DELETE' });
+      onDeleted();
+    } catch {
+      setDeleting(false);
+      setConfirm(false);
+    }
+  }
+
+  if (confirm) {
+    return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+        <span style={{ fontSize: 12, color: 'var(--cw-danger, #b91c1c)', fontWeight: 600 }}>Delete?</span>
+        <button onClick={doDelete} disabled={deleting} style={{
+          background: '#b91c1c', color: '#fff', border: 'none',
+          borderRadius: 4, padding: '3px 10px', fontSize: 12,
+          cursor: deleting ? 'not-allowed' : 'pointer', fontWeight: 600,
+        }}>{deleting ? '…' : 'Yes, delete'}</button>
+        <button onClick={() => setConfirm(false)} disabled={deleting} style={{
+          background: 'var(--cw-surface)', color: 'var(--cw-ink)',
+          border: '1px solid var(--cw-border)', borderRadius: 4,
+          padding: '3px 8px', fontSize: 12, cursor: 'pointer',
+        }}>Cancel</button>
+      </span>
+    );
+  }
+
+  return (
+    <button onClick={() => setConfirm(true)} title="Delete this question" style={{
+      background: 'var(--cw-surface)', color: '#b91c1c',
+      border: '1px solid var(--cw-border)',
+      padding: '4px 10px', borderRadius: 6, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+    }}>Delete</button>
+  );
+}
+
 function EditQuestionButton({ question, passages, onChanged }: { question: Question; passages: Question[]; onChanged: () => void }) {
   const [open, setOpen] = useState(false);
   return (
@@ -3306,6 +4288,11 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
   const [videoUrl, setVideoUrl] = useState(cfg.video && typeof cfg.video.url === 'string' ? cfg.video.url : '');
   const [videoFileName, setVideoFileName] = useState('');
   const [videoUploading, setVideoUploading] = useState(false);
+  // group type: contextMode and optional image URL (video uses the shared videoUrl/videoKind state)
+  const [groupContextMode, setGroupContextMode] = useState<'none' | 'text' | 'video' | 'image'>(
+    typeof cfg.contextMode === 'string' ? (cfg.contextMode as any) : 'none'
+  );
+  const [groupImageUrl, setGroupImageUrl] = useState(typeof cfg.imageUrl === 'string' ? cfg.imageUrl : '');
   // Resources staged inside the New-question modal. Each entry is the same
   // shape as a saved resource minus the id; once the question is created we
   // POST each one to /api/classwork/questions/:newId/resources. In edit mode
@@ -3405,6 +4392,369 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
           hint: String(it?.hint || ''),
         })) }
       : { items: [{ answer: '', scrambled: '', hint: '' }] }
+  );
+  // ─── Game config slots ───────────────────────────────────────────────
+  const [hangmanCfg, setHangmanCfg] = useState<any>(() =>
+    (cfg.hangman && Array.isArray(cfg.hangman.items))
+      ? { items: cfg.hangman.items.map((it: any) => ({ word: String(it?.word || '').toUpperCase(), hint: String(it?.hint || '') })) }
+      : { items: [{ word: '', hint: '' }] }
+  );
+  const [speedRoundCfg, setSpeedRoundCfg] = useState<any>(() =>
+    (cfg.speedRound && Array.isArray(cfg.speedRound.items))
+      ? { items: cfg.speedRound.items.map((it: any) => ({ q: String(it?.q || ''), a: String(it?.a || '') })), seconds: Number(cfg.speedRound.seconds) || 60 }
+      : { items: [{ q: '', a: '' }], seconds: 60 }
+  );
+  const [orderingCfg, setOrderingCfg] = useState<any>(() =>
+    (cfg.ordering && Array.isArray(cfg.ordering.items))
+      ? { prompt: String(cfg.ordering.prompt || ''), items: cfg.ordering.items.map((it: any) => ({ label: String(it?.label || '') })) }
+      : { prompt: '', items: [{ label: '' }, { label: '' }, { label: '' }] }
+  );
+  const [caesarCfg, setCaesarCfg] = useState<any>(() =>
+    (cfg.caesar && Array.isArray(cfg.caesar.items))
+      ? { items: cfg.caesar.items.map((it: any) => ({ text: String(it?.text || '').toUpperCase(), shift: Number(it?.shift) || 0, mode: it?.mode === 'decode' ? 'decode' : 'encode' })) }
+      : { items: [{ text: '', shift: 3, mode: 'encode' }] }
+  );
+  const [spotPhishCfg, setSpotPhishCfg] = useState<any>(() =>
+    (cfg.spotPhish && Array.isArray(cfg.spotPhish.items))
+      ? { items: cfg.spotPhish.items.map((it: any) => ({ text: String(it?.text || ''), isPhish: !!it?.isPhish, why: String(it?.why || '') })) }
+      : { items: [{ text: '', isPhish: false, why: '' }] }
+  );
+  const [binaryHexCfg, setBinaryHexCfg] = useState<any>(() =>
+    cfg.binaryHex && typeof cfg.binaryHex === 'object'
+      ? { rounds: Number(cfg.binaryHex.rounds) || 10, maxValue: Number(cfg.binaryHex.maxValue) || 255, modes: Array.isArray(cfg.binaryHex.modes) ? cfg.binaryHex.modes : ['dec_to_bin','bin_to_dec','dec_to_hex','hex_to_dec'] }
+      : { rounds: 10, maxValue: 255, modes: ['dec_to_bin','bin_to_dec','dec_to_hex','hex_to_dec'] }
+  );
+  const [bitOpsCfg, setBitOpsCfg] = useState<any>(() =>
+    cfg.bitOps && typeof cfg.bitOps === 'object'
+      ? { rounds: Number(cfg.bitOps.rounds) || 6, bitWidth: Number(cfg.bitOps.bitWidth) || 8, ops: Array.isArray(cfg.bitOps.ops) ? cfg.bitOps.ops : ['AND','OR','XOR','NOT','SHL','SHR'] }
+      : { rounds: 6, bitWidth: 8, ops: ['AND','OR','XOR','NOT','SHL','SHR'] }
+  );
+  const [codeTracerCfg, setCodeTracerCfg] = useState<any>(() =>
+    cfg.codeTracer && typeof cfg.codeTracer === 'object'
+      ? { language: cfg.codeTracer.language === 'pseudocode' ? 'pseudocode' : 'python', code: String(cfg.codeTracer.code || ''), steps: Array.isArray(cfg.codeTracer.steps) ? cfg.codeTracer.steps.map((s: any) => ({ note: String(s?.note || ''), vars: Array.isArray(s?.vars) ? s.vars.map((v: any) => ({ name: String(v?.name || ''), value: String(v?.value || '') })) : [] })) : [] }
+      : { language: 'python', code: '', steps: [{ note: '', vars: [{ name: '', value: '' }] }] }
+  );
+  const [flowchartCfg, setFlowchartCfg] = useState<any>(() =>
+    (cfg.flowchartSeq && Array.isArray(cfg.flowchartSeq.blocks))
+      ? { prompt: String(cfg.flowchartSeq.prompt || ''), blocks: cfg.flowchartSeq.blocks.map((b: any) => ({ shape: ['process','decision','io','terminator'].includes(b?.shape) ? b.shape : 'process', label: String(b?.label || '') })) }
+      : { prompt: '', blocks: [{ shape: 'terminator', label: 'Start' }, { shape: 'process', label: '' }, { shape: 'terminator', label: 'End' }] }
+  );
+  const [sortingRaceCfg, setSortingRaceCfg] = useState<any>(() => {
+    const list = (cfg.sortingRace && Array.isArray(cfg.sortingRace.list)) ? cfg.sortingRace.list.map((n: any) => Number(n)).filter((n: number) => Number.isFinite(n)) : [5, 3, 8, 1, 4, 2];
+    return { algorithm: ['bubble','selection','insertion'].includes(cfg.sortingRace?.algorithm) ? cfg.sortingRace.algorithm : 'bubble', list, _listText: list.join(', ') };
+  });
+  const [convertRelayCfg, setConvertRelayCfg] = useState<any>(() =>
+    cfg.convertRelay && typeof cfg.convertRelay === 'object'
+      ? { rounds: Number(cfg.convertRelay.rounds) || 10, maxValue: Number(cfg.convertRelay.maxValue) || 200, modes: Array.isArray(cfg.convertRelay.modes) ? cfg.convertRelay.modes : ['dec_to_bin','bin_to_dec','b_to_kb','kb_to_b','kb_to_mb','mb_to_kb'] }
+      : { rounds: 10, maxValue: 200, modes: ['dec_to_bin','bin_to_dec','b_to_kb','kb_to_b','kb_to_mb','mb_to_kb'] }
+  );
+  const [urlAnatomyCfg, setUrlAnatomyCfg] = useState<any>(() =>
+    (cfg.urlAnatomy && Array.isArray(cfg.urlAnatomy.items))
+      ? { items: cfg.urlAnatomy.items.map((it: any) => ({ url: String(it?.url || '') })) }
+      : { items: [{ url: 'https://www.bbc.co.uk/news/technology?topic=ai#section1' }] }
+  );
+  const [truthTableCfg, setTruthTableCfg] = useState<any>(() =>
+    (cfg.truthTable && typeof cfg.truthTable === 'object')
+      ? { expression: String(cfg.truthTable.expression || '') }
+      : { expression: 'A AND (B OR NOT C)' }
+  );
+  const [fieldTypeSortCfg, setFieldTypeSortCfg] = useState<any>(() =>
+    (cfg.fieldTypeSort && Array.isArray(cfg.fieldTypeSort.items))
+      ? { items: cfg.fieldTypeSort.items.map((it: any) => ({ value: String(it?.value ?? ''), type: String(it?.type || 'text') })) }
+      : { items: [{ value: '42', type: 'integer' }, { value: '"hello"', type: 'text' }, { value: 'True', type: 'boolean' }, { value: '3.14', type: 'real' }, { value: '07/05/2024', type: 'date' }] }
+  );
+  const [ioSortCfg, setIoSortCfg] = useState<any>(() =>
+    (cfg.ioSort && Array.isArray(cfg.ioSort.items))
+      ? { items: cfg.ioSort.items.map((it: any) => ({ name: String(it?.name || ''), category: String(it?.category || 'input') })) }
+      : { items: [{ name: 'Keyboard', category: 'input' }, { name: 'Monitor', category: 'output' }, { name: 'SSD', category: 'storage' }, { name: 'Touchscreen', category: 'both' }] }
+  );
+  const [htmlMatchCfg, setHtmlMatchCfg] = useState<any>(() =>
+    (cfg.htmlMatch && Array.isArray(cfg.htmlMatch.items))
+      ? { items: cfg.htmlMatch.items.map((it: any) => ({ description: String(it?.description || ''), tag: String(it?.tag || '') })) }
+      : { items: [{ description: 'Top-level page heading', tag: 'h1' }, { description: 'A clickable hyperlink', tag: 'a' }, { description: 'An unordered (bulleted) list', tag: 'ul' }, { description: 'A paragraph of text', tag: 'p' }] }
+  );
+  const [passwordForgeCfg, setPasswordForgeCfg] = useState<any>(() =>
+    (cfg.passwordForge && Array.isArray(cfg.passwordForge.rules))
+      ? { rules: cfg.passwordForge.rules }
+      : { rules: ['min_length_12', 'has_upper', 'has_lower', 'has_digit', 'has_symbol', 'no_common_word'] }
+  );
+  const [privacyRadarCfg, setPrivacyRadarCfg] = useState<any>(() =>
+    (cfg.privacyRadar && Array.isArray(cfg.privacyRadar.items))
+      ? { items: cfg.privacyRadar.items.map((it: any) => ({ text: String(it?.text || ''), risk: String(it?.risk || 'low') })) }
+      : { items: [
+          { text: 'Posting your full home address publicly', risk: 'high' },
+          { text: 'Sharing your favourite colour with friends', risk: 'low' },
+          { text: 'Posting a photo of your school ID badge', risk: 'high' },
+          { text: 'Adding your birthday year to a profile', risk: 'medium' },
+        ] }
+  );
+  const [validationRulesCfg, setValidationRulesCfg] = useState<any>(() =>
+    (cfg.validationRules && Array.isArray(cfg.validationRules.items))
+      ? { items: cfg.validationRules.items.map((it: any) => ({ scenario: String(it?.scenario || ''), rule: String(it?.rule || 'presence') })) }
+      : { items: [
+          { scenario: "Pupil's age must be between 5 and 18", rule: 'range' },
+          { scenario: 'Surname must not be left blank', rule: 'presence' },
+          { scenario: 'Postcode must look like AB12 3CD', rule: 'format' },
+          { scenario: 'Year group must be S1, S2, S3, S4, S5 or S6', rule: 'lookup' },
+          { scenario: 'Password must be 8 to 32 characters', rule: 'length' },
+        ] }
+  );
+  const [findDuplicateCfg, setFindDuplicateCfg] = useState<any>(() =>
+    (cfg.findDuplicate && Array.isArray(cfg.findDuplicate.items))
+      ? { items: cfg.findDuplicate.items.map((it: any) => ({ headers: Array.isArray(it?.headers) ? it.headers : [], rows: Array.isArray(it?.rows) ? it.rows : [] })) }
+      : { items: [{ headers: ['Name', 'Age', 'Subject'], rows: [['Alice','10','Maths'], ['Bob','11','English'], ['Alice','10','Maths'], ['Carol','9','Art']] }] }
+  );
+  const [binSearchCfg, setBinSearchCfg] = useState<any>(() =>
+    (cfg.binSearch && Array.isArray(cfg.binSearch.items))
+      ? { items: cfg.binSearch.items.map((it: any) => ({ list: Array.isArray(it?.list) ? it.list : [], target: Number(it?.target) })) }
+      : { items: [{ list: [1, 3, 5, 7, 9, 11, 13, 15], target: 11 }, { list: [2, 4, 6, 8, 10, 12, 14, 16], target: 4 }] }
+  );
+  const [boxModelCfg, setBoxModelCfg] = useState<any>(() =>
+    (cfg.boxModel && Array.isArray(cfg.boxModel.items))
+      ? { items: cfg.boxModel.items.map((it: any) => ({ content: Number(it?.content) || 0, padding: Number(it?.padding) || 0, border: Number(it?.border) || 0, margin: Number(it?.margin) || 0 })) }
+      : { items: [{ content: 200, padding: 10, border: 2, margin: 8 }, { content: 100, padding: 20, border: 4, margin: 0 }] }
+  );
+  const [friendOrFakeCfg, setFriendOrFakeCfg] = useState<any>(() =>
+    (cfg.friendOrFake && Array.isArray(cfg.friendOrFake.items))
+      ? { items: cfg.friendOrFake.items.map((it: any) => ({ text: String(it?.text || ''), verdict: String(it?.verdict || 'real') })) }
+      : { items: [
+          { text: 'Profile is 7 years old, posts about hobbies, has many real friends as connections', verdict: 'real' },
+          { text: 'Account created 2 days ago, no profile picture, sends friend requests to many strangers', verdict: 'fake' },
+          { text: 'Photos look like a celebrity, asks for your phone number in DMs', verdict: 'fake' },
+          { text: 'School friend tagged in classmates\' posts going back years', verdict: 'real' },
+        ] }
+  );
+  const [upstanderCfg, setUpstanderCfg] = useState<any>(() =>
+    (cfg.upstander && Array.isArray(cfg.upstander.items) && cfg.upstander.items.length > 0)
+      ? { items: cfg.upstander.items.map((it: any) => ({
+          scenario: String(it?.scenario || ''),
+          image: it?.image ? String(it.image) : undefined,
+          left:  it?.left  || { label: '', consequence: '', effects: { kindness: 0, courage: 0, safety: 0 } },
+          right: it?.right || { label: '', consequence: '', effects: { kindness: 0, courage: 0, safety: 0 } },
+        })) }
+      : { items: DEFAULT_UPSTANDER_ITEMS }
+  );
+  const [dmDangerCfg, setDmDangerCfg] = useState<any>(() =>
+    (cfg.dmDanger && Array.isArray(cfg.dmDanger.items))
+      ? { items: cfg.dmDanger.items.map((it: any) => ({ text: String(it?.text || ''), risk: String(it?.risk || 'safe') })) }
+      : { items: [
+          { text: 'A school friend asks what time PE finishes today', risk: 'safe' },
+          { text: 'A stranger says "you\'ve won £1000! Click this link to claim"', risk: 'dangerous' },
+          { text: 'Someone you met in a game asks for your home address', risk: 'dangerous' },
+          { text: 'A new follower asks where you live (just the town)', risk: 'risky' },
+        ] }
+  );
+  const [malwareTriageCfg, setMalwareTriageCfg] = useState<any>(() =>
+    (cfg.malwareTriage && Array.isArray(cfg.malwareTriage.items))
+      ? { items: cfg.malwareTriage.items.map((it: any) => ({ text: String(it?.text || ''), kind: String(it?.kind || 'virus') })) }
+      : { items: [
+          { text: 'Encrypts your files and demands payment to unlock them', kind: 'ransomware' },
+          { text: 'Spreads itself across a network without user action', kind: 'worm' },
+          { text: 'Pretends to be a useful program but hides a payload', kind: 'trojan' },
+          { text: 'Records what you type and sends it to attackers', kind: 'spyware' },
+          { text: 'Shows pop-up adverts and slows down your browser', kind: 'adware' },
+          { text: 'Attaches itself to other programs and runs when they do', kind: 'virus' },
+        ] }
+  );
+  const [twoFactorEscapeCfg, setTwoFactorEscapeCfg] = useState<any>(() =>
+    (cfg.twoFactorEscape && Array.isArray(cfg.twoFactorEscape.items))
+      ? { items: cfg.twoFactorEscape.items.map((it: any) => ({ text: String(it?.text || ''), method: String(it?.method || 'password_only') })) }
+      : { items: [
+          { text: 'A bank protecting customers\' money online', method: 'hardware' },
+          { text: 'A pupil signing into a low-risk school quiz site', method: 'password_only' },
+          { text: 'A teacher\'s email account containing pupil data', method: 'authenticator' },
+          { text: 'Confirming a phone bill payment using a one-time code on the phone', method: 'sms' },
+        ] }
+  );
+  const [a11yAuditCfg, setA11yAuditCfg] = useState<any>(() =>
+    (cfg.a11yAudit && Array.isArray(cfg.a11yAudit.items))
+      ? { items: cfg.a11yAudit.items.map((it: any) => ({ text: String(it?.text || ''), issue: String(it?.issue || 'contrast') })) }
+      : { items: [
+          { text: 'Light grey text (#bbb) on a white background', issue: 'contrast' },
+          { text: '<img src="logo.png"> with no alt attribute', issue: 'alt_text' },
+          { text: 'A search box with no <label> and no placeholder', issue: 'labels' },
+          { text: 'Page jumps from <h1> straight to <h4>', issue: 'heading_order' },
+          { text: 'Custom button styled to remove the dotted outline on focus', issue: 'focus_indicator' },
+          { text: 'A modal dialog you can\'t close using only the keyboard', issue: 'keyboard' },
+        ] }
+  );
+  const [fetchExecuteCfg, setFetchExecuteCfg] = useState<any>(() =>
+    (cfg.fetchExecute && Array.isArray(cfg.fetchExecute.items))
+      ? { items: cfg.fetchExecute.items.map((it: any) => ({ text: String(it?.text || ''), step: String(it?.step || 'fetch') })) }
+      : { items: [
+          { text: 'The address in the program counter is sent to memory', step: 'fetch' },
+          { text: 'The instruction is copied from memory into the CIR', step: 'fetch' },
+          { text: 'The control unit interprets the opcode', step: 'decode' },
+          { text: 'Operands are read from registers', step: 'decode' },
+          { text: 'The ALU adds two numbers', step: 'execute' },
+          { text: 'The result is written back to a register', step: 'execute' },
+        ] }
+  );
+  const [screenTimeCfg, setScreenTimeCfg] = useState<any>(() =>
+    (cfg.screenTime && Array.isArray(cfg.screenTime.items))
+      ? { items: cfg.screenTime.items.map((it: any) => ({ text: String(it?.text || ''), rating: String(it?.rating || 'healthy') })) }
+      : { items: [
+          { text: '20 minutes of online homework after school', rating: 'healthy' },
+          { text: '6 hours of TikTok every night until midnight', rating: 'unhealthy' },
+          { text: '1 hour of gaming with friends after exercise outside', rating: 'balanced' },
+          { text: 'Phone in bedroom checking notifications all night', rating: 'unhealthy' },
+        ] }
+  );
+  const [footprintTrailCfg, setFootprintTrailCfg] = useState<any>(() =>
+    (cfg.footprintTrail && Array.isArray(cfg.footprintTrail.items))
+      ? { items: cfg.footprintTrail.items.map((it: any) => ({ text: String(it?.text || ''), visibility: String(it?.visibility || 'private') })) }
+      : { items: [
+          { text: 'Your bank card PIN', visibility: 'private' },
+          { text: 'Your home address', visibility: 'private' },
+          { text: 'A photo of your art project at school', visibility: 'public' },
+          { text: 'Your favourite hobbies', visibility: 'public' },
+          { text: 'Your phone number', visibility: 'personal' },
+          { text: 'Your school class timetable', visibility: 'personal' },
+        ] }
+  );
+  const [socialEngineerCfg, setSocialEngineerCfg] = useState<any>(() =>
+    (cfg.socialEngineer && Array.isArray(cfg.socialEngineer.items))
+      ? { items: cfg.socialEngineer.items.map((it: any) => ({ text: String(it?.text || ''), kind: String(it?.kind || 'phishing') })) }
+      : { items: [
+          { text: 'An email pretending to be from your bank, asking to "verify" details via a link', kind: 'phishing' },
+          { text: 'A USB stick labelled "Salaries 2026" left in the staffroom', kind: 'baiting' },
+          { text: 'Caller pretends to be IT support and asks for your password', kind: 'pretexting' },
+          { text: '"Free 1-month subscription if you give us your school email"', kind: 'quid_pro_quo' },
+          { text: 'Someone follows a teacher through a card-locked door', kind: 'tailgating' },
+          { text: 'Someone watches you type your code at the till', kind: 'shoulder_surfing' },
+        ] }
+  );
+  const [cipherQuestCfg, setCipherQuestCfg] = useState<any>(() =>
+    (cfg.cipherQuest && Array.isArray(cfg.cipherQuest.items))
+      ? { items: cfg.cipherQuest.items.map((it: any) => ({ text: String(it?.text || ''), cipher: String(it?.cipher || 'caesar') })) }
+      : { items: [
+          { text: 'Each letter is shifted by a fixed amount (e.g. +3)', cipher: 'caesar' },
+          { text: 'Each letter is replaced using a secret one-to-one alphabet', cipher: 'substitution' },
+          { text: 'A keyword decides a different shift for each letter', cipher: 'vigenere' },
+          { text: 'Letters of the message are rearranged into a grid', cipher: 'transposition' },
+          { text: 'Modern symmetric block cipher used to secure web traffic', cipher: 'aes' },
+        ] }
+  );
+  const [normaliseItCfg, setNormaliseItCfg] = useState<any>(() =>
+    (cfg.normaliseIt && Array.isArray(cfg.normaliseIt.items))
+      ? { items: cfg.normaliseIt.items.map((it: any) => ({ text: String(it?.text || ''), violation: String(it?.violation || 'normalised') })) }
+      : { items: [
+          { text: 'Pupil(id, name, subject1, subject2, subject3) — three subject columns per row', violation: 'breaks_1nf' },
+          { text: 'BookLoan(bookId, pupilId, bookTitle) where bookTitle depends only on bookId, not the whole key', violation: 'breaks_2nf' },
+          { text: 'Pupil(id, name, formClass, formTeacher) where formTeacher depends on formClass, not on id', violation: 'breaks_3nf' },
+          { text: 'Pupil(id, name, dob) with no repeating groups or partial/transitive dependencies', violation: 'normalised' },
+        ] }
+  );
+  const [subnetCalcCfg, setSubnetCalcCfg] = useState<any>(() =>
+    (cfg.subnetCalc && Array.isArray(cfg.subnetCalc.items))
+      ? { items: cfg.subnetCalc.items.map((it: any) => ({ text: String(it?.text || ''), kind: String(it?.kind || 'class_c') })) }
+      : { items: [
+          { text: '10.0.0.5', kind: 'private' },
+          { text: '127.0.0.1', kind: 'loopback' },
+          { text: '192.168.1.10', kind: 'private' },
+          { text: '8.8.8.8', kind: 'class_a' },
+          { text: '172.217.16.142', kind: 'class_b' },
+          { text: '224.0.0.1', kind: 'class_d' },
+        ] }
+  );
+  const [phishInboxCfg, setPhishInboxCfg] = useState<any>(() =>
+    (cfg.phishInbox && Array.isArray(cfg.phishInbox.items))
+      ? { items: cfg.phishInbox.items.map((it: any) => ({ text: String(it?.text || ''), verdict: String(it?.verdict || 'legitimate') })) }
+      : { items: [
+          { text: 'Order confirmation from a shop you really used yesterday', verdict: 'legitimate' },
+          { text: '"Your parcel is held — pay £1.99 to release"', verdict: 'phishing' },
+          { text: '"Hi friend, urgent help needed, can you send £200?"', verdict: 'scam' },
+          { text: 'Daily newsletter you signed up for and rarely read', verdict: 'spam' },
+          { text: '"Your Apple ID has been suspended. Click here to verify"', verdict: 'phishing' },
+        ] }
+  );
+  const [buildPcCfg, setBuildPcCfg] = useState<any>(() =>
+    (cfg.buildPc && Array.isArray(cfg.buildPc.items))
+      ? { items: cfg.buildPc.items.map((it: any) => ({ text: String(it?.text || ''), part: String(it?.part || 'cpu') })) }
+      : { items: [
+          { text: 'Carries out arithmetic and logic on every instruction', part: 'cpu' },
+          { text: 'Volatile fast memory used while a program is running', part: 'ram' },
+          { text: 'Renders 3-D graphics for games and video', part: 'gpu' },
+          { text: 'Long-term non-volatile place to keep your files', part: 'storage' },
+          { text: 'Converts mains electricity to DC for the components', part: 'psu' },
+          { text: 'Main board everything plugs into', part: 'motherboard' },
+          { text: 'Keeps the CPU temperature down', part: 'cooling' },
+          { text: 'Metal/plastic shell that holds everything', part: 'case' },
+        ] }
+  );
+  const [osSchedCfg, setOsSchedCfg] = useState<any>(() =>
+    (cfg.osSched && Array.isArray(cfg.osSched.items))
+      ? { items: cfg.osSched.items.map((it: any) => ({ text: String(it?.text || ''), algo: String(it?.algo || 'fcfs') })) }
+      : { items: [
+          { text: 'Each process gets a fixed time-slice in turn', algo: 'round_robin' },
+          { text: 'Whichever process arrived first runs to completion', algo: 'fcfs' },
+          { text: 'Always pick the process with the smallest expected runtime', algo: 'sjf' },
+          { text: 'A nurse-call system: more important alarms run first', algo: 'priority' },
+        ] }
+  );
+  const [queryVisualCfg, setQueryVisualCfg] = useState<any>(() =>
+    (cfg.queryVisual && Array.isArray(cfg.queryVisual.items))
+      ? { items: cfg.queryVisual.items.map((it: any) => ({ text: String(it?.text || ''), op: String(it?.op || 'select') })) }
+      : { items: [
+          { text: 'Show only the rows where mark > 50', op: 'filter' },
+          { text: 'Show only the columns name and mark', op: 'project' },
+          { text: 'Combine Pupils and Marks on pupilId', op: 'join' },
+          { text: 'Sort the result by mark, highest first', op: 'sort' },
+          { text: 'Average mark per class', op: 'group_by' },
+          { text: 'Choose all the rows from the Pupils table', op: 'select' },
+        ] }
+  );
+  const [schemaArchCfg, setSchemaArchCfg] = useState<any>(() =>
+    (cfg.schemaArch && Array.isArray(cfg.schemaArch.items))
+      ? { items: cfg.schemaArch.items.map((it: any) => ({ text: String(it?.text || ''), rel: String(it?.rel || 'one_to_many') })) }
+      : { items: [
+          { text: 'Pupil and Locker (each pupil has exactly one locker; each locker has one pupil)', rel: 'one_to_one' },
+          { text: 'Class and Pupil (a class has many pupils; a pupil is in one class)', rel: 'one_to_many' },
+          { text: 'Pupil and Club (pupils join many clubs; clubs have many pupils)', rel: 'many_to_many' },
+          { text: 'Author and Book (one author writes many books; a book has one author)', rel: 'one_to_many' },
+        ] }
+  );
+  const [tagSoupRepairCfg, setTagSoupRepairCfg] = useState<any>(() =>
+    (cfg.tagSoupRepair && Array.isArray(cfg.tagSoupRepair.items))
+      ? { items: cfg.tagSoupRepair.items.map((it: any) => ({ text: String(it?.text || ''), bug: String(it?.bug || 'unclosed') })) }
+      : { items: [
+          { text: '<p>Hello world', bug: 'unclosed' },
+          { text: '<p>Hello <b>world</p></b>', bug: 'wrong_nesting' },
+          { text: '<img src="cat.jpg">', bug: 'missing_attribute' },
+          { text: '<br></br>', bug: 'self_close_misuse' },
+          { text: '<b>My page title</b> at the top of the page', bug: 'wrong_tag' },
+        ] }
+  );
+  const [selectorGolfCfg, setSelectorGolfCfg] = useState<any>(() =>
+    (cfg.selectorGolf && Array.isArray(cfg.selectorGolf.items))
+      ? { items: cfg.selectorGolf.items.map((it: any) => ({ text: String(it?.text || ''), kind: String(it?.kind || 'class') })) }
+      : { items: [
+          { text: '#header', kind: 'id' },
+          { text: '.btn-primary', kind: 'class' },
+          { text: 'h1', kind: 'element' },
+          { text: 'nav a', kind: 'descendant' },
+          { text: 'ul > li', kind: 'child' },
+          { text: 'input[type="email"]', kind: 'attribute' },
+        ] }
+  );
+  const [cssSlidersCfg, setCssSlidersCfg] = useState<any>(() =>
+    (cfg.cssSliders && Array.isArray(cfg.cssSliders.items))
+      ? { items: cfg.cssSliders.items.map((it: any) => ({ text: String(it?.text || ''), prop: String(it?.prop || 'width') })) }
+      : { items: [
+          { text: 'Make the box twice as wide', prop: 'width' },
+          { text: 'Add space between this element and its neighbour', prop: 'margin' },
+          { text: 'Add space inside the box, around the text', prop: 'padding' },
+          { text: 'Make the headline text bigger', prop: 'font_size' },
+          { text: 'Change the text colour to red', prop: 'color' },
+          { text: 'Give the card a yellow background', prop: 'background' },
+          { text: 'Add a thin black outline around the card', prop: 'border' },
+          { text: 'Make the box taller', prop: 'height' },
+        ] }
+  );
+  const [mindmapCfg, setMindmapCfg] = useState<any>(() =>
+    cfg.mindmap && typeof cfg.mindmap === 'object'
+      ? { central: String(cfg.mindmap.central || ''), expectedBranches: String(cfg.mindmap.expectedBranches || ''), guidance: String(cfg.mindmap.guidance || '') }
+      : { central: '', expectedBranches: '', guidance: '' }
   );
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -3534,6 +4884,38 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
     });
   }
 
+  // Add/remove ordered-list prefixes (1. 2. 3. …) on the selected lines.
+  // Toggles off if every selected line already starts with a number+dot.
+  function toggleOrderedList() {
+    const el = promptRef.current;
+    setPrompt((cur) => {
+      const start = el?.selectionStart ?? cur.length;
+      const end = el?.selectionEnd ?? cur.length;
+      const lineStart = cur.lastIndexOf('\n', start - 1) + 1;
+      const lineEndIdx = cur.indexOf('\n', end);
+      const lineEnd = lineEndIdx === -1 ? cur.length : lineEndIdx;
+      const block = cur.slice(lineStart, lineEnd) || '';
+      const sourceLines = block === '' ? [''] : block.split('\n');
+      const allNumbered = sourceLines.every((l) => /^\s*\d+\.\s+/.test(l));
+      const transformed = allNumbered
+        ? sourceLines.map((l) => l.replace(/^\s*\d+\.\s+/, ''))
+        : sourceLines.map((l, idx) => {
+            const stripped = l.replace(/^(#{1,3}\s+|[-*]\s+|\d+\.\s+)/, '');
+            return `${idx + 1}. ${stripped}`;
+          });
+      const newBlock = transformed.join('\n');
+      const next = cur.slice(0, lineStart) + newBlock + cur.slice(lineEnd);
+      const newCaret = lineStart + newBlock.length;
+      requestAnimationFrame(() => {
+        if (promptRef.current) {
+          promptRef.current.focus();
+          promptRef.current.setSelectionRange(lineStart, newCaret);
+        }
+      });
+      return next;
+    });
+  }
+
   async function handlePromptImageFiles(files: File[]) {
     const images = files.filter((f) => f.type.startsWith('image/'));
     if (!images.length) return;
@@ -3597,7 +4979,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
     setBusy(true);
     setErr(null);
     try {
-      const noAnswerType = type === 'passage' || type === 'video_group' || type === 'info_only' || type === 'section_header' || type === 'text_only';
+      const noAnswerType = type === 'passage' || type === 'video_group' || type === 'file_task' || type === 'mc_group' || type === 'group' || type === 'info_only' || type === 'section_header' || type === 'text_only';
       const body: any = {
         questionType: type, prompt,
         // Passages and info-only notes have no marks / marking scheme / AI
@@ -3609,9 +4991,8 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
         aiGradingGuidance: noAnswerType ? '' : aiGuidance,
         isExtension,
       };
-      // Only non-passage types can be attached to a passage (a passage
-      // attaching to itself doesn't make sense).
-      if (type !== 'passage' && type !== 'video_group' && passageId) body.passageId = passageId;
+      // Only non-container types can be attached to a container group.
+      if (type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && type !== 'group' && passageId) body.passageId = passageId;
       if (type === 'multiple_choice') body.options = options;
       if (type === 'presentation') {
         const cfg: any = {};
@@ -3705,6 +5086,17 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
         }
         body.config = { video: { kind: videoKind, url: videoUrl.trim() } };
       }
+      if (type === 'group') {
+        const gcfg: any = { contextMode: groupContextMode };
+        if (groupContextMode === 'video') {
+          if (!videoUrl.trim()) throw new Error('Please paste a YouTube URL or upload a video for this group.');
+          if (videoKind === 'youtube' && !youtubeIdFromUrl(videoUrl)) throw new Error('That doesn\u2019t look like a YouTube URL.');
+          gcfg.video = { kind: videoKind, url: videoUrl.trim() };
+        } else if (groupContextMode === 'image') {
+          if (groupImageUrl.trim()) gcfg.imageUrl = groupImageUrl.trim();
+        }
+        body.config = gcfg;
+      }
       if (type === 'crossword') {
         const entries = (Array.isArray(crosswordCfg.entries) ? crosswordCfg.entries : [])
           .map((e: any) => ({
@@ -3742,7 +5134,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
         // no grid yet — saves the teacher one click.
         const placedSet = new Set(placedWords.map((w) => String(w).toUpperCase()));
         const desiredSet = new Set(wordsFromText.map((w) => w.toUpperCase().replace(/[^A-Z]/g, '')));
-        const drift = grid.length === 0 || placedSet.size !== desiredSet.size || [...desiredSet].some((w) => !placedSet.has(w));
+        const drift = grid.length === 0 || placedSet.size !== desiredSet.size || Array.from(desiredSet).some((w) => !placedSet.has(w));
         if (drift) {
           const out = _generateWordSearchGrid(
             Math.max(5, Number(wordSearchCfg.rows) || 12),
@@ -3790,6 +5182,266 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
         if (cleaned.length === 0) throw new Error('Add at least one anagram with an answer of 2 or more letters.');
         body.config = { anagrams: { items: cleaned } };
       }
+      if (type === 'hangman') {
+        const items = (Array.isArray(hangmanCfg.items) ? hangmanCfg.items : [])
+          .map((it: any) => ({ word: String(it?.word || '').toUpperCase().replace(/[^A-Z ]/g, '').trim(), hint: String(it?.hint || '').trim() }))
+          .filter((it: any) => it.word.replace(/\s/g, '').length >= 2);
+        if (items.length === 0) throw new Error('Add at least one hangman word of 2 or more letters.');
+        body.config = { hangman: { items } };
+      }
+      if (type === 'speed_round') {
+        const items = (Array.isArray(speedRoundCfg.items) ? speedRoundCfg.items : [])
+          .map((it: any) => ({ q: String(it?.q || '').trim(), a: String(it?.a || '').trim() }))
+          .filter((it: any) => it.q && it.a);
+        if (items.length === 0) throw new Error('Add at least one speed-round question with an answer.');
+        body.config = { speedRound: { items, seconds: Math.max(5, Math.min(600, Number(speedRoundCfg.seconds) || 60)) } };
+      }
+      if (type === 'ordering') {
+        const items = (Array.isArray(orderingCfg.items) ? orderingCfg.items : [])
+          .map((it: any) => ({ label: String(it?.label || '').trim() }))
+          .filter((it: any) => it.label);
+        if (items.length < 2) throw new Error('Add at least two steps in their correct order.');
+        body.config = { ordering: { prompt: String(orderingCfg.prompt || '').trim(), items } };
+      }
+      if (type === 'caesar_cipher') {
+        const items = (Array.isArray(caesarCfg.items) ? caesarCfg.items : [])
+          .map((it: any) => ({ text: String(it?.text || '').toUpperCase().replace(/[^A-Z ]/g, ''), shift: Number(it?.shift) || 0, mode: it?.mode === 'decode' ? 'decode' : 'encode' }))
+          .filter((it: any) => it.text.length >= 2);
+        if (items.length === 0) throw new Error('Add at least one Caesar cipher message of 2 or more letters.');
+        body.config = { caesar: { items } };
+      }
+      if (type === 'spot_phish') {
+        const items = (Array.isArray(spotPhishCfg.items) ? spotPhishCfg.items : [])
+          .map((it: any) => ({ text: String(it?.text || '').trim(), isPhish: !!it?.isPhish, why: String(it?.why || '').trim() }))
+          .filter((it: any) => it.text);
+        if (items.length === 0) throw new Error('Add at least one phishing example.');
+        body.config = { spotPhish: { items } };
+      }
+      if (type === 'binary_hex') {
+        const allModes = ['dec_to_bin', 'bin_to_dec', 'dec_to_hex', 'hex_to_dec'];
+        const modes = (Array.isArray(binaryHexCfg.modes) ? binaryHexCfg.modes : []).filter((m: any) => allModes.includes(m));
+        if (modes.length === 0) throw new Error('Pick at least one conversion mode.');
+        body.config = { binaryHex: {
+          rounds: Math.max(1, Math.min(50, Number(binaryHexCfg.rounds) || 10)),
+          maxValue: Math.max(15, Math.min(65535, Number(binaryHexCfg.maxValue) || 255)),
+          modes,
+        } };
+      }
+      if (type === 'bit_ops') {
+        const allOps = ['AND', 'OR', 'XOR', 'NOT', 'SHL', 'SHR'];
+        const ops = (Array.isArray(bitOpsCfg.ops) ? bitOpsCfg.ops : []).filter((o: any) => allOps.includes(o));
+        if (ops.length === 0) throw new Error('Pick at least one bitwise operation.');
+        body.config = { bitOps: {
+          rounds: Math.max(1, Math.min(30, Number(bitOpsCfg.rounds) || 6)),
+          bitWidth: Math.max(4, Math.min(16, Number(bitOpsCfg.bitWidth) || 8)),
+          ops,
+        } };
+      }
+      if (type === 'code_tracer') {
+        const code = String(codeTracerCfg.code || '').trim();
+        if (!code) throw new Error('Paste the code snippet pupils should trace.');
+        const steps = (Array.isArray(codeTracerCfg.steps) ? codeTracerCfg.steps : [])
+          .map((s: any) => ({
+            note: String(s?.note || '').trim(),
+            vars: (Array.isArray(s?.vars) ? s.vars : [])
+              .map((v: any) => ({ name: String(v?.name || '').trim(), value: String(v?.value || '').trim() }))
+              .filter((v: any) => v.name),
+          }))
+          .filter((s: any) => s.vars.length > 0);
+        if (steps.length === 0) throw new Error('Add at least one trace step with a variable.');
+        body.config = { codeTracer: { language: codeTracerCfg.language === 'pseudocode' ? 'pseudocode' : 'python', code, steps } };
+      }
+      if (type === 'flowchart_seq') {
+        const blocks = (Array.isArray(flowchartCfg.blocks) ? flowchartCfg.blocks : [])
+          .map((b: any) => ({ shape: ['process','decision','io','terminator'].includes(b?.shape) ? b.shape : 'process', label: String(b?.label || '').trim() }))
+          .filter((b: any) => b.label);
+        if (blocks.length < 2) throw new Error('Add at least two flowchart blocks in correct order.');
+        body.config = { flowchartSeq: { prompt: String(flowchartCfg.prompt || '').trim(), blocks } };
+      }
+      if (type === 'sorting_race') {
+        const list = (typeof sortingRaceCfg._listText === 'string' ? sortingRaceCfg._listText : (Array.isArray(sortingRaceCfg.list) ? sortingRaceCfg.list.join(',') : ''))
+          .split(/[,\s]+/).map((x: string) => Number(x)).filter((n: number) => Number.isFinite(n));
+        if (list.length < 2) throw new Error('Enter a list of at least 2 numbers to sort.');
+        const algorithm = ['bubble','selection','insertion'].includes(sortingRaceCfg.algorithm) ? sortingRaceCfg.algorithm : 'bubble';
+        body.config = { sortingRace: { list, algorithm } };
+      }
+      if (type === 'convert_relay') {
+        const allModes = ['dec_to_bin','bin_to_dec','dec_to_hex','hex_to_dec','bits_to_bytes','bytes_to_bits','b_to_kb','kb_to_b','kb_to_mb','mb_to_kb','mb_to_gb','gb_to_mb'];
+        const modes = (Array.isArray(convertRelayCfg.modes) ? convertRelayCfg.modes : []).filter((m: any) => allModes.includes(m));
+        if (modes.length === 0) throw new Error('Pick at least one conversion mode.');
+        body.config = { convertRelay: {
+          rounds: Math.max(1, Math.min(40, Number(convertRelayCfg.rounds) || 10)),
+          maxValue: Math.max(10, Math.min(9999, Number(convertRelayCfg.maxValue) || 200)),
+          modes,
+        } };
+      }
+      if (type === 'url_anatomy') {
+        const items = (Array.isArray(urlAnatomyCfg.items) ? urlAnatomyCfg.items : [])
+          .map((it: any) => ({ url: String(it?.url || '').trim() }))
+          .filter((it: any) => it.url);
+        if (items.length === 0) throw new Error('Add at least one URL.');
+        body.config = { urlAnatomy: { items } };
+      }
+      if (type === 'truth_table') {
+        const expression = String(truthTableCfg.expression || '').trim();
+        if (!expression) throw new Error('Enter a Boolean expression (e.g. A AND (B OR NOT C)).');
+        body.config = { truthTable: { expression } };
+      }
+      if (type === 'field_type_sort') {
+        const items = (Array.isArray(fieldTypeSortCfg.items) ? fieldTypeSortCfg.items : [])
+          .map((it: any) => ({ value: String(it?.value ?? ''), type: ['integer','real','text','boolean','date'].includes(it?.type) ? it.type : 'text' }))
+          .filter((it: any) => it.value !== '');
+        if (items.length === 0) throw new Error('Add at least one value to classify.');
+        body.config = { fieldTypeSort: { items } };
+      }
+      if (type === 'io_sort') {
+        const items = (Array.isArray(ioSortCfg.items) ? ioSortCfg.items : [])
+          .map((it: any) => ({ name: String(it?.name || '').trim(), category: ['input','output','storage','both'].includes(it?.category) ? it.category : 'input' }))
+          .filter((it: any) => it.name);
+        if (items.length === 0) throw new Error('Add at least one device.');
+        body.config = { ioSort: { items } };
+      }
+      if (type === 'html_match') {
+        const items = (Array.isArray(htmlMatchCfg.items) ? htmlMatchCfg.items : [])
+          .map((it: any) => ({ description: String(it?.description || '').trim(), tag: String(it?.tag || '').toLowerCase().replace(/[^a-z0-9]/g, '') }))
+          .filter((it: any) => it.description && it.tag);
+        if (items.length === 0) throw new Error('Add at least one description with a matching tag.');
+        body.config = { htmlMatch: { items } };
+      }
+      if (type === 'password_forge') {
+        const allRuleIds = ['min_length_8','min_length_12','min_length_16','has_upper','has_lower','has_digit','has_symbol','no_spaces','no_common_word'];
+        const rules = (Array.isArray(passwordForgeCfg.rules) ? passwordForgeCfg.rules : []).filter((r: any) => allRuleIds.includes(r));
+        if (rules.length === 0) throw new Error('Pick at least one password rule.');
+        body.config = { passwordForge: { rules } };
+      }
+      if (type === 'privacy_radar') {
+        const items = (Array.isArray(privacyRadarCfg.items) ? privacyRadarCfg.items : [])
+          .map((it: any) => ({ text: String(it?.text || '').trim(), risk: ['low','medium','high'].includes(it?.risk) ? it.risk : 'low' }))
+          .filter((it: any) => it.text);
+        if (items.length === 0) throw new Error('Add at least one privacy scenario.');
+        body.config = { privacyRadar: { items } };
+      }
+      if (type === 'validation_rules') {
+        const items = (Array.isArray(validationRulesCfg.items) ? validationRulesCfg.items : [])
+          .map((it: any) => ({ scenario: String(it?.scenario || '').trim(), rule: ['presence','range','length','format','lookup'].includes(it?.rule) ? it.rule : 'presence' }))
+          .filter((it: any) => it.scenario);
+        if (items.length === 0) throw new Error('Add at least one validation scenario.');
+        body.config = { validationRules: { items } };
+      }
+      if (type === 'find_duplicate') {
+        const items = (Array.isArray(findDuplicateCfg.items) ? findDuplicateCfg.items : [])
+          .map((it: any) => ({
+            headers: (Array.isArray(it?.headers) ? it.headers : []).map((h: any) => String(h)),
+            rows: (Array.isArray(it?.rows) ? it.rows : []).map((row: any) => (Array.isArray(row) ? row.map((c: any) => String(c)) : [])),
+          }))
+          .filter((it: any) => it.rows.length >= 2);
+        if (items.length === 0) throw new Error('Add at least one table with rows.');
+        for (const it of items) {
+          const seen = new Map<string, number>();
+          let hasDup = false;
+          for (const row of it.rows) {
+            const k = row.map((c: string) => c.trim().toLowerCase()).join('||');
+            if (seen.has(k)) { hasDup = true; break; }
+            seen.set(k, 1);
+          }
+          if (!hasDup) throw new Error('Each table needs exactly one duplicate row.');
+        }
+        body.config = { findDuplicate: { items } };
+      }
+      if (type === 'bin_search') {
+        const items = (Array.isArray(binSearchCfg.items) ? binSearchCfg.items : [])
+          .map((it: any) => ({
+            list: (Array.isArray(it?.list) ? it.list : []).map((n: any) => Number(n)).filter((n: number) => Number.isFinite(n)),
+            target: Number(it?.target),
+          }))
+          .filter((it: any) => it.list.length >= 2 && Number.isFinite(it.target));
+        for (const it of items) {
+          const sorted = [...it.list].sort((a, b) => a - b);
+          if (sorted.some((v, i) => v !== it.list[i])) throw new Error('Each binary-search list must already be sorted in ascending order.');
+        }
+        if (items.length === 0) throw new Error('Add at least one sorted list with a target.');
+        body.config = { binSearch: { items } };
+      }
+      if (type === 'box_model') {
+        const items = (Array.isArray(boxModelCfg.items) ? boxModelCfg.items : [])
+          .map((it: any) => ({
+            content: Math.max(0, Math.round(Number(it?.content) || 0)),
+            padding: Math.max(0, Math.round(Number(it?.padding) || 0)),
+            border: Math.max(0, Math.round(Number(it?.border) || 0)),
+            margin: Math.max(0, Math.round(Number(it?.margin) || 0)),
+          }))
+          .filter((it: any) => it.content > 0);
+        if (items.length === 0) throw new Error('Add at least one CSS box (content width must be > 0).');
+        body.config = { boxModel: { items } };
+      }
+      const PICKLIST_SAVE: Record<string, { src: any; configKey: string; valueKey: string; allowed: string[] }> = {
+        friend_or_fake: { src: friendOrFakeCfg, configKey: 'friendOrFake', valueKey: 'verdict', allowed: ['real','fake'] },
+        dm_danger: { src: dmDangerCfg, configKey: 'dmDanger', valueKey: 'risk', allowed: ['safe','risky','dangerous'] },
+        upstander_noop: { src: null, configKey: '', valueKey: '', allowed: [] },
+        malware_triage: { src: malwareTriageCfg, configKey: 'malwareTriage', valueKey: 'kind', allowed: ['virus','worm','trojan','ransomware','spyware','adware'] },
+        '2fa_escape': { src: twoFactorEscapeCfg, configKey: 'twoFactorEscape', valueKey: 'method', allowed: ['password_only','sms','email','authenticator','hardware'] },
+        a11y_audit: { src: a11yAuditCfg, configKey: 'a11yAudit', valueKey: 'issue', allowed: ['contrast','alt_text','labels','keyboard','heading_order','focus_indicator'] },
+        fetch_execute: { src: fetchExecuteCfg, configKey: 'fetchExecute', valueKey: 'step', allowed: ['fetch','decode','execute'] },
+        screen_time: { src: screenTimeCfg, configKey: 'screenTime', valueKey: 'rating', allowed: ['healthy','balanced','unhealthy'] },
+        footprint_trail: { src: footprintTrailCfg, configKey: 'footprintTrail', valueKey: 'visibility', allowed: ['private','personal','public'] },
+        social_engineer: { src: socialEngineerCfg, configKey: 'socialEngineer', valueKey: 'kind', allowed: ['phishing','pretexting','baiting','quid_pro_quo','tailgating','shoulder_surfing'] },
+        cipher_quest: { src: cipherQuestCfg, configKey: 'cipherQuest', valueKey: 'cipher', allowed: ['caesar','substitution','vigenere','transposition','aes'] },
+        normalise_it: { src: normaliseItCfg, configKey: 'normaliseIt', valueKey: 'violation', allowed: ['breaks_1nf','breaks_2nf','breaks_3nf','normalised'] },
+        subnet_calc: { src: subnetCalcCfg, configKey: 'subnetCalc', valueKey: 'kind', allowed: ['class_a','class_b','class_c','class_d','class_e','private','loopback'] },
+        phish_inbox: { src: phishInboxCfg, configKey: 'phishInbox', valueKey: 'verdict', allowed: ['legitimate','phishing','spam','scam'] },
+        build_pc: { src: buildPcCfg, configKey: 'buildPc', valueKey: 'part', allowed: ['cpu','gpu','ram','storage','psu','motherboard','cooling','case'] },
+        os_sched: { src: osSchedCfg, configKey: 'osSched', valueKey: 'algo', allowed: ['fcfs','sjf','round_robin','priority'] },
+        query_visual: { src: queryVisualCfg, configKey: 'queryVisual', valueKey: 'op', allowed: ['select','project','join','filter','sort','group_by'] },
+        schema_arch: { src: schemaArchCfg, configKey: 'schemaArch', valueKey: 'rel', allowed: ['one_to_one','one_to_many','many_to_many'] },
+        tag_soup_repair: { src: tagSoupRepairCfg, configKey: 'tagSoupRepair', valueKey: 'bug', allowed: ['unclosed','wrong_nesting','missing_attribute','self_close_misuse','wrong_tag'] },
+        selector_golf: { src: selectorGolfCfg, configKey: 'selectorGolf', valueKey: 'kind', allowed: ['id','class','element','descendant','child','attribute'] },
+        css_sliders: { src: cssSlidersCfg, configKey: 'cssSliders', valueKey: 'prop', allowed: ['width','height','padding','margin','border','color','background','font_size'] },
+      };
+      if (type === 'upstander') {
+        const items = (Array.isArray(upstanderCfg.items) ? upstanderCfg.items : [])
+          .map((it: any) => ({
+            scenario: String(it?.scenario || '').trim(),
+            ...(it?.image ? { image: String(it.image).trim() } : {}),
+            left: {
+              label: String(it?.left?.label || '').trim(),
+              consequence: String(it?.left?.consequence || '').trim(),
+              effects: {
+                kindness: Math.max(-3, Math.min(3, Number(it?.left?.effects?.kindness) || 0)),
+                courage:  Math.max(-3, Math.min(3, Number(it?.left?.effects?.courage)  || 0)),
+                safety:   Math.max(-3, Math.min(3, Number(it?.left?.effects?.safety)   || 0)),
+              },
+            },
+            right: {
+              label: String(it?.right?.label || '').trim(),
+              consequence: String(it?.right?.consequence || '').trim(),
+              effects: {
+                kindness: Math.max(-3, Math.min(3, Number(it?.right?.effects?.kindness) || 0)),
+                courage:  Math.max(-3, Math.min(3, Number(it?.right?.effects?.courage)  || 0)),
+                safety:   Math.max(-3, Math.min(3, Number(it?.right?.effects?.safety)   || 0)),
+              },
+            },
+          }))
+          .filter((it: any) => it.scenario);
+        if (items.length === 0) throw new Error('Add at least one scenario.');
+        body.config = { upstander: { items } };
+      }
+      if (type === 'mindmap') {
+        const central = mindmapCfg.central?.trim() || '';
+        if (!central) throw new Error('Enter a central topic for the mindmap.');
+        body.config = { mindmap: {
+          central,
+          expectedBranches: String(mindmapCfg.expectedBranches || '').trim(),
+          guidance: String(mindmapCfg.guidance || '').trim(),
+        } };
+      }
+      if (PICKLIST_SAVE[type]) {
+        const meta = PICKLIST_SAVE[type];
+        const items = (Array.isArray(meta.src.items) ? meta.src.items : [])
+          .map((it: any) => ({ text: String(it?.text || '').trim(), [meta.valueKey]: meta.allowed.includes(it?.[meta.valueKey]) ? it[meta.valueKey] : meta.allowed[0] }))
+          .filter((it: any) => it.text);
+        if (items.length === 0) throw new Error('Add at least one item.');
+        body.config = { [meta.configKey]: { items } };
+      }
       if (isEdit) {
         await api(`/api/classwork/questions/${existing!.id}`, {
           method: 'PATCH', body: JSON.stringify(body),
@@ -3830,18 +5482,31 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
 
   const rubricTotal = rubric.reduce((a, r) => a + (Number(r.marks) || 0), 0);
 
+  // When this question is attached to an mc_group container, it must be a
+  // multiple_choice question — lock the type selector automatically.
+  const selectedPassage = passages.find((p) => p.id === passageId);
+  const isAttachedToMCG = selectedPassage?.question_type === 'mc_group';
+  useEffect(() => {
+    if (isAttachedToMCG && type !== 'multiple_choice') setType('multiple_choice');
+  }, [isAttachedToMCG]);
+
   return (
     <div style={modalOverlay}>
       <div style={modal}>
         <h2 style={{ marginTop: 0 }}>{isEdit ? 'Edit task' : 'New task'}</h2>
         <label style={fieldLabel}>Type
-          <select value={type} onChange={(e) => onTypeChange(e.target.value)} style={input}>
-            {Object.entries(TYPE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
+          {isAttachedToMCG ? (
+            <div style={{ padding: '6px 10px', background: '#f5f3ff', border: '1px solid #c4b5fd', borderRadius: 8, fontSize: 13, color: '#5b21b6', fontWeight: 400 }}>
+              Multiple choice <span style={{ color: 'var(--cw-muted)' }}>(fixed — children of a MC group must be multiple choice questions)</span>
+            </div>
+          ) : (
+            <TypePicker value={type} onChange={onTypeChange} />
+          )}
         </label>
         <label style={fieldLabel}>{
             type === 'passage' ? 'Passage text (what pupils read)'
             : type === 'video_group' ? 'Description (optional — shown above the video)'
+            : type === 'mc_group' ? 'Question stem / instructions (optional — shown above all sub-questions)'
             : type === 'info_only' ? 'Note text (shown to pupils, no answer required)'
             : type === 'text_only' ? 'Task description (what pupils should do in their jotter)'
             : type === 'section_header' ? 'Section title (shown as a divider, e.g. "Section A: Comprehension")'
@@ -3883,6 +5548,11 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
                   title="Bullet list (prefixes each line with -)"
                   onMouseDown={grab(() => togglePromptLinePrefix('- '))}>
                   • List
+                </button>
+                <button type="button" style={toolBtn}
+                  title="Numbered list (prefixes each selected line with 1. 2. 3. …)"
+                  onMouseDown={grab(() => toggleOrderedList())}>
+                  1. List
                 </button>
                 <span style={{ width: 1, background: 'var(--cw-border)', margin: '0 4px' }} />
                 <button type="button" style={{ ...toolBtn, fontWeight: 700, fontSize: 14 }}
@@ -4083,6 +5753,12 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
               ? 'Type or paste the paragraph pupils have to read. It will sit in a sticky panel beside its attached tasks, so pupils can refer back to it as they answer.'
               : type === 'video_group'
                 ? <>This card is just the video — there\u2019s no answer area on it. <strong>After saving</strong>, click <strong>+ Add question to this video</strong> on the video panel (or use <em>+ New task</em> and pick this video in <em>Attach to passage or video</em>) to add the questions pupils answer underneath it.</>
+              : type === 'group'
+                ? groupContextMode === 'text'
+                  ? 'Type the reading material or stimulus text that pupils will see pinned at the top of this group.'
+                  : groupContextMode === 'video' || groupContextMode === 'image'
+                    ? 'Optional: add an extra text description or caption above the video/image (leave blank if not needed).'
+                    : 'Optional title or description for the group (leave blank for no heading).'
               : type === 'info_only'
                 ? 'A non-interactive note. Use it for instructions, a reminder or a sub-heading between tasks. Pupils don\u2019t answer it and it doesn\u2019t count for marks.'
                 : type === 'fill_in_blanks'
@@ -4090,28 +5766,69 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
                   : <>Tip: paste a URL (e.g. https://bbc.co.uk/bitesize) and it will appear as a clickable link that opens in a new window. For a friendlier label, write <code>[Bitesize lesson](https://bbc.co.uk/bitesize)</code>.</>}
           </span>
         </label>
-        {type !== 'passage' && type !== 'video_group' && passages.length > 0 && (
-          <label style={fieldLabel}>Attach to passage or video (optional)
+        {type === 'group' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <label style={fieldLabel}>Context shown at top of group
+              <select value={groupContextMode} onChange={(e) => setGroupContextMode(e.target.value as any)} style={input}>
+                <option value="none">None — just the question title/description above</option>
+                <option value="text">Reading passage — text pupils refer to while answering</option>
+                <option value="video">Video — pupils watch it, then answer questions below</option>
+                <option value="image">Image — a diagram or photo shown above the questions</option>
+              </select>
+            </label>
+            {groupContextMode === 'video' && (
+              <label style={fieldLabel}>Video URL (YouTube)
+                <input
+                  placeholder="https://www.youtube.com/watch?v=…"
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  style={input}
+                />
+                <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
+                  Paste a YouTube URL. The video will be embedded at the top of the group panel.
+                </span>
+              </label>
+            )}
+            {groupContextMode === 'image' && (
+              <label style={fieldLabel}>Image URL
+                <input
+                  placeholder="https://example.com/image.png"
+                  value={groupImageUrl}
+                  onChange={(e) => setGroupImageUrl(e.target.value)}
+                  style={input}
+                />
+                <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
+                  Paste a public image URL. You can also upload an image via the prompt box above and copy the resulting URL from there.
+                </span>
+              </label>
+            )}
+          </div>
+        )}
+        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && type !== 'group' && passages.length > 0 && (
+          <label style={fieldLabel}>Attach to passage, video, file task, MC group, or group (optional)
             <select value={passageId} onChange={(e) => setPassageId(e.target.value)} style={input}>
               <option value="">— None (standalone task) —</option>
               {passages.map((p) => {
                 const isVid = p.question_type === 'video_group';
+                const isFT = p.question_type === 'file_task';
+                const isMCG = p.question_type === 'mc_group';
+                const isGrp = p.question_type === 'group';
                 const preview = (p.prompt || '').slice(0, 60);
+                const prefix = isVid ? '▶ Video: ' : isFT ? '📎 File task: ' : isMCG ? '☰ MC group: ' : isGrp ? '⊞ Group: ' : 'Passage: ';
+                const fallback = '(no description)';
                 return (
                   <option key={p.id} value={p.id}>
-                    {isVid ? '▶ Video: ' : 'Passage: '}
-                    {preview || (isVid ? '(no description)' : '(no preview)')}
-                    {(p.prompt || '').length > 60 ? '…' : ''}
+                    {prefix}{preview || fallback}{(p.prompt || '').length > 60 ? '…' : ''}
                   </option>
                 );
               })}
             </select>
             <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
-              Group this task with a reading passage or video so pupils see the stimulus alongside their answer area.
+              Group this task with a reading passage, video, file task, MC group, or generic group so pupils see the stimulus alongside their answer area.
             </span>
           </label>
         )}
-        {type !== 'passage' && type !== 'video_group' && type !== 'info_only' && type !== 'text_only' && (
+        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && type !== 'group' && type !== 'info_only' && type !== 'text_only' && (
           <label style={fieldLabel}>Max marks
             <input type="number" min={1} value={maxMarks} onChange={(e) => setMaxMarks(parseInt(e.target.value) || 1)} style={input} />
             {(type === 'fill_in_blanks' || type === 'table' || type === 'labeled_inputs') && (
@@ -4521,7 +6238,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
                         title="Add column"
                         onClick={() => {
                           setTblHeaders([...tblHeaders, `Column ${tblHeaders.length + 1}`]);
-                          setTblRows(tblRows.map((row) => [...row, { value: '', blank: false, accept: '' }]));
+                          setTblRows(tblRows.map((row) => [...row, { value: '', blank: false, accept: '', aiGuidance: '' }]));
                         }}
                         style={{ ...input, cursor: 'pointer', width: '100%' }}
                       >+</button>
@@ -4588,7 +6305,7 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
                 onClick={() =>
                   setTblRows([
                     ...tblRows,
-                    tblHeaders.map(() => ({ value: '', blank: false, accept: '' })),
+                    tblHeaders.map(() => ({ value: '', blank: false, accept: '', aiGuidance: '' })),
                   ])
                 }
                 style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid var(--cw-border)', cursor: 'pointer' }}
@@ -4629,6 +6346,270 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
             <AnagramsEditor cfg={anagramsCfg} setCfg={setAnagramsCfg} />
           </div>
         )}
+        {type === 'hangman' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Hangman</div>
+            <HangmanEditor cfg={hangmanCfg} setCfg={setHangmanCfg} />
+          </div>
+        )}
+        {type === 'speed_round' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Speed round</div>
+            <SpeedRoundEditor cfg={speedRoundCfg} setCfg={setSpeedRoundCfg} />
+          </div>
+        )}
+        {type === 'ordering' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Ordering / sequencing</div>
+            <OrderingEditor cfg={orderingCfg} setCfg={setOrderingCfg} />
+          </div>
+        )}
+        {type === 'caesar_cipher' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Caesar cipher</div>
+            <CaesarEditor cfg={caesarCfg} setCfg={setCaesarCfg} />
+          </div>
+        )}
+        {type === 'spot_phish' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Spot the phish</div>
+            <SpotPhishEditor cfg={spotPhishCfg} setCfg={setSpotPhishCfg} />
+          </div>
+        )}
+        {type === 'binary_hex' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Binary / hex blitz</div>
+            <BinaryHexEditor cfg={binaryHexCfg} setCfg={setBinaryHexCfg} />
+          </div>
+        )}
+        {type === 'bit_ops' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Bit-manipulation puzzle</div>
+            <BitOpsEditor cfg={bitOpsCfg} setCfg={setBitOpsCfg} />
+          </div>
+        )}
+        {type === 'code_tracer' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Code tracer</div>
+            <CodeTracerEditor cfg={codeTracerCfg} setCfg={setCodeTracerCfg} />
+          </div>
+        )}
+        {type === 'flowchart_seq' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Flowchart sequencer</div>
+            <FlowchartEditor cfg={flowchartCfg} setCfg={setFlowchartCfg} />
+          </div>
+        )}
+        {type === 'sorting_race' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Sorting race</div>
+            <SortingRaceEditor cfg={sortingRaceCfg} setCfg={setSortingRaceCfg} />
+          </div>
+        )}
+        {type === 'convert_relay' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Convert-it relay</div>
+            <ConvertRelayEditor cfg={convertRelayCfg} setCfg={setConvertRelayCfg} />
+          </div>
+        )}
+        {type === 'url_anatomy' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>URL anatomy</div>
+            <UrlAnatomyEditor cfg={urlAnatomyCfg} setCfg={setUrlAnatomyCfg} />
+          </div>
+        )}
+        {type === 'truth_table' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Truth table builder</div>
+            <TruthTableEditor cfg={truthTableCfg} setCfg={setTruthTableCfg} />
+          </div>
+        )}
+        {type === 'field_type_sort' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Field-type sorter</div>
+            <FieldTypeSortEditor cfg={fieldTypeSortCfg} setCfg={setFieldTypeSortCfg} />
+          </div>
+        )}
+        {type === 'io_sort' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Input / output sorter</div>
+            <IoSortEditor cfg={ioSortCfg} setCfg={setIoSortCfg} />
+          </div>
+        )}
+        {type === 'html_match' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>HTML element matcher</div>
+            <HtmlMatchEditor cfg={htmlMatchCfg} setCfg={setHtmlMatchCfg} />
+          </div>
+        )}
+        {type === 'password_forge' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Password forge</div>
+            <PasswordForgeEditor cfg={passwordForgeCfg} setCfg={setPasswordForgeCfg} />
+          </div>
+        )}
+        {type === 'privacy_radar' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Privacy radar</div>
+            <PrivacyRadarEditor cfg={privacyRadarCfg} setCfg={setPrivacyRadarCfg} />
+          </div>
+        )}
+        {type === 'validation_rules' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Validation-rule matcher</div>
+            <ValidationRulesEditor cfg={validationRulesCfg} setCfg={setValidationRulesCfg} />
+          </div>
+        )}
+        {type === 'find_duplicate' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Find the duplicate row</div>
+            <FindDuplicateEditor cfg={findDuplicateCfg} setCfg={setFindDuplicateCfg} />
+          </div>
+        )}
+        {type === 'bin_search' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Binary-search trace</div>
+            <BinSearchEditor cfg={binSearchCfg} setCfg={setBinSearchCfg} />
+          </div>
+        )}
+        {type === 'box_model' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>CSS box model</div>
+            <BoxModelEditor cfg={boxModelCfg} setCfg={setBoxModelCfg} />
+          </div>
+        )}
+        {type === 'friend_or_fake' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Friend or fake</div>
+            <FriendOrFakeEditor cfg={friendOrFakeCfg} setCfg={setFriendOrFakeCfg} />
+          </div>
+        )}
+        {type === 'dm_danger' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>DM danger</div>
+            <DmDangerEditor cfg={dmDangerCfg} setCfg={setDmDangerCfg} />
+          </div>
+        )}
+        {type === 'upstander' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Be an Upstander</div>
+            <UpstanderEditor cfg={upstanderCfg} setCfg={setUpstanderCfg} />
+          </div>
+        )}
+        {type === 'malware_triage' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Malware triage</div>
+            <MalwareTriageEditor cfg={malwareTriageCfg} setCfg={setMalwareTriageCfg} />
+          </div>
+        )}
+        {type === '2fa_escape' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>2FA escape</div>
+            <TwoFactorEscapeEditor cfg={twoFactorEscapeCfg} setCfg={setTwoFactorEscapeCfg} />
+          </div>
+        )}
+        {type === 'a11y_audit' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Accessibility audit</div>
+            <A11yAuditEditor cfg={a11yAuditCfg} setCfg={setA11yAuditCfg} />
+          </div>
+        )}
+        {type === 'fetch_execute' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Fetch–decode–execute</div>
+            <FetchExecuteEditor cfg={fetchExecuteCfg} setCfg={setFetchExecuteCfg} />
+          </div>
+        )}
+        {type === 'screen_time' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Screen-time check</div>
+            <ScreenTimeEditor cfg={screenTimeCfg} setCfg={setScreenTimeCfg} />
+          </div>
+        )}
+        {type === 'footprint_trail' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Digital footprint trail</div>
+            <FootprintTrailEditor cfg={footprintTrailCfg} setCfg={setFootprintTrailCfg} />
+          </div>
+        )}
+        {type === 'social_engineer' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Social-engineering scams</div>
+            <SocialEngineerEditor cfg={socialEngineerCfg} setCfg={setSocialEngineerCfg} />
+          </div>
+        )}
+        {type === 'cipher_quest' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Cipher quest</div>
+            <CipherQuestEditor cfg={cipherQuestCfg} setCfg={setCipherQuestCfg} />
+          </div>
+        )}
+        {type === 'normalise_it' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Normalise it</div>
+            <NormaliseItEditor cfg={normaliseItCfg} setCfg={setNormaliseItCfg} />
+          </div>
+        )}
+        {type === 'subnet_calc' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>IP-address classifier</div>
+            <SubnetCalcEditor cfg={subnetCalcCfg} setCfg={setSubnetCalcCfg} />
+          </div>
+        )}
+        {type === 'phish_inbox' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Phish-inbox triage</div>
+            <PhishInboxEditor cfg={phishInboxCfg} setCfg={setPhishInboxCfg} />
+          </div>
+        )}
+        {type === 'build_pc' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Build-a-PC parts</div>
+            <BuildPcEditor cfg={buildPcCfg} setCfg={setBuildPcCfg} />
+          </div>
+        )}
+        {type === 'os_sched' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>OS scheduling algorithms</div>
+            <OsSchedEditor cfg={osSchedCfg} setCfg={setOsSchedCfg} />
+          </div>
+        )}
+        {type === 'query_visual' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>SQL operation identifier</div>
+            <QueryVisualEditor cfg={queryVisualCfg} setCfg={setQueryVisualCfg} />
+          </div>
+        )}
+        {type === 'schema_arch' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Schema relationships</div>
+            <SchemaArchEditor cfg={schemaArchCfg} setCfg={setSchemaArchCfg} />
+          </div>
+        )}
+        {type === 'tag_soup_repair' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Tag-soup HTML repair</div>
+            <TagSoupRepairEditor cfg={tagSoupRepairCfg} setCfg={setTagSoupRepairCfg} />
+          </div>
+        )}
+        {type === 'selector_golf' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>CSS-selector golf</div>
+            <SelectorGolfEditor cfg={selectorGolfCfg} setCfg={setSelectorGolfCfg} />
+          </div>
+        )}
+        {type === 'css_sliders' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>CSS-property sliders</div>
+            <CssSlidersEditor cfg={cssSlidersCfg} setCfg={setCssSlidersCfg} />
+          </div>
+        )}
+        {type === 'mindmap' && (
+          <div style={fieldLabel as any}>
+            <div style={{ fontWeight: 600 }}>Mindmap activity</div>
+            <MindmapEditor cfg={mindmapCfg} setCfg={setMindmapCfg} />
+          </div>
+        )}
         {type !== 'section_header' && (
           <div style={{ marginTop: 8 }}>
             <div style={{ ...fieldLabel, marginBottom: 4 }}>Resources for this task</div>
@@ -4646,13 +6627,21 @@ function NewQuestionModal({ lessonId, passages, existing, initialPassageId, onCl
             )}
           </div>
         )}
-        {type !== 'passage' && type !== 'video_group' && type !== 'info_only' && type !== 'text_only' && type !== 'section_header' && (
+        {type !== 'passage' && type !== 'video_group' && type !== 'file_task' && type !== 'mc_group' && type !== 'group' && type !== 'info_only' && type !== 'text_only' && type !== 'section_header' && (
           <>
             <label style={fieldLabel}>Marking scheme (teacher view only)
               <textarea rows={2} value={markingScheme} onChange={(e) => setMarkingScheme(e.target.value)} style={input} />
             </label>
-            <label style={fieldLabel}>AI grading guidance (used by AI marker — Phase 2)
+            <label style={fieldLabel}>
+              {type === 'multiple_choice'
+                ? 'AI feedback guidance (optional — extra context for the AI explanation)'
+                : 'AI grading guidance (used by the AI marker)'}
               <textarea rows={2} value={aiGuidance} onChange={(e) => setAiGuidance(e.target.value)} style={input} />
+              {type === 'multiple_choice' && (
+                <span style={{ fontSize: 12, color: 'var(--cw-muted)', marginTop: 4 }}>
+                  The AI always explains why the answer is right or wrong. Add extra context here (e.g. "Binary uses base 2 because…") to make the explanation richer.
+                </span>
+              )}
             </label>
           </>
         )}
@@ -4705,7 +6694,7 @@ function VideoQuestionPlayer({ config, compact }: { config: any; compact?: boole
       </div>
     );
   }
-  const maxW = 800;
+  const maxW = 560;
   if (v.kind === 'youtube') {
     const id = youtubeIdFromUrl(String(v.url));
     if (!id) {
@@ -5311,8 +7300,8 @@ function LessonHeader({ lesson }: { lesson: LessonInfo }) {
       .map((s) => s.replace(/^\s*(?:[-*•]|\d+[.)])\s+/, '').trim())
       .filter(Boolean);
   };
-  const li = toLines(lesson.learning_intentions);
-  const sc = toLines(lesson.success_criteria);
+  const li = lesson.is_test ? [] : toLines(lesson.learning_intentions);
+  const sc = lesson.is_test ? [] : toLines(lesson.success_criteria);
   return (
     <div style={{
       background: 'var(--cw-surface)', border: '1px solid var(--cw-border)', borderRadius: 12,
@@ -5358,6 +7347,280 @@ function LessonHeader({ lesson }: { lesson: LessonInfo }) {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// ── McGroupAnswer ─────────────────────────────────────────────────────────────
+// Student-facing component for mc_group questions.  All child multiple_choice
+// questions are displayed together with a single "Submit answers" button.
+function McGroupAnswer({
+  group,
+  childQuestions,
+  submissions,
+  unlockedQIds,
+  preview,
+  onPreviewAnswered,
+  onSubmitted,
+}: {
+  group: Question;
+  childQuestions: Question[];
+  submissions: Submission[];
+  unlockedQIds: Set<string>;
+  preview: boolean;
+  onPreviewAnswered: (ids: string[]) => void;
+  onSubmitted: () => void;
+}) {
+  // Most recent submission per child question.
+  const lastByQid = useMemo(() => {
+    const map: Record<string, Submission> = {};
+    const ids = new Set(childQuestions.map((c) => c.id));
+    for (const s of submissions) {
+      if (!ids.has(s.question_id)) continue;
+      if (!map[s.question_id] || new Date(s.submitted_at) > new Date(map[s.question_id].submitted_at)) {
+        map[s.question_id] = s;
+      }
+    }
+    return map;
+  }, [submissions, childQuestions]);
+
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [justSubmitted, setJustSubmitted] = useState(false);
+  const [previewResults, setPreviewResults] = useState<Record<string, { marksAwarded: number | null; feedback: string | null; maxMarks: number }> | null>(null);
+
+  // Pre-fill from last submissions on first render.
+  const hydrated = useRef(false);
+  useEffect(() => {
+    if (hydrated.current) return;
+    hydrated.current = true;
+    const init: Record<string, string> = {};
+    for (const c of childQuestions) {
+      const sub = lastByQid[c.id];
+      if (sub?.selected_option_label) init[c.id] = sub.selected_option_label;
+    }
+    if (Object.keys(init).length) setAnswers((a) => ({ ...init, ...a }));
+  }, [lastByQid, childQuestions]);
+
+  // Re-fill when teacher grants an unlock.
+  const unlockHydrated = useRef(false);
+  const anyUnlocked = childQuestions.some((c) => unlockedQIds.has(c.id));
+  useEffect(() => {
+    if (!anyUnlocked || unlockHydrated.current) return;
+    unlockHydrated.current = true;
+    setJustSubmitted(false);
+    const init: Record<string, string> = {};
+    for (const c of childQuestions) {
+      const sub = lastByQid[c.id];
+      if (sub?.selected_option_label) init[c.id] = sub.selected_option_label;
+    }
+    if (Object.keys(init).length) setAnswers((a) => ({ ...init, ...a }));
+  }, [anyUnlocked, lastByQid, childQuestions]);
+
+  const allSubmitted = childQuestions.every((c) => !!lastByQid[c.id]);
+  // Children that still need a submission (or have been unlocked for re-submit).
+  const activeChildren = childQuestions.filter((c) => !lastByQid[c.id] || unlockedQIds.has(c.id));
+  const isLocked = (allSubmitted || justSubmitted) && !anyUnlocked && !preview;
+  const canSubmit = activeChildren.length > 0 && activeChildren.every((c) => !!(answers[c.id] || '').trim());
+
+  async function submitAll() {
+    if (busy) return;
+    setBusy(true);
+    setMsg(preview ? 'Running AI marker…' : null);
+    if (preview) setPreviewResults(null);
+    const token = localStorage.getItem('studentToken') || '';
+    try {
+      if (preview) {
+        // Dry-run: use the teacher-auth /try endpoint — no submissions stored.
+        const results: Record<string, { marksAwarded: number | null; feedback: string | null; maxMarks: number }> = {};
+        for (const child of activeChildren) {
+          const selected = answers[child.id] || '';
+          if (!selected) continue;
+          const r = await api<{ marksAwarded: number | null; feedback: string | null; maxMarks: number }>(
+            `/api/classwork/questions/${child.id}/try`,
+            { method: 'POST', body: JSON.stringify({ selectedOptionLabel: selected }) },
+          );
+          results[child.id] = r;
+        }
+        setPreviewResults(results);
+        setMsg(null);
+        onPreviewAnswered(Object.keys(results));
+      } else {
+        for (const child of activeChildren) {
+          const selected = answers[child.id] || '';
+          if (!selected) continue;
+          const res = await fetch(`/api/classwork/questions/${child.id}/submit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ selectedOptionLabel: selected }),
+          });
+          if (!res.ok) {
+            const j = await res.json().catch(() => ({}));
+            throw new Error((j as any)?.error || `Submit failed (${res.status})`);
+          }
+        }
+        setJustSubmitted(true);
+        onSubmitted();
+      }
+    } catch (e: any) {
+      setMsg(e.message || 'Submission failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // ── Locked (all submitted, none unlocked) ──────────────────────────────────
+  if (isLocked) {
+    const totalMarks = childQuestions.reduce((s, c) => s + (c.max_marks || 0), 0);
+    const awarded = childQuestions.reduce((s, c) => s + (lastByQid[c.id]?.marks_awarded ?? 0), 0);
+    return (
+      <div style={{
+        marginTop: 4, padding: '14px 16px',
+        border: '1.5px solid var(--cw-tint-success-border)', borderRadius: 8,
+        background: 'var(--cw-tint-success-bg)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <span style={{ fontSize: 18 }}>✅</span>
+          <span style={{ fontWeight: 700, color: 'var(--cw-tint-success-ink)', fontSize: 14 }}>
+            Submitted · {awarded}/{totalMarks} mark{totalMarks === 1 ? '' : 's'}
+          </span>
+        </div>
+        {childQuestions.map((c, ci) => {
+          const sub = lastByQid[c.id];
+          const opts: any[] = Array.isArray(c.options) ? c.options : [];
+          const optText = opts.find((o: any) => o.label === sub?.selected_option_label)?.text;
+          return (
+            <div key={c.id} style={{
+              marginBottom: 20, paddingBottom: 20,
+              borderBottom: ci < childQuestions.length - 1 ? '1px solid var(--cw-tint-success-border)' : 'none',
+            }}>
+              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>
+                {String.fromCharCode(97 + ci)}) {c.prompt}
+              </div>
+              {sub && (
+                <div style={{ fontSize: 13, color: 'var(--cw-ink)' }}>
+                  <strong>Your answer:</strong> {optText || sub.selected_option_label}
+                  {sub.marks_awarded != null && (
+                    <span style={{ marginLeft: 8, color: 'var(--cw-muted)' }}>
+                      ({sub.marks_awarded}/{c.max_marks} mark{c.max_marks === 1 ? '' : 's'})
+                    </span>
+                  )}
+                </div>
+              )}
+              {sub?.ai_feedback && (
+                <div style={{ marginTop: 4, fontSize: 13, color: 'var(--cw-ink)', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+                  {sub.ai_feedback}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        <p style={{ margin: 0, fontSize: 12, color: 'var(--cw-muted)' }}>
+          Your answers are locked. Ask your teacher if you need to revise.
+        </p>
+      </div>
+    );
+  }
+
+  // ── Active form ────────────────────────────────────────────────────────────
+  return (
+    <div style={{
+      marginTop: 4, padding: 20,
+      border: '1px dashed var(--cw-border)', borderRadius: 8,
+      background: 'var(--cw-surface-soft)',
+    }}>
+      {anyUnlocked && allSubmitted && (
+        <div style={{
+          marginBottom: 20, padding: '8px 12px',
+          background: '#eff6ff', border: '1.5px solid #bfdbfe', borderRadius: 8,
+          fontSize: 13, color: '#1e40af', display: 'flex', gap: 8, alignItems: 'flex-start',
+        }}>
+          <span style={{ flexShrink: 0 }}>🔓</span>
+          <span>Your teacher has unlocked this question — revise your answers below and resubmit.</span>
+        </div>
+      )}
+      {childQuestions.map((c, ci) => {
+        const sub = lastByQid[c.id];
+        const isActive = !sub || unlockedQIds.has(c.id);
+        const opts: any[] = Array.isArray(c.options) ? c.options : [];
+        return (
+          <div key={c.id} style={{
+            marginBottom: 28, paddingBottom: 28,
+            borderBottom: ci < childQuestions.length - 1 ? '1px solid var(--cw-border)' : 'none',
+          }}>
+            <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 12 }}>
+              {String.fromCharCode(97 + ci)}) {c.prompt}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {opts.map((opt: any, oi: number) => {
+                const val: string = opt.label || String(oi);
+                return (
+                  <label key={oi} style={{
+                    display: 'flex', gap: 8, alignItems: 'center',
+                    cursor: isActive ? 'pointer' : 'default',
+                    opacity: !isActive ? 0.6 : 1,
+                  }}>
+                    <input
+                      type="radio"
+                      name={`mcg-${group.id}-${c.id}`}
+                      value={val}
+                      checked={answers[c.id] === val}
+                      onChange={(e) => setAnswers((a) => ({ ...a, [c.id]: e.target.value }))}
+                      disabled={!isActive}
+                    />
+                    <span>{opt.text || opt.label || `Option ${oi + 1}`}</span>
+                  </label>
+                );
+              })}
+            </div>
+            {!isActive && sub && (
+              <div style={{ marginTop: 6, fontSize: 12, color: 'var(--cw-muted)', fontStyle: 'italic' }}>
+                Already submitted
+                {sub.marks_awarded != null && ` · ${sub.marks_awarded}/${c.max_marks} mark${c.max_marks === 1 ? '' : 's'}`}
+              </div>
+            )}
+            {preview && previewResults?.[c.id] && (
+              <div style={{
+                marginTop: 10, padding: '8px 12px', borderRadius: 8,
+                background: 'var(--cw-tint-info-bg)', border: '1px solid var(--cw-tint-info-border)',
+                fontSize: 13,
+              }}>
+                {previewResults[c.id].marksAwarded != null && (
+                  <div style={{ fontWeight: 700, marginBottom: 4, color: 'var(--cw-tint-info-ink)' }}>
+                    {previewResults[c.id].marksAwarded}/{previewResults[c.id].maxMarks} mark{previewResults[c.id].maxMarks === 1 ? '' : 's'}
+                  </div>
+                )}
+                {previewResults[c.id].feedback && (
+                  <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5, color: 'var(--cw-ink)' }}>
+                    {previewResults[c.id].feedback}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4, flexWrap: 'wrap' }}>
+        <button
+          onClick={submitAll}
+          disabled={busy || !canSubmit}
+          style={{
+            background: canSubmit && !busy ? 'var(--cw-accent)' : 'var(--cw-surface-muted)',
+            color: canSubmit && !busy ? '#fff' : 'var(--cw-muted)',
+            border: 'none', padding: '9px 18px', borderRadius: 8,
+            fontWeight: 700, cursor: canSubmit && !busy ? 'pointer' : 'not-allowed', fontSize: 14,
+          }}
+        >
+          {busy ? 'Submitting…' : 'Submit answers'}
+        </button>
+        {msg && <span style={{ color: 'var(--cw-danger)', fontSize: 13 }}>{msg}</span>}
+        {activeChildren.length > 0 && !canSubmit && (
+          <span style={{ color: 'var(--cw-muted)', fontSize: 13 }}>
+            Choose an answer for each question first.
+          </span>
+        )}
+      </div>
     </div>
   );
 }
