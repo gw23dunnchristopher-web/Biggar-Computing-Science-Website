@@ -2626,9 +2626,9 @@ function MindmapSvg({ central, branches }: { central: string; branches: MindmapB
   const MC_S = Math.floor((MW_S - PX_S * 2) / (FS * 0.60)); // ≈17
 
   const n = branches.length;
-  // Radii: keep adjacent branch arcs ≥ 180 px apart
-  const R1 = n <= 1 ? 200 : Math.max(200, Math.ceil(29 * n));
-  const R2 = 170;
+  // Radii: keep adjacent branch arcs ≥ 150 px apart
+  const R1 = n <= 1 ? 155 : Math.max(155, Math.ceil(23 * n));
+  const R2 = 135;
   const FAN = (27 * Math.PI) / 180;
 
   // ── Pre-compute all node positions & sizes (centre = 0,0) ──
