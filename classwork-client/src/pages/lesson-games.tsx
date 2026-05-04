@@ -2563,54 +2563,99 @@ const BRANCH_COLORS = [
   '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6',
 ];
 
-function trunc(s: string, n: number) {
-  const t = (s || '').trim();
-  return t.length > n ? t.slice(0, n - 1) + '…' : (t || '—');
+// Word-wrap a label into lines of at most maxChars characters, splitting on spaces.
+function wrapLabel(text: string, maxChars: number): string[] {
+  const t = (text || '').trim() || '—';
+  if (t.length <= maxChars) return [t];
+  const words = t.split(' ');
+  const lines: string[] = [];
+  let cur = '';
+  for (const w of words) {
+    if (!cur) { cur = w; continue; }
+    if ((cur + ' ' + w).length <= maxChars) { cur += ' ' + w; }
+    else { lines.push(cur); cur = w; }
+  }
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [t];
+}
+
+// Estimate node rect dimensions from wrapped lines.
+function nodeRect(lines: string[], fontSize: number, padX: number, padY: number, minW: number) {
+  const longestChars = Math.max(...lines.map(l => l.length));
+  const w = Math.max(minW, Math.ceil(longestChars * fontSize * 0.61) + padX * 2);
+  const lineH = fontSize + 5;
+  const h = lines.length * lineH + padY * 2;
+  return { w, h, lineH };
+}
+
+// Render wrapped text centred in a node at (nx, ny).
+function MindmapText({ x, nx, ny, lines, fontSize, fill, fontWeight, lineH }: {
+  x?: never; nx: number; ny: number; lines: string[]; fontSize: number;
+  fill: string; fontWeight: string; lineH: number;
+}) {
+  const topY = ny - ((lines.length - 1) * lineH) / 2;
+  return (
+    <text textAnchor="middle" fontFamily="system-ui,sans-serif"
+      fontWeight={fontWeight} fontSize={fontSize} fill={fill}>
+      {lines.map((line, li) => (
+        <tspan key={li} x={nx} y={topY + li * lineH}>{line}</tspan>
+      ))}
+    </text>
+  );
+}
+
+// Smooth elbow connector (cubic bezier S-curve) from (x1,y1) to (x2,y2).
+function elbow(x1: number, y1: number, x2: number, y2: number) {
+  const midY = (y1 + y2) / 2;
+  return `M ${x1} ${y1} C ${x1} ${midY} ${x2} ${midY} ${x2} ${y2}`;
 }
 
 function MindmapSvg({ central, branches }: { central: string; branches: MindmapBranch[] }) {
-  const W = 800, H = 640;
+  const W = 920, H = 700;
   const cx = W / 2, cy = H / 2;
-
   const n = branches.length;
-  // Keep branch nodes far enough apart: arc ≥ 130 px → R1 ≥ 130*n/(2π)
-  const R1 = n <= 1 ? 160 : Math.max(150, Math.ceil(21 * n));
-  const R2 = 120; // extra radius for sub-branch nodes
-  const FAN = (22 * Math.PI) / 180; // 22° gap between sub-branches
 
-  // Branch node geometry
-  const BW = 118, BH = 36;
-  // Sub-branch node geometry
-  const SW = 108, SH = 28;
-  // Central node geometry
-  const CW = 154, CH = 44;
+  // Spread branches so adjacent nodes don't crowd: arc ≥ 170 px → R1 ≥ 170*n/(2π)
+  const R1 = n <= 1 ? 190 : Math.max(190, Math.ceil(27 * n));
+  const R2 = 155; // extra radius from branch centre to sub-branch centre
+  const FAN = (26 * Math.PI) / 180; // 26° between sub-branches
 
-  interface BPos { x: number; y: number; angle: number; color: string; branch: MindmapBranch }
-  const bpos: BPos[] = branches.map((b, i) => {
+  // Central node
+  const centralLines = wrapLabel(central || 'Central Topic', 22);
+  const { w: CW, h: CH, lineH: CLH } = nodeRect(centralLines, 14, 22, 12, 130);
+
+  interface BNode {
+    x: number; y: number; angle: number; color: string;
+    branch: MindmapBranch; lines: string[]; w: number; h: number; lineH: number;
+  }
+  const bpos: BNode[] = branches.map((b, i) => {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+    const lines = wrapLabel(b.label, 18);
+    const { w, h, lineH } = nodeRect(lines, 13, 18, 10, 90);
     return {
       x: cx + R1 * Math.cos(angle),
       y: cy + R1 * Math.sin(angle),
       angle,
       color: BRANCH_COLORS[i % BRANCH_COLORS.length],
-      branch: b,
+      branch: b, lines, w, h, lineH,
     };
   });
 
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
-      style={{ width: '100%', maxHeight: 420, borderRadius: 10, background: 'var(--cw-surface-soft, #f8fafc)', border: '1.5px solid var(--cw-border, #e2e8f0)' }}
+      style={{ width: '100%', maxHeight: 480, borderRadius: 10,
+        background: 'var(--cw-surface-soft, #f8fafc)',
+        border: '1.5px solid var(--cw-border, #e2e8f0)' }}
     >
-      {/* Lines: center → branch */}
+      {/* Elbow connectors: center → branch */}
       {bpos.map((bp, bi) => (
-        <line key={`cl-${bi}`}
-          x1={cx} y1={cy} x2={bp.x} y2={bp.y}
-          stroke={bp.color} strokeWidth={2.5} strokeLinecap="round" opacity={0.6}
-        />
+        <path key={`cl-${bi}`} d={elbow(cx, cy, bp.x, bp.y)}
+          fill="none" stroke={bp.color} strokeWidth={2.5}
+          strokeLinecap="round" opacity={0.55} />
       ))}
 
-      {/* Lines: branch → sub-branch */}
+      {/* Elbow connectors: branch → sub-branch */}
       {bpos.map((bp, bi) => {
         const m = bp.branch.children.length;
         return bp.branch.children.map((_, ci) => {
@@ -2618,10 +2663,9 @@ function MindmapSvg({ central, branches }: { central: string; branches: MindmapB
           const sx = cx + (R1 + R2) * Math.cos(subAngle);
           const sy = cy + (R1 + R2) * Math.sin(subAngle);
           return (
-            <line key={`sl-${bi}-${ci}`}
-              x1={bp.x} y1={bp.y} x2={sx} y2={sy}
-              stroke={bp.color} strokeWidth={1.5} strokeLinecap="round" opacity={0.4}
-            />
+            <path key={`sl-${bi}-${ci}`} d={elbow(bp.x, bp.y, sx, sy)}
+              fill="none" stroke={bp.color} strokeWidth={1.5}
+              strokeLinecap="round" opacity={0.38} />
           );
         });
       })}
@@ -2633,15 +2677,15 @@ function MindmapSvg({ central, branches }: { central: string; branches: MindmapB
           const subAngle = bp.angle + (ci - (m - 1) / 2) * FAN;
           const sx = cx + (R1 + R2) * Math.cos(subAngle);
           const sy = cy + (R1 + R2) * Math.sin(subAngle);
+          const sLines = wrapLabel(child.label, 16);
+          const { w: sw, h: sh, lineH: slh } = nodeRect(sLines, 12, 14, 9, 80);
           return (
             <g key={`sn-${bi}-${ci}`}>
-              <rect x={sx - SW / 2} y={sy - SH / 2} width={SW} height={SH} rx={14}
-                fill={bp.color} opacity={0.15} stroke={bp.color} strokeWidth={1.5} strokeOpacity={0.5}
-              />
-              <text x={sx} y={sy + 4.5} textAnchor="middle" fontSize={11}
-                fill={bp.color} fontFamily="system-ui,sans-serif" fontWeight="600">
-                {trunc(child.label, 15)}
-              </text>
+              <rect x={sx - sw / 2} y={sy - sh / 2} width={sw} height={sh} rx={sh / 2}
+                fill={bp.color} fillOpacity={0.12}
+                stroke={bp.color} strokeWidth={1.5} strokeOpacity={0.55} />
+              <MindmapText nx={sx} ny={sy} lines={sLines} fontSize={12}
+                fill={bp.color} fontWeight="600" lineH={slh} />
             </g>
           );
         });
@@ -2650,25 +2694,21 @@ function MindmapSvg({ central, branches }: { central: string; branches: MindmapB
       {/* Branch nodes */}
       {bpos.map((bp, bi) => (
         <g key={`bn-${bi}`}>
-          <rect x={bp.x - BW / 2} y={bp.y - BH / 2} width={BW} height={BH} rx={18}
+          <rect x={bp.x - bp.w / 2} y={bp.y - bp.h / 2} width={bp.w} height={bp.h} rx={bp.h / 2}
             fill={bp.color} />
-          <text x={bp.x} y={bp.y + 5} textAnchor="middle" fontSize={12.5}
-            fill="#fff" fontFamily="system-ui,sans-serif" fontWeight="700">
-            {trunc(bp.branch.label, 16)}
-          </text>
+          <MindmapText nx={bp.x} ny={bp.y} lines={bp.lines} fontSize={13}
+            fill="#fff" fontWeight="700" lineH={bp.lineH} />
         </g>
       ))}
 
       {/* Central node */}
-      <rect x={cx - CW / 2} y={cy - CH / 2} width={CW} height={CH} rx={22} fill="#1e293b" />
-      <text x={cx} y={cy + 5.5} textAnchor="middle" fontSize={14}
-        fill="#fff" fontFamily="system-ui,sans-serif" fontWeight="700">
-        {trunc(central || 'Central Topic', 20)}
-      </text>
+      <rect x={cx - CW / 2} y={cy - CH / 2} width={CW} height={CH} rx={CH / 2} fill="#1e293b" />
+      <MindmapText nx={cx} ny={cy} lines={centralLines} fontSize={14}
+        fill="#fff" fontWeight="700" lineH={CLH} />
 
       {/* Empty-state hint */}
       {n === 0 && (
-        <text x={cx} y={cy + 52} textAnchor="middle" fontSize={12}
+        <text x={cx} y={cy + CH / 2 + 28} textAnchor="middle" fontSize={12}
           fill="#94a3b8" fontFamily="system-ui,sans-serif">
           Use the editor below to add branches
         </text>
