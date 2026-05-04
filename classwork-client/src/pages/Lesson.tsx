@@ -396,11 +396,13 @@ export default function Lesson() {
   // pupils don't have to leave the lesson to jot something into their unit
   // notes. Pupils edit their own per-unit notes; teachers (browsing or
   // previewing the lesson) edit the shared demo notes for the unit.
-  const [editing, setEditing] = useState<{ unitId: string; title: string } | null>(null);
+  const [editing, setEditing] = useState<{ unitId: string; title: string; lessonTitle?: string } | null>(null);
   const [editContent, setEditContent] = useState('');
   const [editSavedAt, setEditSavedAt] = useState<number | null>(null);
   const [editStatus, setEditStatus] = useState<'idle' | 'loading' | 'saving' | 'saved' | 'error'>('idle');
   const [editErr, setEditErr] = useState<string | null>(null);
+  // Set when the jotter is opened from a specific lesson question; cleared after scroll.
+  const [editScrollTarget, setEditScrollTarget] = useState<string | null>(null);
 
   function notesEndpoint(unitId: string): string {
     return role === 'teacher'
@@ -408,12 +410,27 @@ export default function Lesson() {
       : `/api/classwork/units/${encodeURIComponent(unitId)}/notes`;
   }
 
-  function openEditNotes(unitId: string, unitTitle: string) {
+  function openEditNotes(unitId: string, unitTitle: string, lessonTitle?: string) {
     setEditContent(''); setEditSavedAt(null); setEditErr(null);
     setEditStatus('loading');
-    setEditing({ unitId, title: unitTitle });
+    setEditing({ unitId, title: unitTitle, lessonTitle });
+    if (lessonTitle) setEditScrollTarget(lessonTitle);
     api<{ content: string; updatedAt: number | null }>(notesEndpoint(unitId))
-      .then((r) => { setEditContent(r.content || ''); setEditSavedAt(r.updatedAt); setEditStatus('idle'); })
+      .then((r) => {
+        let content = r.content || '';
+        if (lessonTitle) {
+          // Ensure a heading for this lesson exists; if not, append it so the
+          // student's notes are automatically organised under the lesson topic.
+          const esc = lessonTitle.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          const heading = `<h2>${esc}</h2>`;
+          if (!content.includes(heading)) {
+            content = content ? `${content}\n${heading}\n<p><br></p>` : `${heading}\n<p><br></p>`;
+          }
+        }
+        setEditContent(content);
+        setEditSavedAt(r.updatedAt);
+        setEditStatus('idle');
+      })
       .catch((e: any) => { setEditStatus('error'); setEditErr(e.message || 'Failed to load notes'); });
   }
 
@@ -440,6 +457,24 @@ export default function Lesson() {
     return () => window.clearTimeout(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editContent, editing?.unitId]);
+
+  // After loading finishes, scroll to the lesson heading in the editor (once).
+  useEffect(() => {
+    if (editStatus !== 'idle' || !editScrollTarget) return;
+    const target = editScrollTarget;
+    setEditScrollTarget(null); // clear immediately so this only fires once
+    window.setTimeout(() => {
+      const editor = document.querySelector('[aria-label="Unit notes"]') as HTMLElement | null;
+      if (!editor) return;
+      for (const h of Array.from(editor.querySelectorAll('h2'))) {
+        if ((h as HTMLElement).textContent?.trim() === target.trim()) {
+          (h as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        }
+      }
+    }, 150);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editStatus, editScrollTarget]);
 
   function closeEditNotes() {
     const wasEditing = editing;
@@ -787,6 +822,24 @@ export default function Lesson() {
                   {q.question_type !== 'passage' && !isInfo && (
                     <div style={{ fontSize: 13, color: 'var(--cw-muted)' }}>{q.max_marks} mark{q.max_marks === 1 ? '' : 's'}</div>
                   )}
+                  {/* Jotter shortcut on every question — students open their unit
+                      notes without leaving the lesson; the heading for this lesson
+                      is auto-inserted if it doesn't already exist. */}
+                  {lesson?.unit_id && !isTextOnly && (role === 'student' || previewAsStudent) && (
+                    <button
+                      type="button"
+                      onClick={() => openEditNotes(lesson.unit_id!, lesson.title || 'this unit', lesson.title || undefined)}
+                      title={role === 'teacher' ? 'Open demo jotter for this unit' : 'Add notes to your jotter for this lesson'}
+                      style={{
+                        background: 'none', border: '1px solid var(--cw-border, #e2e8f0)',
+                        borderRadius: 5, padding: '2px 8px', fontSize: 12,
+                        cursor: 'pointer', color: 'var(--cw-muted)', display: 'flex',
+                        alignItems: 'center', gap: 3, whiteSpace: 'nowrap',
+                      }}
+                    >
+                      📓 Jotter
+                    </button>
+                  )}
                   {role === 'teacher' && !previewAsStudent && (
                     <>
                       <EditQuestionButton
@@ -873,7 +926,7 @@ export default function Lesson() {
                       // so pupils can jot something straight away without
                       // navigating away from the lesson.
                       if (!lesson?.unit_id) return;
-                      openEditNotes(lesson.unit_id, lesson.title || 'this unit');
+                      openEditNotes(lesson.unit_id, lesson.title || 'this unit', lesson.title || undefined);
                     }}
                     disabled={!lesson?.unit_id}
                     title={role === 'teacher'
