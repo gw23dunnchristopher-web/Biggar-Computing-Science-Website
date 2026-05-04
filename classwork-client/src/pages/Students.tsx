@@ -268,70 +268,6 @@ export default function Students() {
     );
   }
 
-  function printCredentials() {
-    if (!selectedClass || students.length === 0) return;
-    const loginUrl = `${window.location.origin}/classwork/`;
-    const dateStr = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-    const yearStr = selectedClass.course ? ` — ${yearLabel(selectedClass.course)}` : '';
-
-    const rows = students.map((s) => {
-      const pwd = s.initialPassword || '—';
-      const status = s.mustChangePassword ? 'Not changed yet' : 'Changed own password';
-      const statusStyle = s.mustChangePassword
-        ? 'color:#92400e'
-        : 'color:#6b7280;font-style:italic';
-      return `<tr>
-        <td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;font-family:monospace;font-size:11pt">${s.username}</td>
-        <td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;font-family:monospace;font-size:11pt">${s.mustChangePassword ? pwd : `<span style="color:#9ca3af">${pwd}</span>`}</td>
-        <td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;font-size:10pt;${statusStyle}">${status}</td>
-      </tr>`;
-    }).join('');
-
-    const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>${selectedClass.name} — Login Credentials</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:Arial,sans-serif;font-size:12pt;color:#111;padding:16mm 18mm}
-    h1{font-size:17pt;font-weight:700;margin-bottom:4px}
-    .meta{font-size:10pt;color:#6b7280;margin-bottom:18px}
-    table{width:100%;border-collapse:collapse}
-    thead tr{background:#f3f4f6}
-    th{text-align:left;padding:8px 10px;border-bottom:2px solid #d1d5db;font-size:10pt;color:#374151;font-weight:700}
-    .note{margin-top:20px;font-size:9pt;color:#9ca3af}
-    @media print{@page{margin:12mm}}
-  </style>
-</head>
-<body>
-  <h1>${selectedClass.name}${yearStr}</h1>
-  <div class="meta">Printed ${dateStr} &nbsp;·&nbsp; ${students.length} pupil${students.length !== 1 ? 's' : ''} &nbsp;·&nbsp; Login: <strong>${loginUrl}</strong></div>
-  <table>
-    <thead>
-      <tr>
-        <th>Username</th>
-        <th>Initial password</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>${rows}</tbody>
-  </table>
-  <p class="note">Pupils who have already set their own password are shown in grey — their initial password is shown for your records only.</p>
-</body>
-</html>`;
-
-    const w = window.open('', '_blank', 'width=900,height=700');
-    if (!w) {
-      setModal({ kind: 'info', title: 'Pop-up blocked', message: 'Please allow pop-ups for this site, then try again.' });
-      return;
-    }
-    w.document.write(html);
-    w.document.close();
-    w.focus();
-    setTimeout(() => w.print(), 400);
-  }
-
   if (role !== 'teacher') {
     return (
       <Shell title="Students" back={{ href: '/', label: 'Back to home' }}>
@@ -496,26 +432,7 @@ export default function Students() {
               <>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
                   <h3 style={{ margin: 0 }}>{selectedClass.name}</h3>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                    {students.length > 0 && (
-                      <>
-                        <button
-                          onClick={printCredentials}
-                          title="Open a print-ready credentials sheet for this class"
-                          style={secondaryBtn}
-                        >
-                          Print logins
-                        </button>
-                        <a
-                          href={`/api/classwork/teacher/classes/${selectedId}/students/export.xlsx`}
-                          download
-                          title="Download an Excel file with usernames and initial passwords"
-                          style={{ ...secondaryBtn, textDecoration: 'none', display: 'inline-block' }}
-                        >
-                          Save as Excel
-                        </a>
-                      </>
-                    )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <label style={{ fontSize: 13 }}>Add</label>
                     <input
                       type="number" min={1} max={50} value={bulkCount}

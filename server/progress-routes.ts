@@ -28,7 +28,7 @@ export function registerProgressRoutes(app: Express) {
   app.get("/api/progress/classes", requireTeacher, async (_req, res) => {
     try {
       const classes = await db.select().from(bhsClasses).orderBy(bhsClasses.course, bhsClasses.name);
-      const result = await Promise.all(classes.map(async (cls: any) => {
+      const result = await Promise.all(classes.map(async (cls) => {
         const studs = await db.select({ id: bhsStudents.id })
           .from(bhsStudents).where(eq(bhsStudents.classId, cls.id));
         return { ...cls, studentCount: studs.length };
@@ -51,7 +51,7 @@ export function registerProgressRoutes(app: Express) {
         .where(eq(bhsStudents.classId, classId))
         .orderBy(bhsStudents.username);
 
-      const students = await Promise.all(studs.map(async (s: any) => {
+      const students = await Promise.all(studs.map(async (s) => {
         let results: { score: number; maxMarks: number; percentage: number; title: string; completedAt: Date }[] = [];
         let activeExam: string | null = null;
 
@@ -59,7 +59,7 @@ export function registerProgressRoutes(app: Express) {
           const rows = await db.select().from(studentExamResults)
             .where(eq(studentExamResults.studentId, s.id))
             .orderBy(desc(studentExamResults.completedAt));
-          results = rows.map((r: any) => ({
+          results = rows.map(r => ({
             score: r.score ?? 0,
             maxMarks: r.maxMarks ?? 0,
             percentage: r.percentage ?? 0,
@@ -73,7 +73,7 @@ export function registerProgressRoutes(app: Express) {
           const rows = await db.select().from(n5ExamResults)
             .where(eq(n5ExamResults.studentId, s.id))
             .orderBy(desc(n5ExamResults.timestamp));
-          results = rows.map((r: any) => ({
+          results = rows.map(r => ({
             score: r.score ?? 0,
             maxMarks: r.maxScore ?? 0,
             percentage: r.maxScore ? Math.round((r.score / r.maxScore) * 100) : 0,
@@ -128,7 +128,7 @@ export function registerProgressRoutes(app: Express) {
         const rows = await db.select().from(studentExamResults)
           .where(eq(studentExamResults.studentId, studentId))
           .orderBy(desc(studentExamResults.completedAt));
-        results = rows.map((r: any) => ({
+        results = rows.map(r => ({
           id: r.id,
           title: r.examTitle ?? r.examIdentifier ?? "Past Paper",
           score: r.score ?? 0,
@@ -149,7 +149,7 @@ export function registerProgressRoutes(app: Express) {
         const rows = await db.select().from(n5ExamResults)
           .where(eq(n5ExamResults.studentId, studentId))
           .orderBy(desc(n5ExamResults.timestamp));
-        results = rows.map((r: any) => ({
+        results = rows.map(r => ({
           id: r.id,
           title: r.additionalPaperId ? `Additional Paper (${r.year ?? ""})` : `${r.year ?? "Past Paper"} Past Paper`,
           score: r.score ?? 0,

@@ -6,9 +6,6 @@ import multer from 'multer';
 import { saveClassworkUpload, streamClassworkUpload, downloadClassworkUploadToTemp } from './classwork-uploads-store';
 import { pool, hasDatabase } from './db';
 import {
-  setUnitOdSections,
-  setUnitOdResolvedUrl,
-  resolveOdSharingUrl,
   ensureClassworkSchema,
   isClassworkCourse,
   isClassworkQuestionType,
@@ -71,15 +68,8 @@ import {
   usernameTakenAnywhere,
   setUnitPresentation,
   clearUnitPresentation,
-  setUnitOnedriveUrl,
-  clearUnitOnedriveUrl,
-  getStudentSubmissionForQuestion,
-  unlockSubmission,
-  lockSubmission,
-  listMyUnlocksForLesson,
-  listUnlocksForLesson,
 } from './classwork-storage';
-import { markSubmission, suggestCrosswordClues, renderPptxToImages, extractPptxSections, convertPptxToPdf, fetchGoogleDocText } from './classwork-ai';
+import { markSubmission, suggestCrosswordClues, renderPptxToImages, extractPptxSections, convertPptxToPdf } from './classwork-ai';
 import { storage as n5Storage } from './n5-storage';
 import bcrypt from 'bcryptjs';
 
@@ -333,15 +323,6 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     try {
       const units = await listUnits(course);
       res.json(units);
-      // Background: resolve any sharing URLs that haven't been resolved yet.
-      // Runs fire-and-forget so the response is never delayed.
-      for (const u of units) {
-        if (u.onedrive_embed_url && !u.od_resolved_url) {
-          resolveOdSharingUrl(u.onedrive_embed_url).then((resolved) => {
-            if (resolved) setUnitOdResolvedUrl(u.id, resolved).catch(() => {});
-          }).catch(() => {});
-        }
-      }
     } catch (err) {
       console.error('[classwork] listUnits error:', err);
       res.status(500).json({ error: 'Failed to list units' });
@@ -514,68 +495,6 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     }
   });
 
-  /* ---------- Per-unit OneDrive embed link ---------- */
-
-  // Teachers can attach a OneDrive/SharePoint embed URL to a unit instead of
-  // (or alongside) a locally-uploaded PPTX. The client validates the URL format
-  // before calling this endpoint; we do a basic sanity-check server-side too.
-  app.put('/api/classwork/units/:unitId/onedrive-url', requireTeacher, async (req, res) => {
-    const { url } = req.body as { url?: string };
-    if (!url || typeof url !== 'string' || !url.trim().startsWith('http')) {
-      return res.status(400).json({ error: 'A valid URL is required.' });
-    }
-    try {
-      const updated = await setUnitOnedriveUrl(req.params.unitId, url.trim());
-      if (!updated) return res.status(404).json({ error: 'Unit not found' });
-      // Attempt to resolve the sharing URL to the proper /_layouts/15/doc2.aspx
-      // embed URL in the background. This resolved URL supports wdStartOn for
-      // slide navigation, unlike the raw sharing link which loses query params
-      // during its server-side redirect. We don't await the result before
-      // responding to the teacher — resolution typically takes ~1 s.
-      resolveOdSharingUrl(url.trim()).then((resolved) => {
-        setUnitOdResolvedUrl(req.params.unitId, resolved).catch(() => {});
-      }).catch(() => {});
-      res.json({ ok: true, unit: updated });
-    } catch (err) {
-      console.error('[classwork] set onedrive url error:', err);
-      res.status(500).json({ error: 'Failed to save OneDrive URL' });
-    }
-  });
-
-  // Teachers save manually-defined section markers for the OneDrive viewer.
-  // Sections are stored as JSONB on the unit row so they are always in sync
-  // with whatever the teacher types — no PPTX upload required.
-  app.put('/api/classwork/units/:unitId/od-sections', requireTeacher, async (req, res) => {
-    const { sections } = req.body as { sections?: unknown };
-    if (!Array.isArray(sections)) {
-      return res.status(400).json({ error: 'sections must be an array' });
-    }
-    const validated = (sections as any[]).filter(
-      (s) => s && typeof s.name === 'string' && Number.isFinite(Number(s.startSlide)),
-    ).map((s) => ({ name: String(s.name).trim(), startSlide: Number(s.startSlide) }));
-    try {
-      const updated = await setUnitOdSections(req.params.unitId, validated);
-      if (!updated) return res.status(404).json({ error: 'Unit not found' });
-      res.json({ ok: true, unit: updated });
-    } catch (err) {
-      console.error('[classwork] od-sections update failed:', err);
-      res.status(500).json({ error: 'Failed to update sections' });
-    }
-  });
-
-  app.delete('/api/classwork/units/:unitId/onedrive-url', requireTeacher, async (req, res) => {
-    try {
-      const updated = await clearUnitOnedriveUrl(req.params.unitId);
-      if (!updated) return res.status(404).json({ error: 'Unit not found' });
-      // Also clear the resolved URL so stale data doesn't linger.
-      setUnitOdResolvedUrl(req.params.unitId, null).catch(() => {});
-      res.json({ ok: true, unit: updated });
-    } catch (err) {
-      console.error('[classwork] clear onedrive url error:', err);
-      res.status(500).json({ error: 'Failed to remove OneDrive URL' });
-    }
-  });
-
   /* ---------- Per-pupil unit notes (notes jotter) ---------- */
 
   // Each pupil gets one free-form notes page per unit. Teachers cannot see or
@@ -617,7 +536,7 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
       const cc = await getStudentClassCourse(studentId);
       if (!cc?.course) return res.status(409).json({ error: 'You haven\u2019t been put in a year group yet.' });
       const jotter = await getJotterForStudent(studentId, cc.course);
-      res.json({ ...jotter, courseLabel: (CLASSWORK_COURSE_LABELS as Record<string, string>)[cc.course] || cc.course });
+      res.json({ ...jotter, courseLabel: CLASSWORK_COURSE_LABELS[cc.course] || cc.course });
     } catch (err) {
       console.error('[classwork] getMyJotter error:', err);
       res.status(500).json({ error: 'Failed to load jotter' });
@@ -631,7 +550,7 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
       const cc = await getStudentClassCourse(studentId);
       if (!cc?.course) return res.status(409).json({ error: 'This pupil hasn\u2019t been put in a year group yet.' });
       const jotter = await getJotterForStudent(studentId, cc.course);
-      res.json({ ...jotter, courseLabel: (CLASSWORK_COURSE_LABELS as Record<string, string>)[cc.course] || cc.course });
+      res.json({ ...jotter, courseLabel: CLASSWORK_COURSE_LABELS[cc.course] || cc.course });
     } catch (err) {
       console.error('[classwork] getStudentJotter error:', err);
       res.status(500).json({ error: 'Failed to load jotter' });
@@ -982,32 +901,10 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
         fileUrl,
       });
 
-      // If this question belongs to a file_task group, fetch the student's
-      // uploaded file from the parent submission so the AI can mark in context.
-      let parentFileContent: string | null = null;
-      if (q.passage_id) {
-        const parent = await getQuestion(q.passage_id);
-        if (parent?.question_type === 'file_task') {
-          const parentSub = await getStudentSubmissionForQuestion(q.passage_id, (req as any).studentId);
-          if (parentSub?.text_answer) {
-            try {
-              const parsed = JSON.parse(parentSub.text_answer);
-              parentFileContent = typeof parsed.content === 'string' ? parsed.content : parentSub.text_answer;
-            } catch {
-              parentFileContent = parentSub.text_answer;
-            }
-          } else if (parentSub?.link_url) {
-            const doc = await fetchGoogleDocText(parentSub.link_url).catch(() => null);
-            if (doc?.text) parentFileContent = doc.text;
-          }
-        }
-      }
-
       // Try to AI-mark within ~25 s; fall back to "pending teacher mark"
       // if the model takes too long or no key is configured.
       try {
-        const subWithContext = parentFileContent ? { ...sub, parentFileContent } : sub;
-        const markPromise = markSubmission(q as any, subWithContext as any);
+        const markPromise = markSubmission(q as any, sub as any);
         const result = await Promise.race([
           markPromise,
           new Promise<null>((resolve) => setTimeout(() => resolve(null), 25000)),
@@ -1295,17 +1192,6 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     }
   });
 
-  // Student: which question IDs in this lesson are currently unlocked for them?
-  app.get('/api/classwork/lessons/:lessonId/my-unlocks', requireStudent, async (req, res) => {
-    try {
-      const ids = await listMyUnlocksForLesson(req.params.lessonId, (req as any).studentId);
-      res.json(ids);
-    } catch (err) {
-      console.error('[classwork] my-unlocks error:', err);
-      res.status(500).json({ error: 'Failed to list unlocks' });
-    }
-  });
-
   // Teacher: list every submission for a lesson.
   app.get('/api/classwork/lessons/:lessonId/submissions', requireTeacher, async (req, res) => {
     try {
@@ -1314,40 +1200,6 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] submissions error:', err);
       res.status(500).json({ error: 'Failed to list submissions' });
-    }
-  });
-
-  // Teacher: all current unlock records for a lesson (so the UI can show
-  // which students are unlocked without a per-row round-trip).
-  app.get('/api/classwork/lessons/:lessonId/unlocks', requireTeacher, async (req, res) => {
-    try {
-      const unlocks = await listUnlocksForLesson(req.params.lessonId);
-      res.json(unlocks);
-    } catch (err) {
-      console.error('[classwork] unlocks error:', err);
-      res.status(500).json({ error: 'Failed to list unlocks' });
-    }
-  });
-
-  // Teacher: grant a student permission to revise and resubmit one question.
-  app.post('/api/classwork/questions/:questionId/unlock/:studentId', requireTeacher, async (req, res) => {
-    try {
-      await unlockSubmission(req.params.studentId, req.params.questionId);
-      res.json({ ok: true });
-    } catch (err) {
-      console.error('[classwork] unlock error:', err);
-      res.status(500).json({ error: 'Failed to unlock' });
-    }
-  });
-
-  // Teacher: revoke a previously granted unlock.
-  app.delete('/api/classwork/questions/:questionId/unlock/:studentId', requireTeacher, async (req, res) => {
-    try {
-      await lockSubmission(req.params.studentId, req.params.questionId);
-      res.json({ ok: true });
-    } catch (err) {
-      console.error('[classwork] lock error:', err);
-      res.status(500).json({ error: 'Failed to lock' });
     }
   });
 
@@ -1505,24 +1357,6 @@ export function registerClassworkRoutes(app: Express, requireTeacher: RequireTea
     } catch (err) {
       console.error('[classwork] list class students error:', err);
       res.status(500).json({ error: 'Failed to list students' });
-    }
-  });
-
-  app.get('/api/classwork/teacher/classes/:id/students/export.xlsx', requireTeacher, async (req, res) => {
-    try {
-      const { buildCredentialsWorkbook } = await import('./classwork-export.js');
-      const result = await buildCredentialsWorkbook(req.params.id);
-      if (!result) return res.status(404).json({ error: 'Class not found or has no students' });
-      const { wb, className } = result;
-      const slug = className.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
-      const filename = `logins-${slug}-${new Date().toISOString().slice(0, 10)}.xlsx`;
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      await wb.xlsx.write(res);
-      res.end();
-    } catch (err) {
-      console.error('[classwork] credentials export error:', err);
-      if (!res.headersSent) res.status(500).json({ error: 'Failed to build credentials workbook' });
     }
   });
 

@@ -69,15 +69,6 @@ function Gate({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('storage', onStorage);
   }, []);
 
-  // Redirect to login when any api() call gets a 401 (session expired server-side).
-  useEffect(() => {
-    const onExpired = () => {
-      window.location.href = '/classwork/login?expired=1';
-    };
-    window.addEventListener('classwork:session-expired', onExpired);
-    return () => window.removeEventListener('classwork:session-expired', onExpired);
-  }, []);
-
   const role = getCurrentRole();
   if (role === 'guest') return <Redirect to="/login" />;
   return <>{children}</>;

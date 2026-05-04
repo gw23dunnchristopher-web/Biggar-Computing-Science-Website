@@ -235,7 +235,7 @@ export async function registerRoutes(
     }
     const filename = cleanUrl.replace(/^resources\//, "");
     const candidatePaths = [
-      path.resolve(process.cwd(), "public", "resources", filename),
+      path.resolve(resourceUploadDir, filename),
       path.resolve(process.cwd(), "public", cleanUrl),
       path.resolve(process.cwd(), cleanUrl),
     ];

@@ -447,7 +447,7 @@ export async function registerN5Routes(
           : 'http://localhost:5000';
       const resetLink = `${baseUrl}/teacher/reset-password/${resetToken}`;
       
-      const emailSent = await sendPasswordResetEmail(email, resetLink, user.username ?? email);
+      const emailSent = await sendPasswordResetEmail(email, resetLink);
       
       if (!emailSent) {
         return res.status(500).json({ message: "Failed to send email. Please try again." });

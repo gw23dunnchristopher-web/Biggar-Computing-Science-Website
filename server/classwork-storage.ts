@@ -55,71 +55,6 @@ export const CLASSWORK_QUESTION_TYPES = [
   'word_search',
   'matching',
   'anagrams',
-  // Game types — same JSON-into-text_answer shape as fun activities.
-  // Each game's config sits under a different key on q.config.
-  'hangman',
-  'speed_round',
-  'ordering',
-  'caesar_cipher',
-  'spot_phish',
-  'binary_hex',
-  'bit_ops',
-  'code_tracer',
-  'flowchart_seq',
-  'sorting_race',
-  'convert_relay',
-  'url_anatomy',
-  'truth_table',
-  'field_type_sort',
-  'io_sort',
-  'html_match',
-  'password_forge',
-  'privacy_radar',
-  'validation_rules',
-  'find_duplicate',
-  'bin_search',
-  'box_model',
-  'friend_or_fake',
-  'dm_danger',
-  'malware_triage',
-  '2fa_escape',
-  'a11y_audit',
-  'fetch_execute',
-  'screen_time',
-  'footprint_trail',
-  'social_engineer',
-  'cipher_quest',
-  'normalise_it',
-  'subnet_calc',
-  'phish_inbox',
-  'build_pc',
-  'os_sched',
-  'query_visual',
-  'schema_arch',
-  'tag_soup_repair',
-  'selector_golf',
-  'css_sliders',
-  'mindmap',
-  'upstander',
-  // Pupil uploads a plain-text or code file (.txt/.py/.csv/.html/.js).
-  // The file is read as text in the browser and stored as JSON in text_answer
-  // so the AI can read the content directly without object storage.
-  'file_upload',
-  // Like passage but instead of reading material the pupil uploads a file.
-  // Child questions (attached via passage_id) are then marked by AI with
-  // reference to whatever the pupil uploaded or linked. Excluded from
-  // analytics alongside passage/video_group (it is a container, not a task).
-  'file_task',
-  // Container that groups multiple_choice child questions together so pupils
-  // see them all at once and submit with a single button. Excluded from
-  // analytics (it is a container, not a scoreable task).
-  'mc_group',
-  // Generic group container — any child question type can be attached via
-  // passage_id. Config holds contextMode ('none'|'text'|'video'|'image')
-  // and, for video/image modes, the relevant URL. Excluded from analytics
-  // alongside passage/video_group/file_task/mc_group (it is a container,
-  // not a scoreable task).
-  'group',
 ] as const;
 export type ClassworkQuestionType = (typeof CLASSWORK_QUESTION_TYPES)[number];
 
@@ -254,17 +189,6 @@ export function ensureClassworkSchema(): Promise<void> {
           PRIMARY KEY (student_id, question_id)
         );
       `),
-      // Teacher-granted permission for a student to revise and resubmit a
-      // question they have already answered. Consumed (deleted) the moment
-      // the student submits again so each unlock covers exactly one resubmit.
-      pool.query(`
-        CREATE TABLE IF NOT EXISTS bhs_classwork_submission_unlocks (
-          student_id  VARCHAR(64) NOT NULL,
-          question_id VARCHAR(64) NOT NULL REFERENCES bhs_classwork_questions(id) ON DELETE CASCADE,
-          created_at  TIMESTAMP DEFAULT NOW(),
-          PRIMARY KEY (student_id, question_id)
-        );
-      `),
       // Indexes on phase-1 tables
       pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_units_course    ON bhs_classwork_units(course);`),
       pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_lessons_unit    ON bhs_classwork_lessons(unit_id);`),
@@ -276,12 +200,8 @@ export function ensureClassworkSchema(): Promise<void> {
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_pages_url   TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_filename    TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS presentation_uploaded_at TIMESTAMP;`),
-      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS onedrive_embed_url       TEXT;`),
-      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS od_sections             JSONB;`),
-      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_units ADD COLUMN IF NOT EXISTS od_resolved_url         TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS learning_intentions TEXT;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS success_criteria    TEXT;`),
-      pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lessons   ADD COLUMN IF NOT EXISTS is_test BOOLEAN NOT NULL DEFAULT FALSE;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_questions ADD COLUMN IF NOT EXISTS is_extension  BOOLEAN NOT NULL DEFAULT FALSE;`),
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_questions ADD COLUMN IF NOT EXISTS passage_id    VARCHAR(64);`),
       // Additive columns on shared tables from other apps (IF EXISTS — silent no-op when absent)
@@ -301,7 +221,6 @@ export function ensureClassworkSchema(): Promise<void> {
       pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_views_student       ON bhs_classwork_question_views(student_id);`),
       pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_drafts_lesson_student ON bhs_classwork_drafts(lesson_id, student_id);`),
       pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_questions_passage   ON bhs_classwork_questions(passage_id);`),
-      pool.query(`CREATE INDEX IF NOT EXISTS idx_classwork_unlocks_question    ON bhs_classwork_submission_unlocks(question_id);`),
       // question_id column on lesson_resources — safe here because lesson_resources was created in phase 2
       pool.query(`ALTER TABLE IF EXISTS bhs_classwork_lesson_resources ADD COLUMN IF NOT EXISTS question_id VARCHAR(64) REFERENCES bhs_classwork_questions(id) ON DELETE CASCADE;`),
     ]);
@@ -545,7 +464,7 @@ export async function listUnits(course: ClassworkCourse) {
   const r = await pool.query(
     `SELECT id, course, title, description, image_url, order_index, created_at,
             presentation_url, presentation_pages_url, presentation_filename,
-            presentation_uploaded_at, onedrive_embed_url, od_sections, od_resolved_url
+            presentation_uploaded_at
        FROM bhs_classwork_units
       WHERE course = $1
       ORDER BY order_index ASC, created_at ASC`,
@@ -587,97 +506,6 @@ export async function clearUnitPresentation(unitId: string) {
             presentation_pages_url = NULL,
             presentation_filename = NULL,
             presentation_uploaded_at = NULL
-      WHERE id = $1
-      RETURNING *`,
-    [unitId]
-  );
-  return r.rows[0] || null;
-}
-
-// Save (or replace) the OneDrive embed URL for a unit.
-export async function setUnitOnedriveUrl(unitId: string, url: string) {
-  await ensureClassworkSchema();
-  const r = await pool.query(
-    `UPDATE bhs_classwork_units
-        SET onedrive_embed_url = $1
-      WHERE id = $2
-      RETURNING *`,
-    [url, unitId]
-  );
-  return r.rows[0] || null;
-}
-
-// Store the server-resolved form of a sharing URL (the proper /_layouts/15/doc2.aspx?sourcedoc=...
-// embed URL that supports wdStartOn for slide navigation). Null clears the column.
-export async function setUnitOdResolvedUrl(unitId: string, resolvedUrl: string | null) {
-  await ensureClassworkSchema();
-  const r = await pool.query(
-    `UPDATE bhs_classwork_units SET od_resolved_url = $1 WHERE id = $2 RETURNING *`,
-    [resolvedUrl, unitId],
-  );
-  return r.rows[0] || null;
-}
-
-// Follow HTTP redirects for a OneDrive/SharePoint sharing URL and return the
-// stable /_layouts/15/doc2.aspx?sourcedoc=... embed URL (minus the
-// session-specific slrid param). Returns null if the URL cannot be resolved or
-// does not redirect to a recognisable SharePoint document viewer.
-export async function resolveOdSharingUrl(sharingUrl: string): Promise<string | null> {
-  try {
-    // Without action=embedview the sharing link redirects to a login page.
-    // Always add it so SharePoint follows the embed-viewer redirect path.
-    let fetchUrl = sharingUrl;
-    try {
-      const u = new URL(sharingUrl);
-      u.searchParams.set('action', 'embedview');
-      fetchUrl = u.toString();
-    } catch { /* use sharingUrl as-is */ }
-
-    const response = await fetch(fetchUrl, {
-      method: 'GET',
-      redirect: 'follow',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-      signal: AbortSignal.timeout(10_000),
-    });
-    const finalUrl = response.url;
-    if (
-      finalUrl !== sharingUrl &&
-      (finalUrl.includes('/_layouts/15/Doc.aspx') || finalUrl.includes('/_layouts/15/doc2.aspx')) &&
-      finalUrl.includes('sourcedoc=')
-    ) {
-      // Strip session-scoped parameters that change per-request.
-      const u = new URL(finalUrl);
-      u.searchParams.delete('slrid');
-      return u.toString();
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-// Save manually-defined section markers for the OneDrive viewer.
-export async function setUnitOdSections(
-  unitId: string,
-  sections: { name: string; startSlide: number }[],
-) {
-  await ensureClassworkSchema();
-  const r = await pool.query(
-    `UPDATE bhs_classwork_units SET od_sections = $1 WHERE id = $2 RETURNING *`,
-    [JSON.stringify(sections), unitId],
-  );
-  return r.rows[0] || null;
-}
-
-// Clear the OneDrive embed URL so the row no longer renders the iframe.
-export async function clearUnitOnedriveUrl(unitId: string) {
-  await ensureClassworkSchema();
-  const r = await pool.query(
-    `UPDATE bhs_classwork_units
-        SET onedrive_embed_url = NULL
       WHERE id = $1
       RETURNING *`,
     [unitId]
@@ -742,7 +570,7 @@ export async function listLessons(unitId: string, opts: { onlyPublished?: boolea
   const r = await pool.query(
     `SELECT id, unit_id, course, title, description,
             learning_intentions, success_criteria,
-            order_index, is_published, is_test, created_at
+            order_index, is_published, created_at
        FROM bhs_classwork_lessons
        ${where}
       ORDER BY order_index ASC, created_at ASC`,
@@ -756,7 +584,7 @@ export async function getLesson(id: string) {
   const r = await pool.query(
     `SELECT id, unit_id, course, title, description,
             learning_intentions, success_criteria,
-            order_index, is_published, is_test, created_at
+            order_index, is_published, created_at
        FROM bhs_classwork_lessons WHERE id = $1`,
     [id]
   );
@@ -782,7 +610,6 @@ export async function updateLesson(id: string, fields: {
   successCriteria?: string | null;
   orderIndex?: number;
   isPublished?: boolean;
-  isTest?: boolean;
 }) {
   await ensureClassworkSchema();
   const sets: string[] = [];
@@ -794,7 +621,6 @@ export async function updateLesson(id: string, fields: {
   if (fields.successCriteria    !== undefined) { sets.push(`success_criteria    = $${i++}`); vals.push(fields.successCriteria); }
   if (fields.orderIndex !== undefined) { sets.push(`order_index = $${i++}`); vals.push(fields.orderIndex); }
   if (fields.isPublished !== undefined) { sets.push(`is_published = $${i++}`); vals.push(fields.isPublished); }
-  if (fields.isTest      !== undefined) { sets.push(`is_test = $${i++}`);       vals.push(fields.isTest); }
   if (!sets.length) return null;
   vals.push(id);
   const r = await pool.query(
@@ -1115,15 +941,6 @@ export async function createSubmission(input: CreateSubmissionInput) {
     // cleanup hiccup.
     console.error('[classwork] draft cleanup error:', err);
   }
-  // Consume any teacher-granted resubmit unlock — one unlock = one resubmit.
-  try {
-    await pool.query(
-      `DELETE FROM bhs_classwork_submission_unlocks WHERE student_id = $1 AND question_id = $2`,
-      [input.studentId, input.questionId],
-    );
-  } catch (err) {
-    console.error('[classwork] unlock cleanup error:', err);
-  }
   return r.rows[0];
 }
 
@@ -1240,18 +1057,6 @@ export async function getMyLessonDrafts(lessonId: string, studentId: string) {
   }>;
 }
 
-export async function getStudentSubmissionForQuestion(questionId: string, studentId: string) {
-  await ensureClassworkSchema();
-  const r = await pool.query(
-    `SELECT * FROM bhs_classwork_submissions
-      WHERE question_id = $1 AND student_id = $2
-      ORDER BY submitted_at DESC
-      LIMIT 1`,
-    [questionId, studentId]
-  );
-  return r.rows[0] || null;
-}
-
 export async function listMySubmissionsForLesson(lessonId: string, studentId: string) {
   await ensureClassworkSchema();
   const r = await pool.query(
@@ -1270,59 +1075,6 @@ export async function listSubmissionsForLesson(lessonId: string) {
       WHERE lesson_id = $1
       ORDER BY submitted_at DESC`,
     [lessonId]
-  );
-  return r.rows;
-}
-
-/* ---------- Submission unlocks ---------- */
-
-// Grant a specific student permission to revise and resubmit one question.
-// Idempotent — calling it twice for the same pair is harmless.
-export async function unlockSubmission(studentId: string, questionId: string): Promise<void> {
-  await ensureClassworkSchema();
-  await pool.query(
-    `INSERT INTO bhs_classwork_submission_unlocks (student_id, question_id, created_at)
-     VALUES ($1, $2, NOW())
-     ON CONFLICT (student_id, question_id) DO NOTHING`,
-    [studentId, questionId],
-  );
-}
-
-// Revoke a previously granted unlock (teacher locks again without a resubmit).
-export async function lockSubmission(studentId: string, questionId: string): Promise<void> {
-  await ensureClassworkSchema();
-  await pool.query(
-    `DELETE FROM bhs_classwork_submission_unlocks WHERE student_id = $1 AND question_id = $2`,
-    [studentId, questionId],
-  );
-}
-
-// Return the question IDs that are currently unlocked for a specific student
-// within a lesson (used by the student-facing endpoint).
-export async function listMyUnlocksForLesson(lessonId: string, studentId: string): Promise<string[]> {
-  await ensureClassworkSchema();
-  const r = await pool.query(
-    `SELECT u.question_id
-     FROM bhs_classwork_submission_unlocks u
-     JOIN bhs_classwork_questions q ON q.id = u.question_id
-     WHERE q.lesson_id = $1 AND u.student_id = $2`,
-    [lessonId, studentId],
-  );
-  return r.rows.map((row: any) => row.question_id as string);
-}
-
-// Return all (student_id, question_id) unlock pairs for a lesson
-// (used by the teacher-facing endpoint to show unlock indicators).
-export async function listUnlocksForLesson(
-  lessonId: string,
-): Promise<{ student_id: string; question_id: string }[]> {
-  await ensureClassworkSchema();
-  const r = await pool.query(
-    `SELECT u.student_id, u.question_id
-     FROM bhs_classwork_submission_unlocks u
-     JOIN bhs_classwork_questions q ON q.id = u.question_id
-     WHERE q.lesson_id = $1`,
-    [lessonId],
   );
   return r.rows;
 }
@@ -1357,7 +1109,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
        LEFT JOIN (
          SELECT lesson_id, COUNT(*)::int AS question_count
            FROM bhs_classwork_questions
-          WHERE is_extension = FALSE AND question_type NOT IN ('passage','video_group','file_task','mc_group','group','info_only','section_header','text_only')
+          WHERE is_extension = FALSE AND question_type NOT IN ('passage','video_group','info_only','section_header','text_only')
           GROUP BY lesson_id
        ) qstat ON qstat.lesson_id = l.id
        LEFT JOIN (
@@ -1372,7 +1124,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
                 )                                              AS avg_percent
            FROM bhs_classwork_submissions s
            JOIN bhs_classwork_questions q ON q.id = s.question_id
-          WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','video_group','file_task','mc_group','group','info_only','section_header','text_only')
+          WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','video_group','info_only','section_header','text_only')
           GROUP BY s.lesson_id
        ) sstat ON sstat.lesson_id = l.id
       WHERE l.course = $1
@@ -1395,7 +1147,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
             )                                                    AS avg_percent
        FROM bhs_classwork_submissions s
        JOIN bhs_classwork_questions q ON q.id = s.question_id
-      WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','video_group','file_task','mc_group','group','info_only','section_header','text_only')
+      WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','video_group','info_only','section_header','text_only')
       GROUP BY s.student_id
       ORDER BY MAX(s.student_username) ASC`,
     [course]
@@ -1408,7 +1160,7 @@ export async function getCourseAnalytics(course: ClassworkCourse) {
             COUNT(DISTINCT s.student_id)::int          AS distinct_students
        FROM bhs_classwork_submissions s
        JOIN bhs_classwork_questions q ON q.id = s.question_id
-      WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','video_group','file_task','mc_group','group','info_only','section_header','text_only')`,
+      WHERE s.course = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','video_group','info_only','section_header','text_only')`,
     [course]
   );
 
@@ -1471,7 +1223,7 @@ export async function getLessonAnalytics(lessonId: string) {
           WHERE lesson_id = $1
           GROUP BY question_id
        ) v ON v.question_id = q.id
-      WHERE q.lesson_id = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','video_group','file_task','mc_group','group','info_only','section_header','text_only')
+      WHERE q.lesson_id = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','video_group','info_only','section_header','text_only')
       ORDER BY q.order_index, q.id`,
     [lessonId]
   );
@@ -1488,7 +1240,7 @@ export async function getLessonAnalytics(lessonId: string) {
               q.max_marks
          FROM bhs_classwork_submissions s
          JOIN bhs_classwork_questions q ON q.id = s.question_id
-        WHERE s.lesson_id = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','video_group','file_task','mc_group','group','info_only','section_header','text_only')
+        WHERE s.lesson_id = $1 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','video_group','info_only','section_header','text_only')
         ORDER BY s.student_id, s.question_id, s.marks_awarded DESC NULLS LAST, s.submitted_at DESC
      )
      SELECT student_id,
@@ -1525,7 +1277,7 @@ export async function getStudentCourseAnalytics(course: ClassworkCourse, student
        JOIN bhs_classwork_questions q ON q.id = s.question_id
        JOIN bhs_classwork_lessons   l ON l.id = s.lesson_id
        JOIN bhs_classwork_units     u ON u.id = l.unit_id
-      WHERE s.course = $1 AND s.student_id = $2 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','video_group','file_task','mc_group','group','info_only','section_header','text_only')
+      WHERE s.course = $1 AND s.student_id = $2 AND q.is_extension = FALSE AND q.question_type NOT IN ('passage','video_group','info_only','section_header','text_only')
       ORDER BY u.order_index, l.order_index, q.order_index, s.submitted_at DESC`,
     [course, studentId]
   );

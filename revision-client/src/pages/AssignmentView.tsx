@@ -25,7 +25,7 @@ interface ContentBlock {
   dataTable?: {
     tableName: string;
     columns: { id: string; header: string; align?: string; width?: string }[];
-    rows: { id: string; cells: (string | { value: string; role?: "data" | "header" | "title"; colSpan?: number; rowSpan?: number; hidden?: boolean })[] }[];
+    rows: { id: string; cells: (string | { value: string; role?: string; colSpan?: number; rowSpan?: number; hidden?: boolean })[] }[];
     hideHeaders?: boolean;
     centered?: boolean;
     verticalAlign?: string;

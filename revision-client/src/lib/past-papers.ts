@@ -107,11 +107,10 @@ export interface SubQuestion {
     exampleImages?: string[];
     exampleFiles?: { url: string; originalName: string }[];
   } | null;
-  inputStyle?: "text" | "table" | "labeled-inputs" | "code-editor" | "drawing" | "design-choice" | "fill-in-blanks" | "info-only" | "erd-annotation" | "nav-structure" | "nav-structure-higher" | "tag-matching" | "structure-dataflow" | "form-wireframe" | "webpage-wireframe" | "structure-diagram" | "entity-occurrence-diagram" | "database-schema" | "image-paste";
+  inputStyle?: "text" | "table" | "labeled-inputs" | "code-editor" | "drawing" | "design-choice" | "fill-in-blanks" | "info-only" | "erd-annotation" | "nav-structure" | "nav-structure-higher" | "tag-matching" | "structure-dataflow" | "form-wireframe" | "structure-diagram" | "entity-occurrence-diagram" | "database-schema" | "image-paste";
   codeRequirement?: "programming-language" | "design-notation" | "either";
   // Nested sub-questions (e.g., a) with (i), (ii), (iii) under it)
   subParts?: SubQuestion[];
-  parts?: SubQuestion[];
   inputConfig?: {
     headers?: string[];
     rows?: Array<{ label: string; value?: string; isInput?: boolean; key?: string; width?: string; placeholder?: string; multiline?: boolean }>;
@@ -126,9 +125,6 @@ export interface SubQuestion {
     // Flexible grid table: full control over each cell
     grid?: {
       headers: string[];
-      colWidths?: string[];
-      rowMinHeights?: string[];
-      showHeaders?: boolean;
       rows: Array<{
         cells: Array<{ value?: string; isInput?: boolean; key?: string; width?: string; placeholder?: string; multiline?: boolean }>;
       }>;

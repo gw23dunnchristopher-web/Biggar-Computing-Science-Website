@@ -24,29 +24,12 @@ interface Unit {
   presentation_pages_url?: string | null;
   presentation_filename?: string | null;
   presentation_uploaded_at?: string | null;
-  // OneDrive / SharePoint embed URL. When set, the unit shows a second
-  // "View slides" button that opens the presentation in a full-screen iframe
-  // rather than the local PDF viewer. Updates in OneDrive are reflected
-  // automatically since the iframe always loads the live embed.
-  onedrive_embed_url?: string | null;
-  // Server-resolved form of onedrive_embed_url. The raw URL is often a
-  // /:p:/g/personal/… sharing link whose query params (wdStartOn etc.) are
-  // discarded in a server-side redirect. The server follows that redirect once
-  // at save-time and stores the final /_layouts/15/doc2.aspx?sourcedoc=…
-  // URL here. buildOdSrc uses this for slide navigation when it's present.
-  od_resolved_url?: string | null;
-  // Manually-defined section markers for the OneDrive viewer. Each entry has
-  // a display name and the 1-based slide number where the section starts.
-  // Stored as JSONB on the unit row so they are always independent of any
-  // uploaded PPTX file and stay accurate even when the OneDrive copy changes.
-  od_sections?: { name: string; startSlide: number }[] | null;
 }
 interface Lesson {
   id: string; unit_id: string; title: string; description: string | null;
   learning_intentions?: string | null;
   success_criteria?: string | null;
   is_published: boolean;
-  is_test?: boolean;
 }
 
 interface Resource {
@@ -97,7 +80,6 @@ export default function Course() {
   const [unitDescInput, setUnitDescInput] = useState('');
   const [unitImageUrl, setUnitImageUrl] = useState('');
   const [unitImageUploading, setUnitImageUploading] = useState(false);
-  const [editLessonTitle, setEditLessonTitle] = useState('');
   const [editLI, setEditLI] = useState('');
   const [editSC, setEditSC] = useState('');
   const [editResources, setEditResources] = useState<Resource[]>([]);
@@ -124,15 +106,6 @@ export default function Course() {
   const [presViewerUnit, setPresViewerUnit] = useState<Unit | null>(null);
   const [presBusy, setPresBusy] = useState<Record<string, boolean>>({});
   const [presErr, setPresErr] = useState<Record<string, string>>({});
-  // OneDrive embed state — keyed by unit id.
-  const [odInput, setOdInput] = useState<Record<string, string>>({}); // pending text field value
-  const [odBusy, setOdBusy] = useState<Record<string, boolean>>({});
-  const [odErr, setOdErr] = useState<Record<string, string>>({});
-  const [odViewerUnit, setOdViewerUnit] = useState<Unit | null>(null); // open iframe modal
-  // Section editor state (teacher only, per-unit).
-  const [odSecOpen, setOdSecOpen] = useState<Record<string, boolean>>({});
-  const [odSecDraft, setOdSecDraft] = useState<Record<string, { name: string; startSlide: string }[]>>({});
-  const [odSecBusy, setOdSecBusy] = useState<Record<string, boolean>>({});
 
   // Per-unit collapse state. Stored client-side only and persisted in
   // localStorage scoped per course so each user's chosen layout (e.g.
@@ -160,7 +133,7 @@ export default function Course() {
       const next = new Set(prev);
       if (next.has(unitId)) next.delete(unitId); else next.add(unitId);
       try {
-        if (collapseStorageKey) localStorage.setItem(collapseStorageKey, JSON.stringify(Array.from(next)));
+        if (collapseStorageKey) localStorage.setItem(collapseStorageKey, JSON.stringify([...next]));
       } catch { /* localStorage may be full or disabled */ }
       return next;
     });
@@ -169,7 +142,7 @@ export default function Course() {
     const next: Set<string> = collapsed ? new Set(units.map((u) => u.id)) : new Set();
     setCollapsedUnits(next);
     try {
-      if (collapseStorageKey) localStorage.setItem(collapseStorageKey, JSON.stringify(Array.from(next)));
+      if (collapseStorageKey) localStorage.setItem(collapseStorageKey, JSON.stringify([...next]));
     } catch { /* ignore */ }
   }
 
@@ -236,23 +209,6 @@ export default function Course() {
 
   useEffect(() => { refresh(); }, [course]);
 
-  // Background-preload presentation PDFs into the browser cache as soon as
-  // units arrive. PresentationViewer then gets the file from cache when it
-  // calls pdfjsLib.getDocument(), making the first "View slides" click instant.
-  useEffect(() => {
-    units.forEach((u) => {
-      if (!u.presentation_pages_url) return;
-      fetch(u.presentation_pages_url, { credentials: 'same-origin' })
-        .then((r) => r.ok ? r.json() : null)
-        .then((m: any) => {
-          if (m?.version >= 2 && m?.pdfUrl) {
-            fetch(m.pdfUrl, { credentials: 'same-origin' }).catch(() => {});
-          }
-        })
-        .catch(() => {});
-    });
-  }, [units]);
-
   function openAddUnit() {
     setTitleInput(''); setUnitDescInput(''); setUnitImageUrl('');
     setModalErr(null);
@@ -266,30 +222,8 @@ export default function Course() {
     setModal({ kind: 'editUnit', unit });
   }
 
-  // Compress an image file client-side before uploading. Resizes to ≤ maxPx on
-  // the longest side and re-encodes as JPEG. Falls back to the original file
-  // if the Canvas API isn't available (e.g. in jsdom tests).
-  function compressImage(file: File, maxPx = 800, quality = 0.85): Promise<Blob> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      const blobUrl = URL.createObjectURL(file);
-      img.onload = () => {
-        URL.revokeObjectURL(blobUrl);
-        const scale = Math.min(1, maxPx / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
-        const w = Math.round((img.naturalWidth || 1) * scale);
-        const h = Math.round((img.naturalHeight || 1) * scale);
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) { resolve(file); return; }
-        ctx.drawImage(img, 0, 0, w, h);
-        canvas.toBlob((blob) => resolve(blob ?? file), 'image/jpeg', quality);
-      };
-      img.onerror = () => { URL.revokeObjectURL(blobUrl); resolve(file); };
-      img.src = blobUrl;
-    });
-  }
-
+  // Reuses the same teacher resource upload endpoint used elsewhere on
+  // this page — returns a public /uploads URL we can persist as the
   // unit's `image_url`. Surfaces failures via `modalErr` so the
   // currently-open New/Edit unit modal shows the message inline.
   async function uploadUnitImage(file: File) {
@@ -298,18 +232,10 @@ export default function Course() {
       setModalErr('Please choose an image file (PNG, JPG, GIF, …).');
       return;
     }
-    // Show a local blob preview instantly so the teacher sees the image
-    // straight away instead of staring at a spinner during the network round-trip.
-    const localPreview = URL.createObjectURL(file);
-    setUnitImageUrl(localPreview);
     setUnitImageUploading(true);
     try {
-      // Compress to ≤ 800 px on the longest side — more than enough for a
-      // course thumbnail and typically 10-20× smaller than a raw phone photo.
-      const blob = await compressImage(file, 800, 0.85);
-      const safeName = file.name.replace(/\.[^.]+$/, '') + '.jpg';
       const fd = new FormData();
-      fd.append('file', blob, safeName);
+      fd.append('file', file);
       const teacherToken = (() => {
         try { return localStorage.getItem('teacher_token') || localStorage.getItem('teacherToken') || ''; }
         catch { return ''; }
@@ -325,11 +251,8 @@ export default function Course() {
         throw new Error(msg);
       }
       const up = await res.json() as { url: string; filename: string };
-      URL.revokeObjectURL(localPreview);
       setUnitImageUrl(up.url);
     } catch (e: any) {
-      URL.revokeObjectURL(localPreview);
-      setUnitImageUrl('');
       setModalErr(e.message || 'Upload failed');
     } finally {
       setUnitImageUploading(false);
@@ -403,170 +326,11 @@ export default function Course() {
     }
   }
 
-  // Best-effort conversion of a OneDrive/SharePoint share URL to an embed URL.
-  // If the URL is already an embed URL (contains "action=embedview" or is the
-  // onedrive.live.com/embed path) it is returned unchanged.
-  function toOnedriveEmbedUrl(raw: string): string {
-    try {
-      const u = new URL(raw.trim());
-      const host = u.hostname.toLowerCase();
-      // SharePoint / OneDrive for Business
-      if (host.endsWith('sharepoint.com')) {
-        if (u.searchParams.get('action') !== 'embedview') {
-          u.searchParams.set('action', 'embedview');
-        }
-        return u.toString();
-      }
-      // Personal OneDrive — convert view.aspx to embed path
-      if (host === 'onedrive.live.com') {
-        if (u.pathname.toLowerCase().includes('view.aspx') || u.pathname === '/') {
-          u.pathname = '/embed';
-          if (!u.searchParams.has('action')) u.searchParams.set('action', 'embedview');
-          return u.toString();
-        }
-      }
-      return raw.trim();
-    } catch {
-      return raw.trim();
-    }
-  }
-
-  // Build the final iframe src for a given 1-based slide number.
-  //
-  // Prefers `resolvedUrl` (the server-resolved /_layouts/15/doc2.aspx?sourcedoc=…
-  // URL) because that form passes wdStartOn directly to the Office Online viewer
-  // without any redirect that would strip query params.  Falls back to `raw`
-  // (the teacher-pasted sharing link) with action=embedview when no resolved
-  // URL is available — slide navigation won't work in that case but the viewer
-  // itself still loads fine.
-  function buildOdSrc(raw: string, resolvedUrl?: string | null): string {
-    // SharePoint's embed renderer ignores wdStartOn / wdSlideIndex when loaded
-    // inside a third-party iframe (its inline initialiser is blocked by
-    // SharePoint's own page CSP). We can't auto-jump to a slide; the viewer
-    // always opens at slide 1 and pupils navigate manually using the section
-    // reference list shown above the iframe.
-    return resolvedUrl ? resolvedUrl : toOnedriveEmbedUrl(raw);
-  }
-
-  async function saveOnedriveUrl(unitId: string) {
-    const url = (odInput[unitId] || '').trim();
-    if (!url.startsWith('http')) {
-      setOdErr((e) => ({ ...e, [unitId]: 'Please enter a valid URL starting with https://' }));
-      return;
-    }
-    setOdBusy((b) => ({ ...b, [unitId]: true }));
-    setOdErr((e) => { const n = { ...e }; delete n[unitId]; return n; });
-    try {
-      const res = await fetch(`/api/classwork/units/${unitId}/onedrive-url`, {
-        method: 'PUT',
-        headers: { ...teacherTokenHeader(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
-      });
-      if (!res.ok) {
-        let msg = `Failed (${res.status})`;
-        try { const j = await res.json(); if (j?.error) msg = j.error; } catch {}
-        throw new Error(msg);
-      }
-      const data = await res.json() as { unit: Unit };
-      setUnits((us) => us.map((u) => (u.id === unitId ? { ...u, ...data.unit } : u)));
-      setOdInput((inp) => { const n = { ...inp }; delete n[unitId]; return n; });
-    } catch (e: any) {
-      setOdErr((er) => ({ ...er, [unitId]: e?.message || 'Save failed' }));
-    } finally {
-      setOdBusy((b) => { const n = { ...b }; delete n[unitId]; return n; });
-    }
-  }
-
-  async function removeOnedriveUrl(unitId: string) {
-    if (!window.confirm('Remove the OneDrive link from this unit? Pupils will no longer see the "View slides" button.')) return;
-    setOdBusy((b) => ({ ...b, [unitId]: true }));
-    setOdErr((e) => { const n = { ...e }; delete n[unitId]; return n; });
-    try {
-      const res = await fetch(`/api/classwork/units/${unitId}/onedrive-url`, {
-        method: 'DELETE',
-        headers: teacherTokenHeader(),
-      });
-      if (!res.ok) {
-        let msg = `Failed (${res.status})`;
-        try { const j = await res.json(); if (j?.error) msg = j.error; } catch {}
-        throw new Error(msg);
-      }
-      const data = await res.json() as { unit: Unit };
-      setUnits((us) => us.map((u) => (u.id === unitId ? { ...u, ...data.unit } : u)));
-    } catch (e: any) {
-      setOdErr((er) => ({ ...er, [unitId]: e?.message || 'Remove failed' }));
-    } finally {
-      setOdBusy((b) => { const n = { ...b }; delete n[unitId]; return n; });
-    }
-  }
-
-  // ── Section editor helpers (teacher only) ─────────────────────────────────
-
-  function openSectionEditor(u: Unit) {
-    const existing = (u.od_sections || []).map((s) => ({
-      name: s.name,
-      startSlide: String(s.startSlide),
-    }));
-    setOdSecDraft((d) => ({ ...d, [u.id]: existing }));
-    setOdSecOpen((o) => ({ ...o, [u.id]: true }));
-  }
-
-  function closeSectionEditor(unitId: string) {
-    setOdSecOpen((o) => ({ ...o, [unitId]: false }));
-  }
-
-  function addSectionRow(unitId: string) {
-    setOdSecDraft((d) => ({ ...d, [unitId]: [...(d[unitId] || []), { name: '', startSlide: '' }] }));
-  }
-
-  function updateSectionRow(unitId: string, idx: number, field: 'name' | 'startSlide', value: string) {
-    setOdSecDraft((d) => {
-      const rows = [...(d[unitId] || [])];
-      rows[idx] = { ...rows[idx], [field]: value };
-      return { ...d, [unitId]: rows };
-    });
-  }
-
-  function removeSectionRow(unitId: string, idx: number) {
-    setOdSecDraft((d) => {
-      const rows = [...(d[unitId] || [])];
-      rows.splice(idx, 1);
-      return { ...d, [unitId]: rows };
-    });
-  }
-
-  async function saveSections(unitId: string) {
-    const rows = odSecDraft[unitId] || [];
-    const sections = rows
-      .filter((r) => r.name.trim() && Number.isFinite(parseInt(r.startSlide, 10)))
-      .map((r) => ({ name: r.name.trim(), startSlide: parseInt(r.startSlide, 10) }));
-    setOdSecBusy((b) => ({ ...b, [unitId]: true }));
-    try {
-      const res = await fetch(`/api/classwork/units/${unitId}/od-sections`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', ...teacherTokenHeader() },
-        body: JSON.stringify({ sections }),
-      });
-      if (!res.ok) throw new Error(`Save failed (${res.status})`);
-      const data = await res.json() as { unit: Unit };
-      setUnits((us) => us.map((u) => (u.id === unitId ? { ...u, ...data.unit } : u)));
-      // Also update the viewer unit so the dropdown reflects immediately if
-      // the teacher saves while the modal is open on this unit.
-      setOdViewerUnit((prev) => prev?.id === unitId ? { ...prev, ...data.unit } : prev);
-      closeSectionEditor(unitId);
-    } catch (e: any) {
-      alert(e?.message || 'Could not save sections');
-    } finally {
-      setOdSecBusy((b) => { const n = { ...b }; delete n[unitId]; return n; });
-    }
-  }
-
   function openAddLesson(unitId: string) {
     setTitleInput(''); setModalErr(null);
     setModal({ kind: 'addLesson', unitId });
   }
   function openEditLesson(l: Lesson) {
-    setEditLessonTitle(l.title || '');
     setEditLI(l.learning_intentions || '');
     setEditSC(l.success_criteria || '');
     setEditResources([]);
@@ -649,12 +413,10 @@ export default function Course() {
   }
 
   async function submitEditLesson(l: Lesson) {
-    if (!editLessonTitle.trim()) { setModalErr('Lesson name is required.'); return; }
     try {
       await api(`/api/classwork/lessons/${l.id}`, {
         method: 'PATCH',
         body: JSON.stringify({
-          title: editLessonTitle.trim(),
           // Empty textarea → clear the field on the server.
           learningIntentions: editLI.trim() ? editLI : null,
           successCriteria:    editSC.trim() ? editSC : null,
@@ -766,17 +528,6 @@ export default function Course() {
     try {
       await api(`/api/classwork/lessons/${lesson.id}`, {
         method: 'PATCH', body: JSON.stringify({ isPublished: !lesson.is_published }),
-      });
-      refresh();
-    } catch (e: any) {
-      setModal({ kind: 'info', title: 'Could not update lesson', message: e.message });
-    }
-  }
-
-  async function toggleTest(lesson: Lesson) {
-    try {
-      await api(`/api/classwork/lessons/${lesson.id}`, {
-        method: 'PATCH', body: JSON.stringify({ isTest: !lesson.is_test }),
       });
       refresh();
     } catch (e: any) {
@@ -959,65 +710,35 @@ export default function Course() {
                   hidden so empty-state placeholders don't clutter their
                   course page. Teachers always see the band so they can
                   upload, replace or remove a deck. */}
-              {(u.presentation_url || u.onedrive_embed_url || role === 'teacher') && (
+              {(u.presentation_url || role === 'teacher') && (
                 <div style={{
-                  display: 'flex', flexDirection: 'column', gap: 8,
+                  display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
                   marginTop: 12, padding: '10px 12px',
                   border: '1px solid var(--cw-border)', borderRadius: 8,
                   background: 'var(--cw-surface-soft)',
                 }}>
-                  {/* ── Row 1: PPTX upload / viewer ── */}
-                  {(u.presentation_url || role === 'teacher') && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 18, lineHeight: 1 }} aria-hidden>📊</span>
-                      {u.presentation_url ? (
+                  <span style={{ fontSize: 18, lineHeight: 1 }} aria-hidden>📊</span>
+                  {u.presentation_url ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => setPresViewerUnit(u)}
+                        style={primaryBtn}
+                        title="Open the slides in a viewer"
+                      >View presentation</button>
+                      <span style={{ color: 'var(--cw-muted)', fontSize: 13, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {u.presentation_filename || 'Slides'}
+                      </span>
+                      {role === 'teacher' && (
                         <>
-                          <button
-                            type="button"
-                            onClick={() => setPresViewerUnit(u)}
-                            style={primaryBtn}
-                            title="Open the slides in a viewer"
-                          >View slides (PDF)</button>
-                          <span style={{ color: 'var(--cw-muted)', fontSize: 13, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {u.presentation_filename || 'Slides'}
-                          </span>
-                          {role === 'teacher' && (
-                            <>
-                              <a
-                                href={u.presentation_url}
-                                download={u.presentation_filename || true}
-                                style={{ ...secondaryBtn, textDecoration: 'none' }}
-                                title="Download the original .pptx"
-                              >Download</a>
-                              <label style={{ ...secondaryBtn, cursor: presBusy[u.id] ? 'wait' : 'pointer', opacity: presBusy[u.id] ? 0.6 : 1 }}>
-                                {presBusy[u.id] ? 'Uploading…' : 'Replace'}
-                                <input
-                                  type="file"
-                                  accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                                  hidden
-                                  disabled={!!presBusy[u.id]}
-                                  onChange={(e) => {
-                                    const f = e.currentTarget.files?.[0];
-                                    e.currentTarget.value = '';
-                                    if (f) uploadPresentation(u.id, f);
-                                  }}
-                                />
-                              </label>
-                              <button
-                                type="button"
-                                onClick={() => removePresentation(u.id)}
-                                style={dangerBtn}
-                                disabled={!!presBusy[u.id]}
-                              >Remove</button>
-                            </>
-                          )}
-                        </>
-                      ) : role === 'teacher' && (
-                        <>
-                          <span style={{ fontWeight: 600, color: 'var(--cw-ink)', fontSize: 13 }}>Upload PPTX</span>
-                          <label style={{ ...secondaryBtn, cursor: presBusy[u.id] ? 'wait' : 'pointer', opacity: presBusy[u.id] ? 0.6 : 1 }}
-                                 title="Convert a PowerPoint deck so pupils can flip through the slides on this page">
-                            {presBusy[u.id] ? 'Uploading…' : 'Choose .pptx file'}
+                          <a
+                            href={u.presentation_url}
+                            download={u.presentation_filename || true}
+                            style={{ ...secondaryBtn, textDecoration: 'none' }}
+                            title="Download the original .pptx"
+                          >Download</a>
+                          <label style={{ ...secondaryBtn, cursor: presBusy[u.id] ? 'wait' : 'pointer', opacity: presBusy[u.id] ? 0.6 : 1 }}>
+                            {presBusy[u.id] ? 'Uploading…' : 'Replace'}
                             <input
                               type="file"
                               accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"
@@ -1030,133 +751,39 @@ export default function Course() {
                               }}
                             />
                           </label>
-                        </>
-                      )}
-                      {presErr[u.id] && (
-                        <span style={{ color: 'var(--cw-danger)', fontSize: 13, width: '100%' }}>
-                          {presErr[u.id]}
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {/* ── Row 2: OneDrive / SharePoint embed link ── */}
-                  {(u.onedrive_embed_url || role === 'teacher') && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 18, lineHeight: 1 }} aria-hidden>☁️</span>
-                      {u.onedrive_embed_url ? (
-                        <>
                           <button
                             type="button"
-                            onClick={() => setOdViewerUnit(u)}
-                            style={primaryBtn}
-                            title="Open the live OneDrive presentation"
-                          >View slides (OneDrive)</button>
-                          {role === 'teacher' && (
-                            <button
-                              type="button"
-                              onClick={() => removeOnedriveUrl(u.id)}
-                              style={dangerBtn}
-                              disabled={!!odBusy[u.id]}
-                            >{odBusy[u.id] ? 'Removing…' : 'Remove link'}</button>
-                          )}
-                        </>
-                      ) : role === 'teacher' && (
-                        <>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 220 }}>
-                            <div style={{ display: 'flex', gap: 6 }}>
-                              <input
-                                type="url"
-                                placeholder="Paste OneDrive or SharePoint embed URL…"
-                                value={odInput[u.id] || ''}
-                                onChange={(e) => setOdInput((inp) => ({ ...inp, [u.id]: e.target.value }))}
-                                style={{ flex: 1, padding: '5px 8px', border: '1px solid var(--cw-border)', borderRadius: 6, fontSize: 13 }}
-                                onKeyDown={(e) => { if (e.key === 'Enter') saveOnedriveUrl(u.id); }}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => saveOnedriveUrl(u.id)}
-                                style={secondaryBtn}
-                                disabled={!!odBusy[u.id] || !(odInput[u.id] || '').trim()}
-                              >{odBusy[u.id] ? 'Saving…' : 'Save'}</button>
-                            </div>
-                            <span style={{ fontSize: 11, color: 'var(--cw-muted)', lineHeight: 1.4 }}>
-                              In OneDrive/SharePoint: open the presentation → Share → Embed → copy the <em>src</em> URL from the iframe code.
-                            </span>
-                          </div>
+                            onClick={() => removePresentation(u.id)}
+                            style={dangerBtn}
+                            disabled={!!presBusy[u.id]}
+                          >Remove</button>
                         </>
                       )}
-                      {odErr[u.id] && (
-                        <span style={{ color: 'var(--cw-danger)', fontSize: 13, width: '100%' }}>
-                          {odErr[u.id]}
-                        </span>
-                      )}
-                    </div>
+                    </>
+                  ) : role === 'teacher' && (
+                    <>
+                      <span style={{ fontWeight: 600, color: 'var(--cw-ink)' }}>No presentation uploaded</span>
+                      <label style={{ ...secondaryBtn, cursor: presBusy[u.id] ? 'wait' : 'pointer', opacity: presBusy[u.id] ? 0.6 : 1 }}
+                             title="Convert a PowerPoint deck so pupils can flip through the slides on this page">
+                        {presBusy[u.id] ? 'Uploading… (this can take a minute on big decks)' : 'Upload PowerPoint (.pptx)'}
+                        <input
+                          type="file"
+                          accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+                          hidden
+                          disabled={!!presBusy[u.id]}
+                          onChange={(e) => {
+                            const f = e.currentTarget.files?.[0];
+                            e.currentTarget.value = '';
+                            if (f) uploadPresentation(u.id, f);
+                          }}
+                        />
+                      </label>
+                    </>
                   )}
-
-                  {/* ── Section editor (teacher only, when OneDrive link is set) ── */}
-                  {u.onedrive_embed_url && role === 'teacher' && (
-                    <div style={{ marginTop: 6 }}>
-                      {!odSecOpen[u.id] ? (
-                        <button
-                          type="button"
-                          onClick={() => openSectionEditor(u)}
-                          style={{ fontSize: 12, background: 'none', border: '1px solid var(--cw-border)', borderRadius: 6, padding: '3px 10px', cursor: 'pointer', color: 'var(--cw-muted)' }}
-                        >
-                          ☰ {(u.od_sections?.length ?? 0) > 0 ? `Sections (${u.od_sections!.length})` : 'Add sections'}
-                        </button>
-                      ) : (
-                        <div style={{ border: '1px solid var(--cw-border)', borderRadius: 8, padding: 12, background: 'var(--cw-bg)', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                          <span style={{ fontSize: 13, fontWeight: 600 }}>Sections</span>
-                          <span style={{ fontSize: 11, color: 'var(--cw-muted)' }}>
-                            Each section needs a name and the slide number it starts on. Slide numbers must match the live OneDrive presentation.
-                          </span>
-                          {(odSecDraft[u.id] || []).map((row, idx) => (
-                            <div key={idx} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                              <input
-                                type="text"
-                                placeholder="Section name"
-                                value={row.name}
-                                onChange={(e) => updateSectionRow(u.id, idx, 'name', e.target.value)}
-                                style={{ flex: 3, padding: '4px 8px', border: '1px solid var(--cw-border)', borderRadius: 6, fontSize: 13 }}
-                              />
-                              <input
-                                type="number"
-                                placeholder="Slide"
-                                value={row.startSlide}
-                                min={1}
-                                onChange={(e) => updateSectionRow(u.id, idx, 'startSlide', e.target.value)}
-                                style={{ flex: 1, minWidth: 60, padding: '4px 8px', border: '1px solid var(--cw-border)', borderRadius: 6, fontSize: 13 }}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => removeSectionRow(u.id, idx)}
-                                style={{ background: 'none', border: 'none', color: 'var(--cw-danger)', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '2px 4px' }}
-                                title="Remove section"
-                              >✕</button>
-                            </div>
-                          ))}
-                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                            <button
-                              type="button"
-                              onClick={() => addSectionRow(u.id)}
-                              style={{ fontSize: 12, background: 'none', border: '1px solid var(--cw-border)', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', color: 'var(--cw-text)' }}
-                            >+ Add section</button>
-                            <button
-                              type="button"
-                              onClick={() => saveSections(u.id)}
-                              disabled={!!odSecBusy[u.id]}
-                              style={{ ...secondaryBtn, fontSize: 12, padding: '4px 14px' }}
-                            >{odSecBusy[u.id] ? 'Saving…' : 'Save'}</button>
-                            <button
-                              type="button"
-                              onClick={() => closeSectionEditor(u.id)}
-                              style={{ fontSize: 12, background: 'none', border: 'none', color: 'var(--cw-muted)', cursor: 'pointer', padding: '4px 6px' }}
-                            >Cancel</button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                  {presErr[u.id] && (
+                    <span style={{ color: 'var(--cw-danger)', fontSize: 13, width: '100%' }}>
+                      {presErr[u.id]}
+                    </span>
                   )}
                 </div>
               )}
@@ -1200,10 +827,10 @@ export default function Course() {
                         }}
                         style={{
                           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
-                          padding: 12, borderRadius: 8,
-                          border: l.is_test ? '1px solid var(--cw-tint-amber-border)' : '1px solid var(--cw-border)',
-                          background: l.is_test ? 'var(--cw-tint-amber-bg)' : 'var(--cw-surface-soft)',
+                          padding: 12, border: '1px solid var(--cw-border)', borderRadius: 8, background: 'var(--cw-surface-soft)',
                           opacity: isDragging ? 0.4 : 1,
+                          // Show a coloured indicator line on the side of the
+                          // row where the dragged lesson will land.
                           boxShadow: showTopLine
                             ? 'inset 0 3px 0 0 var(--cw-accent)'
                             : showBotLine
@@ -1245,13 +872,6 @@ export default function Course() {
                               whiteSpace: 'nowrap', minWidth: 0,
                             }}
                           >{l.title}</Link>
-                          {l.is_test && (
-                            <span style={{
-                              fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 999,
-                              background: 'var(--cw-tint-amber-border)', color: 'var(--cw-tint-amber-ink)',
-                              flexShrink: 0, letterSpacing: '0.04em', textTransform: 'uppercase',
-                            }}>Test</span>
-                          )}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           {role === 'teacher' && (
@@ -1268,15 +888,8 @@ export default function Course() {
                               >
                                 {l.is_published ? 'Lock' : 'Publish'}
                               </button>
-                              <button
-                                onClick={() => toggleTest(l)}
-                                style={secondaryBtn}
-                                title={l.is_test ? 'Remove test flag from this lesson' : 'Mark this lesson as a test'}
-                              >
-                                {l.is_test ? 'Unmark test' : 'Mark as test'}
-                              </button>
                               <button onClick={() => openEditLesson(l)} style={secondaryBtn}
-                                title={l.is_test ? 'Edit lesson title and resources' : 'Edit lesson title, learning intentions and success criteria'}>
+                                title="Edit lesson title, learning intentions and success criteria">
                                 Edit
                               </button>
                               <button onClick={() => { setModalErr(null); setModal({ kind: 'deleteLesson', lesson: l }); }} style={dangerBtn}>Delete</button>
@@ -1409,51 +1022,32 @@ export default function Course() {
           <button onClick={() => modal.kind === 'editLesson' && submitEditLesson(modal.lesson)} style={modalPrimaryBtn}>Save lesson</button>
         </>}
       >
-        {modal.kind === 'editLesson' && (
-          <div style={{ marginBottom: 16 }}>
-            <label style={modalLabel}>Lesson name</label>
-            <input
-              type="text"
-              value={editLessonTitle}
-              onChange={(e) => setEditLessonTitle(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') submitEditLesson(modal.lesson); }}
-              placeholder="e.g. Variables and data types"
-              style={modalInput}
-              autoFocus
-            />
-          </div>
-        )}
-
-        {modal.kind === 'editLesson' && !modal.lesson.is_test && (
-          <>
-            <div>
-              <label style={modalLabel}>Learning intentions</label>
-              <textarea
-                rows={4}
-                value={editLI}
-                onChange={(e) => setEditLI(e.target.value)}
-                placeholder={'One per line, e.g.\nUnderstand what a variable is\nIdentify suitable data types'}
-                style={{ ...modalInput, fontFamily: 'inherit', resize: 'vertical' }}
-              />
-              <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--cw-muted)' }}>
-                One bullet per line. Leave blank to hide.
-              </p>
-            </div>
-            <div style={{ marginTop: 12 }}>
-              <label style={modalLabel}>Success criteria</label>
-              <textarea
-                rows={4}
-                value={editSC}
-                onChange={(e) => setEditSC(e.target.value)}
-                placeholder={'One per line, e.g.\nI can declare a variable\nI can choose the right data type for a value'}
-                style={{ ...modalInput, fontFamily: 'inherit', resize: 'vertical' }}
-              />
-              <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--cw-muted)' }}>
-                One bullet per line. Leave blank to hide.
-              </p>
-            </div>
-          </>
-        )}
+        <div>
+          <label style={modalLabel}>Learning intentions</label>
+          <textarea
+            rows={4}
+            value={editLI}
+            onChange={(e) => setEditLI(e.target.value)}
+            placeholder={'One per line, e.g.\nUnderstand what a variable is\nIdentify suitable data types'}
+            style={{ ...modalInput, fontFamily: 'inherit', resize: 'vertical' }}
+          />
+          <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--cw-muted)' }}>
+            One bullet per line. Leave blank to hide.
+          </p>
+        </div>
+        <div style={{ marginTop: 12 }}>
+          <label style={modalLabel}>Success criteria</label>
+          <textarea
+            rows={4}
+            value={editSC}
+            onChange={(e) => setEditSC(e.target.value)}
+            placeholder={'One per line, e.g.\nI can declare a variable\nI can choose the right data type for a value'}
+            style={{ ...modalInput, fontFamily: 'inherit', resize: 'vertical' }}
+          />
+          <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--cw-muted)' }}>
+            One bullet per line. Leave blank to hide.
+          </p>
+        </div>
 
         {modal.kind === 'editLesson' && (
           <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--cw-border)' }}>
@@ -1688,53 +1282,6 @@ export default function Course() {
         filename={presViewerUnit?.presentation_filename || null}
         onClose={() => setPresViewerUnit(null)}
       />
-
-      {/* OneDrive / SharePoint iframe modal */}
-      {odViewerUnit?.onedrive_embed_url && (
-        <div
-          style={{
-            position: 'fixed', inset: 0, zIndex: 1200,
-            background: 'rgba(0,0,0,0.6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: 16,
-          }}
-          onClick={(e) => { if (e.target === e.currentTarget) setOdViewerUnit(null); }}
-        >
-          <div style={{
-            display: 'flex', flexDirection: 'column',
-            width: '100%', maxWidth: 1600, height: '92vh',
-            borderRadius: 12, overflow: 'hidden',
-            boxShadow: '0 24px 64px rgba(0,0,0,0.45)',
-          }}>
-            {/* Modal header */}
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
-              padding: '10px 16px', background: '#1e293b', color: '#f1f5f9',
-              flexShrink: 0,
-            }}>
-              <span style={{ fontWeight: 700, fontSize: 15, marginRight: 4 }}>
-                ☁️ {odViewerUnit.title}
-              </span>
-              <span style={{ flex: 1 }} />
-              <button
-                onClick={() => setOdViewerUnit(null)}
-                style={{
-                  background: 'transparent', color: '#94a3b8', border: '1px solid #334155',
-                  borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontWeight: 600, fontSize: 13,
-                }}
-              >✕ Close</button>
-            </div>
-            {/* Embedded presentation. SharePoint always opens at slide 1; pupils
-                navigate manually using the viewer's own slide controls. */}
-            <iframe
-              src={buildOdSrc(odViewerUnit.onedrive_embed_url, odViewerUnit.od_resolved_url)}
-              style={{ flex: 1, border: 'none', width: '100%' }}
-              allowFullScreen
-              title={`${odViewerUnit.title} — OneDrive slides`}
-            />
-          </div>
-        </div>
-      )}
     </Shell>
   );
 }

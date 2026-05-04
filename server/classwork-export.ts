@@ -2,7 +2,6 @@ import ExcelJS from 'exceljs';
 import {
   getCourseAnalytics,
   getLessonAnalytics,
-  listStudentsInClass,
   type ClassworkCourse,
 } from './classwork-storage.js';
 
@@ -231,81 +230,4 @@ export async function buildAnalyticsWorkbook(course: ClassworkCourse): Promise<E
   }
 
   return wb;
-}
-
-export async function buildCredentialsWorkbook(
-  classId: string,
-): Promise<{ wb: ExcelJS.Workbook; className: string } | null> {
-  const students = await listStudentsInClass(classId);
-  if (!students || students.length === 0) return null;
-
-  // Pull class name from the first student's classId — we need to query it.
-  // listStudentsInClass returns StudentRow[] which doesn't include the class
-  // name, so derive a fallback from the id and let the caller label via the
-  // workbook title.
-  const className = (students as any[])[0]?.className as string | undefined || classId;
-
-  const wb = new ExcelJS.Workbook();
-  wb.creator = 'BHS Classwork';
-  wb.created = new Date();
-  wb.title = `Login Credentials — ${className}`;
-
-  const sh = wb.addWorksheet('Logins', { views: [{ state: 'frozen', ySplit: 2 }] });
-
-  // Row 1 — instruction note spanning all columns
-  sh.mergeCells('A1:E1');
-  const noteCell = sh.getCell('A1');
-  noteCell.value =
-    'Fill in the "Name" column with each pupil\'s real name. ' +
-    'Keep this file secure — do not share or upload it.';
-  noteCell.font = { italic: true, color: { argb: 'FF6B7280' }, size: 10 };
-  noteCell.alignment = { vertical: 'middle', wrapText: true };
-  sh.getRow(1).height = 30;
-
-  // Row 2 — column headers
-  sh.columns = [
-    { key: 'name',     width: 28 },
-    { key: 'username', width: 28 },
-    { key: 'password', width: 22 },
-    { key: 'status',   width: 24 },
-    { key: 'notes',    width: 32 },
-  ];
-  const headerRow = sh.getRow(2);
-  headerRow.values = ['Name', 'Username', 'Initial password', 'Status', 'Notes'];
-  styleHeaderRow(headerRow);
-
-  // Data rows
-  for (const s of students as any[]) {
-    const changed = !s.mustChangePassword;
-    sh.addRow({
-      name:     '',
-      username: s.username,
-      password: s.initialPassword || '',
-      status:   changed ? 'Changed own password' : 'Not yet changed',
-      notes:    '',
-    });
-    const row = sh.lastRow!;
-    if (changed) {
-      // Grey out the password cell for students who have already changed it
-      row.getCell('password').font = { color: { argb: 'FF9CA3AF' }, italic: true };
-      row.getCell('status').font  = { color: { argb: 'FF9CA3AF' }, italic: true };
-    }
-    row.getCell('username').font = { name: 'Courier New', size: 11 };
-    row.getCell('password').font = { ...row.getCell('password').font, name: 'Courier New', size: 11 };
-  }
-
-  // Light border on all data cells
-  const lastRow = sh.rowCount;
-  for (let r = 2; r <= lastRow; r++) {
-    sh.getRow(r).eachCell({ includeEmpty: true }, (cell) => {
-      cell.border = {
-        top:    { style: 'thin', color: { argb: 'FFE5E7EB' } },
-        left:   { style: 'thin', color: { argb: 'FFE5E7EB' } },
-        bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } },
-        right:  { style: 'thin', color: { argb: 'FFE5E7EB' } },
-      };
-    });
-  }
-
-  return { wb, className };
 }

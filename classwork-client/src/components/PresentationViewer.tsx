@@ -71,16 +71,15 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
   const renderTokenRef = useRef(0);
   const [stageSize, setStageSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
 
-  // Eagerly load the manifest and PDF as soon as pagesUrl is known — don't
-  // wait for the modal to open. This way the first slide is ready to paint the
-  // instant the user clicks "View slides" rather than after a visible fetch
-  // round-trip. We still gate on pagesUrl so nothing loads when no deck is set.
+  // Load manifest (and PDF for v2) on open or when the URL changes.
   useEffect(() => {
-    if (!pagesUrl) return;
+    if (!open || !pagesUrl) return;
     let cancelled = false;
     setManifest(null);
     setPdfDoc((prev) => { if (prev) prev.destroy(); return null; });
     setSlideCount(0);
+    setSlideIdx(0);
+    setJumpInput('1');
     setLoadErr(null);
     setLoading(true);
     (async () => {
@@ -113,21 +112,14 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
       }
     })();
     return () => { cancelled = true; };
-  }, [pagesUrl]);
+  }, [open, pagesUrl]);
 
-  // Reset to slide 1 each time the modal opens so re-opening always starts
-  // from the beginning (the PDF doc itself stays loaded in memory).
+  // Tear the PDF doc down when the modal closes for good. We keep it
+  // alive while open so paging between slides is instant.
   useEffect(() => {
-    if (!open) return;
-    setSlideIdx(0);
-    setJumpInput('1');
-  }, [open]);
-
-  // Tear the PDF doc down when the pagesUrl is cleared (unit removed/changed).
-  useEffect(() => {
-    if (pagesUrl) return;
+    if (open) return;
     setPdfDoc((prev) => { if (prev) prev.destroy(); return null; });
-  }, [pagesUrl]);
+  }, [open]);
 
   // Sync the page-jump input when the user navigates by other means.
   useEffect(() => { setJumpInput(String(slideIdx + 1)); }, [slideIdx]);
@@ -245,6 +237,19 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
     return () => { try { renderTask?.cancel(); } catch { /* noop */ } };
   }, [pdfDoc, slideIdx, stageSize.w, stageSize.h]);
 
+  // Derive the current section index for the dropdown highlight. Uses a
+  // sequential scan rather than binary search because section lists are
+  // tiny in practice (rarely >10 entries).
+  const currentSectionIdx = (() => {
+    if (!manifest || manifest.sections.length === 0) return -1;
+    const slideNum = slideIdx + 1;
+    let idx = -1;
+    for (let i = 0; i < manifest.sections.length; i++) {
+      if (manifest.sections[i].startSlide <= slideNum) idx = i;
+      else break;
+    }
+    return idx;
+  })();
 
   // Keyboard nav while the modal is open. We bail out when the user is
   // typing in the page-jump input so number keys don't get hijacked.
@@ -440,6 +445,31 @@ export default function PresentationViewer({ open, pagesUrl, unitTitle, filename
               />
               <span style={{ color: 'var(--cw-muted)', fontSize: 14 }}>of {slideCount}</span>
             </span>
+
+            {manifest.sections.length > 0 && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 8 }}>
+                <label htmlFor="cw-pres-section" style={{ color: 'var(--cw-muted)', fontSize: 14 }}>Section</label>
+                <select
+                  id="cw-pres-section"
+                  value={currentSectionIdx >= 0 ? currentSectionIdx : ''}
+                  onChange={(e) => {
+                    const i = parseInt(e.target.value, 10);
+                    if (Number.isFinite(i) && manifest.sections[i]) go(manifest.sections[i].startSlide - 1);
+                  }}
+                  style={{
+                    padding: '6px 8px', borderRadius: 6,
+                    border: '1px solid var(--cw-border)', fontSize: 14, maxWidth: 240,
+                  }}
+                >
+                  {currentSectionIdx === -1 && (
+                    <option value="">— before first section —</option>
+                  )}
+                  {manifest.sections.map((s, i) => (
+                    <option key={i} value={i}>{s.name} (slide {s.startSlide})</option>
+                  ))}
+                </select>
+              </span>
+            )}
 
             {/* Spacer pushes the view-mode controls to the right side. */}
             <span style={{ flex: 1 }} />

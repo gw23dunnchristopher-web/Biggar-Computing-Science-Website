@@ -2696,7 +2696,7 @@ export default function Revision() {
                             {block.type === "pseudocode" && block.pseudocodeLines && (
                               <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-50 dark:bg-neutral-900">
                                 <pre className="font-mono text-sm whitespace-pre-wrap break-words">{block.pseudocodeLines.map(line => 
-                                  `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent || 0)}${line.content}`
+                                  `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent)}${line.content}`
                                 ).join('\n')}</pre>
                               </div>
                             )}
@@ -2765,7 +2765,7 @@ export default function Revision() {
                                     {childBlock.type === "pseudocode" && childBlock.pseudocodeLines && (
                                       <div className="p-3 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-50 dark:bg-neutral-900">
                                         <pre className="font-mono text-sm whitespace-pre-wrap break-words">{childBlock.pseudocodeLines.map(line => 
-                                          `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent || 0)}${line.content}`
+                                          `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent)}${line.content}`
                                         ).join('\n')}</pre>
                                       </div>
                                     )}
@@ -2937,7 +2937,7 @@ export default function Revision() {
                                     {block.type === "pseudocode" && block.pseudocodeLines && (
                                       <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-50 dark:bg-neutral-900">
                                         <pre className="font-mono text-sm whitespace-pre-wrap break-words">{block.pseudocodeLines.map(line => 
-                                          `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent || 0)}${line.content}`
+                                          `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent)}${line.content}`
                                         ).join('\n')}</pre>
                                       </div>
                                     )}
@@ -2978,7 +2978,7 @@ export default function Revision() {
                                             {childBlock.type === "pseudocode" && childBlock.pseudocodeLines && (
                                               <div className="p-3 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-50 dark:bg-neutral-900">
                                                 <pre className="font-mono text-sm whitespace-pre-wrap break-words">{childBlock.pseudocodeLines.map(line => 
-                                                  `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent || 0)}${line.content}`
+                                                  `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent)}${line.content}`
                                                 ).join('\n')}</pre>
                                               </div>
                                             )}
@@ -3148,7 +3148,7 @@ export default function Revision() {
                                                   {block.type === "pseudocode" && block.pseudocodeLines && (
                                                     <div className="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg bg-neutral-50 dark:bg-neutral-900">
                                                       <pre className="font-mono text-sm whitespace-pre-wrap break-words">{block.pseudocodeLines.map(line => 
-                                                        `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent || 0)}${line.content}`
+                                                        `${String(line.lineNumber).padStart(2, ' ')}  ${'  '.repeat(line.indent)}${line.content}`
                                                       ).join('\n')}</pre>
                                                     </div>
                                                   )}
@@ -3366,7 +3366,7 @@ export default function Revision() {
                           const grade = pct >= 70 ? "A" : pct >= 60 ? "B" : pct >= 50 ? "C" : pct >= 40 ? "D" : "No Award";
                           generateResultsPDF({
                             title: `${currentQuestion.title} - Revision`,
-                            subtitle: topicDetails?.name || "",
+                            subtitle: topicDetails?.label || "",
                             date: new Date().toLocaleDateString(),
                             totalScore,
                             maxScore,

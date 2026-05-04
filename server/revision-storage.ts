@@ -363,13 +363,7 @@ class MemoryStorage implements IStorage {
   async deleteStudentSession(token: string) { this.studentSessionMap.delete(token); }
   async deleteStudentSessionsByStudentId(studentId: string) { const toDelete: string[] = []; this.studentSessionMap.forEach((session, token) => { if (session.studentId === studentId) toDelete.push(token); }); toDelete.forEach(token => this.studentSessionMap.delete(token)); }
 
-  async listCodeProjects(_studentId: string, _kind: string) { return []; }
-  async getCodeProject(_studentId: string, _id: string) { return undefined; }
-  async createCodeProject(_studentId: string, kind: string, name: string, code: string): Promise<{ id: string; kind: string; name: string; code: string; updatedAt: Date | null; createdAt: Date | null }> { throw new Error("Not supported in memory mode"); }
-  async updateCodeProject(_studentId: string, _id: string, _data: { name?: string; code?: string }) { return undefined; }
-  async deleteCodeProject(_studentId: string, _id: string) {}
-
-  async saveStudentExamResult(result: InsertStudentExamResult) { const r: StudentExamResult = { id: genId("ser"), ...result, additionalPaperId: result.additionalPaperId ?? null, examTitle: result.examTitle ?? null, timeSpentSeconds: result.timeSpentSeconds ?? null, answers: result.answers ?? null, completedAt: new Date() }; this.studentExamResultMap.set(r.id, r); return r; }
+  async saveStudentExamResult(result: InsertStudentExamResult) { const r: StudentExamResult = { id: genId("ser"), ...result, examTitle: result.examTitle ?? null, timeSpentSeconds: result.timeSpentSeconds ?? null, answers: result.answers ?? null, completedAt: new Date() }; this.studentExamResultMap.set(r.id, r); return r; }
   async getStudentExamResults(studentId: string) { return Array.from(this.studentExamResultMap.values()).filter(r => r.studentId === studentId).sort((a, b) => (b.completedAt?.getTime() ?? 0) - (a.completedAt?.getTime() ?? 0)); }
   async getStudentExamResultById(id: string) { return this.studentExamResultMap.get(id); }
   async updateStudentExamResult(id: string, data: Partial<StudentExamResult>) { const r = this.studentExamResultMap.get(id); if (!r) return undefined; Object.assign(r, data); return r; }
@@ -383,7 +377,7 @@ class MemoryStorage implements IStorage {
       Object.assign(existing, data, { updatedAt: new Date() });
       return existing;
     }
-    const p: StudentExamProgress = { id: genId("sep"), studentId, examType, examIdentifier, examTitle: data.examTitle ?? null, totalQuestions: data.totalQuestions ?? 0, answeredQuestions: data.answeredQuestions ?? 0, currentAnswers: data.currentAnswers ?? null, status: data.status ?? "in_progress", startedAt: new Date(), updatedAt: new Date(), timeLeft: null, answeredQuestionIds: null, extraTimeAdded: null, currentQuestionIndex: null };
+    const p: StudentExamProgress = { id: genId("sep"), studentId, examType, examIdentifier, examTitle: data.examTitle ?? null, totalQuestions: data.totalQuestions ?? 0, answeredQuestions: data.answeredQuestions ?? 0, currentAnswers: data.currentAnswers ?? null, status: data.status ?? "in_progress", startedAt: new Date(), updatedAt: new Date() };
     this.examProgressMap.set(key, p);
     return p;
   }

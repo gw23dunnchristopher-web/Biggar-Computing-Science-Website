@@ -39,12 +39,6 @@ export async function api<T = any>(path: string, init?: RequestInit): Promise<T>
     headers: buildHeaders(init?.headers),
   });
   if (!res.ok) {
-    if (res.status === 401) {
-      // Session has expired server-side — clear stale tokens and bounce to login.
-      logoutTeacher();
-      logoutStudent();
-      window.dispatchEvent(new CustomEvent('classwork:session-expired'));
-    }
     let message = `Request failed (${res.status})`;
     try {
       const body = await res.json();
