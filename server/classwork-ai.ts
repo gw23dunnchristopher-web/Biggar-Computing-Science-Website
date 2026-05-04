@@ -111,93 +111,50 @@ export async function markSubmission(
       case 'anagrams':
         return markAnagrams(q, s);
       case 'hangman':
-        return markHangman(q, s);
       case 'speed_round':
-        return markSpeedRound(q, s);
       case 'ordering':
-        return markOrdering(q, s);
       case 'caesar_cipher':
-        return markCaesarCipher(q, s);
       case 'spot_phish':
-        return markSpotPhish(q, s);
       case 'binary_hex':
-        return markBinaryHex(q, s);
       case 'bit_ops':
-        return markBitOps(q, s);
       case 'code_tracer':
-        return markCodeTracer(q, s);
       case 'flowchart_seq':
-        return markFlowchartSeq(q, s);
       case 'sorting_race':
-        return markSortingRace(q, s);
       case 'convert_relay':
-        return markConvertRelay(q, s);
       case 'url_anatomy':
-        return markUrlAnatomy(q, s);
       case 'truth_table':
-        return markTruthTable(q, s);
       case 'field_type_sort':
-        return markFieldTypeSort(q, s);
       case 'io_sort':
-        return markIoSort(q, s);
       case 'html_match':
-        return markHtmlMatch(q, s);
       case 'password_forge':
-        return markPasswordForge(q, s);
       case 'privacy_radar':
-        return markPrivacyRadar(q, s);
       case 'validation_rules':
-        return markValidationRules(q, s);
       case 'find_duplicate':
-        return markFindDuplicate(q, s);
       case 'bin_search':
-        return markBinSearch(q, s);
       case 'box_model':
-        return markBoxModel(q, s);
       case 'friend_or_fake':
-        return markPickListGeneric(q, s, 'friendOrFake', 'verdict', 'profiles classified', ['real', 'fake']);
       case 'dm_danger':
-        return markPickListGeneric(q, s, 'dmDanger', 'risk', 'DMs rated', ['safe', 'risky', 'dangerous']);
       case 'malware_triage':
-        return markPickListGeneric(q, s, 'malwareTriage', 'kind', 'malware types matched', ['virus', 'worm', 'trojan', 'ransomware', 'spyware', 'adware']);
       case '2fa_escape':
-        return markPickListGeneric(q, s, 'twoFactorEscape', 'method', '2FA methods chosen', ['password_only', 'sms', 'email', 'authenticator', 'hardware']);
       case 'a11y_audit':
-        return markPickListGeneric(q, s, 'a11yAudit', 'issue', 'accessibility issues identified', ['contrast', 'alt_text', 'labels', 'keyboard', 'heading_order', 'focus_indicator']);
       case 'fetch_execute':
-        return markPickListGeneric(q, s, 'fetchExecute', 'step', 'FDE stages classified', ['fetch', 'decode', 'execute']);
       case 'screen_time':
-        return markPickListGeneric(q, s, 'screenTime', 'rating', 'screen-time habits rated', ['healthy', 'balanced', 'unhealthy']);
       case 'footprint_trail':
-        return markPickListGeneric(q, s, 'footprintTrail', 'visibility', 'footprint items classified', ['private', 'personal', 'public']);
       case 'social_engineer':
-        return markPickListGeneric(q, s, 'socialEngineer', 'kind', 'social-engineering scams matched', ['phishing', 'pretexting', 'baiting', 'quid_pro_quo', 'tailgating', 'shoulder_surfing']);
       case 'cipher_quest':
-        return markPickListGeneric(q, s, 'cipherQuest', 'cipher', 'ciphers identified', ['caesar', 'substitution', 'vigenere', 'transposition', 'aes']);
       case 'normalise_it':
-        return markPickListGeneric(q, s, 'normaliseIt', 'violation', 'normal-form violations spotted', ['breaks_1nf', 'breaks_2nf', 'breaks_3nf', 'normalised']);
       case 'subnet_calc':
-        return markPickListGeneric(q, s, 'subnetCalc', 'kind', 'IPs classified', ['class_a', 'class_b', 'class_c', 'class_d', 'class_e', 'private', 'loopback']);
       case 'phish_inbox':
-        return markPickListGeneric(q, s, 'phishInbox', 'verdict', 'inbox items triaged', ['legitimate', 'phishing', 'spam', 'scam']);
       case 'build_pc':
-        return markPickListGeneric(q, s, 'buildPc', 'part', 'PC parts identified', ['cpu', 'gpu', 'ram', 'storage', 'psu', 'motherboard', 'cooling', 'case']);
       case 'os_sched':
-        return markPickListGeneric(q, s, 'osSched', 'algo', 'scheduling algorithms picked', ['fcfs', 'sjf', 'round_robin', 'priority']);
       case 'query_visual':
-        return markPickListGeneric(q, s, 'queryVisual', 'op', 'SQL operations identified', ['select', 'project', 'join', 'filter', 'sort', 'group_by']);
       case 'schema_arch':
-        return markPickListGeneric(q, s, 'schemaArch', 'rel', 'relationships classified', ['one_to_one', 'one_to_many', 'many_to_many']);
       case 'tag_soup_repair':
-        return markPickListGeneric(q, s, 'tagSoupRepair', 'bug', 'HTML bugs spotted', ['unclosed', 'wrong_nesting', 'missing_attribute', 'self_close_misuse', 'wrong_tag']);
       case 'selector_golf':
-        return markPickListGeneric(q, s, 'selectorGolf', 'kind', 'CSS selectors identified', ['id', 'class', 'element', 'descendant', 'child', 'attribute']);
       case 'css_sliders':
-        return markPickListGeneric(q, s, 'cssSliders', 'prop', 'CSS properties matched', ['width', 'height', 'padding', 'margin', 'border', 'color', 'background', 'font_size']);
       case 'mindmap':
-        return await markMindmap(q, s);
       case 'upstander':
-        return { score: null, feedback: 'Extension activity — no marking required.', breakdown: [] };
+        return null;
       case 'file_upload':
         return await markFileUpload(q, s);
       case 'info_only':
